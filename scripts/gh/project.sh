@@ -32,6 +32,8 @@
 # Usage:
 #   scripts/gh/project.sh status <issue> <todo|in-progress|done>  # move an issue's board Status
 #   scripts/gh/project.sh add    <issue>                          # add an issue to the board (auto-add normally does this)
+#   scripts/gh/project.sh transfer <issue> <owner/repo>            # move an issue to another repo AND drop its card (the only way out)
+#   scripts/gh/project.sh transferred <owner/repo>#<n>              # repair: drop the card of an issue moved with a raw gh issue transfer
 #   scripts/gh/project.sh show   <issue>                          # print the issue's current board Status
 #   scripts/gh/project.sh board                                   # print the whole board grouped by Status
 #   scripts/gh/project.sh url                                     # print the project URL
@@ -299,6 +301,8 @@ main() {
   case "$sub" in
     status) cmd_status "$@" ;;
     add) cmd_add "$@" ;;
+    transfer) cmd_transfer "$@" ;;
+    transferred) cmd_transferred "$@" ;;
     show) cmd_show "$@" ;;
     board) cmd_board "$@" ;;
     url) cmd_url "$@" ;;
