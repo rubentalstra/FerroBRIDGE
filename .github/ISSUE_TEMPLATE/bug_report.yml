@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: Apache-2.0
+name: Bug report
+description: Report a defect in FerroBRIDGE.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. A maintainer sets the type and priority
+        labels during triage, so you do not need to add them.
+
+        Do not use this form for a security vulnerability. Report those
+        privately through the Security tab. See
+        [SECURITY.md](https://github.com/rubentalstra/FerroBRIDGE/blob/main/SECURITY.md).
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What goes wrong, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact steps, request, mapping file, or command that triggers the bug.
+      placeholder: |
+        1. Start the server with ...
+        2. Send POST /...
+        3. See the response
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead. Include the response body or error output.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: The release tag or commit SHA you run.
+      placeholder: v0.1.0, or a commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: >-
+        Your OS and architecture, how you run FerroBRIDGE (binary, container,
+        or source), and which openEHR CDR and terminology server it talks to.
+    validations:
+      required: false
