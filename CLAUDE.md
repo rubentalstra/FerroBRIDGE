@@ -16,56 +16,35 @@ code systems and value sets.
 The name follows the Ferro family (FerroEHR, FerroTERM). FerroBRIDGE in prose,
 `ferrobridge` in identifiers.
 
-## Status: design phase
+## The design is recorded in `docs/architecture.md`
 
-**`docs/architecture.md` does not exist yet.** It is the output of the research
-program on issue #1, which reads FHIRconnect, the HL7 FHIR REST API, the
-openEHR ITS-REST API, OMOCL, the OMOP Common Data Model documentation, and the
-prior art (openFHIR as the FHIRconnect reference implementation, Eos as the
-OMOCL reference implementation, EHRbase FHIR Bridge) before any design is
-fixed. Until that program closes:
+Read it first. It is the output of the 2026-09-03 research pass over the primary
+sources (issue #1) and records the decisions with their ground: FHIRconnect and
+OMOCL are two languages sharing one header, so the bridge is one shared
+foundation, two interpreters, two sinks; the pins are FHIRconnect v1.0.0, FHIR
+R4, OMOCL v1.0.0, OMOP CDM v5.4 and openEHR ITS-REST 1.1.0; the FHIR side is a
+facade over the CDR, the OMOP side a batch ETL over AQL into a CDM database; OMOP
+concept resolution is SQL over the loaded OHDSI vocabulary, never a FHIR
+terminology operation. Where a specification is silent (FHIR search, identity,
+failure policy, extension ordering) the document names the decision as
+FerroBRIDGE's own; keep that labelling in code and docs.
 
-- The architecture is undecided. There are no crates, no storage design, and no
-  engine design, and this file describes none.
-- **Make no technical claim about either target beyond the product statement
-  above.** The OMOP CDM version, the shape of the openEHR to OMOP path, and how
-  vocabularies are resolved are the research program's to settle
-  (`.claude/memory/omop-target.md`).
-- Do not scaffold a Cargo workspace, a crate layout, or a module tree. Build
-  after the direction is confirmed (`.claude/memory/owner-work-style.md`).
-- Version pins (FHIRconnect, OMOCL, the FHIR release or releases, the openEHR
-  ITS-REST release, the OMOP CDM release) are research output too. Never write
-  a pin from memory; the research records each one with its source.
+## The two layers
 
-This file is the working discipline, and it applies from the first commit.
-Write all prose (docs, comments, commits, PRs, issues) to
-`.claude/rules/writing-style.md`.
+- **Generated where a machine-readable source exists:** the OMOP CDM v5.4 row
+  types and DDL from the OHDSI `CommonDataModel` definitions. Every file marked
+  `// @generated` is off-limits: change the generator and regenerate, never
+  hand-edit generated code. The FHIR model is a DEPENDENCY, not a generator
+  (`docs/architecture.md` §7); the openEHR model comes from the published
+  `openehr-*` crates.
+- **Hand-written and the product:** the shared mapping foundation, the
+  FHIRconnect and OMOCL parsers, validators and interpreters, the ITS-REST
+  client, the terminology client, the FHIR facade and the ETL runner. Modern
+  idiomatic Rust of our own design, with the FHIRconnect, FHIR, OMOCL, OMOP CDM
+  and openEHR specifications as the authority.
 
-## The two layers (the intended shape, pending the research)
-
-This is the split FerroEHR and FerroTERM both use, stated here as the EXPECTED
-shape for FerroBRIDGE rather than a decided one. Issue #1 confirms it, refines
-it, or replaces it with evidence.
-
-- **The FHIR model layer is expected to be GENERATED** from vendored,
-  machine-readable FHIR packages (`StructureDefinition` and
-  `OperationDefinition` resources), the way FerroTERM generates its FHIR crate.
-  Under that shape, every file marked `// @generated` is off-limits: to change
-  output, change the generator and regenerate, never hand-edit generated code.
-- **The bridge engine is expected to be HAND-WRITTEN** and to be the product:
-  the mapping loader and validator for each mapping specification, the mapping
-  interpreter that drives each target, the ITS-REST client, and the terminology
-  client. Modern idiomatic Rust of our own design, with the FHIRconnect, FHIR,
-  OMOCL, OMOP, and openEHR specifications as the authority.
-
-Two boundaries are open, and both are research questions rather than
-assumptions. The openEHR side: FerroEHR generates its openEHR reference-model
-crates from the published BMM meta-model, and whether FerroBRIDGE consumes
-published crates, generates its own, or needs neither is undecided. The OMOP
-side: whether the CDM has a machine-readable form worth generating from is
-undecided too. Nothing in this section is a commitment;
-`.claude/rules/codegen.md` carries the rule that applies once each boundary is
-decided.
+The Cargo workspace lands with the first milestone (one verbatim round trip per
+target, `docs/architecture.md` §9), never before its issues are filed.
 
 ## Repo map
 
