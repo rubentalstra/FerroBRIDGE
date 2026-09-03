@@ -46,3 +46,5 @@ bridge, so the CDR stops carrying a second FHIR implementation. That retirement
 is FerroEHR's own tracker work, decided and executed there, never from this
 repository (`sibling-projects.md`). Design here as if the CDR has no FHIR
 surface of its own.
+
+Update 2026-09-03 (research closed): `docs/architecture.md` exists; pins are FHIRconnect v1.0.0, FHIR R4, OMOCL v1.0.0, OMOP CDM v5.4, ITS-REST 1.1.0; one shared foundation, two interpreters, two sinks; FHIR facade + OMOP batch ETL; the FHIR model is a dependency, the CDM types are generated from the OHDSI definitions.

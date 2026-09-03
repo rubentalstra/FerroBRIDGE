@@ -28,6 +28,8 @@ FHIRconnect as if it covered OMOP is a factual error to catch in review.
 **Origin:** the OMOP question came from FerroEHR issue **#2652**, carried into
 this repository as **FerroBRIDGE #2**.
 
+Update 2026-09-03 (research closed): `docs/architecture.md` exists; pins are FHIRconnect v1.0.0, FHIR R4, OMOCL v1.0.0, OMOP CDM v5.4, ITS-REST 1.1.0; one shared foundation, two interpreters, two sinks; FHIR facade + OMOP batch ETL; the FHIR model is a dependency, the CDM types are generated from the OHDSI definitions.
+
 **How to apply:**
 
 - Make **no technical claim about OMOP beyond the product statement**

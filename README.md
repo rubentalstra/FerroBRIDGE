@@ -24,20 +24,17 @@ sets.
 > [FerroTERM](https://github.com/rubentalstra/FerroTERM), the FHIR terminology
 > server.
 
-## Status: design phase
+## Status: designed, not yet built
 
-**There is no code yet, and that is deliberate.** The architecture is the
-output of a research program that reads the specifications and the prior art
-before anything is built: FHIRconnect, the HL7 FHIR REST API, the openEHR
-ITS-REST API, OMOCL, the OMOP Common Data Model, openFHIR (the FHIRconnect
-reference implementation), Eos (the OMOCL reference implementation), and
-EHRbase FHIR Bridge.
-
-That program is **[issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1)**,
-and it produces `docs/architecture.md`. Until it closes, the repository carries
-its working discipline and nothing else: there are no crates, no storage
-design, and no engine design, and none is claimed. Watch the tracker if you
-want to see the decisions as they are made, with their citations.
+The research pass over the specifications and the prior art is done and its
+result is [`docs/architecture.md`](docs/architecture.md): FHIRconnect and OMOCL
+are two mapping languages sharing one header, so FerroBRIDGE is one shared
+foundation with two interpreters and two sinks; it pins FHIRconnect v1.0.0 on
+FHIR R4 and OMOCL v1.0.0 on OMOP CDM v5.4; the FHIR side is a REST facade over
+the CDR and the OMOP side a batch ETL into a CDM database. The first milestone is
+one verbatim round trip per target on upstream mapping files. Follow
+[issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1) for the
+decisions and their citations.
 
 ## What is decided
 
