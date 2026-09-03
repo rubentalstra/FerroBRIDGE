@@ -175,8 +175,7 @@ FerroTERM's.** A second FHIR code generator buys the bridge nothing:
 FerroTERM already generates per-version FHIR types (R4, R4B, R5, R6) and the
 terminology operation contracts from the vendored HL7 packages
 (the `fhir-types` crate, 0.1.0 on crates.io), and its `fhir-terminology` crate
-carries the operation model the terminology client speaks (publishing tracked
-as rubentalstra/FerroTERM#165). FerroBRIDGE consumes those crates from
+carries the operation model the terminology client speaks (0.1.0 on crates.io). FerroBRIDGE consumes those crates from
 crates.io, pinned by version like every other dependency, never by path. The same holds for the
 openEHR side: the published `openehr-*` crates carry the OPT, Web Template,
 canonical JSON and FLAT codecs, so `openehr-path` is a thin layer over them.
