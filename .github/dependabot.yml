@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: Apache-2.0
+
+# .github/dependabot.yml: automated dependency updates.
+#
+# ONE ecosystem for now: the GitHub Actions that the workflows in this
+# directory pin. There is no Cargo workspace yet, so a cargo entry would have
+# nothing to resolve; add it in the same change that lands the workspace.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    labels:
+      - "dependencies"
+    schedule:
+      interval: "weekly"
+    # A delay between a release being published and this bot proposing it, so a
+    # compromised or yanked release has a window to be caught before it reaches
+    # a pull request (the OWASP CI/CD Security Cheat Sheet's third-party-code
+    # control). Short, because an action runs in CI and does not ship in the
+    # product, and every action here is digest-pinned, so a bump is a reviewed
+    # change of digest.
+    #
+    # SECURITY updates are exempt by design: Dependabot applies no cooldown to
+    # advisory-driven bumps, so an advisory still arrives immediately. That is
+    # what makes a cooldown safe rather than a delay on getting fixes.
+    # `semver-major-days` is not accepted for this ecosystem, and the 3-day
+    # default covers every bump.
+    cooldown:
+      default-days: 3
+    groups:
+      # ONE weekly PR for every minor and patch action bump (one codeql-action
+      # release alone opens three PRs, one per sub-action). MAJORS stay
+      # individual: a breaking action major is a real review, and burying one
+      # in a batch is how it gets rubber-stamped.
+      actions-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "ci"

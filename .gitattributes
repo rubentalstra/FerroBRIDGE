@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: Apache-2.0
+
+# Normalize line endings: Git stores text with LF and checks it out with LF on
+# every platform.
+* text=auto eol=lf
+
+# Vendored trees (machine-readable specifications, mapping schemas, test
+# corpora) are exempt from GitHub language statistics and collapse in diffs.
+# Nothing is vendored yet; extend the list in the same change that lands the
+# first vendored tree (.claude/rules/vendored-inputs.md).
+#
+# Vendored material is stored byte for byte as its publisher ships it, so it
+# also opts out of line-ending normalization and the tree matches the upstream
+# archive exactly.
+# <path>/vendor/** linguist-vendored
+# <path>/vendor/** -text
+
+# A generated tree is marked generated so it collapses in diffs and stays out
+# of language statistics. Nothing is generated yet
+# (.claude/rules/codegen.md).
+# <crate>/src/** linguist-generated

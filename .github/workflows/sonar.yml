@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: Apache-2.0
+
+# SonarQube Cloud analysis: the machine opinion beside CodeQL. Findings are
+# ADVISORY. They never outrank the specifications, the project rules, or the
+# local gates, and they gate no merge (.claude/rules/ai-code-review.md). The
+# quality gate is the built-in "Sonar way" default.
+#
+# The repository is in its design phase, so this lane runs the multi-language
+# sweep only: shell, YAML, JSON, and the other config surfaces the Rust gates
+# never see. There is no cargo, nextest, or coverage step here, because there
+# is nothing to build. The instrumented test run and the lcov coverage import
+# join this lane in the same change that lands the Cargo workspace, together
+# with the sonar.projectVersion derivation that anchors the New Code window.
+#
+# Scan SCOPE lives in sonar-project.properties; do not restate it here.
+# SONAR_HOST_URL is not needed for SonarQube Cloud (SonarSource/
+# sonarqube-scan-action README, v8.2.1).
+name: SonarQube Cloud
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  scan:
+    name: analyze
+    # Pull-request analysis authenticates with SONAR_TOKEN, which a fork pull
+    # request cannot read, and neither can a DEPENDABOT one: a dependabot-actor
+    # run reads Dependabot secrets rather than Actions secrets, so the scan
+    # would die on "Not authorized". A dependency bump has nothing to decorate
+    # anyway, and the post-merge push to main analyzes the merged result.
+    if: github.event_name == 'push' || (github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read # PR decoration reads the pull-request metadata
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: Sonar assigns issues and new-code status by blame.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

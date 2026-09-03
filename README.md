@@ -1,1 +1,86 @@
+<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
 # FerroBRIDGE
+
+[![CodeQL](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml/badge.svg)](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/rubentalstra/FerroBRIDGE/badge)](https://scorecard.dev/viewer/?uri=github.com/rubentalstra/FerroBRIDGE)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rubentalstra_FerroBRIDGE&metric=alert_status)](https://sonarcloud.io/summary/overall?id=rubentalstra_FerroBRIDGE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+A pure-Rust, standalone bridge between openEHR and two interoperability
+targets: HL7 FHIR, driven by the FHIRconnect specification (model-mapping and
+contextual-mapping YAML validated against its published JSON schemas), and the
+OMOP Common Data Model, driven by the OMOCL specification. Mappings are
+specification-conformant YAML, never hand-coded per resource or table. It runs
+as its own server beside any openEHR CDR reached over the openEHR ITS-REST API
+(FerroEHR is the reference CDR, never a compile-time dependency) and uses a
+FHIR terminology server (FerroTERM is the reference) for code systems and value
+sets.
+
+> **FerroBRIDGE** follows the Ferro family: Ferro for the Rust the family
+> shares, BRIDGE for what this one does. The siblings are
+> [FerroEHR](https://github.com/rubentalstra/FerroEHR), the openEHR CDR, and
+> [FerroTERM](https://github.com/rubentalstra/FerroTERM), the FHIR terminology
+> server.
+
+## Status: design phase
+
+**There is no code yet, and that is deliberate.** The architecture is the
+output of a research program that reads the specifications and the prior art
+before anything is built: FHIRconnect, the HL7 FHIR REST API, the openEHR
+ITS-REST API, OMOCL, the OMOP Common Data Model, openFHIR (the FHIRconnect
+reference implementation), Eos (the OMOCL reference implementation), and
+EHRbase FHIR Bridge.
+
+That program is **[issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1)**,
+and it produces `docs/architecture.md`. Until it closes, the repository carries
+its working discipline and nothing else: there are no crates, no storage
+design, and no engine design, and none is claimed. Watch the tracker if you
+want to see the decisions as they are made, with their citations.
+
+## What is decided
+
+- **A standalone server.** FerroBRIDGE is its own process and its own image. It
+  is not a crate inside a CDR, not a plugin, and not a library a CDR links. It
+  reaches the CDR over ITS-REST like any other client, which is what lets it
+  work against a CDR it did not build.
+- **Mapping-driven, never hand-coded.** Mappings are specification-conformant
+  YAML validated against the published schemas. A hand-written per-resource or
+  per-table converter is refused in review, because it is the thing this
+  project exists to avoid.
+- **Pure Rust.** No JVM, and a single binary, like the rest of the family.
+- **Apache 2.0.** See below.
+
+## What is open
+
+The crate layout, the engine design, whether a generated model layer exists on
+the FHIR side or the openEHR side, the version pins for every specification,
+and the acceptance instrument. Each is a question for issue #1 rather than an
+assumption, and the answer arrives with its citation.
+
+## Licensing
+
+The project's own code and text are under the Apache License 2.0
+([`LICENSE`](LICENSE)). Contribution is inbound equals outbound under section 5
+of that licence, and there is no contributor licence agreement and no copyright
+assignment. Vendored specifications and third-party material keep their
+upstream terms, recorded beside them.
+
+FerroBRIDGE is deliberately the permissive member of the family: a bridge is
+only worth building if people put it in the path between their systems, so the
+licence is not a reason to refuse it.
+
+## Contributing
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) has the rules, and the open issues are the
+worklist. While the project is in its design phase the most useful contribution
+is evidence: a specification citation, a measurement, or first-hand experience
+with FHIRconnect, OMOCL, or an openEHR CDR in production.
+
+- [`CLAUDE.md`](CLAUDE.md): the working discipline, in full.
+- [`AI_STATEMENT.md`](AI_STATEMENT.md): how AI tools are used to build this,
+  and what they are not allowed to do.
+- [`GOVERNANCE.md`](GOVERNANCE.md), [`MAINTAINERS.md`](MAINTAINERS.md): who
+  decides, and the honest answer about the bus factor.
+- [`SECURITY.md`](SECURITY.md): report a vulnerability privately.
