@@ -167,13 +167,21 @@ machine-readable source:
 | `omocl-engine` | the one-directional interpreter emitting typed CDM rows | hand-written |
 | `omop-cdm` | CDM v5.4 row types and DDL generated from the OHDSI `CommonDataModel` CSV definitions; the Athena vocabulary loader and concept resolver; the derived-table generators | generated + hand-written |
 | `ferrobridge-openehr` | the ITS-REST client (section 3) | hand-written |
-| `ferrobridge-term` | the FHIR terminology client (section 6) | hand-written |
+| `ferrobridge-term` | the FHIR terminology client (section 6) over `ferroterm-fhir` types and `ferroterm-terminology` operation contracts | hand-written |
 | `ferrobridge-server` | the FHIR R4 facade, the OMOP ETL job runner and its API, the id-map store | hand-written |
 
-**The FHIR model is a dependency, not a generator.** A second FHIR code
-generator buys the bridge nothing; a maintained crate with generated R4 types
-is taken instead (candidates recorded on issue #1), and the choice is
-re-adjudicated if it stops tracking FHIR releases.
+**The FHIR model is a dependency, not a generator, and the dependency is
+FerroTERM's.** A second FHIR code generator buys the bridge nothing:
+FerroTERM already generates per-version FHIR types (R4, R4B, R5, R6) and the
+terminology operation contracts from the vendored HL7 packages
+(`ferroterm-fhir`), and its `ferroterm-terminology` crate carries the
+operation model the terminology client speaks. FerroBRIDGE consumes those
+crates from crates.io once FerroTERM publishes them (its workspace is
+`publish = false` today; the publishing is FerroTERM tracker work), pinned by
+version like every other dependency, never by path. The same holds for the
+openEHR side: the published `openehr-*` crates carry the OPT, Web Template,
+canonical JSON and FLAT codecs, so `openehr-path` is a thin layer over them.
+Nothing the Ferro family already generates is generated twice.
 
 ## 8. Identity, failure and the specification's recommendations
 
