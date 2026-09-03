@@ -24,4 +24,4 @@ target
 .claude/settings.local.json
 
 # JetBrains IDE state
-.idea/
+#.idea/
