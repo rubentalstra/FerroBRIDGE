@@ -135,6 +135,52 @@ cmd_add() {
   echo "ok: #$n is on the board"
 }
 
+# `transfer` is the ONE way an issue leaves this repository: it moves the
+# issue with `gh issue transfer` and removes its card from this board in the
+# same step, because GitHub carries the project item along with the issue and
+# the board would otherwise show a foreign issue as ours.
+cmd_transfer() {
+  local n="${1:?issue number}" dest="${2:?owner/repo}"
+  need_int "$n"
+  [[ "$dest" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || die "transfer: expected owner/repo, got '$dest'"
+  [[ "$dest" != "$REPO" ]] || die "transfer: $dest is this repository"
+  resolve_project
+  local item url
+  item="$(item_id_for_issue "$n")"
+  url="$(gh issue transfer "$n" "$dest")"
+  if [[ -n "$item" ]]; then
+    gh project item-delete "$PROJ_NUMBER" --owner "$OWNER" --id "$item" >/dev/null
+    echo "ok: #$n moved to $url and its card left the board"
+  else
+    echo "ok: #$n moved to $url (it had no card on the board)"
+  fi
+}
+
+# An issue transferred to another repository keeps its card on this board
+# (GitHub moves project items with the issue), so the board then shows a
+# foreign issue as if it were ours. The card is looked up from the ISSUE side
+# in its new repository, so no whole-board listing is needed.
+cmd_transferred() {
+  local ref="${1:?owner/repo#number}"
+  [[ "$ref" =~ ^([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)#([0-9]+)$ ]] \
+    || die "transferred: expected owner/repo#number, got '$ref'"
+  local new_repo="${BASH_REMATCH[1]}" n="${BASH_REMATCH[2]}"
+  [[ "$new_repo" != "$REPO" ]] \
+    || die "transferred: $ref is this repository's own issue; only a transferred-out issue is removed"
+  resolve_project
+  local item
+  # shellcheck disable=SC2016 # GraphQL variables, bound by the -f flags
+  item="$(gh api graphql \
+    -f owner="${new_repo%%/*}" -f name="${new_repo##*/}" -F number="$n" \
+    -f query='query($owner:String!,$name:String!,$number:Int!){
+      repository(owner:$owner,name:$name){issue(number:$number){
+        projectItems(first:20){nodes{id project{id}}}}}}' \
+    --jq ".data.repository.issue.projectItems.nodes[] | select(.project.id == \"$PROJ_ID\") | .id")"
+  [[ -n "$item" ]] || die "transferred: $ref has no card on this board"
+  gh project item-delete "$PROJ_NUMBER" --owner "$OWNER" --id "$item" >/dev/null
+  echo "ok: removed the card of $ref (transferred out of $REPO)"
+}
+
 cmd_status() {
   local n="${1:?issue number}" want
   want="$(canonical_status "${2:?status (todo|in-progress|done)}")"
