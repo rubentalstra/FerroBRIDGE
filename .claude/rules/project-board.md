@@ -94,6 +94,13 @@ token scope (`gh auth refresh -s project`).
 
 Never move `Done` by hand, never `gh project item-edit` raw, and never
 `item-archive`/`item-delete`; closed items stay visible as the shipped record.
+The one deletion the helper performs belongs to a transfer: GitHub moves a
+project item along with an issue transferred to another repository, so the
+board would otherwise show a foreign issue as ours. An issue leaves this
+repository ONLY through `scripts/gh/project.sh transfer <n> <owner/repo>`,
+which moves it and drops its card in one step; `project.sh transferred
+<owner/repo>#<n>` repairs a transfer someone ran raw. Never run
+`gh issue transfer` by hand.
 
 ## Status updates (the board's progress narrative)
 
