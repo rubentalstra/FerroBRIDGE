@@ -22,6 +22,3 @@ target
 
 # Claude Code personal/local overrides (never committed)
 .claude/settings.local.json
-
-# JetBrains IDE state
-#.idea/
