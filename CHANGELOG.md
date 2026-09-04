@@ -19,11 +19,22 @@ architecture is the output of the research program on
 
 ## [Unreleased]
 
+### Added
+
+- `docs/VERSIONS.md`, the pin matrix: one place that records every version pin
+  (the five specification pins, the published `fhir-types` and
+  `fhir-terminology` crate pins, the Rust toolchain,
+  edition, resolver and MSRV, the product version, and the licence) with the
+  files that repeat each one. `scripts/checks/versions.sh` fails on any
+  disagreement and on a first-party file claiming a licence other than
+  `BUSL-1.1`, and skips with a printed reason for each file that does not
+  exist yet. A `PostToolUse` hook runs the guard when a pinned file changes
+  (#15).
+
 ### Changed
 
 - The licence of the project's own code and text is the Business Source
-  License 1.1 (`LICENSE`, `NOTICE`), on FerroEHR's and FerroTERM's terms: free
-  for non-production use and for non-commercial production use, a commercial
+  License 1.1 (`LICENSE`, `NOTICE`): free for non-production use and for non-commercial production use, a commercial
   licence for any other production use, and Apache License 2.0 four years
   after each version. Every header, the README badge and licensing section,
   and the community and governance documents name it (#12).

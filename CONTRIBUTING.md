@@ -67,9 +67,9 @@ Five sources, one per surface: the HL7 FHIR specification for the version in
 play, FHIRconnect, the OMOP Common Data Model, OMOCL, and openEHR ITS-REST.
 Read the governing section before implementing spec-facing behaviour, and cite
 it in the pull request. Never resolve a specification question from memory, and
-never from another implementation's behaviour: openFHIR, Eos, EHRbase FHIR
-Bridge, FerroEHR, and FerroTERM are prior art and reference deployments, never
-oracles (`.claude/rules/spec-adherence.md`).
+never from another implementation's behaviour: openFHIR, Eos, and the EHRbase
+FHIR Bridge are prior art, a running CDR or terminology server is a test
+deployment, and none of them is an oracle (`.claude/rules/spec-adherence.md`).
 
 Where the specifications are silent, say so in the text you write: "no
 specification governs this: our own design".

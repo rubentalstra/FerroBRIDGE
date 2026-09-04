@@ -24,8 +24,9 @@ the Clippy book.
    live here, so every pedantic lint is effectively a hard rule (including
    `missing_errors_doc` and `missing_panics_doc`).
 4. **A committed check script or CI job:** currently
-   `scripts/checks/comment-style.sh` (per-edit via the hook) and the workflow
-   lanes in `ci-cd.md`; more are added as CI grows.
+   `scripts/checks/comment-style.sh` and `scripts/checks/versions.sh` (both
+   per-edit via a hook) and the workflow lanes in `ci-cd.md`; more are added as
+   CI grows.
 5. **Review-enforced** (weakest; minimize): only for properties no tool can
    check, each marked below.
 
