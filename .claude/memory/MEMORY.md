@@ -25,3 +25,12 @@
   reference CDR and FerroTERM at `../FerroTERM` the reference terminology
   server; both are read-only prior art from here and are never edited from
   this repository
+- [Domain ferrobridge.eu](domain-ferrobridge-eu.md): the public domain is a
+  Pages setting mirroring ferroterm.eu, never a `CNAME` file; owner 2026-09-04
+- [Milestones 0.0.x](milestones-0-0-x.md): milestones start at v0.0.1 and step
+  by a patch number, never a v0.1.0 opener; owner 2026-09-04
+- [PR auto-merge](pr-auto-merge.md): enable auto-merge on every pull request
+  the moment it is opened (`gh pr merge <n> --auto --squash --delete-branch`);
+  owner 2026-09-04
+- [Memory lives in the repo](memory-lives-in-repo.md): every learning is a
+  tracked file in `.claude/memory/`, never a per-user note; owner 2026-09-04
