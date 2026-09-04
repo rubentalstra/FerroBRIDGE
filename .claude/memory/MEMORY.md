@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Memory index
 
@@ -16,10 +16,11 @@
 - [Owner work style](owner-work-style.md): research-first and evidence-based,
   from first principles; confirm foundational decisions before scaffolding; no
   code while the design is open
-- [Licence: Apache 2.0](license-apache.md): owner decision 2026-09-03,
-  FerroBRIDGE stays Apache 2.0 while FerroEHR and FerroTERM moved to BUSL 1.1
-  the same day, because the bridge is meant to be adopted widely; inbound
-  equals outbound, no contributor licence agreement
+- [Licence: BUSL 1.1](license-busl.md): owner decision 2026-09-04 (#12), the
+  Business Source License 1.1 on FerroEHR's and FerroTERM's terms, replacing
+  the 2026-09-03 Apache 2.0 choice; non-commercial production free, commercial
+  production needs a licence, Apache 2.0 four years after each version;
+  inbound equals outbound, no contributor licence agreement
 - [Sibling projects](sibling-projects.md): FerroEHR at `../ferroehr` is the
   reference CDR and FerroTERM at `../FerroTERM` the reference terminology
   server; both are read-only prior art from here and are never edited from

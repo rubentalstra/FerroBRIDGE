@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-FileCopyrightText: Ruben Talstra
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 # .claude/hooks/block_dangerous.sh
 #
 # Claude Code PreToolUse hook (matcher: Bash). Blocks destructive commands:
@@ -50,7 +50,7 @@ fi
 
 # Never delete the licence or the working discipline.
 if printf '%s' "$cmd" | grep -qE '(^|[;&|[:space:]])(git[[:space:]]+rm|rm)[^;|&]*(LICENSE|CLAUDE\.md)([[:space:]]|$|["'"'"';&|])'; then
-  echo "BLOCKED: LICENSE (Apache 2.0, the project licence) and CLAUDE.md (the working discipline) must not be deleted." >&2
+  echo "BLOCKED: LICENSE (the Business Source License 1.1, the project licence) and CLAUDE.md (the working discipline) must not be deleted." >&2
   exit 2
 fi
 

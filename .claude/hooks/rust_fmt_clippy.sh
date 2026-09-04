@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-FileCopyrightText: Ruben Talstra
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 # .claude/hooks/rust_fmt_clippy.sh
 #
 # Claude Code PostToolUse hook (matcher: Write|Edit).

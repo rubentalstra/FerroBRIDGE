@@ -7,7 +7,7 @@ metadata:
 ---
 
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 FerroBRIDGE is the third project in the Ferro family, and the other two are
 checked out beside it on the owner's machine:
@@ -33,7 +33,8 @@ checked out beside it on the owner's machine:
   evidence in a comparison; the specification is the authority
   (`.claude/rules/spec-adherence.md`). A defect found in one of them is
   reported to that project rather than worked around here.
-- Their licences differ from this one (both moved to BUSL 1.1 on 2026-09-03,
-  while FerroBRIDGE stays Apache 2.0). Never copy code between the
-  repositories on the assumption the terms match, and never copy a licence
-  decision across (see `license-apache.md`).
+- All three are under the Business Source License 1.1 on the same terms
+  since 2026-09-04 (see `license-busl.md`). Never copy code between the
+  repositories anyway: each is its own Licensed Work with its own Licensor
+  copy, and a licence decision is made per repository by the owner, never
+  assumed from a sibling.

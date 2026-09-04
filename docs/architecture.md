@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Architecture
 
@@ -152,7 +152,8 @@ configured, never assumed. The OMOP side uses the local vocabulary tables
 
 ## 7. Workspace layout
 
-Apache-2.0 throughout, matching every upstream artefact. The generated-versus-
+The Business Source License 1.1 throughout for the project's own crates
+(`LICENSE`); vendored upstream artefacts keep their own terms. The generated-versus-
 hand-written split FerroEHR and FerroTERM use applies where there is a
 machine-readable source:
 

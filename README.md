@@ -1,12 +1,12 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # FerroBRIDGE
 
 [![CodeQL](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml/badge.svg)](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/rubentalstra/FerroBRIDGE/badge)](https://scorecard.dev/viewer/?uri=github.com/rubentalstra/FerroBRIDGE)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rubentalstra_FerroBRIDGE&metric=alert_status)](https://sonarcloud.io/summary/overall?id=rubentalstra_FerroBRIDGE)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
 
 A pure-Rust, standalone bridge between openEHR and two interoperability
 targets: HL7 FHIR, driven by the FHIRconnect specification (model-mapping and
@@ -17,12 +17,6 @@ as its own server beside any openEHR CDR reached over the openEHR ITS-REST API
 (FerroEHR is the reference CDR, never a compile-time dependency) and uses a
 FHIR terminology server (FerroTERM is the reference) for code systems and value
 sets.
-
-> **FerroBRIDGE** follows the Ferro family: Ferro for the Rust the family
-> shares, BRIDGE for what this one does. The siblings are
-> [FerroEHR](https://github.com/rubentalstra/FerroEHR), the openEHR CDR, and
-> [FerroTERM](https://github.com/rubentalstra/FerroTERM), the FHIR terminology
-> server.
 
 ## Status: designed, not yet built
 
@@ -47,7 +41,8 @@ decisions and their citations.
   per-table converter is refused in review, because it is the thing this
   project exists to avoid.
 - **Pure Rust.** No JVM, and a single binary, like the rest of the family.
-- **Apache 2.0.** See below.
+- **Business Source License 1.1.** Free for non-commercial use, a commercial
+  licence for production use in a business. See below.
 
 ## What is open
 
@@ -58,15 +53,33 @@ assumption, and the answer arrives with its citation.
 
 ## Licensing
 
-The project's own code and text are under the Apache License 2.0
-([`LICENSE`](LICENSE)). Contribution is inbound equals outbound under section 5
-of that licence, and there is no contributor licence agreement and no copyright
-assignment. Vendored specifications and third-party material keep their
-upstream terms, recorded beside them.
+The project's own code and text are source-available under the Business
+Source License 1.1 ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)), the same terms
+as FerroEHR and FerroTERM, with no open-core tier: everything in this
+repository is under the one licence.
 
-FerroBRIDGE is deliberately the permissive member of the family: a bridge is
-only worth building if people put it in the path between their systems, so the
-licence is not a reason to refuse it.
+The licence lets you read, build, modify, and redistribute the source without
+a fee and without asking anyone, and it covers every non-production use:
+development, testing, evaluation, and prototyping. Production use is free for
+Non-Commercial Purposes, which the licence defines as personal use, academic or
+scientific research, teaching, and use by a non-profit organisation or public
+body that is not in the course of a business, does not deliver a service for
+payment, and is not for commercial advantage. Any other production use needs a
+commercial licence from the Licensor: a hospital, clinic, or care provider
+running FerroBRIDGE between its systems needs one, and so does a vendor,
+integrator, or any company running it in production. Offering FerroBRIDGE, or a
+work derived from it, to third parties as a hosted, managed, or embedded
+service that maps or exchanges health data, and selling, sublicensing, or
+otherwise distributing it for a fee on its own or inside another product, need
+a commercial licence in every case. Each version becomes Apache License 2.0
+four years after that version is published. The commercial licence starts with
+a short conversation with the maintainer named in
+[MAINTAINERS.md](MAINTAINERS.md).
+
+Contributions are licensed inbound equals outbound under the same licence, and
+there is no contributor licence agreement and no copyright assignment. Vendored
+specifications and third-party material keep their upstream terms, recorded
+beside them.
 
 ## Contributing
 

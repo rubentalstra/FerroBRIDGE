@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: Ruben Talstra
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 
 # SonarQube Cloud analysis: the machine opinion beside CodeQL. Findings are
 # ADVISORY. They never outrank the specifications, the project rules, or the

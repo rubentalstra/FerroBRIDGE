@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Reliability and safety hard rules (safety-critical Rust)
 
@@ -170,10 +170,11 @@ the Clippy book.
 
 ## Deviations from the API Guidelines (deliberate)
 
-- **C-PERMISSIVE: followed.** The project's own code is under the Apache
-  License 2.0, which is the permissive licence the guideline asks for, and it
-  adds the patent grant and the contribution terms of section 5. Vendored
-  third-party material keeps its upstream terms
+- **C-PERMISSIVE is not followed: the Business Source License 1.1 for the
+  project's own code** (the owner's decision, 2026-09-04, as FerroEHR and
+  FerroTERM): free for non-production and non-commercial production use, a
+  commercial licence for other production use, Apache 2.0 four years after
+  each version. Vendored third-party material keeps its upstream terms
   (`vendored-inputs.md`).
 - **C-STABLE: pre-1.0 dependencies are acceptable while the crates are
   unpublished.** If any crate is ever published, re-adjudicate every pre-1.0

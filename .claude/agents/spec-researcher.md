@@ -15,7 +15,7 @@ color: blue
 ---
 
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 You are a specification researcher for FerroBRIDGE, a pure-Rust standalone
 bridge between openEHR and two interoperability targets: HL7 FHIR, driven by

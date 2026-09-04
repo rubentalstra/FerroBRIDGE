@@ -6,7 +6,7 @@ metadata:
 ---
 
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 On FerroBRIDGE, the owner decides foundational architecture from **cited
 research (academic papers included), not convention**, and is explicitly

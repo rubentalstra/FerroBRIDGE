@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # CLAUDE.md
 
@@ -190,17 +190,22 @@ AI attribution). Delegate with a tight spec and verify the result.
 
 ## Licence
 
-The project's own code and text are under the **Apache License 2.0**
-(`LICENSE`). Every first-party file carries `SPDX-FileCopyrightText: Ruben
-Talstra` and `SPDX-License-Identifier: Apache-2.0` in its header. Contribution
-is inbound equals outbound under section 5 of that licence, and there is no
-contributor licence agreement and no copyright assignment. Vendored
-specifications and third-party material keep their upstream terms, recorded in
-a `PROVENANCE.md` beside each vendored tree
-(`.claude/rules/vendored-inputs.md`).
+The project's own code and text are under the **Business Source License 1.1**
+(`LICENSE`, `NOTICE`), on the terms FerroEHR and FerroTERM use: free to read,
+build, modify, and redistribute, free for every non-production use and for
+non-commercial production use, a commercial licence from the Licensor for any
+other production use (always for a hosted, managed, or embedded service and
+for for-fee distribution), and Apache License 2.0 four years after each
+version. Every first-party file carries `SPDX-FileCopyrightText: Ruben
+Talstra` and `SPDX-License-Identifier: BUSL-1.1` in its header. Contribution
+is inbound equals outbound under the same licence, and there is no contributor
+licence agreement and no copyright assignment. Vendored specifications and
+third-party material keep their upstream terms, recorded in a `PROVENANCE.md`
+beside each vendored tree (`.claude/rules/vendored-inputs.md`).
 
-FerroBRIDGE stays Apache 2.0 while FerroEHR and FerroTERM moved to other
-licences; the reason is recorded in `.claude/memory/license-apache.md`.
+The decision and its history are recorded in
+`.claude/memory/license-busl.md`. The one file that names Apache 2.0 as a
+licence of its own is `LICENSE`, where it is the Change License.
 
 ## Working discipline (`.claude/`)
 
