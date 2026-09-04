@@ -174,13 +174,29 @@ machine-readable source:
 **The FHIR model is a dependency, not a generator, and the dependency is
 FerroTERM's.** A second FHIR code generator buys the bridge nothing:
 FerroTERM already generates per-version FHIR types (R4, R4B, R5, R6) and the
-terminology operation contracts from the vendored HL7 packages
-(the `fhir-types` crate, 0.1.0 on crates.io), and its `fhir-terminology` crate
-carries the operation model the terminology client speaks (0.1.0 on crates.io). FerroBRIDGE consumes those crates from
-crates.io, pinned by version like every other dependency, never by path. The same holds for the
-openEHR side: the published `openehr-*` crates carry the OPT, Web Template,
-canonical JSON and FLAT codecs, so `openehr-path` is a thin layer over them.
-Nothing the Ferro family already generates is generated twice.
+terminology operation contracts from the vendored HL7 packages, and its
+`fhir-terminology` crate carries the operation model the terminology client
+speaks. FerroBRIDGE consumes both from crates.io, pinned by version like every
+other dependency, never by path. The pins on 2026-09-04:
+
+| Crate | Version | Licence on crates.io | Used for |
+|---|---|---|---|
+| `fhir-types` | 0.1.22 | Apache-2.0 | the R4 resource and data types of the facade (section 4) and of the terminology operations |
+| `fhir-terminology` | 0.1.22 | BUSL-1.1 | the `$expand`, `$lookup`, `$translate`, `$validate-code` request and response contracts the client speaks (section 6) |
+
+FerroTERM publishes fourteen crates; the other twelve stay out of the bridge.
+The code system content crates (`rf2`, `loinc`, `icd11`, `rxnorm-rrf`,
+`gstandaard`, `labcodeset`, `dhd-thesaurus`, `sct-ecl`) and the index and
+store crates (`concept-store`, `concept-graph`, `designation-index`,
+`classification`) exist to serve terminology; the bridge asks a terminology
+server for that over FHIR operations and never loads code system content
+itself (section 6), and OMOP concept resolution is SQL over the loaded OHDSI
+vocabulary (section 5). The pins move to the pin matrix and the workspace
+manifest when those exist, and a version bump is a dependency update like any
+other. The same holds for the openEHR side: the published `openehr-*` crates
+carry the OPT, Web Template, canonical JSON and FLAT codecs, so `openehr-path`
+is a thin layer over them. Nothing the Ferro family already generates is
+generated twice.
 
 ## 8. Identity, failure and the specification's recommendations
 
