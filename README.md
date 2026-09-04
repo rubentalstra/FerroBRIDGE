@@ -13,10 +13,9 @@ targets: HL7 FHIR, driven by the FHIRconnect specification (model-mapping and
 contextual-mapping YAML validated against its published JSON schemas), and the
 OMOP Common Data Model, driven by the OMOCL specification. Mappings are
 specification-conformant YAML, never hand-coded per resource or table. It runs
-as its own server beside any openEHR CDR reached over the openEHR ITS-REST API
-(FerroEHR is the reference CDR, never a compile-time dependency) and uses a
-FHIR terminology server (FerroTERM is the reference) for code systems and value
-sets.
+as its own server beside any openEHR CDR reached over the openEHR ITS-REST API,
+never as a compile-time dependency of one, and uses any FHIR terminology server
+for code systems and value sets.
 
 ## Status: designed, not yet built
 
@@ -53,10 +52,10 @@ assumption, and the answer arrives with its citation.
 
 ## Licensing
 
-The project's own code and text are source-available under the Business
-Source License 1.1 ([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)), the same terms
-as FerroEHR and FerroTERM, with no open-core tier: everything in this
-repository is under the one licence.
+FerroBRIDGE is source-available under the Business Source License 1.1
+([`LICENSE`](LICENSE), [`NOTICE`](NOTICE)), with no open-core tier: the
+bridge, the server, and the tools are in this repository under the one
+licence, and nothing is held back to be sold back to you.
 
 The licence lets you read, build, modify, and redistribute the source without
 a fee and without asking anyone, and it covers every non-production use:

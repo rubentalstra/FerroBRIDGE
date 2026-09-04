@@ -128,8 +128,7 @@ request:
 - **No re-modelling by hand of what a specification publishes in
   machine-readable form.** A change goes into the generator.
 - **No compile-time dependency on a particular CDR.** The bridge reaches any
-  openEHR CDR over ITS-REST, and FerroEHR is a reference rather than a
-  requirement.
+  openEHR CDR over ITS-REST, and no single CDR is a requirement.
 - **No patient data in the repository**, in a fixture, or in an issue.
 - **No weakening a test, a gate, or an expectation to make a build green.** A
   red gate is information.

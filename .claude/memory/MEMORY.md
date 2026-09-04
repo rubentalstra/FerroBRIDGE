@@ -34,3 +34,6 @@
   owner 2026-09-04
 - [Memory lives in the repo](memory-lives-in-repo.md): every learning is a
   tracked file in `.claude/memory/`, never a per-user note; owner 2026-09-04
+- [Standalone product](standalone-product.md): public documents never name
+  FerroEHR or FerroTERM; any CDR, any terminology server, crates by crate name;
+  the licence framing stands on its own; owner 2026-09-04

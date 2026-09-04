@@ -53,8 +53,8 @@ moved.
 | FHIR | R4 (4.0.1) | the only value the FHIRconnect schemas admit for `spec.version`; the mapping library targets R4; the prose says other releases "should" work but nothing is tested |
 | OMOCL | v1.0.0 (`grammar: OMOCL/v1.0.0`) | the only released grammar; no JSON schema is published (railroad diagram plus syntax tables; lexer and parser marked work in progress) |
 | OMOP CDM | v5.4 | the only version OMOCL files declare (`spec.system: OMOP`, `spec.version: 5.4`) and the only one Eos supports; DDLs and the machine-readable table definitions come from <https://github.com/OHDSI/CommonDataModel> |
-| openEHR ITS-REST | 1.1.0 | the released REST API the CDR speaks (FerroEHR's pin) |
-| FHIR terminology operations | R4/R4B tolerant | `CodeSystem/$lookup`, `ConceptMap/$translate`, `ValueSet/$validate-code`; FerroTERM answers R4B |
+| openEHR ITS-REST | 1.1.0 | the released REST API a conformant CDR speaks |
+| FHIR terminology operations | R4/R4B tolerant | `CodeSystem/$lookup`, `ConceptMap/$translate`, `ValueSet/$validate-code`; a server may answer R4 or R4B |
 
 Later FHIR releases are feature-gated in the model crate and claimed only once a
 mapping corpus proves them.
@@ -145,17 +145,15 @@ tables derived rather than mapped.
 The FHIR side needs three operations on a FHIR terminology server: `$lookup`
 (the specification recommends resolving a code's display through a terminology
 server because `DV_CODED_TEXT.value` is mandatory while FHIR `display` is not),
-`$translate` for `conceptmap` references, and `$validate-code`. FerroTERM is the
-reference server; the client is version-tolerant across R4 and R4B and is
-configured, never assumed. The OMOP side uses the local vocabulary tables
-(section 5).
+`$translate` for `conceptmap` references, and `$validate-code`. The server is
+configured, never assumed, and the client is version-tolerant across R4 and R4B.
+The OMOP side uses the local vocabulary tables (section 5).
 
 ## 7. Workspace layout
 
 The Business Source License 1.1 throughout for the project's own crates
-(`LICENSE`); vendored upstream artefacts keep their own terms. The generated-versus-
-hand-written split FerroEHR and FerroTERM use applies where there is a
-machine-readable source:
+(`LICENSE`); vendored upstream artefacts keep their own terms. Code is generated
+where a machine-readable source exists and hand-written everywhere else:
 
 | Crate | Role | Kind |
 |---|---|---|
@@ -168,24 +166,24 @@ machine-readable source:
 | `omocl-engine` | the one-directional interpreter emitting typed CDM rows | hand-written |
 | `omop-cdm` | CDM v5.4 row types and DDL generated from the OHDSI `CommonDataModel` CSV definitions; the Athena vocabulary loader and concept resolver; the derived-table generators | generated + hand-written |
 | `ferrobridge-openehr` | the ITS-REST client (section 3) | hand-written |
-| `ferrobridge-term` | the FHIR terminology client (section 6) over `fhir-types` and `fhir-terminology` from FerroTERM | hand-written |
+| `ferrobridge-term` | the FHIR terminology client (section 6) over the published `fhir-types` and `fhir-terminology` crates | hand-written |
 | `ferrobridge-server` | the FHIR R4 facade, the OMOP ETL job runner and its API, the id-map store | hand-written |
 
-**The FHIR model is a dependency, not a generator, and the dependency is
-FerroTERM's.** A second FHIR code generator buys the bridge nothing:
-FerroTERM already generates per-version FHIR types (R4, R4B, R5, R6) and the
-terminology operation contracts from the vendored HL7 packages, and its
-`fhir-terminology` crate carries the operation model the terminology client
-speaks. FerroBRIDGE consumes both from crates.io, pinned by version like every
-other dependency, never by path. The pins on 2026-09-04:
+**The FHIR model is a dependency of this repository, never something it
+generates.** A FHIR code generator here buys the bridge nothing: the published
+`fhir-types` crate already carries per-version FHIR types (R4, R4B, R5, R6)
+generated from the HL7 packages, and the `fhir-terminology` crate carries the
+operation model the terminology client speaks. FerroBRIDGE consumes both from
+crates.io, pinned by version like every other dependency, never by path. The
+pins on 2026-09-04:
 
 | Crate | Version | Licence on crates.io | Used for |
 |---|---|---|---|
 | `fhir-types` | 0.1.22 | Apache-2.0 | the R4 resource and data types of the facade (section 4) and of the terminology operations |
 | `fhir-terminology` | 0.1.22 | BUSL-1.1 | the `$expand`, `$lookup`, `$translate`, `$validate-code` request and response contracts the client speaks (section 6) |
 
-FerroTERM publishes fourteen crates; the other twelve stay out of the bridge.
-The code system content crates (`rf2`, `loinc`, `icd11`, `rxnorm-rrf`,
+The same publisher's other crates stay out of the bridge. The code system
+content crates (`rf2`, `loinc`, `icd11`, `rxnorm-rrf`,
 `gstandaard`, `labcodeset`, `dhd-thesaurus`, `sct-ecl`) and the index and
 store crates (`concept-store`, `concept-graph`, `designation-index`,
 `classification`) exist to serve terminology; the bridge asks a terminology
@@ -230,8 +228,9 @@ pins each as its own decision:
   OMOCL files emitting MEASUREMENT rows into a CDM 5.4 database with a real
   Athena vocabulary loaded, with resolved `concept_id`s asserted and unmapped
   codes landing as `0`.
-- FerroEHR is the reference CDR in the composed test stack, reached over
-  ITS-REST only; FerroTERM is the reference terminology server.
+- The composed test stack runs an openEHR CDR, reached over ITS-REST only, and
+  a FHIR terminology server; both are configured deployments, never
+  compile-time dependencies.
 
 ## 10. What is deliberately outside
 
