@@ -3,7 +3,7 @@ paths: ["scripts/vendor/*.sh", "**/vendor/**", "docs/specs/**"]
 ---
 
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Vendored inputs
 
@@ -41,8 +41,8 @@ schema, a test corpus, a grammar) is:
 
 Vendored material keeps its upstream terms, and those terms are recorded in the
 `PROVENANCE.md` rather than assumed. The project's own code and text are
-Apache 2.0 (`CLAUDE.md` §Licence); a vendored tree is not, and the two are
-never conflated. If a corpus's licence does not permit redistribution, it is
+under the Business Source License 1.1 (`CLAUDE.md` §Licence); a vendored tree
+is not, and the two are never conflated. If a corpus's licence does not permit redistribution, it is
 not vendored: the fetch script pulls it into an ignored directory at build time
 and the repository ships none of it.
 

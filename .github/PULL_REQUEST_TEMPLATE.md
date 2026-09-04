@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 ## What changed and why
 
@@ -17,6 +17,6 @@ Closes #NNN
 - [ ] Every commit is signed.
 - [ ] No AI or assistant attribution anywhere in the commits or this PR.
 
-Contributions are inbound equals outbound under the Apache License 2.0
-(section 5); there is no contributor licence agreement. See
+Contributions are inbound equals outbound under the Business Source License
+1.1, including its Change License; there is no contributor licence agreement. See
 [CONTRIBUTING.md](../CONTRIBUTING.md) for the full contribution guide.

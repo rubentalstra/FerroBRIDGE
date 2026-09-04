@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # FerroBRIDGE AI Statement
 
@@ -10,7 +10,7 @@
 | Status | Active |
 | Author and owner | Ruben Talstra, maintainer |
 | Canonical location | `AI_STATEMENT.md` at the repository root |
-| Licence | Apache 2.0, like the rest of the project's own text |
+| Licence | Business Source License 1.1, like the rest of the project's own text |
 | Review | at every major or minor release, and on any trigger in §13 |
 
 **Abstract.** This document discloses how artificial-intelligence tools are
@@ -162,17 +162,17 @@ What these controls do **not** prove is stated in §12.
 
 ## 8. Licensing and provenance of AI output
 
-The project is Apache 2.0 licensed. The position taken here follows the Apache
-Software Foundation's and LLVM's published reasoning rather than wishful
-shortcuts: an AI tool's output does not launder anyone's copyright, the full
+The project is licensed under the Business Source License 1.1. The position
+taken here follows the Apache Software Foundation's and LLVM's published
+reasoning rather than wishful shortcuts: an AI tool's output does not launder anyone's copyright, the full
 provenance of generated text is generally not knowable, and prompting alone is
 not treated as authorship. In practice: a contribution of substantially copied
 third-party material is refused however it was produced; generated code is held
 to the same originality expectations as human code, under the same review; and
 if identifiable third-party material is found in the tree, it is removed or
 licensed properly, exactly as it would be for a human-introduced copy. The
-tools are used under terms that do not restrict the output's use in Apache 2.0
-licensed software.
+tools are used under terms that do not restrict the output's use in software
+under this project's licence.
 
 ## 9. Data
 
@@ -266,7 +266,7 @@ tracker, and never silently absorbed.
 ## 15. References
 
 **Normative for this project** (the documents that bind the practice described
-here): the [Apache License 2.0](LICENSE); the HL7 FHIR, FHIRconnect, OMOP
+here): the [Business Source License 1.1](LICENSE); the HL7 FHIR, FHIRconnect, OMOP
 Common Data Model, OMOCL, and openEHR ITS-REST specifications; the repository's
 rule set (`.claude/rules/`, in particular `spec-adherence.md`, `testing.md`,
 `reliability.md`, `codegen.md`, `comments.md`, `ai-code-review.md`,

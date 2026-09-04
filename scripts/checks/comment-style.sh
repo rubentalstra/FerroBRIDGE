@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-FileCopyrightText: Ruben Talstra
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 # Comment-style guard (.claude/rules/comments.md, RFC 505 and RFC 1574).
 #
 # Checks HAND-WRITTEN .rs files (a file carrying the `@generated` marker is

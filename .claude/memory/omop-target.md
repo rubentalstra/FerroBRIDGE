@@ -7,7 +7,7 @@ metadata:
 ---
 
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 On **2026-09-03** the owner confirmed that FerroBRIDGE has **two first-class
 targets**, not one: HL7 FHIR and the **OMOP Common Data Model**. The scope

@@ -6,7 +6,7 @@ argument-hint: "[issue number] (optional)"
 ---
 
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # /next-task
 

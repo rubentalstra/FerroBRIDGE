@@ -1,5 +1,5 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Changelog
 
@@ -18,5 +18,14 @@ architecture is the output of the research program on
 [issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1).
 
 ## [Unreleased]
+
+### Changed
+
+- The licence of the project's own code and text is the Business Source
+  License 1.1 (`LICENSE`, `NOTICE`), on FerroEHR's and FerroTERM's terms: free
+  for non-production use and for non-commercial production use, a commercial
+  licence for any other production use, and Apache License 2.0 four years
+  after each version. Every header, the README badge and licensing section,
+  and the community and governance documents name it (#12).
 
 [Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/commits/main

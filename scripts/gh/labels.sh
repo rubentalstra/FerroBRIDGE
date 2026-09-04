@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-FileCopyrightText: Ruben Talstra
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BUSL-1.1
 # scripts/gh/labels.sh: bootstrap the FerroBRIDGE issue-label taxonomy.
 #
 # Creates (idempotently) the labels the tracker workflow assumes:
