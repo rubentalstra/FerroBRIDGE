@@ -57,8 +57,8 @@ There is no Cargo workspace yet. What exists:
   `versions.sh`, which fails when a file disagrees with the `docs/VERSIONS.md`
   pin matrix or claims a licence other than `BUSL-1.1`).
 - `.github/`: issue and pull-request templates, CODEOWNERS, Dependabot, and
-  four workflows that work on a repository with no code (CI, Scorecard,
-  CodeQL, SonarQube Cloud). `ci.yml` runs its workflow, shell, container and
+  five workflows that work on a repository with no code (CI, Docs,
+  Scorecard, CodeQL, SonarQube Cloud). `ci.yml` runs its workflow, shell, container and
   guard tier now and keeps the Rust tier gated behind a `Cargo.toml` detection
   job; its `conclusion` job is the single required check on `main`
   (`docs/ci-cd.md`). There is no release lane, because there is nothing to

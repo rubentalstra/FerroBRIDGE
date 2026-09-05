@@ -90,6 +90,17 @@ rest of the FerroBRIDGE surfaces use the system font stack in
   rebuild the wordmark in another typeface.
 - Do not redraw the arch, the deck, or the nodes. The geometry is fixed.
 
+## Where the palette applies
+
+The landing page reads these values through its own `--fb-*` tokens in
+`website/landing/style.css`, so the site and the mark agree.
+
+The book keeps mdBook's stock `rust` and `coal` themes. Overriding an mdBook
+theme means carrying a copy of its CSS and re-reconciling it at every mdBook
+upgrade, and the book already carries the brand through the favicon and through
+the landing page a reader arrives from. Revisit this if the book ever needs a
+layout change that the stock themes cannot express.
+
 ## Regenerating the rasters
 
 The PNG and ICO files derive from the SVGs. Run these from the repository root
