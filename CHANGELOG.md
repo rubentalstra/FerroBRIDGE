@@ -13,33 +13,15 @@ Maintenance rule: every pull request that changes user-visible behaviour adds
 an entry under **[Unreleased]** in the same PR. Cutting a release renames
 [Unreleased] to the version and date, and adds a fresh link reference.
 
-There is no release yet. FerroBRIDGE is in its design phase, and the
-architecture is the output of the research program on
-[issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1).
+FerroBRIDGE is in its design phase, and the architecture is the output of the
+research program on
+[issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1). Releases on
+the 0.0.x line carry the repository, its gates, and its documentation; there is
+no binary to download yet.
 
 ## [Unreleased]
 
-### Changed
-
-- `SECURITY.md` and `MAINTAINERS.md` name both protections a published release
-  has: the immutable-releases setting freezes its notes and assets, and the
-  `release-tags` ruleset stops its tag being moved or deleted (#68).
-
-- The README's mark uses an absolute URL, so it renders wherever the README
-  travels rather than only on the repository page (#60).
-
-- The landing page footer shows the mark beside the wordmark, so the mark
-  brackets the page instead of appearing only in the header (#56).
-
-- The FerroBRIDGE mark is now the fork the product draws: a filled circle for
-  the openEHR source, a two-way arrow to HL7 FHIR, and a plain line into a
-  table for the OMOP Common Data Model. Only the FHIR branch carries
-  arrowheads, because that side is an exchange and the OMOP side writes rows.
-  Every file in `assets/brand/` is redrawn from the new masters, along with the
-  book theme favicon, the social card, the lockups and the raster favicon set.
-  The palette is unchanged. `assets/brand/README.md` describes the new
-  geometry and its two drawing rules, and the landing page image alt text names
-  the new shapes (#54).
+## [0.0.1] - 2026-09-05
 
 ### Added
 
@@ -128,6 +110,27 @@ architecture is the output of the research program on
 
 ### Changed
 
+- `SECURITY.md` and `MAINTAINERS.md` name both protections a published release
+  has: the immutable-releases setting freezes its notes and assets, and the
+  `release-tags` ruleset stops its tag being moved or deleted (#68).
+
+- The README's mark uses an absolute URL, so it renders wherever the README
+  travels rather than only on the repository page (#60).
+
+- The landing page footer shows the mark beside the wordmark, so the mark
+  brackets the page instead of appearing only in the header (#56).
+
+- The FerroBRIDGE mark is now the fork the product draws: a filled circle for
+  the openEHR source, a two-way arrow to HL7 FHIR, and a plain line into a
+  table for the OMOP Common Data Model. Only the FHIR branch carries
+  arrowheads, because that side is an exchange and the OMOP side writes rows.
+  Every file in `assets/brand/` is redrawn from the new masters, along with the
+  book theme favicon, the social card, the lockups and the raster favicon set.
+  The palette is unchanged. `assets/brand/README.md` describes the new
+  geometry and its two drawing rules, and the landing page image alt text names
+  the new shapes (#54).
+
+
 - The landing page runs the approved "Indigo & Iron" palette. It carried a
   pre-brand blue that twenty-one rules read, so every link, button and
   gradient disagreed with the mark beside them. Every accent now clears
@@ -170,4 +173,5 @@ architecture is the output of the research program on
   after each version. Every header, the README badge and licensing section,
   and the community and governance documents name it (#12).
 
-[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/commits/main
+[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/rubentalstra/FerroBRIDGE/releases/tag/v0.0.1
