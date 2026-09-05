@@ -18,7 +18,7 @@ build.
 
 ## What runs today
 
-Four workflows, all of which work on a repository with no code:
+Five workflows, all of which work on a repository with no code:
 
 - `.github/workflows/ci.yml`: the two-tier gate. Tier 1 runs now (zizmor,
   actionlint, shellcheck, hadolint, the comment-style guard, the versions
@@ -34,12 +34,20 @@ Four workflows, all of which work on a repository with no code:
   is skipped cleanly until the workspace lands and then activates by itself.
 - `.github/workflows/sonar.yml`: SonarQube Cloud, the multi-language sweep
   over shell, YAML, and JSON. Advisory, gating no merge
-  (`ai-code-review.md`); the Rust analysis and the coverage import join it
-  with the workspace.
+  (`ai-code-review.md`). The instrumented coverage run and the
+  `sonar.projectVersion` derivation sit behind a `hashFiles('Cargo.toml')`
+  step gate and start reporting when the workspace lands.
+- `.github/workflows/docs.yml`: the documentation site. It builds the mdBook on
+  every pull request and deploys from `main` through GitHub Pages, using the
+  pinned toolchain in `.github/actions/docs-toolchain` (#18).
 
-The Rust lanes in `ci.yml` are written and gated off, so they need no edit when
-the workspace lands. There is no release lane, because there is nothing to
-release. Do not add one before the workspace exists.
+The Rust lanes in `ci.yml`, `codeql.yml` and `sonar.yml` are written and gated
+off, so they need no edit when the workspace lands. `.github/dependabot.yml`
+carries the same property: its `cargo` and `docker` entries are inert until
+their manifests exist. There is no release lane, because there is nothing to
+release. Do not add one before the workspace exists;
+`.github/release.yml` configures only the auto-generated release notes, which
+GitHub reads when a release is cut by hand.
 
 ## Workflow security (every workflow, no exceptions)
 
@@ -54,11 +62,15 @@ release. Do not add one before the workspace exists.
 - **A publishing lane restores no build cache.** A cache an untrusted run could
   poison must not feed a release.
 
-**Enforcement:** `ci.yml` tier 1 runs `zizmor --min-severity=low
-.github/workflows/`, `actionlint`, and `shellcheck --severity=style` on every
-push to `main`, pull request, and merge-group run. Run the same three by hand
-before pushing a workflow or script change, so a finding costs a local run
-rather than a CI round trip.
+**Enforcement:** `ci.yml` tier 1 runs `zizmor --min-severity=low .github/`,
+`actionlint`, and `shellcheck --severity=style` on every push to `main`, pull
+request, and merge-group run. Run the same three by hand before pushing a
+workflow or script change, so a finding costs a local run rather than a CI
+round trip. The zizmor path is the whole of `.github`, so `dependabot.yml` and
+every composite action under `.github/actions/` are audited alongside the
+workflows. Never narrow it back to make a finding disappear: fix the cause, or
+record a `# zizmor: ignore[audit]` suppression with its reason on the line the
+finding names.
 
 ## Shell scripts are analysed like code
 

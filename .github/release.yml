@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+#
+# Configuration for GitHub's auto-generated release notes. Every category maps
+# onto a label the tracker already uses (.claude/rules/issue-workflow.md,
+# bootstrapped by scripts/gh/labels.sh); no label is invented here. The
+# hand-curated CHANGELOG.md stays the primary record, and these notes are the
+# per-pull-request index beside it.
+#
+# `no-changelog` is the pull-request escape hatch for a change with no
+# user-visible effect, which is the same set that does not belong in release
+# notes, so it doubles as the exclusion.
+# https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+changelog:
+  exclude:
+    labels:
+      - no-changelog
+  categories:
+    - title: Features
+      labels:
+        - enhancement
+    - title: Fixes
+      labels:
+        - bug
+    - title: Security
+      labels:
+        - security
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: Maintenance
+      labels:
+        - chore
+        - refactor
+        - perf
+        - test
+        - ci
+    - title: Other changes
+      labels:
+        - "*"

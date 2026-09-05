@@ -10,7 +10,7 @@ Closes #NNN
 ## Checklist
 
 - [ ] Spec-facing decisions cite the governing specification (HL7 FHIR, FHIRconnect, the OMOP Common Data Model, OMOCL, or openEHR ITS-REST), not memory and not another implementation.
-- [ ] Shell and workflow files are clean: `shellcheck --severity=style`, `actionlint`, `zizmor --min-severity=low .github/workflows`.
+- [ ] Shell and workflow files are clean: `shellcheck --severity=style`, `actionlint`, `zizmor --min-severity=low .github/`.
 - [ ] Rust gates pass, once a workspace exists: `cargo fmt --all --check`, `cargo clippy --workspace --all-targets --all-features -- -D warnings`, `cargo nextest run --workspace --locked`, `cargo test --doc --locked`, `cargo doc` with `RUSTDOCFLAGS=-D warnings`, and `cargo deny check`.
 - [ ] `CHANGELOG.md` has an `[Unreleased]` entry, if the change is user-visible.
 - [ ] Docs are updated, if behaviour changed.

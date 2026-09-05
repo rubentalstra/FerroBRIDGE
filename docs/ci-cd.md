@@ -25,7 +25,7 @@ the committed guards, so both are live code from day one and both need a gate.
 
 | Job | Runs |
 |---|---|
-| `zizmor` | `zizmor --min-severity=low .github/workflows/`, with `GH_TOKEN` so the online audits (`impostor-commit`) work |
+| `zizmor` | `zizmor --min-severity=low .github/`, with `GH_TOKEN` so the online audits (`impostor-commit`) work |
 | `actionlint` | the official digest-pinned image, with `SHELLCHECK_OPTS='-e SC2016'` |
 | `shellcheck` | `--severity=style` over every tracked `*.sh` and every tracked extensionless file with a shell shebang |
 | `hadolint` | every tracked Dockerfile under `.hadolint.yaml` (`failure-threshold: warning`) |
@@ -77,6 +77,34 @@ counted.
 Reading the results through `env:` rather than splicing them into the `run:`
 block is the same template-injection rule every other workflow follows
 (`.claude/rules/ci-cd.md`).
+
+## What zizmor audits, and the cooldown decision
+
+The zizmor lane audits `.github/`, not `.github/workflows/`. zizmor reads more
+than workflow files: it audits `dependabot.yml` and the composite actions under
+`.github/actions/`, and a composite action runs with the calling workflow's
+permissions, so it is the same class of token-holding code. Auditing only the
+workflows left both invisible.
+
+Widening the path surfaced one finding, `dependabot-cooldown` at medium
+severity and high confidence: `default-days: 3` on the `github-actions` entry,
+below the 7-day floor the audit enforces. The three-day value had a recorded
+defence, that an action runs in CI rather than shipping in the product, that
+every action is digest-pinned so a bump is a reviewed change of digest, and
+that Dependabot applies no cooldown to advisory-driven bumps. Only the third
+leg survives inspection. CI is where the release-signing identity lives, so
+"runs in CI" understates the consequence rather than reducing it, and a
+maintainer approving a digest bump does not read the action's diff, so
+digest pinning records what changed without reviewing it.
+
+The cooldown was raised to 7 days on `github-actions` and `docker`, matching
+the 7-day minor and 14-day major values already on `cargo`. The cost is a week
+of delay on convenience bumps that arrive on a weekly schedule anyway, and
+security updates are exempt from cooldown by design, so an advisory still
+arrives immediately. The benefit is four more days of community detection
+window on a compromised release, which is the attack this control exists for.
+No suppression was recorded and the audit path was not narrowed
+(`.claude/rules/ai-code-review.md`).
 
 ## Configuration this workflow reads
 
