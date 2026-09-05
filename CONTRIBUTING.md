@@ -40,7 +40,7 @@ in review.
 Today the gates are the shell and workflow set, and they run on every change:
 
 ```
-zizmor --min-severity=low .github/workflows/
+zizmor --min-severity=low .github/
 actionlint
 shellcheck --severity=style <tracked shell files>
 hadolint --config .hadolint.yaml <tracked Dockerfiles>

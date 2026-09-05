@@ -19,12 +19,6 @@ architecture is the output of the research program on
 
 ## [Unreleased]
 
-### Changed
-
-- `CONTRIBUTING.md` lists all six tier-1 gates `ci.yml` runs, in the same order
-  and with the same flags. It named four, so a contributor who ran the listed
-  commands could still fail CI on hadolint or the versions guard (#36).
-
 ### Added
 
 - `.github/release.yml`, so GitHub's auto-generated release notes group pull
@@ -44,7 +38,17 @@ architecture is the output of the research program on
   workspace version. `sonar-project.properties` names the lcov file and
   excludes build output, vendored trees, and the generated OMOP CDM subtree
   (#17).
-
+- The documentation site at <https://ferrobridge.eu/>: a hand-written landing
+  page at the root and an mdBook under `/docs/`, organised by reader intent
+  (Evaluate, Operate, Integrate, Contribute). `.github/workflows/docs.yml`
+  builds it on every pull request and deploys from `main` through GitHub Pages,
+  `.github/actions/docs-toolchain/action.yml` installs the pinned mdBook
+  toolchain, and `scripts/site/assemble.sh` places both halves and renders the
+  roadmap block from the open milestones. `llms.txt` and `CITATION.cff` land
+  with it, the README badge block covers CI, CodeQL, Scorecard, the Sonar
+  quality gate and coverage, the licence and the latest release, and
+  `scripts/checks/versions.sh` now guards the citation version and the three
+  documentation-toolchain pins (#18).
 - `.github/workflows/ci.yml`, the CI gate, in two tiers. Tier 1 runs on a
   repository with no code: zizmor at `--min-severity=low` with the online
   audits enabled, actionlint through its digest-pinned official image,
@@ -63,17 +67,6 @@ architecture is the output of the research program on
 - The CI tool pins (zizmor, actionlint, shellcheck, hadolint) as a section of
   `docs/VERSIONS.md`, with `scripts/checks/versions.sh` failing when
   `ci.yml` and the matrix disagree (#16).
-- The documentation site at <https://ferrobridge.eu/>: a hand-written landing
-  page at the root and an mdBook under `/docs/`, organised by reader intent
-  (Evaluate, Operate, Integrate, Contribute). `.github/workflows/docs.yml`
-  builds it on every pull request and deploys from `main` through GitHub Pages,
-  `.github/actions/docs-toolchain/action.yml` installs the pinned mdBook
-  toolchain, and `scripts/site/assemble.sh` places both halves and renders the
-  roadmap block from the open milestones. `llms.txt` and `CITATION.cff` land
-  with it, the README badge block covers CI, CodeQL, Scorecard, the Sonar
-  quality gate and coverage, the licence and the latest release, and
-  `scripts/checks/versions.sh` now guards the citation version and the three
-  documentation-toolchain pins (#18).
 - `docs/VERSIONS.md`, the pin matrix: one place that records every version pin
   (the five specification pins, the published `fhir-types` and
   `fhir-terminology` crate pins, the Rust toolchain,
@@ -89,13 +82,18 @@ architecture is the output of the research program on
 - The zizmor lane in `.github/workflows/ci.yml` audits `.github/` rather than
   `.github/workflows/`, so `dependabot.yml` and every composite action under
   `.github/actions/` are covered. A composite action runs with the calling
-  workflow's permissions, so it is the same class of token-holding code (#34).
+  workflow's permissions, so it is the same class of token-holding code.
+  `CONTRIBUTING.md` and the pull-request template name the wider path too, so a
+  local run still matches CI (#34).
 - The Dependabot cooldown on the `github-actions` and `docker` ecosystems is
   7 days, up from 3, which is the floor zizmor's `dependabot-cooldown` audit
   enforces and matches the 7-day minor value already on `cargo`. Security
   updates are exempt from cooldown, so an advisory still arrives immediately.
   `docs/ci-cd.md` records why the earlier defence of the 3-day value did not
   hold and why no suppression was recorded (#34).
+- `CONTRIBUTING.md` lists all six tier-1 gates `ci.yml` runs, in the same order
+  and with the same flags. It named four, so a contributor who ran the listed
+  commands could still fail CI on hadolint or the versions guard (#36).
 - The licence of the project's own code and text is the Business Source
   License 1.1 (`LICENSE`, `NOTICE`): free for non-production use and for non-commercial production use, a commercial
   licence for any other production use, and Apache License 2.0 four years

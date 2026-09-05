@@ -18,7 +18,7 @@ build.
 
 ## What runs today
 
-Four workflows, all of which work on a repository with no code:
+Five workflows, all of which work on a repository with no code:
 
 - `.github/workflows/ci.yml`: the two-tier gate. Tier 1 runs now (zizmor,
   actionlint, shellcheck, hadolint, the comment-style guard, the versions
@@ -37,6 +37,9 @@ Four workflows, all of which work on a repository with no code:
   (`ai-code-review.md`). The instrumented coverage run and the
   `sonar.projectVersion` derivation sit behind a `hashFiles('Cargo.toml')`
   step gate and start reporting when the workspace lands.
+- `.github/workflows/docs.yml`: the documentation site. It builds the mdBook on
+  every pull request and deploys from `main` through GitHub Pages, using the
+  pinned toolchain in `.github/actions/docs-toolchain` (#18).
 
 The Rust lanes in `ci.yml`, `codeql.yml` and `sonar.yml` are written and gated
 off, so they need no edit when the workspace lands. `.github/dependabot.yml`
