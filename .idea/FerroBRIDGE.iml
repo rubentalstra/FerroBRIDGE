@@ -15,10 +15,14 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-model/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-resolve/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-resolve/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/omocl-engine/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/omocl-engine/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/omocl-model/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/omocl-model/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omocl/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omocl/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/omop-cdm/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/omop-cdm/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/crates/openehr-mapping-core/src" isTestSource="false" />

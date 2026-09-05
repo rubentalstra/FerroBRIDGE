@@ -26,6 +26,25 @@ no binary to download yet.
 - The Cargo workspace skeleton (#107): the root manifest with every lint the
   reliability rule names, the release profile, `rust-toolchain.toml`,
   `rustfmt.toml`, `clippy.toml`, `deny.toml` and a committed `Cargo.lock`;
+  six placeholder library crates at version 0.0.0 (`openehr-mapping-core`,
+  `fhirconnect`, `omocl`, `omop-cdm`, `ferrobridge-openehr`,
+  `ferrobridge-term`), published to reserve their names, each carrying its
+  pinned specification version as a constant that an integration test checks
+  against the pin matrix; a thin `ferrobridge` binary over a library that does
+  nothing yet; and the `ferrobridge-testkit` tool crate with the pin-matrix
+  reader. CI tier 2 is active from this change on.
+
+### Changed
+
+- `docs/architecture.md` §7 collapses the published crate set from twelve to
+  seven (one crate per language, with modules), after a duplication check
+  against both sibling projects; the tracker issues keep the module work units.
+
+### Added
+
+- The Cargo workspace skeleton (#107): the root manifest with every lint the
+  reliability rule names, the release profile, `rust-toolchain.toml`,
+  `rustfmt.toml`, `clippy.toml`, `deny.toml` and a committed `Cargo.lock`;
   eleven placeholder library crates at version 0.0.0, published to reserve
   their names, each carrying its pinned specification version as a constant
   that an integration test checks against the pin matrix; a thin

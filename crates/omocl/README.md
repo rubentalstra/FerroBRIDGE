@@ -1,22 +1,17 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
-# openehr-mapping-core
+# omocl
 
-The shared foundation of the FerroBRIDGE mapping languages: the common header
-model, the YAML loader, the mapping registry, the diagnostic model, and openEHR
-path resolution and execution over the Web Template.
+The OMOCL mapping language for Rust: the mapping file model and its validation, and the interpreter emitting OMOP CDM rows from openEHR compositions.
 
 Part of [FerroBRIDGE](https://ferrobridge.eu), a pure-Rust bridge between
 openEHR and two interoperability targets: HL7 FHIR through the FHIRconnect
 specification, and the OMOP Common Data Model through the OMOCL specification.
 
 Version 0.0.0 reserves the crate name. The implementation lands with
-[FerroBRIDGE issue #74](https://github.com/rubentalstra/FerroBRIDGE/issues/74),
+[FerroBRIDGE issue #2](https://github.com/rubentalstra/FerroBRIDGE/issues/2),
 and the design is recorded in the repository's architecture document.
-
-openEHR is a registered trademark of the openEHR Foundation. This crate is not
-endorsed by the openEHR Foundation.
 
 ## Licence
 

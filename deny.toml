@@ -40,13 +40,8 @@ confidence-threshold = 0.9
 # openehr-term is Apache-2.0 AND CC-BY-SA-3.0).
 exceptions = [
   { allow = ["BUSL-1.1"], crate = "openehr-mapping-core" },
-  { allow = ["BUSL-1.1"], crate = "openehr-path" },
-  { allow = ["BUSL-1.1"], crate = "fhir-tree" },
-  { allow = ["BUSL-1.1"], crate = "fhirconnect-model" },
-  { allow = ["BUSL-1.1"], crate = "fhirconnect-resolve" },
-  { allow = ["BUSL-1.1"], crate = "fhirconnect-engine" },
-  { allow = ["BUSL-1.1"], crate = "omocl-model" },
-  { allow = ["BUSL-1.1"], crate = "omocl-engine" },
+  { allow = ["BUSL-1.1"], crate = "fhirconnect" },
+  { allow = ["BUSL-1.1"], crate = "omocl" },
   { allow = ["BUSL-1.1"], crate = "omop-cdm" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-openehr" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-term" },

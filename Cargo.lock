@@ -25,42 +25,14 @@ name = "ferrobridge-testkit"
 version = "0.0.1"
 
 [[package]]
-name = "fhir-tree"
+name = "fhirconnect"
 version = "0.0.0"
 dependencies = [
  "ferrobridge-testkit",
 ]
 
 [[package]]
-name = "fhirconnect-engine"
-version = "0.0.0"
-dependencies = [
- "ferrobridge-testkit",
-]
-
-[[package]]
-name = "fhirconnect-model"
-version = "0.0.0"
-dependencies = [
- "ferrobridge-testkit",
-]
-
-[[package]]
-name = "fhirconnect-resolve"
-version = "0.0.0"
-dependencies = [
- "ferrobridge-testkit",
-]
-
-[[package]]
-name = "omocl-engine"
-version = "0.0.0"
-dependencies = [
- "ferrobridge-testkit",
-]
-
-[[package]]
-name = "omocl-model"
+name = "omocl"
 version = "0.0.0"
 dependencies = [
  "ferrobridge-testkit",
@@ -76,10 +48,3 @@ dependencies = [
 [[package]]
 name = "openehr-mapping-core"
 version = "0.0.0"
-
-[[package]]
-name = "openehr-path"
-version = "0.0.0"
-dependencies = [
- "ferrobridge-testkit",
-]
