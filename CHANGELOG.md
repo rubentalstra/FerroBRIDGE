@@ -79,6 +79,10 @@ architecture is the output of the research program on
 
 ### Changed
 
+- `SUPPORT.md` sends a reader to the documentation site first. It still said
+  there was no site, which went false the day the site went live and
+  contradicted `README.md` on the same tree (#44).
+
 - The contributor page at `/docs/contribute/checks-and-gates.html` names the
   zizmor audit path `.github/`, matching what CI runs. It still named
   `.github/workflows/`, so following it missed the Dependabot configuration
