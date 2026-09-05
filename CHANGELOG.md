@@ -91,6 +91,13 @@ architecture is the output of the research program on
 
 ### Changed
 
+- The landing page runs the approved "Indigo & Iron" palette. It carried a
+  pre-brand blue that twenty-one rules read, so every link, button and
+  gradient disagreed with the mark beside them. Every accent now clears
+  WCAG AA against its background in both light and dark (#51).
+- The social card's specification line is larger and lighter, so it stays
+  legible at the size a link preview actually renders (#51).
+
 - `SECURITY.md` links the private advisory form directly, so a reporter can
   act on the policy without navigating by hand. The document carried no
   hyperlink at all, which is what Scorecard's Security-Policy check scores

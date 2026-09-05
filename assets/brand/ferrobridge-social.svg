@@ -21,5 +21,5 @@
   </g>
   <text x="600" y="380" text-anchor="middle" font-family="'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="90" font-weight="700" letter-spacing="-2" fill="#F1F5F9">FerroBRIDGE</text>
   <text x="600" y="437" text-anchor="middle" font-family="system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="30" font-weight="400" fill="#F1F5F9" opacity="0.72">An openEHR bridge to HL7 FHIR and the OMOP Common Data Model.</text>
-  <text x="600" y="487" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="22" font-weight="500" letter-spacing="1" fill="#818CF8">FHIRconnect · OMOCL · openEHR ITS-REST</text>
+  <text x="600" y="487" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="27" font-weight="500" letter-spacing="1" fill="#A5B4FC">FHIRconnect · OMOCL · openEHR ITS-REST</text>
 </svg>
