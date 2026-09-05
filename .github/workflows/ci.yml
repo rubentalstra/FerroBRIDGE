@@ -4,10 +4,10 @@
 # CI in two tiers.
 #
 #   1. The workflow, shell, container and guard tier runs NOW, on a repository
-#      with no code: zizmor and actionlint over .github/workflows, shellcheck
-#      over the tracked shell programs, hadolint over any Dockerfile, and the
-#      committed comment-style and versions guards. These keep this very file
-#      honest, so none of them may depend on Rust existing.
+#      with no code: zizmor over .github, actionlint over .github/workflows,
+#      shellcheck over the tracked shell programs, hadolint over any
+#      Dockerfile, and the committed comment-style and versions guards. These
+#      keep this very file honest, so none of them may depend on Rust existing.
 #   2. The Rust tier is gated behind a detection job that looks for a root
 #      Cargo.toml. Every cargo lane is skipped cleanly until the workspace
 #      lands and then activates by itself, with no workflow edit. hashFiles()
@@ -44,6 +44,11 @@ jobs:
   # as hard rules: every `uses:` pinned to a commit SHA (unpinned-uses), no
   # checkout persisting credentials (artipacked), and no context value spliced
   # into a shell (template-injection).
+  #
+  # The audit path is the whole of .github, not just the workflows: zizmor also
+  # reads dependabot.yml (dependabot-cooldown) and composite actions under
+  # .github/actions, which run with the calling workflow's permissions and are
+  # the same class of live, token-holding code (#34).
   workflow-audit:
     name: zizmor
     runs-on: ubuntu-latest
@@ -57,14 +62,14 @@ jobs:
       - uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
         with:
           tool: zizmor@1.29.0
-      - name: Audit .github/workflows
+      - name: Audit .github
         # GH_TOKEN enables the online audits. impostor-commit verifies that a
         # pinned commit really belongs to the repository named in front of it,
         # which it cannot do offline. --min-severity=low gates every actionable
         # tier and leaves the informational tier advisory.
         env:
           GH_TOKEN: ${{ github.token }}
-        run: zizmor --min-severity=low .github/workflows/
+        run: zizmor --min-severity=low .github/
 
   # actionlint is the correctness half of the pair: `${{ }}` expressions that
   # cannot evaluate, `needs:` naming a job that does not exist, unknown runner

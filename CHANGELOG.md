@@ -21,6 +21,24 @@ architecture is the output of the research program on
 
 ### Added
 
+- `.github/release.yml`, so GitHub's auto-generated release notes group pull
+  requests by the tracker's own label taxonomy (Features, Fixes, Security,
+  Documentation, Dependencies, Maintenance, Other changes), with
+  `no-changelog` as the exclusion. The hand-curated changelog stays the primary
+  record (#17).
+- Two `cargo` and `docker` entries in `.github/dependabot.yml` beside the
+  existing `github-actions` one, each grouping minor and patch bumps into one
+  weekly pull request while majors stay individual, with the conventional
+  commit prefixes `ci`, `deps` and `build` and `open-pull-requests-limit: 10`
+  on cargo. Both are inert until their manifests exist (#17).
+- The Rust half of `.github/workflows/sonar.yml`, gated on a root `Cargo.toml`
+  at step level: the pinned toolchain with `llvm-tools-preview`, the
+  instrumented `cargo llvm-cov nextest` run that writes `lcov.info`, and the
+  `sonar.projectVersion` derivation that anchors the New Code window to the
+  workspace version. `sonar-project.properties` names the lcov file and
+  excludes build output, vendored trees, and the generated OMOP CDM subtree
+  (#17).
+
 - `.github/workflows/ci.yml`, the CI gate, in two tiers. Tier 1 runs on a
   repository with no code: zizmor at `--min-severity=low` with the online
   audits enabled, actionlint through its digest-pinned official image,
@@ -52,6 +70,16 @@ architecture is the output of the research program on
 
 ### Changed
 
+- The zizmor lane in `.github/workflows/ci.yml` audits `.github/` rather than
+  `.github/workflows/`, so `dependabot.yml` and every composite action under
+  `.github/actions/` are covered. A composite action runs with the calling
+  workflow's permissions, so it is the same class of token-holding code (#34).
+- The Dependabot cooldown on the `github-actions` and `docker` ecosystems is
+  7 days, up from 3, which is the floor zizmor's `dependabot-cooldown` audit
+  enforces and matches the 7-day minor value already on `cargo`. Security
+  updates are exempt from cooldown, so an advisory still arrives immediately.
+  `docs/ci-cd.md` records why the earlier defence of the 3-day value did not
+  hold and why no suppression was recorded (#34).
 - The licence of the project's own code and text is the Business Source
   License 1.1 (`LICENSE`, `NOTICE`): free for non-production use and for non-commercial production use, a commercial
   licence for any other production use, and Apache License 2.0 four years

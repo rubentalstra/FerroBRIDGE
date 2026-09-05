@@ -6,12 +6,13 @@
 # local gates, and they gate no merge (.claude/rules/ai-code-review.md). The
 # quality gate is the built-in "Sonar way" default.
 #
-# The repository is in its design phase, so this lane runs the multi-language
-# sweep only: shell, YAML, JSON, and the other config surfaces the Rust gates
-# never see. There is no cargo, nextest, or coverage step here, because there
-# is nothing to build. The instrumented test run and the lcov coverage import
-# join this lane in the same change that lands the Cargo workspace, together
-# with the sonar.projectVersion derivation that anchors the New Code window.
+# The multi-language sweep over shell, YAML, JSON and the other config surfaces
+# the Rust gates never see runs on every scan, including today, on a repository
+# with no code. The Rust steps (the pinned toolchain, the instrumented coverage
+# run, the projectVersion derivation) are guarded on a root Cargo.toml, so they
+# skip until the workspace lands and then activate by themselves. hashFiles()
+# is the correct primitive HERE, unlike in ci.yml: the checkout above it has
+# already populated the workspace when the step-level `if:` is evaluated.
 #
 # Scan SCOPE lives in sonar-project.properties; do not restate it here.
 # SONAR_HOST_URL is not needed for SonarQube Cloud (SonarSource/
@@ -36,7 +37,7 @@ jobs:
     # anyway, and the post-merge push to main analyzes the merged result.
     if: github.event_name == 'push' || (github.actor != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     permissions:
       contents: read
       pull-requests: read # PR decoration reads the pull-request metadata
@@ -46,6 +47,47 @@ jobs:
           # Full history: Sonar assigns issues and new-code status by blame.
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Install the Rust toolchain
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        # TODO(#20): lift this step into ./.github/actions/setup-rust with the
+        # Cargo workspace; it reads the channel from rust-toolchain.toml, which
+        # that issue also lands.
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          # llvm-tools-preview carries the profdata reader cargo-llvm-cov needs.
+          components: llvm-tools-preview
+          cache-shared-key: sonar
+          cache-save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Install cargo-llvm-cov and cargo-nextest
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
+        with:
+          tool: cargo-llvm-cov,cargo-nextest
+
+      # The lcov file sonar.rust.lcov.reportPaths names. --no-tests=pass keeps
+      # a member with no tests from failing the run, the same flag the ci.yml
+      # test lane uses.
+      - name: Instrumented tests to lcov
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        run: cargo llvm-cov nextest --locked --workspace --all-features --no-tests=pass --lcov --output-path lcov.info
+
+      # sonar.projectVersion anchors the "Previous version" New Code window: the
+      # workspace version bumps at every release cut, so "new code" means "since
+      # the last release". Read from the root Cargo.toml at scan time, never a
+      # second hand-maintained copy, and appended to the properties file, so no
+      # context value reaches a shell or the action arguments.
+      - name: Derive sonar.projectVersion from the workspace version
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        run: |
+          set -euo pipefail
+          v="$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2 || true)"
+          if [ -z "$v" ]; then
+            echo "Cargo.toml has no [workspace.package] version" >&2
+            exit 1
+          fi
+          echo "sonar.projectVersion=$v" >> sonar-project.properties
 
       - uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
         env:
