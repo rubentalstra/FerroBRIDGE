@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+name: Install the docs toolchain
+description: >-
+  Install the pinned mdBook toolchain (mdBook, mdbook-toc, mdbook-mermaid) that
+  renders the documentation site. The calling job checks out the repository
+  first: a local action path (./.github/actions/docs-toolchain) resolves only
+  after checkout, so this action does not check out.
+inputs:
+  mdbook-version:
+    description: mdBook version, pinned in docs/VERSIONS.md.
+    required: false
+    default: "0.5.4"
+  mdbook-toc-version:
+    description: mdbook-toc version, pinned in docs/VERSIONS.md.
+    required: false
+    default: "0.15.4"
+  mdbook-mermaid-version:
+    description: mdbook-mermaid version, pinned in docs/VERSIONS.md.
+    required: false
+    default: "0.17.1"
+runs:
+  using: composite
+  steps:
+    # install-action downloads each tool's upstream release binary and verifies
+    # its checksum, so no cargo build runs in the docs lane.
+    - uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
+      with:
+        tool: mdbook@${{ inputs.mdbook-version }},mdbook-toc@${{ inputs.mdbook-toc-version }},mdbook-mermaid@${{ inputs.mdbook-mermaid-version }}

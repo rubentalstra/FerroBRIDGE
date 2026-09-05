@@ -16,6 +16,12 @@
 # <path>/vendor/** linguist-vendored
 # <path>/vendor/** -text
 
+# The mermaid browser assets the book loads, fetched verbatim by
+# scripts/vendor/mdbook-mermaid-assets.sh (website/book/vendor/mermaid/PROVENANCE.md).
+website/book/vendor/mermaid/*.js linguist-vendored
+website/book/vendor/mermaid/*.js -text
+website/book/vendor/mermaid/LICENSE-* linguist-vendored
+
 # A generated tree is marked generated so it collapses in diffs and stays out
 # of language statistics (.claude/rules/codegen.md). The one generated tree the
 # architecture calls for is the OMOP CDM v5.4 row types and DDL emitted from

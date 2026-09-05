@@ -25,3 +25,8 @@ target
 
 # Claude Code agent worktrees (isolated per-agent checkouts, never committed)
 .claude/worktrees/
+
+# The rendered book (the mdBook build-dir) and the assembled site.
+# .github/workflows/docs.yml renders both in CI.
+/website/book/book/
+/_site/

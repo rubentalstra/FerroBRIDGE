@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+# Docs: build the documentation site and publish it to GitHub Pages.
+#
+# The shape is GitHub's Pages-with-Actions pattern (the actions/starter-workflows
+# pages/mdbook.yml): a `build` job renders the site and uploads it as a Pages
+# artifact, and a `deploy` job publishes that artifact to the github-pages
+# environment. `build` runs on pull requests too, so a book that does not build
+# fails the check; only a push to main or a manual dispatch deploys.
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+# One concurrency group serializes the Pages deployment. cancel-in-progress is
+# false so an in-flight publish finishes instead of being cut off half-written.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # Render the site and upload it as the Pages artifact. Runs on every event,
+  # pull requests included.
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/docs-toolchain
+      - name: Assemble the site (the landing page at /, the book under /docs/)
+        env:
+          # The roadmap block is rendered from the open milestones. The token
+          # reads public repository metadata and nothing else.
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/site/assemble.sh _site
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  # Publish the artifact. Skipped on pull requests: a pull request verifies the
+  # book and never deploys it.
+  deploy:
+    name: deploy
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

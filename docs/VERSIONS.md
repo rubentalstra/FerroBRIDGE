@@ -63,8 +63,26 @@ version is 0.0.1.
 |---|---|---|
 | Product version | 0.0.1 | root `Cargo.toml` `[workspace.package]` `version` (#20), `CITATION.cff` `version` (#18) |
 
-`CITATION.cff` tracks the workspace version exactly. The guard compares the two
-once both files exist.
+`CITATION.cff` tracks this row exactly, and the guard compares the two whenever
+`CITATION.cff` exists. Once the root `Cargo.toml` lands, the guard also compares
+its `[workspace.package]` `version` with both.
+
+## Documentation toolchain
+
+The site is an mdBook rendered by `.github/workflows/docs.yml`. Every tool it
+installs is pinned here and repeated in the composite action that installs
+them, so the book renders the same way in CI as it does on a laptop.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| mdBook | 0.5.4 | `.github/actions/docs-toolchain/action.yml` `mdbook-version` |
+| mdbook-toc | 0.15.4 | `.github/actions/docs-toolchain/action.yml` `mdbook-toc-version` |
+| mdbook-mermaid | 0.17.1 | `.github/actions/docs-toolchain/action.yml` `mdbook-mermaid-version` |
+
+The mermaid browser assets the book loads are vendored from the same
+`mdbook-mermaid` release, pinned by commit in
+`scripts/vendor/mdbook-mermaid-assets.sh` and recorded in
+`website/book/vendor/mermaid/PROVENANCE.md`.
 
 ## Licence
 
