@@ -1,0 +1,422 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+# The release lane. One workflow owns the `v*` tag, and every ordering in it is
+# a `needs` edge:
+#
+#   plan ── github-release (draft) ── build-binaries ── finalize-release (publish)
+#
+# The release is created as a DRAFT, the binaries are attached to it, and only
+# once the expected asset set is complete is it PUBLISHED. Publishing last
+# means a half-assembled release is never visible.
+#
+# Two tiers, the same split ci.yml uses. `plan`, `github-release` and
+# `finalize-release` run on a repository with no code, because a pre-code
+# release is legitimate here: it carries the changelog section and nothing
+# else. `build-binaries` is gated behind the same root-Cargo.toml detection,
+# so it reports `skipped` today and activates by itself when the workspace
+# lands, with no edit to this file.
+#
+# The workflow is dormant until a `v*` tag is pushed. It does not run on a push
+# to main, on a pull request, or in a merge group.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing vX.Y.Z tag to (re)publish. Dispatch this workflow AT that tag."
+        required: true
+        type: string
+
+# A release must never be cancelled part-way through publishing: a draft with
+# some assets attached is worse than a queued second run, so a second tag push
+# queues behind the first rather than replacing it.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+# No permissions by default: each job grants its own, and only the three jobs
+# that create, fill or publish the release get `contents: write`.
+permissions: {}
+
+jobs:
+  # ---- plan: every release fact, verified before anything is created --------
+
+  plan:
+    name: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      version: ${{ steps.tag.outputs.version }}
+      is-prerelease: ${{ steps.tag.outputs.is_prerelease }}
+      cargo: ${{ steps.workspace.outputs.cargo }}
+      targets: ${{ steps.workspace.outputs.targets }}
+    steps:
+      - id: tag
+        name: Resolve and validate the release tag
+        # The dispatch input reaches the shell through env, never spliced into
+        # the script, and has to match a full semver tag shape before anything
+        # downstream uses it.
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="$INPUT_TAG"
+            # A dispatch names a tag but runs at whatever ref it was started
+            # from, so the two are compared. Without this, a dispatch could
+            # publish notes and binaries built from a different commit.
+            if [ "${GITHUB_REF}" != "refs/tags/${tag}" ]; then
+              echo "::error::dispatched at '${GITHUB_REF}', not at refs/tags/${tag}. Run: gh workflow run Release --ref ${tag} -f tag=${tag}" >&2
+              exit 1
+            fi
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
+          if ! printf '%s\n' "$tag" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::'$tag' is not a vX.Y.Z tag" >&2
+            exit 1
+          fi
+          # A tag carrying a pre-release suffix (v1.2.3-rc.1) publishes as a
+          # pre-release; a bare vX.Y.Z is an official release.
+          case "$tag" in
+            *-*) is_prerelease=true ;;
+            *) is_prerelease=false ;;
+          esac
+          {
+            echo "tag=$tag"
+            echo "version=${tag#v}"
+            echo "is_prerelease=$is_prerelease"
+          } >> "$GITHUB_OUTPUT"
+          echo "releasing ${tag} (pre-release: ${is_prerelease})"
+
+      # github.sha is the commit the event ref points at, and the mismatch
+      # refusal above guarantees it is the tag's commit on a dispatch too.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: The tag matches the declared product version
+        # Every file that declares the product version has to agree with the
+        # tag. Today that is CITATION.cff and the product row of
+        # docs/VERSIONS.md; the root Cargo.toml joins them the moment it
+        # exists, so the workspace needs no edit here.
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          fail=0
+          check() {
+            if [ -z "$2" ]; then
+              echo "::error::$1 declares no product version." >&2
+              fail=1
+            elif [ "$2" != "$VERSION" ]; then
+              echo "::error::tag $TAG declares version $VERSION, but $1 says $2." >&2
+              fail=1
+            else
+              echo "OK: $1 declares $VERSION"
+            fi
+          }
+
+          if [ ! -f CITATION.cff ]; then
+            echo "::error::CITATION.cff is missing, so $TAG cannot be checked against a declared version." >&2
+            exit 1
+          fi
+          cff="$(sed -nE 's/^version:[[:space:]]*//p' CITATION.cff | head -n1 | tr -d '"'\''[:space:]')"
+          check "CITATION.cff" "$cff"
+
+          if [ ! -f docs/VERSIONS.md ]; then
+            echo "::error::docs/VERSIONS.md is missing, so $TAG cannot be checked against the pin matrix." >&2
+            exit 1
+          fi
+          # The first token of the second cell of the markdown row whose first
+          # cell is "Product version", backticks and padding removed. Same
+          # reading scripts/checks/versions.sh does.
+          matrix="$(awk -F'|' '
+            NF >= 3 {
+              k = $2; v = $3
+              gsub(/`/, "", k); gsub(/`/, "", v)
+              gsub(/^[[:space:]]+|[[:space:]]+$/, "", k)
+              gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+              if (k == "Product version") { split(v, w, /[[:space:]]/); print w[1]; exit }
+            }
+          ' docs/VERSIONS.md)"
+          check "the docs/VERSIONS.md product-version row" "$matrix"
+
+          if [ -f Cargo.toml ]; then
+            manifest="$(awk '
+              /^[[:space:]]*\[/ { h = $0; gsub(/[[:space:]]/, "", h); f = (h == "[workspace.package]"); next }
+              f && $0 ~ /^[[:space:]]*version[[:space:]]*=/ {
+                if (match($0, /"[^"]*"/)) { print substr($0, RSTART + 1, RLENGTH - 2); exit }
+              }
+            ' Cargo.toml)"
+            check "the root Cargo.toml [workspace.package] version" "$manifest"
+          else
+            echo "no root Cargo.toml at $TAG: the manifest joins this check when the workspace lands."
+          fi
+
+          [ "$fail" -eq 0 ] || exit 1
+
+      - id: notes
+        name: Extract the changelog section as the release notes
+        # The changelog is hand-curated and is the release notes. A missing or
+        # empty section fails the release rather than falling back to notes
+        # generated from the commit range, which would silently replace the
+        # record with a different one.
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          if [ ! -f CHANGELOG.md ]; then
+            echo "::error::CHANGELOG.md is missing, so $VERSION has no release notes." >&2
+            exit 1
+          fi
+          if ! grep -q "^## \[$VERSION\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no '## [$VERSION]' section. Cut the release before tagging: rename [Unreleased] to $VERSION with its date." >&2
+            exit 1
+          fi
+          # Everything under the version heading, stopping at the next version
+          # heading or at the trailing link-reference block, whichever comes
+          # first.
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { found = 1; next }
+            found && /^## \[/ { exit }
+            found && /^\[[^]]+\]:/ { exit }
+            found { print }
+          ' CHANGELOG.md > release-notes.md
+          if ! grep -q '[^[:space:]]' release-notes.md; then
+            echo "::error::the [$VERSION] changelog section is empty." >&2
+            exit 1
+          fi
+          echo "release notes ($(wc -l < release-notes.md) lines):"
+          cat release-notes.md
+
+      - id: workspace
+        name: Detect the Cargo workspace and name the binary targets
+        # The same detection ci.yml tier 2 uses, for the same reason:
+        # hashFiles() is evaluated before checkout, when the workspace is
+        # empty, so a real detection step is the correct primitive.
+        #
+        # The target set is emitted once, here, and read both by the
+        # build-binaries matrix and by the finalize asset check, so the two
+        # cannot drift apart. Linux only, because the deliverable is a server.
+        # No specification governs this: our own design.
+        run: |
+          set -euo pipefail
+          if [ -f Cargo.toml ]; then
+            echo "cargo=true" >> "$GITHUB_OUTPUT"
+            echo "Cargo.toml present: the binary lane will run."
+          else
+            echo "cargo=false" >> "$GITHUB_OUTPUT"
+            echo "No Cargo.toml: the binary lane is skipped and this release promises no binaries."
+          fi
+          targets='{"include":[
+            {"runner":"ubuntu-latest","target":"x86_64-unknown-linux-gnu"},
+            {"runner":"ubuntu-latest","target":"x86_64-unknown-linux-musl"},
+            {"runner":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-gnu"},
+            {"runner":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-musl"}
+          ]}'
+          echo "targets=$(printf '%s' "$targets" | tr -d '\n ')" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the release notes
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-notes
+          path: release-notes.md
+
+  # ---- github-release: create the release as a DRAFT ------------------------
+
+  github-release:
+    name: github release (draft)
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # create the GitHub release
+    steps:
+      - name: Download the release notes
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-notes
+
+      # Created as a DRAFT and finalized only after every asset is attached. A
+      # draft is mutable, which is the window the binary uploads need, and it
+      # is not visible to anyone browsing releases.
+      - name: Create the release as a draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          VERSION: ${{ needs.plan.outputs.version }}
+          IS_PRERELEASE: ${{ needs.plan.outputs.is-prerelease }}
+        run: |
+          set -euo pipefail
+          # The title is the bare version; the repository already says whose
+          # release it is. --verify-tag refuses to invent a tag that is not
+          # already on the remote.
+          args=(
+            --repo "$GITHUB_REPOSITORY"
+            --draft
+            --verify-tag
+            --title "$VERSION"
+            --notes-file release-notes.md
+          )
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            args+=(--prerelease)
+          fi
+          state="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' 2>/dev/null || echo missing)"
+          case "$state" in
+            missing)
+              gh release create "$TAG" "${args[@]}"
+              ;;
+            true)
+              echo "a draft for $TAG already exists: refreshing its notes."
+              gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$VERSION" --notes-file release-notes.md
+              ;;
+            *)
+              # The recovery rule for a bad cut is a new patch version, never a
+              # retag, so an already-published release is never reopened here.
+              echo "::error::$TAG is already published. A bad cut ships forward as a new patch version; it is never retagged." >&2
+              exit 1
+              ;;
+          esac
+
+  # ---- build-binaries: gated on the workspace, skipped today ----------------
+
+  # TODO(#23): this job becomes a call to a reusable workflow
+  # (`on: workflow_call`) that also emits SLSA build provenance, a CycloneDX
+  # SBOM, and the Sigstore bundles for both. The isolation is the point: SLSA
+  # Build Level 3 requires the signing material to sit out of reach of
+  # user-defined build steps, and a job's steps all share one runner VM
+  # (https://slsa.dev/spec/v1.0/levels). Everything below then moves into that
+  # workflow unchanged, and this job keeps its name, its gate and its place in
+  # the graph.
+  build-binaries:
+    name: binaries (${{ matrix.target }})
+    needs: [plan, github-release]
+    if: needs.plan.outputs.cargo == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.targets) }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: write # attach the archives to the draft release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      # No cache in a publishing lane: a cache an untrusted run could poison
+      # must never feed a release, so this builds from the checkout and
+      # nothing else.
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          target: ${{ matrix.target }}
+          cache: false
+      - name: Build the release binaries
+        env:
+          TARGET: ${{ matrix.target }}
+        run: cargo build --release --locked --workspace --bins --target "$TARGET"
+      - name: Package the binaries with their checksum
+        env:
+          TAG: ${{ needs.plan.outputs.tag }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          # The binary names come from the workspace itself, so this step needs
+          # no edit when a binary is added or renamed.
+          bins=()
+          while IFS= read -r name; do
+            if [ -n "$name" ]; then
+              bins+=("$name")
+            fi
+          done < <(cargo metadata --format-version 1 --no-deps --locked \
+            | jq -r '.packages[].targets[] | select(.kind | index("bin")) | .name' | sort -u)
+          if [ "${#bins[@]}" -eq 0 ]; then
+            echo "::error::the workspace declares no bin target, so this release can attach no binary." >&2
+            exit 1
+          fi
+          printf 'packaging: %s\n' "${bins[@]}"
+          mkdir -p dist
+          archive="ferrobridge-${TAG}-${TARGET}.tar.gz"
+          tar -czf "dist/${archive}" -C "target/${TARGET}/release" "${bins[@]}"
+          (cd dist && sha256sum "${archive}" > "${archive}.sha256sum")
+          cat "dist/${archive}.sha256sum"
+      - name: Attach the archive to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          archive="ferrobridge-${TAG}-${TARGET}.tar.gz"
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+            "dist/${archive}" "dist/${archive}.sha256sum"
+
+  # ---- finalize-release: verify the asset set, then PUBLISH -----------------
+
+  finalize-release:
+    name: github release (publish)
+    needs: [plan, github-release, build-binaries]
+    # build-binaries is skipped while there is no workspace, and a skipped
+    # `needs` job skips its dependents by default, so the results are read
+    # explicitly. A skip is a pass here; a failure is not.
+    if: >-
+      always()
+      && needs.plan.result == 'success'
+      && needs.github-release.result == 'success'
+      && (needs.build-binaries.result == 'success' || needs.build-binaries.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # publish the release
+    steps:
+      - name: The draft carries every asset this version promises
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          HAVE_BINARIES: ${{ needs.plan.outputs.cargo }}
+          TARGETS: ${{ needs.plan.outputs.targets }}
+        run: |
+          set -euo pipefail
+          assets="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+          echo "attached assets:"
+          printf '%s\n' "$assets"
+          if [ "$HAVE_BINARIES" != "true" ]; then
+            if [ -n "$assets" ]; then
+              echo "::error::the draft carries assets that a release with no workspace does not promise." >&2
+              exit 1
+            fi
+            echo "this version promises no binaries, and the draft carries none."
+            exit 0
+          fi
+          missing=""
+          # grep -Fxq: fixed string, whole line, so ".tar.gz" is not satisfied
+          # by ".tar.gz.sha256sum".
+          # TODO(#23): extend this suffix list with the provenance, SBOM and
+          # Sigstore bundle names once the attested build lane emits them.
+          while IFS= read -r target; do
+            for suffix in ".tar.gz" ".tar.gz.sha256sum"; do
+              printf '%s\n' "$assets" | grep -Fxq "ferrobridge-${TAG}-${target}${suffix}" \
+                || missing="$missing ferrobridge-${TAG}-${target}${suffix}"
+            done
+          done < <(printf '%s' "$TARGETS" | jq -r '.include[].target')
+          if [ -n "$missing" ]; then
+            echo "::error::the draft is missing assets, so it will not be published:$missing" >&2
+            exit 1
+          fi
+          echo "every expected asset is attached."
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false

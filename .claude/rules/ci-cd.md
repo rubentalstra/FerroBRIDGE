@@ -18,7 +18,7 @@ build.
 
 ## What runs today
 
-Five workflows, all of which work on a repository with no code:
+Six workflows, all of which work on a repository with no code:
 
 - `.github/workflows/ci.yml`: the two-tier gate. Tier 1 runs now (zizmor,
   actionlint, shellcheck, hadolint, the comment-style guard, the versions
@@ -40,14 +40,21 @@ Five workflows, all of which work on a repository with no code:
 - `.github/workflows/docs.yml`: the documentation site. It builds the mdBook on
   every pull request and deploys from `main` through GitHub Pages, using the
   pinned toolchain in `.github/actions/docs-toolchain` (#18).
+- `.github/workflows/release.yml`: the release lane, dormant until a `v*` tag
+  is pushed. It validates the tag, checks it against every file that declares
+  the product version, takes the release notes from the matching
+  `CHANGELOG.md` section, creates the release as a draft, and publishes only
+  after the expected asset set is complete. Its binary lane sits behind the
+  same root-`Cargo.toml` detection and is skipped until the workspace lands.
+  The checklist a cut follows is `docs/release.md` (#63).
 
 The Rust lanes in `ci.yml`, `codeql.yml` and `sonar.yml` are written and gated
 off, so they need no edit when the workspace lands. `.github/dependabot.yml`
 carries the same property: its `cargo` and `docker` entries are inert until
-their manifests exist. There is no release lane, because there is nothing to
-release. Do not add one before the workspace exists;
-`.github/release.yml` configures only the auto-generated release notes, which
-GitHub reads when a release is cut by hand.
+their manifests exist, and so does the binary lane of `release.yml`.
+`.github/release.yml` is a different file from the workflow: it configures
+GitHub's auto-generated release notes, which the lane never uses, because a
+release ships the hand-curated changelog section or it fails.
 
 ## Workflow security (every workflow, no exceptions)
 
@@ -102,10 +109,12 @@ lockfile drift rather than on registry drift. Commit `Cargo.lock`.
 - **Every release artifact carries provenance and a signed SBOM**, signed
   keyless through Sigstore (`id-token: write`), and consumers verify with
   `gh attestation verify … --signer-workflow …`.
-- **Releases are immutable**: create the release as a draft, attach every
-  asset, check the set is complete, and publish last, because the platform
-  freezes a published release. The fix for a bad cut is a new patch version,
-  never a retag.
+- **A release is assembled as a draft and published last**: create the draft,
+  attach every asset, check the set is complete, then publish, so a
+  half-assembled release is never visible. The fix for a bad cut is a new patch
+  version, never a retag. That rule is ours and the `release-tags` ruleset
+  enforces its tag half; the platform's own release-immutability setting is not
+  exposed on this repository, which `docs/release.md` records.
 - **A version pin has a single source of truth**, and a committed check fails
   on cross-file drift.
 
