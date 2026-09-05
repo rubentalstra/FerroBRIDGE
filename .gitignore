@@ -22,3 +22,6 @@ target
 
 # Claude Code personal/local overrides (never committed)
 .claude/settings.local.json
+
+# Claude Code agent worktrees (isolated per-agent checkouts, never committed)
+.claude/worktrees/
