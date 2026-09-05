@@ -25,7 +25,10 @@ releases, and a release is cut when its milestone has no open issue left.
   gated on the Cargo workspace and is skipped until that lands.
 - This documentation site.
 
-There is no Cargo workspace, no crate, no binary, and no container image.
+The Cargo workspace is a skeleton: the root manifests with the full lint set,
+eleven placeholder library crates at version 0.0.0 that hold their names on
+crates.io, a thin `ferrobridge` binary that does nothing yet, and a test
+support crate. There is no container image and no release with a binary.
 
 ## What comes next
 

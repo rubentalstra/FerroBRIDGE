@@ -1,38 +1,11 @@
 # SPDX-FileCopyrightText: Ruben Talstra
 # SPDX-License-Identifier: BUSL-1.1
 
-# Normalize line endings: Git stores text with LF and checks it out with LF on
-# every platform.
+# Git stores text with LF and checks it out with LF on every platform.
 * text=auto eol=lf
 
-# Vendored trees (machine-readable specifications, mapping schemas, test
-# corpora) are exempt from GitHub language statistics and collapse in diffs.
-# Nothing is vendored yet; extend the list in the same change that lands the
-# first vendored tree (.claude/rules/vendored-inputs.md).
-#
-# Vendored material is stored byte for byte as its publisher ships it, so it
-# also opts out of line-ending normalization and the tree matches the upstream
-# archive exactly.
-# <path>/vendor/** linguist-vendored
-# <path>/vendor/** -text
-
-# The mermaid browser assets the book loads, fetched verbatim by
-# scripts/vendor/mdbook-mermaid-assets.sh (website/book/vendor/mermaid/PROVENANCE.md).
-website/book/vendor/mermaid/*.js linguist-vendored
-website/book/vendor/mermaid/*.js -text
-website/book/vendor/mermaid/LICENSE-* linguist-vendored
-
-# The brand rasters are binary. `text=auto` above detects that by itself, and
-# the explicit opt-out keeps a future misdetection from rewriting their bytes
-# (assets/brand/README.md).
-*.png -text
-*.ico -text
-
-# A generated tree is marked generated so it collapses in diffs and stays out
-# of language statistics (.claude/rules/codegen.md). The one generated tree the
-# architecture calls for is the OMOP CDM v5.4 row types and DDL emitted from
-# the OHDSI CommonDataModel definitions (docs/architecture.md section 7). The
-# `omop-cdm` crate is mixed, so only the emitted subtree is marked, never the
-# hand-written vocabulary loader and resolver beside it. The path is reserved
-# here so it is in force before the first generated file lands.
-crates/omop-cdm/src/generated/** linguist-generated
+# Vendored trees and generated files are exempt from language statistics and
+# collapse in diffs; extend the list when one lands
+# (.claude/rules/vendored-inputs.md, .claude/rules/codegen.md).
+# vendor/** linguist-vendored -text
+# **/generated/** linguist-generated

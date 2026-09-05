@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+[package]
+name = "openehr-mapping-core"
+description = "The shared foundation of the FerroBRIDGE mapping languages: the common header model, the YAML loader, the mapping registry, the diagnostic model, and openEHR path resolution and execution over the Web Template"
+# 0.0.0 reserves the name; the crate line starts at 0.1.44 (docs/VERSIONS.md).
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+documentation = "https://docs.rs/openehr-mapping-core"
+readme = "README.md"
+keywords = ["openehr", "fhirconnect", "omocl", "mapping", "healthcare"]
+categories = ["parser-implementations", "science"]
+# The crate line is published on crates.io; include is the packaged content.
+publish = true
+include = ["src/**", "README.md", "LICENSE"]
+
+[dependencies]
+
+[lints]
+workspace = true

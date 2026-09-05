@@ -586,22 +586,27 @@ so, as the published `openehr-*` crates do.
 
 | Crate | Role | Kind | Published |
 |---|---|---|---|
-| `openehr-mapping-core` | the shared header model; the YAML loader (`serde-saphyr`: anchors, aliases, merge keys, source positions); the archetype-keyed mapping registry; the diagnostic model (file, YAML path, mapping name, model path); the RM-path model with `../` resolution | hand-written | yes |
-| `openehr-path` | the `aqlPath` index over a Web Template with leaf RM type resolution; relative path derivation; composition build and read over `openehr-its` and `openehr-rm` | hand-written | yes |
+| `openehr-mapping-core` | the one shared foundation: the header model; the YAML loader (`serde-saphyr`: anchors, aliases, merge keys, source positions); the archetype-keyed mapping registry; the diagnostic model (file, YAML path, mapping name, model path); the RM-path model with `../` resolution; the `aqlPath` index over a Web Template with leaf RM type resolution; relative path derivation; composition build and read over `openehr-its` and `openehr-rm` | hand-written | yes |
 | `fhir-types` | the FHIR model: per-version resources, datatypes and primitives with the strict JSON and XML codecs, the terminology operation contracts, the public element table; emitted by `tools/fhir-codegen` from the vendored HL7 packages | generated | yes (inherited line) |
-| `fhir-tree` | the bidirectional path model over FHIR JSON guided by the `fhir-types` element table; choice types, repeating elements, primitive extensions; the three read-side FHIRPath forms | hand-written | yes |
-| `fhirconnect-model` | the FHIRconnect AST; FerroBRIDGE's strict schemas; the published schemas vendored and exercised; semantic validation | hand-written | yes |
-| `fhirconnect-resolve` | context resolution into one immutable program per (profile, template); extension ordering and collision rules | hand-written | yes |
-| `fhirconnect-engine` | the bidirectional interpreter over `fhir-tree` and `openehr-path`; the data-type lens matrix; the PROGRAMMED registry | hand-written | yes |
-| `omocl-model` | the OMOCL AST; FerroBRIDGE's authored JSON schema; the key-to-column projection tables; validation | hand-written | yes |
-| `omocl-engine` | the one-directional interpreter emitting record graphs of typed CDM rows; the `CustomMapping` registry | hand-written | yes |
+| `fhirconnect` | the FHIRconnect language as one crate with one module per stage: `model` (the AST, FerroBRIDGE's strict schemas, the published schemas vendored and exercised, semantic validation), `resolve` (one immutable program per profile and template, the extension ordering and collision rules), `tree` (the bidirectional path model over FHIR JSON guided by the `fhir-types` element table: choice types, repeating elements, primitive extensions, the three read-side FHIRPath forms), `engine` (the bidirectional interpreter, the data-type lens matrix, the PROGRAMMED registry) | hand-written | yes |
+| `omocl` | the OMOCL language as one crate: `model` (the AST, FerroBRIDGE's authored JSON schema, the key-to-column projection tables, validation) and `engine` (the one-directional interpreter emitting record graphs of typed CDM rows, the `CustomMapping` registry) | hand-written | yes |
 | `omop-cdm` | CDM v5.4 row types and column metadata generated from the OHDSI field definitions; the OHDSI PostgreSQL DDL vendored verbatim and embedded; the vocabulary loader and concept resolver; the derived-table runners; the `COPY` writer | generated plus hand-written | yes |
 | `ferrobridge-openehr` | the ITS-REST client over `reqwest`, with the `openehr-its` data types, `backon` retry, typed outcomes per status | hand-written | yes |
 | `ferrobridge-term` | the FHIR terminology client over `fhir-types` | hand-written | yes |
-| `app/ferrobridge` | the one binary: `serve` (the FHIR facade and the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `redb` identity store | hand-written | no |
+| `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade and the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `redb` identity store | hand-written | no |
 | `tools/fhir-codegen` | the FHIR generator moved from the sibling, with its `emit --check` drift gate and its vendored packages | hand-written | no |
 | `tools/omop-cdm-codegen` | the CDM generator with its `emit --check` drift gate | hand-written | no |
-| `tools/ferrobridge-testkit` | fixtures, the synthetic vocabulary, the CDR and terminology stubs (`wiremock`), the container harness (`testcontainers`); a path-only dev-dependency | hand-written | no |
+| `tools/ferrobridge-testkit` | the pin-matrix reader, fixtures, the synthetic vocabulary, the CDR and terminology stubs (`wiremock`), the container harness (`testcontainers`); a path-only dev-dependency | hand-written | no |
+
+**Seven published crates, one per concern** (owner decision 2026-09-05, after a
+duplication check against both siblings): a finer split into twelve was
+scaffolded and collapsed, because each language is one thing to a consumer
+(the sibling ships each of its languages as one crate with modules), and every
+extra crate costs a manifest, a publish step, a version-guard entry and a
+Trusted Publishing pair for nothing a consumer needs. A module becomes a crate
+only when a second consumer appears. Nothing here duplicates a sibling: the
+terminology server's code-system loaders, indexes and server crate stay out
+(section 4.1), and the openEHR crates are consumed, never copied (section 3).
 
 **One binary.** The server and the batch ETL share the mapping crates, the
 CDR client and the identity model, so they are one binary with subcommands.
@@ -631,24 +636,23 @@ out.
 
 ## 8. What each seam carries
 
-- `openehr-mapping-core` to both model crates: a parsed header, a YAML value
-  tree with positions, a registry lookup by `metadata.name` and by archetype
-  id, a diagnostic.
-- `openehr-path` to both engines: a resolved Web Template node (RM type,
+- `openehr-mapping-core` to both language crates: a parsed header, a YAML
+  value tree with positions, a registry lookup by `metadata.name` and by
+  archetype id, a diagnostic; a resolved Web Template node (RM type,
   occurrences, `aqlPath`, node id), a canonical composition tree, path
   navigation and value read and write over it.
-- `fhirconnect-resolve` to `fhirconnect-engine`: one immutable program, an
+- `fhirconnect::resolve` to `fhirconnect::engine`: one immutable program, an
   `Arc`-shared value, with every path pre-resolved to a Web Template node or a
   FHIR element and every occurrence index structured.
-- `fhirconnect-engine` to the facade: a composition tree plus a list of
+- `fhirconnect` to the facade: a composition tree plus a list of
   defaulted fields and warnings, or a FHIR resource set plus the same, or a
   typed refusal naming every failing element.
-- `omocl-engine` to `omop-cdm`: a record graph of typed rows for one
+- `omocl` to `omop-cdm`: a record graph of typed rows for one
   composition, with natural keys, plus counted outcomes.
 - `ferrobridge-openehr` to everything above it: typed results per call, with
   every CDR status a variant carrying the upstream body; never an `Option` for
   a failure.
-- `ferrobridge-term` to `fhirconnect-engine`: typed lookup, translate and
+- `ferrobridge-term` to `fhirconnect`: typed lookup, translate and
   validate outcomes, with a failed call a typed error.
 
 Identifiers cross every seam as distinct newtypes: an `EhrId`, a
@@ -828,7 +832,7 @@ Issues #22 and #23 carry the contracts; the decisions that shape them:
   `syft` can build the image SBOM from a distroless filesystem that holds one
   file; the image is built from the already-attested tarballs after verifying
   each.
-- **The crates.io lane** publishes the twelve library crates in dependency
+- **The crates.io lane** publishes the seven library crates in dependency
   order through Trusted Publishing, with a dry run on every pull request, a
   crate-version guard, and both drift gates (`fhir-codegen`, `omop-cdm-codegen`) ahead of the
   publish dry run so a published generated crate never disagrees with its
@@ -850,19 +854,19 @@ the order and the reason for it.
 scripts and provenance for the corpora and the HL7 packages; `fhir-types` and
 `fhir-codegen` moved in from the sibling and republished from here;
 `openehr-mapping-core`; `omop-cdm` with its generator and drift gate (the
-generated layer lands with the workspace); `openehr-path`; `ferrobridge-openehr`; `ferrobridge-term`;
-the testkit; the server shape (#21); the container (#22); the release lane
+generated layer lands with the workspace); `ferrobridge-openehr`;
+`ferrobridge-term`; the testkit; the server shape (#21); the container (#22); the release lane
 with the crates leg (#23); the first publish of every crate at 0.1.0. Nothing
 maps yet; everything the mapping needs exists and is published.
 
-**v0.0.3, the FHIR round trip.** `fhir-tree`; `fhirconnect-model`;
-`fhirconnect-resolve`; `fhirconnect-engine` with the data-type lens matrix for
-the types the round trip touches; the facade's create, read, update and
+**v0.0.3, the FHIR round trip.** The `fhirconnect` crate: its `tree`, `model`,
+`resolve` and `engine` modules, with the data-type lens matrix for the types
+the round trip touches; the facade's create, read, update and
 transaction; the identity store; the round trip of section 11. Depends on the
 `resources` feature of `fhir-types` (v0.0.2).
 
-**v0.0.4, the OMOP round trip.** `omocl-model` with the authored schema;
-`omocl-engine`; the vocabulary loader after the Athena format is pinned; the
+**v0.0.4, the OMOP round trip.** The `omocl` crate: its `model` module with
+the authored schema and its `engine` module; the vocabulary loader after the Athena format is pinned; the
 concept resolver; the `COPY` writer and the record-graph commit; the identity
 side table; `FactRelationshipCustomConverter`; `OBSERVATION_PERIOD`, the era
 SQL and AQL visits; the `etl` and `cdm init` subcommands; the conformance gate

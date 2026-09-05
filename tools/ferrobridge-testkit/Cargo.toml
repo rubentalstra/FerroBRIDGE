@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+[package]
+name = "ferrobridge-testkit"
+description = "Test support for the FerroBRIDGE suites: the pin-matrix reader, fixtures and stubs; never shipped"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+publish = false
+
+[dependencies]
+
+[lints]
+workspace = true
