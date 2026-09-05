@@ -89,6 +89,24 @@ fully pinned third-party crate set once it exists. This file does not duplicate
 crate versions; on any discrepancy the manifest wins. A crate joins a member
 with `dep.workspace = true`.
 
+## CI tool pins
+
+The tier-1 lanes of `.github/workflows/ci.yml` run four analyzers, each pinned
+to an exact version so a CI result matches the local one. `zizmor` and
+`shellcheck` are fetched by `taiki-e/install-action`, which verifies the
+upstream release checksum; `actionlint` and `hadolint` run from their official
+container images, pinned by tag and by digest.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| `zizmor` | 1.29.0 | `.github/workflows/ci.yml` |
+| `actionlint` | 1.7.12 | `.github/workflows/ci.yml` |
+| `shellcheck` | 0.11.0 | `.github/workflows/ci.yml` |
+| `hadolint` | 2.15.1 | `.github/workflows/ci.yml` |
+
+Keep the locally installed versions on these numbers, so a finding costs a
+local run rather than a CI round trip (`.claude/rules/ci-cd.md`).
+
 ## GitHub Actions pins
 
 Every `uses:` in `.github/workflows/**` is pinned to a full commit SHA with a

@@ -195,6 +195,43 @@ else
   note "no CITATION.cff yet, skipped"
 fi
 
+echo "== CI tool pins (.github/workflows/ci.yml <-> docs/VERSIONS.md)"
+if [ -f .github/workflows/ci.yml ]; then
+  # The version each analyzer is pinned to in the workflow: an installer
+  # `tool: name@version` line, or the tag of a digest-pinned image.
+  ci_tool_pin() {
+    case "$1" in
+    zizmor | shellcheck)
+      sed -nE "s|^[[:space:]]*tool:[[:space:]]*$1@([^[:space:]]+).*|\1|p" \
+        .github/workflows/ci.yml | head -n1
+      ;;
+    actionlint)
+      sed -nE 's|^[[:space:]]*rhysd/actionlint:([^@[:space:]]+)@sha256:.*|\1|p' \
+        .github/workflows/ci.yml | head -n1
+      ;;
+    hadolint)
+      sed -nE 's|^[[:space:]]*hadolint/hadolint:v([^@[:space:]]+)@sha256:.*|\1|p' \
+        .github/workflows/ci.yml | head -n1
+      ;;
+    esac
+  }
+  for tool in zizmor actionlint shellcheck hadolint; do
+    want="$(pin_of "$tool" docs/VERSIONS.md)"
+    found="$(ci_tool_pin "$tool")"
+    if [ -z "$want" ]; then
+      bad "docs/VERSIONS.md has no '$tool' row"
+    elif [ -z "$found" ]; then
+      bad ".github/workflows/ci.yml pins no $tool version"
+    elif [ "$found" != "$want" ]; then
+      bad "$tool: ci.yml pins $found, docs/VERSIONS.md pins $want"
+    else
+      note "OK: $tool $found"
+    fi
+  done
+else
+  note "no .github/workflows/ci.yml yet, skipped"
+fi
+
 echo "== licence (LICENSE <-> SPDX headers, manifests, badges, labels)"
 if [ -f LICENSE ]; then
   stale=0

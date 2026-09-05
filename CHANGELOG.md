@@ -21,6 +21,25 @@ architecture is the output of the research program on
 
 ### Added
 
+- `.github/workflows/ci.yml`, the CI gate, in two tiers. Tier 1 runs on a
+  repository with no code: zizmor at `--min-severity=low` with the online
+  audits enabled, actionlint through its digest-pinned official image,
+  shellcheck at `--severity=style` over every tracked shell program, hadolint
+  over every tracked Dockerfile, and the comment-style and versions guards.
+  Tier 2 is the Rust set (rustfmt, clippy, nextest and doctests, rustdoc,
+  `cargo deny`, MSRV, dependency review), gated behind a `detect` job that
+  looks for a root `Cargo.toml`, so it activates by itself when the workspace
+  lands. The `conclusion` job reads every job's result and is the single
+  required status check on `main`. Housekeeping the lanes read lands with it:
+  `.hadolint.yaml`, `.dockerignore`, `.github/actionlint.yaml`, and the
+  `.gitattributes` `linguist-generated` line reserved for the generated OMOP
+  CDM subtree. `docs/ci-cd.md` records the design, why a mostly-skipped
+  pipeline is still enforceable, and the owner actions that cannot be scripted
+  (#16).
+- The CI tool pins (zizmor, actionlint, shellcheck, hadolint) as a section of
+  `docs/VERSIONS.md`, with `scripts/checks/versions.sh` failing when
+  `ci.yml` and the matrix disagree (#16).
+
 - `docs/VERSIONS.md`, the pin matrix: one place that records every version pin
   (the five specification pins, the published `fhir-types` and
   `fhir-terminology` crate pins, the Rust toolchain,
