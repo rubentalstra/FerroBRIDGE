@@ -22,6 +22,12 @@ website/book/vendor/mermaid/*.js linguist-vendored
 website/book/vendor/mermaid/*.js -text
 website/book/vendor/mermaid/LICENSE-* linguist-vendored
 
+# The brand rasters are binary. `text=auto` above detects that by itself, and
+# the explicit opt-out keeps a future misdetection from rewriting their bytes
+# (assets/brand/README.md).
+*.png -text
+*.ico -text
+
 # A generated tree is marked generated so it collapses in diffs and stays out
 # of language statistics (.claude/rules/codegen.md). The one generated tree the
 # architecture calls for is the OMOP CDM v5.4 row types and DDL emitted from
