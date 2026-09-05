@@ -75,7 +75,9 @@ sibling terminology server, which then consumes the crate from crates.io).
 
 The library crates are published to crates.io on one lockstep crate version
 line, distinct from the product version (owner decision 2026-09-05). The line
-inherits `fhir-types`, whose last release from the sibling is the floor.
+inherits `fhir-types`, whose last release from the sibling is the floor. Every
+other library crate holds its name with a 0.0.0 placeholder (#107), a version
+outside the line.
 
 | Item | Pin | Repeated in |
 |---|---|---|
