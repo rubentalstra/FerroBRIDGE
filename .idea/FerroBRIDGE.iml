@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="EMPTY_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/app/ferrobridge-server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ferrobridge-openehr/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ferrobridge-openehr/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ferrobridge-term/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/ferrobridge-term/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhir-tree/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhir-tree/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-engine/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-engine/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-model/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-model/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-resolve/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhirconnect-resolve/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omocl-engine/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omocl-engine/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omocl-model/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omocl-model/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omop-cdm/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/omop-cdm/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/openehr-mapping-core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/openehr-mapping-core/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/openehr-path/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/openehr-path/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/ferrobridge-testkit/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
