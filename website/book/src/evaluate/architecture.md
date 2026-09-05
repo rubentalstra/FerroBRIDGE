@@ -53,9 +53,10 @@ Mapping paths in both languages are RM and archetype paths such as
 executable: the leaf RM type and the template-specific identifiers come from the
 Web Template built from the template's operational template. The order is the
 operational template, then the Web Template, then path resolution, then the
-composition. FerroBRIDGE resolves in that order using the published `openehr-*`
-crates, which already carry the operational-template ingestion, the Web Template
-builder, and the canonical-JSON and FLAT codecs.
+composition. FerroBRIDGE fetches the operational template from the CDR, builds
+the Web Template locally with the published `openehr-*` crates, resolves paths
+against the canonical composition tree, and commits and reads canonical JSON.
+FLAT never crosses the wire.
 
 FHIRconnect requires the context mapping's `start` entry to slot in a reusable
 `COMPOSITION.<archetype>.<Resource>` mapping, and it defaults the
@@ -68,9 +69,11 @@ defaulted one.
 ## The FHIR side
 
 FerroBRIDGE exposes a FHIR R4 REST facade and maps each request onto CDR
-operations. It stores no clinical data. Bundles are split by context profile
-URL, a resource that two mappings both need becomes a linked mapping, and
-unresolved references are fetched from the sending site with cycle protection.
+operations. It stores no clinical data. A transaction Bundle is all or nothing
+and a batch Bundle answers per entry, as FHIR R4 defines them. Bundles are
+split by the profiles in `meta.profile`, a resource that two mappings both need
+becomes a linked mapping, and unresolved references are fetched from the
+sending site with cycle protection.
 
 FHIRconnect states that it "does not focus specifically on AQL and FHIRsearch",
 so FHIR search has no specification behind it here. The search design is
@@ -96,15 +99,17 @@ means by "no matching concept", and it is never dropped. The
 
 ## Generated and hand-written
 
-The OMOP CDM v5.4 row types and DDL are generated from the OHDSI
-`CommonDataModel` definitions, because that model is published in
-machine-readable form and a hand-transcribed copy drifts from its source with
-no way to detect it. The FHIR model is a dependency: the published `fhir-types`
-and `fhir-terminology` crates already carry per-version FHIR types and the
-terminology operation contracts, so nothing regenerates them here. Everything
-that makes FerroBRIDGE a bridge is hand-written: the mapping foundation, the two
-parsers and interpreters, the ITS-REST client, the terminology client, the
-facade, and the ETL runner.
+Two models are generated, because both are published in machine-readable form
+and a hand-transcribed copy drifts from its source with no way to detect it.
+The FHIR model, the `fhir-types` crate, is emitted by `fhir-codegen` from the
+HL7 FHIR packages; it moved into this repository from the sibling terminology
+server, which now consumes it from crates.io. The OMOP CDM v5.4 row types are
+emitted from the OHDSI `CommonDataModel` field definitions, with the OHDSI
+PostgreSQL DDL vendored verbatim beside them. The openEHR model comes from the
+published `openehr-*` crates. Everything that makes FerroBRIDGE a bridge is
+hand-written: the mapping foundation, both mapping languages' types, validators
+and interpreters, the FHIR path model, the ITS-REST client, the terminology
+client, the facade, and the ETL runner.
 
 ## Where the specifications are silent
 

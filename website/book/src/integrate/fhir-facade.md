@@ -28,18 +28,24 @@ for `spec.version`. The facade answers create, update, and read, plus
 transaction and batch Bundles including the conditional forms `If-None-Exist`
 and `If-Match`.
 
-A Bundle is split by context profile URL, following the specification's engine
-chapter. A resource that two mappings both need becomes a linked mapping rather
-than two independent conversions. An unresolved reference is fetched from the
-sending site, with cycle protection.
+A transaction Bundle is all or nothing and a batch Bundle answers per entry,
+as FHIR R4 defines them. A Bundle is split by the profiles in `meta.profile`,
+following the specification's engine chapter (which names `meta.url`, an
+element R4 does not have; that is reported upstream). A resource that two
+mappings both need becomes one linked mapping. An unresolved reference is
+fetched from the sending site, with cycle protection, and one that cannot be
+fetched refuses the request.
 
 ## Paths are written as well as read
 
 The engine is a bidirectional path model over FHIR JSON, because a mapping has
-to construct a resource, not only read one. FHIRPath evaluation is used only
-for the read-side expressions the mappings actually contain: `ofType()`,
-`extension(url)`, and `resolve()`. FHIRconnect's `^` parent operator and
-`$fhirRoot` are not FHIRPath, and the path model handles them directly.
+to construct a resource as well as read one. The model is guided by the
+element table of the generated `fhir-types` crate, so it knows which elements
+repeat, which are choice types, and which alternatives a choice admits. The
+three read-side FHIRPath forms the published mappings use (`ofType()` and
+`as()`, `extension(url)`, `resolve()`) are path-model operations; no FHIRPath
+evaluator is embedded. FHIRconnect's `^` parent operator and `$fhirRoot` are
+not FHIRPath, and the path model resolves them when the mapping is compiled.
 
 ## Terminology
 

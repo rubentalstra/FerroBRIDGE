@@ -24,7 +24,7 @@ openEHR and two targets, so it answers to five sources:
 4. **OMOCL** (<https://github.com/SevKohler/OMOCL>), the OMOP mapping
    specification.
 5. **openEHR ITS-REST**
-   (<https://specifications.openehr.org/releases/ITS-REST/latest/>): every call
+   (<https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/>): every call
    the bridge makes into a CDR, with its status codes, headers, and error
    bodies.
 

@@ -118,6 +118,11 @@ lockfile drift rather than on registry drift. Commit `Cargo.lock`.
   (`docs/release.md`).
 - **A version pin has a single source of truth**, and a committed check fails
   on cross-file drift.
+- **The library crates publish to crates.io through Trusted Publishing** (OIDC,
+  no long-lived token), in dependency order, from a dispatch lane and from the
+  release lane, with a dry run on every pull request and the codegen drift gates
+  ahead of it, so a published generated crate never disagrees with its
+  generator.
 
 ## Never
 

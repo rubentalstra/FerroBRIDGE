@@ -10,7 +10,7 @@
 #   1. specification pins  the five rows of the docs/architecture.md pin table
 #                          (FHIRconnect, FHIR, OMOCL, OMOP CDM, openEHR
 #                          ITS-REST) against docs/VERSIONS.md.
-#   2. FHIR model crates   fhir-types and fhir-terminology across
+#   2. model crates        fhir-types and the openehr-* crates across
 #                          docs/architecture.md, docs/VERSIONS.md, and the root
 #                          Cargo.toml [workspace.dependencies] requirement.
 #   3. toolchain           rust-toolchain.toml channel, plus the root
@@ -125,9 +125,9 @@ else
   note "no docs/architecture.md or docs/VERSIONS.md yet, skipped"
 fi
 
-echo "== FHIR model crate pins (docs/architecture.md <-> docs/VERSIONS.md <-> Cargo.toml)"
+echo "== model crate pins (docs/architecture.md <-> docs/VERSIONS.md <-> Cargo.toml)"
 if [ -f docs/architecture.md ] && [ -f docs/VERSIONS.md ]; then
-  for crate in fhir-types fhir-terminology; do
+  for crate in fhir-types openehr-base openehr-rm openehr-its openehr-query; do
     arch="$(pin_of "$crate" docs/architecture.md)"
     matrix="$(pin_of "$crate" docs/VERSIONS.md)"
     if [ -z "$arch" ]; then

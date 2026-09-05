@@ -23,8 +23,9 @@
   inbound equals outbound, no contributor licence agreement
 - [Sibling projects](sibling-projects.md): FerroEHR at `../ferroehr` is the
   reference CDR and FerroTERM at `../FerroTERM` the reference terminology
-  server; both are read-only prior art from here and are never edited from
-  this repository
+  server; both are read-only prior art from here and never edited from this
+  repository; a tracker issue in a sibling may be filed from here when the
+  owner asks (2026-09-05, FerroTERM #298)
 - [Domain ferrobridge.eu](domain-ferrobridge-eu.md): the public domain is a
   Pages setting mirroring ferroterm.eu, never a `CNAME` file; owner 2026-09-04
 - [Milestones 0.0.x](milestones-0-0-x.md): milestones start at v0.0.1 and step
@@ -37,3 +38,7 @@
 - [Standalone product](standalone-product.md): public documents never name
   FerroEHR or FerroTERM; any CDR, any terminology server, crates by crate name;
   the licence framing stands on its own; owner 2026-09-04
+- [Crates published](crates-published.md): owner decision 2026-09-05, the
+  library crates are published to crates.io on the sibling model (`crates/*`
+  published, `app/*` and `tools/*` never), so the release lane carries a
+  crates.io leg and every `pub` surface is designed as API from the start

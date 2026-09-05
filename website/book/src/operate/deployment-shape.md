@@ -31,9 +31,12 @@ implementation the same way.
 ## What FerroBRIDGE stores
 
 Clinical data lives in the CDR and, on the OMOP side, in the CDM database.
-FerroBRIDGE stores one thing of its own: the id-map, a persistent store holding
-the patient identifier to `ehr_id` relation and the external to internal
-resource id relation. Everything else it holds is configuration: the loaded
+FerroBRIDGE stores two things of its own: the id-map, a persistent store
+holding the patient identifier to `ehr_id` relation, the external to internal
+resource id relation and the resource id to composition relation; and, on the
+OMOP side, a side table in its own schema beside the CDM that maps each source
+record to its rows, which is what makes a re-run replace rather than
+duplicate. Everything else it holds is configuration: the loaded
 mapping files, the terminology server address, and the CDR address.
 
 ## What it asks of the CDR
@@ -43,11 +46,12 @@ The FHIR side uses the composition and EHR endpoints:
 `POST`, `PUT`, and `GET` on `/ehr/{ehr_id}/composition[/{uid}]`, and
 `POST /ehr/{ehr_id}/contribution` for an atomic multi-object commit. Both sides
 use `POST /query/aql`. Templates come from
-`GET /definition/template/adl1.4/{template_id}`, and the Web Template from the
-same endpoint with `Accept: application/openehr.wt+json`.
+`GET /definition/template/adl1.4/{template_id}` as canonical XML; FerroBRIDGE
+builds the Web Template from that itself, so the CDR need not serve one.
+Compositions cross the wire as canonical JSON.
 
-A CDR that does not serve the Web Template cannot drive the bridge, because a
-mapping path alone does not carry the leaf RM type.
+A CDR that does not serve the operational template cannot drive the bridge,
+because a mapping path alone does not carry the leaf RM type.
 
 ## What it asks of the terminology server
 

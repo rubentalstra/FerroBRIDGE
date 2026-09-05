@@ -18,8 +18,8 @@ The name follows the Ferro family (FerroEHR, FerroTERM). FerroBRIDGE in prose,
 
 ## The design is recorded in `docs/architecture.md`
 
-Read it first. It is the output of the 2026-09-03 research pass over the primary
-sources (issue #1) and records the decisions with their ground: FHIRconnect and
+Read it first. It is the output of the 2026-09-03 and 2026-09-05 research passes over the
+primary sources (issue #1) and records the decisions with their ground: FHIRconnect and
 OMOCL are two languages sharing one header, so the bridge is one shared
 foundation, two interpreters, two sinks; the pins are FHIRconnect v1.0.0, FHIR
 R4, OMOCL v1.0.0, OMOP CDM v5.4 and openEHR ITS-REST 1.1.0; the FHIR side is a
@@ -31,11 +31,15 @@ FerroBRIDGE's own; keep that labelling in code and docs.
 
 ## The two layers
 
-- **Generated where a machine-readable source exists:** the OMOP CDM v5.4 row
-  types and DDL from the OHDSI `CommonDataModel` definitions. Every file marked
+- **Generated where a machine-readable source exists:** the FHIR model
+  (`fhir-types`, emitted by `tools/fhir-codegen` from the vendored HL7 FHIR
+  packages; the crate and its generator moved here from the sibling terminology
+  server by owner decision on 2026-09-05, and the sibling consumes the crate
+  from crates.io) and the OMOP CDM v5.4 row types from the OHDSI
+  `CommonDataModel` field definitions, with the OHDSI PostgreSQL DDL vendored
+  verbatim beside them (`docs/architecture.md` §10). Every file marked
   `// @generated` is off-limits: change the generator and regenerate, never
-  hand-edit generated code. The FHIR model is a DEPENDENCY, not a generator
-  (`docs/architecture.md` §7); the openEHR model comes from the published
+  hand-edit generated code. The openEHR model comes from the published
   `openehr-*` crates.
 - **Hand-written and the product:** the shared mapping foundation, the
   FHIRconnect and OMOCL parsers, validators and interpreters, the ITS-REST
@@ -43,8 +47,9 @@ FerroBRIDGE's own; keep that labelling in code and docs.
   idiomatic Rust of our own design, with the FHIRconnect, FHIR, OMOCL, OMOP CDM
   and openEHR specifications as the authority.
 
-The Cargo workspace lands with the first milestone (one verbatim round trip per
-target, `docs/architecture.md` §9), never before its issues are filed.
+The Cargo workspace lands with v0.0.2, the foundation release
+(`docs/architecture.md` §13); the round trips follow in v0.0.3 (FHIR) and
+v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 
 ## Repo map
 
@@ -252,6 +257,6 @@ either from this repository (`.claude/memory/sibling-projects.md`).
 - The HL7 FHIR specification: <https://hl7.org/fhir/>
 - The OMOP Common Data Model: <https://ohdsi.github.io/CommonDataModel/>
 - The openEHR ITS-REST specification:
-  <https://specifications.openehr.org/releases/ITS-REST/latest/>
+  <https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/>
 - The tracker: `gh issue list --state open`. Issue #1 carries the research
   program that produces `docs/architecture.md`.

@@ -22,18 +22,23 @@ order:
    archetypes, the extensions, and the `start` mapping.
 
 On the OMOP side you supply OMOCL files: a flat list of records keyed by CDM
-target, each record's keys being CDM column names with ordered `alternatives`.
-YAML anchors and aliases are supported, because the published library uses
-them.
+target, each record's keys drawn from OMOCL's own column vocabulary (`value`,
+`unit`, `concept_id`, `measurement_date`) with ordered `alternatives`.
+FerroBRIDGE carries the table that projects each key onto CDM columns, because
+OMOCL does not publish one. YAML anchors and aliases are supported, because the
+published library uses them.
 
 ## Validation happens at load, not at runtime
 
-Every FHIRconnect file is validated against the two published draft-07 JSON
-schemas, `model-mapping.schema.json` and `contextual-mapping.schema.json`, plus
-the constraints those schemas cannot express: `targetRoot` alignment,
-`appendTo` and `slotArchetype` resolution, and the presence of `criteria` where
-the grammar requires it. Every OMOCL file is validated against the schema
-FerroBRIDGE authors from the grammar tables.
+Every FHIRconnect file is checked three ways. The two published draft-07 JSON
+schemas are vendored and run, and the files they reject are recorded, because
+those schemas refuse three mapping types the specification defines. Then
+FerroBRIDGE's own strict schema runs, which admits exactly what the prose
+defines. Then the constraints no schema can express are checked: `targetRoot`
+alignment, `appendTo` and `slotArchetype` resolution, unique mapping names,
+the presence of `criteria` where the grammar requires it, and every path
+resolving against the template and the FHIR element table. Every OMOCL file is
+validated against the schema FerroBRIDGE authors from the grammar tables.
 
 Version agreement is part of loading. The mapping version, the grammar version,
 the archetype revision, the template `sem_ver`, and the profile version have to
