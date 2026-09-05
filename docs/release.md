@@ -82,9 +82,14 @@ unsigned tag is refused at push time. `release.yml` takes it from there.
 2. **Post the board status update** with what shipped and what the next
    milestone targets (`.claude/rules/project-board.md`).
 
-## What is immutable today, and what is not
+## What a published release is protected against
 
-Two separate things get called immutability, and only one of them is on.
+Two protections cover different things, and both are on.
+
+**The release is frozen.** GitHub's repository-level immutable-releases setting
+is enabled, so once a release is published its notes and its assets cannot be
+edited. That is why the lane assembles a draft and publishes last: the draft is
+the only window in which assets can still be attached.
 
 **The tag is protected.** The `release-tags` ruleset is active on
 `refs/tags/v*` and blocks `deletion` and `non_fast_forward` updates, and
@@ -92,13 +97,8 @@ requires signatures. A pushed `vX.Y.Z` cannot be moved to another commit and
 cannot be deleted, so the commit a release names stays the commit it was cut
 from.
 
-**The release is not frozen by the platform.** GitHub has a repository-level
-immutable-releases setting, which stops a published release's assets and notes
-from being changed after the fact. It is not exposed on this repository through
-the API: reading the repository returns no `immutable_releases` field, and a
-`PATCH` setting it is ignored. Treat it as an owner toggle to check in
-repository Settings, and assume until then that a published release can still
-be edited by anyone with write access.
+Read the notes before you tag. Once the release publishes, the text you wrote
+is the text that stands.
 
 **The no-retag rule is ours, not the platform's.** A bad cut ships forward as a
 new patch version. Never move a tag, never delete a release and recreate it,

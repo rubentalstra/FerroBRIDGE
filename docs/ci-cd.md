@@ -145,7 +145,7 @@ the state on 2026-09-05.
 | Pages publishes from GitHub Actions and serves `ferrobridge.eu` with HTTPS enforced; the apex A records point at the four GitHub Pages addresses, `www` is a CNAME to `rubentalstra.github.io`, and the domain is verified for the account | done |
 | The roadmap board and the label bootstrap (`scripts/gh/labels.sh`) | done |
 | Registration at bestpractices.dev, with the returned badge added to the README | open |
-| Immutable releases, the repository setting that stops a published release's notes and assets from being edited | open: the setting is not exposed on this repository through the API, so it is checked and turned on in Settings by hand (`docs/release.md`) |
+| Immutable releases, the repository setting that stops a published release's notes and assets from being edited | done: enabled by the owner. It is not reported by the REST API, so read it in Settings rather than from `gh api` (`docs/release.md`) |
 | A `crates-io` environment with a required reviewer | conditional: only if FerroBRIDGE ever publishes a crate. `docs/architecture.md` section 7 has it consuming published crates rather than publishing its own |
 
 `conclusion` is the contract for the required-checks list. Add no other CI check

@@ -57,8 +57,9 @@ contractual service-level agreement:
 - **An initial assessment** (is it valid, how severe) within about 10 business
   days.
 - **A fix or a mitigation plan** for a confirmed vulnerability as a priority,
-  released as a new patch version. A released tag cannot be moved or deleted,
-  so a fix ships forward as a new version rather than by re-tagging.
+  released as a new patch version. A published release is immutable and its
+  tag cannot be moved or deleted, so a fix ships forward as a new version
+  rather than by re-tagging.
 
 You will be kept informed through the private advisory and, with your consent,
 credited when the advisory is published. Please give a reasonable window to
