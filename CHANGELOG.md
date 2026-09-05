@@ -19,6 +19,12 @@ architecture is the output of the research program on
 
 ## [Unreleased]
 
+### Changed
+
+- `CONTRIBUTING.md` lists all six tier-1 gates `ci.yml` runs, in the same order
+  and with the same flags. It named four, so a contributor who ran the listed
+  commands could still fail CI on hadolint or the versions guard (#36).
+
 ### Added
 
 - `.github/workflows/ci.yml`, the CI gate, in two tiers. Tier 1 runs on a
