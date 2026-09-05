@@ -4,9 +4,9 @@
    copy the values. */
 :root {
   /* Core palette */
-  --ferrobridge-indigo: #4F46E5;       /* the arch, primary mark, accents */
-  --ferrobridge-indigo-deep: #4338CA;  /* the deck, hover, pressed */
-  --ferrobridge-violet: #818CF8;       /* the two deck nodes, highlights */
+  --ferrobridge-indigo: #4F46E5;       /* the connecting lines, primary mark, accents */
+  --ferrobridge-indigo-deep: #4338CA;  /* the source circle, the table header, hover, pressed */
+  --ferrobridge-violet: #818CF8;       /* the arrowheads, the table body, highlights */
   --ferrobridge-ink: #0F172A;          /* text on light */
   --ferrobridge-mist: #F1F5F9;         /* text on dark */
   --ferrobridge-tile: #0B1020;         /* dark tile background */

@@ -14,27 +14,34 @@ mark and the palette are FerroBRIDGE's own.
 
 ## The mark
 
-The mark is a through-arch bridge: an arch springing from two piers, a deck
-crossing it, and two accent nodes sitting on the deck. It draws what the
-product is. The arch and the deck are the shared mapping foundation, and the
-two nodes are the two targets the bridge carries, HL7 FHIR and the OMOP Common
-Data Model.
+The mark draws what the product does: one source, two targets, and two
+branches that deliberately differ.
+
+- **The filled circle is openEHR**, the source. One record, one origin.
+- **The two-way arrow is HL7 FHIR.** FHIR is an exchange, so the arrow carries
+  a head at both ends: the bridge reads openEHR out to FHIR and writes FHIR
+  back in. The FHIR side is a facade over the CDR and stores no clinical data,
+  which is why FHIR has no box to sit in.
+- **The table with a header row is the OMOP Common Data Model**, reached by a
+  plain line with no arrowhead. That side is a batch ETL that writes rows into
+  a database.
 
 ## Palette, "Indigo & Iron"
 
 | Token | Hex | Use |
 |---|---|---|
-| indigo | `#4F46E5` | the arch, primary mark, accents |
-| indigo-deep | `#4338CA` | the deck, hover, pressed |
-| violet | `#818CF8` | the two deck nodes, highlights |
+| indigo | `#4F46E5` | the connecting lines, primary mark, accents |
+| indigo-deep | `#4338CA` | the source circle and the table header, hover, pressed |
+| violet | `#818CF8` | the arrowheads and the table body, highlights |
 | ink | `#0F172A` | text on light |
 | mist | `#F1F5F9` | text on dark |
 | tile | `#0B1020` | dark tile background |
 | surface | `#F8FAFC` | light surface background |
 
 The values live in `tokens.css` as `--ferrobridge-*` custom properties. On a
-dark tile the mark brightens so it holds contrast: the arch goes to `#6366F1`,
-the deck to `#818CF8`, and the nodes to `#C7D2FE`.
+dark tile the mark brightens so it holds contrast: the lines go to `#6366F1`,
+the source circle and the table header to `#A5B4FC`, and the arrowheads and the
+table body to `#C7D2FE`.
 
 ## Files
 
@@ -46,7 +53,7 @@ the deck to `#818CF8`, and the nodes to `#C7D2FE`.
 | `ferrobridge-lockup-light.svg` | icon and "FerroBRIDGE" wordmark for light backgrounds |
 | `ferrobridge-lockup-dark.svg` | the lockup for dark backgrounds |
 | `ferrobridge-lockup-auto.svg` | the lockup that follows `prefers-color-scheme` |
-| `favicon.svg` | the mark on an indigo tile, for browser tabs |
+| `favicon.svg` | the tightened mark on an indigo tile, for browser tabs |
 | `favicon-32.png`, `favicon-16.png`, `favicon.ico` | raster favicons |
 | `ferrobridge-social.svg`, `ferrobridge-social.png` | 1200x630 social card |
 | `tokens.css` | the palette as CSS custom properties |
@@ -79,16 +86,23 @@ rest of the FerroBRIDGE surfaces use the system font stack in
 
 ## Usage
 
-- Keep clear space around the mark equal to the diameter of one deck node.
-- The smallest the mark reads is 16 px. Below 32 px use `favicon.svg`, which
-  drops the two deck nodes because they stop reading at that size.
+- Keep clear space around the mark equal to the diameter of the source circle.
+- The icon reads down to 24 px. Below that use `favicon.svg`, which shortens
+  the arrow shaft and drops the table header row, and reads at 16 px.
 - Put the colour mark on light or quiet surfaces, and `ferrobridge-icon-dark.svg`
   on busy or light-photographic backgrounds.
 - Use `ferrobridge-icon-mono.svg` where one colour is required; it takes the
   surrounding text colour.
 - Do not recolour the mark outside the palette, stretch it, add effects, or
   rebuild the wordmark in another typeface.
-- Do not redraw the arch, the deck, or the nodes. The geometry is fixed.
+- Do not redraw the circle, the two-way arrow, or the table. The geometry is
+  fixed.
+- Only the FHIR branch carries arrowheads. The line into the OMOP table is
+  plain, because that side writes rows rather than exchanging them. Do not add
+  a head to it in any derivative.
+- The two connecting lines come first in document order, then the two
+  arrowhead chevrons, then the circle and the table, so the lines pass behind
+  the heads. Keep that order in every file.
 
 ## Where the palette applies
 

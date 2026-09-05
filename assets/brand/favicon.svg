@@ -1,11 +1,15 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
-<!-- Favicon master: the arch and deck on an indigo tile. The two deck nodes are
-     dropped because they stop reading below 32 px, the same call FerroEHR makes
-     for its heartbeat tick. Intrinsic size stays 64: a favicon wants a small
+<!-- Favicon master: a tightened cut of the mark on an indigo tile. The arrow
+     shaft is shorter and the table drops its header row, because the full
+     detail blurs below 24 px. Intrinsic size stays 64: a favicon wants a small
      natural size. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="FerroBRIDGE">
   <rect x="0" y="0" width="64" height="64" rx="14" fill="#4F46E5"/>
-  <path d="M16 45.5 V34.5 A16 16 0 0 1 48 34.5 V45.5" fill="none" stroke="#F1F5F9" stroke-width="5" stroke-linecap="round"/>
-  <rect x="11" y="31.7" width="42" height="5.6" rx="2.8" fill="#F1F5F9"/>
+  <path d="M24 20 H52" fill="none" stroke="#F1F5F9" stroke-width="5" stroke-linecap="round"/>
+  <path d="M19 28 L27.5 44 H36" fill="none" stroke="#F1F5F9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M29.8 14.2 L24 20 L29.8 25.8" fill="none" stroke="#F1F5F9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M46.2 14.2 L52 20 L46.2 25.8" fill="none" stroke="#F1F5F9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15.5" cy="20" r="7.5" fill="#F1F5F9"/>
+  <rect x="34" y="36" width="19" height="19" rx="4" fill="#F1F5F9"/>
 </svg>
