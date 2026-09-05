@@ -79,6 +79,11 @@ architecture is the output of the research program on
 
 ### Changed
 
+- The contributor page at `/docs/contribute/checks-and-gates.html` names the
+  zizmor audit path `.github/`, matching what CI runs. It still named
+  `.github/workflows/`, so following it missed the Dependabot configuration
+  and everything under `.github/actions/` (#40).
+
 - The zizmor lane in `.github/workflows/ci.yml` audits `.github/` rather than
   `.github/workflows/`, so `dependabot.yml` and every composite action under
   `.github/actions/` are covered. A composite action runs with the calling

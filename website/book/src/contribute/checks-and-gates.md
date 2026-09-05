@@ -16,7 +16,7 @@ required status check on `main`.
 
 | Check | Command | What it protects |
 |---|---|---|
-| Workflow security | `zizmor --min-severity=low .github/workflows/` | every `uses:` pinned to a commit SHA, no credential-persisting checkout, no context spliced into a shell |
+| Workflow security | `zizmor --min-severity=low .github/` | every `uses:` pinned to a commit SHA, no credential-persisting checkout, no context spliced into a shell, and the Dependabot cooldown window |
 | Workflow correctness | `actionlint` | expressions that cannot evaluate, a `needs:` naming no job, unknown runner labels |
 | Shell | `shellcheck --severity=style` over every tracked shell program | shellcheck's lowest floor, so every finding gates |
 | Containers | `hadolint` over every tracked Dockerfile | container-recipe defects; no Dockerfile exists yet, so it reports that and passes |
