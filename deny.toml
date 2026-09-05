@@ -1,0 +1,71 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+# cargo-deny configuration. Run: cargo deny check
+# Docs: https://embarkstudios.github.io/cargo-deny/
+#
+# This is the ONLY advisory gate. cargo deny check advisories reads the same
+# RustSec database cargo audit does and adds yanked, licenses, bans and
+# sources, so there is no separate cargo-audit job.
+
+[advisories]
+version = 2
+# Fail on any RustSec advisory. Add exceptions explicitly, dated, and each
+# naming the event that deletes it.
+yanked = "deny"
+ignore = []
+
+[licenses]
+version = 2
+# Permissive licences a BUSL-1.1 project can depend on (and that its Apache 2.0
+# Change License admits). Copyleft is not allowed by default; a weak-copyleft
+# dependency gets a crate-scoped exceptions entry with its reason.
+allow = [
+  "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
+  "MIT",
+  "MIT-0",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "BSL-1.0",
+  "ISC",
+  "Zlib",
+  "Unicode-3.0",
+  "CC0-1.0",
+  "CDLA-Permissive-2.0",
+]
+confidence-threshold = 0.9
+# The project's own crates are BUSL-1.1 (LICENSE). The openEHR model crates
+# join this list when they are added (openehr-its, openehr-query are BUSL-1.1;
+# openehr-term is Apache-2.0 AND CC-BY-SA-3.0).
+exceptions = [
+  { allow = ["BUSL-1.1"], crate = "openehr-mapping-core" },
+  { allow = ["BUSL-1.1"], crate = "openehr-path" },
+  { allow = ["BUSL-1.1"], crate = "fhir-tree" },
+  { allow = ["BUSL-1.1"], crate = "fhirconnect-model" },
+  { allow = ["BUSL-1.1"], crate = "fhirconnect-resolve" },
+  { allow = ["BUSL-1.1"], crate = "fhirconnect-engine" },
+  { allow = ["BUSL-1.1"], crate = "omocl-model" },
+  { allow = ["BUSL-1.1"], crate = "omocl-engine" },
+  { allow = ["BUSL-1.1"], crate = "omop-cdm" },
+  { allow = ["BUSL-1.1"], crate = "ferrobridge-openehr" },
+  { allow = ["BUSL-1.1"], crate = "ferrobridge-term" },
+  { allow = ["BUSL-1.1"], crate = "ferrobridge-server" },
+  { allow = ["BUSL-1.1"], crate = "ferrobridge-testkit" },
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+# Internal path-only deps carry an implicit "*" version, which never reaches a
+# registry. External wildcards stay denied.
+allow-wildcard-paths = true
+deny = []
+skip = []
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

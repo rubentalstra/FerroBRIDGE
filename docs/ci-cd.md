@@ -146,7 +146,7 @@ the state on 2026-09-05.
 | The roadmap board and the label bootstrap (`scripts/gh/labels.sh`) | done |
 | Registration at bestpractices.dev, with the returned badge added to the README | open |
 | Immutable releases, the repository setting that stops a published release's notes and assets from being edited | done: enabled by the owner. It is not reported by the REST API, so read it in Settings rather than from `gh api` (`docs/release.md`) |
-| A `crates-io` environment with a required reviewer, and crates.io Trusted Publishing entries per crate for `release.yml` and `publish-crates.yml` | open: the library crates are published (owner decision 2026-09-05, `docs/architecture.md` §7 and §12); the first version of each new crate is a local `cargo publish` by the owner, since a crate's first release cannot use OIDC |
+| A `crates-io` environment with a required reviewer, and crates.io Trusted Publishing entries per crate for `release.yml` and `publish-crates.yml` | open: the library crates are published (owner decision 2026-09-05, `docs/architecture.md` §7 and §12). The first version of each crate (0.0.0, the name reservation) was published locally by the owner on 2026-09-05 (#107), since a crate's first release cannot use OIDC |
 
 `conclusion` is the contract for the required-checks list. Add no other CI check
 to it: a job added to `ci.yml` joins the `conclusion` job's `needs` list

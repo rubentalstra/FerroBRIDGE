@@ -53,7 +53,10 @@ v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 
 ## Repo map
 
-There is no Cargo workspace yet. What exists:
+The Cargo workspace is a skeleton (#107): the root manifests with the full lint
+set, eleven placeholder library crates at 0.0.0 holding their crates.io names,
+a thin `ferrobridge` binary that does nothing yet, and the testkit tool crate.
+Beside it:
 
 - `.claude/`: the working discipline. `rules/` (the path-scoped and standing
   rules), `hooks/`, `skills/`, `agents/`, `memory/`.

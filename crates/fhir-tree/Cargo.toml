@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+[package]
+name = "fhir-tree"
+description = "A bidirectional path model over FHIR JSON guided by the FHIR element table, for mapping engines that write resources as well as read them"
+# 0.0.0 reserves the name; the crate line starts at 0.1.44 (docs/VERSIONS.md).
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+documentation = "https://docs.rs/fhir-tree"
+readme = "README.md"
+keywords = ["fhir", "hl7", "json", "path", "healthcare"]
+categories = ["data-structures", "science"]
+# The crate line is published on crates.io; include is the packaged content.
+publish = true
+include = ["src/**", "README.md", "LICENSE"]
+
+[dependencies]
+
+[dev-dependencies]
+ferrobridge-testkit.workspace = true
+
+[lints]
+workspace = true
