@@ -1,0 +1,11 @@
+<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
+<!-- The FerroBRIDGE mark: a through-arch bridge. The arch on two piers and the
+     deck crossing it are the shared mapping foundation; the two nodes on the
+     deck are the two targets, FHIR and OMOP. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" role="img" aria-label="FerroBRIDGE icon">
+  <path d="M9 51.5 V34.5 A23 23 0 0 1 55 34.5 V51.5" fill="none" stroke="#4F46E5" stroke-width="5.5" stroke-linecap="round"/>
+  <rect x="4" y="31.5" width="56" height="6" rx="3" fill="#4338CA"/>
+  <circle cx="21" cy="34.5" r="4.5" fill="#818CF8"/>
+  <circle cx="43" cy="34.5" r="4.5" fill="#818CF8"/>
+</svg>

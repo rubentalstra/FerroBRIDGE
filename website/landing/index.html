@@ -14,11 +14,22 @@
   <meta name="description" content="FerroBRIDGE is a pure-Rust, standalone bridge between openEHR and two targets: HL7 FHIR through the FHIRconnect specification, and the OMOP Common Data Model through OMOCL. Mappings are specification-conformant YAML, never hand-coded per resource or table. The project is in its design phase.">
   <link rel="canonical" href="https://ferrobridge.eu/">
   <link rel="stylesheet" href="./style.css">
+  <link rel="icon" href="./assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="alternate icon" href="./assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="alternate icon" href="./assets/brand/favicon.ico" sizes="32x32 16x16">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://ferrobridge.eu/">
   <meta property="og:site_name" content="FerroBRIDGE">
   <meta property="og:title" content="FerroBRIDGE: an openEHR bridge to HL7 FHIR and the OMOP Common Data Model">
   <meta property="og:description" content="A pure-Rust, standalone bridge between openEHR and two targets: HL7 FHIR through FHIRconnect, and the OMOP Common Data Model through OMOCL. Mappings are specification-conformant YAML. The project is in its design phase.">
+  <meta property="og:image" content="https://ferrobridge.eu/assets/brand/ferrobridge-social.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The FerroBRIDGE mark, a through-arch bridge, above the wordmark FerroBRIDGE.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://ferrobridge.eu/assets/brand/ferrobridge-social.png">
+  <meta name="twitter:image:alt" content="The FerroBRIDGE mark, a through-arch bridge, above the wordmark FerroBRIDGE.">
 
   <!-- Structured data. Browsers never execute an application/ld+json data block
        (https://html.spec.whatwg.org/multipage/scripting.html#data-block), so
@@ -40,7 +51,10 @@
 
   <header class="nav">
     <div class="wrap">
-      <a class="brand" href="./">FerroBRIDGE</a>
+      <a class="brand" href="./">
+        <img src="./assets/brand/ferrobridge-icon.svg" alt="" aria-hidden="true" width="28" height="28">
+        <span>FerroBRIDGE</span>
+      </a>
       <nav class="nav-links" aria-label="Primary">
         <a href="./docs/">Docs</a>
         <a href="./docs/evaluate/architecture.html" class="hide-sm">Architecture</a>

@@ -1,0 +1,14 @@
+<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
+<!-- The mark beside the FerroBRIDGE wordmark, for dark backgrounds. The mark
+     carries the brightened dark-ground tones. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="284" height="64" viewBox="0 0 284 64" role="img" aria-label="FerroBRIDGE">
+  <title>FerroBRIDGE</title>
+  <g transform="translate(4,0)">
+    <path d="M9 51.5 V34.5 A23 23 0 0 1 55 34.5 V51.5" fill="none" stroke="#6366F1" stroke-width="5.5" stroke-linecap="round"/>
+    <rect x="4" y="31.5" width="56" height="6" rx="3" fill="#818CF8"/>
+    <circle cx="21" cy="34.5" r="4.5" fill="#C7D2FE"/>
+    <circle cx="43" cy="34.5" r="4.5" fill="#C7D2FE"/>
+  </g>
+  <text x="82" y="45" font-family="'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="30" font-weight="700" letter-spacing="-0.3" fill="#F1F5F9">FerroBRIDGE</text>
+</svg>

@@ -1,0 +1,10 @@
+<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
+<!-- The FerroBRIDGE through-arch bridge in one colour, taking the surrounding
+     text colour through currentColor. Same geometry as the master icon. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" role="img" aria-label="FerroBRIDGE icon, single colour">
+  <path d="M9 51.5 V34.5 A23 23 0 0 1 55 34.5 V51.5" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
+  <rect x="4" y="31.5" width="56" height="6" rx="3" fill="currentColor"/>
+  <circle cx="21" cy="34.5" r="4.5" fill="currentColor"/>
+  <circle cx="43" cy="34.5" r="4.5" fill="currentColor"/>
+</svg>

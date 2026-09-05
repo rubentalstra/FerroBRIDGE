@@ -12,6 +12,10 @@
 # tracker's open milestones through the GitHub API when `gh` is authenticated.
 # Without a token the block stays empty and the page keeps its link to the
 # milestones page, so an assembly on a laptop never fails on the network.
+#
+# The brand assets (assets/brand) and llms.txt live outside the landing
+# directory and are copied in here, because both are addressed from the site
+# root.
 
 set -euo pipefail
 
@@ -42,6 +46,16 @@ rm -rf "${OUT:?}"
 mkdir -p "$OUT/docs"
 cp -R "$LANDING"/. "$OUT/"
 cp -R website/book/book/. "$OUT/docs/"
+
+# The brand directory holds the favicons the landing page links and the social
+# card its og:image names, so it has to reach the site root for those URLs to
+# resolve (assets/brand/README.md).
+mkdir -p "$OUT/assets"
+cp -R assets/brand "$OUT/assets/"
+
+# The llms.txt convention puts the file at the site root, which is the one URL
+# that makes it useful.
+cp llms.txt "$OUT/llms.txt"
 
 block="$(mktemp)"
 trap 'rm -f "$block"' EXIT

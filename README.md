@@ -3,6 +3,8 @@
 
 # FerroBRIDGE
 
+<img src="assets/brand/ferrobridge-lockup-auto.svg" alt="FerroBRIDGE" width="284" height="64">
+
 <!-- badges:begin -->
 [![CI](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/ci.yml/badge.svg)](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml/badge.svg)](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml)

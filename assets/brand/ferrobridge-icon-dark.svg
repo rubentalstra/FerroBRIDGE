@@ -1,0 +1,12 @@
+<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
+<!-- The FerroBRIDGE through-arch bridge on a dark tile, brightened so it holds
+     contrast: the arch and deck are the shared foundation, the two deck nodes
+     are the FHIR and OMOP targets. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" role="img" aria-label="FerroBRIDGE icon on a dark tile">
+  <rect x="2" y="2" width="60" height="60" rx="13" fill="#0B1020"/>
+  <path d="M12 49.5 V35.5 A19 19 0 0 1 52 35.5 V49.5" fill="none" stroke="#6366F1" stroke-width="5" stroke-linecap="round"/>
+  <rect x="7" y="32.8" width="50" height="5.5" rx="2.75" fill="#818CF8"/>
+  <circle cx="22" cy="35.5" r="4.1" fill="#C7D2FE"/>
+  <circle cx="42" cy="35.5" r="4.1" fill="#C7D2FE"/>
+</svg>

@@ -1,0 +1,26 @@
+/* SPDX-FileCopyrightText: Ruben Talstra */
+/* SPDX-License-Identifier: BUSL-1.1 */
+/* FerroBRIDGE brand tokens, the "Indigo & Iron" palette. Import this file, or
+   copy the values. */
+:root {
+  /* Core palette */
+  --ferrobridge-indigo: #4F46E5;       /* the arch, primary mark, accents */
+  --ferrobridge-indigo-deep: #4338CA;  /* the deck, hover, pressed */
+  --ferrobridge-violet: #818CF8;       /* the two deck nodes, highlights */
+  --ferrobridge-ink: #0F172A;          /* text on light */
+  --ferrobridge-mist: #F1F5F9;         /* text on dark */
+  --ferrobridge-tile: #0B1020;         /* dark tile background */
+  --ferrobridge-surface: #F8FAFC;      /* light surface background */
+
+  /* Roles */
+  --ferrobridge-brand: var(--ferrobridge-indigo);
+  --ferrobridge-brand-2: var(--ferrobridge-violet);
+  --ferrobridge-fg: var(--ferrobridge-ink);
+  --ferrobridge-bg: var(--ferrobridge-surface);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ferrobridge-fg: var(--ferrobridge-mist);
+    --ferrobridge-bg: var(--ferrobridge-tile);
+  }
+}

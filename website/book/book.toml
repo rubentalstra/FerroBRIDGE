@@ -16,6 +16,9 @@ build-dir = "book"
 # root. site-url makes the book's absolute asset, search, and 404 links resolve
 # under that prefix.
 site-url = "/docs/"
+# The tab icon is a theme override: mdBook copies theme/favicon.svg and
+# theme/favicon.png into the build output and links them from every page. Both
+# are regenerated from assets/brand/favicon.svg (assets/brand/README.md).
 default-theme = "rust"
 preferred-dark-theme = "coal"
 git-repository-url = "https://github.com/rubentalstra/FerroBRIDGE"

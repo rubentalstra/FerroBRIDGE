@@ -21,6 +21,18 @@ architecture is the output of the research program on
 
 ### Added
 
+- The FerroBRIDGE brand assets under `assets/brand/`: the through-arch bridge
+  mark and its dark-tile, monochrome, and favicon variants, the three lockups
+  (light, dark, and one that follows `prefers-color-scheme`), the 1200x630
+  social card, the raster favicon set, the "Indigo & Iron" palette as
+  `--ferrobridge-*` custom properties in `tokens.css`, and the brand README
+  with the usage rules and the raster regeneration commands. The landing page
+  now carries the favicon, the social card as its `og:image` and Twitter card
+  image, and the mark in its header; the book gets the same favicon through
+  `website/book/theme/`; and the repository README shows the lockup (#32).
+- `scripts/site/assemble.sh` copies `assets/brand/` and the repository-root
+  `llms.txt` into the assembled site, so the brand URLs the landing page names
+  and <https://ferrobridge.eu/llms.txt> both resolve on the live host (#32).
 - `.github/release.yml`, so GitHub's auto-generated release notes group pull
   requests by the tracker's own label taxonomy (Features, Fixes, Security,
   Documentation, Dependencies, Maintenance, Other changes), with
