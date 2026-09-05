@@ -1,0 +1,46 @@
+<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-License-Identifier: BUSL-1.1 -->
+
+# FerroBRIDGE
+
+> FerroBRIDGE is a pure-Rust, standalone bridge between openEHR and two interoperability targets: HL7 FHIR, driven by the FHIRconnect specification, and the OMOP Common Data Model, driven by the OMOCL specification. Mappings are specification-conformant YAML validated against published schemas, never hand-coded per FHIR resource or per OMOP table. It runs as its own server beside any openEHR CDR reached over the openEHR ITS-REST API, and uses a FHIR terminology server for code systems and value sets. The project is in its design phase: the research over the primary sources is done and recorded, and there is no Cargo workspace, no release, and no binary yet. FerroBRIDGE ships no AI: no model is trained, embedded, or called at request time. AI coding assistance is used to build it, under human review.
+
+## Start here
+
+- [README](README.md): what FerroBRIDGE is, what is decided, what is open, and the licence.
+- [Architecture](docs/architecture.md): the design authority, with the decisions and their citations to the primary sources.
+- [Version matrix](docs/VERSIONS.md): every version pin in one place, with the file that repeats each one.
+- [Working discipline](CLAUDE.md): the engineering rules for changing the code, and the repo map.
+
+## The documentation site (https://ferrobridge.eu/)
+
+- [Architecture at a glance](https://ferrobridge.eu/docs/evaluate/architecture.html): the short tour of the design.
+- [The two mapping specifications](https://ferrobridge.eu/docs/evaluate/mapping-specifications.html): what FHIRconnect and OMOCL share, and where they part.
+- [Build order](https://ferrobridge.eu/docs/evaluate/build-order.html): what exists today and what gets built next.
+- [What FerroBRIDGE runs beside](https://ferrobridge.eu/docs/operate/deployment-shape.html): the CDR, the terminology server, and the CDM database.
+- [The FHIR facade](https://ferrobridge.eu/docs/integrate/fhir-facade.html) and [the OMOP ETL](https://ferrobridge.eu/docs/integrate/omop-etl.html): the two target surfaces.
+- [Writing and loading mappings](https://ferrobridge.eu/docs/integrate/mappings.html): the mapping files that drive both sides.
+
+## Rules (`.claude/rules/`)
+
+- [spec-adherence.md](.claude/rules/spec-adherence.md): the FHIR, FHIRconnect, OMOP CDM, OMOCL, and openEHR ITS-REST specifications are the oracle; strictness and citation.
+- [codegen.md](.claude/rules/codegen.md): what is generated and what is hand-written; never hand-edit a `// @generated` file.
+- [reliability.md](.claude/rules/reliability.md): the machine-enforced safety rules (no `unsafe`, typed errors, deny-tier lints, no flattened upstream failure).
+- [rust-style.md](.claude/rules/rust-style.md): idiomatic Rust style and import discipline.
+- [testing.md](.claude/rules/testing.md): test discipline; never weaken a test to make a build pass.
+- [comments.md](.claude/rules/comments.md): comment budgets (RFC 505 and RFC 1574).
+- [writing-style.md](.claude/rules/writing-style.md): the prose rules for all human-facing text.
+- [vendored-inputs.md](.claude/rules/vendored-inputs.md): external material enters through a committed fetch script, verbatim, with provenance.
+- [ci-cd.md](.claude/rules/ci-cd.md): workflow security and the supply-chain discipline.
+- [ai-code-review.md](.claude/rules/ai-code-review.md): SonarQube Cloud and CodeQL are advisory, never authority.
+- [issue-workflow.md](.claude/rules/issue-workflow.md): the GitHub Issues work loop.
+
+## Governance and policies
+
+- [AI statement](AI_STATEMENT.md): how AI tools are used to develop FerroBRIDGE, and the fact that the product ships no AI.
+- [Governance](GOVERNANCE.md): how decisions get made, and by whom.
+- [Maintainers](MAINTAINERS.md): the roster and the access-continuity answer.
+- [Contributing](CONTRIBUTING.md): setup, gates, and the hard rules.
+- [Support](SUPPORT.md): where to get help.
+- [Security policy](SECURITY.md): report a vulnerability privately.
+- [Changelog](CHANGELOG.md): every change with a user-visible effect.

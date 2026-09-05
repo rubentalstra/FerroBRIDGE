@@ -15,9 +15,16 @@
 #                          Cargo.toml [workspace.dependencies] requirement.
 #   3. toolchain           rust-toolchain.toml channel, plus the root
 #                          Cargo.toml edition, rust-version and resolver.
-#   4. product version     CITATION.cff version against the root Cargo.toml
-#                          [workspace.package] version.
-#   5. licence             LICENSE is the Business Source License 1.1 and no
+#   4. product version     CITATION.cff version against the docs/VERSIONS.md
+#                          product-version row, and against the root Cargo.toml
+#                          [workspace.package] version once that exists.
+#   5. CI tool pins        the zizmor, actionlint, shellcheck and hadolint
+#                          versions .github/workflows/ci.yml installs, against
+#                          docs/VERSIONS.md.
+#   6. docs toolchain      the mdBook, mdbook-toc and mdbook-mermaid defaults of
+#                          .github/actions/docs-toolchain/action.yml against
+#                          docs/VERSIONS.md.
+#   7. licence             LICENSE is the Business Source License 1.1 and no
 #                          first-party file claims MIT or Apache-2.0 as its own.
 #
 # Usage:
@@ -78,6 +85,23 @@ manifest_req() {
       print substr(s, RSTART + 1, RLENGTH - 2); exit
     }
   ' Cargo.toml
+}
+
+# The `default:` of composite-action input KEY, unquoted. An input key sits at
+# two spaces of indentation and its own keys at four, which is what the exact
+# prefix comparisons below rely on.
+action_default() {
+  awk -v key="  $1:" '
+    $0 == key { inside = 1; next }
+    inside && index($0, "    default:") == 1 {
+      sub(/^[[:space:]]*default:[[:space:]]*/, "")
+      gsub(/"/, "")
+      gsub(/[[:space:]]/, "")
+      print
+      exit
+    }
+    inside && $0 ~ /^[^[:space:]]/ { exit }
+  ' "$2"
 }
 
 echo "== specification pins (docs/architecture.md <-> docs/VERSIONS.md)"
@@ -176,21 +200,31 @@ else
   note "no root Cargo.toml yet, skipped the edition, MSRV and resolver rows"
 fi
 
-echo "== product version (CITATION.cff <-> Cargo.toml)"
-if [ -f CITATION.cff ] && [ -f Cargo.toml ]; then
+echo "== product version (CITATION.cff <-> docs/VERSIONS.md <-> Cargo.toml)"
+if [ -f CITATION.cff ]; then
   cff="$(sed -nE 's/^version:[[:space:]]*//p' CITATION.cff | head -n1 | tr -d '"'\''[:space:]')"
-  cargo_ver="$(toml_val "[workspace.package]" version Cargo.toml)"
+  matrix_ver="$(pin_of "Product version" docs/VERSIONS.md)"
   if [ -z "$cff" ]; then
     bad "CITATION.cff has no version"
-  elif [ -z "$cargo_ver" ]; then
-    bad "root Cargo.toml has no [workspace.package] version"
-  elif [ "$cff" != "$cargo_ver" ]; then
-    bad "product version: CITATION.cff says $cff, root Cargo.toml says $cargo_ver"
+  elif [ -z "$matrix_ver" ]; then
+    bad "docs/VERSIONS.md has no 'Product version' row"
+  elif [ "$cff" != "$matrix_ver" ]; then
+    bad "product version: CITATION.cff says $cff, docs/VERSIONS.md pins $matrix_ver"
   else
-    note "OK: both name $cff"
+    note "OK: CITATION.cff and docs/VERSIONS.md both name $cff"
   fi
-elif [ -f CITATION.cff ]; then
-  note "no root Cargo.toml yet, skipped"
+  if [ -f Cargo.toml ]; then
+    cargo_ver="$(toml_val "[workspace.package]" version Cargo.toml)"
+    if [ -z "$cargo_ver" ]; then
+      bad "root Cargo.toml has no [workspace.package] version"
+    elif [ -n "$cff" ] && [ "$cff" != "$cargo_ver" ]; then
+      bad "product version: CITATION.cff says $cff, root Cargo.toml says $cargo_ver"
+    else
+      note "OK: root Cargo.toml names $cargo_ver"
+    fi
+  else
+    note "no root Cargo.toml yet, skipped its version"
+  fi
 else
   note "no CITATION.cff yet, skipped"
 fi
@@ -230,6 +264,29 @@ if [ -f .github/workflows/ci.yml ]; then
   done
 else
   note "no .github/workflows/ci.yml yet, skipped"
+fi
+
+echo "== docs toolchain (.github/actions/docs-toolchain <-> docs/VERSIONS.md)"
+action=.github/actions/docs-toolchain/action.yml
+if [ -f "$action" ]; then
+  agreed=0
+  for tool in mdbook mdbook-toc mdbook-mermaid; do
+    if [ "$tool" = mdbook ]; then row=mdBook; else row="$tool"; fi
+    found="$(action_default "$tool-version" "$action")"
+    want="$(pin_of "$row" docs/VERSIONS.md)"
+    if [ -z "$found" ]; then
+      bad "$action has no $tool-version default"
+    elif [ -z "$want" ]; then
+      bad "docs/VERSIONS.md has no '$row' row"
+    elif [ "$found" != "$want" ]; then
+      bad "$tool: $action installs $found, docs/VERSIONS.md pins $want"
+    else
+      agreed=$((agreed + 1))
+    fi
+  done
+  [ "$agreed" -eq 3 ] && note "OK: the three docs-toolchain pins agree"
+else
+  note "no $action yet, skipped"
 fi
 
 echo "== licence (LICENSE <-> SPDX headers, manifests, badges, labels)"

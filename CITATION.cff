@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "FerroBRIDGE"
+abstract: >-
+  A pure-Rust, standalone bridge between openEHR and two interoperability
+  targets: HL7 FHIR, driven by the FHIRconnect specification, and the OMOP
+  Common Data Model, driven by the OMOCL specification. Mappings are
+  specification-conformant YAML validated against published schemas.
+type: software
+authors:
+  - given-names: Ruben
+    family-names: Talstra
+license: BUSL-1.1
+repository-code: "https://github.com/rubentalstra/FerroBRIDGE"
+url: "https://ferrobridge.eu"
+keywords:
+  - openEHR
+  - FHIR
+  - FHIRconnect
+  - OMOP
+  - OMOCL
+  - Rust
+version: 0.0.1

@@ -1,0 +1,312 @@
+/* SPDX-FileCopyrightText: Ruben Talstra */
+/* SPDX-License-Identifier: BUSL-1.1 */
+
+/* FerroBRIDGE landing page: tokens and layout. Self-contained: a system font
+   stack, no external asset, and light and dark through prefers-color-scheme.
+   Relative URLs only. */
+
+:root {
+  /* accent */
+  --fb-accent: #2f5fa8;
+  --fb-accent-600: #24497f;
+  --fb-accent-050: #eaf0f9;
+  /* light theme */
+  --fb-bg: #ffffff;
+  --fb-surface: #f5f7fa;
+  --fb-text: #14181f;
+  --fb-muted: #58616e;
+  --fb-border: #dde3eb;
+  --fb-shadow: 0 1px 2px rgba(20, 24, 31, 0.06), 0 8px 24px rgba(20, 24, 31, 0.06);
+  /* fonts */
+  --fb-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --fb-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  /* layout */
+  --fb-max: 1080px;
+  --fb-radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fb-bg: #0d1117;
+    --fb-surface: #151c26;
+    --fb-text: #eef2f7;
+    --fb-muted: #a4aebc;
+    --fb-border: #263041;
+    --fb-accent: #6d9bea;
+    --fb-accent-600: #8fb4f2;
+    --fb-accent-050: #16202f;
+    --fb-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--fb-sans);
+  color: var(--fb-text);
+  background: var(--fb-bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--fb-accent); text-decoration: none; }
+a:hover { color: var(--fb-accent-600); text-decoration: underline; }
+
+img, svg { max-width: 100%; height: auto; }
+
+code {
+  font-family: var(--fb-mono);
+  font-size: 0.88em;
+  background: var(--fb-accent-050);
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--fb-max);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* Nav */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: saturate(180%) blur(12px);
+  background: color-mix(in srgb, var(--fb-bg) 82%, transparent);
+  border-bottom: 1px solid var(--fb-border);
+}
+.nav .wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 60px;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+  color: var(--fb-text);
+}
+.brand:hover { text-decoration: none; color: var(--fb-accent); }
+.nav-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.nav-links a { color: var(--fb-muted); }
+.nav-links a:hover { color: var(--fb-accent); text-decoration: none; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: 1.5px solid transparent;
+  transition: transform 0.06s ease, background 0.15s ease, border-color 0.15s ease;
+}
+.btn:hover { text-decoration: none; transform: translateY(-1px); }
+.btn-primary { background: var(--fb-accent); color: #fff; }
+.btn-primary:hover { background: var(--fb-accent-600); color: #fff; }
+.btn-ghost { border-color: var(--fb-border); color: var(--fb-text); background: var(--fb-surface); }
+.btn-ghost:hover { border-color: var(--fb-accent); color: var(--fb-accent); }
+
+/* Hero */
+.hero {
+  position: relative;
+  padding: clamp(3rem, 8vw, 5.5rem) 0 clamp(2.5rem, 6vw, 4rem);
+  text-align: center;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 55% at 50% 0%, color-mix(in srgb, var(--fb-accent) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--fb-accent-050), transparent 42%);
+  pointer-events: none;
+}
+.hero > * { position: relative; }
+.status {
+  display: inline-block;
+  margin: 0 auto 1.25rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  background: var(--fb-accent-050);
+  border: 1px solid var(--fb-border);
+  color: var(--fb-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.hero h1 {
+  font-size: clamp(1.6rem, 3.6vw, 2.5rem);
+  line-height: 1.2;
+  margin: 0 auto 1rem;
+  max-width: 24ch;
+  letter-spacing: -0.01em;
+}
+.hero .sub {
+  color: var(--fb-muted);
+  font-size: clamp(1rem, 1.6vw, 1.18rem);
+  max-width: 62ch;
+  margin: 0 auto 2rem;
+}
+.hero-cta { display: flex; gap: 0.85rem; justify-content: center; flex-wrap: wrap; }
+.hero .note {
+  margin: 1.5rem auto 0;
+  max-width: 60ch;
+  color: var(--fb-muted);
+  font-size: 0.86rem;
+}
+
+/* Section scaffolding */
+section { padding: clamp(3rem, 7vw, 4.5rem) 0; }
+.surface { background: var(--fb-surface); border-block: 1px solid var(--fb-border); }
+.section-head { text-align: center; max-width: 62ch; margin: 0 auto 2.5rem; }
+.section-head h2 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.01em;
+}
+.section-head p { color: var(--fb-muted); margin: 0; font-size: 1.05rem; }
+.eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--fb-accent);
+  margin-bottom: 0.5rem;
+}
+
+.tag {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--fb-muted);
+  margin-bottom: 0.5rem;
+}
+
+/* Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.1rem;
+}
+.card {
+  background: var(--fb-bg);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  padding: 1.5rem;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--fb-shadow);
+  border-color: color-mix(in srgb, var(--fb-accent) 40%, var(--fb-border));
+}
+.card h3 { margin: 0 0 0.4rem; font-size: 1.08rem; }
+.card p { margin: 0; color: var(--fb-muted); font-size: 0.94rem; }
+.card code { font-size: 0.85em; }
+
+.audiences { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.audience ul {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Status panel */
+.status-panel {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+  background: var(--fb-bg);
+  border: 1px solid var(--fb-border);
+  border-radius: var(--fb-radius);
+  padding: clamp(1.75rem, 5vw, 2.75rem);
+}
+.status-panel h2 { margin: 0 0 0.75rem; font-size: clamp(1.3rem, 3vw, 1.8rem); }
+.status-panel p { color: var(--fb-muted); margin: 0 auto 1rem; max-width: 60ch; }
+.status-panel .hero-cta { margin-top: 1.5rem; }
+
+/* The roadmap rendered from the open milestones by scripts/site/assemble.sh */
+.roadmap {
+  margin: 1.25rem 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.6rem;
+}
+.roadmap li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+  align-items: baseline;
+  justify-content: center;
+}
+.roadmap .tag { margin: 0; }
+.roadmap .due { color: var(--fb-muted); font-size: 0.9rem; }
+
+/* Footer */
+.footer {
+  border-top: 1px solid var(--fb-border);
+  background: var(--fb-surface);
+  padding: 3rem 0 2.5rem;
+  font-size: 0.92rem;
+}
+.footer-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.footer-brand { max-width: 46ch; }
+.footer-brand .brand { margin-bottom: 0.75rem; }
+.footer-brand p { color: var(--fb-muted); margin: 0.35rem 0; }
+.footer-links { display: flex; gap: 2.5rem; flex-wrap: wrap; }
+.footer-links ul { list-style: none; margin: 0; padding: 0; }
+.footer-links h4 { margin: 0 0 0.6rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fb-text); }
+.footer-links li { margin: 0.35rem 0; }
+.footer-links a { color: var(--fb-muted); }
+.footer-links a:hover { color: var(--fb-accent); }
+.footer-note {
+  margin-top: 2.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--fb-border);
+  color: var(--fb-muted);
+  font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .nav-links { gap: 1rem; font-size: 0.9rem; }
+  .nav-links .hide-sm { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto; transition: none !important; }
+}
