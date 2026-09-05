@@ -21,6 +21,9 @@ architecture is the output of the research program on
 
 ### Changed
 
+- The landing page footer shows the mark beside the wordmark, so the mark
+  brackets the page instead of appearing only in the header (#56).
+
 - The FerroBRIDGE mark is now the fork the product draws: a filled circle for
   the openEHR source, a two-way arrow to HL7 FHIR, and a plain line into a
   table for the OMOP Common Data Model. Only the FHIR branch carries
