@@ -21,6 +21,9 @@ architecture is the output of the research program on
 
 ### Changed
 
+- The README's mark uses an absolute URL, so it renders wherever the README
+  travels rather than only on the repository page (#60).
+
 - The landing page footer shows the mark beside the wordmark, so the mark
   brackets the page instead of appearing only in the header (#56).
 
