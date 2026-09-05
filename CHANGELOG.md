@@ -79,6 +79,11 @@ architecture is the output of the research program on
 
 ### Changed
 
+- `SECURITY.md` links the private advisory form directly, so a reporter can
+  act on the policy without navigating by hand. The document carried no
+  hyperlink at all, which is what Scorecard's Security-Policy check scores
+  (#47).
+
 - `SUPPORT.md` sends a reader to the documentation site first. It still said
   there was no site, which went false the day the site went live and
   contradicted `README.md` on the same tree (#44).
