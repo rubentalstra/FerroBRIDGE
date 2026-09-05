@@ -40,11 +40,17 @@ in review.
 Today the gates are the shell and workflow set, and they run on every change:
 
 ```
-shellcheck --severity=style <tracked shell files>
+zizmor --min-severity=low .github/workflows/
 actionlint
-zizmor --min-severity=low .github/workflows
+shellcheck --severity=style <tracked shell files>
+hadolint --config .hadolint.yaml <tracked Dockerfiles>
 scripts/checks/comment-style.sh --all
+scripts/checks/versions.sh
 ```
+
+These are the six tier-1 guards `ci.yml` runs, in the same order and with the
+same flags, so a local pass means a CI pass. The `conclusion` job aggregates
+them and is the single required check on `main` (`docs/ci-cd.md`).
 
 Once the Cargo workspace exists, the local gates mirror CI exactly:
 

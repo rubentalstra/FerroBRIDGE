@@ -19,6 +19,12 @@ architecture is the output of the research program on
 
 ## [Unreleased]
 
+### Changed
+
+- `CONTRIBUTING.md` lists all six tier-1 gates `ci.yml` runs, in the same order
+  and with the same flags. It named four, so a contributor who ran the listed
+  commands could still fail CI on hadolint or the versions guard (#36).
+
 ### Added
 
 - `.github/release.yml`, so GitHub's auto-generated release notes group pull
@@ -57,7 +63,17 @@ architecture is the output of the research program on
 - The CI tool pins (zizmor, actionlint, shellcheck, hadolint) as a section of
   `docs/VERSIONS.md`, with `scripts/checks/versions.sh` failing when
   `ci.yml` and the matrix disagree (#16).
-
+- The documentation site at <https://ferrobridge.eu/>: a hand-written landing
+  page at the root and an mdBook under `/docs/`, organised by reader intent
+  (Evaluate, Operate, Integrate, Contribute). `.github/workflows/docs.yml`
+  builds it on every pull request and deploys from `main` through GitHub Pages,
+  `.github/actions/docs-toolchain/action.yml` installs the pinned mdBook
+  toolchain, and `scripts/site/assemble.sh` places both halves and renders the
+  roadmap block from the open milestones. `llms.txt` and `CITATION.cff` land
+  with it, the README badge block covers CI, CodeQL, Scorecard, the Sonar
+  quality gate and coverage, the licence and the latest release, and
+  `scripts/checks/versions.sh` now guards the citation version and the three
+  documentation-toolchain pins (#18).
 - `docs/VERSIONS.md`, the pin matrix: one place that records every version pin
   (the five specification pins, the published `fhir-types` and
   `fhir-terminology` crate pins, the Rust toolchain,

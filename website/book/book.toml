@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+[book]
+title = "FerroBRIDGE"
+authors = ["FerroBRIDGE contributors"]
+description = "Documentation for FerroBRIDGE, a standalone bridge between openEHR and HL7 FHIR through FHIRconnect and the OMOP Common Data Model through OMOCL."
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+
+[output.html]
+# The book is served under /docs/ of the Pages site; the landing page holds the
+# root. site-url makes the book's absolute asset, search, and 404 links resolve
+# under that prefix.
+site-url = "/docs/"
+default-theme = "rust"
+preferred-dark-theme = "coal"
+git-repository-url = "https://github.com/rubentalstra/FerroBRIDGE"
+edit-url-template = "https://github.com/rubentalstra/FerroBRIDGE/edit/main/website/book/src/{path}"
+additional-js = ["vendor/mermaid/mermaid.min.js", "vendor/mermaid/mermaid-init.js"]
+
+[output.html.search]
+enable = true
+
+# Mermaid diagrams render from ```mermaid fences. The browser assets above are
+# vendored by scripts/vendor/mdbook-mermaid-assets.sh.
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+# A table of contents where a chapter carries a `<!-- toc -->` marker.
+[preprocessor.toc]
+command = "mdbook-toc"
+renderer = ["html"]
