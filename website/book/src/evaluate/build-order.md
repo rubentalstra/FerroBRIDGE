@@ -20,6 +20,9 @@ releases, and a release is cut when its milestone has no open issue left.
 - The security and analysis workflows that work on a repository with no code:
   OpenSSF Scorecard, CodeQL over the workflow files, and SonarQube Cloud's
   multi-language sweep.
+- The release lane, which turns a signed `vX.Y.Z` tag into a GitHub release
+  whose notes are the changelog section for that version. Its binary build is
+  gated on the Cargo workspace and is skipped until that lands.
 - This documentation site.
 
 There is no Cargo workspace, no crate, no binary, and no container image.
@@ -39,8 +42,9 @@ files published upstream rather than files written for the occasion:
    kept.
 
 The Cargo workspace lands with that milestone, along with the server binary,
-the container image, the release lane, and the conformance gate. Nothing is
-scaffolded before its issues are filed.
+the container image, the attested binary build the release lane is already
+gated for, and the conformance gate. Nothing is scaffolded before its issues
+are filed.
 
 ## How correctness is measured
 

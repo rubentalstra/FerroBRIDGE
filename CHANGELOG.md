@@ -39,6 +39,23 @@ architecture is the output of the research program on
 
 ### Added
 
+- `.github/workflows/release.yml`, the release lane, dormant until a `v*` tag
+  is pushed and running on nothing else. It validates the tag shape, refuses a
+  `workflow_dispatch` that is not dispatched at the tag it names, checks the
+  tag against every file that declares the product version (`CITATION.cff` and
+  the `docs/VERSIONS.md` product row today, the root `Cargo.toml` as soon as it
+  exists), and takes the release notes from the `## [X.Y.Z]` section of this
+  changelog, failing when that section is missing or empty. The release is
+  created as a draft and published only once its expected asset set is
+  complete. The binary build sits behind the same root-`Cargo.toml` detection
+  `ci.yml` tier 2 uses, so it is skipped on a tree with no workspace and
+  activates by itself when one lands (#63).
+- `docs/release.md`, the cut checklist in order, the no-retag rule, and what is
+  and is not immutable about a published release: the `release-tags` ruleset
+  blocks tag deletion and non-fast-forward updates and requires a signature,
+  while GitHub's repository-level immutable-releases setting is not exposed on
+  this repository through the API and stays an owner toggle to check in
+  Settings (#63).
 - The FerroBRIDGE brand assets under `assets/brand/`: the mark and its
   dark-tile, monochrome, and favicon variants, the three lockups
   (light, dark, and one that follows `prefers-color-scheme`), the 1200x630
