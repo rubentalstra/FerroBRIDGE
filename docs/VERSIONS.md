@@ -26,16 +26,60 @@ records why the value is what it is. The guard compares the first token of each
 | OMOP CDM | v5.4 | `docs/architecture.md`, later the `omop-cdm` generator and its DDL |
 | openEHR ITS-REST | 1.1.0 | `docs/architecture.md`, later the `ferrobridge-openehr` client |
 
-## FHIR model crates (crates.io)
+## Corpora and machine-readable inputs
 
-The FHIR model and the terminology operation contracts come from two published
-crates, consumed by version like any other dependency (`docs/architecture.md`
-§7).
+A corpus is pinned by commit or immutable tag, never by a moving tag or a
+`latest` URL, and vendored by a committed `scripts/vendor/*.sh` with a
+`PROVENANCE.md` (`.claude/rules/vendored-inputs.md`). The guard does not read
+these rows yet; the vendor scripts do, when they land (#20).
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| `fhir-types` | 0.1.22 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
-| `fhir-terminology` | 0.1.22 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| FHIRconnect specification source | `SevKohler/FHIRconnect-spec` commit `195b07fdb4c78da0432fdd1e9dbd127b81be6165` | `docs/architecture.md` §2, later `scripts/vendor/fhirconnect.sh` |
+| FHIRconnect mapping library (corpus, never an oracle) | `SevKohler/FHIRconnect-mapping-lib` commit `6bd4c19a2f96821c04fbeed3c6f6c190fd85825b` | `docs/architecture.md` §2, later `scripts/vendor/fhirconnect.sh` |
+| OMOCL corpus | `SevKohler/OMOCL` commit `dd42574fdb074c02cbe077a0c49b1bb5bae28f35` (grammar `OMOCL/v1.0.0`; the git tag `v1.0.0` carries pre-grammar files) | `docs/architecture.md` §2, later `scripts/vendor/omocl.sh` |
+| OMOP CDM definitions and PostgreSQL DDL | `OHDSI/CommonDataModel` tag `v5.4.3` | `docs/architecture.md` §2, later `scripts/vendor/omop-cdm.sh` and the `omop-cdm` generator |
+| openEHR ITS-REST OpenAPI | `openEHR/specifications-ITS-REST` tag `Release-1.1.0`, modules EHR, Query, Definition | `docs/architecture.md` §2, later `scripts/vendor/its-rest.sh` |
+
+## openEHR model crates (crates.io)
+
+The openEHR RM, the OPT 1.4 and Web Template codecs, the canonical JSON and
+FLAT codecs, the ITS-REST data types and the AQL parser come from four
+published crates, consumed by version like any other dependency
+(`docs/architecture.md` §3). The minor line is pinned here; the manifest
+carries the exact patch.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| `openehr-base` | 0.0.61 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-rm` | 0.0.61 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-its` | 0.0.61 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-query` | 0.0.61 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+
+## FHIR packages (the `fhir-types` generator input)
+
+The FHIR model is generated in this repository by `tools/fhir-codegen` from the
+HL7 FHIR packages below, vendored verbatim from the FHIR package registry
+(owner decision 2026-09-05: the crate and its generator move here from the
+sibling terminology server, which then consumes the crate from crates.io).
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| `hl7.fhir.r4.core` | 4.0.1 | `tools/fhir-codegen/vendor/hl7.fhir.r4.core/PROVENANCE.md` |
+| `hl7.fhir.r4b.core` | 4.3.0 | `tools/fhir-codegen/vendor/hl7.fhir.r4b.core/PROVENANCE.md` |
+| `hl7.fhir.r5.core` | 5.0.0 | `tools/fhir-codegen/vendor/hl7.fhir.r5.core/PROVENANCE.md` |
+| `hl7.fhir.r6.core` | 6.0.0-ballot5 | `tools/fhir-codegen/vendor/hl7.fhir.r6.core/PROVENANCE.md` |
+| `hl7.terminology` (THO) | 7.3.0 | `tools/fhir-codegen/vendor/hl7.terminology/PROVENANCE.md` |
+
+## Crate line
+
+The library crates are published to crates.io on one lockstep crate version
+line, distinct from the product version (owner decision 2026-09-05). The line
+inherits `fhir-types`, whose last release from the sibling is the floor.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| `fhir-types` | 0.1.43 | `docs/architecture.md`, later the `version` of every published `crates/*` manifest |
 
 ## Language and runtime
 

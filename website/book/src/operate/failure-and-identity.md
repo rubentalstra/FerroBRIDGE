@@ -11,12 +11,15 @@ decision, and this page is the operator-facing statement of it.
 
 <!-- toc -->
 
-## All or nothing per request
+## All or nothing per unit
 
-A Bundle that cannot be mapped in full is refused with an `OperationOutcome`
-naming every failing entry, and nothing is committed. There is no partial
-commit and no best-effort mode. The same rule holds for the OMOP side: a job
-that cannot map a composition reports it rather than writing a half-row.
+A transaction Bundle that cannot be mapped in full is refused with an
+`OperationOutcome` naming every failing entry, and nothing is committed. A
+batch Bundle answers per entry and counts its failures, because FHIR R4 defines
+batch that way. There is no best-effort mode. On the OMOP side the unit is one
+composition's whole record graph: a composition becomes many linked rows, and
+they commit together or not at all, so no `FACT_RELATIONSHIP` row ever points
+at a record that was never written.
 
 ## Type coercion is strict
 
@@ -36,19 +39,29 @@ an error that says so, not a resource with a coding missing its display.
 A source code with no standard concept lands as `concept_id = 0` with the
 source value kept in its source column. That is the CDM's own answer for "no
 matching concept", and it keeps the row auditable. A row is never discarded
-because its code did not resolve.
+because its code did not resolve, and every run reports how many codes landed
+there, per mapping, because the reference implementation's own authors measured
+8.65% of primary concepts doing so and called that an underestimate.
 
 ## Identity
 
-FerroBRIDGE keeps a persistent id-map: the patient identifier to `ehr_id`
-relation, and the external to internal resource id relation. An exported
-resource id is derived deterministically, as a hash of the composition UID plus
-the entry path, which is what the specification recommends.
+On the FHIR side an exported resource id is derived deterministically, as the
+specification recommends, from the composition's stable `versioned_object_uid`,
+the entry path and the split occurrence, so it stays the same across
+composition versions, which FHIR requires of a logical id; `meta.versionId`
+carries the openEHR version. FerroBRIDGE also keeps a persistent id-map: the
+patient identifier to `ehr_id` relation, the external to internal resource id
+relation, and the resource id to composition relation, so a `PUT` resolves and
+a re-sent Bundle is recognised.
 
-That scheme has a failure mode worth knowing before you run it: a re-sent
-Bundle that omits one resource hashes differently and reads as a different
-mapping. It is documented rather than hidden, and it is the reason the id-map
-is persistent rather than recomputed.
+On the OMOP side every CDM v5.4 primary key is a 32-bit integer, so ids come
+from database sequences and a bridge-owned side table maps each source record
+to its row. That table is what makes a re-run replace rather than duplicate,
+and it keeps the openEHR identity in the `*_source_value` columns.
+
+The FHIR scheme has a failure mode worth knowing before you run it: a re-sent
+Bundle that omits one resource reads as a different mapping. It is documented
+rather than hidden.
 
 ## Version mismatch is refused at load time
 

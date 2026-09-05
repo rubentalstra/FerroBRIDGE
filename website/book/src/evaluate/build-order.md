@@ -29,22 +29,30 @@ There is no Cargo workspace, no crate, no binary, and no container image.
 
 ## What comes next
 
-The first code milestone is one verbatim round trip per target, on mapping
-files published upstream rather than files written for the occasion:
+The program is one verbatim round trip per target, on mapping files published
+upstream rather than files written for the occasion, in three releases:
 
-1. The published `EVALUATION.problem_diagnosis.v1` FHIRconnect mapping, with an
-   R4 `Condition` committed to a CDR over ITS-REST, read back, and mapped to
-   FHIR again. The result has to equal the input except for the fields the
-   specification defaults.
-2. The published laboratory OMOCL files, emitting MEASUREMENT rows into a CDM
-   5.4 database with a real Athena vocabulary loaded. Resolved `concept_id`
-   values are asserted, and an unmapped code lands as `0` with its source value
-   kept.
+1. **v0.0.2, the foundation.** The Cargo workspace with every lint, the vendored
+   corpora with provenance, the two generated model crates (`fhir-types`,
+   moved in from the sibling terminology server, and `omop-cdm`), the shared
+   mapping foundation, the ITS-REST and terminology clients, the server binary,
+   the container image, and the attested release lane with the crates.io leg.
+   Nothing maps yet; everything the mapping needs exists and is published.
+2. **v0.0.3, the FHIR round trip.** The published
+   `EVALUATION.problem_diagnosis.v1` FHIRconnect mapping and its published
+   extensions, with an R4 `Condition` committed to a CDR over ITS-REST, read
+   back, and mapped to FHIR again. The result equals the input except for the
+   set of fields the program declares defaulted or unmapped, and that set is
+   asserted exactly.
+3. **v0.0.4, the OMOP round trip.** The published laboratory OMOCL files,
+   emitting MEASUREMENT and FACT_RELATIONSHIP rows into a CDM 5.4 database.
+   Resolved `concept_id` values are asserted, an unmapped code lands as `0`
+   with its source value kept and is counted, and a second run produces an
+   identical database.
 
-The Cargo workspace lands with that milestone, along with the server binary,
-the container image, the attested binary build the release lane is already
-gated for, and the conformance gate. Nothing is scaffolded before its issues
-are filed.
+Later releases widen each side to the whole published library, then add FHIR
+search, which no specification governs. Nothing is scaffolded before its
+issues are filed.
 
 ## How correctness is measured
 

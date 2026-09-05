@@ -49,7 +49,7 @@ explicitly as such and record the decision; never treat one as authority.
     version in play, never the "current" build for a released version)
   - OMOP Common Data Model: <https://ohdsi.github.io/CommonDataModel/>
   - openEHR ITS-REST:
-    <https://specifications.openehr.org/releases/ITS-REST/latest/>
+    <https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/>
   - openEHR specifications index:
     <https://specifications.openehr.org/releases>
 

@@ -21,6 +21,31 @@ no binary to download yet.
 
 ## [Unreleased]
 
+### Changed
+
+- `docs/architecture.md` is rewritten as the output of the second research
+  pass (2026-09-05): the FHIR model is generated in this repository (the
+  `fhir-types` crate and its generator move here from the sibling terminology
+  server, which then consumes the crate from crates.io); the FHIRconnect
+  mapping files are validated by a hand-written model, the vendored published
+  schemas exercised as evidence, a strict schema of FerroBRIDGE's own, and
+  semantic checks; a context mapping compiles once into an immutable program
+  with pinned extension ordering; one interpreter serves both directions over
+  data-type lenses; the openEHR wire is canonical JSON with the Web Template
+  built locally from the OPT; FHIR ids derive from the stable composition uid
+  and OMOP ids from sequences with a bridge-owned natural-key table; the OMOP
+  commit unit is one composition's record graph; the library crates are
+  published; the binary is one with subcommands; and the build order splits the
+  round trips into v0.0.3 (FHIR) and v0.0.4 (OMOP). Every decision names its
+  ground and its rejected alternatives.
+- `docs/VERSIONS.md` pins the corpora by commit, the four `openehr-*` crates,
+  the five HL7 FHIR packages the generator reads, and the crate line; the
+  `fhir-terminology` row is removed, since the client contracts live in
+  `fhir-types`. `scripts/checks/versions.sh` checks the new crate rows.
+- The book's Evaluate, Operate and Integrate pages, `CLAUDE.md`,
+  `docs/ci-cd.md` and the rules cite the pinned ITS-REST release and follow
+  the rewritten design.
+
 ## [0.0.1] - 2026-09-05
 
 ### Added

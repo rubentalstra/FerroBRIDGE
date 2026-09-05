@@ -30,3 +30,9 @@ from the start. **How to apply:**
 
 Same defer-nothing, proper-rewrites-welcome spirit as on FerroEHR and
 FerroTERM.
+
+Reaffirmed 2026-09-05 at the start of the second architecture pass. Asked
+which design intuitions to test, the owner answered: do your own proper
+research, find the best way forward, then fact-check whether it really is the
+best way, using white papers and industry best practice. The bar is a design
+a reader can check against published sources and disagree with on the merits.
