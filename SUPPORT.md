@@ -8,9 +8,12 @@ the difference between an answer and a thread nobody is paged for.
 
 ## I have a question
 
-FerroBRIDGE is in its **design phase**: there is no code, no release, and no
-documentation site yet, so there is little to configure and nothing to operate.
-[`README.md`](README.md) says what the project is,
+FerroBRIDGE is in its **design phase**: there is no code and no release, so
+there is little to configure and nothing to operate. Start at
+[the documentation site](https://ferrobridge.eu/), whose book at
+[ferrobridge.eu/docs/](https://ferrobridge.eu/docs/) is organised by what you
+came to do: evaluate, operate, integrate, or contribute. The architecture is
+the first page under Evaluate.
 [`CLAUDE.md`](CLAUDE.md) carries the working discipline, and the research
 program on
 [issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1) is where the

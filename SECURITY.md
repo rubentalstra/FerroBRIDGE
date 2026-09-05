@@ -26,9 +26,11 @@ Once the project reaches 1.0 this table will name a supported minor line.
 **Do not open a public issue for a security vulnerability.** Report it
 privately through GitHub's private vulnerability reporting:
 
-1. Go to the repository's **Security** tab.
-2. Choose **Report a vulnerability** (GitHub Security Advisories).
-3. Describe the issue, the affected version or commit, and a reproduction if
+1. Open the private advisory form:
+   <https://github.com/rubentalstra/FerroBRIDGE/security/advisories/new>. You
+   can also reach it from the repository's **Security** tab under **Report a
+   vulnerability**.
+2. Describe the issue, the affected version or commit, and a reproduction if
    you have one.
 
 This opens a private advisory visible only to you and the maintainer. If you

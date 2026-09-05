@@ -91,6 +91,20 @@ architecture is the output of the research program on
 
 ### Changed
 
+- `SECURITY.md` links the private advisory form directly, so a reporter can
+  act on the policy without navigating by hand. The document carried no
+  hyperlink at all, which is what Scorecard's Security-Policy check scores
+  (#47).
+
+- `SUPPORT.md` sends a reader to the documentation site first. It still said
+  there was no site, which went false the day the site went live and
+  contradicted `README.md` on the same tree (#44).
+
+- The contributor page at `/docs/contribute/checks-and-gates.html` names the
+  zizmor audit path `.github/`, matching what CI runs. It still named
+  `.github/workflows/`, so following it missed the Dependabot configuration
+  and everything under `.github/actions/` (#40).
+
 - The zizmor lane in `.github/workflows/ci.yml` audits `.github/` rather than
   `.github/workflows/`, so `dependabot.yml` and every composite action under
   `.github/actions/` are covered. A composite action runs with the calling
