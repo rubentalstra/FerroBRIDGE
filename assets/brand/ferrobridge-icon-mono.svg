@@ -1,10 +1,13 @@
 <!-- SPDX-FileCopyrightText: Ruben Talstra -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
-<!-- The FerroBRIDGE through-arch bridge in one colour, taking the surrounding
-     text colour through currentColor. Same geometry as the master icon. -->
+<!-- The FerroBRIDGE mark in one colour, taking the surrounding text colour
+     through currentColor. Same geometry as the master icon. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" role="img" aria-label="FerroBRIDGE icon, single colour">
-  <path d="M9 51.5 V34.5 A23 23 0 0 1 55 34.5 V51.5" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
-  <rect x="4" y="31.5" width="56" height="6" rx="3" fill="currentColor"/>
-  <circle cx="21" cy="34.5" r="4.5" fill="currentColor"/>
-  <circle cx="43" cy="34.5" r="4.5" fill="currentColor"/>
+  <path d="M23.5 19 H57" fill="none" stroke="currentColor" stroke-width="4.6" stroke-linecap="round"/>
+  <path d="M17.5 27 L28 46 H41" fill="none" stroke="currentColor" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M29.1 13.4 L23.5 19 L29.1 24.6" fill="none" stroke="currentColor" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M51.4 13.4 L57 19 L51.4 24.6" fill="none" stroke="currentColor" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="14" cy="19" r="8" fill="currentColor"/>
+  <rect x="39" y="37.6" width="17.4" height="17.4" rx="3.2" fill="currentColor"/>
+  <path d="M39 43.4 V40.8 a3.2 3.2 0 0 1 3.2 -3.2 h11 a3.2 3.2 0 0 1 3.2 3.2 v2.6 Z" fill="currentColor"/>
 </svg>

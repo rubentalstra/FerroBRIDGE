@@ -19,10 +19,22 @@ architecture is the output of the research program on
 
 ## [Unreleased]
 
+### Changed
+
+- The FerroBRIDGE mark is now the fork the product draws: a filled circle for
+  the openEHR source, a two-way arrow to HL7 FHIR, and a plain line into a
+  table for the OMOP Common Data Model. Only the FHIR branch carries
+  arrowheads, because that side is an exchange and the OMOP side writes rows.
+  Every file in `assets/brand/` is redrawn from the new masters, along with the
+  book theme favicon, the social card, the lockups and the raster favicon set.
+  The palette is unchanged. `assets/brand/README.md` describes the new
+  geometry and its two drawing rules, and the landing page image alt text names
+  the new shapes (#54).
+
 ### Added
 
-- The FerroBRIDGE brand assets under `assets/brand/`: the through-arch bridge
-  mark and its dark-tile, monochrome, and favicon variants, the three lockups
+- The FerroBRIDGE brand assets under `assets/brand/`: the mark and its
+  dark-tile, monochrome, and favicon variants, the three lockups
   (light, dark, and one that follows `prefers-color-scheme`), the 1200x630
   social card, the raster favicon set, the "Indigo & Iron" palette as
   `--ferrobridge-*` custom properties in `tokens.css`, and the brand README
