@@ -1,0 +1,412 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+# CI in two tiers.
+#
+#   1. The workflow, shell, container and guard tier runs NOW, on a repository
+#      with no code: zizmor and actionlint over .github/workflows, shellcheck
+#      over the tracked shell programs, hadolint over any Dockerfile, and the
+#      committed comment-style and versions guards. These keep this very file
+#      honest, so none of them may depend on Rust existing.
+#   2. The Rust tier is gated behind a detection job that looks for a root
+#      Cargo.toml. Every cargo lane is skipped cleanly until the workspace
+#      lands and then activates by itself, with no workflow edit. hashFiles()
+#      cannot gate a job at `if:` time, because the workspace is empty before
+#      checkout, so a real detection job is the correct primitive.
+#
+# The `conclusion` job is the single required status check on main; it is what
+# makes a mostly-skipped pipeline enforceable (docs/ci-cd.md).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Cancel superseded runs on a pull request only. A push to main and a
+  # merge-group run each verify a distinct commit that must keep its own
+  # result.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# No permissions by default: each job grants its own.
+permissions: {}
+
+jobs:
+  # ---- Tier 1: the checks that run on a repository with no code -------------
+
+  # zizmor (https://docs.zizmor.sh/) is the static security analysis for GitHub
+  # Actions, the machine check behind three properties this repository treats
+  # as hard rules: every `uses:` pinned to a commit SHA (unpinned-uses), no
+  # checkout persisting credentials (artipacked), and no context value spliced
+  # into a shell (template-injection).
+  workflow-audit:
+    name: zizmor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
+        with:
+          tool: zizmor@1.29.0
+      - name: Audit .github/workflows
+        # GH_TOKEN enables the online audits. impostor-commit verifies that a
+        # pinned commit really belongs to the repository named in front of it,
+        # which it cannot do offline. --min-severity=low gates every actionable
+        # tier and leaves the informational tier advisory.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: zizmor --min-severity=low .github/workflows/
+
+  # actionlint is the correctness half of the pair: `${{ }}` expressions that
+  # cannot evaluate, `needs:` naming a job that does not exist, unknown runner
+  # labels, and shellcheck over every embedded `run:` block.
+  workflow-lint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Lint .github/workflows
+        # The official image, digest-pinned. actionlint is a Go binary rather
+        # than a crate, and its README's alternative is `curl | bash` off main,
+        # the unpinned fetch the pinning rule forbids. The image also bundles
+        # shellcheck, which half of actionlint's value depends on.
+        #
+        # SC2016 ("expressions don't expand in single quotes") is excluded, and
+        # only it: every occurrence here is a printf format or a jq filter,
+        # where single quotes are the correct idiom.
+        run: |
+          docker run --rm \
+            -v "$PWD:/repo" --workdir /repo \
+            -e SHELLCHECK_OPTS='-e SC2016' \
+            rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
+            -color
+
+  # shellcheck over the tracked shell programs: the CI guards, the tracker
+  # helpers, and the hooks. `--severity=style` is the lowest floor, so every
+  # finding gates. A finding is fixed, or it carries a per-line
+  # `# shellcheck disable=SCnnnn` directive with its reason. There is no
+  # .shellcheckrc, deliberately: nothing may turn a code off tree-wide
+  # (.claude/rules/ci-cd.md).
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The upstream release binary, pinned by version, rather than the
+      # runner's distro package, which moves at every runner-image refresh.
+      # Fetched by the same SHA-pinned installer, which verifies the checksum.
+      - uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
+        with:
+          tool: shellcheck@0.11.0
+      - name: Every tracked shell program is clean at severity=style
+        run: |
+          set -euo pipefail
+          # Every tracked *.sh, plus every tracked extensionless file whose
+          # first line is a shell shebang, which covers the git hooks. A
+          # NUL-delimited pipe, so a path with a space survives.
+          {
+            git ls-files -z '*.sh'
+            git ls-files -z | while IFS= read -r -d '' f; do
+              case "$f" in
+                *.*) ;;
+                *) head -c2 "$f" 2>/dev/null | grep -q '#!' \
+                     && head -n1 "$f" | grep -qE 'sh$' && printf '%s\0' "$f" ;;
+              esac
+            done
+          } | { grep -zc . >/dev/null && xargs -0 -r shellcheck --severity=style; } \
+            || echo "no shell files to check"
+
+  # hadolint over every tracked Dockerfile, under the committed .hadolint.yaml
+  # (failure-threshold: warning). No Dockerfile exists yet, so the step reports
+  # that and passes; it gains teeth the moment a container recipe lands.
+  dockerfile-lint:
+    name: hadolint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Every tracked Dockerfile passes hadolint
+        # The official image, digest-pinned, for the same reason as actionlint:
+        # hadolint is a Haskell binary with no checksum-verified installer in
+        # the pinned tool set.
+        run: |
+          set -euo pipefail
+          files=()
+          while IFS= read -r -d '' f; do files+=("$f"); done \
+            < <(git ls-files -z 'Dockerfile' '*/Dockerfile' '*.Dockerfile' 'Dockerfile.*')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "no Dockerfile to check"
+            exit 0
+          fi
+          printf 'checking: %s\n' "${files[@]}"
+          docker run --rm \
+            -v "$PWD:/repo" --workdir /repo \
+            hadolint/hadolint:v2.15.1@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d \
+            hadolint --config .hadolint.yaml "${files[@]}"
+
+  # The comment-style guard (.claude/rules/comments.md, RFC 505 and RFC 1574)
+  # over the whole tree. It reads .rs files only, so it reports "no files to
+  # check" today and gates from the first hand-written source file.
+  comment-style:
+    name: comment-style
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: bash scripts/checks/comment-style.sh --all
+
+  # The version-drift guard. It compares every present config file against
+  # docs/VERSIONS.md and skips loudly for the files that have not landed yet,
+  # so it is useful now and grows teeth as files appear.
+  versions:
+    name: versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: bash scripts/checks/versions.sh
+
+  # ---- Tier 2: the Rust lanes, gated on the workspace existing --------------
+
+  # The one job that decides whether the cargo tier runs at all: it checks out
+  # and looks for a root Cargo.toml. Every Rust job below `needs` it.
+  detect:
+    name: detect workspace
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      cargo: ${{ steps.check.outputs.cargo }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: check
+        run: |
+          set -euo pipefail
+          if [ -f Cargo.toml ]; then
+            echo "cargo=true" >> "$GITHUB_OUTPUT"
+            echo "Cargo.toml present: the Rust lanes will run."
+          else
+            echo "cargo=false" >> "$GITHUB_OUTPUT"
+            echo "No Cargo.toml: the Rust lanes are skipped (repository in its design phase)."
+          fi
+
+  fmt:
+    name: rustfmt
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # TODO(#20): lift this step into ./.github/actions/setup-rust with the
+      # Cargo workspace; it reads the channel from rust-toolchain.toml, which
+      # that issue also lands.
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          components: rustfmt
+      - run: cargo fmt --all --check
+
+  clippy:
+    name: clippy
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # TODO(#20): lift this step into ./.github/actions/setup-rust.
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          components: clippy
+      - run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+
+  test:
+    name: test
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # TODO(#20): lift this step into ./.github/actions/setup-rust.
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      - uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
+        with:
+          tool: cargo-nextest
+      - run: cargo nextest run --workspace --locked --no-tests=pass
+      # nextest does not run doctests, so they get their own compile.
+      - run: cargo test --doc --workspace --locked
+
+  doc:
+    name: rustdoc
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      # The [workspace.lints.rustdoc] levels apply to every `cargo doc`; -D
+      # turns a broken intra-doc link into a failed build.
+      RUSTDOCFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # TODO(#20): lift this step into ./.github/actions/setup-rust.
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      - run: cargo doc --locked --workspace --no-deps --all-features --document-private-items
+
+  cargo-deny:
+    name: cargo-deny
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # TODO(#20): lift this step into ./.github/actions/setup-rust.
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      - uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
+        with:
+          tool: cargo-deny
+      # Reads the same RustSec advisory database as cargo-audit and adds
+      # yanked, licences, bans and sources, so there is no separate audit job.
+      - run: cargo deny check
+
+  msrv:
+    name: msrv (cargo-hack)
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # TODO(#20): lift this step into ./.github/actions/setup-rust.
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      - uses: taiki-e/install-action@0758d235715de2f3551eacc980d9ae8fce9342c3 # v2.87.3
+        with:
+          tool: cargo-hack
+      # The Cargo book's named tool for verifying the declared rust-version,
+      # which it reads from the workspace `rust-version`.
+      - run: cargo hack check --rust-version --workspace --locked --all-targets
+
+  dependency-review:
+    name: dependency-review
+    needs: detect
+    # Pull requests only: the action compares the base..head dependency graph,
+    # which a push has no diff for. Also gated on the workspace, so it stays
+    # quiet while the repository has no manifest.
+    if: github.event_name == 'pull_request' && needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # Block a pull request that introduces a vulnerable or
+          # disallowed-licence dependency. The licence policy mirrors
+          # deny.toml once that file exists.
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
+
+  # ---- The single required check -------------------------------------------
+
+  # conclusion is the one status check the branch ruleset requires. It `needs`
+  # every other job and runs on always(), so it reports even when every gated
+  # Rust lane is skipped. It fails when a needed job failed or was cancelled
+  # and passes when every result is success or skipped. The results arrive
+  # through env:, never spliced into run: (.claude/rules/ci-cd.md).
+  conclusion:
+    name: conclusion
+    needs:
+      - workflow-audit
+      - workflow-lint
+      - shellcheck
+      - dockerfile-lint
+      - comment-style
+      - versions
+      - detect
+      - fmt
+      - clippy
+      - test
+      - doc
+      - cargo-deny
+      - msrv
+      - dependency-review
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every required job passed or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          set -euo pipefail
+          echo "needed job results: ${RESULTS}"
+          case " ${RESULTS} " in
+            *" failure "* | *" cancelled "*)
+              echo "a required job failed or was cancelled"
+              exit 1
+              ;;
+          esac
+          echo "all required jobs passed or were skipped"

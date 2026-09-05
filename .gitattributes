@@ -17,6 +17,10 @@
 # <path>/vendor/** -text
 
 # A generated tree is marked generated so it collapses in diffs and stays out
-# of language statistics. Nothing is generated yet
-# (.claude/rules/codegen.md).
-# <crate>/src/** linguist-generated
+# of language statistics (.claude/rules/codegen.md). The one generated tree the
+# architecture calls for is the OMOP CDM v5.4 row types and DDL emitted from
+# the OHDSI CommonDataModel definitions (docs/architecture.md section 7). The
+# `omop-cdm` crate is mixed, so only the emitted subtree is marked, never the
+# hand-written vocabulary loader and resolver beside it. The path is reserved
+# here so it is in force before the first generated file lands.
+crates/omop-cdm/src/generated/** linguist-generated

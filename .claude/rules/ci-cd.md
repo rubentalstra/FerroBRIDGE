@@ -18,8 +18,13 @@ build.
 
 ## What runs today
 
-Three workflows, all of which work on a repository with no code:
+Four workflows, all of which work on a repository with no code:
 
+- `.github/workflows/ci.yml`: the two-tier gate. Tier 1 runs now (zizmor,
+  actionlint, shellcheck, hadolint, the comment-style guard, the versions
+  guard); tier 2 is the Rust set, gated behind a `detect` job that looks for a
+  root `Cargo.toml`. The `conclusion` job is the single required status check
+  on `main`. The design is `docs/ci-cd.md`.
 - `.github/workflows/scorecard.yml`: OpenSSF Scorecard, an independent score of
   the repository's security posture, published to the OpenSSF API and to code
   scanning.
@@ -32,8 +37,9 @@ Three workflows, all of which work on a repository with no code:
   (`ai-code-review.md`); the Rust analysis and the coverage import join it
   with the workspace.
 
-There is no build lane, no test lane, and no release lane, because there is
-nothing to build. Do not add one before the workspace exists.
+The Rust lanes in `ci.yml` are written and gated off, so they need no edit when
+the workspace lands. There is no release lane, because there is nothing to
+release. Do not add one before the workspace exists.
 
 ## Workflow security (every workflow, no exceptions)
 
@@ -48,13 +54,11 @@ nothing to build. Do not add one before the workspace exists.
 - **A publishing lane restores no build cache.** A cache an untrusted run could
   poison must not feed a release.
 
-**Enforcement, stated honestly:** no lane runs `actionlint`, `zizmor`, or
-`shellcheck` yet, because the CI workflow that would host them does not exist.
-Until it does, run them by hand on any workflow or script you touch:
-`actionlint`, `zizmor --min-severity=low .github/workflows`, and `shellcheck
---severity=style` over the tracked shell files. The lane that makes them
-failing checks is added with the first CI workflow, and it goes in before the
-Rust lanes, since it needs no Rust.
+**Enforcement:** `ci.yml` tier 1 runs `zizmor --min-severity=low
+.github/workflows/`, `actionlint`, and `shellcheck --severity=style` on every
+push to `main`, pull request, and merge-group run. Run the same three by hand
+before pushing a workflow or script change, so a finding costs a local run
+rather than a CI round trip.
 
 ## Shell scripts are analysed like code
 
@@ -65,9 +69,9 @@ per-line `# shellcheck disable=SCnnnn` directive with its reason on the same
 line. A blanket exclusion is refused, and no `.shellcheckrc` exists, because a
 file that can turn a code off tree-wide eventually does.
 
-## Rust CI lanes (activate with the Cargo workspace)
+## Rust CI lanes (gated in `ci.yml`, activate with the Cargo workspace)
 
-The lanes to stand up, in this order, with the local commands mirroring the CI
+The lanes, with the local commands mirroring the CI
 flags verbatim: `cargo fmt --all --check`; `cargo clippy --workspace
 --all-targets --all-features -- -D warnings`; `cargo nextest run --workspace
 --locked` plus `cargo test --doc --locked`; `cargo doc` with
