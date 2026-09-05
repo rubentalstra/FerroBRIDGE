@@ -21,6 +21,10 @@ architecture is the output of the research program on
 
 ### Changed
 
+- `SECURITY.md` and `MAINTAINERS.md` say a released tag cannot be moved or
+  deleted, which is what the `release-tags` ruleset enforces. Both claimed
+  platform-level release immutability, which is not enabled (#65).
+
 - The README's mark uses an absolute URL, so it renders wherever the README
   travels rather than only on the repository page (#60).
 

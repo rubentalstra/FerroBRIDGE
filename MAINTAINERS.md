@@ -53,9 +53,9 @@ legal entity behind it.
 
 There is no succession plan that a document can create. What exists instead:
 
-- **Nothing already published disappears.** Releases are immutable and their
-  assets stay downloadable; a deployment already running is not affected by
-  maintainer availability.
+- **Nothing already published disappears.** A released tag cannot be moved or
+  deleted and its assets stay downloadable; a deployment already running is not
+  affected by maintainer availability.
 - **Nothing new ships.** No release and no security fix. The support window in
   [SECURITY.md](SECURITY.md) (only the newest release is supported) becomes, in
   that situation, no supported release at all.
