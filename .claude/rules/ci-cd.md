@@ -112,9 +112,10 @@ lockfile drift rather than on registry drift. Commit `Cargo.lock`.
 - **A release is assembled as a draft and published last**: create the draft,
   attach every asset, check the set is complete, then publish, so a
   half-assembled release is never visible. The fix for a bad cut is a new patch
-  version, never a retag. That rule is ours and the `release-tags` ruleset
-  enforces its tag half; the platform's own release-immutability setting is not
-  exposed on this repository, which `docs/release.md` records.
+  version, never a retag, and both halves are enforced: the immutable-releases
+  setting freezes a published release's notes and assets, and the
+  `release-tags` ruleset stops the tag being moved or deleted
+  (`docs/release.md`).
 - **A version pin has a single source of truth**, and a committed check fails
   on cross-file drift.
 

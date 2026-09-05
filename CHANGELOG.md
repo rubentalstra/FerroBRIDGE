@@ -21,9 +21,9 @@ architecture is the output of the research program on
 
 ### Changed
 
-- `SECURITY.md` and `MAINTAINERS.md` say a released tag cannot be moved or
-  deleted, which is what the `release-tags` ruleset enforces. Both claimed
-  platform-level release immutability, which is not enabled (#65).
+- `SECURITY.md` and `MAINTAINERS.md` name both protections a published release
+  has: the immutable-releases setting freezes its notes and assets, and the
+  `release-tags` ruleset stops its tag being moved or deleted (#68).
 
 - The README's mark uses an absolute URL, so it renders wherever the README
   travels rather than only on the repository page (#60).
@@ -54,12 +54,10 @@ architecture is the output of the research program on
   complete. The binary build sits behind the same root-`Cargo.toml` detection
   `ci.yml` tier 2 uses, so it is skipped on a tree with no workspace and
   activates by itself when one lands (#63).
-- `docs/release.md`, the cut checklist in order, the no-retag rule, and what is
-  and is not immutable about a published release: the `release-tags` ruleset
-  blocks tag deletion and non-fast-forward updates and requires a signature,
-  while GitHub's repository-level immutable-releases setting is not exposed on
-  this repository through the API and stays an owner toggle to check in
-  Settings (#63).
+- `docs/release.md`, the cut checklist in order, the no-retag rule, and what a
+  published release is protected against: the immutable-releases setting
+  freezes its notes and assets, and the `release-tags` ruleset blocks tag
+  deletion and non-fast-forward updates and requires a signature (#63).
 - The FerroBRIDGE brand assets under `assets/brand/`: the mark and its
   dark-tile, monochrome, and favicon variants, the three lockups
   (light, dark, and one that follows `prefers-color-scheme`), the 1200x630
