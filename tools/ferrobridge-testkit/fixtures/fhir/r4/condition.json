@@ -1,0 +1,45 @@
+{
+  "resourceType": "Condition",
+  "id": "ferrobridge-synthetic-condition-1",
+  "identifier": [
+    {
+      "system": "http://example.org/fhir/sid/ferrobridge-condition",
+      "value": "synthetic-condition-0001"
+    }
+  ],
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active",
+        "display": "Active"
+      }
+    ]
+  },
+  "verificationStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+        "code": "confirmed",
+        "display": "Confirmed"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://example.org/fhir/CodeSystem/synthetic-problems",
+        "code": "SYN-001",
+        "display": "Synthetic problem one"
+      }
+    ],
+    "text": "Synthetic problem one"
+  },
+  "subject": {
+    "identifier": {
+      "system": "http://example.org/fhir/sid/ferrobridge-subject",
+      "value": "synthetic-subject-0001"
+    }
+  },
+  "recordedDate": "2026-09-12T10:00:00+02:00"
+}

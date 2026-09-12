@@ -8,6 +8,7 @@
 
 #![allow(clippy::panic_in_result_fn, reason = "test assertions")]
 
+mod catalogue;
 mod ddl;
 mod pins;
 mod tables;

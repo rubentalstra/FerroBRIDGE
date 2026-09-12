@@ -78,6 +78,14 @@ Beside it:
 - `tools/omop-cdm-codegen`: that generator, reading
   `docs/specs/omop-cdm/inst/` and emitting the 39 table modules, the metadata
   index and the embedded DDL.
+- `tools/ferrobridge-testkit`: the test-support crate, a path-only
+  dev-dependency (#78). `containers` starts PostgreSQL and the reference CDR
+  behind the `FERROBRIDGE_E2E` gate, with every image pinned by digest in
+  `docs/VERSIONS.md`; `stubs` carries the documented ITS-REST and FHIR R4
+  terminology response shapes for `wiremock`; `fixtures/` holds the synthetic
+  template, composition and FHIR resources; `matrix_pin` reads the pin matrix.
+  The synthetic OHDSI vocabulary fixture arrives with the vocabulary loader
+  (#89).
 - `docs/specs/`: the vendored specification corpora (#71), one directory per
   corpus with a `PROVENANCE.md`, fetched by `scripts/vendor/*.sh` from the pins
   in `docs/VERSIONS.md`: FHIRconnect with its schemas and the draft REST API
