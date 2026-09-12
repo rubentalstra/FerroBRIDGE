@@ -36,6 +36,23 @@ rather than a CI round trip.
 Every cargo lane runs `--locked`, so CI fails on lockfile drift rather than on
 registry drift.
 
+## The end-to-end lane, and running it locally
+
+One more job, `e2e`, starts real servers in containers: a PostgreSQL for the
+OMOP CDM catalogue test and the reference openEHR CDR with its own database for
+the ITS-REST client test. It is gated on the environment variable
+`FERROBRIDGE_E2E`, and every container-backed test returns without touching
+Docker unless that variable is `1`, so your ordinary test run stays offline.
+To run the lane yourself, start Docker and set the variable:
+
+```bash
+FERROBRIDGE_E2E=1 cargo nextest run --locked -p omop-cdm -p ferrobridge-openehr -p ferrobridge-testkit
+```
+
+The first run pulls the images, which are pinned by digest in
+`docs/VERSIONS.md`; later runs start in a few seconds. Each test owns its
+containers and stops them when it ends.
+
 ## Workflow security rules
 
 Every workflow follows the same four rules, and the analysers above check them:

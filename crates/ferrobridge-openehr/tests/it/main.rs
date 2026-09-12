@@ -14,6 +14,7 @@
 mod composition;
 mod contribution;
 mod ehr;
+mod end_to_end;
 mod pins;
 mod query;
 mod support;

@@ -1,0 +1,45 @@
+{
+  "resourceType": "Observation",
+  "id": "ferrobridge-synthetic-observation-1",
+  "identifier": [
+    {
+      "system": "http://example.org/fhir/sid/ferrobridge-observation",
+      "value": "synthetic-observation-0001"
+    }
+  ],
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://example.org/fhir/CodeSystem/observation-category",
+          "code": "laboratory",
+          "display": "Laboratory"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://example.org/fhir/CodeSystem/synthetic-analytes",
+        "code": "SYN-ANALYTE-1",
+        "display": "Synthetic analyte one"
+      }
+    ],
+    "text": "Synthetic analyte one"
+  },
+  "subject": {
+    "identifier": {
+      "system": "http://example.org/fhir/sid/ferrobridge-subject",
+      "value": "synthetic-subject-0001"
+    }
+  },
+  "effectiveDateTime": "2026-09-12T10:00:00+02:00",
+  "valueQuantity": {
+    "value": 5.4,
+    "unit": "mmol/l",
+    "system": "http://example.org/fhir/CodeSystem/synthetic-units",
+    "code": "mmol/l"
+  }
+}

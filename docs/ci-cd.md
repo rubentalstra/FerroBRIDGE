@@ -47,6 +47,32 @@ clippy at `-D warnings`, nextest plus doctests, rustdoc at `-D warnings`,
 command in `.claude/rules/ci-cd.md` verbatim. The workspace pull request
 therefore changes nothing in CI; the lanes activate by themselves.
 
+## The end-to-end lane and its gate
+
+`e2e` is the one job that starts real servers. The container harness in
+`tools/ferrobridge-testkit` reads the environment variable `FERROBRIDGE_E2E`,
+and every container-backed test returns before it touches Docker unless that
+variable is exactly `1`. The ordinary `test` job therefore stays offline and
+fast, and `e2e` sets the variable and runs the three packages that own those
+tests: `cargo nextest run --locked -p omop-cdm -p ferrobridge-openehr -p
+ferrobridge-testkit --no-tests=pass`.
+
+Three properties of the job are deliberate. It names packages rather than
+`--workspace`, because a workspace-wide compile schedules the generated crates
+side by side and the runner runs out of memory. It uses no `services:` block:
+`testcontainers` talks to the runner's own Docker daemon, and the harness
+creates the network, starts PostgreSQL and the reference CDR, and tears both
+down when the test's value drops. It needs no registry credential, because
+every image is a public package, pinned by tag and by digest in
+`docs/VERSIONS.md` and in the harness constants the versions guard compares.
+
+The trade the gate makes: a gated-off test is reported by nextest as passed,
+not as skipped, because it returns `Ok(())` rather than being `#[ignore]`d. An
+`#[ignore]` would show honestly as skipped but would also need a second
+invocation flag to run at all, which puts the lane one forgotten flag away from
+never running. The gate variable is the single switch instead, and this job is
+where it is on.
+
 `fhir-types-features` runs `cargo hack check -p fhir-types --each-feature
 --locked` plus one wide combination, because the generated crate
 holds the union of its declared root sets and its features select inside it

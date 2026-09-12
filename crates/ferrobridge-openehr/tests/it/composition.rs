@@ -89,8 +89,9 @@ async fn create_composition_reports_the_422_validation_errors() -> Result<(), Bo
     let server = MockServer::start().await;
     Mock::given(method("POST"))
         .and(path(format!("/v1/ehr/{EHR}/composition")))
-        .respond_with(ResponseTemplate::new(422).set_body_string(
-            r#"{"message":"the template does not validate the composition","validationErrors":["/content[0]: unknown node"]}"#,
+        .respond_with(ferrobridge_testkit::stubs::its_rest::unprocessable(
+            "the template does not validate the composition",
+            &["/content[0]: unknown node"],
         ))
         .mount(&server)
         .await;

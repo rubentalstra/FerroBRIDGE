@@ -326,6 +326,34 @@ jobs:
       # nextest does not run doctests, so they get their own compile.
       - run: cargo test --doc --workspace --locked
 
+  # The container-backed lane. Every test behind the harness returns early
+  # unless FERROBRIDGE_E2E is 1, so this job is the only run where the
+  # PostgreSQL and the reference CDR actually start. testcontainers talks to
+  # the runner's own Docker daemon, so `services:` is not used: the harness
+  # creates the network and both containers itself and tears them down on drop.
+  # The images are public, so no registry credential is needed. Per package,
+  # never --workspace: a workspace-wide compile schedules the generated giants
+  # side by side and the runner runs out of memory.
+  e2e:
+    name: e2e (containers)
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      FERROBRIDGE_E2E: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+      - uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: cargo-nextest
+      - run: cargo nextest run --locked -p omop-cdm -p ferrobridge-openehr -p ferrobridge-testkit --no-tests=pass
+
   doc:
     name: rustdoc
     needs: detect
@@ -539,6 +567,7 @@ jobs:
       - clippy
       - clippy-fhir-types
       - test
+      - e2e
       - doc
       - cargo-deny
       - msrv

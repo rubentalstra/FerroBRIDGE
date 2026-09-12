@@ -4,10 +4,19 @@
 //! Test support for the FerroBRIDGE suites, consumed as a path-only
 //! dev-dependency so `cargo package` strips it.
 //!
-//! Today it reads the pin matrix, so a crate's version constant can be asserted
-//! against the single source of truth. The fixtures, the synthetic vocabulary
-//! and the server stubs arrive with the round trips.
+//! [`matrix_pin`] reads the pin matrix, so a crate's version constant can be
+//! asserted against the single source of truth; [`containers`] starts the
+//! PostgreSQL and the reference CDR the end-to-end lane runs against;
+//! [`fixtures`] holds the synthetic documents the suites commit and map; and
+//! [`stubs`] carries the upstream response shapes for `wiremock`.
 #![doc(test(attr(deny(warnings))))]
+
+// TODO(#89): the synthetic OHDSI vocabulary fixture the concept resolver
+// loads, once #88 pins the Athena export format.
+
+pub mod containers;
+pub mod fixtures;
+pub mod stubs;
 
 use std::fmt;
 use std::path::PathBuf;

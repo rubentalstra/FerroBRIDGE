@@ -78,6 +78,29 @@ dependency pins below.
 | `futures-core`, `futures-util` | 0.3.34 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `tokio` | 1.53.1 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `wiremock` | 0.6.5 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
+| `testcontainers` | 0.27.3 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
+| `tokio-postgres` | 0.7.18 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
+
+## Container images (the end-to-end lane)
+
+The end-to-end lane starts real servers in containers behind the
+`FERROBRIDGE_E2E` gate (`docs/ci-cd.md`). Every image is pinned by tag AND by
+the digest of its image index, because a tag can be re-pointed and a digest
+cannot; the digest is what Docker resolves. The one place each pin is written
+in code is the matching constant in
+`tools/ferrobridge-testkit/src/containers.rs`, and
+`scripts/checks/versions.sh` compares the two.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| PostgreSQL image | `postgres:18.6@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280` | the `POSTGRES` constant in `tools/ferrobridge-testkit/src/containers.rs` |
+| FerroEHR CDR image | `ghcr.io/rubentalstra/ferroehr:4.2.5@sha256:aa5a9e0447befadb396084fd19ce7a6d30ea1fb8e16806615071e9f1748125ca` | the `CDR` constant in `tools/ferrobridge-testkit/src/containers.rs` |
+| FerroEHR CDR database image | `ghcr.io/rubentalstra/ferroehr-postgres:4.2.5@sha256:e094461744fa8510ca8c1c4ecde4460474befb00b310ba41f7d9ff6e67e181bc` | the `CDR_POSTGRES` constant in `tools/ferrobridge-testkit/src/containers.rs` |
+
+The CDR runs against its own published database image rather than the plain
+PostgreSQL above: that image is built from `postgres:18.6` and carries the
+login role, the schemas and the extensions the CDR's migrations expect to find,
+which a bare PostgreSQL does not have.
 
 ## FHIR packages (the `fhir-types` generator input)
 

@@ -13,11 +13,18 @@ authors.workspace = true
 publish = false
 
 [dependencies]
+reqwest.workspace = true
+serde_json.workspace = true
+testcontainers.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["time"] }
+wiremock.workspace = true
 
 # The corpus suite re-hashes the vendored FHIRconnect schemas, so it needs a
 # sha256 the workspace does not otherwise carry.
 [dev-dependencies]
 sha2.workspace = true
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "time"] }
 
 [lints]
 workspace = true

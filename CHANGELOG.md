@@ -23,6 +23,26 @@ no binary to download yet.
 
 ### Added
 
+- The container harness, the upstream stubs and the synthetic fixtures in
+  `tools/ferrobridge-testkit` (#78), with the two end-to-end tests they carry.
+  `containers` starts PostgreSQL 18.6 and the reference openEHR CDR with its
+  own database, each image pinned by tag and digest in `docs/VERSIONS.md`,
+  which `scripts/checks/versions.sh` now compares with the harness constants,
+  and torn down when the test's value drops; every container-backed test
+  returns early unless `FERROBRIDGE_E2E=1`, so the ordinary suite stays
+  offline.
+  `stubs` carries the documented ITS-REST status shapes and the FHIR R4
+  terminology `Parameters` for `wiremock`, and `fixtures` the synthetic
+  operational template, composition and R4 resources. On that harness,
+  `omop-cdm` applies its embedded OHDSI DDL to a real database and asserts the
+  catalogue against the generated column metadata (#73), and
+  `ferrobridge-openehr` commits, reads, updates, queries and deletes a
+  composition against a real CDR over ITS-REST (#76). The `e2e` CI job runs
+  both with the gate set. A second catalogue test pins what OHDSI's rendered
+  `OMOPCDM_postgresql_5.4_constraints.sql` does at tag `v5.4.3`: PostgreSQL
+  refuses it, because `vocabulary` is the one foreign-key target the rendered
+  `primary_keys.sql` declares no key for.
+
 - The generated OMOP CDM v5.4 layer and its generator (#73): `omop-cdm` carries
   a row type and a column-metadata static for every one of the 39 tables the
   OHDSI definitions declare across the `CDM`, `VOCAB` and `RESULTS` schemas,
