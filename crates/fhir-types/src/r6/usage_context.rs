@@ -85,9 +85,15 @@ impl super::super::codec::Json for UsageContext {
         let mut raw_value = super::super::codec::ChoiceSlot::default();
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "code" => raw_code = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
                 "valueCodeableConcept" => {
                     raw_value.value("CodeableConcept", value, path)?;
                 }

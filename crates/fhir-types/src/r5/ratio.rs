@@ -78,10 +78,18 @@ impl super::super::codec::Json for Ratio {
         let mut raw_denominator: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "numerator" => raw_numerator = Some(value),
-                "denominator" => raw_denominator = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "numerator" => {
+                    raw_numerator = Some(value);
+                }
+                "denominator" => {
+                    raw_denominator = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

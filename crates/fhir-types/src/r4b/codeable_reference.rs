@@ -80,10 +80,18 @@ impl super::super::codec::Json for CodeableReference {
         let mut raw_reference: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "concept" => raw_concept = Some(value),
-                "reference" => raw_reference = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "concept" => {
+                    raw_concept = Some(value);
+                }
+                "reference" => {
+                    raw_reference = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

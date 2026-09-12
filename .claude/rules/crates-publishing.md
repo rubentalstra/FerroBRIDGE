@@ -22,7 +22,7 @@ rule, machine-enforced by the `crate-version-guard` CI job.
   (the server, the tools, the release tag `vX.Y.Z`).
 - **The crate line** is the `version` in each `crates/*/Cargo.toml`. It never
   adopts the product version or a specification version; it is the crates' own
-  SemVer line. `fhir-types` carries the line at 0.1.98 and every other member
+  SemVer line. `fhir-types` carries the line at 0.1.99 and every other member
   still holds its name at the 0.0.0 placeholder, so the set is deliberately not
   lockstep today (`docs/VERSIONS.md`).
 

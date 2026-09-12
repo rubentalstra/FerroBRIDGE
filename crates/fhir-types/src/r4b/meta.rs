@@ -157,18 +157,42 @@ impl super::super::codec::Json for Meta {
         let mut raw_tag: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "versionId" => raw_version_id = Some(value),
-                "_versionId" => raw_version_id_element = Some(value),
-                "lastUpdated" => raw_last_updated = Some(value),
-                "_lastUpdated" => raw_last_updated_element = Some(value),
-                "source" => raw_source = Some(value),
-                "_source" => raw_source_element = Some(value),
-                "profile" => raw_profile = Some(value),
-                "_profile" => raw_profile_element = Some(value),
-                "security" => raw_security = Some(value),
-                "tag" => raw_tag = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "versionId" => {
+                    raw_version_id = Some(value);
+                }
+                "_versionId" => {
+                    raw_version_id_element = Some(value);
+                }
+                "lastUpdated" => {
+                    raw_last_updated = Some(value);
+                }
+                "_lastUpdated" => {
+                    raw_last_updated_element = Some(value);
+                }
+                "source" => {
+                    raw_source = Some(value);
+                }
+                "_source" => {
+                    raw_source_element = Some(value);
+                }
+                "profile" => {
+                    raw_profile = Some(value);
+                }
+                "_profile" => {
+                    raw_profile_element = Some(value);
+                }
+                "security" => {
+                    raw_security = Some(value);
+                }
+                "tag" => {
+                    raw_tag = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

@@ -77,12 +77,24 @@ impl super::super::codec::Json for Money {
         let mut raw_currency_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "value" => raw_value = Some(value),
-                "_value" => raw_value_element = Some(value),
-                "currency" => raw_currency = Some(value),
-                "_currency" => raw_currency_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "value" => {
+                    raw_value = Some(value);
+                }
+                "_value" => {
+                    raw_value_element = Some(value);
+                }
+                "currency" => {
+                    raw_currency = Some(value);
+                }
+                "_currency" => {
+                    raw_currency_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

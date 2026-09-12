@@ -1,12 +1,159 @@
 // SPDX-FileCopyrightText: Ruben Talstra
 // SPDX-License-Identifier: BUSL-1.1
 
+use std::collections::BTreeSet;
+use std::fs;
+
 use fhir_codegen::closure::TypeClosure;
 use fhir_codegen::fhir::StructureKind;
 use fhir_codegen::lower::{Cardinality, Target, TypeKind, VersionModule};
-use fhir_codegen::roots::RootSet;
+use fhir_codegen::naming::type_name;
+use fhir_codegen::package::Package;
+use fhir_codegen::roots::{RootScope, RootSet};
 
-use crate::{R4B, R5};
+use crate::{R4, R4B, R5, crate_dir, packages};
+
+/// The wide closure and model of `package`, the emitter's own inputs.
+fn wide(module: &str, package: &Package) -> (TypeClosure, VersionModule) {
+    let roots =
+        RootSet::select_scoped(package, RootScope::Resources).expect("the wide root set selects");
+    let closure = TypeClosure::compute(package, &roots).expect("the wide closure computes");
+    let model = VersionModule::lower(&closure, module, "package", "version")
+        .expect("the wide model lowers");
+    (closure, model)
+}
+
+/// The type modules of one version directory of the generated crate.
+fn emitted_modules(module: &str) -> BTreeSet<String> {
+    let dir = crate_dir().join("src").join(module);
+    fs::read_dir(&dir)
+        .expect("the version directory lists")
+        .filter_map(|entry| {
+            let path = entry.expect("the entry reads").path();
+            let stem = path.file_stem()?.to_str()?.to_owned();
+            (path.extension().is_some_and(|e| e == "rs") && stem != "mod" && stem != "schema")
+                .then_some(stem)
+        })
+        .collect()
+}
+
+#[test]
+fn the_emitted_tree_is_exactly_the_wide_closure() {
+    for (module, _, package) in packages() {
+        let (closure, model) = wide(module, package);
+        for name in closure.structures().keys() {
+            assert!(
+                model.types.contains_key(&type_name(name)),
+                "{module}: {name} is in the closure and is lowered"
+            );
+        }
+        let modules: BTreeSet<String> = model.modules().keys().map(|m| (*m).to_owned()).collect();
+        assert_eq!(
+            modules,
+            emitted_modules(module),
+            "{module}: the emitted files are the closure's modules"
+        );
+    }
+}
+
+#[test]
+fn a_type_is_behind_terminology_exactly_when_the_terminology_closure_holds_it() {
+    for (module, _, package) in packages() {
+        let roots = RootSet::select(package).expect("the terminology root set selects");
+        let terminology: BTreeSet<String> = TypeClosure::compute(package, &roots)
+            .expect("the terminology closure computes")
+            .structures()
+            .keys()
+            .cloned()
+            .collect();
+        let (closure, model) = wide(module, package);
+        for name in closure.structures().keys() {
+            let expected = if terminology.contains(name) {
+                RootScope::Terminology
+            } else {
+                RootScope::Resources
+            };
+            let ty = model
+                .types
+                .get(&type_name(name))
+                .expect("every closure structure is lowered");
+            assert_eq!(ty.scope, expected, "{module}: {name}");
+        }
+        let text = fs::read_to_string(crate_dir().join("src").join(module).join("mod.rs"))
+            .expect("the version mod.rs reads");
+        for name in model.modules().keys() {
+            let line = format!(
+                "#[cfg(feature = \"{}\")]\npub mod {name};",
+                model.module_scope(name).feature()
+            );
+            assert!(text.contains(&line), "{module}: {name} carries its feature");
+        }
+    }
+}
+
+#[test]
+fn the_r4_wide_closure_holds_the_clinical_resources() {
+    let (closure, model) = wide("r4", &R4);
+    for name in [
+        "Patient",
+        "Observation",
+        "Condition",
+        "Provenance",
+        "MedicationRequest",
+        "DiagnosticReport",
+    ] {
+        assert!(
+            closure.structures().contains_key(name),
+            "{name} is in the R4 wide closure"
+        );
+        assert_eq!(
+            closure.scope(name),
+            Some(RootScope::Resources),
+            "{name} is behind the resources feature"
+        );
+        assert!(model.types.contains_key(name), "{name} is lowered");
+    }
+}
+
+#[test]
+fn the_resource_enum_covers_every_concrete_resource() {
+    for (module, _, package) in packages() {
+        let roots =
+            RootSet::select_scoped(package, RootScope::Resources).expect("the root set selects");
+        let (_, model) = wide(module, package);
+        let TypeKind::ResourceEnum { resources } = &model
+            .types
+            .get("Resource")
+            .expect("the Resource enum is lowered")
+            .kind
+        else {
+            panic!("Resource is the enum");
+        };
+        assert_eq!(
+            resources.len(),
+            roots.resources.len(),
+            "{module}: one variant per concrete resource"
+        );
+        let text = fs::read_to_string(crate_dir().join("src").join(module).join("resource.rs"))
+            .expect("the resource module reads");
+        assert!(
+            text.contains("    Unknown(UnknownResource),"),
+            "{module}: a resource outside the enabled root set is still carried"
+        );
+        for resource in resources {
+            let feature = model
+                .types
+                .get(resource)
+                .expect("every variant is lowered")
+                .scope
+                .feature();
+            assert!(
+                text.contains(&format!("#[cfg(feature = \"{feature}\")]\n    {resource}(")),
+                "{module}: the {resource} variant carries its feature"
+            );
+        }
+    }
+}
 
 fn closure() -> TypeClosure {
     let roots = RootSet::select(&R4B).expect("root set selects");

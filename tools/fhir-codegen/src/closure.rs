@@ -6,14 +6,16 @@
 //! Starting from the root resources, the closure follows every element type
 //! and every content reference to the `StructureDefinition` that defines it,
 //! transitively, so the emitted module holds the complete set of datatypes
-//! and primitives the terminology surface can carry, and nothing else
-//! (`codegen.md`: complete within a declared closure).
+//! and primitives the root set can carry, and nothing else (`codegen.md`:
+//! complete within a declared closure). Each type also records the narrowest
+//! root set that reaches it, which is the feature the emitted type is gated
+//! behind.
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::fhir::{Derivation, StructureKind};
+use crate::fhir::{Derivation, StructureDefinition, StructureKind};
 use crate::package::Package;
-use crate::roots::RootSet;
+use crate::roots::{RootScope, RootSet};
 use crate::snapshot::{ElementShape, ResolveError, ResolvedElement, ResolvedStructure};
 
 /// Type codes that name a structural base rather than a datatype to emit.
@@ -52,39 +54,48 @@ pub enum ClosureError {
 pub struct TypeClosure {
     structures: BTreeMap<String, ResolvedStructure>,
     roots: BTreeSet<String>,
+    scopes: BTreeMap<String, RootScope>,
 }
 
 impl TypeClosure {
     /// Computes the closure of `roots` over `package`.
+    ///
+    /// Every structure records the narrowest scope of `roots` that reaches it,
+    /// so a datatype the terminology set already carries stays terminology
+    /// when the wide resource set reaches it too.
     ///
     /// # Errors
     ///
     /// Returns [`ClosureError`] when an element names an undefined type or a
     /// profile, or when a snapshot does not resolve.
     pub fn compute(package: &Package, roots: &RootSet<'_>) -> Result<Self, ClosureError> {
-        let mut structures = BTreeMap::new();
-        let mut pending: Vec<(String, String)> = roots
-            .resources
-            .values()
-            .map(|definition| (definition.name.clone(), String::from("(root)")))
+        let structures = walk(package, roots.resources.values().copied())?;
+        let terminology: BTreeSet<String> = if roots.holds(RootScope::Resources) {
+            walk(package, roots.in_scope(RootScope::Terminology))?
+                .into_keys()
+                .collect()
+        } else {
+            structures.keys().cloned().collect()
+        };
+        let scopes = structures
+            .keys()
+            .map(|name| {
+                let scope = if terminology.contains(name) {
+                    RootScope::Terminology
+                } else {
+                    RootScope::Resources
+                };
+                (name.clone(), scope)
+            })
             .collect();
-        let root_names: BTreeSet<String> = pending.iter().map(|(name, _)| name.clone()).collect();
-
-        while let Some((code, referrer)) = pending.pop() {
-            if structures.contains_key(&code) || STRUCTURAL_TYPES.contains(&code.as_str()) {
-                continue;
-            }
-            let resolved = resolve_named(package, &code, &referrer)?;
-            if resolved.kind != StructureKind::PrimitiveType {
-                for element in &resolved.elements {
-                    referenced(package, element, &mut pending);
-                }
-            }
-            structures.insert(code, resolved);
-        }
         Ok(Self {
             structures,
-            roots: root_names,
+            roots: roots
+                .resources
+                .values()
+                .map(|definition| definition.name.clone())
+                .collect(),
+            scopes,
         })
     }
 
@@ -100,12 +111,42 @@ impl TypeClosure {
         &self.roots
     }
 
+    /// The narrowest root set that reaches the structure named `name`.
+    #[must_use]
+    pub fn scope(&self, name: &str) -> Option<RootScope> {
+        self.scopes.get(name).copied()
+    }
+
     /// The structures of one kind, in name order.
     pub fn of_kind(&self, kind: StructureKind) -> impl Iterator<Item = &ResolvedStructure> {
         self.structures
             .values()
             .filter(move |structure| structure.kind == kind)
     }
+}
+
+/// Resolves `roots` and everything they reference, transitively.
+fn walk<'a>(
+    package: &Package,
+    roots: impl Iterator<Item = &'a StructureDefinition>,
+) -> Result<BTreeMap<String, ResolvedStructure>, ClosureError> {
+    let mut structures = BTreeMap::new();
+    let mut pending: Vec<(String, String)> = roots
+        .map(|definition| (definition.name.clone(), String::from("(root)")))
+        .collect();
+    while let Some((code, referrer)) = pending.pop() {
+        if structures.contains_key(&code) || STRUCTURAL_TYPES.contains(&code.as_str()) {
+            continue;
+        }
+        let resolved = resolve_named(package, &code, &referrer)?;
+        if resolved.kind != StructureKind::PrimitiveType {
+            for element in &resolved.elements {
+                referenced(package, element, &mut pending);
+            }
+        }
+        structures.insert(code, resolved);
+    }
+    Ok(structures)
 }
 
 /// The structure `code` names, refused when it is undefined or is a profile.

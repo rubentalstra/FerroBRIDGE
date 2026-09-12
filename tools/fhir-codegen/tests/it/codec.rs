@@ -144,6 +144,61 @@ fn every_r6_root_set_resource_round_trips() {
     round_trip_all::<fhir_types::r6::resource::Resource>("hl7.fhir.r6.core");
 }
 
+/// A synthetic Observation: a body-weight quantity, invented for this test
+/// (<https://hl7.org/fhir/R4/observation.html>).
+const OBSERVATION: &str = r#"{"resourceType":"Observation","status":"final","code":{"coding":[{"system":"http://loinc.org","code":"29463-7","display":"Body weight"}]},"subject":{"reference":"Patient/synthetic-1"},"effectiveDateTime":"2026-01-14","valueQuantity":{"value":72.50,"unit":"kg","system":"http://unitsofmeasure.org","code":"kg"}}"#;
+
+/// A synthetic Patient, invented for this test
+/// (<https://hl7.org/fhir/R4/patient.html>).
+const PATIENT: &str = r#"{"resourceType":"Patient","name":[{"family":"Synthetic","given":["Test"]}],"birthDate":"1984-03-02"}"#;
+
+/// Decodes `text` and asserts the encoding is the document it came from.
+fn round_trip_text<T: Json>(text: &str, root: &str) -> T {
+    let original: Value = serde_json::from_str(text).expect("the fixture is JSON");
+    let mut path = ElementPath::root(root);
+    let object = expect_object(&original, &path).expect("the fixture is an object");
+    let decoded = T::from_json(object, &mut path).expect("the fixture decodes");
+    let encoded = Value::Object(decoded.to_json().expect("the value encodes"));
+    assert_eq!(encoded, original, "{root}: the round trip is lossless");
+    decoded
+}
+
+#[test]
+fn a_clinical_resource_round_trips_in_every_version() {
+    let observation =
+        round_trip_text::<fhir_types::r4::observation::Observation>(OBSERVATION, "Observation");
+    let Some(fhir_types::r4::observation::ObservationValue::Quantity(quantity)) =
+        &observation.value
+    else {
+        panic!("the Observation carries a valueQuantity");
+    };
+    // The decimal keeps the lexical form the document carried
+    // (https://hl7.org/fhir/R4/datatypes.html#decimal).
+    assert_eq!(
+        quantity.value.as_ref().and_then(|v| v.value.as_deref()),
+        Some("72.50")
+    );
+    let patient = round_trip_text::<fhir_types::r4::patient::Patient>(PATIENT, "Patient");
+    assert_eq!(
+        patient
+            .name
+            .first()
+            .and_then(|name| name.family.as_ref())
+            .and_then(|family| family.value.as_deref()),
+        Some("Synthetic")
+    );
+    assert!(matches!(
+        round_trip_text::<fhir_types::r4::resource::Resource>(OBSERVATION, "Resource"),
+        fhir_types::r4::resource::Resource::Observation(_)
+    ));
+    round_trip_text::<fhir_types::r4b::observation::Observation>(OBSERVATION, "Observation");
+    round_trip_text::<fhir_types::r4b::patient::Patient>(PATIENT, "Patient");
+    round_trip_text::<fhir_types::r5::observation::Observation>(OBSERVATION, "Observation");
+    round_trip_text::<fhir_types::r5::patient::Patient>(PATIENT, "Patient");
+    round_trip_text::<fhir_types::r6::observation::Observation>(OBSERVATION, "Observation");
+    round_trip_text::<fhir_types::r6::patient::Patient>(PATIENT, "Patient");
+}
+
 fn decode_coding(
     text: &str,
 ) -> Result<fhir_types::r4b::coding::Coding, fhir_types::codec::DecodeError> {

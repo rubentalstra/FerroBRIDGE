@@ -665,21 +665,51 @@ impl super::super::codec::Json for ValueSet {
                         return Err(path.error(super::super::codec::DecodeErrorKind::ResourceType));
                     }
                 }
-                "id" => raw_id = Some(value),
-                "meta" => raw_meta = Some(value),
-                "implicitRules" => raw_implicit_rules = Some(value),
-                "_implicitRules" => raw_implicit_rules_element = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "text" => raw_text = Some(value),
-                "contained" => raw_contained = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
-                "identifier" => raw_identifier = Some(value),
-                "version" => raw_version = Some(value),
-                "_version" => raw_version_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "meta" => {
+                    raw_meta = Some(value);
+                }
+                "implicitRules" => {
+                    raw_implicit_rules = Some(value);
+                }
+                "_implicitRules" => {
+                    raw_implicit_rules_element = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "contained" => {
+                    raw_contained = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
+                "identifier" => {
+                    raw_identifier = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "_version" => {
+                    raw_version_element = Some(value);
+                }
                 "versionAlgorithmString" => {
                     raw_version_algorithm.value("String", value, path)?;
                 }
@@ -692,45 +722,123 @@ impl super::super::codec::Json for ValueSet {
                 "_versionAlgorithmCoding" => {
                     raw_version_algorithm.element("Coding", value, path)?;
                 }
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
-                "title" => raw_title = Some(value),
-                "_title" => raw_title_element = Some(value),
-                "status" => raw_status = Some(value),
-                "_status" => raw_status_element = Some(value),
-                "experimental" => raw_experimental = Some(value),
-                "_experimental" => raw_experimental_element = Some(value),
-                "date" => raw_date = Some(value),
-                "_date" => raw_date_element = Some(value),
-                "publisher" => raw_publisher = Some(value),
-                "_publisher" => raw_publisher_element = Some(value),
-                "contact" => raw_contact = Some(value),
-                "description" => raw_description = Some(value),
-                "_description" => raw_description_element = Some(value),
-                "useContext" => raw_use_context = Some(value),
-                "jurisdiction" => raw_jurisdiction = Some(value),
-                "immutable" => raw_immutable = Some(value),
-                "_immutable" => raw_immutable_element = Some(value),
-                "purpose" => raw_purpose = Some(value),
-                "_purpose" => raw_purpose_element = Some(value),
-                "copyright" => raw_copyright = Some(value),
-                "_copyright" => raw_copyright_element = Some(value),
-                "copyrightLabel" => raw_copyright_label = Some(value),
-                "_copyrightLabel" => raw_copyright_label_element = Some(value),
-                "approvalDate" => raw_approval_date = Some(value),
-                "_approvalDate" => raw_approval_date_element = Some(value),
-                "lastReviewDate" => raw_last_review_date = Some(value),
-                "_lastReviewDate" => raw_last_review_date_element = Some(value),
-                "effectivePeriod" => raw_effective_period = Some(value),
-                "topic" => raw_topic = Some(value),
-                "author" => raw_author = Some(value),
-                "editor" => raw_editor = Some(value),
-                "reviewer" => raw_reviewer = Some(value),
-                "endorser" => raw_endorser = Some(value),
-                "relatedArtifact" => raw_related_artifact = Some(value),
-                "compose" => raw_compose = Some(value),
-                "expansion" => raw_expansion = Some(value),
-                "scope" => raw_scope = Some(value),
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
+                "title" => {
+                    raw_title = Some(value);
+                }
+                "_title" => {
+                    raw_title_element = Some(value);
+                }
+                "status" => {
+                    raw_status = Some(value);
+                }
+                "_status" => {
+                    raw_status_element = Some(value);
+                }
+                "experimental" => {
+                    raw_experimental = Some(value);
+                }
+                "_experimental" => {
+                    raw_experimental_element = Some(value);
+                }
+                "date" => {
+                    raw_date = Some(value);
+                }
+                "_date" => {
+                    raw_date_element = Some(value);
+                }
+                "publisher" => {
+                    raw_publisher = Some(value);
+                }
+                "_publisher" => {
+                    raw_publisher_element = Some(value);
+                }
+                "contact" => {
+                    raw_contact = Some(value);
+                }
+                "description" => {
+                    raw_description = Some(value);
+                }
+                "_description" => {
+                    raw_description_element = Some(value);
+                }
+                "useContext" => {
+                    raw_use_context = Some(value);
+                }
+                "jurisdiction" => {
+                    raw_jurisdiction = Some(value);
+                }
+                "immutable" => {
+                    raw_immutable = Some(value);
+                }
+                "_immutable" => {
+                    raw_immutable_element = Some(value);
+                }
+                "purpose" => {
+                    raw_purpose = Some(value);
+                }
+                "_purpose" => {
+                    raw_purpose_element = Some(value);
+                }
+                "copyright" => {
+                    raw_copyright = Some(value);
+                }
+                "_copyright" => {
+                    raw_copyright_element = Some(value);
+                }
+                "copyrightLabel" => {
+                    raw_copyright_label = Some(value);
+                }
+                "_copyrightLabel" => {
+                    raw_copyright_label_element = Some(value);
+                }
+                "approvalDate" => {
+                    raw_approval_date = Some(value);
+                }
+                "_approvalDate" => {
+                    raw_approval_date_element = Some(value);
+                }
+                "lastReviewDate" => {
+                    raw_last_review_date = Some(value);
+                }
+                "_lastReviewDate" => {
+                    raw_last_review_date_element = Some(value);
+                }
+                "effectivePeriod" => {
+                    raw_effective_period = Some(value);
+                }
+                "topic" => {
+                    raw_topic = Some(value);
+                }
+                "author" => {
+                    raw_author = Some(value);
+                }
+                "editor" => {
+                    raw_editor = Some(value);
+                }
+                "reviewer" => {
+                    raw_reviewer = Some(value);
+                }
+                "endorser" => {
+                    raw_endorser = Some(value);
+                }
+                "relatedArtifact" => {
+                    raw_related_artifact = Some(value);
+                }
+                "compose" => {
+                    raw_compose = Some(value);
+                }
+                "expansion" => {
+                    raw_expansion = Some(value);
+                }
+                "scope" => {
+                    raw_scope = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1534,17 +1642,39 @@ impl super::super::codec::Json for ValueSetCompose {
         let mut raw_property_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "lockedDate" => raw_locked_date = Some(value),
-                "_lockedDate" => raw_locked_date_element = Some(value),
-                "inactive" => raw_inactive = Some(value),
-                "_inactive" => raw_inactive_element = Some(value),
-                "include" => raw_include = Some(value),
-                "exclude" => raw_exclude = Some(value),
-                "property" => raw_property = Some(value),
-                "_property" => raw_property_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "lockedDate" => {
+                    raw_locked_date = Some(value);
+                }
+                "_lockedDate" => {
+                    raw_locked_date_element = Some(value);
+                }
+                "inactive" => {
+                    raw_inactive = Some(value);
+                }
+                "_inactive" => {
+                    raw_inactive_element = Some(value);
+                }
+                "include" => {
+                    raw_include = Some(value);
+                }
+                "exclude" => {
+                    raw_exclude = Some(value);
+                }
+                "property" => {
+                    raw_property = Some(value);
+                }
+                "_property" => {
+                    raw_property_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1885,19 +2015,45 @@ impl super::super::codec::Json for ValueSetComposeInclude {
         let mut raw_copyright_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "system" => raw_system = Some(value),
-                "_system" => raw_system_element = Some(value),
-                "version" => raw_version = Some(value),
-                "_version" => raw_version_element = Some(value),
-                "concept" => raw_concept = Some(value),
-                "filter" => raw_filter = Some(value),
-                "valueSet" => raw_value_set = Some(value),
-                "_valueSet" => raw_value_set_element = Some(value),
-                "copyright" => raw_copyright = Some(value),
-                "_copyright" => raw_copyright_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "system" => {
+                    raw_system = Some(value);
+                }
+                "_system" => {
+                    raw_system_element = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "_version" => {
+                    raw_version_element = Some(value);
+                }
+                "concept" => {
+                    raw_concept = Some(value);
+                }
+                "filter" => {
+                    raw_filter = Some(value);
+                }
+                "valueSet" => {
+                    raw_value_set = Some(value);
+                }
+                "_valueSet" => {
+                    raw_value_set_element = Some(value);
+                }
+                "copyright" => {
+                    raw_copyright = Some(value);
+                }
+                "_copyright" => {
+                    raw_copyright_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2199,14 +2355,30 @@ impl super::super::codec::Json for ValueSetComposeIncludeConcept {
         let mut raw_designation: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
-                "designation" => raw_designation = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
+                "designation" => {
+                    raw_designation = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2465,15 +2637,33 @@ impl super::super::codec::Json for ValueSetComposeIncludeConceptDesignation {
         let mut raw_value_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "use" => raw_use = Some(value),
-                "additionalUse" => raw_additional_use = Some(value),
-                "value" => raw_value = Some(value),
-                "_value" => raw_value_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "use" => {
+                    raw_use = Some(value);
+                }
+                "additionalUse" => {
+                    raw_additional_use = Some(value);
+                }
+                "value" => {
+                    raw_value = Some(value);
+                }
+                "_value" => {
+                    raw_value_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2743,15 +2933,33 @@ impl super::super::codec::Json for ValueSetComposeIncludeFilter {
         let mut raw_value_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "property" => raw_property = Some(value),
-                "_property" => raw_property_element = Some(value),
-                "op" => raw_op = Some(value),
-                "_op" => raw_op_element = Some(value),
-                "value" => raw_value = Some(value),
-                "_value" => raw_value_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "property" => {
+                    raw_property = Some(value);
+                }
+                "_property" => {
+                    raw_property_element = Some(value);
+                }
+                "op" => {
+                    raw_op = Some(value);
+                }
+                "_op" => {
+                    raw_op_element = Some(value);
+                }
+                "value" => {
+                    raw_value = Some(value);
+                }
+                "_value" => {
+                    raw_value_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -3074,22 +3282,54 @@ impl super::super::codec::Json for ValueSetExpansion {
         let mut raw_contains: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "identifier" => raw_identifier = Some(value),
-                "_identifier" => raw_identifier_element = Some(value),
-                "next" => raw_next = Some(value),
-                "_next" => raw_next_element = Some(value),
-                "timestamp" => raw_timestamp = Some(value),
-                "_timestamp" => raw_timestamp_element = Some(value),
-                "total" => raw_total = Some(value),
-                "_total" => raw_total_element = Some(value),
-                "offset" => raw_offset = Some(value),
-                "_offset" => raw_offset_element = Some(value),
-                "parameter" => raw_parameter = Some(value),
-                "property" => raw_property = Some(value),
-                "contains" => raw_contains = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "identifier" => {
+                    raw_identifier = Some(value);
+                }
+                "_identifier" => {
+                    raw_identifier_element = Some(value);
+                }
+                "next" => {
+                    raw_next = Some(value);
+                }
+                "_next" => {
+                    raw_next_element = Some(value);
+                }
+                "timestamp" => {
+                    raw_timestamp = Some(value);
+                }
+                "_timestamp" => {
+                    raw_timestamp_element = Some(value);
+                }
+                "total" => {
+                    raw_total = Some(value);
+                }
+                "_total" => {
+                    raw_total_element = Some(value);
+                }
+                "offset" => {
+                    raw_offset = Some(value);
+                }
+                "_offset" => {
+                    raw_offset_element = Some(value);
+                }
+                "parameter" => {
+                    raw_parameter = Some(value);
+                }
+                "property" => {
+                    raw_property = Some(value);
+                }
+                "contains" => {
+                    raw_contains = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -3522,24 +3762,60 @@ impl super::super::codec::Json for ValueSetExpansionContains {
         let mut raw_contains: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "system" => raw_system = Some(value),
-                "_system" => raw_system_element = Some(value),
-                "abstract" => raw_abstract = Some(value),
-                "_abstract" => raw_abstract_element = Some(value),
-                "inactive" => raw_inactive = Some(value),
-                "_inactive" => raw_inactive_element = Some(value),
-                "version" => raw_version = Some(value),
-                "_version" => raw_version_element = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
-                "designation" => raw_designation = Some(value),
-                "property" => raw_property = Some(value),
-                "contains" => raw_contains = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "system" => {
+                    raw_system = Some(value);
+                }
+                "_system" => {
+                    raw_system_element = Some(value);
+                }
+                "abstract" => {
+                    raw_abstract = Some(value);
+                }
+                "_abstract" => {
+                    raw_abstract_element = Some(value);
+                }
+                "inactive" => {
+                    raw_inactive = Some(value);
+                }
+                "_inactive" => {
+                    raw_inactive_element = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "_version" => {
+                    raw_version_element = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
+                "designation" => {
+                    raw_designation = Some(value);
+                }
+                "property" => {
+                    raw_property = Some(value);
+                }
+                "contains" => {
+                    raw_contains = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -3879,11 +4155,21 @@ impl super::super::codec::Json for ValueSetExpansionContainsProperty {
         let mut raw_sub_property: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
                 "valueCode" => {
                     raw_value.value("Code", value, path)?;
                 }
@@ -3926,7 +4212,9 @@ impl super::super::codec::Json for ValueSetExpansionContainsProperty {
                 "_valueDecimal" => {
                     raw_value.element("Decimal", value, path)?;
                 }
-                "subProperty" => raw_sub_property = Some(value),
+                "subProperty" => {
+                    raw_sub_property = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -4197,11 +4485,21 @@ impl super::super::codec::Json for ValueSetExpansionContainsPropertySubProperty 
         let mut raw_value = super::super::codec::ChoiceSlot::default();
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
                 "valueCode" => {
                     raw_value.value("Code", value, path)?;
                 }
@@ -4766,11 +5064,21 @@ impl super::super::codec::Json for ValueSetExpansionParameter {
         let mut raw_value = super::super::codec::ChoiceSlot::default();
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
                 "valueString" => {
                     raw_value.value("String", value, path)?;
                 }
@@ -5189,13 +5497,27 @@ impl super::super::codec::Json for ValueSetExpansionProperty {
         let mut raw_uri_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "uri" => raw_uri = Some(value),
-                "_uri" => raw_uri_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "uri" => {
+                    raw_uri = Some(value);
+                }
+                "_uri" => {
+                    raw_uri_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -5404,13 +5726,27 @@ impl super::super::codec::Json for ValueSetScope {
         let mut raw_exclusion_criteria_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "inclusionCriteria" => raw_inclusion_criteria = Some(value),
-                "_inclusionCriteria" => raw_inclusion_criteria_element = Some(value),
-                "exclusionCriteria" => raw_exclusion_criteria = Some(value),
-                "_exclusionCriteria" => raw_exclusion_criteria_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "inclusionCriteria" => {
+                    raw_inclusion_criteria = Some(value);
+                }
+                "_inclusionCriteria" => {
+                    raw_inclusion_criteria_element = Some(value);
+                }
+                "exclusionCriteria" => {
+                    raw_exclusion_criteria = Some(value);
+                }
+                "_exclusionCriteria" => {
+                    raw_exclusion_criteria_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

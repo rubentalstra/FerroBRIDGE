@@ -171,24 +171,60 @@ impl super::super::codec::Json for Attachment {
         let mut raw_creation_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "contentType" => raw_content_type = Some(value),
-                "_contentType" => raw_content_type_element = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "data" => raw_data = Some(value),
-                "_data" => raw_data_element = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
-                "size" => raw_size = Some(value),
-                "_size" => raw_size_element = Some(value),
-                "hash" => raw_hash = Some(value),
-                "_hash" => raw_hash_element = Some(value),
-                "title" => raw_title = Some(value),
-                "_title" => raw_title_element = Some(value),
-                "creation" => raw_creation = Some(value),
-                "_creation" => raw_creation_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "contentType" => {
+                    raw_content_type = Some(value);
+                }
+                "_contentType" => {
+                    raw_content_type_element = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "data" => {
+                    raw_data = Some(value);
+                }
+                "_data" => {
+                    raw_data_element = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
+                "size" => {
+                    raw_size = Some(value);
+                }
+                "_size" => {
+                    raw_size_element = Some(value);
+                }
+                "hash" => {
+                    raw_hash = Some(value);
+                }
+                "_hash" => {
+                    raw_hash_element = Some(value);
+                }
+                "title" => {
+                    raw_title = Some(value);
+                }
+                "_title" => {
+                    raw_title_element = Some(value);
+                }
+                "creation" => {
+                    raw_creation = Some(value);
+                }
+                "_creation" => {
+                    raw_creation_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

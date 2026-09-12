@@ -32,6 +32,15 @@ no binary to download yet.
   documents. An integration test reads every tree, and
   `scripts/checks/versions.sh` fails when a provenance stamp stops naming the
   pin the matrix records.
+- `fhir-types` carries a feature table (#120): `r4`, `r4b`, `r5` and `r6` gate
+  the version modules, `terminology` carries the terminology root set the crate
+  has always held, and `resources` widens the declared root set to every
+  concrete resource each package defines with the complete closure of the
+  datatypes it references. The default set is every version plus `terminology`,
+  so a dependant that names no feature gets what it had. One emitted tree holds
+  the union and each item carries the `cfg` of the narrowest feature that
+  selects it, so the drift gate still covers the whole tree; a new
+  `fhir-types-features` CI job checks each feature on its own.
 - `docs/architecture.md` §3 supports both template generations (owner
   requirement, 2026-09-12): ADL 1.4 fetched as OPT 1.4 XML and ADL 2 fetched
   as AOM2 canonical JSON from the `adl2` route, decoded into the two OPT types

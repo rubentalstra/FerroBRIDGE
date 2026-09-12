@@ -12,7 +12,7 @@ use std::fmt::{self, Write};
 
 use crate::lower::{Cardinality, Field, Scalar, Target, TypeDef, TypeKind, Variant, VersionModule};
 use crate::naming::type_name;
-use crate::render::render_target;
+use crate::render::{render_target, resource_scope};
 
 /// The codec module path from a type file (`<version>/<module>.rs`).
 const C: &str = "super::super::codec";
@@ -88,8 +88,8 @@ pub fn render_codec(model: &VersionModule, out: &mut String, ty: &TypeDef) -> fm
         }
         TypeKind::Choice { variants, .. } => render_choice(model, out, ty, variants),
         TypeKind::ResourceEnum { resources } => {
-            render_resource_enum(out, ty, resources)?;
-            render_resource_serialize(out, ty, resources)?;
+            render_resource_enum(model, out, ty, resources)?;
+            render_resource_serialize(model, out, ty, resources)?;
             render_deserialize(out, &ty.name)
         }
         TypeKind::UnknownResource => Ok(()),
@@ -617,7 +617,12 @@ fn render_choice_from_json_parts(
     writeln!(out, "        }}\n    }}")
 }
 
-fn render_resource_enum(out: &mut String, ty: &TypeDef, resources: &[String]) -> fmt::Result {
+fn render_resource_enum(
+    model: &VersionModule,
+    out: &mut String,
+    ty: &TypeDef,
+    resources: &[String],
+) -> fmt::Result {
     writeln!(out, "\nimpl {C}::Json for {} {{", ty.name)?;
     writeln!(
         out,
@@ -625,6 +630,7 @@ fn render_resource_enum(out: &mut String, ty: &TypeDef, resources: &[String]) ->
     )?;
     writeln!(out, "        match self {{")?;
     for resource in resources {
+        out.push_str(&resource_scope(model, resource).cfg());
         writeln!(
             out,
             "            Self::{resource}(inner) => {C}::Json::to_json(inner.as_ref()),"
@@ -650,9 +656,10 @@ fn render_resource_enum(out: &mut String, ty: &TypeDef, resources: &[String]) ->
     )?;
     writeln!(out, "        match {C}::resource_type(object, path)? {{")?;
     for resource in resources {
+        out.push_str(&resource_scope(model, resource).cfg());
         writeln!(
             out,
-            "            {resource:?} => Ok(Self::{resource}(Box::new({C}::Json::from_json(object, path)?))),"
+            "            {resource:?} => Ok(Self::{resource}({C}::boxed(object, path)?)),"
         )?;
     }
     writeln!(
@@ -941,14 +948,20 @@ fn render_from_json(
                 }
             }
             Shape::Primitive => {
-                writeln!(out, "                {key:?} => raw_{slot} = Some(value),")?;
                 writeln!(
                     out,
-                    "                \"_{key}\" => raw_{slot}_element = Some(value),"
+                    "                {key:?} => {{{{ raw_{slot} = Some(value); }}}}"
+                )?;
+                writeln!(
+                    out,
+                    "                \"_{key}\" => {{{{ raw_{slot}_element = Some(value); }}}}"
                 )?;
             }
             Shape::Scalar(_) | Shape::Complex => {
-                writeln!(out, "                {key:?} => raw_{slot} = Some(value),")?;
+                writeln!(
+                    out,
+                    "                {key:?} => {{{{ raw_{slot} = Some(value); }}}}"
+                )?;
             }
         }
     }
@@ -1447,7 +1460,12 @@ fn render_choice_arm(
 }
 
 /// The resource enum's `Serialize`: the resource it holds writes itself.
-fn render_resource_serialize(out: &mut String, ty: &TypeDef, resources: &[String]) -> fmt::Result {
+fn render_resource_serialize(
+    model: &VersionModule,
+    out: &mut String,
+    ty: &TypeDef,
+    resources: &[String],
+) -> fmt::Result {
     writeln!(out, "\nimpl serde::Serialize for {} {{", ty.name)?;
     writeln!(
         out,
@@ -1455,6 +1473,7 @@ fn render_resource_serialize(out: &mut String, ty: &TypeDef, resources: &[String
     )?;
     writeln!(out, "        match self {{")?;
     for resource in resources {
+        out.push_str(&resource_scope(model, resource).cfg());
         writeln!(
             out,
             "            Self::{resource}(inner) => serde::Serialize::serialize(inner.as_ref(), serializer),"

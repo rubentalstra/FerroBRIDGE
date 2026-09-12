@@ -59,3 +59,19 @@ static R5: LazyLock<Package> = LazyLock::new(|| {
     Package::open(vendor_dir().join("hl7.fhir.r5.core"))
         .expect("the vendored hl7.fhir.r5.core package should load")
 });
+
+/// Every vendored package: the version module name, its directory, and the
+/// loaded package.
+fn packages() -> [(&'static str, PathBuf, &'static Package); 4] {
+    [
+        ("r4", vendor_dir().join("hl7.fhir.r4.core"), &R4),
+        ("r4b", r4b_dir(), &R4B),
+        ("r5", vendor_dir().join("hl7.fhir.r5.core"), &R5),
+        ("r6", vendor_dir().join("hl7.fhir.r6.core"), &R6),
+    ]
+}
+
+/// The directory of the generated crate.
+fn crate_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../crates/fhir-types")
+}

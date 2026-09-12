@@ -79,9 +79,15 @@ impl super::super::codec::Json for Extension {
         let mut raw_value = super::super::codec::ChoiceSlot::default();
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "url" => raw_url = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
                 "valueBase64Binary" => {
                     raw_value.value("Base64Binary", value, path)?;
                 }

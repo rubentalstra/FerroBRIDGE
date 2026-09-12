@@ -16,6 +16,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use crate::closure::{STRUCTURAL_TYPES, TypeClosure};
 use crate::fhir::StructureKind;
 use crate::naming::{backbone_name, field_name, module_name, type_name};
+use crate::roots::RootScope;
 use crate::snapshot::{ElementShape, Max, ResolvedElement, ResolvedStructure, TypeRef};
 
 /// The module holding every primitive type.
@@ -52,6 +53,16 @@ pub enum LowerError {
         /// The first origin.
         first: String,
         /// The second origin.
+        second: String,
+    },
+    /// Two structures lower to the same module (file) name.
+    #[error("{first} and {second} both lower to the module {module}")]
+    ModuleCollision {
+        /// The colliding module name.
+        module: String,
+        /// The first type name.
+        first: String,
+        /// The second type name.
         second: String,
     },
 }
@@ -183,6 +194,37 @@ pub struct TypeDef {
     /// a primitive: `Code` and `Id` specialize `String`, `Canonical` and `Url`
     /// specialize `Uri` (<https://hl7.org/fhir/R5/datatypes.html#primitive>).
     pub base: Option<String>,
+    /// The narrowest root set that reaches the type, so the feature it is
+    /// gated behind.
+    pub scope: RootScope,
+}
+
+/// Where a lowered structure lands in the generated module.
+#[derive(Debug, Clone, Copy)]
+struct Placement<'a> {
+    /// The Rust type name.
+    name: &'a str,
+    /// The module (file) the type lives in.
+    module: &'a str,
+    /// The feature scope of the type.
+    scope: RootScope,
+    /// Whether the structure is a FHIR primitive.
+    is_primitive: bool,
+    /// Whether the structure is a root-set resource.
+    is_resource: bool,
+}
+
+impl<'a> Placement<'a> {
+    /// The placement of a backbone element nested in this one.
+    fn nested(self, name: &'a str) -> Self {
+        Self {
+            name,
+            module: self.module,
+            scope: self.scope,
+            is_primitive: false,
+            is_resource: false,
+        }
+    }
 }
 
 /// The generated module for one FHIR version: every type it emits.
@@ -220,6 +262,15 @@ impl VersionModule {
             operations: Vec::new(),
             types: BTreeMap::new(),
         };
+        // NOTE: the two emitter-owned modules are claimed first, so a FHIR
+        // type whose module name would land in one is reported, never merged.
+        let mut owners: BTreeMap<String, String> = BTreeMap::from([
+            (
+                PRIMITIVES_MODULE.to_owned(),
+                String::from("(the primitives)"),
+            ),
+            (RESOURCE_MODULE.to_owned(), RESOURCE_ENUM.to_owned()),
+        ]);
         for structure in closure.structures().values() {
             let is_primitive = structure.kind == StructureKind::PrimitiveType;
             let name = type_name(&structure.name);
@@ -228,35 +279,43 @@ impl VersionModule {
             } else {
                 module_name(&name)
             };
-            let is_resource = closure.roots().contains(&structure.name);
+            if !is_primitive && let Some(first) = owners.insert(module.clone(), name.clone()) {
+                return Err(LowerError::ModuleCollision {
+                    module,
+                    first,
+                    second: name,
+                });
+            }
             let root_path = structure
                 .elements
                 .first()
                 .map_or_else(|| structure.name.clone(), |e| e.path.clone());
-            lower_struct(
-                &mut model,
-                structure,
-                &root_path,
-                &name,
-                &module,
+            let placement = Placement {
+                name: &name,
+                module: &module,
+                scope: closure
+                    .scope(&structure.name)
+                    .unwrap_or(RootScope::Resources),
                 is_primitive,
-                is_resource,
-            )?;
+                is_resource: closure.roots().contains(&structure.name),
+            };
+            lower_struct(&mut model, structure, &root_path, placement)?;
         }
         let resources: Vec<String> = closure.roots().iter().map(|name| type_name(name)).collect();
         model.insert(TypeDef {
             name: RESOURCE_ENUM.to_owned(),
             module: RESOURCE_MODULE.to_owned(),
             docs: Docs {
-                short: Some(String::from("A resource of the terminology root set, or an unknown resource carried as JSON.")),
+                short: Some(String::from("A resource of the root set, or an unknown resource carried as JSON.")),
                 definition: Some(
-                    format!("The abstract Resource type (https://hl7.org/fhir/{}/resource.html) as the root set closes over it: one variant per root-set resource, and UnknownResource for any other resource type met inside a Bundle entry or a contained list.", version_module.to_uppercase()),
+                    format!("The abstract Resource type (https://hl7.org/fhir/{}/resource.html) as the root set closes over it: one variant per root-set resource the enabled features select, and UnknownResource for any other resource type met inside a Bundle entry or a contained list.", version_module.to_uppercase()),
                 ),
             },
             kind: TypeKind::ResourceEnum { resources },
             is_primitive: false,
             is_resource: false,
             base: None,
+            scope: RootScope::Terminology,
         }, "the Resource enum")?;
         model.insert(TypeDef {
             name: UNKNOWN_RESOURCE.to_owned(),
@@ -264,12 +323,13 @@ impl VersionModule {
             docs: Docs {
                 short: Some(String::from("A resource outside the root set, kept as its JSON body.")),
                 definition: Some(String::from(
-                    "Carries the resourceType and the complete JSON object so a Bundle or a contained resource of a type the terminology surface does not model round-trips unchanged.",
+                    "Carries the resourceType and the complete JSON object so a Bundle or a contained resource of a type outside the root set round-trips unchanged.",
                 )),
             },
             kind: TypeKind::UnknownResource,
             is_primitive: false,
             is_resource: false,
+            scope: RootScope::Terminology,
             base: None,
         }, "the UnknownResource struct")?;
         model.box_cycles();
@@ -287,6 +347,22 @@ impl VersionModule {
         }
         self.types.insert(ty.name.clone(), ty);
         Ok(())
+    }
+
+    /// The feature scope of `module`: the narrowest scope its types carry.
+    ///
+    /// A module holds one root structure with its backbone elements and choice
+    /// enums, so the scopes agree; the primitives module is the exception, and
+    /// a primitive only the wide root set reaches still compiles under the
+    /// narrower feature.
+    #[must_use]
+    pub fn module_scope(&self, module: &str) -> RootScope {
+        self.types
+            .values()
+            .filter(|ty| ty.module == module)
+            .map(|ty| ty.scope)
+            .min()
+            .unwrap_or(RootScope::Terminology)
     }
 
     /// The modules of the model, in name order, each with its types in name order.
@@ -428,11 +504,15 @@ fn lower_struct(
     model: &mut VersionModule,
     structure: &ResolvedStructure,
     path: &str,
-    name: &str,
-    module: &str,
-    is_primitive: bool,
-    is_resource: bool,
+    placement: Placement<'_>,
 ) -> Result<(), LowerError> {
+    let Placement {
+        name,
+        module,
+        scope,
+        is_primitive,
+        is_resource,
+    } = placement;
     let root_docs = structure.element(path).map(docs_of).unwrap_or_default();
     let mut fields = Vec::new();
     for element in structure.children_of(path).cloned().collect::<Vec<_>>() {
@@ -469,13 +549,14 @@ fn lower_struct(
                         is_primitive: false,
                         base: None,
                         is_resource: false,
+                        scope,
                     },
                     &element.path,
                 )?;
                 Target::Named(enum_name)
             }
             ElementShape::Typed(types) => {
-                lower_typed(model, structure, &element, types, module, is_primitive)?
+                lower_typed(model, structure, &element, types, placement)?
             }
         };
         fields.push(Field {
@@ -503,6 +584,7 @@ fn lower_struct(
                 .flatten()
                 .and_then(|url| url.rsplit('/').next())
                 .map(type_name),
+            scope,
         },
         path,
     )
@@ -555,9 +637,9 @@ fn lower_typed(
     structure: &ResolvedStructure,
     element: &ResolvedElement,
     types: &[TypeRef],
-    module: &str,
-    is_primitive: bool,
+    placement: Placement<'_>,
 ) -> Result<Target, LowerError> {
+    let is_primitive = placement.is_primitive;
     let Some(only) = types.first() else {
         return Err(LowerError::EmptyChoice {
             path: element.path.clone(),
@@ -585,15 +667,7 @@ fn lower_typed(
         Ok(Target::Inline(scalar_for(scalar_name)))
     } else if only.code == "BackboneElement" || only.code == "Element" {
         let nested = backbone_name(&element.path);
-        lower_struct(
-            model,
-            structure,
-            &element.path,
-            &nested,
-            module,
-            false,
-            false,
-        )?;
+        lower_struct(model, structure, &element.path, placement.nested(&nested))?;
         Ok(Target::Named(nested))
     } else if only.code == "Resource" {
         Ok(Target::Named(RESOURCE_ENUM.to_owned()))

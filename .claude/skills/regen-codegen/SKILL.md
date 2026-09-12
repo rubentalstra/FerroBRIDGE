@@ -39,13 +39,17 @@ generator or its override map and regenerate here. Full discipline:
 
    A non-empty diff means the committed generated code was stale; commit the
    regenerated output. The `codegen-drift` job in `.github/workflows/ci.yml`
-   runs `cargo run --locked -p fhir-codegen -- emit --check` as the gate.
+   runs `cargo run --locked -p fhir-codegen -- emit --check` as the gate, over
+   the union tree: one emitted tree holds every declared root set and each item
+   carries the `cfg` of the narrowest feature that selects it, so the drift
+   check covers every feature at once.
 
 4. **Gate the result:**
 
    ```bash
    cargo build -p fhir-types
    cargo clippy -p fhir-types --all-targets -- -D warnings
+   cargo hack check -p fhir-types --each-feature --locked
    cargo nextest run -p fhir-codegen
    ```
 

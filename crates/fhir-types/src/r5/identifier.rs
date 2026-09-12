@@ -136,17 +136,39 @@ impl super::super::codec::Json for Identifier {
         let mut raw_assigner: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "use" => raw_use = Some(value),
-                "_use" => raw_use_element = Some(value),
-                "type" => raw_type = Some(value),
-                "system" => raw_system = Some(value),
-                "_system" => raw_system_element = Some(value),
-                "value" => raw_value = Some(value),
-                "_value" => raw_value_element = Some(value),
-                "period" => raw_period = Some(value),
-                "assigner" => raw_assigner = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "use" => {
+                    raw_use = Some(value);
+                }
+                "_use" => {
+                    raw_use_element = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "system" => {
+                    raw_system = Some(value);
+                }
+                "_system" => {
+                    raw_system_element = Some(value);
+                }
+                "value" => {
+                    raw_value = Some(value);
+                }
+                "_value" => {
+                    raw_value_element = Some(value);
+                }
+                "period" => {
+                    raw_period = Some(value);
+                }
+                "assigner" => {
+                    raw_assigner = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

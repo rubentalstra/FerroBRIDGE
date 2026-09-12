@@ -132,18 +132,42 @@ impl super::super::codec::Json for Coding {
         let mut raw_user_selected_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "system" => raw_system = Some(value),
-                "_system" => raw_system_element = Some(value),
-                "version" => raw_version = Some(value),
-                "_version" => raw_version_element = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
-                "userSelected" => raw_user_selected = Some(value),
-                "_userSelected" => raw_user_selected_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "system" => {
+                    raw_system = Some(value);
+                }
+                "_system" => {
+                    raw_system_element = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "_version" => {
+                    raw_version_element = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
+                "userSelected" => {
+                    raw_user_selected = Some(value);
+                }
+                "_userSelected" => {
+                    raw_user_selected_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

@@ -191,17 +191,39 @@ impl super::super::codec::Json for OperationOutcome {
                         return Err(path.error(super::super::codec::DecodeErrorKind::ResourceType));
                     }
                 }
-                "id" => raw_id = Some(value),
-                "meta" => raw_meta = Some(value),
-                "implicitRules" => raw_implicit_rules = Some(value),
-                "_implicitRules" => raw_implicit_rules_element = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "text" => raw_text = Some(value),
-                "contained" => raw_contained = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "issue" => raw_issue = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "meta" => {
+                    raw_meta = Some(value);
+                }
+                "implicitRules" => {
+                    raw_implicit_rules = Some(value);
+                }
+                "_implicitRules" => {
+                    raw_implicit_rules_element = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "contained" => {
+                    raw_contained = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "issue" => {
+                    raw_issue = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -549,20 +571,48 @@ impl super::super::codec::Json for OperationOutcomeIssue {
         let mut raw_expression_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "severity" => raw_severity = Some(value),
-                "_severity" => raw_severity_element = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "details" => raw_details = Some(value),
-                "diagnostics" => raw_diagnostics = Some(value),
-                "_diagnostics" => raw_diagnostics_element = Some(value),
-                "location" => raw_location = Some(value),
-                "_location" => raw_location_element = Some(value),
-                "expression" => raw_expression = Some(value),
-                "_expression" => raw_expression_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "severity" => {
+                    raw_severity = Some(value);
+                }
+                "_severity" => {
+                    raw_severity_element = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "details" => {
+                    raw_details = Some(value);
+                }
+                "diagnostics" => {
+                    raw_diagnostics = Some(value);
+                }
+                "_diagnostics" => {
+                    raw_diagnostics_element = Some(value);
+                }
+                "location" => {
+                    raw_location = Some(value);
+                }
+                "_location" => {
+                    raw_location_element = Some(value);
+                }
+                "expression" => {
+                    raw_expression = Some(value);
+                }
+                "_expression" => {
+                    raw_expression_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

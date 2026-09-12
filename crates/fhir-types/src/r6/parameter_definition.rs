@@ -157,22 +157,54 @@ impl super::super::codec::Json for ParameterDefinition {
         let mut raw_profile_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
-                "use" => raw_use = Some(value),
-                "_use" => raw_use_element = Some(value),
-                "min" => raw_min = Some(value),
-                "_min" => raw_min_element = Some(value),
-                "max" => raw_max = Some(value),
-                "_max" => raw_max_element = Some(value),
-                "documentation" => raw_documentation = Some(value),
-                "_documentation" => raw_documentation_element = Some(value),
-                "type" => raw_type = Some(value),
-                "_type" => raw_type_element = Some(value),
-                "profile" => raw_profile = Some(value),
-                "_profile" => raw_profile_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
+                "use" => {
+                    raw_use = Some(value);
+                }
+                "_use" => {
+                    raw_use_element = Some(value);
+                }
+                "min" => {
+                    raw_min = Some(value);
+                }
+                "_min" => {
+                    raw_min_element = Some(value);
+                }
+                "max" => {
+                    raw_max = Some(value);
+                }
+                "_max" => {
+                    raw_max_element = Some(value);
+                }
+                "documentation" => {
+                    raw_documentation = Some(value);
+                }
+                "_documentation" => {
+                    raw_documentation_element = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "_type" => {
+                    raw_type_element = Some(value);
+                }
+                "profile" => {
+                    raw_profile = Some(value);
+                }
+                "_profile" => {
+                    raw_profile_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

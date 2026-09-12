@@ -190,12 +190,24 @@ impl super::super::codec::Json for DataRequirement {
         let mut raw_sort: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "type" => raw_type = Some(value),
-                "_type" => raw_type_element = Some(value),
-                "profile" => raw_profile = Some(value),
-                "_profile" => raw_profile_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "_type" => {
+                    raw_type_element = Some(value);
+                }
+                "profile" => {
+                    raw_profile = Some(value);
+                }
+                "_profile" => {
+                    raw_profile_element = Some(value);
+                }
                 "subjectCodeableConcept" => {
                     raw_subject.value("CodeableConcept", value, path)?;
                 }
@@ -208,13 +220,27 @@ impl super::super::codec::Json for DataRequirement {
                 "_subjectReference" => {
                     raw_subject.element("Reference", value, path)?;
                 }
-                "mustSupport" => raw_must_support = Some(value),
-                "_mustSupport" => raw_must_support_element = Some(value),
-                "codeFilter" => raw_code_filter = Some(value),
-                "dateFilter" => raw_date_filter = Some(value),
-                "limit" => raw_limit = Some(value),
-                "_limit" => raw_limit_element = Some(value),
-                "sort" => raw_sort = Some(value),
+                "mustSupport" => {
+                    raw_must_support = Some(value);
+                }
+                "_mustSupport" => {
+                    raw_must_support_element = Some(value);
+                }
+                "codeFilter" => {
+                    raw_code_filter = Some(value);
+                }
+                "dateFilter" => {
+                    raw_date_filter = Some(value);
+                }
+                "limit" => {
+                    raw_limit = Some(value);
+                }
+                "_limit" => {
+                    raw_limit_element = Some(value);
+                }
+                "sort" => {
+                    raw_sort = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -533,15 +559,33 @@ impl super::super::codec::Json for DataRequirementCodeFilter {
         let mut raw_code: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "path" => raw_path = Some(value),
-                "_path" => raw_path_element = Some(value),
-                "searchParam" => raw_search_param = Some(value),
-                "_searchParam" => raw_search_param_element = Some(value),
-                "valueSet" => raw_value_set = Some(value),
-                "_valueSet" => raw_value_set_element = Some(value),
-                "code" => raw_code = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "path" => {
+                    raw_path = Some(value);
+                }
+                "_path" => {
+                    raw_path_element = Some(value);
+                }
+                "searchParam" => {
+                    raw_search_param = Some(value);
+                }
+                "_searchParam" => {
+                    raw_search_param_element = Some(value);
+                }
+                "valueSet" => {
+                    raw_value_set = Some(value);
+                }
+                "_valueSet" => {
+                    raw_value_set_element = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -769,12 +813,24 @@ impl super::super::codec::Json for DataRequirementDateFilter {
         let mut raw_value = super::super::codec::ChoiceSlot::default();
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "path" => raw_path = Some(value),
-                "_path" => raw_path_element = Some(value),
-                "searchParam" => raw_search_param = Some(value),
-                "_searchParam" => raw_search_param_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "path" => {
+                    raw_path = Some(value);
+                }
+                "_path" => {
+                    raw_path_element = Some(value);
+                }
+                "searchParam" => {
+                    raw_search_param = Some(value);
+                }
+                "_searchParam" => {
+                    raw_search_param_element = Some(value);
+                }
                 "valueDateTime" => {
                     raw_value.value("DateTime", value, path)?;
                 }
@@ -1103,12 +1159,24 @@ impl super::super::codec::Json for DataRequirementSort {
         let mut raw_direction_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "path" => raw_path = Some(value),
-                "_path" => raw_path_element = Some(value),
-                "direction" => raw_direction = Some(value),
-                "_direction" => raw_direction_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "path" => {
+                    raw_path = Some(value);
+                }
+                "_path" => {
+                    raw_path_element = Some(value);
+                }
+                "direction" => {
+                    raw_direction = Some(value);
+                }
+                "_direction" => {
+                    raw_direction_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

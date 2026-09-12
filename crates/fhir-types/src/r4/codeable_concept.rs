@@ -89,11 +89,21 @@ impl super::super::codec::Json for CodeableConcept {
         let mut raw_text_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "coding" => raw_coding = Some(value),
-                "text" => raw_text = Some(value),
-                "_text" => raw_text_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "coding" => {
+                    raw_coding = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "_text" => {
+                    raw_text_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

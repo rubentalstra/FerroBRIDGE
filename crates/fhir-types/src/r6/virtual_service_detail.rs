@@ -128,9 +128,15 @@ impl super::super::codec::Json for VirtualServiceDetail {
         let mut raw_session_key_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "channelType" => raw_channel_type = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "channelType" => {
+                    raw_channel_type = Some(value);
+                }
                 "addressUrl" => {
                     raw_address.value("Url", value, path)?;
                 }
@@ -155,12 +161,24 @@ impl super::super::codec::Json for VirtualServiceDetail {
                 "_addressExtendedContactDetail" => {
                     raw_address.element("ExtendedContactDetail", value, path)?;
                 }
-                "additionalInfo" => raw_additional_info = Some(value),
-                "_additionalInfo" => raw_additional_info_element = Some(value),
-                "maxParticipants" => raw_max_participants = Some(value),
-                "_maxParticipants" => raw_max_participants_element = Some(value),
-                "sessionKey" => raw_session_key = Some(value),
-                "_sessionKey" => raw_session_key_element = Some(value),
+                "additionalInfo" => {
+                    raw_additional_info = Some(value);
+                }
+                "_additionalInfo" => {
+                    raw_additional_info_element = Some(value);
+                }
+                "maxParticipants" => {
+                    raw_max_participants = Some(value);
+                }
+                "_maxParticipants" => {
+                    raw_max_participants_element = Some(value);
+                }
+                "sessionKey" => {
+                    raw_session_key = Some(value);
+                }
+                "_sessionKey" => {
+                    raw_session_key_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

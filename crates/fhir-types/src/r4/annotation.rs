@@ -96,8 +96,12 @@ impl super::super::codec::Json for Annotation {
         let mut raw_text_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
                 "authorReference" => {
                     raw_author.value("Reference", value, path)?;
                 }
@@ -110,10 +114,18 @@ impl super::super::codec::Json for Annotation {
                 "_authorString" => {
                     raw_author.element("String", value, path)?;
                 }
-                "time" => raw_time = Some(value),
-                "_time" => raw_time_element = Some(value),
-                "text" => raw_text = Some(value),
-                "_text" => raw_text_element = Some(value),
+                "time" => {
+                    raw_time = Some(value);
+                }
+                "_time" => {
+                    raw_time_element = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "_text" => {
+                    raw_text_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

@@ -87,11 +87,21 @@ impl super::super::codec::Json for ContactDetail {
         let mut raw_telecom: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
-                "telecom" => raw_telecom = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
+                "telecom" => {
+                    raw_telecom = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

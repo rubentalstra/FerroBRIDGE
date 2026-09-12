@@ -467,42 +467,114 @@ impl super::super::codec::Json for ConceptMap {
                         return Err(path.error(super::super::codec::DecodeErrorKind::ResourceType));
                     }
                 }
-                "id" => raw_id = Some(value),
-                "meta" => raw_meta = Some(value),
-                "implicitRules" => raw_implicit_rules = Some(value),
-                "_implicitRules" => raw_implicit_rules_element = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "text" => raw_text = Some(value),
-                "contained" => raw_contained = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
-                "identifier" => raw_identifier = Some(value),
-                "version" => raw_version = Some(value),
-                "_version" => raw_version_element = Some(value),
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
-                "title" => raw_title = Some(value),
-                "_title" => raw_title_element = Some(value),
-                "status" => raw_status = Some(value),
-                "_status" => raw_status_element = Some(value),
-                "experimental" => raw_experimental = Some(value),
-                "_experimental" => raw_experimental_element = Some(value),
-                "date" => raw_date = Some(value),
-                "_date" => raw_date_element = Some(value),
-                "publisher" => raw_publisher = Some(value),
-                "_publisher" => raw_publisher_element = Some(value),
-                "contact" => raw_contact = Some(value),
-                "description" => raw_description = Some(value),
-                "_description" => raw_description_element = Some(value),
-                "useContext" => raw_use_context = Some(value),
-                "jurisdiction" => raw_jurisdiction = Some(value),
-                "purpose" => raw_purpose = Some(value),
-                "_purpose" => raw_purpose_element = Some(value),
-                "copyright" => raw_copyright = Some(value),
-                "_copyright" => raw_copyright_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "meta" => {
+                    raw_meta = Some(value);
+                }
+                "implicitRules" => {
+                    raw_implicit_rules = Some(value);
+                }
+                "_implicitRules" => {
+                    raw_implicit_rules_element = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "contained" => {
+                    raw_contained = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
+                "identifier" => {
+                    raw_identifier = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "_version" => {
+                    raw_version_element = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
+                "title" => {
+                    raw_title = Some(value);
+                }
+                "_title" => {
+                    raw_title_element = Some(value);
+                }
+                "status" => {
+                    raw_status = Some(value);
+                }
+                "_status" => {
+                    raw_status_element = Some(value);
+                }
+                "experimental" => {
+                    raw_experimental = Some(value);
+                }
+                "_experimental" => {
+                    raw_experimental_element = Some(value);
+                }
+                "date" => {
+                    raw_date = Some(value);
+                }
+                "_date" => {
+                    raw_date_element = Some(value);
+                }
+                "publisher" => {
+                    raw_publisher = Some(value);
+                }
+                "_publisher" => {
+                    raw_publisher_element = Some(value);
+                }
+                "contact" => {
+                    raw_contact = Some(value);
+                }
+                "description" => {
+                    raw_description = Some(value);
+                }
+                "_description" => {
+                    raw_description_element = Some(value);
+                }
+                "useContext" => {
+                    raw_use_context = Some(value);
+                }
+                "jurisdiction" => {
+                    raw_jurisdiction = Some(value);
+                }
+                "purpose" => {
+                    raw_purpose = Some(value);
+                }
+                "_purpose" => {
+                    raw_purpose_element = Some(value);
+                }
+                "copyright" => {
+                    raw_copyright = Some(value);
+                }
+                "_copyright" => {
+                    raw_copyright_element = Some(value);
+                }
                 "sourceUri" => {
                     raw_source.value("Uri", value, path)?;
                 }
@@ -527,7 +599,9 @@ impl super::super::codec::Json for ConceptMap {
                 "_targetCanonical" => {
                     raw_target.element("Canonical", value, path)?;
                 }
-                "group" => raw_group = Some(value),
+                "group" => {
+                    raw_group = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1153,19 +1227,45 @@ impl super::super::codec::Json for ConceptMapGroup {
         let mut raw_unmapped: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "source" => raw_source = Some(value),
-                "_source" => raw_source_element = Some(value),
-                "sourceVersion" => raw_source_version = Some(value),
-                "_sourceVersion" => raw_source_version_element = Some(value),
-                "target" => raw_target = Some(value),
-                "_target" => raw_target_element = Some(value),
-                "targetVersion" => raw_target_version = Some(value),
-                "_targetVersion" => raw_target_version_element = Some(value),
-                "element" => raw_element = Some(value),
-                "unmapped" => raw_unmapped = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "source" => {
+                    raw_source = Some(value);
+                }
+                "_source" => {
+                    raw_source_element = Some(value);
+                }
+                "sourceVersion" => {
+                    raw_source_version = Some(value);
+                }
+                "_sourceVersion" => {
+                    raw_source_version_element = Some(value);
+                }
+                "target" => {
+                    raw_target = Some(value);
+                }
+                "_target" => {
+                    raw_target_element = Some(value);
+                }
+                "targetVersion" => {
+                    raw_target_version = Some(value);
+                }
+                "_targetVersion" => {
+                    raw_target_version_element = Some(value);
+                }
+                "element" => {
+                    raw_element = Some(value);
+                }
+                "unmapped" => {
+                    raw_unmapped = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1466,14 +1566,30 @@ impl super::super::codec::Json for ConceptMapGroupElement {
         let mut raw_target: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
-                "target" => raw_target = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
+                "target" => {
+                    raw_target = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1783,19 +1899,45 @@ impl super::super::codec::Json for ConceptMapGroupElementTarget {
         let mut raw_product: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
-                "equivalence" => raw_equivalence = Some(value),
-                "_equivalence" => raw_equivalence_element = Some(value),
-                "comment" => raw_comment = Some(value),
-                "_comment" => raw_comment_element = Some(value),
-                "dependsOn" => raw_depends_on = Some(value),
-                "product" => raw_product = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
+                "equivalence" => {
+                    raw_equivalence = Some(value);
+                }
+                "_equivalence" => {
+                    raw_equivalence_element = Some(value);
+                }
+                "comment" => {
+                    raw_comment = Some(value);
+                }
+                "_comment" => {
+                    raw_comment_element = Some(value);
+                }
+                "dependsOn" => {
+                    raw_depends_on = Some(value);
+                }
+                "product" => {
+                    raw_product = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2106,17 +2248,39 @@ impl super::super::codec::Json for ConceptMapGroupElementTargetDependsOn {
         let mut raw_display_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "property" => raw_property = Some(value),
-                "_property" => raw_property_element = Some(value),
-                "system" => raw_system = Some(value),
-                "_system" => raw_system_element = Some(value),
-                "value" => raw_value = Some(value),
-                "_value" => raw_value_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "property" => {
+                    raw_property = Some(value);
+                }
+                "_property" => {
+                    raw_property_element = Some(value);
+                }
+                "system" => {
+                    raw_system = Some(value);
+                }
+                "_system" => {
+                    raw_system_element = Some(value);
+                }
+                "value" => {
+                    raw_value = Some(value);
+                }
+                "_value" => {
+                    raw_value_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2391,17 +2555,39 @@ impl super::super::codec::Json for ConceptMapGroupUnmapped {
         let mut raw_url_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "mode" => raw_mode = Some(value),
-                "_mode" => raw_mode_element = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "mode" => {
+                    raw_mode = Some(value);
+                }
+                "_mode" => {
+                    raw_mode_element = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

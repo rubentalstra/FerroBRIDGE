@@ -189,22 +189,54 @@ impl super::super::codec::Json for Bundle {
                         return Err(path.error(super::super::codec::DecodeErrorKind::ResourceType));
                     }
                 }
-                "id" => raw_id = Some(value),
-                "meta" => raw_meta = Some(value),
-                "implicitRules" => raw_implicit_rules = Some(value),
-                "_implicitRules" => raw_implicit_rules_element = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "identifier" => raw_identifier = Some(value),
-                "type" => raw_type = Some(value),
-                "_type" => raw_type_element = Some(value),
-                "timestamp" => raw_timestamp = Some(value),
-                "_timestamp" => raw_timestamp_element = Some(value),
-                "total" => raw_total = Some(value),
-                "_total" => raw_total_element = Some(value),
-                "link" => raw_link = Some(value),
-                "entry" => raw_entry = Some(value),
-                "signature" => raw_signature = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "meta" => {
+                    raw_meta = Some(value);
+                }
+                "implicitRules" => {
+                    raw_implicit_rules = Some(value);
+                }
+                "_implicitRules" => {
+                    raw_implicit_rules_element = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "identifier" => {
+                    raw_identifier = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "_type" => {
+                    raw_type_element = Some(value);
+                }
+                "timestamp" => {
+                    raw_timestamp = Some(value);
+                }
+                "_timestamp" => {
+                    raw_timestamp_element = Some(value);
+                }
+                "total" => {
+                    raw_total = Some(value);
+                }
+                "_total" => {
+                    raw_total_element = Some(value);
+                }
+                "link" => {
+                    raw_link = Some(value);
+                }
+                "entry" => {
+                    raw_entry = Some(value);
+                }
+                "signature" => {
+                    raw_signature = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -561,16 +593,36 @@ impl super::super::codec::Json for BundleEntry {
         let mut raw_response: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "link" => raw_link = Some(value),
-                "fullUrl" => raw_full_url = Some(value),
-                "_fullUrl" => raw_full_url_element = Some(value),
-                "resource" => raw_resource = Some(value),
-                "search" => raw_search = Some(value),
-                "request" => raw_request = Some(value),
-                "response" => raw_response = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "link" => {
+                    raw_link = Some(value);
+                }
+                "fullUrl" => {
+                    raw_full_url = Some(value);
+                }
+                "_fullUrl" => {
+                    raw_full_url_element = Some(value);
+                }
+                "resource" => {
+                    raw_resource = Some(value);
+                }
+                "search" => {
+                    raw_search = Some(value);
+                }
+                "request" => {
+                    raw_request = Some(value);
+                }
+                "response" => {
+                    raw_response = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -927,21 +979,51 @@ impl super::super::codec::Json for BundleEntryRequest {
         let mut raw_if_none_exist_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "method" => raw_method = Some(value),
-                "_method" => raw_method_element = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
-                "ifNoneMatch" => raw_if_none_match = Some(value),
-                "_ifNoneMatch" => raw_if_none_match_element = Some(value),
-                "ifModifiedSince" => raw_if_modified_since = Some(value),
-                "_ifModifiedSince" => raw_if_modified_since_element = Some(value),
-                "ifMatch" => raw_if_match = Some(value),
-                "_ifMatch" => raw_if_match_element = Some(value),
-                "ifNoneExist" => raw_if_none_exist = Some(value),
-                "_ifNoneExist" => raw_if_none_exist_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "method" => {
+                    raw_method = Some(value);
+                }
+                "_method" => {
+                    raw_method_element = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
+                "ifNoneMatch" => {
+                    raw_if_none_match = Some(value);
+                }
+                "_ifNoneMatch" => {
+                    raw_if_none_match_element = Some(value);
+                }
+                "ifModifiedSince" => {
+                    raw_if_modified_since = Some(value);
+                }
+                "_ifModifiedSince" => {
+                    raw_if_modified_since_element = Some(value);
+                }
+                "ifMatch" => {
+                    raw_if_match = Some(value);
+                }
+                "_ifMatch" => {
+                    raw_if_match_element = Some(value);
+                }
+                "ifNoneExist" => {
+                    raw_if_none_exist = Some(value);
+                }
+                "_ifNoneExist" => {
+                    raw_if_none_exist_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1246,18 +1328,42 @@ impl super::super::codec::Json for BundleEntryResponse {
         let mut raw_outcome: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "status" => raw_status = Some(value),
-                "_status" => raw_status_element = Some(value),
-                "location" => raw_location = Some(value),
-                "_location" => raw_location_element = Some(value),
-                "etag" => raw_etag = Some(value),
-                "_etag" => raw_etag_element = Some(value),
-                "lastModified" => raw_last_modified = Some(value),
-                "_lastModified" => raw_last_modified_element = Some(value),
-                "outcome" => raw_outcome = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "status" => {
+                    raw_status = Some(value);
+                }
+                "_status" => {
+                    raw_status_element = Some(value);
+                }
+                "location" => {
+                    raw_location = Some(value);
+                }
+                "_location" => {
+                    raw_location_element = Some(value);
+                }
+                "etag" => {
+                    raw_etag = Some(value);
+                }
+                "_etag" => {
+                    raw_etag_element = Some(value);
+                }
+                "lastModified" => {
+                    raw_last_modified = Some(value);
+                }
+                "_lastModified" => {
+                    raw_last_modified_element = Some(value);
+                }
+                "outcome" => {
+                    raw_outcome = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1517,13 +1623,27 @@ impl super::super::codec::Json for BundleEntrySearch {
         let mut raw_score_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "mode" => raw_mode = Some(value),
-                "_mode" => raw_mode_element = Some(value),
-                "score" => raw_score = Some(value),
-                "_score" => raw_score_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "mode" => {
+                    raw_mode = Some(value);
+                }
+                "_mode" => {
+                    raw_mode_element = Some(value);
+                }
+                "score" => {
+                    raw_score = Some(value);
+                }
+                "_score" => {
+                    raw_score_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1742,13 +1862,27 @@ impl super::super::codec::Json for BundleLink {
         let mut raw_url_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "relation" => raw_relation = Some(value),
-                "_relation" => raw_relation_element = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "relation" => {
+                    raw_relation = Some(value);
+                }
+                "_relation" => {
+                    raw_relation_element = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

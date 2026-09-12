@@ -4,7 +4,9 @@
 //! The `emit` command: packages in, generated crate out, byte-deterministic.
 //!
 //! One run emits every FHIR version in [`EmitOptions::versions`]: each
-//! package lowers to its own module, and one `lib.rs` declares them all. The
+//! package lowers to its own module, and one `lib.rs` declares them all. One
+//! tree holds the union of the declared root sets, and each emitted item
+//! carries the `cfg` of the narrowest feature that selects it. The
 //! pipeline renders every file into a scratch directory, formats it with the
 //! pinned `rustfmt`, and then either replaces the generated tree or, in check
 //! mode, compares it with the tree on disk and reports every difference.
@@ -23,7 +25,7 @@ use crate::operations::{
 };
 use crate::package::{LoadError, Package};
 use crate::render::{render_lib, render_module, render_version_mod};
-use crate::roots::{MissingRoot, RootSet};
+use crate::roots::{MissingRoot, RootScope, RootSet};
 
 /// One FHIR version to emit: its module name and its vendored package.
 #[derive(Debug, Clone)]
@@ -231,7 +233,7 @@ fn lower_models(
 ) -> Result<Vec<VersionModule>, EmitError> {
     let mut root_sets = Vec::with_capacity(packages.len());
     for package in packages {
-        root_sets.push(RootSet::select(package)?);
+        root_sets.push(RootSet::select_scoped(package, RootScope::Resources)?);
     }
     // NOTE: the overlay pre-adopts R6 parameters into every earlier version
     // (`crate::ecosystem`); the R6 module is the source, named `r6`.
@@ -295,28 +297,34 @@ fn read_tree(
     Ok(out)
 }
 
+/// Formats the rendered tree with the pinned `rustfmt`.
+///
+/// The union tree holds thousands of files, more than one command line holds,
+/// so the paths go in batches (<https://doc.rust-lang.org/std/process/struct.Command.html>).
 fn rustfmt(
     root: &Path,
     files: &BTreeMap<String, String>,
     crate_dir: &Path,
 ) -> Result<(), EmitError> {
+    const BATCH: usize = 256;
     let config = crate_dir.join("../../rustfmt.toml");
-    let mut command = Command::new("rustfmt");
-    command.arg("--edition").arg("2024");
-    if config.is_file() {
-        command.arg("--config-path").arg(&config);
-    }
-    for relative in files.keys() {
-        command.arg(root.join(relative));
-    }
-    let output = command.output().map_err(|source| EmitError::Io {
-        path: PathBuf::from("rustfmt"),
-        source,
-    })?;
-    if !output.status.success() {
-        return Err(EmitError::Rustfmt {
-            stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
-        });
+    let paths: Vec<PathBuf> = files.keys().map(|relative| root.join(relative)).collect();
+    for batch in paths.chunks(BATCH) {
+        let mut command = Command::new("rustfmt");
+        command.arg("--edition").arg("2024");
+        if config.is_file() {
+            command.arg("--config-path").arg(&config);
+        }
+        command.args(batch);
+        let output = command.output().map_err(|source| EmitError::Io {
+            path: PathBuf::from("rustfmt"),
+            source,
+        })?;
+        if !output.status.success() {
+            return Err(EmitError::Rustfmt {
+                stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
+            });
+        }
     }
     Ok(())
 }

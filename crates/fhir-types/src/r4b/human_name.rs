@@ -152,21 +152,51 @@ impl super::super::codec::Json for HumanName {
         let mut raw_period: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "use" => raw_use = Some(value),
-                "_use" => raw_use_element = Some(value),
-                "text" => raw_text = Some(value),
-                "_text" => raw_text_element = Some(value),
-                "family" => raw_family = Some(value),
-                "_family" => raw_family_element = Some(value),
-                "given" => raw_given = Some(value),
-                "_given" => raw_given_element = Some(value),
-                "prefix" => raw_prefix = Some(value),
-                "_prefix" => raw_prefix_element = Some(value),
-                "suffix" => raw_suffix = Some(value),
-                "_suffix" => raw_suffix_element = Some(value),
-                "period" => raw_period = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "use" => {
+                    raw_use = Some(value);
+                }
+                "_use" => {
+                    raw_use_element = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "_text" => {
+                    raw_text_element = Some(value);
+                }
+                "family" => {
+                    raw_family = Some(value);
+                }
+                "_family" => {
+                    raw_family_element = Some(value);
+                }
+                "given" => {
+                    raw_given = Some(value);
+                }
+                "_given" => {
+                    raw_given_element = Some(value);
+                }
+                "prefix" => {
+                    raw_prefix = Some(value);
+                }
+                "_prefix" => {
+                    raw_prefix_element = Some(value);
+                }
+                "suffix" => {
+                    raw_suffix = Some(value);
+                }
+                "_suffix" => {
+                    raw_suffix_element = Some(value);
+                }
+                "period" => {
+                    raw_period = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
