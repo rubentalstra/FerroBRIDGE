@@ -3,7 +3,7 @@
 [package]
 name = "openehr-mapping-core"
 description = "The shared foundation of the FerroBRIDGE mapping languages: the common header model, the YAML loader, the mapping registry, the diagnostic model, and openEHR path resolution and execution over the Web Template"
-# 0.0.0 reserves the name; the crate line starts at 0.1.44 (docs/VERSIONS.md).
+# 0.0.0 reserves the name on crates.io; the crate line is the fhir-types line (docs/VERSIONS.md).
 version = "0.0.0"
 edition.workspace = true
 rust-version.workspace = true

@@ -3,7 +3,7 @@
 [package]
 name = "fhirconnect"
 description = "The FHIRconnect mapping language for Rust: the mapping file model and its validation, context resolution into an immutable program, and the bidirectional interpreter between openEHR compositions and FHIR resources"
-# 0.0.0 reserves the name; the crate line starts at 0.1.44 (docs/VERSIONS.md).
+# 0.0.0 reserves the name on crates.io; the crate line is the fhir-types line (docs/VERSIONS.md).
 version = "0.0.0"
 edition.workspace = true
 rust-version.workspace = true
