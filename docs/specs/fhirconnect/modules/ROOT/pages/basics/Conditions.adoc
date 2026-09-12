@@ -1,0 +1,282 @@
+= Conditions
+:navtitle: Condition
+
+Conditions implement conditional logic in FHIRconnect. The mapping method that has
+a condition is only executed if the parts in the condition are true. There are two types of conditions:
+`openehrCondition` and `fhirCondition`, one for each corresponding standard.
+
+Examples:
+[source,yaml]
+----
+- name: "example"
+  with:
+    fhir: "$fhirRoot"
+    openehr: "$archetype"
+  slotArchetype: "EVALUATION.problem_diagnosis.v1"
+  openehrCondition:
+    targetRoot: "$archetype"
+    targetAttribute: "data[at0001]/items[openEHR-EHR-CLUSTER.problem_qualifier.v2]/items[at0063]/defining_code/code_string"
+    operator: "one of"
+    criteria: "at0064"
+----
+
+[source,yaml]
+----
+  - name: "mapIdentifierForRoom"
+    with:
+      fhir: "$resource.identifier"
+      openehr: "$archetype/data[at0001]/items[at0018]/items[at0023]"
+    fhirCondition:
+      targetRoot: "$resource.identifier"
+      targetAttribute: "type.coding.code"
+      operator: "one of"
+      criteria: "room"
+----
+
+== targetRoot
+
+Each condition has 4 fields. The `targetRoot` is the first one. It defines what element is returned once filtered. This is important since the returned element is matched against the path in the `with` method. If these do
+not align, FHIRconnect will not be able to filter correctly and the engine should return an error here.
+
+[source,yaml]
+----
+  - name: "mapIdentifierForRoom"
+    with:
+      fhir: "$resource.identifier" # same path 0..n
+      openehr: "$archetype/data[at0001]/items[at0018]/items[at0023]"
+    fhirCondition:
+      targetRoot: "$resource.identifier" # same path 0..n
+----
+In the `fhirCondition` example, the `$resource.identifier` is the same in both paths. The condition is applied
+to each element in the identifier (0..n), and the `with` method only executes the mapping for those identifiers for which
+the condition is true.
+
+Meanwhile, for the following example, the condition method would try to filter on
+`type`, which does not match the element in the `with:` statement. This would result in an error.
+
+[source,yaml]
+----
+  - name: "mapIdentifierForRoom"
+    with:
+      fhir: "$resource.identifier" # same path 0..n
+      openehr: "$archetype/data[at0001]/items[at0018]/items[at0023]"
+    fhirCondition:
+      targetRoot: "$resource.identifier.type" # not the same since references type
+----
+
+== targetAttribute
+
+The `targetAttribute` is used to specify the path the filter is applied to. The example below in FHIRPath would be
+written as `$resource.identifier.where(type.coding.code="room")`, therefore checking for the code `type` and returning
+the identifier entries that match. These are the ones that are mapped in the `with:` method.
+[source,yaml]
+----
+  - name: "mapIdentifierForRoom"
+    with:
+      fhir: "$resource.identifier"
+      openehr: "$archetype/data[at0001]/items[at0018]/items[at0023]"
+    fhirCondition:
+      targetRoot: "$resource.identifier" # same except for type
+      targetAttribute: "type.coding.code" # access child nodes
+      operator: "one of"
+      criteria: "room"
+----
+
+In the following example, only the `encounter-id-1245` would be mapped, since it fits the condition. The `bed` code would be
+ignored.
+[source,json]
+----
+"identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "room" //would be mapped
+                }
+              ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "encounter-id-1245"
+          },
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "bed" //wouldn't be mapped
+                }
+              ]
+            },
+            "system": "http://hospital.smarthealthit.org",
+            "value": "encounter-id-12asdasdasd45"
+          }
+        ],
+----
+
+It is also important to mention that conditions are always applied on the input data. They do not
+filter on the data that is currently mapped. When we map a FHIR resource into openEHR, only the fhirConditions are
+processed and in case of openEHR to FHIR it's the other way around. So e.g. the openEHRCondition are not applied via
+mapping-time to the openEHR data being currently mapped. The use of Attributes is also supported, in this case
+the values need to be written as a yaml list using `-`.
+
+Conditions can also be unattached to the path contained in the `with:` method and point to a different path.
+This is sometimes necessary since there can be factors that influence the mapping in other places.
+These paths are handled as simple true/false and therefore differ in the way
+they interact with the `with:` method.
+
+[source,yaml]
+----
+  - name: "room"
+    with:
+      fhir: "$resource.location.identifier.value"
+      openehr: "$archetype/data[at0001]/items[at0018]/items[at0023]"
+    fhirCondition:
+      targetRoot: "$resource.some.otherPath"
+      targetAttribute: "coding.code"
+      operator: "one of"
+      criteria: "someValue"
+----
+
+== operator
+
+Once the path for the condition is chosen and how it relates (or does not relate) to the `with:` method is specified,
+an operator must also be specified.
+
+[width="100%",cols="18%,82%",options="header",]
+|===
+|Operators |Description
+|`one of` | checks if the path contains one of the elements contained in `criteria`, uses https://en.wikipedia.org/wiki/Logical_conjunction[*OR*]
+
+|`not of` | checks if the path does not contain one of the elements contained in `criteria`, uses https://en.wikipedia.org/wiki/Logical_conjunction[*AND*]
+
+|`empty` | checks if the path is empty; does not include a `criteria`, uses https://en.wikipedia.org/wiki/Logical_conjunction[*AND*]
+
+|`not empty` | checks if the path is not empty; does not include a `criteria`, uses https://en.wikipedia.org/wiki/Logical_conjunction[*AND*]
+
+|`type` | checks if the element in the path matches the given type in `criteria`, uses https://en.wikipedia.org/wiki/Logical_conjunction[*OR*]
+|===
+
+== criteria
+
+Defines the element that is combined with the operator and checked against the path. `criteria` is not required for
+`empty` or `not empty`. `criteria` can be either a single element, or as a list (using `-`).
+
+Examples:
+
+=== one of
+[source,yaml]
+----
+  - name: "mapIdentifierForRoom"
+    with:
+      fhir: "$resource.location.identifier"
+      openehr: "$archetype/data[at0001]/items[at0018]/items[at0023]"
+    fhirCondition:
+      targetRoot: "$resource.location.identifier" # same except for type
+      targetAttribute: "type.coding.code" # access child nodes
+      operator: "one of"
+      criteria: "room"
+----
+=== not of
+[source,yaml]
+----
+  - name: "statusCoded"
+    with:
+      fhir: "$resource.verificationStatus.coding"
+      openehr: "$archetype/items[at0004]/value/defining_code"
+    fhirCondition:
+      targetRoot: "$resource.verificationStatus.coding.code"
+      targetAttribute: "value"
+      operator: "not of"
+      criteria: "entered-in-error"
+----
+
+=== empty
+[source,yaml]
+----
+  - name: "bodySiteText"
+    with:
+      fhir: "$resource.bodysite.text"
+      openehr: "$archetype/items[at0001]" #Name of body site
+    fhirCondition:
+      targetRoot: "$resource.bodysite"
+      targetAttribute: "coding"
+      operator: "empty"
+----
+
+=== not empty
+[source,yaml]
+----
+  mappings:
+    - name: "period"
+      with:
+        fhir: "$resource.onset.ofType(Period)"
+        openehr: "$archetype/data[at0001]"
+        type: "NONE"
+      openehrCondition:
+        targetRoot: "$archetype/data[at0001]"
+        targetAttribute: "items[openEHR-EHR-CLUSTER.lebensphase.v0]"
+        operator: "not empty"
+----
+
+=== type
+[source,yaml]
+----
+  # openehrCondition example
+  - name: "bodySiteCoded"
+    with:
+      fhir: "$resource.bodysite"
+      openehr: "$archetype/items[at0001]" #Name of body site
+    openehrCondition:
+      targetRoot: "$archetype"
+      targetAttribute: "items[at0001]"
+      operator: "type"
+      criteria: "DV_CODED_TEXT"
+
+  # fhirCondition example
+  - name: "bodySiteCoding"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype"
+    fhirCondition:
+      targetRoot: "$fhirRoot"
+      operator: "type"
+      criteria: "CodeableConcept"
+----
+
+There can be more conditions (with AND connectors between them). Notice that the condition is an array.
+
+== Conditions in the preprocessor
+
+There is a special case where a condition can be contained in the preprocessor of a file.
+This logic defines that the mapping file is only executed if the given condition is met.
+There can be only one `fhirCondition` and/or one `openEHRCondition`.
+The Condition filters the amount of `$archetype` or `resources` that are to be mapped.
+
+Example:
+[source,yaml]
+----
+preprocessor:
+  fhirCondition:
+    targetRoot: "$resource.verificationStatus"
+    targetAttribute: "coding"
+    operator: "not of"
+    criteria: "entered-in-error"
+
+mappings:
+  - name: "period"
+    with:
+      fhir: "$resource.onset.ofType(Period)"
+      openehr: "$archetype/data[at0001]"
+      type: "NONE"
+    openehrCondition:
+      targetRoot: "$archetype/data[at0001]"
+      targetAttribute: "items[openEHR-EHR-CLUSTER.lebensphase.v0]"
+      operator: "not empty"
+----
+
+Here, The openEHR mapping will only be executed if the `verificationStatus` of the cluster
+is not `entered-in-error`. This is done to prevent wrongly entered data from being mapped into openEHR.
+

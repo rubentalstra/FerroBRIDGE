@@ -8,9 +8,10 @@ paths: ["scripts/vendor/*.sh", "**/vendor/**", "docs/specs/**"]
 # Vendored inputs
 
 External material enters this repository one way only: a committed fetch
-script, vendored verbatim, stamped with provenance. The first vendored tree is
-the five HL7 FHIR packages under `tools/fhir-codegen/vendor/` (#72); the
-corpora and definitions `docs/VERSIONS.md` pins follow the same rule (#71).
+script, vendored verbatim, stamped with provenance. Two trees exist: the five
+HL7 FHIR packages under `tools/fhir-codegen/vendor/` (#72), and the
+specification corpora under `docs/specs/`, one directory per corpus, fetched by
+`scripts/vendor/*.sh` from the pins in `docs/VERSIONS.md` (#71).
 
 ## The rule
 

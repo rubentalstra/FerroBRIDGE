@@ -1,0 +1,63 @@
+= DV_ORDINAL
+
+
+[IMPORTANT]
+====
+There is no transformation into FHIR directly, DV_ORDINAL describes:
+
+A data type that represents integral score values, e.g. pain, Apgar values, etc, where there is:
+
+a) implied ordering, b) no implication that the distance between each value is constant, and c) the total number of values is finite; d) integer values only.
+
+====
+
+== CodeableConcept
+https://hl7.org/fhir/R4/datatypes.html#CodeableConcept[CodeableConcept] to https://specifications.openehr.org/releases/RM/latest/data_types.html#_dv_ordinal_class[DV_ORDINAL
+]
+
+An option is to use Coding here. However, the mapping requires context information, such as the value of the coding,
+which is not provided by the Coding itself.
+Therefore, the mapping relies on the model representing the same, with the value coded as part of the ordinal.
+
+[cols="^1,^1,^2,^1,^1,^2",options="header"]
+|===
+| FHIRpath        | Cardinality | Comment                                                 | openEHR              | Cardinality | Comment
+| coding.code          | 0..n  |  | symbol    | 1..1                 | requires manual mapping!
+| -               |       | | value    | 1..1                 | has to be maintained by the archetype itself
+|===
+
+This will require a manual mapping, since DV_ORDINALS are modeled as local term_sets.
+
+Example
+[source, json]
+----
+{
+     "coding": [
+       {
+         "system": "https://somecoding.com",
+         "code": "resp4",
+         "display": "Respiratory system SOFA score 4"
+       }
+     ],
+     "text": "PaO₂/FiO₂ 300-399 mmHg"
+   }
+----
+
+
+[source, json]
+----
+ "_type" : "DV_ORDINAL",
+              "symbol" : {
+                "_type" : "DV_CODED_TEXT",
+                "value" : "PaO₂/FiO₂ 300-399 mmHg",
+                "defining_code" : {
+                  "_type" : "CODE_PHRASE",
+                  "terminology_id" : {
+                    "_type" : "TERMINOLOGY_ID",
+                    "value" : "local"
+                  },
+                  "code_string" : "at0002"
+                }
+              },
+              "value" : 4 # part of the archetype
+----

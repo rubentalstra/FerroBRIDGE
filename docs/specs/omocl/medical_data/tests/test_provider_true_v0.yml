@@ -1,0 +1,32 @@
+grammar: OMOCL/v1.0.0
+type: model
+metadata:
+  name: test_provider_true_v0
+  version: 1.0.0
+spec: # OHDSI OMOP v5.4
+  system: OMOP
+  version: 5.4
+  openEhrConfig:
+    archetype: openEHR-EHR-INSTRUCTION.test_provider_true.v0
+
+mappings:
+  - type: "ConditionOccurrence"
+    concept_id:
+      alternatives:
+        - path: "data[at0001]/items[at0002]"
+    condition_start_date:
+      alternatives:
+        - path: "data[at0001]/items[at0077]"
+        - path: "../context"
+    condition_end_date:
+      optional: true
+      alternatives:
+        - path: "data[at0001]/items[at0030]"
+    condition_status_concept_id:
+      optional: true
+      alternatives:
+        - code: 32893
+    provider_id:
+      optional: true
+      alternatives:
+        - path: "description[at0002]/items[at0091]"

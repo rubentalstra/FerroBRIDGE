@@ -9,3 +9,4 @@
 # (.claude/rules/vendored-inputs.md, .claude/rules/codegen.md).
 crates/fhir-types/src/** linguist-generated
 tools/fhir-codegen/vendor/** linguist-vendored -text
+docs/specs/** linguist-vendored -text

@@ -23,6 +23,15 @@ no binary to download yet.
 
 ### Added
 
+- The specification corpora under `docs/specs/` (#71), each fetched by a
+  committed `scripts/vendor/*.sh` from the commit `docs/VERSIONS.md` pins and
+  stamped with a `PROVENANCE.md`: the FHIRconnect specification source with its
+  two published schemas and the unmerged REST API chapter, the FHIRconnect
+  mapping library, the OMOCL corpus, the OMOP CDM v5.4 definitions with OHDSI's
+  rendered PostgreSQL DDL, and the three `STABLE` openEHR ITS-REST OpenAPI
+  documents. An integration test reads every tree, and
+  `scripts/checks/versions.sh` fails when a provenance stamp stops naming the
+  pin the matrix records.
 - `docs/architecture.md` §3 supports both template generations (owner
   requirement, 2026-09-12): ADL 1.4 fetched as OPT 1.4 XML and ADL 2 fetched
   as AOM2 canonical JSON from the `adl2` route, decoded into the two OPT types

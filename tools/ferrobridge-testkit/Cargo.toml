@@ -14,5 +14,10 @@ publish = false
 
 [dependencies]
 
+# The corpus suite re-hashes the vendored FHIRconnect schemas, so it needs a
+# sha256 the workspace does not otherwise carry.
+[dev-dependencies]
+sha2.workspace = true
+
 [lints]
 workspace = true

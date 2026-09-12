@@ -1,0 +1,45 @@
+grammar: OMOCL/v1.0.0
+type: model
+metadata:
+  name: Tobacco_smoking_summary_v1
+  version: 1.0.0
+spec: # OHDSI OMOP v5.4
+  system: OMOP
+  version: 5.4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.tobacco_smoking_summary.v1
+
+mappings:
+  - type: "Observation"
+    concept_id:
+      alternatives:
+        - code: 4041306
+    observation_date:
+      alternatives:
+        - path: "../context"
+    value:
+      alternatives:
+        - path: "/data[at0001]/items[at0089]"
+        - path: "/data[at0001]/items[at0043]"
+
+  - type: "Measurement"
+    concept_id:
+      alternatives:
+        - code: 4151768 # pack years
+    measurement_date:
+      alternatives:
+        - path: "../context"
+    value:
+      alternatives:
+        - path: "/data[at0001]/items[at0074]" # overall pack years
+
+  - type: "Observation"
+    concept_id:
+      alternatives:
+        - code: 44786668 # date quit tobacco smoking
+    observation_date:
+      alternatives:
+        - path: "../context"
+    value:
+      alternatives:
+        - path: "/data[at0001]/items[at0016]" # overall quit date

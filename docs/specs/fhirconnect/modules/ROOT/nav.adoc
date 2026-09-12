@@ -1,0 +1,93 @@
+* Grammar
+
+** Basics
+*** xref:basics/main.adoc[]
+*** xref:basics/body.adoc[]
+*** xref:basics/preprocessor.adoc[]
+*** xref:basics/Variables.adoc[]
+*** xref:basics/Conditions.adoc[]
+*** xref:basics/FollowedBy.adoc[]
+*** xref:basics/path_operators.adoc[]
+
+** Types of Mappings
+*** xref:types-of-mappings/main.adoc[]
+*** Data-type mappings
+**** xref:types-of-mappings/data-type/data-mappings.adoc[]
+
+**** Foundation types
+***** xref:types-of-mappings/data-type/String.adoc[]
+
+**** Basic Package
+***** xref:types-of-mappings/data-type/DV_IDENTIFIER.adoc[]
+
+**** Text Package
+***** xref:types-of-mappings/data-type/DV_TEXT.adoc[]
+***** xref:types-of-mappings/data-type/DV_CODED_TEXT.adoc[]
+***** xref:types-of-mappings/data-type/CODE_PHRASE.adoc[]
+***** xref:types-of-mappings/data-type/TERM_MAPPING.adoc[]
+
+**** Quantity Package
+***** xref:types-of-mappings/data-type/DV_INTERVAL.adoc[]
+***** xref:types-of-mappings/data-type/DV_ORDINAL.adoc[]
+***** xref:types-of-mappings/data-type/DV_SCALE.adoc[]
+***** xref:types-of-mappings/data-type/DV_QUANTITY.adoc[]
+***** xref:types-of-mappings/data-type/DV_COUNT.adoc[]
+***** xref:types-of-mappings/data-type/DV_PROPORTION.adoc[]
+
+**** Date Time Package
+***** xref:types-of-mappings/data-type/DV_DATE.adoc[]
+***** xref:types-of-mappings/data-type/DV_TIME.adoc[]
+***** xref:types-of-mappings/data-type/DV_DATE_TIME.adoc[]
+***** xref:types-of-mappings/data-type/DV_DURATION.adoc[]
+
+**** Encapsulated Package
+***** xref:types-of-mappings/data-type/DV_MULTIMEDIA.adoc[]
+***** xref:types-of-mappings/data-type/DV_PARSABLE.adoc[]
+
+**** Uri Package
+***** xref:types-of-mappings/data-type/DV_URI.adoc[]
+***** xref:types-of-mappings/data-type/DV_EHR_URI.adoc[]
+
+**** Common Information Model
+***** xref:types-of-mappings/data-type/PARTY_IDENTIFIED.adoc[]
+***** xref:types-of-mappings/data-type/NULL_FLAVOUR.adoc[]
+***** xref:types-of-mappings/data-type/EVENT.adoc[]
+// ***** xref:types-of-mappings/data-type/HISTORY.adoc[] WIP
+
+
+*** Concept-type mappings
+**** xref:types-of-mappings/concept-type/concept-mappings.adoc[]
+**** xref:types-of-mappings/concept-type/SlotArchetypes.adoc[]
+**** xref:types-of-mappings/concept-type/Reference.adoc[]
+**** xref:types-of-mappings/concept-type/manual.adoc[]
+**** xref:types-of-mappings/concept-type/HierarchyMappings.adoc[]
+
+
+** Recurrence
+*** xref:recurrence/main.adoc[]
+*** xref:recurrence/Overwriting.adoc[]
+*** xref:recurrence/TransformingList.adoc[]
+*** xref:recurrence/PopulatingAnEntry.adoc[]
+
+** Types of Mapping files
+*** xref:types-of-mapping-files/main.adoc[]
+*** xref:types-of-mapping-files/model-mappings.adoc[]
+*** xref:types-of-mapping-files/extension-mappings.adoc[]
+*** xref:types-of-mapping-files/extension-methods.adoc[]
+*** xref:types-of-mapping-files/composition-element.adoc[]
+*** xref:types-of-mapping-files/context-mappings.adoc[]
+*** xref:types-of-mapping-files/operational-mappings.adoc[]
+*** xref:types-of-mapping-files/TemplateAgnostic.adoc[]
+
+** Syntax
+*** xref:schema/schema.adoc[]
+
+* Engine
+** xref:engine/introduction.adoc[]
+** xref:engine/defaults-for-fields.adoc[]
+** xref:engine/Fail.adoc[]
+** xref:engine/bundles.adoc[]
+** xref:engine/id-management.adoc[]
+** xref:engine/demographics.adoc[]
+** xref:engine/references.adoc[]
+** xref:engine/fhirsearch-and-aql.adoc[]

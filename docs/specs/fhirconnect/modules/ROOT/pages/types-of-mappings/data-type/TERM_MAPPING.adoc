@@ -1,0 +1,48 @@
+= TERM_MAPPING
+
+For context see xref:types-of-mappings/data-type/DV_CODED_TEXT.adoc[]
+
+
+https://specifications.openehr.org/releases/RM/latest/data_types.html#_term_mapping_class[TERM_MAPPING] to
+https://hl7.org/fhir/R4/datatypes.html#Coding[Coding]
+
+[cols="^1,^1,^2,^1,^1,^2", options="header"]
+|===
+| FHIRpath  | Cardinality | Comment       | openEHR  | Cardinality | Comment
+| -         | -                  |         | match    | 1..1                  | hard coded to `=`, other operators not mappable to FHIR
+| -         | -                  |      | purpose  | 0..1                  |
+| coding    | 0..1               |     | target   | 1..1                  | see xref:types-of-mappings/data-type/CODE_PHRASE.adoc[]
+|===
+
+Example:
+[source,json]
+----
+{
+  "mappings": [
+    {
+      "_type": "TERM_MAPPING",
+      "match": "=",
+      "target": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "http://snomed.info/sct"
+        },
+        "code_string": "386661006"
+      }
+    }
+  ]
+}
+----
+
+To:
+[source,json]
+----
+"coding":  [
+  {
+    "system": "http://loinc.org",
+    "code": "LP74849-8",
+    "display": "Fever"
+  }
+}
+----

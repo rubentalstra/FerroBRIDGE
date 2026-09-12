@@ -1,0 +1,87 @@
+= CODE_PHRASE
+
+
+
+== Coding
+
+https://hl7.org/fhir/R4/datatypes.html#Coding[Coding] to https://specifications.openehr.org/releases/RM/latest/data_types.html#_code_phrase_class[CODE_PHRASE]
+[cols="^1,^1,^2,^1,^1,^2", options="header"]
+|===
+| FHIRpath        | Cardinality (FHIR) | Comment              | openEHR                  | Cardinality (openEHR) | Comment
+| system          | 0..1               |                      | terminology_id/name       | 1..1                  |
+| version         | 0..1               |                      | terminology_id/version_id | 1..1                  | populate with emtpy string if not provided
+| value           | 0..1               |                      | code_string               | 1..1                  |
+| display         | 0..1               |                      | value                     | 1..1                  |
+| userSelected    | 0..1               |                      | -                         | -                     |
+| -               | -                  |                      | preferred_term            | 0..1                  |
+| -               | -                  |                      | hyperlink                 | 0..1                  |
+| -               | -                  |                      | formatting                | 0..1                  |
+| -               | -                  |                      | mappings                  | 0..1                  |
+| -               | -                  |                      | language                  | 0..1                  |
+| -               | -                  |                      | encoding                  | 0..1                  |
+|===
+
+
+Example:
+[source,json]
+----
+{
+    "defining_code" : {
+      "_type" : "CODE_PHRASE",
+      "terminology_id" : {
+        "_type" : "TERMINOLOGY_ID",
+        "value" : "http://loinc.org"
+      },
+      "code_string" : "LP74849-8"
+    }
+}
+----
+
+To:
+[source,json]
+----
+"coding":  [
+  {
+    "system": "http://loinc.org",
+    "code": "LP74849-8",
+    "display": "Fever"
+  }
+}
+----
+
+== String
+https://specifications.openehr.org/releases/RM/latest/data_types.html#_code_phrase_class[CODE_PHRASE]
+to https://hl7.org/fhir/R4/datatypes.html#string[String]
+
+The transformation into a string is lacklustre when coming from a coded value. To
+maintain some of the content the coding should be parsed into the String and back as
+`terminology_id/value::code_string`, e.g. `http://loinc.org::LP74849-8`, that way the
+most important fields are contained. The double : are introduced since they represent a
+unique combination that usually does rarely appear in text.
+
+[WARNING]
+====
+When converting back, this may cause problems, providers need to make sure that the freetext elements do
+not contain a :: or even skip a back-transformation or even skip the back-transformation of `::`.
+====
+
+[IMPORTANT]
+====
+A transformation from a string that does not use `::` into a `CODE_PHRASE` is not possible due ot missing `TERMINOLOGY_ID` which is
+mandatory in openEHR.
+====
+
+[cols="^1,^1,^2,^1,^1,^2", options="header"]
+|===
+| FHIRpath  | Cardinality (FHIR) | Comment                 | openEHR                  | Cardinality (openEHR) | Comment
+| string    | 0..1               |   FHIR->openEHR if contains `::`  | terminology_id/name :: code_string | 1..1                  |  openEHR->FHIR
+| string    | 0..1               |                         | code_string | 1..1                  | openEHR->FHIR
+| -         | -                  |                         | preferred_term            | 0..1                  |
+| -         | -                  |                         | hyperlink                 | 0..1                  |
+| -         | -                  |                         | formatting                | 0..1                  |
+| -         | -                  |                         | mappings                  | 0..1                  |
+| -         | -                  |                         | language                  | 0..1                  |
+| -         | -                  |                         | encoding                  | 0..1                  |
+| -         | -                  |                         | -                         | -                     |
+|===
+

@@ -28,12 +28,24 @@ openEHR and two targets, so it answers to five sources:
    the bridge makes into a CDR, with its status codes, headers, and error
    bodies.
 
-The precise release of each, and which parts are vendored in-tree, are output
-of the research on issue #1. Once versions are pinned, the machine-readable
-artifacts (the FHIR packages, the mapping schemas) are vendored under
-`docs/specs/` or a codegen vendor directory with a `PROVENANCE.md` per tree
-(`vendored-inputs.md`), and this file gains the exact paths. Until then, read
-the published sources at the URLs above and cite them.
+The precise release of each is pinned in `docs/VERSIONS.md` with its ground in
+`docs/architecture.md` §2, and the machine-readable artefacts are vendored
+verbatim with a `PROVENANCE.md` per tree (`vendored-inputs.md`):
+
+- `docs/specs/fhirconnect/`: the two published mapping schemas (under
+  `build/site/FHIRconnect/v1.0.0/_attachments/`), the specification prose
+  (`modules/ROOT/pages/`), and the unmerged REST API chapter under
+  `draft-rest-api/`.
+- `docs/specs/fhirconnect-mapping-lib/`: the mapping library, the conformance
+  corpus, never an oracle.
+- `docs/specs/omocl/`: the OMOCL corpus.
+- `docs/specs/omop-cdm/`: the CDM v5.4 field and table definitions and the
+  PostgreSQL DDL.
+- `docs/specs/its-rest/`: the three `STABLE` ITS-REST 1.1.0 OpenAPI documents.
+- `tools/fhir-codegen/vendor/`: the HL7 FHIR packages the generator reads.
+
+Read the vendored text for a citation and name the file and section; the
+published URLs above are the same content at the pinned version.
 
 ## Hard rules
 

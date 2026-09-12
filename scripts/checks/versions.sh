@@ -24,7 +24,9 @@
 #   6. docs toolchain      the mdBook, mdbook-toc and mdbook-mermaid defaults of
 #                          .github/actions/docs-toolchain/action.yml against
 #                          docs/VERSIONS.md.
-#   7. licence             LICENSE is the Business Source License 1.1 and no
+#   7. vendored corpora    every docs/specs/*/PROVENANCE.md names the commit or
+#                          tag the docs/VERSIONS.md corpus row pins for it.
+#   8. licence             LICENSE is the Business Source License 1.1 and no
 #                          first-party file claims MIT or Apache-2.0 as its
 #                          own, crates/fhir-types excepted (Apache-2.0).
 #
@@ -290,6 +292,64 @@ else
   note "no $action yet, skipped"
 fi
 
+echo "== vendored corpora (docs/specs/*/PROVENANCE.md <-> docs/VERSIONS.md)"
+# A corpus row carries the repository and its commit or immutable tag in one
+# cell, so this reads the whole cell rather than its first token.
+pin_cell_of() {
+  awk -F'|' -v item="$1" '
+    NF >= 3 {
+      k = $2; v = $3
+      gsub(/`/, "", k); gsub(/`/, "", v)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", k)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+      if (k == item) { print v; exit }
+    }
+  ' "$2"
+}
+
+# The reference a pin cell names: its first 40-hex token, else the token after
+# the word `tag`.
+pinned_ref_of() {
+  awk '{
+    for (i = 1; i <= NF; i++) if ($i ~ /^[0-9a-f]{40}$/) { print $i; exit }
+    for (i = 1; i < NF; i++) if ($i == "tag") { t = $(i + 1); gsub(/[,.;:]+$/, "", t); print t; exit }
+  }' <<< "$1"
+}
+
+corpora="docs/specs/fhirconnect|FHIRconnect specification source
+docs/specs/fhirconnect/draft-rest-api|FHIRconnect REST API chapter (draft, unmerged)
+docs/specs/fhirconnect-mapping-lib|FHIRconnect mapping library (corpus, never an oracle)
+docs/specs/omocl|OMOCL corpus
+docs/specs/omop-cdm|OMOP CDM definitions and PostgreSQL DDL
+docs/specs/its-rest|openEHR ITS-REST OpenAPI"
+
+if [ -f docs/VERSIONS.md ]; then
+  agreed=0
+  expected=0
+  while IFS='|' read -r dir item; do
+    [ -n "$dir" ] || continue
+    expected=$((expected + 1))
+    if [ ! -f "$dir/PROVENANCE.md" ]; then
+      note "no $dir/PROVENANCE.md yet, skipped (run scripts/vendor/)"
+      continue
+    fi
+    cell="$(pin_cell_of "$item" docs/VERSIONS.md)"
+    want="$(pinned_ref_of "$cell")"
+    if [ -z "$cell" ]; then
+      bad "docs/VERSIONS.md has no '$item' row"
+    elif [ -z "$want" ]; then
+      bad "the docs/VERSIONS.md pin for '$item' names no commit and no tag"
+    elif ! grep -qF "$want" "$dir/PROVENANCE.md"; then
+      bad "$dir/PROVENANCE.md does not name the pin $want that docs/VERSIONS.md records for '$item'"
+    else
+      agreed=$((agreed + 1))
+    fi
+  done <<< "$corpora"
+  [ "$agreed" -eq "$expected" ] && note "OK: all $expected corpus provenance stamps name their pin"
+else
+  note "no docs/VERSIONS.md yet, skipped"
+fi
+
 echo "== licence (LICENSE <-> SPDX headers, manifests, badges, labels)"
 if [ -f LICENSE ]; then
   stale=0
@@ -306,7 +366,7 @@ if [ -f LICENSE ]; then
     stale=1
   done < <(git grep -n -E 'SPDX-License-Identifier: (MIT|Apache-2\.0)|License-MIT|License-Apache|^license = "(MIT|Apache-2\.0)"|^license: (MIT|Apache-2\.0)|image\.licenses="?(MIT|Apache)' \
     -- ':!LICENSE' ':!CHANGELOG.md' ':!scripts/checks/versions.sh' ':(glob,exclude)**/vendor/**' \
-    ':(glob,exclude)crates/fhir-types/**' || true)
+    ':(glob,exclude)docs/specs/**' ':(glob,exclude)crates/fhir-types/**' || true)
   [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types excepted, Apache-2.0)"
 else
   note "no LICENSE yet, skipped"

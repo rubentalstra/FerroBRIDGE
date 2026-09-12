@@ -1,0 +1,10 @@
+= Introduction
+:navtitle: Introduction
+
+Some of the logic to provide a working FHIRconnect spec needs to be covered by the engine. In this chapter
+the potential problems are identified and suggestions on how an engine should solve them are presented.
+
+[IMPORTANT]
+====
+These are recommendations.
+====
