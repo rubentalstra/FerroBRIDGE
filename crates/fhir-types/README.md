@@ -83,6 +83,25 @@ changes how numbers deserialize, so your own types keep reading and writing the
 JSON they always did. Reading a document uses `serde_json`'s raw value, so the
 `Deserialize` impls read `serde_json`'s format.
 
+### Converting to and from `serde_json::Value`
+
+A decimal is never silently altered, so the conversion out is fallible.
+`Value::into_serde_json` and `Value::to_serde_json` hand the document to
+`serde_json` only when every number comes back in the text the document
+carried; a number `serde_json` would write differently, or cannot hold at all,
+is a `ValueConversionError` naming the element path
+(`Observation.valueQuantity.value`), the lexical form and what `serde_json`
+writes. With `arbitrary_precision` on your side every form converts; without
+it, whole numbers and the decimals `f64` writes back convert and `1.50` is
+refused.
+
+`Value::from_serde_json` is the other direction and cannot fail. It takes the
+number in the text `serde_json` holds, which is the document's own form under
+`arbitrary_precision` and the `f64` rendering of it otherwise, so read a
+document whose decimals must stay exact through this crate's decoder
+(`serde_json::from_str::<fhir_types::codec::Value>`) rather than through
+`serde_json::Value`.
+
 ## Where it sits
 
 `fhir-types` is generated in [FerroBRIDGE](https://github.com/rubentalstra/FerroBRIDGE),

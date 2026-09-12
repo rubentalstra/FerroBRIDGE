@@ -23,8 +23,13 @@ to hand edits; the only hand-maintained files are `Cargo.toml` and this
 - The operation contracts stay the terminology set.
 - `schema::SCHEMAS` is the one element table per version: the XML codec and the
   path model read the same statics, so cardinality, the element path, the type
-  codes and `contentReference` are never copied into a second table. The
-  conversion to `serde_json::Value` at the HTTP edge is #122.
+  codes and `contentReference` are never copied into a second table.
+- `codec::Value` converts to `serde_json::Value` only when every number comes
+  back in the text the document carried, and otherwise reports a
+  `ValueConversionError` with the element path; `Value::from_serde_json` is the
+  infallible other direction for the HTTP edge and for fixtures. The lexical
+  `Value` stays the crate's own document model, and nothing here depends on the
+  dependant's `serde_json` feature set.
 - `Resource`-typed elements (`Bundle.entry.resource`, `contained`) hold the
   `Resource` enum over the root set plus `UnknownResource`, which keeps any
   other resource's JSON body so a Bundle round-trips.
@@ -34,3 +39,6 @@ to hand edits; the only hand-maintained files are `Cargo.toml` and this
 - The crate is Apache-2.0, the one first-party crate under a licence other
   than BUSL-1.1 (`docs/architecture.md` §4.1); `scripts/checks/versions.sh`
   carries the exception.
+- The move the crate arrived by is finished: the generator, the feature table,
+  the element table and the `serde_json::Value` conversion all landed. What the
+  crate does next is whatever the tracker files for it.

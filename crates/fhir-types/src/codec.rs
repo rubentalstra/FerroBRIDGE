@@ -11,6 +11,7 @@
 
 use std::collections::BTreeMap;
 use std::fmt;
+use std::str::FromStr;
 
 use serde_json::value::RawValue;
 
@@ -64,7 +65,7 @@ impl fmt::Display for NotANumber {
 
 impl std::error::Error for NotANumber {}
 
-impl std::str::FromStr for Number {
+impl FromStr for Number {
     type Err = NotANumber;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {
@@ -175,6 +176,171 @@ impl Value {
     #[must_use]
     pub const fn is_null(&self) -> bool {
         matches!(self, Self::Null)
+    }
+
+    /// This document as a `serde_json::Value`, keeping every number exact.
+    ///
+    /// A number converts only when `serde_json` writes it back in the text
+    /// this document carried, so a decimal is never altered on the way out:
+    /// FHIR regards `0.010` as different from `0.01`
+    /// (<https://hl7.org/fhir/R4/datatypes.html#decimal>). A `serde_json`
+    /// built with `arbitrary_precision` keeps every lexical form, and one
+    /// built without it keeps whole numbers and the decimals `f64` writes back
+    /// unchanged. Object keys stay in the sorted order [`Object`] holds them
+    /// in, which carries no meaning: "the order of properties of an object is
+    /// not significant in the JSON representation"
+    /// (<https://hl7.org/fhir/R4/json.html>).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ValueConversionError`] naming the element path of the first
+    /// number `serde_json` would alter or cannot hold.
+    pub fn into_serde_json(
+        self,
+        path: &mut Path,
+    ) -> Result<serde_json::Value, ValueConversionError> {
+        match self {
+            Self::Null => Ok(serde_json::Value::Null),
+            Self::Bool(flag) => Ok(serde_json::Value::Bool(flag)),
+            Self::Number(number) => convert_number(&number, path).map(serde_json::Value::Number),
+            Self::String(text) => Ok(serde_json::Value::String(text)),
+            Self::Array(items) => {
+                let mut converted = Vec::with_capacity(items.len());
+                for (index, item) in items.into_iter().enumerate() {
+                    converted.push(path.with_index("", index, |path| item.into_serde_json(path))?);
+                }
+                Ok(serde_json::Value::Array(converted))
+            }
+            Self::Object(members) => {
+                let mut converted = serde_json::Map::with_capacity(members.len());
+                for (key, member) in members {
+                    let value = convert_member(&key, member, path)?;
+                    converted.insert(key, value);
+                }
+                Ok(serde_json::Value::Object(converted))
+            }
+        }
+    }
+
+    /// A copy of this document as a `serde_json::Value`, keeping every number
+    /// exact.
+    ///
+    /// The document is cloned first, so prefer [`Value::into_serde_json`]
+    /// where the caller owns it. The number rule is the same.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ValueConversionError`] naming the element path of the first
+    /// number `serde_json` would alter or cannot hold.
+    pub fn to_serde_json(
+        &self,
+        path: &mut Path,
+    ) -> Result<serde_json::Value, ValueConversionError> {
+        self.clone().into_serde_json(path)
+    }
+
+    /// A `serde_json::Value` as this document.
+    ///
+    /// A number arrives in the text `serde_json` holds for it, which is the
+    /// form the document carried when `serde_json` was built with
+    /// `arbitrary_precision` and the `f64` rendering of it otherwise. Read a
+    /// FHIR document whose decimals must stay exact through this crate's own
+    /// [`Value`] decoder instead; this direction serves the HTTP edge and test
+    /// fixtures, where the document is already a `serde_json::Value`.
+    #[must_use]
+    pub fn from_serde_json(value: serde_json::Value) -> Self {
+        match value {
+            serde_json::Value::Null => Self::Null,
+            serde_json::Value::Bool(flag) => Self::Bool(flag),
+            serde_json::Value::Number(number) => Self::Number(Number(number.to_string())),
+            serde_json::Value::String(text) => Self::String(text),
+            serde_json::Value::Array(items) => {
+                Self::Array(items.into_iter().map(Self::from_serde_json).collect())
+            }
+            serde_json::Value::Object(members) => Self::Object(
+                members
+                    .into_iter()
+                    .map(|(key, member)| (key, Self::from_serde_json(member)))
+                    .collect(),
+            ),
+        }
+    }
+}
+
+/// Why a [`Value`] has no `serde_json::Value` form.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ValueConversionError {
+    /// `serde_json` writes the number back in another form.
+    LossyNumber {
+        /// The element path, for example `Observation.valueQuantity.value`.
+        path: String,
+        /// The number as the document carried it.
+        lexical: String,
+        /// The number as `serde_json` writes it.
+        rendered: String,
+    },
+    /// `serde_json` holds no number of this magnitude.
+    UnrepresentableNumber {
+        /// The element path, for example `Observation.valueQuantity.value`.
+        path: String,
+        /// The number as the document carried it.
+        lexical: String,
+    },
+}
+
+impl fmt::Display for ValueConversionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::LossyNumber {
+                path,
+                lexical,
+                rendered,
+            } => write!(f, "{path}: serde_json writes {lexical} as {rendered}"),
+            Self::UnrepresentableNumber { path, lexical } => {
+                write!(f, "{path}: serde_json holds no number {lexical}")
+            }
+        }
+    }
+}
+
+impl std::error::Error for ValueConversionError {}
+
+fn convert_number(
+    number: &Number,
+    path: &Path,
+) -> Result<serde_json::Number, ValueConversionError> {
+    let lexical = number.as_str();
+    let converted = serde_json::Number::from_str(lexical).map_err(|_| {
+        ValueConversionError::UnrepresentableNumber {
+            path: path.location(),
+            lexical: String::from(lexical),
+        }
+    })?;
+    let rendered = converted.to_string();
+    if rendered == lexical {
+        return Ok(converted);
+    }
+    Err(ValueConversionError::LossyNumber {
+        path: path.location(),
+        lexical: String::from(lexical),
+        rendered,
+    })
+}
+
+fn convert_member(
+    key: &str,
+    member: Value,
+    path: &mut Path,
+) -> Result<serde_json::Value, ValueConversionError> {
+    match member {
+        Value::Array(items) => {
+            let mut converted = Vec::with_capacity(items.len());
+            for (index, item) in items.into_iter().enumerate() {
+                converted.push(path.with_index(key, index, |path| item.into_serde_json(path))?);
+            }
+            Ok(serde_json::Value::Array(converted))
+        }
+        other => path.with(key, |path| other.into_serde_json(path)),
     }
 }
 
@@ -361,16 +527,22 @@ impl Path {
         self.lenient
     }
 
+    /// The dotted path, for example `Observation.valueQuantity.value`.
+    #[must_use]
+    pub fn location(&self) -> String {
+        self.segments.join(".")
+    }
+
     /// Runs `f` under `name`.
     ///
     /// # Errors
     ///
     /// Returns whatever `f` returns.
-    pub fn with<T>(
+    pub fn with<T, E>(
         &mut self,
         name: &str,
-        f: impl FnOnce(&mut Self) -> Result<T, DecodeError>,
-    ) -> Result<T, DecodeError> {
+        f: impl FnOnce(&mut Self) -> Result<T, E>,
+    ) -> Result<T, E> {
         self.segments.push(name.to_owned());
         let out = f(self);
         self.segments.pop();
@@ -382,12 +554,12 @@ impl Path {
     /// # Errors
     ///
     /// Returns whatever `f` returns.
-    pub fn with_index<T>(
+    pub fn with_index<T, E>(
         &mut self,
         name: &str,
         index: usize,
-        f: impl FnOnce(&mut Self) -> Result<T, DecodeError>,
-    ) -> Result<T, DecodeError> {
+        f: impl FnOnce(&mut Self) -> Result<T, E>,
+    ) -> Result<T, E> {
         self.segments.push(format!("{name}[{index}]"));
         let out = f(self);
         self.segments.pop();
@@ -398,7 +570,7 @@ impl Path {
     #[must_use]
     pub fn error(&self, kind: DecodeErrorKind) -> DecodeError {
         DecodeError {
-            path: self.segments.join("."),
+            path: self.location(),
             kind,
         }
     }

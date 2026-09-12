@@ -60,6 +60,15 @@ no binary to download yet.
   gives the type such a path resolves to. A test walks every vendored
   `StructureDefinition` of the emitted set and asserts the table agrees element
   by element.
+- `fhir-types` converts between its own `codec::Value` and `serde_json::Value`
+  (#122): `Value::into_serde_json` and `Value::to_serde_json` hand a document
+  to `serde_json` only when every number comes back in the text the document
+  carried, and otherwise return a typed error naming the element path, the
+  lexical form and what `serde_json` writes, so a decimal never changes on the
+  way out (FHIR regards `0.010` as different from `0.01`,
+  <https://hl7.org/fhir/R4/datatypes.html#decimal>). `Value::from_serde_json`
+  is the infallible other direction for the HTTP edge and test fixtures, and
+  the strict codec's refusals still apply to a document that arrives that way.
 - `ferrobridge-openehr` is the openEHR ITS-REST 1.1.0 client (#76): every call
   answers with an outcome enum whose variants are the statuses the governing
   operation documents, each carrying the upstream body, and a refused

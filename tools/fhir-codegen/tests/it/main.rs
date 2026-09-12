@@ -28,6 +28,7 @@ mod precision;
 mod roots;
 mod serialize;
 mod snapshot;
+mod value_conversion;
 mod xml;
 
 /// The vendored R4B core package, loaded once for every test.
