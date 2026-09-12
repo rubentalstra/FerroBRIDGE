@@ -782,7 +782,7 @@ sequenceDiagram
     participant P as Program
     participant W as Web Template index
     H->>O: POST /$tofhir Parameters{composition, templateId?, context?}
-    O->>O: canonical or FLAT (FLAT needs templateId); FLAT converted at the edge
+    O->>O: canonical or FLAT (FLAT needs templateId), FLAT converted at the edge
     O->>P: select program by template_id and profile
     P->>W: resolve every mapping path (pre-resolved at load)
     P->>P: traverse openEHR to FHIR, lenses, unidirectional skips
