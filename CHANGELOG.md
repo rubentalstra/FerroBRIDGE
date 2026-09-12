@@ -28,6 +28,25 @@ no binary to download yet.
   pipeline, the inbound create and the `$tofhir` sequences, the OMOP ETL flow,
   the crate graph, the FHIR identity derivation and the build order; the book's
   architecture tour gains the FHIRconnect pipeline and the ETL flow.
+- The generated FHIR model and its generator (#72), moved in from the sibling
+  terminology server by the owner decision of 2026-09-05: `crates/fhir-types`
+  at 0.1.98, the one first-party crate under Apache-2.0, with the per-version
+  R4, R4B, R5 and R6 modules, the strict JSON and XML codecs and the
+  terminology operation contracts; `tools/fhir-codegen`, which emits the crate
+  from the five vendored HL7 FHIR packages (380 MB, each with its
+  `PROVENANCE.md`); `scripts/vendor/fhir-packages.sh`, which refetches those
+  packages against the `docs/VERSIONS.md` pins; the `codegen-drift` CI job,
+  which regenerates in check mode and fails on any difference; and the
+  `regen-codegen` skill. Features, the public element table and the
+  `serde_json::Value` conversion follow in the next increments of #72.
+- The crates.io lane the published crate line needs (#72): the `crates` leg of
+  `release.yml`, gated by the `crates-io` environment and authenticated with
+  Trusted Publishing; `.github/workflows/publish-crates.yml`, the dispatch dry
+  run and recovery path; `scripts/release/publish-crates.sh`, which uploads
+  each member in dependency order and reads the registry back at each crate's
+  own manifest version; the `publish-dry-run` CI job; and
+  `scripts/checks/crate-version-guard.sh`, which fails a change that alters a
+  crate's packaged content without moving its version.
 - The workspace root discipline is complete (#20): a composite
   `.github/actions/setup-rust` action reads `rust-toolchain.toml` for every
   Rust-tier job, and every workspace member carries one integration binary at

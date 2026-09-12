@@ -35,8 +35,8 @@ FerroBRIDGE's own; keep that labelling in code and docs.
   (`fhir-types`, emitted by `tools/fhir-codegen` from the vendored HL7 FHIR
   packages; by owner decision on 2026-09-05 the crate and its generator move
   here from the sibling terminology server, which then consumes the crate from
-  crates.io; the move is the first unit of v0.0.2 (#72) and had not started
-  on 2026-09-12) and the OMOP CDM v5.4 row types from the OHDSI
+  crates.io; the move landed with #72's first increment) and the OMOP CDM v5.4
+  row types from the OHDSI
   `CommonDataModel` field definitions, with the OHDSI PostgreSQL DDL vendored
   verbatim beside them (`docs/architecture.md` §10). Every file marked
   `// @generated` is off-limits: change the generator and regenerate, never
@@ -59,6 +59,10 @@ set, six placeholder library crates at 0.0.0 holding their crates.io names,
 a thin `ferrobridge` binary that does nothing yet, and the testkit tool crate.
 Beside it:
 
+- `crates/fhir-types`: the generated FHIR model, Apache-2.0, emitted whole by
+  the generator below and never hand-edited.
+- `tools/fhir-codegen`: the generator, with the five vendored HL7 FHIR packages
+  under `vendor/` (380 MB, a `PROVENANCE.md` each) as its only input.
 - `.claude/`: the working discipline. `rules/` (the path-scoped and standing
   rules), `hooks/`, `skills/`, `agents/`, `memory/`.
 - `scripts/gh/`: the tracker helpers (`rel.sh`, `project.sh`, `labels.sh`).
@@ -66,13 +70,15 @@ Beside it:
   `versions.sh`, which fails when a file disagrees with the `docs/VERSIONS.md`
   pin matrix or claims a licence other than `BUSL-1.1`).
 - `.github/`: issue and pull-request templates, CODEOWNERS, Dependabot, and
-  six workflows that work on a repository with no code (CI, Docs,
-  Scorecard, CodeQL, SonarQube Cloud, Release). `ci.yml` runs its workflow, shell, container and
-  guard tier now and keeps the Rust tier gated behind a `Cargo.toml` detection
-  job; its `conclusion` job is the single required check on `main`
+  seven workflows (CI, Docs, Scorecard, CodeQL, SonarQube Cloud, Release,
+  Publish crates), six of which work on a repository with no code. `ci.yml`
+  runs its workflow, shell, container and guard tier now and keeps the Rust
+  tier gated behind a `Cargo.toml` detection job; its `conclusion` job is the
+  single required check on `main`
   (`docs/ci-cd.md`). `release.yml` is dormant until a `v*` tag is pushed and
   cuts a release from the changelog section, with its binary lane behind the
-  same `Cargo.toml` gate (`docs/release.md`).
+  same `Cargo.toml` gate, and its `crates` leg publishes the library crates
+  through Trusted Publishing (`docs/release.md`).
 - Root markdown: this file, `README.md`, and the community and governance set.
 
 When the workspace lands, each crate carries its own `CLAUDE.md` with
@@ -238,12 +244,14 @@ apply always. Read the relevant one before working in that area.
   the research that fixes the boundary.
 - `.claude/rules/vendored-inputs.md`: every external corpus is fetched by a
   committed `scripts/vendor/*.sh`, vendored verbatim, provenance-stamped.
-- `.claude/rules/ci-cd.md`, `ai-code-review.md`: the workflow-security
-  discipline and the advisory-analyzer policy (SonarQube Cloud, CodeQL).
+- `.claude/rules/ci-cd.md`, `ai-code-review.md`, `crates-publishing.md`: the
+  workflow-security discipline, the advisory-analyzer policy (SonarQube Cloud,
+  CodeQL), and the crates.io bump and publish rules.
 - `.claude/rules/issue-workflow.md`, `issue-relationships.md`,
   `project-board.md`: the tracker work style.
 - Skills: `/spec-lookup` (find the authoritative answer in oracle order),
-  `/next-task`, `/phase-done`, `/phase-status` (the issue loop).
+  `/next-task`, `/phase-done`, `/phase-status` (the issue loop),
+  `/regen-codegen` (regenerate `crates/fhir-types` and check for drift).
 - Agents: `spec-researcher`, `implementer` (both on Opus 5).
 
 ## Sibling projects

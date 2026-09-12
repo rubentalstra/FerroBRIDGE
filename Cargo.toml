@@ -19,9 +19,23 @@ publish = false
 
 # The authoritative third-party set. A crate takes a dependency with
 # dep.workspace = true, and every version is checked against crates.io on the
-# day it is added (.claude/rules/reliability.md). The set is empty while the
-# workspace is a skeleton; the first real dependency lands with #74.
+# day it is added (.claude/rules/reliability.md).
 [workspace.dependencies]
+# Serialization and the wire formats the FHIR codegen reads and writes.
+quick-xml = "0.42.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = { version = "1.0.151", features = ["raw_value"] }
+thiserror = "2.0.20"
+# anyhow is a binary-only error type (.claude/rules/rust-style.md).
+anyhow = "1.0.104"
+clap = { version = "4.6.6", features = ["derive"] }
+tempfile = "3.27.0"
+# Test-only.
+insta = { version = "1.48.0", features = ["json"] }
+proptest = "1.11.0"
+# Published from this workspace, so the requirement carries both a path and a
+# version: cargo resolves the path locally and the version on crates.io.
+fhir-types = { path = "crates/fhir-types", version = "0.1.98" }
 # Path-only, with no version: cargo strips the dev-dependency from a packaged
 # crates/* manifest instead of looking it up on crates.io.
 ferrobridge-testkit = { path = "tools/ferrobridge-testkit" }

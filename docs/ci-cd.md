@@ -47,6 +47,17 @@ clippy at `-D warnings`, nextest plus doctests, rustdoc at `-D warnings`,
 command in `.claude/rules/ci-cd.md` verbatim. The workspace pull request
 therefore changes nothing in CI; the lanes activate by themselves.
 
+Three tier-2 jobs guard what is published rather than what compiles.
+`codegen-drift` runs `cargo run --locked -p fhir-codegen -- emit --check`, so
+the committed `crates/fhir-types` tree always matches what the emitter produces
+from the vendored HL7 packages. `publish-dry-run` runs `cargo publish
+--workspace --dry-run --locked` with no cache, so a packaging failure surfaces
+on the pull request instead of in a release. `crate-version-guard` runs on pull
+requests only and fails a change that alters a crate's packaged content without
+moving that crate's version, which a published version's immutability makes a
+hard rule (`.claude/rules/crates-publishing.md`); the `no-crate-bump` label is
+its escape.
+
 `hashFiles()` cannot do this work. It is evaluated before checkout, when the
 workspace is empty, so a `if: hashFiles('Cargo.toml') != ''` gate never sees
 the file. A detection job that checks out and tests for the file is the
@@ -146,7 +157,7 @@ the state on 2026-09-05.
 | The roadmap board and the label bootstrap (`scripts/gh/labels.sh`) | done |
 | Registration at bestpractices.dev, with the returned badge added to the README | open |
 | Immutable releases, the repository setting that stops a published release's notes and assets from being edited | done: enabled by the owner. It is not reported by the REST API, so read it in Settings rather than from `gh api` (`docs/release.md`) |
-| A `crates-io` environment with a required reviewer, and crates.io Trusted Publishing entries per crate for `release.yml` and `publish-crates.yml` | open: the library crates are published (owner decision 2026-09-05, `docs/architecture.md` §7 and §13). The first version of each crate (0.0.0, the name reservation) was published locally by the owner on 2026-09-05 (#107), since a crate's first release cannot use OIDC |
+| A `crates-io` environment with a required reviewer, and crates.io Trusted Publishing entries per crate for `release.yml` and `publish-crates.yml` | open: both lanes exist and call `scripts/release/publish-crates.sh` (#72), so what is left is the owner's side. The first version of each crate (0.0.0, the name reservation) was published locally by the owner on 2026-09-05 (#107), since a crate's first release cannot use OIDC; `fhir-types` already exists on crates.io and its Trusted Publisher entries move here from the sibling terminology server |
 
 `conclusion` is the contract for the required-checks list. Add no other CI check
 to it: a job added to `ci.yml` joins the `conclusion` job's `needs` list

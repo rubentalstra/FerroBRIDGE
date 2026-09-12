@@ -3,11 +3,11 @@
 
 # Code generation: the intended discipline, pending the research
 
-**Nothing is generated yet, because no code exists.** This file is the rule
-that applies the moment a generated layer lands, written now so the decision is
-made against a standing discipline rather than in the middle of an
-implementation. The boundary itself is a research question on issue #1
-(`CLAUDE.md` §The two layers).
+**Two generated layers exist or are decided.** `crates/fhir-types` is emitted
+by `tools/fhir-codegen` from the vendored HL7 FHIR packages (landed with #72),
+and `omop-cdm`'s row types come from the OHDSI field definitions (#73). The
+boundary between generated and hand-written code is fixed in
+`docs/architecture.md` §10 (`CLAUDE.md` §The two layers).
 
 ## Why a generated layer is the expected shape
 

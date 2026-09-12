@@ -342,6 +342,70 @@ jobs:
       # which it reads from the workspace `rust-version`.
       - run: cargo hack check --rust-version --workspace --locked --all-targets
 
+  # The codegen drift gate (.claude/rules/codegen.md): regenerate
+  # crates/fhir-types from the vendored HL7 packages and fail on any
+  # difference. The emitter shells out to rustfmt, so the toolchain needs that
+  # component.
+  codegen-drift:
+    name: codegen-drift
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+        with:
+          components: rustfmt
+      - run: cargo run --locked -p fhir-codegen -- emit --check
+
+  # The per-crate bump rule (.claude/rules/crates-publishing.md): a pull
+  # request that changes a crate's packaged content moves that crate's version
+  # in the same change, because a published version is immutable. The
+  # `no-crate-bump` label is the escape for a diff that provably alters no
+  # packaged bytes.
+  crate-version-guard:
+    name: crate-version-guard
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'no-crate-bump')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Packaged crate content moved with its version
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: bash scripts/checks/crate-version-guard.sh "$BASE" "$HEAD"
+
+  # Every publishable crate packages and verifies as crates.io would build it,
+  # so a release's crates leg finds no surprise. No cache: the dry run checks
+  # the bytes a publish would upload (.claude/rules/ci-cd.md).
+  publish-dry-run:
+    name: publish-dry-run
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        with:
+          cache: false
+      - run: cargo publish --workspace --dry-run --locked
+
   dependency-review:
     name: dependency-review
     needs: detect
@@ -388,6 +452,9 @@ jobs:
       - doc
       - cargo-deny
       - msrv
+      - codegen-drift
+      - crate-version-guard
+      - publish-dry-run
       - dependency-review
     if: always()
     runs-on: ubuntu-latest
