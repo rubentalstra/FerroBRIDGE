@@ -197,7 +197,9 @@ default branch.
 | `openehr-base` | 0.0.64 (minor line 0.0; Apache-2.0) | the RM foundation types, including partial ISO 8601 dates (section 3); the line moved from 0.0.61 to 0.0.64 between passes with no change to the surfaces named here |
 | `openehr-rm` | 0.0.64 (Apache-2.0) | the RM 1.1.0 model, its canonical JSON codec and the BASE path parser |
 | `openehr-its` | 0.0.64 (BUSL-1.1 AND Apache-2.0) | the OPT 1.4 codec, the Web Template builder, the FLAT and canonical JSON codecs, the composition builder, the ITS-REST 1.1.0 data types; 0.0.64 adds a browser-capable feature set (`flat`, `opt14`, `json`, `rest-server`), so the bridge takes `default-features = false` and names what it uses |
-| `openehr-query` | 0.0.64 (BUSL-1.1) | the AQL 1.1.0 parser and canonical printer. `openehr-term` (Apache-2.0 AND CC-BY-SA-3.0), `openehr-am` and `openehr-lang` arrive transitively |
+| `openehr-query` | 0.0.64 (BUSL-1.1) | the AQL 1.1.0 parser and canonical printer. `openehr-term` (Apache-2.0 AND CC-BY-SA-3.0) and `openehr-lang` arrive transitively |
+| `openehr-am` | 0.0.64 (Apache-2.0) | the generated AM 2.4 model: the AOM2 `OPERATIONAL_TEMPLATE` and `ARCHETYPE_HRID` types an ADL 2 template decodes into (section 3); taken directly because the bridge names those types |
+| `openehr-adl` | not taken in the first cut (0.0.64, BUSL-1.1) | the ADL 2 text parser, flattener and OPT2 generator; the bridge fetches an ADL 2 template as AOM2 canonical JSON, so it never parses ADL source (section 3); taken later only if a CDR serves ADL 2 templates as text alone |
 | `fhir-types` | 0.1.98 is the next patch above the sibling terminology server's 0.1.97 (2026-09-12) and the version this repository publishes first | the FHIR model, generated here by `tools/fhir-codegen` from the vendored HL7 packages (section 4.1); the crate and its generator now live here and the sibling consumes the crate from crates.io |
 | openFHIR, the FHIRconnect reference engine | 3.0.1 (2026-09-09), read for behaviour only | never an oracle; section 4.4 records the 3.0.0 behaviour changes and what the bridge takes |
 | Eos, the OMOCL reference engine | 0.0.62 (2024-03-20), last commit 2026-03-09 | never an oracle; dormant, so its behaviour is prior art with no expected movement |
@@ -218,8 +220,9 @@ dependency is OPT, then Web Template, then path resolution, then composition.
 
 ```mermaid
 flowchart LR
-    OPT["OPT 1.4 (canonical XML)<br/>GET /definition/template/adl1.4/{id}"] -->|"openehr-its opt14"| WT["Web Template<br/>built locally, one builder"]
-    WT -->|"bridge-owned index"| IDX["aqlPath index<br/>node, RM type, occurrences, node id"]
+    OPT["OPT 1.4, canonical XML<br/>GET /definition/template/adl1.4/{id}"] -->|"opt14::from_xml, builder"| WT["Web Template<br/>one type, built locally"]
+    OPT2["OPT2, AOM2 canonical JSON<br/>GET /definition/template/adl2/{hrid}"] -->|"from_canonical_json, builder_v2_4"| WT
+    WT -->|"code space checked: at-codes only"| IDX["aqlPath index<br/>node, RM type, occurrences, node id"]
     MP["Mapping path<br/>$archetype/data[at0001]/items[at0077]"] --> IDX
     IDX --> RES["Resolved path<br/>leaf RM type, 1-based predicates"]
     RES -->|"flat::build"| CMP["Canonical composition"]
@@ -242,21 +245,85 @@ response types generated from the vendored OpenAPI.
 `aqlPath` index over the Web Template with leaf RM type resolution, the
 parent-to-child relative path derivation (the crate keeps its own copy
 private), and the HTTP client (the crates generate data types and server
-traits, no client). `openehr-adl` is not needed: the bridge reads OPT 1.4 from
-the CDR and never sees ADL source.
+traits, no client).
+
+**Both template generations are supported: ADL 1.4 (OPT 1.4) and ADL 2 (the
+AM 2.4 line: AOM2, OPT2).** Owner requirement, 2026-09-12. The ITS-REST 1.1.0
+Definition API serves both (<https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/definition.html>),
+and the Simplified Formats specification defines a Web Template as "a
+processed representation of an openEHR Operational Template" without naming a
+generation, which is the seam the design stands on. The two paths meet at one
+type:
+
+| Generation | Fetch | Body | Decode | Build |
+|---|---|---|---|---|
+| ADL 1.4 | `GET /definition/template/adl1.4/{template_id}` with `Accept: application/xml` | the canonical OPT 1.4 XML | `openehr_its::opt14::from_xml` | `openehr_its::flat::webtemplate::builder::build_web_template` |
+| ADL 2 | `GET /definition/template/adl2/{template_id}` with `Accept: application/json` | `OperationalTemplateV2`, which the OpenAPI leaves as an empty object schema and the reference CDR fills with AOM2 canonical JSON (`_type: OPERATIONAL_TEMPLATE`) | `openehr_its::json::from_canonical_json` into `openehr_am::v2_4::aom2::archetype::operational_template::OperationalTemplate` | `openehr_its::flat::webtemplate::builder_v2_4::build_web_template_v2_4` |
+
+Both builders return the same `WebTemplate` type and run the same compaction,
+in-context synthesis and node-id passes, so everything downstream (the
+`aqlPath` index, relative paths, composition build and read) is
+generation-blind. The rules around the seam, each with its ground:
+
+- **Resolution order is `adl1.4` then `adl2`, on the one `template_id` a
+  composition carries.** A canonical composition's `archetype_details` names
+  a template by string with no generation marker, and the reference CDR
+  resolves the same way (its OPT 1.4 store first, its ADL 2 store on a miss).
+  A `404` or `406` from one route means "try the other"; a miss on both is the
+  typed unknown-template error.
+- **The ADL 2 request never accepts `text/plain` and never sends
+  `application/xml` alone.** The OpenAPI enumerates `application/json`,
+  `application/xml` and `text/plain` in `Accept` but declares bodies only for
+  `text/plain` (ADL 2 source) and `application/json`; the reference CDR lets
+  `text/plain` win whenever it is acceptable and answers `406` to XML alone.
+  Consuming ADL 2 source would cost the `openehr-adl` parser, its flattener
+  and an archetype repository for `create_opt`; the JSON form is the OPT2 the
+  server already compiled. A server whose `application/json` body is not AOM2
+  canonical JSON is a typed refusal naming the body's `_type`, never a guess.
+- **Identifiers.** An ADL 2 template is an `ARCHETYPE_HRID` with a full
+  three-part version and an optional namespace
+  (`org.highmed::openEHR-EHR-COMPOSITION.t_vital_signs.v1.0.0`); a partial
+  id resolves to the latest matching major version, and the bridge caches
+  under the resolved id the `ETag` names, never under what it asked for. The
+  Web Template's `templateId` carries the full HRID with namespace, its root
+  `nodeId` and every `aqlPath` predicate carry the interface form (`.v1`, no
+  namespace), and `semVer` is the release version for ADL 2 and absent for
+  ADL 1.4; the generation is decided by which fetch succeeded, never by that
+  field. Mapping files that key on `$archetype` use the interface form.
+- **The node-id code space is checked before any path resolves.** ADL 2.4
+  admits at-codes and id-codes, and states that "the at-code coding system
+  must be used for systems that need to be conformant to the openEHR
+  Reference Model" (<https://specifications.openehr.org/releases/AM/Release-2.4.0/ADL2.html>,
+  §ADL 2.4); the reference corpus and the reference CDR's 1.4-to-2 converter
+  produce id-codes all the same. FHIRconnect and OMOCL paths are written with
+  at-codes, and the ADL 2 builder copies node ids verbatim and reads no
+  `alternative_ids`, so an at-coded path does not resolve against an id-coded
+  template. The bridge inspects the built Web Template and refuses an
+  id-coded template with a diagnostic naming the template and the code space.
+  An at-to-id translation from `C_OBJECT.alternative_ids` is a later,
+  separately decided unit, never a silent fallback.
+- **Two deltas the engines must not trip over.** A term binding's `value` is
+  a code for ADL 1.4 and a URI for ADL 2, and constraint (`ac`) bindings exist
+  only on the 1.4 side, so the lens that reads bindings switches on the
+  generation the Web Template records; and the ADL 2 builder's structural
+  conformance walk is empty, so the bridge's own composition validation before
+  commit (section 12) carries more weight for ADL 2 templates than for 1.4.
+  No specification governs the reconciliation of the two generations: AM 2.4
+  has no "AOM 1.4 to AOM2" mapping document, so each rule above is
+  FerroBRIDGE's own and is labelled so in code.
 
 **The Web Template is built locally, never fetched.** The crate's builder-side
 `WebTemplate` type serialises and does not deserialise (still true at 0.0.64;
 the generated ITS-REST `definition::WebTemplate` type does deserialise, but it
 is the OpenAPI schema shape, not the builder's model, and carries no `inputs`
-resolution). The bridge fetches the OPT
-(`GET /definition/template/adl1.4/{template_id}`, canonical XML) and builds
-the Web Template with the crate. This is also the safer path: the FLAT node-id
-uniqueness rule in the Simplified Formats specification does not fix sibling
-order, so two conformant servers can name the same node differently, and a
-bridge that regenerated node ids against a foreign Web Template would mis-key
-values. The reference CDR does serve `application/openehr.wt+json`; the
-bridge does not depend on it.
+resolution), and ITS-REST 1.1.0 defines a Web Template representation
+(`application/openehr.wt+json`) for the `adl1.4` route only, none for `adl2`,
+so a fetched Web Template could never cover both generations. This is also
+the safer path: the FLAT node-id uniqueness rule in the Simplified Formats
+specification does not fix sibling order, so two conformant servers can name
+the same node differently, and a bridge that regenerated node ids against a
+foreign Web Template would mis-key values. The reference CDR does serve
+`application/openehr.wt+json` for ADL 1.4; the bridge does not depend on it.
 
 **The wire is canonical JSON.** Canonical JSON is the mandatory composition
 representation in ITS-REST 1.1.0; FLAT and STRUCTURED are optional. The
@@ -275,7 +342,8 @@ indices are 0-based.
 `POST /ehr/{ehr_id}/composition`, `PUT /ehr/{ehr_id}/composition/{versioned_object_uid}`
 with `If-Match`, `GET /ehr/{ehr_id}/composition/{uid_based_id}`;
 `POST /ehr/{ehr_id}/contribution` for atomic multi-object commits;
-`POST /query/aql`; `GET /definition/template/adl1.4/{template_id}`
+`POST /query/aql`; `GET /definition/template/adl1.4/{template_id}` and
+`GET /definition/template/adl2/{template_id}`
 (<https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/ehr.html>,
 <https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/query.html>,
 <https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/definition.html>).
@@ -1149,9 +1217,11 @@ identity store; `jiff` 0.2.35 for the bridge's own timestamps (openEHR partial
 dates stay in their lexical form in `openehr-base`; FHIR primitives keep theirs
 in `fhir-types`); `sha2` 0.11.0; `insta`, `proptest`, `wiremock`,
 `testcontainers` 0.27.3 for tests. Consuming `openehr-its` with
-`default-features = false` and the `opt14`, `flat` and `json` features keeps
-`axum`, `moka` and the server traits out; the remaining hard transitive cost
-(`jsonschema`, `quick-xml`) is accepted and recorded here. `openehr-adl`,
+`default-features = false` and the `flat` feature (which implies `opt14`,
+`xml` and `json`, and carries both Web Template builders) keeps `axum`, `moka`
+and the server traits out; the remaining hard transitive cost (`quick-xml`)
+is accepted and recorded here; `openehr-am` 0.0.64 is taken directly for the
+OPT2 types. `openehr-adl` (until a CDR serves ADL 2 as text alone),
 `fhir-terminology`, `fhir-model` and every FHIRPath crate stay out.
 
 ## 8. What each seam carries
@@ -1614,6 +1684,9 @@ extension.
 | FHIR path handling | own bidirectional path model over the `Value` tree with the element table; every expression classified writable or read-only at load | `with.fhir` is written; `^` is not FHIRPath; no crate writes; the retired connector's reverse path silently wrote nothing | a FHIRPath evaluator (all read-only, heavy) |
 | Engine surface | `$tofhir` and `$toopenehr` per the draft chapter, pinned by commit, ahead of the facade | the specification's own conformance surface; no CDR needed; an external facade can call it | facade only |
 | openEHR wire | canonical JSON; Web Template built locally from the OPT; FLAT only at the operations edge | canonical is mandatory in ITS-REST; `WebTemplate` does not deserialise; node ids are server-specific; the draft API requires both serialisations | FLAT on the CDR wire; fetching `wt+json` |
+| Template generations | both ADL 1.4 and ADL 2, resolved `adl1.4` then `adl2` on one id, decoded into two OPT types, built into one `WebTemplate` (section 3) | owner requirement 2026-09-12; the Simplified Formats seam is generation-neutral; ITS-REST 1.1.0 serves both | ADL 1.4 only; a second pipeline per generation |
+| ADL 2 fetch form | `Accept: application/json`, AOM2 canonical JSON into `openehr-am`'s `OperationalTemplate` | the server already compiled the OPT2; ADL 2 source would cost the parser, the flattener and a repository | `text/plain` source through `openehr-adl` |
+| Node-id code space | at-coded templates only; an id-coded ADL 2 template is refused naming the code space | mapping paths are at-coded; ADL 2.4 requires at-codes for openEHR-RM systems; the builder reads no `alternative_ids` | silent non-resolution; a speculative at-to-id translation |
 | FHIR identity | the entry `uid` when present, else SHA-256 over (`versioned_object_uid`, path, split occurrence), base32, plus a recorded map that wins once written | FHIR id grammar and immutability; the version id changes per update; the upstream revision (PR #94) names `LOCATABLE.uid`, which is optional in the RM | hash of the full version id; random ids; `uid` only |
 | Create semantics | conditional and idempotent by source `id` and `meta.versionId` through the identity map | R4 conditional create; the retired connector duplicated on every `POST` | a new composition per `POST` |
 | OMOP identity | sequences plus a bridge-owned natural-key side table | every CDM 5.4 key is a 32-bit integer | content-hash surrogate keys (collide near 65k rows) |
@@ -1657,8 +1730,11 @@ references, mis-cased keywords, stale profile versions and the EEHRxF
 context's `sem_ver` contradiction; the OMOCL grammar images that document a
 header no file uses and a `ProcedureOccurrence` table naming condition
 columns; the CDM `Integer` datatype typo; the ITS-REST OpenAPI's missing
-commit headers and contradictory error schemas; the reference OMOP engine's
-concept resolution without validity filters; and, to HL7 Europe, the
+commit headers and contradictory error schemas, its `OperationalTemplateV2`
+schema being an empty object and its `adl2` route declaring no Web Template
+representation while `adl1.4` does; the Simplified Formats specification's
+silence on the node-id code space of an ADL 2 template; the reference OMOP
+engine's concept resolution without validity filters; and, to HL7 Europe, the
 discharge-report snapshot unreachable through its version history.
 
 Tracked, not reported: the draft REST API chapter and the identity revision

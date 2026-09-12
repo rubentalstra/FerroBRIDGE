@@ -45,3 +45,6 @@
 - [Subagent reports go to a file](subagent-reports-to-file.md): a long
   agent report is written to the scratchpad by the agent, because a truncated
   result is lost and a finished agent cannot be resumed; 2026-09-12
+- [Mermaid diagrams](mermaid-diagrams.md): the architecture carries mermaid
+  diagrams; render every fence with mermaid-cli against the installed Chrome
+  before a pull request; a semicolon ends a sequence message; 2026-09-12

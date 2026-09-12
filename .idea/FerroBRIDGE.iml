@@ -32,6 +32,9 @@
       <sourceFolder url="file://$MODULE_DIR$/tools/ferrobridge-testkit/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/app/ferrobridge-server/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tools/ferrobridge-testkit/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/fhir-types/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/fhir-codegen/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/fhir-codegen/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
