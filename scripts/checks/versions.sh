@@ -25,7 +25,8 @@
 #                          .github/actions/docs-toolchain/action.yml against
 #                          docs/VERSIONS.md.
 #   7. licence             LICENSE is the Business Source License 1.1 and no
-#                          first-party file claims MIT or Apache-2.0 as its own.
+#                          first-party file claims MIT or Apache-2.0 as its
+#                          own, crates/fhir-types excepted (Apache-2.0).
 #
 # Usage:
 #   scripts/checks/versions.sh
@@ -296,13 +297,17 @@ if [ -f LICENSE ]; then
     bad "LICENSE is not the Business Source License 1.1"
     stale=1
   fi
+  # crates/fhir-types is excepted: it is the one first-party crate under
+  # Apache-2.0 (docs/architecture.md section 4.1), generated from the CC0 HL7
+  # FHIR packages and published so any Rust project can depend on it.
   while IFS= read -r hit; do
     [ -n "$hit" ] || continue
     bad "stale licence claim at $hit"
     stale=1
   done < <(git grep -n -E 'SPDX-License-Identifier: (MIT|Apache-2\.0)|License-MIT|License-Apache|^license = "(MIT|Apache-2\.0)"|^license: (MIT|Apache-2\.0)|image\.licenses="?(MIT|Apache)' \
-    -- ':!LICENSE' ':!CHANGELOG.md' ':!scripts/checks/versions.sh' ':(glob,exclude)**/vendor/**' || true)
-  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1"
+    -- ':!LICENSE' ':!CHANGELOG.md' ':!scripts/checks/versions.sh' ':(glob,exclude)**/vendor/**' \
+    ':(glob,exclude)crates/fhir-types/**' || true)
+  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types excepted, Apache-2.0)"
 else
   note "no LICENSE yet, skipped"
 fi

@@ -18,7 +18,7 @@ to `main`, on a pull request, or in a merge group. `workflow_dispatch` re-runs
 it for a tag that already exists and has to be dispatched at that tag.
 
 ```text
-plan ── github-release (draft) ── build-binaries ── finalize-release (publish)
+plan ── github-release (draft) ── build-binaries ── finalize-release (publish) ── crates
 ```
 
 - **plan** validates the tag shape, refuses a dispatch that is not at the tag
@@ -37,6 +37,16 @@ plan ── github-release (draft) ── build-binaries ── finalize-release
 - **finalize-release** checks that the draft carries every asset this version
   promises, then publishes. Publishing last means a half-assembled release is
   never visible.
+- **crates** uploads the `crates/*` members to crates.io once the release is
+  public, so a refused upload never leaves a release half-cut. It runs in the
+  `crates-io` environment, whose required reviewer pauses it until the owner
+  approves, authenticates with Trusted Publishing (OIDC, no stored token), and
+  calls `scripts/release/publish-crates.sh`, which publishes each member in
+  dependency order and then reads the registry back. Re-running the same leg is
+  safe: a version already on the index counts as done. The between-releases
+  path for the same script is `.github/workflows/publish-crates.yml`, a manual
+  dispatch that is a dry run unless `publish` is set. The rules are
+  `.claude/rules/crates-publishing.md`.
 
 Concurrency is `cancel-in-progress: false`. A second tag push queues behind the
 first, because a release cancelled part-way through publishing is worse than a

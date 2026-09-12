@@ -18,7 +18,7 @@ build.
 
 ## What runs today
 
-Six workflows, all of which work on a repository with no code:
+Seven workflows. Six of them work on a repository with no code:
 
 - `.github/workflows/ci.yml`: the two-tier gate. Tier 1 runs now (zizmor,
   actionlint, shellcheck, hadolint, the comment-style guard, the versions
@@ -46,7 +46,13 @@ Six workflows, all of which work on a repository with no code:
   `CHANGELOG.md` section, creates the release as a draft, and publishes only
   after the expected asset set is complete. Its binary lane sits behind the
   same root-`Cargo.toml` detection and is skipped until the workspace lands.
-  The checklist a cut follows is `docs/release.md` (#63).
+  Its `crates` leg uploads the library crates to crates.io after the release is
+  public. The checklist a cut follows is `docs/release.md` (#63).
+- `.github/workflows/publish-crates.yml`: the between-releases crates.io lane,
+  a manual dispatch that is a dry run unless `publish` is set. It shares
+  `scripts/release/publish-crates.sh` with the release lane; the rules are
+  `crates-publishing.md`. This is the one workflow that needs the Cargo
+  workspace to do anything.
 
 The Rust lanes in `ci.yml`, `codeql.yml` and `sonar.yml` are written and gated
 off, so they need no edit when the workspace lands. `.github/dependabot.yml`

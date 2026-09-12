@@ -7,6 +7,10 @@ Non-Commercial Purposes under the Additional Use Grant in the License; any other
 production use requires a commercial license from the Licensor. Each version
 becomes available under the Apache License, Version 2.0 on its Change Date.
 
+One directory is excepted: crates/fhir-types, the generated FHIR model, is
+licensed under the Apache License, Version 2.0, under the LICENSE file in that
+directory.
+
 The FHIR, FHIRconnect, OMOP Common Data Model, OMOCL, and openEHR specifications
 this software implements are published by their own bodies under their own
 terms, and vendored material keeps its upstream terms, recorded beside it.
