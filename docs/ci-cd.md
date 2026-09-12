@@ -138,11 +138,15 @@ Each tier-2 job installs the toolchain through the composite
 `clippy`), so the pin lives in one file.
 
 Every cargo invocation in the workflow runs with `CARGO_BUILD_JOBS=2` (a
-workflow-level `env:`): the hosted runner has four cores and seven gigabytes,
-and compiling the full-feature `fhir-types` beside `openehr-am`, `reqwest` and
-the other large crates in parallel exceeded that memory and got the job killed
-with exit 143 and no diagnostic. Two crates at a time is slower and never
-killed. No specification governs this: our own design.
+workflow-level `env:`), and clippy never lints the all-features union of
+`fhir-types` (four versions, every resource, one crate): that single compile
+exceeded the hosted runner's seven gigabytes and got the job killed with exit
+143 and no diagnostic, and it is not a surface any consumer builds. The
+`clippy` job lints the workspace at default features; the `clippy-fhir-types`
+matrix lints `fhir-types` per version with `resources`, which is what a
+consumer builds. Locally, `cargo clippy --workspace --all-targets
+--all-features` still runs on a machine with the memory for it. No
+specification governs this: our own design.
 
 ## Triggers and concurrency
 
