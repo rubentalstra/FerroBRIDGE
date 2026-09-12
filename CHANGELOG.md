@@ -23,6 +23,14 @@ no binary to download yet.
 
 ### Added
 
+- `docs/architecture.md` §3 supports both template generations (owner
+  requirement, 2026-09-12): ADL 1.4 fetched as OPT 1.4 XML and ADL 2 fetched
+  as AOM2 canonical JSON from the `adl2` route, decoded into the two OPT types
+  and built into one Web Template by the two `openehr-its` builders behind one
+  seam; the resolution order, the ADL 2 `Accept` rule, the HRID identifier
+  handling, the at-code versus id-code refusal and the term-binding delta are
+  recorded as FerroBRIDGE's own; `openehr-am` joins the pins and
+  `openehr-adl` stays out until a CDR serves ADL 2 as text alone.
 - `docs/architecture.md` carries ten mermaid diagrams: the system picture, the
   two languages over one foundation, the openEHR path pipeline, the FHIRconnect
   pipeline, the inbound create and the `$tofhir` sequences, the OMOP ETL flow,

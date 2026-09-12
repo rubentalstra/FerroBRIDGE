@@ -56,6 +56,7 @@ carries the exact patch.
 | `openehr-rm` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
 | `openehr-its` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
 | `openehr-query` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-am` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` (the AOM2 OPT2 types an ADL 2 template decodes into) |
 
 ## FHIR packages (the `fhir-types` generator input)
 

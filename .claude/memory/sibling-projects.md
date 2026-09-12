@@ -25,9 +25,13 @@ checked out beside it on the owner's machine:
 
 - Read either freely: their code, their rules, their git history, their closed
   issues. That is the fastest source of prior art for a decision here.
-- **Never edit either from this repository.** No file changes, no commits, no
-  branches in their repositories from a FerroBRIDGE session. A code change
-  either project needs is made there, in its own session.
+- **Never edit either from this repository on your own initiative.** A code
+  change a sibling needs is made there, in its own session. Owner ruling
+  2026-09-12: when the owner directs a sibling change from a FerroBRIDGE
+  session (the first was FerroTERM #300, consuming `fhir-types` from crates.io
+  after the move), it is done in that sibling's checkout on its own branch
+  and pull request, under that sibling's `CLAUDE.md`, rules and hooks, never
+  by mixing it into a FerroBRIDGE branch.
 - **A tracker issue in a sibling MAY be filed from here when the owner asks.**
   Owner ruling 2026-09-05 ("you just create an issue directly there because
   it's my repo"): a request the bridge needs from a sibling (the first was
