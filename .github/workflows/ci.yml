@@ -269,20 +269,17 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           components: clippy
-      # Default features: fhir-types with every version module and the
-      # terminology root set. The all-features union (four versions, every
-      # resource, one crate) does not fit the hosted runner's memory under
-      # clippy and is not a surface any consumer builds; the per-version
-      # `resources` surface is linted by clippy-fhir-types below.
-      #
-      # Two steps, because the runner killed the job when a dependency's
-      # compile (openehr-am is large) ran beside clippy's pass over
-      # fhir-types: `cargo check` compiles the dependencies first, clippy reuses
-      # those artefacts and lints the workspace members one at a time.
-      - run: cargo check --locked --workspace --all-targets
-      - env:
-          CARGO_BUILD_JOBS: "1"
-        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+      - uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: cargo-hack
+      # One package at a time, the way the msrv job compiles and passes: a
+      # workspace-wide check schedules the two generated giants (fhir-types with
+      # its four versions, openehr-am behind the client) side by side and the
+      # runner's seven gigabytes run out; per package they never meet. Default
+      # features here; the per-version `resources` surface of fhir-types is
+      # linted by clippy-fhir-types below, and the all-features union (four
+      # versions, every resource, one crate) is no consumer's surface.
+      - run: cargo hack clippy --workspace --all-targets --locked -- -D warnings
 
   clippy-fhir-types:
     name: clippy-fhir-types (${{ matrix.version }}, resources)

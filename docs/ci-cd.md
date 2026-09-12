@@ -138,16 +138,15 @@ Each tier-2 job installs the toolchain through the composite
 `clippy`), so the pin lives in one file.
 
 Every cargo invocation in the workflow runs with `CARGO_BUILD_JOBS=2` (a
-workflow-level `env:`), and clippy never lints the all-features union of
-`fhir-types` (four versions, every resource, one crate): that single compile
-exceeded the hosted runner's seven gigabytes and got the job killed with exit
-143 and no diagnostic, and it is not a surface any consumer builds. The
-`clippy` job lints the workspace at default features in two steps (`cargo
-check` compiles the dependencies first, then clippy lints the members one at a
-time, because a dependency compile beside the clippy pass over `fhir-types`
-was the peak that got the job killed); the `clippy-fhir-types` matrix lints
-`fhir-types` per version with `resources`, which is what a consumer builds. Locally, `cargo clippy --workspace --all-targets
---all-features` still runs on a machine with the memory for it. No
+workflow-level `env:`), and the `clippy` job lints one package at a time
+through `cargo hack clippy`, the way the `msrv` job compiles: a workspace-wide
+`cargo check` or `cargo clippy` schedules the two generated giants
+(`fhir-types` with its four versions, `openehr-am` behind the client) side by
+side, the hosted runner's seven gigabytes run out, and the runner kills the
+job with exit 143 and no diagnostic; per package the two never meet. The
+`clippy-fhir-types` matrix lints `fhir-types` per version with `resources`,
+which is what a consumer builds; the all-features union (four versions, every
+resource, one crate) is no consumer's surface and is not linted in CI. No
 specification governs this: our own design.
 
 ## Triggers and concurrency
