@@ -20,8 +20,11 @@ to hand edits; the only hand-maintained files are `Cargo.toml` and this
 - The four version modules are behind `r4`, `r4b`, `r5` and `r6`; the default
   feature set is every version plus `terminology`, which is the surface the
   sibling terminology server consumes.
-- The operation contracts stay the terminology set: FerroBRIDGE's own
-  operations are #121, and the mapping-facing surface is #122.
+- The operation contracts stay the terminology set.
+- `schema::SCHEMAS` is the one element table per version: the XML codec and the
+  path model read the same statics, so cardinality, the element path, the type
+  codes and `contentReference` are never copied into a second table. The
+  conversion to `serde_json::Value` at the HTTP edge is #122.
 - `Resource`-typed elements (`Bundle.entry.resource`, `contained`) hold the
   `Resource` enum over the root set plus `UnknownResource`, which keeps any
   other resource's JSON body so a Bundle round-trips.

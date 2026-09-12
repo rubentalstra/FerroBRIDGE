@@ -38,6 +38,36 @@ output, change the generator and regenerate; the crate is never hand-edited.
 The terminology ecosystem overlay (the HL7 terminology ecosystem IG requirements)
 is applied at generation and marked per parameter.
 
+## The element table
+
+Each version module carries `schema::SCHEMAS`, the elements of every type it
+emits in definition order. Per element it holds the `ElementDefinition` path,
+`min`, `max`, the type codes the definition lists, the `contentReference`
+target, and the kind the XML codec reads. `Schemas::element` resolves a dotted
+element path through complex types, backbone elements and content references,
+and answers on a choice element's base path and on each expanded form the JSON
+representation gives it; `Schemas::type_of` gives the type a path resolves to.
+
+```rust
+use fhir_types::r4::schema::SCHEMAS;
+
+let (owner, element) = SCHEMAS
+    .element("Parameters.parameter.valueQuantity")
+    .expect("a defined element");
+assert_eq!(owner.path, "Parameters.parameter");
+assert_eq!(element.path, "Parameters.parameter.value[x]");
+assert_eq!((element.min, element.max), (0, Some(1)));
+assert_eq!(
+    SCHEMAS
+        .type_of("Parameters.parameter.valueQuantity")
+        .map(|schema| schema.name),
+    Some("Quantity"),
+);
+```
+
+A type the enabled features leave out is absent from the table, so a path into
+it resolves to `None`.
+
 ## JSON and decimal precision
 
 The codec reads and writes FHIR JSON through its own document model,
