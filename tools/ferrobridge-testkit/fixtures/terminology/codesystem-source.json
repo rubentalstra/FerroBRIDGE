@@ -1,0 +1,33 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "ferrobridge-source",
+  "url": "http://example.org/fhir/CodeSystem/ferrobridge-source",
+  "version": "1.0.0",
+  "name": "FerroBridgeSyntheticSource",
+  "title": "FerroBRIDGE synthetic source code system",
+  "status": "active",
+  "experimental": true,
+  "publisher": "FerroBRIDGE test fixtures",
+  "description": "A synthetic code system invented for the FerroBRIDGE tests.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 2,
+  "concept": [
+    {
+      "code": "alpha",
+      "display": "Alpha finding",
+      "definition": "A synthetic finding used by the FerroBRIDGE tests.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "Alfa bevinding"
+        }
+      ]
+    },
+    {
+      "code": "beta",
+      "display": "Beta finding",
+      "definition": "A second synthetic finding used by the FerroBRIDGE tests."
+    }
+  ]
+}
