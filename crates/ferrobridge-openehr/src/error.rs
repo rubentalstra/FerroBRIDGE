@@ -202,6 +202,17 @@ pub enum Error {
         #[source]
         source: Box<IdError>,
     },
+    /// A free-text part of a commit header carries a quote or a control
+    /// character, which the quoted `key="value"` form cannot hold without
+    /// changing the attribute list the service reads.
+    #[error("an attribute of the {header} header carries text the quoted value form cannot hold")]
+    HeaderAttribute {
+        /// The header that was being built.
+        header: &'static str,
+        /// Which attribute, and which character.
+        #[source]
+        source: crate::commit::CodeError,
+    },
     /// A value the caller supplied cannot travel in an HTTP header.
     #[error("the value for the {header} header is not a legal header value")]
     HeaderValue {
@@ -223,6 +234,27 @@ pub enum Error {
 }
 
 impl Error {
+    /// Returns the variant's name as a short kebab-case label, for a log line
+    /// that must name the failure class and never the URL or a body.
+    #[must_use]
+    pub fn kind(&self) -> &'static str {
+        match self {
+            Self::BaseUrl { .. } => "base-url",
+            Self::ClientBuild { .. } => "client-build",
+            Self::Transport { .. } => "transport",
+            Self::Timeout { .. } => "timeout",
+            Self::ServiceFailure { .. } => "service-failure",
+            Self::Unauthorized { .. } => "unauthorized",
+            Self::UndocumentedStatus { .. } => "undocumented-status",
+            Self::Body { .. } => "body",
+            Self::MissingHeader { .. } => "missing-header",
+            Self::MalformedHeader { .. } => "malformed-header",
+            Self::HeaderAttribute { .. } => "header-attribute",
+            Self::HeaderValue { .. } => "header-value",
+            Self::NotOperationalTemplate { .. } => "not-operational-template",
+            Self::Identifier(..) => "identifier",
+        }
+    }
     /// Returns whether a retry of the same request could succeed.
     ///
     /// Only a failure that did not reach the service, or one the service

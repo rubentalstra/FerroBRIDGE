@@ -181,15 +181,17 @@ impl CommitContext {
             ));
         }
         if let Some(description) = self.description.as_ref() {
+            let description = attribute("description", description)?;
             rendered.push((
                 AUDIT_DETAILS_HEADER,
                 format!("description.value=\"{description}\""),
             ));
         }
         if let Some(committer) = self.committer.as_ref() {
-            rendered.push((AUDIT_DETAILS_HEADER, committer_value(committer)));
+            rendered.push((AUDIT_DETAILS_HEADER, committer_value(committer)?));
         }
         if let Some(system_id) = self.system_id.as_ref() {
+            let system_id = attribute("system_id", system_id)?;
             rendered.push((AUDIT_DETAILS_HEADER, format!("system_id=\"{system_id}\"")));
         }
         if let Some(template_id) = self.template_id.as_ref() {
@@ -209,15 +211,28 @@ impl CommitContext {
     }
 }
 
+/// Returns `text` as a quoted attribute value of the audit header, refusing a
+/// quote or a control character that would rewrite the attribute list.
+fn attribute(kind: &'static str, text: &str) -> Result<String, Error> {
+    quotable(kind, text).map_err(|source| Error::HeaderAttribute {
+        header: AUDIT_DETAILS_HEADER,
+        source,
+    })
+}
+
 /// Returns the `committer` attribute list of an `openehr-audit-details` value.
-fn committer_value(committer: &Committer) -> String {
-    let name = &committer.name;
+fn committer_value(committer: &Committer) -> Result<String, Error> {
+    let name = attribute("committer.name", &committer.name)?;
     match committer.external_ref.as_ref() {
-        None => format!("committer.name=\"{name}\""),
-        Some(reference) => format!(
-            "committer.name=\"{name}\",committer.external_ref.id=\"{}\",committer.external_ref.namespace=\"{}\",committer.external_ref.type=\"{}\"",
-            reference.id, reference.namespace, reference.party_type
-        ),
+        None => Ok(format!("committer.name=\"{name}\"")),
+        Some(reference) => {
+            let id = attribute("committer.external_ref.id", &reference.id)?;
+            let namespace = attribute("committer.external_ref.namespace", &reference.namespace)?;
+            let party_type = attribute("committer.external_ref.type", &reference.party_type)?;
+            Ok(format!(
+                "committer.name=\"{name}\",committer.external_ref.id=\"{id}\",committer.external_ref.namespace=\"{namespace}\",committer.external_ref.type=\"{party_type}\""
+            ))
+        }
     }
 }
 
@@ -293,6 +308,32 @@ mod tests {
     }
 
     #[test]
+    fn a_quote_in_a_free_text_part_is_refused_before_the_header_is_built() {
+        let context = CommitContext {
+            description: Some("first\", change_type.code_string=\"249".to_owned()),
+            ..CommitContext::default()
+        };
+        let error = context
+            .headers()
+            .expect_err("a quote rewrites the attribute list");
+        assert!(
+            matches!(error, Error::HeaderAttribute { header, .. } if header == AUDIT_DETAILS_HEADER),
+            "expected a header attribute refusal, got {error:?}"
+        );
+        let context = CommitContext {
+            committer: Some(Committer {
+                name: "Dr \"Quote\"".to_owned(),
+                external_ref: None,
+            }),
+            ..CommitContext::default()
+        };
+        assert!(matches!(
+            context.headers(),
+            Err(Error::HeaderAttribute { .. })
+        ));
+    }
+
+    #[test]
     fn a_description_that_is_not_a_header_value_is_a_typed_error() {
         let context = CommitContext {
             description: Some("first\nsecond".to_owned()),
@@ -300,7 +341,7 @@ mod tests {
         };
         let error = context.headers().expect_err("a newline is refused");
         assert!(
-            matches!(error, Error::HeaderValue { header, .. } if header == AUDIT_DETAILS_HEADER)
+            matches!(error, Error::HeaderAttribute { header, .. } if header == AUDIT_DETAILS_HEADER)
         );
     }
 }

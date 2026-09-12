@@ -220,7 +220,7 @@ impl Client {
                     .when(Error::is_retryable)
                     .notify(|error: &Error, delay| {
                         tracing::warn!(
-                            error = %error,
+                            error = error.kind(),
                             delay_ms = delay.as_millis(),
                             "retrying an idempotent openEHR request"
                         );
@@ -296,9 +296,10 @@ impl Client {
             headers,
             body: String::from_utf8_lossy(&bytes).into_owned(),
         };
+        // The query of a URL can name a subject; the log carries the path only.
         tracing::debug!(
             method = %call.method,
-            url = %answer.url,
+            path = answer.url.path(),
             status = %status,
             "the openEHR service answered"
         );
