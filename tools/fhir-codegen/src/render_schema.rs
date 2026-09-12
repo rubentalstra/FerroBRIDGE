@@ -1,18 +1,21 @@
 // SPDX-FileCopyrightText: Ruben Talstra
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The per-version XML schema: every struct type's elements in definition
-//! order, each with the kind the XML codec needs.
+//! The per-version element table: every struct type's elements in definition
+//! order, each with its path, cardinality, type codes, content reference, and
+//! the kind the XML codec needs.
 //!
-//! The schema is the one input of the runtime XML module (`xml.rs`), so the
-//! generated footprint of XML stays one static per version while the JSON
-//! codec keeps the strictness (<https://hl7.org/fhir/R4B/xml.html>).
+//! The table is the one input of the runtime XML module (`xml.rs`) and the one
+//! source of the element model a path-driven consumer walks
+//! (<https://hl7.org/fhir/R4/elementdefinition.html>), so the generated
+//! footprint stays one static per version.
 
 use std::fmt::{self, Write};
 
 use crate::lower::{Cardinality, RESOURCE_ENUM, Scalar, Target, TypeDef, TypeKind, VersionModule};
 use crate::naming::type_name;
 use crate::roots::RootScope;
+use crate::snapshot::Max;
 
 /// Renders the `schema.rs` module of `model`.
 ///
@@ -22,7 +25,7 @@ use crate::roots::RootScope;
 pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
     let mut out = crate::render::banner(model);
     out.push_str(
-        "//! The XML schema of the version's types: each element's kind in definition\n//! order, the one input of the XML codec (<https://hl7.org/fhir/R4B/xml.html>).\n\n",
+        "//! The element table of the version's types: each element's path, cardinality,\n//! type codes, content reference and XML kind, in definition order\n//! (<https://hl7.org/fhir/R4/elementdefinition.html>).\n\n",
     );
     out.push_str("use super::super::xml::Schemas;\n");
     out.push_str(&RootScope::Terminology.cfg());
@@ -39,8 +42,8 @@ pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
         out.push_str(&ty.scope.cfg());
         writeln!(
             out,
-            "        TypeSchema {{\n            name: {:?},\n            fields: &[",
-            ty.name
+            "        TypeSchema {{\n            name: {:?},\n            path: {:?},\n            fields: &[",
+            ty.name, ty.path
         )?;
         for field in fields {
             let many = field.ty.card == Cardinality::Many;
@@ -53,9 +56,21 @@ pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
             } else {
                 kind_of(model, &field.ty.target)
             };
+            let max = match field.max {
+                Max::Bounded(bound) => format!("Some({bound})"),
+                Max::Unbounded => String::from("None"),
+            };
+            let types: Vec<String> = field.types.iter().map(|code| format!("{code:?}")).collect();
+            let content_reference = field.content_reference.as_ref().map_or_else(
+                || String::from("None"),
+                |target| format!("Some({target:?})"),
+            );
+            let path = &field.path;
+            let min = field.min;
             writeln!(
                 out,
-                "                FieldSchema {{ name: {name:?}, kind: {kind}, many: {many} }},"
+                "                FieldSchema {{ name: {name:?}, path: {path:?}, kind: {kind}, min: {min}, max: {max}, many: {many}, types: &[{}], content_reference: {content_reference} }},",
+                types.join(", ")
             )?;
         }
         out.push_str("            ],\n        },\n");

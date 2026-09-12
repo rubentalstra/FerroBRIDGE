@@ -136,6 +136,15 @@ pub struct Field {
     pub docs: Docs,
     /// The type.
     pub ty: FieldType,
+    /// The minimum cardinality the definition states.
+    pub min: u32,
+    /// The maximum cardinality the definition states.
+    pub max: Max,
+    /// The type codes the definition lists, in its order; a choice lists its
+    /// alternatives and a content reference lists none.
+    pub types: Vec<String>,
+    /// The element path a `contentReference` names, without the leading `#`.
+    pub content_reference: Option<String>,
 }
 
 /// A choice enum variant.
@@ -180,6 +189,10 @@ pub enum TypeKind {
 pub struct TypeDef {
     /// The Rust name.
     pub name: String,
+    /// The FHIR path the type was lowered from: a structure's root element
+    /// path, a backbone or choice element's path, or the type's own name for
+    /// the two types the emitter owns.
+    pub path: String,
     /// The module (file) the type lives in.
     pub module: String,
     /// Documentation.
@@ -304,6 +317,7 @@ impl VersionModule {
         let resources: Vec<String> = closure.roots().iter().map(|name| type_name(name)).collect();
         model.insert(TypeDef {
             name: RESOURCE_ENUM.to_owned(),
+            path: RESOURCE_ENUM.to_owned(),
             module: RESOURCE_MODULE.to_owned(),
             docs: Docs {
                 short: Some(String::from("A resource of the root set, or an unknown resource carried as JSON.")),
@@ -319,6 +333,7 @@ impl VersionModule {
         }, "the Resource enum")?;
         model.insert(TypeDef {
             name: UNKNOWN_RESOURCE.to_owned(),
+            path: UNKNOWN_RESOURCE.to_owned(),
             module: RESOURCE_MODULE.to_owned(),
             docs: Docs {
                 short: Some(String::from("A resource outside the root set, kept as its JSON body.")),
@@ -537,6 +552,7 @@ fn lower_struct(
                 model.insert(
                     TypeDef {
                         name: enum_name.clone(),
+                        path: element.path.clone(),
                         module: module.to_owned(),
                         docs: Docs {
                             short: Some(format!("The `{}` choice of `{name}`.", element.name())),
@@ -569,11 +585,16 @@ fn lower_struct(
                 target,
                 boxed: false,
             },
+            min: element.min,
+            max: element.max,
+            types: type_codes(&element.shape),
+            content_reference: content_reference_of(&element.shape),
         });
     }
     model.insert(
         TypeDef {
             name: name.to_owned(),
+            path: path.to_owned(),
             module: module.to_owned(),
             docs: root_docs,
             kind: TypeKind::Struct { fields },
@@ -588,6 +609,27 @@ fn lower_struct(
         },
         path,
     )
+}
+
+/// The type codes an element lists, in the definition's order.
+///
+/// A content reference carries its children's types on the element it names
+/// (<https://hl7.org/fhir/R4/elementdefinition.html>), so it lists none here.
+fn type_codes(shape: &ElementShape) -> Vec<String> {
+    match shape {
+        ElementShape::Root | ElementShape::ContentReference { .. } => Vec::new(),
+        ElementShape::Typed(types) | ElementShape::Choice(types) => {
+            types.iter().map(|type_ref| type_ref.code.clone()).collect()
+        }
+    }
+}
+
+/// The element path a `contentReference` names, without the leading `#`.
+fn content_reference_of(shape: &ElementShape) -> Option<String> {
+    match shape {
+        ElementShape::ContentReference { path, .. } => Some(path.clone()),
+        _ => None,
+    }
 }
 
 fn choice_variants(types: &[TypeRef], path: &str) -> Result<Vec<Variant>, LowerError> {

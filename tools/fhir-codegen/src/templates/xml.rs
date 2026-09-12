@@ -53,14 +53,29 @@ pub enum Kind {
 }
 
 /// One element of a type, in definition order.
+///
+/// The cardinality, the path, the type codes and the content reference are the
+/// `ElementDefinition` fields of the definition this element comes from
+/// (<https://hl7.org/fhir/R4/elementdefinition.html>).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FieldSchema {
     /// The element name (the JSON key; a choice's stem).
     pub name: &'static str,
+    /// The element path, for example `Observation.value[x]`.
+    pub path: &'static str,
     /// How it travels.
     pub kind: Kind,
+    /// The minimum cardinality.
+    pub min: u32,
+    /// The maximum cardinality; `None` is `*`.
+    pub max: Option<u32>,
     /// Whether it repeats.
     pub many: bool,
+    /// The type codes the definition lists, in its order; a choice lists its
+    /// alternatives and a content reference lists none.
+    pub types: &'static [&'static str],
+    /// The element path a `contentReference` names, without the leading `#`.
+    pub content_reference: Option<&'static str>,
 }
 
 /// One type's elements.
@@ -68,6 +83,9 @@ pub struct FieldSchema {
 pub struct TypeSchema {
     /// The type name (a resource's element name).
     pub name: &'static str,
+    /// The path the type is defined at: its own name for a resource or a
+    /// datatype, the element path for a backbone element.
+    pub path: &'static str,
     /// The elements, in definition order.
     pub fields: &'static [FieldSchema],
 }
@@ -91,9 +109,89 @@ impl Schemas {
             .and_then(|i| self.types.get(i))
     }
 
+    /// The type and element a dotted element path names.
+    ///
+    /// The walk starts at the resource or datatype the first segment names and
+    /// follows each further segment through the complex and backbone types the
+    /// elements hold, including the hop a `contentReference` makes
+    /// (<https://hl7.org/fhir/R4/elementdefinition.html>). A choice element
+    /// answers to its base path (`Observation.value[x]`) and to every expanded
+    /// form the JSON representation gives it (`Observation.valueQuantity`,
+    /// <https://hl7.org/fhir/R4/json.html>). A path that continues through a
+    /// primitive, through a resource-typed element, or through the base form of
+    /// a choice has no element here, and neither has a path the schema does not
+    /// know.
+    #[must_use]
+    pub fn element(&self, path: &str) -> Option<(&'static TypeSchema, &'static FieldSchema)> {
+        let (schema, field, _) = self.resolve(path)?;
+        Some((schema, field))
+    }
+
+    /// The type an element path resolves to.
+    ///
+    /// A bare type name resolves to that type; an element path resolves to the
+    /// complex or backbone type the element holds. A primitive element has no
+    /// type here, because the schema carries only complex types.
+    #[must_use]
+    pub fn type_of(&self, path: &str) -> Option<&'static TypeSchema> {
+        let Some((_, _, kind)) = self.resolve(path) else {
+            return self.type_named(path).filter(|schema| schema.path == path);
+        };
+        match kind {
+            Kind::Complex(name) => self.type_named(name),
+            _ => None,
+        }
+    }
+
+    /// The type, element, and effective kind a dotted element path names.
+    ///
+    /// The effective kind is the chosen variant's kind when the path names an
+    /// expanded choice form, and the element's own kind otherwise.
+    fn resolve(&self, path: &str) -> Option<(&'static TypeSchema, &'static FieldSchema, Kind)> {
+        let (root, rest) = path.split_once('.')?;
+        let mut schema = self.type_named(root).filter(|found| found.path == root)?;
+        let mut segments = rest.split('.').peekable();
+        while let Some(segment) = segments.next() {
+            let (field, kind) = field_named(schema, segment)?;
+            if segments.peek().is_none() {
+                return Some((schema, field, kind));
+            }
+            let Kind::Complex(name) = kind else {
+                return None;
+            };
+            schema = self.type_named(name)?;
+        }
+        None
+    }
+
     fn is_resource(&self, name: &str) -> bool {
         self.resources.binary_search(&name).is_ok()
     }
+}
+
+/// The element `segment` names in `schema`, with the kind that segment selects.
+///
+/// A segment is an element name, a choice element's base name with its `[x]`
+/// suffix, or a choice element's name with the suffix of one alternative
+/// (<https://hl7.org/fhir/R4/json.html>).
+fn field_named(schema: &'static TypeSchema, segment: &str) -> Option<(&'static FieldSchema, Kind)> {
+    let named = schema
+        .fields
+        .iter()
+        .find(|field| field.name == segment || segment.strip_suffix("[x]") == Some(field.name));
+    if let Some(field) = named {
+        return Some((field, field.kind));
+    }
+    schema.fields.iter().find_map(|field| {
+        let Kind::Choice(variants) = field.kind else {
+            return None;
+        };
+        let suffix = segment.strip_prefix(field.name)?;
+        variants
+            .iter()
+            .find(|(candidate, _)| *candidate == suffix)
+            .map(|(_, kind)| (field, *kind))
+    })
 }
 
 /// Writes `object`, a resource in the JSON object model, as FHIR XML.
@@ -229,7 +327,9 @@ fn write_primitive_field(
     }
     let values = values.and_then(Value::as_array);
     let elements = elements.and_then(Value::as_array);
-    let len = values.map_or(0, <[Value]>::len).max(elements.map_or(0, <[Value]>::len));
+    let len = values
+        .map_or(0, <[Value]>::len)
+        .max(elements.map_or(0, <[Value]>::len));
     for index in 0..len {
         let value = values.and_then(|v| v.get(index)).filter(|v| !v.is_null());
         let element = elements

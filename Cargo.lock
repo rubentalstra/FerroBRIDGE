@@ -378,7 +378,7 @@ dependencies = [
 
 [[package]]
 name = "fhir-types"
-version = "0.1.99"
+version = "0.1.100"
 dependencies = [
  "quick-xml",
  "serde",

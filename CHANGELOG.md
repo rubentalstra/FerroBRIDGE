@@ -50,6 +50,16 @@ no binary to download yet.
   against an anchor and refuses a step above its root. Both vendored corpora
   load through the public seam in the test suite, which pins the exact set of
   files this crate refuses and why.
+- The `fhir-types` element table (#121): every emitted type carries the path it
+  is defined at, and every element carries its `ElementDefinition` path, `min`,
+  `max`, the type codes the definition lists and the `contentReference` target,
+  beside the XML kind the codec already read. `Schemas::element` resolves a
+  dotted element path through complex types, backbone elements and content
+  references, on a choice element's base path (`Observation.value[x]`) and on
+  each expanded form (`Observation.valueQuantity`), and `Schemas::type_of`
+  gives the type such a path resolves to. A test walks every vendored
+  `StructureDefinition` of the emitted set and asserts the table agrees element
+  by element.
 - The specification corpora under `docs/specs/` (#71), each fetched by a
   committed `scripts/vendor/*.sh` from the commit `docs/VERSIONS.md` pins and
   stamped with a `PROVENANCE.md`: the FHIRconnect specification source with its
