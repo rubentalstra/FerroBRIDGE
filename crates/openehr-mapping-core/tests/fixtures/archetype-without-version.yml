@@ -1,0 +1,10 @@
+grammar: OMOCL/v1.0.0
+type: model
+metadata:
+  name: badarchetype.v0
+  version: 1.0.0
+spec:
+  system: OMOP
+  version: 5.4
+  openEhrConfig:
+    archetype: openEHR-EHR-CLUSTER.device

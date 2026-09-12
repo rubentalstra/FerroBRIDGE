@@ -27,7 +27,11 @@ quick-xml = "0.42.0"
 csv = "1.4.0"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.151", features = ["raw_value"] }
+# The maintained serde YAML: anchors, aliases, merge keys and source spans.
+serde-saphyr = { version = "1.2.0", default-features = false, features = ["deserialize"] }
 thiserror = "2.0.20"
+# The openEHR RM 1.1.0 model and the BASE path parser.
+openehr-rm = "0.0.64"
 # anyhow is a binary-only error type (.claude/rules/rust-style.md).
 anyhow = "1.0.104"
 clap = { version = "4.6.6", features = ["derive"] }

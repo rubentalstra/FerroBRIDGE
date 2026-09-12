@@ -20,9 +20,14 @@ publish = true
 include = ["src/**", "README.md", "LICENSE"]
 
 [dependencies]
+openehr-rm.workspace = true
+serde.workspace = true
+serde-saphyr.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
+proptest.workspace = true
 
 [lints]
 workspace = true
