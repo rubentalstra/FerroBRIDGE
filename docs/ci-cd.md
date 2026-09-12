@@ -137,6 +137,18 @@ Each tier-2 job installs the toolchain through the composite
 `rust-toolchain.toml`, and takes the `components` a job asks for (`rustfmt`,
 `clippy`), so the pin lives in one file.
 
+Every cargo invocation in the workflow runs with `CARGO_BUILD_JOBS=2` (a
+workflow-level `env:`), and the `clippy` job lints one package at a time
+through `cargo hack clippy`, the way the `msrv` job compiles: a workspace-wide
+`cargo check` or `cargo clippy` schedules the two generated giants
+(`fhir-types` with its four versions, `openehr-am` behind the client) side by
+side, the hosted runner's seven gigabytes run out, and the runner kills the
+job with exit 143 and no diagnostic; per package the two never meet. The
+`clippy-fhir-types` matrix lints `fhir-types` per version with `resources`,
+which is what a consumer builds; the all-features union (four versions, every
+resource, one crate) is no consumer's surface and is not linted in CI. No
+specification governs this: our own design.
+
 ## Triggers and concurrency
 
 `push` to `main`, `pull_request` against `main`, `merge_group`, and

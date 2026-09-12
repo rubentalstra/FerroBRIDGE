@@ -34,6 +34,14 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # No permissions by default: each job grants its own.
+# The hosted runner has four cores and seven gigabytes. Every cargo invocation
+# builds two crates at a time, so a large generated crate never compiles beside
+# three others; the all-features union of fhir-types is kept out of CI
+# altogether (see the clippy jobs), because that one crate compile alone
+# exceeded the memory and the runner killed the job (exit 143, no diagnostic).
+env:
+  CARGO_BUILD_JOBS: "2"
+
 permissions: {}
 
 jobs:
@@ -261,7 +269,42 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           components: clippy
-      - run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+      - uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: cargo-hack
+      # One package at a time, the way the msrv job compiles and passes: a
+      # workspace-wide check schedules the two generated giants (fhir-types with
+      # its four versions, openehr-am behind the client) side by side and the
+      # runner's seven gigabytes run out; per package they never meet. Default
+      # features here; the per-version `resources` surface of fhir-types is
+      # linted by clippy-fhir-types below, and the all-features union (four
+      # versions, every resource, one crate) is no consumer's surface.
+      - run: cargo hack clippy --workspace --all-targets --locked -- -D warnings
+
+  clippy-fhir-types:
+    name: clippy-fhir-types (${{ matrix.version }}, resources)
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [r4, r4b, r5, r6]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+        with:
+          components: clippy
+      # One version with every resource is what a consumer builds; each is one
+      # crate compile and fits the runner.
+      - env:
+          VERSION: ${{ matrix.version }}
+        run: cargo clippy --locked -p fhir-types --all-targets --no-default-features --features "$VERSION,resources" -- -D warnings
 
   test:
     name: test
@@ -494,6 +537,7 @@ jobs:
       - detect
       - fmt
       - clippy
+      - clippy-fhir-types
       - test
       - doc
       - cargo-deny

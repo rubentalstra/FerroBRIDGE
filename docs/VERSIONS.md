@@ -69,6 +69,15 @@ dependency pins below.
 | Item | Pin | Repeated in |
 |---|---|---|
 | `serde-saphyr` | 1.2.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
+| `reqwest` | 0.13.5 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
+| `backon` | 1.6.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
+| `url` | 2.5.8 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `http` | 1.5.0 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `secrecy` | 0.10.3 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `tracing` | 0.1.44 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `futures-core`, `futures-util` | 0.3.34 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `tokio` | 1.53.1 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `wiremock` | 0.6.5 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
 
 ## FHIR packages (the `fhir-types` generator input)
 

@@ -98,7 +98,7 @@ file that can turn a code off tree-wide eventually does.
 
 The lanes, with the local commands mirroring the CI
 flags verbatim: `cargo fmt --all --check`; `cargo clippy --workspace
---all-targets --all-features -- -D warnings`; `cargo nextest run --workspace
+--all-targets -- -D warnings` at default features, plus `cargo clippy -p fhir-types --all-targets --no-default-features --features <version>,resources` per version (the all-features union of `fhir-types` does not fit the hosted runner and no consumer builds it; `docs/ci-cd.md`); `cargo nextest run --workspace
 --locked` plus `cargo test --doc --locked`; `cargo doc` with
 `RUSTDOCFLAGS=-D warnings`; `cargo deny check` (advisories, licences, bans,
 sources, which subsumes cargo-audit); MSRV via `cargo hack check

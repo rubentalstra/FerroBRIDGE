@@ -284,7 +284,9 @@ generation-blind. The rules around the seam, each with its ground:
   three-part version and an optional namespace
   (`org.highmed::openEHR-EHR-COMPOSITION.t_vital_signs.v1.0.0`); a partial
   id resolves to the latest matching major version, and the bridge caches
-  under the resolved id the `ETag` names, never under what it asked for. The
+  under the resolved id, never under what it asked for: the `ETag` when it
+  parses as an HRID (the reference CDR's behaviour), else the template's own
+  `archetype_id` (the OpenAPI's `ETag` example is a UUID, reported on #104). The
   Web Template's `templateId` carries the full HRID with namespace, its root
   `nodeId` and every `aqlPath` predicate carry the interface form (`.v1`, no
   namespace), and `semVer` is the release version for ADL 2 and absent for
@@ -353,12 +355,13 @@ explicitly, because the specification warns its default may change;
 carries is stripped; `DELETE` reports a concurrency failure as `409` where
 `PUT` reports `412`; and `GET …?version_at_time=` answers `204` for a deleted
 composition, which the client surfaces as a typed "deleted" outcome, never as
-an absent value. The commit metadata headers (`openEHR-VERSION`,
-`openEHR-AUDIT_DETAILS`, `openEHR-TEMPLATE_ID`) exist only in the prose and
-are absent from the OpenAPI; the client sends them from the prose and the gap
-is reported upstream. The reference CDR accepts both the 1.1.0 value-carrying
-form and the deprecated 1.0.3 path-in-name form; the client sends the 1.1.0
-form only.
+an absent value. The commit metadata headers (`openehr-version`,
+`openehr-audit-details`, `openehr-template-id`, the 1.1.0 names; the overview's
+deprecation table maps the older `openEHR-VERSION`, `openEHR-AUDIT_DETAILS`
+and `openEHR-TEMPLATE_ID` onto them) exist only in the prose and are absent
+from the OpenAPI; the client sends them from the prose and the gap is reported
+upstream. The reference CDR accepts both the 1.1.0 value-carrying form and the
+deprecated path-in-name form; the client sends the 1.1.0 form only.
 
 Composition-level fields have no FHIR counterpart. FHIRconnect requires the
 `start` mapping to slot a reusable `COMPOSITION.<archetype>.<Resource>` mapping
@@ -1211,17 +1214,19 @@ that carries identifiable data says so at start-up.
 maintained serde YAML with anchors, aliases, merge keys and spans;
 `serde_yaml` is archived, `serde-yaml-ng` and `serde_yml` unmaintained);
 `jsonschema` 0.53.0 with `default-features = false`; `axum` 0.8.9, `tower-http`
-0.7.1, `reqwest` 0.13.4 with rustls, `backon` 1.6.0; `sqlx` 0.9.0 for checked
+0.7.1, `reqwest` 0.13.5 with rustls, `backon` 1.6.0; `sqlx` 0.9.0 for checked
 queries and `tokio-postgres` 0.7.18 for binary `COPY`; `redb` 4.2.0 for the
 identity store; `jiff` 0.2.35 for the bridge's own timestamps (openEHR partial
 dates stay in their lexical form in `openehr-base`; FHIR primitives keep theirs
 in `fhir-types`); `sha2` 0.11.0; `insta`, `proptest`, `wiremock`,
 `testcontainers` 0.27.3 for tests. Consuming `openehr-its` with
-`default-features = false` and the `flat` feature (which implies `opt14`,
-`xml` and `json`, and carries both Web Template builders) keeps `axum`, `moka`
-and the server traits out; the remaining hard transitive cost (`quick-xml`)
-is accepted and recorded here; `openehr-am` 0.0.64 is taken directly for the
-OPT2 types. `openehr-adl` (until a CDR serves ADL 2 as text alone),
+`default-features = false` and the `flat` and `rest-server` features (`flat`
+implies `opt14`, `xml` and `json` and carries both Web Template builders;
+`rest-server` is the only feature that compiles the generated ITS-REST data
+types, so `axum` arrives as a transitive dependency of the client until the
+crate offers a client-side types feature) keeps `moka` out; the transitive
+cost (`quick-xml`, `axum`) is accepted and recorded here; `openehr-am` 0.0.64
+is taken directly for the OPT2 types. `openehr-adl` (until a CDR serves ADL 2 as text alone),
 `fhir-terminology`, `fhir-model` and every FHIRPath crate stay out.
 
 ## 8. What each seam carries
