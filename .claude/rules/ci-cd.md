@@ -102,8 +102,11 @@ flags verbatim: `cargo fmt --all --check`; `cargo clippy --workspace
 --locked` plus `cargo test --doc --locked`; `cargo doc` with
 `RUSTDOCFLAGS=-D warnings`; `cargo deny check` (advisories, licences, bans,
 sources, which subsumes cargo-audit); MSRV via `cargo hack check
---rust-version`; `dependency-review-action` on pull requests; and the
-`comment-style.sh` guard at `--all`. **Always `--locked`**, so CI fails on
+--rust-version`; the codegen drift gate (`cargo run --locked -p fhir-codegen --
+emit --check`); `cargo publish --workspace --dry-run --locked`; the
+crate-version guard on pull requests (`scripts/checks/crate-version-guard.sh`);
+`dependency-review-action` on pull requests; and the `comment-style.sh` guard
+at `--all`. **Always `--locked`**, so CI fails on
 lockfile drift rather than on registry drift. Commit `Cargo.lock`.
 
 ## Supply chain (the shape a release lane takes)

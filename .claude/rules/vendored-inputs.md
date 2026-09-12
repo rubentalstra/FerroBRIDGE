@@ -8,9 +8,9 @@ paths: ["scripts/vendor/*.sh", "**/vendor/**", "docs/specs/**"]
 # Vendored inputs
 
 External material enters this repository one way only: a committed fetch
-script, vendored verbatim, stamped with provenance. Nothing is vendored yet,
-because the research on issue #1 has not pinned any version. The rule stands
-from the first vendored byte.
+script, vendored verbatim, stamped with provenance. The first vendored tree is
+the five HL7 FHIR packages under `tools/fhir-codegen/vendor/` (#72); the
+corpora and definitions `docs/VERSIONS.md` pins follow the same rule (#71).
 
 ## The rule
 

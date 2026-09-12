@@ -55,6 +55,7 @@ package_field() {
 fail=0
 bumped=""
 clean=""
+reserved=""
 for manifest in crates/*/Cargo.toml; do
   crate="$(dirname "$manifest")"
   name="$(package_field name < "$manifest")"
@@ -81,6 +82,12 @@ for manifest in crates/*/Cargo.toml; do
 
   new_ver="$(package_field version < "$manifest")"
   old_ver="$(git show "$base:$manifest" 2>/dev/null | package_field version || true)"
+  # A 0.0.0 manifest is a crates.io name reservation outside the crate line
+  # (docs/VERSIONS.md); its content changes until the first real version.
+  if [[ "$new_ver" = "0.0.0" ]] && [[ "${old_ver:-0.0.0}" = "0.0.0" ]]; then
+    reserved="$reserved $name"
+    continue
+  fi
   if [[ -n "$old_ver" ]] && [[ "$old_ver" = "$new_ver" ]]; then
     echo "::error::packaged content of $name changed but its version is still $new_ver. Bump $manifest, move any internal requirement in the root Cargo.toml with it, refresh Cargo.lock, or apply the 'no-crate-bump' label when the diff provably does not alter packaged bytes." >&2
     fail=1
@@ -110,3 +117,4 @@ else
   echo "crate-version-guard: packaged content changed and the version moved:$bumped"
 fi
 [[ -z "$clean" ]] || echo "crate-version-guard: unchanged packaged content:$clean"
+[[ -z "$reserved" ]] || echo "crate-version-guard: 0.0.0 name reservations, outside the line:$reserved"
