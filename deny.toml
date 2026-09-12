@@ -48,6 +48,7 @@ exceptions = [
   { allow = ["BUSL-1.1"], crate = "ferrobridge-server" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-testkit" },
   { allow = ["BUSL-1.1"], crate = "fhir-codegen" },
+  { allow = ["BUSL-1.1"], crate = "omop-cdm-codegen" },
 ]
 
 [bans]

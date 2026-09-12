@@ -390,6 +390,25 @@ jobs:
           components: rustfmt
       - run: cargo run --locked -p fhir-codegen -- emit --check
 
+  # The same gate for the OMOP side: regenerate crates/omop-cdm from the
+  # vendored OHDSI CommonDataModel definitions and fail on any difference.
+  omop-cdm-codegen-drift:
+    name: omop-cdm-codegen-drift
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+        with:
+          components: rustfmt
+      - run: cargo run --locked -p omop-cdm-codegen -- emit --check
+
   # The per-crate bump rule (.claude/rules/crates-publishing.md): a pull
   # request that changes a crate's packaged content moves that crate's version
   # in the same change, because a published version is immutable. The
@@ -481,6 +500,7 @@ jobs:
       - msrv
       - fhir-types-features
       - codegen-drift
+      - omop-cdm-codegen-drift
       - crate-version-guard
       - publish-dry-run
       - dependency-review
