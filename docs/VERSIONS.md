@@ -23,7 +23,7 @@ records why the value is what it is. The guard compares the first token of each
 | FHIRconnect | v1.0.0 | `docs/architecture.md`, later the `fhirconnect-*` crates |
 | FHIR | R4 (4.0.1) | `docs/architecture.md`, later the facade and terminology crates |
 | OMOCL | v1.0.0 | `docs/architecture.md`, later the `omocl-*` crates |
-| OMOP CDM | v5.4 | `docs/architecture.md`, later the `omop-cdm` generator and its DDL |
+| OMOP CDM | v5.4 | `docs/architecture.md`, `tools/omop-cdm-codegen` and the `omop-cdm` crate constant, and its embedded DDL |
 | openEHR ITS-REST | 1.1.0 | `docs/architecture.md`, later the `ferrobridge-openehr` client |
 
 ## Corpora and machine-readable inputs
@@ -40,7 +40,7 @@ its pin from this table, and `scripts/checks/versions.sh` reads each vendored
 | FHIRconnect specification source | `SevKohler/FHIRconnect-spec` commit `195b07fdb4c78da0432fdd1e9dbd127b81be6165` | `docs/architecture.md` §2, `scripts/vendor/fhirconnect.sh`, `docs/specs/fhirconnect/PROVENANCE.md` |
 | FHIRconnect mapping library (corpus, never an oracle) | `SevKohler/FHIRconnect-mapping-lib` commit `6bd4c19a2f96821c04fbeed3c6f6c190fd85825b` | `docs/architecture.md` §2, `scripts/vendor/fhirconnect-mapping-lib.sh`, `docs/specs/fhirconnect-mapping-lib/PROVENANCE.md` |
 | OMOCL corpus | `SevKohler/OMOCL` commit `dd42574fdb074c02cbe077a0c49b1bb5bae28f35` (grammar `OMOCL/v1.0.0`; the git tag `v1.0.0` carries pre-grammar files) | `docs/architecture.md` §2, `scripts/vendor/omocl.sh`, `docs/specs/omocl/PROVENANCE.md` |
-| OMOP CDM definitions and PostgreSQL DDL | `OHDSI/CommonDataModel` tag `v5.4.3` | `docs/architecture.md` §2, `scripts/vendor/omop-cdm.sh`, `docs/specs/omop-cdm/PROVENANCE.md`, later the `omop-cdm` generator |
+| OMOP CDM definitions and PostgreSQL DDL | `OHDSI/CommonDataModel` tag `v5.4.3` | `docs/architecture.md` §2, `scripts/vendor/omop-cdm.sh`, `docs/specs/omop-cdm/PROVENANCE.md`, `tools/omop-cdm-codegen` and the banner of every file it emits |
 | openEHR ITS-REST OpenAPI | `openEHR/specifications-ITS-REST` tag `Release-1.1.0`, modules EHR, Query, Definition | `docs/architecture.md` §2, `scripts/vendor/its-rest.sh`, `docs/specs/its-rest/PROVENANCE.md` |
 
 ## openEHR model crates (crates.io)

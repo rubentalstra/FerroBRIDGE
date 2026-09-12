@@ -8,5 +8,7 @@
 # collapse in diffs; extend the list when one lands
 # (.claude/rules/vendored-inputs.md, .claude/rules/codegen.md).
 crates/fhir-types/src/** linguist-generated
+crates/omop-cdm/src/generated/** linguist-generated
+crates/omop-cdm/ddl/** linguist-vendored -text
 tools/fhir-codegen/vendor/** linguist-vendored -text
 docs/specs/** linguist-vendored -text

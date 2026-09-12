@@ -63,6 +63,13 @@ Beside it:
   the generator below and never hand-edited.
 - `tools/fhir-codegen`: the generator, with the five vendored HL7 FHIR packages
   under `vendor/` (380 MB, a `PROVENANCE.md` each) as its only input.
+- `crates/omop-cdm`: the OMOP CDM v5.4 layer. `src/generated/` and `ddl/` are
+  emitted by `tools/omop-cdm-codegen` from the vendored OHDSI definitions; the
+  column metadata, the three column types and the DDL schema substitution are
+  hand-written beside them.
+- `tools/omop-cdm-codegen`: that generator, reading
+  `docs/specs/omop-cdm/inst/` and emitting the 39 table modules, the metadata
+  index and the embedded DDL.
 - `docs/specs/`: the vendored specification corpora (#71), one directory per
   corpus with a `PROVENANCE.md`, fetched by `scripts/vendor/*.sh` from the pins
   in `docs/VERSIONS.md`: FHIRconnect with its schemas and the draft REST API

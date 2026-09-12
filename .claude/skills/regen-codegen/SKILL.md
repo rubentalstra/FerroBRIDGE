@@ -1,6 +1,6 @@
 ---
 name: regen-codegen
-description: Regenerate the generated fhir-types crate from the vendored FHIR packages and verify no drift. Use after changing the generator, an override, or a vendored FHIR package pin.
+description: Regenerate the generated layers, fhir-types from the vendored FHIR packages and omop-cdm from the vendored OHDSI definitions, and verify no drift. Use after changing a generator, an override, or a vendored pin.
 allowed-tools: Bash, Read, Grep
 ---
 
@@ -52,6 +52,24 @@ generator or its override map and regenerate here. Full discipline:
    cargo hack check -p fhir-types --each-feature --locked
    cargo nextest run -p fhir-codegen
    ```
+
+## Regenerate the OMOP layer
+
+`crates/omop-cdm/src/generated/` is generated from
+`docs/specs/omop-cdm/inst/csv/` by `tools/omop-cdm-codegen`, which also copies
+the four rendered PostgreSQL DDL files into `crates/omop-cdm/ddl/`. Both trees
+are off-limits to hand edits.
+
+```bash
+cargo run -p omop-cdm-codegen -- emit
+git diff --exit-code crates/omop-cdm
+cargo clippy -p omop-cdm --all-targets -- -D warnings
+cargo nextest run -p omop-cdm -p omop-cdm-codegen
+```
+
+`cargo run --locked -p omop-cdm-codegen -- emit --check` is the gate, run by
+the `omop-cdm-codegen-drift` job in `.github/workflows/ci.yml`. The inputs are
+fetched only by `scripts/vendor/omop-cdm.sh` from the `docs/VERSIONS.md` pin.
 
 ## Rules
 

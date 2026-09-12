@@ -17,9 +17,11 @@ keywords = ["omop", "ohdsi", "cdm", "vocabulary", "healthcare"]
 categories = ["database", "science"]
 # The crate line is published on crates.io; include is the packaged content.
 publish = true
-include = ["src/**", "README.md", "LICENSE"]
+# `ddl/` holds the four OHDSI DDL files the generated `ddl` module embeds.
+include = ["src/**", "ddl/**", "README.md", "LICENSE"]
 
 [dependencies]
+thiserror.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true

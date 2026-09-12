@@ -23,6 +23,18 @@ no binary to download yet.
 
 ### Added
 
+- The generated OMOP CDM v5.4 layer and its generator (#73): `omop-cdm` carries
+  a row type and a column-metadata static for every one of the 39 tables the
+  OHDSI definitions declare across the `CDM`, `VOCAB` and `RESULTS` schemas,
+  432 columns in definition order, with the CDM datatypes mapped to `i32`,
+  `f64`, a bounded `Varchar<N>`, and the lexical `CdmDate` and `CdmDatetime`;
+  OHDSI's four rendered PostgreSQL files are embedded verbatim and their
+  `@cdmDatabaseSchema` placeholder is substituted through a checked PostgreSQL
+  identifier. `tools/omop-cdm-codegen` emits all of it from the vendored
+  definitions at tag `v5.4.3`, byte-deterministically, and the
+  `omop-cdm-codegen-drift` CI job fails on any difference. Tests assert the
+  generated column set of every table against OHDSI's DDL.
+
 - The specification corpora under `docs/specs/` (#71), each fetched by a
   committed `scripts/vendor/*.sh` from the commit `docs/VERSIONS.md` pins and
   stamped with a `PROVENANCE.md`: the FHIRconnect specification source with its
