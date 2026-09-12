@@ -101,6 +101,23 @@ fn every_aql_path_resolves_to_exactly_one_node() {
 }
 
 #[test]
+fn a_positional_predicate_in_a_mapping_path_is_refused_not_dropped() {
+    // BASE master11-paths, Using Positional Parameters: a position selects an
+    // instance, and instances travel as structured occurrences into a build or
+    // a read; a position written inside a path would be dropped silently.
+    let index = fixture_index();
+    let positioned = "/content[openEHR-EHR-EVALUATION.ferrobridge_note.v1]/data[at0001]/items[at0002 and 2]/value";
+    let path = MappingPath::from_str(positioned).expect("a well-formed mapping path");
+    let error = index
+        .resolve(&path, &root_anchor())
+        .expect_err("a positional predicate is refused");
+    assert!(
+        matches!(error, PathError::PositionalPredicate { ref path } if path.contains("/items[2]/value")),
+        "expected a positional-predicate refusal, got {error:?}"
+    );
+}
+
+#[test]
 fn a_resolved_leaf_carries_its_rm_type_and_occurrence_bounds() {
     let index = fixture_index();
     let path = MappingPath::from_str(NOTE_TEXT).expect("a well-formed mapping path");

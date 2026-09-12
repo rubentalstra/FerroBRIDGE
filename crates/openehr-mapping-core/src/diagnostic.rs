@@ -139,6 +139,9 @@ pub enum DiagnosticCode {
     MalformedPath,
     /// A mapping path walks above the root of the anchor it resolves against.
     PathAboveAnchorRoot,
+    /// A mapping path carries a positional predicate; instances are selected
+    /// by structured occurrences, never inside a path.
+    PositionalPredicateInPath,
     /// An operational template does not build a Web Template.
     TemplateBuild,
     /// An ADL 2 template identifies its nodes with id-codes.
@@ -174,6 +177,7 @@ impl DiagnosticCode {
             Self::DuplicateMappingName => "duplicate-mapping-name",
             Self::MalformedPath => "malformed-path",
             Self::PathAboveAnchorRoot => "path-above-anchor-root",
+            Self::PositionalPredicateInPath => "positional-predicate-in-path",
             Self::TemplateBuild => "template-build",
             Self::IdCodedTemplate => "id-coded-template",
             Self::MalformedTemplate => "malformed-template",

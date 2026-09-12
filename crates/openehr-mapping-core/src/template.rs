@@ -313,6 +313,18 @@ pub enum PathError {
         #[source]
         source: openehr_rm::v1_2::paths::PathError,
     },
+    /// The mapping path carries a positional predicate (`items[2]`).
+    ///
+    /// A position selects an instance, never a node, and the engines carry
+    /// instance selection as structured occurrences into a build or a read;
+    /// a position inside a path would be dropped silently, so it is refused.
+    #[error(
+        "the mapping path `{path}` carries a positional predicate; occurrences are structured, never written inside a path"
+    )]
+    PositionalPredicate {
+        /// The offending path.
+        path: String,
+    },
     /// The mapping path could not be resolved against its anchor.
     #[error("the mapping path `{path}` does not resolve against its anchor")]
     Anchor {
@@ -408,6 +420,7 @@ impl PathError {
             | Self::MalformedAqlPath { .. }
             | Self::AmbiguousPath { .. } => DiagnosticCode::MalformedTemplate,
             Self::Anchor { .. } => DiagnosticCode::PathAboveAnchorRoot,
+            Self::PositionalPredicate { .. } => DiagnosticCode::PositionalPredicateInPath,
             Self::UnknownPath { .. }
             | Self::UnknownNode { .. }
             | Self::NotADescendant { .. }

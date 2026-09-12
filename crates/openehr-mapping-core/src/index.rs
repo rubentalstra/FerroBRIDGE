@@ -471,13 +471,16 @@ impl WebTemplateIndex {
     /// ([`MappingPath::resolve`]), then the openEHR path that remains is
     /// matched against the template. A node-id predicate matches by exact
     /// at-code or by archetype id in interface form; a positional predicate
-    /// selects an instance and never a node, so it is accepted and ignored; a
-    /// `name/value` predicate refuses a node whose template-fixed name differs
-    /// and is accepted on a node that fixes none.
+    /// selects an instance and never a node, and instance selection travels as
+    /// structured occurrences ([`crate::composition`]), so a position inside a
+    /// mapping path is refused rather than dropped; a `name/value` predicate
+    /// refuses a node whose template-fixed name differs and is accepted on a
+    /// node that fixes none.
     ///
     /// # Errors
     ///
     /// Returns [`PathError::Anchor`] when the path walks above its anchor,
+    /// [`PathError::PositionalPredicate`] when a segment carries a position,
     /// [`PathError::UnknownPath`] naming the nearest matching ancestor when no
     /// node matches, and [`PathError::AmbiguousPath`] when more than one does.
     pub fn resolve(&self, path: &MappingPath, anchor: &RmPath) -> Result<&ResolvedNode, PathError> {
@@ -485,6 +488,15 @@ impl WebTemplateIndex {
             path: path.to_string(),
             source,
         })?;
+        if target
+            .segments
+            .iter()
+            .any(|segment| segment.predicate.position.is_some())
+        {
+            return Err(PathError::PositionalPredicate {
+                path: target.to_string(),
+            });
+        }
         self.at_rm_path(&target)
     }
 
@@ -783,9 +795,19 @@ mod tests {
 
     #[test]
     fn a_positional_predicate_selects_an_instance_and_not_a_node() {
+        // BASE master11-paths, Using Positional Parameters: the position stands
+        // alone or joins the node id as a conjunct; it never changes which node
+        // a path names, only which instance of it.
         let node = path("/content[openEHR-EHR-EVALUATION.note.v1]/data[at0001]/items[at0002]");
-        let query = path("/content[openEHR-EHR-EVALUATION.note.v1]/data[at0001]/items[at0002][2]");
-        assert!(matches_node(&query, &node, None));
+        let alone = path("/content[openEHR-EHR-EVALUATION.note.v1]/data[at0001]/items[2]");
+        let joined =
+            path("/content[openEHR-EHR-EVALUATION.note.v1]/data[at0001]/items[at0002 and 2]");
+        assert!(matches_node(&alone, &node, None));
+        assert!(matches_node(&joined, &node, None));
+        assert_eq!(
+            joined.segments.last().and_then(|s| s.predicate.position),
+            Some(2)
+        );
     }
 
     #[test]
