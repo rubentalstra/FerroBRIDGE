@@ -48,3 +48,11 @@ repository (`sibling-projects.md`). Design here as if the CDR has no FHIR
 surface of its own.
 
 Update 2026-09-03 (research closed): `docs/architecture.md` exists; pins are FHIRconnect v1.0.0, FHIR R4, OMOCL v1.0.0, OMOP CDM v5.4, ITS-REST 1.1.0; one shared foundation, two interpreters, two sinks; FHIR facade + OMOP batch ETL; the FHIR model is a dependency, the CDM types are generated from the OHDSI definitions.
+
+Update 2026-09-12 (third pass): `docs/architecture.md` is rewritten again. The
+`fhir-types` move (#72) had not started; the sibling still publishes the crate
+(0.1.97). The reference CDR retires its in-tree FHIR connector once the first
+round trip ships (its #3080) and defers all profile mappings here (its #3206);
+the carry-over register is architecture §12 and issue #1. The draft FHIRconnect
+REST API (spec PR #93) is the engine surface; the EHDS categories and the HL7
+Europe guides are the planned profile targets (§4.8, v0.0.8).

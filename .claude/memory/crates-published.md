@@ -34,7 +34,7 @@ Rust projects can reuse, and the sibling's lane is proven.
   re-read the moment the first crate ships: pre-1.0 public dependencies in a
   published API are re-adjudicated then.
 - Published crates carry a lockstep crate version line distinct from the
-  product version, as the sibling does (`fhir-types` 0.1.43 beside product
+  product version, as the sibling does (`fhir-types` 0.1.97 on 2026-09-12, still published by the sibling, beside product
   0.0.11 on 2026-09-05).
 - The crates depend on the openEHR model crates and the FHIR model crates by
   version from crates.io, never by path, so a consumer can build them.
@@ -44,7 +44,8 @@ Rust projects can reuse, and the sibling's lane is proven.
   which generates the full FHIR model (every resource, per-version features,
   the public element table). FerroTERM then consumes `fhir-types` from
   crates.io behind a terminology-only feature set. FerroTERM #298 (the widening
-  in place) was closed as not planned and FerroTERM #300 (v0.1.1) carries the
+  in place, since removed from that tracker) was closed as not planned and
+  FerroTERM #300 carries the
   sibling's half of the move; a separate repository for the crate was
   refused ("we will not have an own thing"). The bridge is the crate's
   largest consumer, so the generator lives where the root set is widest.

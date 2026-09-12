@@ -31,7 +31,7 @@ checked out beside it on the owner's machine:
 - **A tracker issue in a sibling MAY be filed from here when the owner asks.**
   Owner ruling 2026-09-05 ("you just create an issue directly there because
   it's my repo"): a request the bridge needs from a sibling (the first was
-  FerroTERM #298, widening `fhir-types` to the full resource set) is filed in
+  FerroTERM #300, widening `fhir-types` to the full resource set) is filed in
   that repository's tracker with its labels and milestone, and recorded here
   on the FerroBRIDGE issue that depends on it. Issues only; code stays theirs.
 - Neither is an oracle. A response from a running FerroEHR or FerroTERM is

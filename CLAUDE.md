@@ -18,9 +18,9 @@ The name follows the Ferro family (FerroEHR, FerroTERM). FerroBRIDGE in prose,
 
 ## The design is recorded in `docs/architecture.md`
 
-Read it first. It is the output of the 2026-09-03 and 2026-09-05 research passes over the
-primary sources (issue #1) and records the decisions with their ground: FHIRconnect and
-OMOCL are two languages sharing one header, so the bridge is one shared
+Read it first. It is the output of the 2026-09-03, 2026-09-05 and 2026-09-12
+research passes over the primary sources (issue #1) and records the decisions
+with their ground: FHIRconnect and OMOCL are two languages sharing one header, so the bridge is one shared
 foundation, two interpreters, two sinks; the pins are FHIRconnect v1.0.0, FHIR
 R4, OMOCL v1.0.0, OMOP CDM v5.4 and openEHR ITS-REST 1.1.0; the FHIR side is a
 facade over the CDR, the OMOP side a batch ETL over AQL into a CDM database; OMOP
@@ -33,9 +33,10 @@ FerroBRIDGE's own; keep that labelling in code and docs.
 
 - **Generated where a machine-readable source exists:** the FHIR model
   (`fhir-types`, emitted by `tools/fhir-codegen` from the vendored HL7 FHIR
-  packages; the crate and its generator moved here from the sibling terminology
-  server by owner decision on 2026-09-05, and the sibling consumes the crate
-  from crates.io) and the OMOP CDM v5.4 row types from the OHDSI
+  packages; by owner decision on 2026-09-05 the crate and its generator move
+  here from the sibling terminology server, which then consumes the crate from
+  crates.io; the move is the first unit of v0.0.2 (#72) and had not started
+  on 2026-09-12) and the OMOP CDM v5.4 row types from the OHDSI
   `CommonDataModel` field definitions, with the OHDSI PostgreSQL DDL vendored
   verbatim beside them (`docs/architecture.md` §10). Every file marked
   `// @generated` is off-limits: change the generator and regenerate, never
@@ -48,13 +49,13 @@ FerroBRIDGE's own; keep that labelling in code and docs.
   and openEHR specifications as the authority.
 
 The Cargo workspace lands with v0.0.2, the foundation release
-(`docs/architecture.md` §13); the round trips follow in v0.0.3 (FHIR) and
+(`docs/architecture.md` §14); the round trips follow in v0.0.3 (FHIR) and
 v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 
 ## Repo map
 
 The Cargo workspace is a skeleton (#107): the root manifests with the full lint
-set, eleven placeholder library crates at 0.0.0 holding their crates.io names,
+set, six placeholder library crates at 0.0.0 holding their crates.io names,
 a thin `ferrobridge` binary that does nothing yet, and the testkit tool crate.
 Beside it:
 
