@@ -77,10 +77,18 @@ impl super::super::codec::Json for Range {
         let mut raw_high: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "low" => raw_low = Some(value),
-                "high" => raw_high = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "low" => {
+                    raw_low = Some(value);
+                }
+                "high" => {
+                    raw_high = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

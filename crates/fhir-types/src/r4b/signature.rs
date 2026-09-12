@@ -158,19 +158,45 @@ impl super::super::codec::Json for Signature {
         let mut raw_data_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "type" => raw_type = Some(value),
-                "when" => raw_when = Some(value),
-                "_when" => raw_when_element = Some(value),
-                "who" => raw_who = Some(value),
-                "onBehalfOf" => raw_on_behalf_of = Some(value),
-                "targetFormat" => raw_target_format = Some(value),
-                "_targetFormat" => raw_target_format_element = Some(value),
-                "sigFormat" => raw_sig_format = Some(value),
-                "_sigFormat" => raw_sig_format_element = Some(value),
-                "data" => raw_data = Some(value),
-                "_data" => raw_data_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "when" => {
+                    raw_when = Some(value);
+                }
+                "_when" => {
+                    raw_when_element = Some(value);
+                }
+                "who" => {
+                    raw_who = Some(value);
+                }
+                "onBehalfOf" => {
+                    raw_on_behalf_of = Some(value);
+                }
+                "targetFormat" => {
+                    raw_target_format = Some(value);
+                }
+                "_targetFormat" => {
+                    raw_target_format_element = Some(value);
+                }
+                "sigFormat" => {
+                    raw_sig_format = Some(value);
+                }
+                "_sigFormat" => {
+                    raw_sig_format_element = Some(value);
+                }
+                "data" => {
+                    raw_data = Some(value);
+                }
+                "_data" => {
+                    raw_data_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

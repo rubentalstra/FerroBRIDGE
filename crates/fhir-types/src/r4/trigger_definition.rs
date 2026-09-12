@@ -131,12 +131,24 @@ impl super::super::codec::Json for TriggerDefinition {
         let mut raw_condition: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "type" => raw_type = Some(value),
-                "_type" => raw_type_element = Some(value),
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "_type" => {
+                    raw_type_element = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
                 "timingTiming" => {
                     raw_timing.value("Timing", value, path)?;
                 }
@@ -161,8 +173,12 @@ impl super::super::codec::Json for TriggerDefinition {
                 "_timingDateTime" => {
                     raw_timing.element("DateTime", value, path)?;
                 }
-                "data" => raw_data = Some(value),
-                "condition" => raw_condition = Some(value),
+                "data" => {
+                    raw_data = Some(value);
+                }
+                "condition" => {
+                    raw_condition = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

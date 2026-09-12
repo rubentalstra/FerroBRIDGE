@@ -13,14 +13,19 @@
     clippy::too_many_lines,
     clippy::similar_names,
     clippy::map_err_ignore,
+    clippy::too_long_first_doc_paragraph,
     unused_qualifications,
-    reason = "generated from the FHIR specification: the documentation is the specification's own text, choice enums hold every allowed type, modules mirror FHIR type names, the codec of a large resource is one long function over FHIR-named locals, a primitive that fails to parse is reported by its path and kind, and every path is spelled from the crate root by construction"
+    reason = "generated from the FHIR specification: the documentation is the specification's own text, choice enums hold every allowed type, modules mirror FHIR type names, the codec of a large resource is one long function over FHIR-named locals, a primitive that fails to parse is reported by its path and kind, a type's summary is the definition's own first paragraph however long, and every path is spelled from the crate root by construction"
 )]
 
 pub mod codec;
 pub mod operation;
+#[cfg(feature = "r4")]
 pub mod r4;
+#[cfg(feature = "r4b")]
 pub mod r4b;
+#[cfg(feature = "r5")]
 pub mod r5;
+#[cfg(feature = "r6")]
 pub mod r6;
 pub mod xml;

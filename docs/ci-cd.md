@@ -47,6 +47,11 @@ clippy at `-D warnings`, nextest plus doctests, rustdoc at `-D warnings`,
 command in `.claude/rules/ci-cd.md` verbatim. The workspace pull request
 therefore changes nothing in CI; the lanes activate by themselves.
 
+`fhir-types-features` runs `cargo hack check -p fhir-types --each-feature
+--locked` plus one wide combination, because the generated crate
+holds the union of its declared root sets and its features select inside it
+(`crates/fhir-types/README.md`).
+
 Three tier-2 jobs guard what is published rather than what compiles.
 `codegen-drift` runs `cargo run --locked -p fhir-codegen -- emit --check`, so
 the committed `crates/fhir-types` tree always matches what the emitter produces

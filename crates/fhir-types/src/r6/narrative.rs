@@ -83,12 +83,24 @@ impl super::super::codec::Json for Narrative {
         let mut raw_div_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "status" => raw_status = Some(value),
-                "_status" => raw_status_element = Some(value),
-                "div" => raw_div = Some(value),
-                "_div" => raw_div_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "status" => {
+                    raw_status = Some(value);
+                }
+                "_status" => {
+                    raw_status_element = Some(value);
+                }
+                "div" => {
+                    raw_div = Some(value);
+                }
+                "_div" => {
+                    raw_div_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

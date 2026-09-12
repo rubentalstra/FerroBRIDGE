@@ -131,15 +131,33 @@ impl super::super::codec::Json for Reference {
         let mut raw_display_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "reference" => raw_reference = Some(value),
-                "_reference" => raw_reference_element = Some(value),
-                "type" => raw_type = Some(value),
-                "_type" => raw_type_element = Some(value),
-                "identifier" => raw_identifier = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "reference" => {
+                    raw_reference = Some(value);
+                }
+                "_reference" => {
+                    raw_reference_element = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "_type" => {
+                    raw_type_element = Some(value);
+                }
+                "identifier" => {
+                    raw_identifier = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

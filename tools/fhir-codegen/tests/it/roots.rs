@@ -1,10 +1,93 @@
 // SPDX-FileCopyrightText: Ruben Talstra
 // SPDX-License-Identifier: BUSL-1.1
 
-use fhir_codegen::fhir::ParameterUse;
-use fhir_codegen::roots::{OPERATION_RESOURCES, ROOT_RESOURCES, RootSet};
+use std::collections::BTreeSet;
+use std::fs;
+use std::path::Path;
 
-use crate::R4B;
+use fhir_codegen::fhir::ParameterUse;
+use fhir_codegen::roots::{OPERATION_RESOURCES, ROOT_RESOURCES, RootScope, RootSet};
+
+use crate::{R4B, packages};
+
+/// The concrete resource types `dir` defines, read straight from the package
+/// JSON: a `StructureDefinition` of kind `resource` that is neither abstract
+/// nor a profile (<https://hl7.org/fhir/R4B/structuredefinition.html>).
+fn concrete_resources(dir: &Path) -> BTreeSet<String> {
+    let mut names = BTreeSet::new();
+    for entry in fs::read_dir(dir.join("package")).expect("the package directory lists") {
+        let path = entry.expect("the entry reads").path();
+        if !path
+            .extension()
+            .is_some_and(|e| e.eq_ignore_ascii_case("json"))
+        {
+            continue;
+        }
+        let text = fs::read_to_string(&path).expect("the file reads");
+        let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {
+            continue;
+        };
+        let field = |name: &str| value.get(name).and_then(serde_json::Value::as_str);
+        if field("resourceType") != Some("StructureDefinition")
+            || field("kind") != Some("resource")
+            || field("derivation") != Some("specialization")
+            || value.get("abstract").and_then(serde_json::Value::as_bool) != Some(false)
+        {
+            continue;
+        }
+        names.insert(
+            field("name")
+                .expect("a StructureDefinition names its type")
+                .to_owned(),
+        );
+    }
+    names
+}
+
+#[test]
+fn the_wide_root_set_is_every_concrete_resource_the_package_defines() {
+    for (module, dir, package) in packages() {
+        let roots =
+            RootSet::select_scoped(package, RootScope::Resources).expect("root set selects");
+        let selected: BTreeSet<String> = roots.resources.keys().map(|n| (*n).to_owned()).collect();
+        assert_eq!(selected, concrete_resources(&dir), "{module}");
+        for name in ROOT_RESOURCES {
+            assert_eq!(
+                roots.scope(name),
+                Some(RootScope::Terminology),
+                "{module}: {name} comes from the terminology root set"
+            );
+        }
+        // The R4 resource count the widening was declared with (#120).
+        if module == "r4" {
+            assert_eq!(selected.len(), 146, "the R4 concrete resource count");
+        }
+    }
+}
+
+#[test]
+fn the_terminology_root_set_is_a_subset_of_the_wide_one() {
+    for (module, _, package) in packages() {
+        let narrow = RootSet::select(package).expect("terminology root set selects");
+        let wide =
+            RootSet::select_scoped(package, RootScope::Resources).expect("wide root set selects");
+        assert_eq!(
+            narrow.resources.keys().copied().collect::<Vec<_>>(),
+            ROOT_RESOURCES.to_vec(),
+            "{module}"
+        );
+        assert!(!narrow.holds(RootScope::Resources), "{module}");
+        assert!(wide.holds(RootScope::Resources), "{module}");
+        for name in narrow.resources.keys() {
+            assert!(wide.resources.contains_key(name), "{module}: {name}");
+        }
+        assert_eq!(
+            narrow.operations.keys().collect::<Vec<_>>(),
+            wide.operations.keys().collect::<Vec<_>>(),
+            "{module}: widening the resources leaves the operations alone"
+        );
+    }
+}
 
 #[test]
 fn the_eight_root_resources_are_found() {

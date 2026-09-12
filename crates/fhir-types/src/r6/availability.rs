@@ -106,11 +106,21 @@ impl super::super::codec::Json for Availability {
         let mut raw_not_available_time: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "period" => raw_period = Some(value),
-                "availableTime" => raw_available_time = Some(value),
-                "notAvailableTime" => raw_not_available_time = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "period" => {
+                    raw_period = Some(value);
+                }
+                "availableTime" => {
+                    raw_available_time = Some(value);
+                }
+                "notAvailableTime" => {
+                    raw_not_available_time = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -346,16 +356,36 @@ impl super::super::codec::Json for AvailabilityAvailableTime {
         let mut raw_available_end_time_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "daysOfWeek" => raw_days_of_week = Some(value),
-                "_daysOfWeek" => raw_days_of_week_element = Some(value),
-                "allDay" => raw_all_day = Some(value),
-                "_allDay" => raw_all_day_element = Some(value),
-                "availableStartTime" => raw_available_start_time = Some(value),
-                "_availableStartTime" => raw_available_start_time_element = Some(value),
-                "availableEndTime" => raw_available_end_time = Some(value),
-                "_availableEndTime" => raw_available_end_time_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "daysOfWeek" => {
+                    raw_days_of_week = Some(value);
+                }
+                "_daysOfWeek" => {
+                    raw_days_of_week_element = Some(value);
+                }
+                "allDay" => {
+                    raw_all_day = Some(value);
+                }
+                "_allDay" => {
+                    raw_all_day_element = Some(value);
+                }
+                "availableStartTime" => {
+                    raw_available_start_time = Some(value);
+                }
+                "_availableStartTime" => {
+                    raw_available_start_time_element = Some(value);
+                }
+                "availableEndTime" => {
+                    raw_available_end_time = Some(value);
+                }
+                "_availableEndTime" => {
+                    raw_available_end_time_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -550,11 +580,21 @@ impl super::super::codec::Json for AvailabilityNotAvailableTime {
         let mut raw_during: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "description" => raw_description = Some(value),
-                "_description" => raw_description_element = Some(value),
-                "during" => raw_during = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "description" => {
+                    raw_description = Some(value);
+                }
+                "_description" => {
+                    raw_description_element = Some(value);
+                }
+                "during" => {
+                    raw_during = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

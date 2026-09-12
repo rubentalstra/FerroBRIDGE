@@ -241,17 +241,39 @@ impl super::super::codec::Json for Dosage {
         let mut raw_max_dose_per_lifetime: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "sequence" => raw_sequence = Some(value),
-                "_sequence" => raw_sequence_element = Some(value),
-                "text" => raw_text = Some(value),
-                "_text" => raw_text_element = Some(value),
-                "additionalInstruction" => raw_additional_instruction = Some(value),
-                "patientInstruction" => raw_patient_instruction = Some(value),
-                "_patientInstruction" => raw_patient_instruction_element = Some(value),
-                "timing" => raw_timing = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "sequence" => {
+                    raw_sequence = Some(value);
+                }
+                "_sequence" => {
+                    raw_sequence_element = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "_text" => {
+                    raw_text_element = Some(value);
+                }
+                "additionalInstruction" => {
+                    raw_additional_instruction = Some(value);
+                }
+                "patientInstruction" => {
+                    raw_patient_instruction = Some(value);
+                }
+                "_patientInstruction" => {
+                    raw_patient_instruction_element = Some(value);
+                }
+                "timing" => {
+                    raw_timing = Some(value);
+                }
                 "asNeededBoolean" => {
                     raw_as_needed.value("Boolean", value, path)?;
                 }
@@ -264,13 +286,27 @@ impl super::super::codec::Json for Dosage {
                 "_asNeededCodeableConcept" => {
                     raw_as_needed.element("CodeableConcept", value, path)?;
                 }
-                "site" => raw_site = Some(value),
-                "route" => raw_route = Some(value),
-                "method" => raw_method = Some(value),
-                "doseAndRate" => raw_dose_and_rate = Some(value),
-                "maxDosePerPeriod" => raw_max_dose_per_period = Some(value),
-                "maxDosePerAdministration" => raw_max_dose_per_administration = Some(value),
-                "maxDosePerLifetime" => raw_max_dose_per_lifetime = Some(value),
+                "site" => {
+                    raw_site = Some(value);
+                }
+                "route" => {
+                    raw_route = Some(value);
+                }
+                "method" => {
+                    raw_method = Some(value);
+                }
+                "doseAndRate" => {
+                    raw_dose_and_rate = Some(value);
+                }
+                "maxDosePerPeriod" => {
+                    raw_max_dose_per_period = Some(value);
+                }
+                "maxDosePerAdministration" => {
+                    raw_max_dose_per_administration = Some(value);
+                }
+                "maxDosePerLifetime" => {
+                    raw_max_dose_per_lifetime = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -762,9 +798,15 @@ impl super::super::codec::Json for DosageDoseAndRate {
         let mut raw_rate = super::super::codec::ChoiceSlot::default();
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "type" => raw_type = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
                 "doseRange" => {
                     raw_dose.value("Range", value, path)?;
                 }

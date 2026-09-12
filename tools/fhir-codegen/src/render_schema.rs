@@ -12,6 +12,7 @@ use std::fmt::{self, Write};
 
 use crate::lower::{Cardinality, RESOURCE_ENUM, Scalar, Target, TypeDef, TypeKind, VersionModule};
 use crate::naming::type_name;
+use crate::roots::RootScope;
 
 /// Renders the `schema.rs` module of `model`.
 ///
@@ -23,7 +24,9 @@ pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
     out.push_str(
         "//! The XML schema of the version's types: each element's kind in definition\n//! order, the one input of the XML codec (<https://hl7.org/fhir/R4B/xml.html>).\n\n",
     );
-    out.push_str("use super::super::xml::{FieldSchema, Kind, Schemas, TypeSchema, ValueKind};\n\n");
+    out.push_str("use super::super::xml::Schemas;\n");
+    out.push_str(&RootScope::Terminology.cfg());
+    out.push_str("use super::super::xml::{FieldSchema, Kind, TypeSchema, ValueKind};\n\n");
     out.push_str("/// The version's schema.\n");
     out.push_str("pub static SCHEMAS: Schemas = Schemas {\n    types: &[\n");
     for ty in model.types.values() {
@@ -33,6 +36,7 @@ pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
         if ty.is_primitive {
             continue;
         }
+        out.push_str(&ty.scope.cfg());
         writeln!(
             out,
             "        TypeSchema {{\n            name: {:?},\n            fields: &[",
@@ -58,6 +62,7 @@ pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
     }
     out.push_str("    ],\n    resources: &[\n");
     for ty in model.types.values().filter(|t| t.is_resource) {
+        out.push_str(&ty.scope.cfg());
         writeln!(out, "        {:?},", ty.name)?;
     }
     out.push_str("    ],\n};\n");

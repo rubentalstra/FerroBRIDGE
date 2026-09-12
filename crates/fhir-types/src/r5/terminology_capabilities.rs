@@ -596,21 +596,51 @@ impl super::super::codec::Json for TerminologyCapabilities {
                         return Err(path.error(super::super::codec::DecodeErrorKind::ResourceType));
                     }
                 }
-                "id" => raw_id = Some(value),
-                "meta" => raw_meta = Some(value),
-                "implicitRules" => raw_implicit_rules = Some(value),
-                "_implicitRules" => raw_implicit_rules_element = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "text" => raw_text = Some(value),
-                "contained" => raw_contained = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
-                "identifier" => raw_identifier = Some(value),
-                "version" => raw_version = Some(value),
-                "_version" => raw_version_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "meta" => {
+                    raw_meta = Some(value);
+                }
+                "implicitRules" => {
+                    raw_implicit_rules = Some(value);
+                }
+                "_implicitRules" => {
+                    raw_implicit_rules_element = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "contained" => {
+                    raw_contained = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
+                "identifier" => {
+                    raw_identifier = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "_version" => {
+                    raw_version_element = Some(value);
+                }
                 "versionAlgorithmString" => {
                     raw_version_algorithm.value("String", value, path)?;
                 }
@@ -623,42 +653,114 @@ impl super::super::codec::Json for TerminologyCapabilities {
                 "_versionAlgorithmCoding" => {
                     raw_version_algorithm.element("Coding", value, path)?;
                 }
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
-                "title" => raw_title = Some(value),
-                "_title" => raw_title_element = Some(value),
-                "status" => raw_status = Some(value),
-                "_status" => raw_status_element = Some(value),
-                "experimental" => raw_experimental = Some(value),
-                "_experimental" => raw_experimental_element = Some(value),
-                "date" => raw_date = Some(value),
-                "_date" => raw_date_element = Some(value),
-                "publisher" => raw_publisher = Some(value),
-                "_publisher" => raw_publisher_element = Some(value),
-                "contact" => raw_contact = Some(value),
-                "description" => raw_description = Some(value),
-                "_description" => raw_description_element = Some(value),
-                "useContext" => raw_use_context = Some(value),
-                "jurisdiction" => raw_jurisdiction = Some(value),
-                "purpose" => raw_purpose = Some(value),
-                "_purpose" => raw_purpose_element = Some(value),
-                "copyright" => raw_copyright = Some(value),
-                "_copyright" => raw_copyright_element = Some(value),
-                "copyrightLabel" => raw_copyright_label = Some(value),
-                "_copyrightLabel" => raw_copyright_label_element = Some(value),
-                "kind" => raw_kind = Some(value),
-                "_kind" => raw_kind_element = Some(value),
-                "software" => raw_software = Some(value),
-                "implementation" => raw_implementation = Some(value),
-                "lockedDate" => raw_locked_date = Some(value),
-                "_lockedDate" => raw_locked_date_element = Some(value),
-                "codeSystem" => raw_code_system = Some(value),
-                "expansion" => raw_expansion = Some(value),
-                "codeSearch" => raw_code_search = Some(value),
-                "_codeSearch" => raw_code_search_element = Some(value),
-                "validateCode" => raw_validate_code = Some(value),
-                "translation" => raw_translation = Some(value),
-                "closure" => raw_closure = Some(value),
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
+                "title" => {
+                    raw_title = Some(value);
+                }
+                "_title" => {
+                    raw_title_element = Some(value);
+                }
+                "status" => {
+                    raw_status = Some(value);
+                }
+                "_status" => {
+                    raw_status_element = Some(value);
+                }
+                "experimental" => {
+                    raw_experimental = Some(value);
+                }
+                "_experimental" => {
+                    raw_experimental_element = Some(value);
+                }
+                "date" => {
+                    raw_date = Some(value);
+                }
+                "_date" => {
+                    raw_date_element = Some(value);
+                }
+                "publisher" => {
+                    raw_publisher = Some(value);
+                }
+                "_publisher" => {
+                    raw_publisher_element = Some(value);
+                }
+                "contact" => {
+                    raw_contact = Some(value);
+                }
+                "description" => {
+                    raw_description = Some(value);
+                }
+                "_description" => {
+                    raw_description_element = Some(value);
+                }
+                "useContext" => {
+                    raw_use_context = Some(value);
+                }
+                "jurisdiction" => {
+                    raw_jurisdiction = Some(value);
+                }
+                "purpose" => {
+                    raw_purpose = Some(value);
+                }
+                "_purpose" => {
+                    raw_purpose_element = Some(value);
+                }
+                "copyright" => {
+                    raw_copyright = Some(value);
+                }
+                "_copyright" => {
+                    raw_copyright_element = Some(value);
+                }
+                "copyrightLabel" => {
+                    raw_copyright_label = Some(value);
+                }
+                "_copyrightLabel" => {
+                    raw_copyright_label_element = Some(value);
+                }
+                "kind" => {
+                    raw_kind = Some(value);
+                }
+                "_kind" => {
+                    raw_kind_element = Some(value);
+                }
+                "software" => {
+                    raw_software = Some(value);
+                }
+                "implementation" => {
+                    raw_implementation = Some(value);
+                }
+                "lockedDate" => {
+                    raw_locked_date = Some(value);
+                }
+                "_lockedDate" => {
+                    raw_locked_date_element = Some(value);
+                }
+                "codeSystem" => {
+                    raw_code_system = Some(value);
+                }
+                "expansion" => {
+                    raw_expansion = Some(value);
+                }
+                "codeSearch" => {
+                    raw_code_search = Some(value);
+                }
+                "_codeSearch" => {
+                    raw_code_search_element = Some(value);
+                }
+                "validateCode" => {
+                    raw_validate_code = Some(value);
+                }
+                "translation" => {
+                    raw_translation = Some(value);
+                }
+                "closure" => {
+                    raw_closure = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1321,11 +1423,21 @@ impl super::super::codec::Json for TerminologyCapabilitiesClosure {
         let mut raw_translation_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "translation" => raw_translation = Some(value),
-                "_translation" => raw_translation_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "translation" => {
+                    raw_translation = Some(value);
+                }
+                "_translation" => {
+                    raw_translation_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1563,16 +1675,36 @@ impl super::super::codec::Json for TerminologyCapabilitiesCodeSystem {
         let mut raw_subsumption_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "uri" => raw_uri = Some(value),
-                "_uri" => raw_uri_element = Some(value),
-                "version" => raw_version = Some(value),
-                "content" => raw_content = Some(value),
-                "_content" => raw_content_element = Some(value),
-                "subsumption" => raw_subsumption = Some(value),
-                "_subsumption" => raw_subsumption_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "uri" => {
+                    raw_uri = Some(value);
+                }
+                "_uri" => {
+                    raw_uri_element = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "content" => {
+                    raw_content = Some(value);
+                }
+                "_content" => {
+                    raw_content_element = Some(value);
+                }
+                "subsumption" => {
+                    raw_subsumption = Some(value);
+                }
+                "_subsumption" => {
+                    raw_subsumption_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -1867,20 +1999,48 @@ impl super::super::codec::Json for TerminologyCapabilitiesCodeSystemVersion {
         let mut raw_property_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "isDefault" => raw_is_default = Some(value),
-                "_isDefault" => raw_is_default_element = Some(value),
-                "compositional" => raw_compositional = Some(value),
-                "_compositional" => raw_compositional_element = Some(value),
-                "language" => raw_language = Some(value),
-                "_language" => raw_language_element = Some(value),
-                "filter" => raw_filter = Some(value),
-                "property" => raw_property = Some(value),
-                "_property" => raw_property_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "isDefault" => {
+                    raw_is_default = Some(value);
+                }
+                "_isDefault" => {
+                    raw_is_default_element = Some(value);
+                }
+                "compositional" => {
+                    raw_compositional = Some(value);
+                }
+                "_compositional" => {
+                    raw_compositional_element = Some(value);
+                }
+                "language" => {
+                    raw_language = Some(value);
+                }
+                "_language" => {
+                    raw_language_element = Some(value);
+                }
+                "filter" => {
+                    raw_filter = Some(value);
+                }
+                "property" => {
+                    raw_property = Some(value);
+                }
+                "_property" => {
+                    raw_property_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2149,13 +2309,27 @@ impl super::super::codec::Json for TerminologyCapabilitiesCodeSystemVersionFilte
         let mut raw_op_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
-                "op" => raw_op = Some(value),
-                "_op" => raw_op_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
+                "op" => {
+                    raw_op = Some(value);
+                }
+                "_op" => {
+                    raw_op_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2406,18 +2580,42 @@ impl super::super::codec::Json for TerminologyCapabilitiesExpansion {
         let mut raw_text_filter_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "hierarchical" => raw_hierarchical = Some(value),
-                "_hierarchical" => raw_hierarchical_element = Some(value),
-                "paging" => raw_paging = Some(value),
-                "_paging" => raw_paging_element = Some(value),
-                "incomplete" => raw_incomplete = Some(value),
-                "_incomplete" => raw_incomplete_element = Some(value),
-                "parameter" => raw_parameter = Some(value),
-                "textFilter" => raw_text_filter = Some(value),
-                "_textFilter" => raw_text_filter_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "hierarchical" => {
+                    raw_hierarchical = Some(value);
+                }
+                "_hierarchical" => {
+                    raw_hierarchical_element = Some(value);
+                }
+                "paging" => {
+                    raw_paging = Some(value);
+                }
+                "_paging" => {
+                    raw_paging_element = Some(value);
+                }
+                "incomplete" => {
+                    raw_incomplete = Some(value);
+                }
+                "_incomplete" => {
+                    raw_incomplete_element = Some(value);
+                }
+                "parameter" => {
+                    raw_parameter = Some(value);
+                }
+                "textFilter" => {
+                    raw_text_filter = Some(value);
+                }
+                "_textFilter" => {
+                    raw_text_filter_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2674,13 +2872,27 @@ impl super::super::codec::Json for TerminologyCapabilitiesExpansionParameter {
         let mut raw_documentation_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
-                "documentation" => raw_documentation = Some(value),
-                "_documentation" => raw_documentation_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
+                "documentation" => {
+                    raw_documentation = Some(value);
+                }
+                "_documentation" => {
+                    raw_documentation_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -2895,13 +3107,27 @@ impl super::super::codec::Json for TerminologyCapabilitiesImplementation {
         let mut raw_url_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "description" => raw_description = Some(value),
-                "_description" => raw_description_element = Some(value),
-                "url" => raw_url = Some(value),
-                "_url" => raw_url_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "description" => {
+                    raw_description = Some(value);
+                }
+                "_description" => {
+                    raw_description_element = Some(value);
+                }
+                "url" => {
+                    raw_url = Some(value);
+                }
+                "_url" => {
+                    raw_url_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -3119,13 +3345,27 @@ impl super::super::codec::Json for TerminologyCapabilitiesSoftware {
         let mut raw_version_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "name" => raw_name = Some(value),
-                "_name" => raw_name_element = Some(value),
-                "version" => raw_version = Some(value),
-                "_version" => raw_version_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "_name" => {
+                    raw_name_element = Some(value);
+                }
+                "version" => {
+                    raw_version = Some(value);
+                }
+                "_version" => {
+                    raw_version_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -3320,11 +3560,21 @@ impl super::super::codec::Json for TerminologyCapabilitiesTranslation {
         let mut raw_needs_map_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "needsMap" => raw_needs_map = Some(value),
-                "_needsMap" => raw_needs_map_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "needsMap" => {
+                    raw_needs_map = Some(value);
+                }
+                "_needsMap" => {
+                    raw_needs_map_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -3511,11 +3761,21 @@ impl super::super::codec::Json for TerminologyCapabilitiesValidateCode {
         let mut raw_translations_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "translations" => raw_translations = Some(value),
-                "_translations" => raw_translations_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "translations" => {
+                    raw_translations = Some(value);
+                }
+                "_translations" => {
+                    raw_translations_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

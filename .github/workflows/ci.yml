@@ -342,6 +342,33 @@ jobs:
       # which it reads from the workspace `rust-version`.
       - run: cargo hack check --rust-version --workspace --locked --all-targets
 
+  # The feature matrix of the generated crate (#120): one tree holds the union
+  # of the declared root sets, so every feature combination the emitter
+  # distinguishes has to compile on its own.
+  fhir-types-features:
+    name: fhir-types-features (cargo-hack)
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+      - uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: cargo-hack
+      # `--no-dev-deps` rewrites the workspace manifests, which `--locked`
+      # then refuses; the crate has no dev-dependencies, so the flag would
+      # change nothing here.
+      - run: cargo hack check -p fhir-types --each-feature --locked
+      # The widest selection one version carries, which no single-feature run
+      # reaches.
+      - run: cargo check -p fhir-types --no-default-features --features r4,resources --locked
+
   # The codegen drift gate (.claude/rules/codegen.md): regenerate
   # crates/fhir-types from the vendored HL7 packages and fail on any
   # difference. The emitter shells out to rustfmt, so the toolchain needs that
@@ -452,6 +479,7 @@ jobs:
       - doc
       - cargo-deny
       - msrv
+      - fhir-types-features
       - codegen-drift
       - crate-version-guard
       - publish-dry-run

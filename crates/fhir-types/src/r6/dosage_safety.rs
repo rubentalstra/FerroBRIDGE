@@ -108,12 +108,24 @@ impl super::super::codec::Json for DosageSafety {
         let mut raw_if_exceeded_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "doseLimit" => raw_dose_limit = Some(value),
-                "ifExceeded" => raw_if_exceeded = Some(value),
-                "_ifExceeded" => raw_if_exceeded_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "doseLimit" => {
+                    raw_dose_limit = Some(value);
+                }
+                "ifExceeded" => {
+                    raw_if_exceeded = Some(value);
+                }
+                "_ifExceeded" => {
+                    raw_if_exceeded_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -323,8 +335,12 @@ impl super::super::codec::Json for DosageSafetyDoseLimit {
         let mut raw_text_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
                 "valueInteger" => {
                     raw_value.value("Integer", value, path)?;
                 }
@@ -343,11 +359,21 @@ impl super::super::codec::Json for DosageSafetyDoseLimit {
                 "_valueExpression" => {
                     raw_value.element("Expression", value, path)?;
                 }
-                "scope" => raw_scope = Some(value),
-                "_scope" => raw_scope_element = Some(value),
-                "period" => raw_period = Some(value),
-                "text" => raw_text = Some(value),
-                "_text" => raw_text_element = Some(value),
+                "scope" => {
+                    raw_scope = Some(value);
+                }
+                "_scope" => {
+                    raw_scope_element = Some(value);
+                }
+                "period" => {
+                    raw_period = Some(value);
+                }
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "_text" => {
+                    raw_text_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

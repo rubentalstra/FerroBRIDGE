@@ -154,21 +154,51 @@ impl super::super::codec::Json for SampledData {
         let mut raw_data_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "origin" => raw_origin = Some(value),
-                "period" => raw_period = Some(value),
-                "_period" => raw_period_element = Some(value),
-                "factor" => raw_factor = Some(value),
-                "_factor" => raw_factor_element = Some(value),
-                "lowerLimit" => raw_lower_limit = Some(value),
-                "_lowerLimit" => raw_lower_limit_element = Some(value),
-                "upperLimit" => raw_upper_limit = Some(value),
-                "_upperLimit" => raw_upper_limit_element = Some(value),
-                "dimensions" => raw_dimensions = Some(value),
-                "_dimensions" => raw_dimensions_element = Some(value),
-                "data" => raw_data = Some(value),
-                "_data" => raw_data_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "origin" => {
+                    raw_origin = Some(value);
+                }
+                "period" => {
+                    raw_period = Some(value);
+                }
+                "_period" => {
+                    raw_period_element = Some(value);
+                }
+                "factor" => {
+                    raw_factor = Some(value);
+                }
+                "_factor" => {
+                    raw_factor_element = Some(value);
+                }
+                "lowerLimit" => {
+                    raw_lower_limit = Some(value);
+                }
+                "_lowerLimit" => {
+                    raw_lower_limit_element = Some(value);
+                }
+                "upperLimit" => {
+                    raw_upper_limit = Some(value);
+                }
+                "_upperLimit" => {
+                    raw_upper_limit_element = Some(value);
+                }
+                "dimensions" => {
+                    raw_dimensions = Some(value);
+                }
+                "_dimensions" => {
+                    raw_dimensions_element = Some(value);
+                }
+                "data" => {
+                    raw_data = Some(value);
+                }
+                "_data" => {
+                    raw_data_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

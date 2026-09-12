@@ -90,13 +90,14 @@ target the MII Kerndatensatz modules at 2025.0.0).
 The library crates are published to crates.io on one lockstep crate version
 line, distinct from the product version (owner decision 2026-09-05). The line
 inherits `fhir-types`, whose latest release from the sibling was the floor:
-the sibling published 0.1.97 on 2026-09-12, so the first release from here is
-0.1.98. Every other library crate holds its name with a 0.0.0 placeholder
-(#107), a version outside the line.
+the sibling published 0.1.97 on 2026-09-12, so the line from here starts at
+0.1.98 and moves one patch with every change to the crate's packaged content
+(`.claude/rules/crates-publishing.md`). Every other library crate holds its
+name with a 0.0.0 placeholder (#107), a version outside the line.
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| `fhir-types` | 0.1.98 | `docs/architecture.md`, `crates/fhir-types/Cargo.toml`, the root `Cargo.toml` `[workspace.dependencies]`, later the `version` of every published `crates/*` manifest |
+| `fhir-types` | 0.1.99 | `docs/architecture.md`, `crates/fhir-types/Cargo.toml`, the root `Cargo.toml` `[workspace.dependencies]`, later the `version` of every published `crates/*` manifest |
 
 ## Language and runtime
 

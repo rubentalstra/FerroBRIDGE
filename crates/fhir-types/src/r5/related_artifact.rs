@@ -203,25 +203,63 @@ impl super::super::codec::Json for RelatedArtifact {
         let mut raw_publication_date_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "type" => raw_type = Some(value),
-                "_type" => raw_type_element = Some(value),
-                "classifier" => raw_classifier = Some(value),
-                "label" => raw_label = Some(value),
-                "_label" => raw_label_element = Some(value),
-                "display" => raw_display = Some(value),
-                "_display" => raw_display_element = Some(value),
-                "citation" => raw_citation = Some(value),
-                "_citation" => raw_citation_element = Some(value),
-                "document" => raw_document = Some(value),
-                "resource" => raw_resource = Some(value),
-                "_resource" => raw_resource_element = Some(value),
-                "resourceReference" => raw_resource_reference = Some(value),
-                "publicationStatus" => raw_publication_status = Some(value),
-                "_publicationStatus" => raw_publication_status_element = Some(value),
-                "publicationDate" => raw_publication_date = Some(value),
-                "_publicationDate" => raw_publication_date_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "type" => {
+                    raw_type = Some(value);
+                }
+                "_type" => {
+                    raw_type_element = Some(value);
+                }
+                "classifier" => {
+                    raw_classifier = Some(value);
+                }
+                "label" => {
+                    raw_label = Some(value);
+                }
+                "_label" => {
+                    raw_label_element = Some(value);
+                }
+                "display" => {
+                    raw_display = Some(value);
+                }
+                "_display" => {
+                    raw_display_element = Some(value);
+                }
+                "citation" => {
+                    raw_citation = Some(value);
+                }
+                "_citation" => {
+                    raw_citation_element = Some(value);
+                }
+                "document" => {
+                    raw_document = Some(value);
+                }
+                "resource" => {
+                    raw_resource = Some(value);
+                }
+                "_resource" => {
+                    raw_resource_element = Some(value);
+                }
+                "resourceReference" => {
+                    raw_resource_reference = Some(value);
+                }
+                "publicationStatus" => {
+                    raw_publication_status = Some(value);
+                }
+                "_publicationStatus" => {
+                    raw_publication_status_element = Some(value);
+                }
+                "publicationDate" => {
+                    raw_publication_date = Some(value);
+                }
+                "_publicationDate" => {
+                    raw_publication_date_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

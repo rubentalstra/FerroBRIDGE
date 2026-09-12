@@ -145,13 +145,27 @@ impl super::super::codec::Json for DosageCondition {
         let mut raw_text_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "code" => raw_code = Some(value),
-                "details" => raw_details = Some(value),
-                "operation" => raw_operation = Some(value),
-                "_operation" => raw_operation_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "details" => {
+                    raw_details = Some(value);
+                }
+                "operation" => {
+                    raw_operation = Some(value);
+                }
+                "_operation" => {
+                    raw_operation_element = Some(value);
+                }
                 "valueBase64Binary" => {
                     raw_value.value("Base64Binary", value, path)?;
                 }
@@ -482,8 +496,12 @@ impl super::super::codec::Json for DosageCondition {
                 "_valueMeta" => {
                     raw_value.element("Meta", value, path)?;
                 }
-                "text" => raw_text = Some(value),
-                "_text" => raw_text_element = Some(value),
+                "text" => {
+                    raw_text = Some(value);
+                }
+                "_text" => {
+                    raw_text_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

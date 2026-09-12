@@ -9,15 +9,19 @@ to hand edits; the only hand-maintained files are `Cargo.toml` and this
   `cargo run -p fhir-codegen -- emit` and commit the regenerated tree.
   `cargo run -p fhir-codegen -- emit --check` is the CI drift check and
   fails on any difference.
-- The emission scope is today's declared root set, the terminology one (Bundle,
-  CapabilityStatement, CodeSystem, ConceptMap, OperationOutcome, Parameters,
-  TerminologyCapabilities, ValueSet, and the terminology OperationDefinitions)
-  and the complete closure of every type those roots reference, per version,
-  one module per version (`r4`, `r4b`, `r5`, `r6`). Never trim inside that
-  closure.
-- Widening that root set to every `kind: resource` StructureDefinition behind a
-  `resources` feature, and cutting the versions over per-version features, is
-  tracked on #72.
+- The emission scope is per feature, over one emitted tree. `terminology` is
+  the first declared root set (Bundle, CapabilityStatement, CodeSystem,
+  ConceptMap, OperationOutcome, Parameters, TerminologyCapabilities, ValueSet,
+  and the terminology OperationDefinitions); `resources` widens it to every
+  concrete `kind: resource` StructureDefinition of the package. Each carries
+  the complete closure of every type its roots reference, per version, and each
+  emitted item carries the `cfg` of the narrowest feature that selects it.
+  Never trim inside a closure.
+- The four version modules are behind `r4`, `r4b`, `r5` and `r6`; the default
+  feature set is every version plus `terminology`, which is the surface the
+  sibling terminology server consumes.
+- The operation contracts stay the terminology set: FerroBRIDGE's own
+  operations are #121, and the mapping-facing surface is #122.
 - `Resource`-typed elements (`Bundle.entry.resource`, `contained`) hold the
   `Resource` enum over the root set plus `UnknownResource`, which keeps any
   other resource's JSON body so a Bundle round-trips.

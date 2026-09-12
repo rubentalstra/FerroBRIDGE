@@ -10,9 +10,12 @@ resources are the authority for what it emits (`.claude/rules/codegen.md`).
 - The pipeline is `package` (read), `snapshot` (resolve), `roots` (select),
   `closure` (the root-set closure), `lower` (the Rust model: structs per
   type and backbone element, enums per choice, boxed cycle edges), `render`
-  (source text), `emit` (write or `--check`). The emission scope is the
-  declared root set and the complete closure of the types it references, per
-  version. A shape the consumer lacks is fixed here, never shadowed downstream.
+  (source text), `emit` (write or `--check`). Two root sets are declared,
+  `roots::RootScope::Terminology` and `roots::RootScope::Resources`; the
+  emitter emits one tree holding the union with the complete closure of the
+  types each references, per version, and marks every item with the `cfg` of
+  the narrowest feature that selects it. A shape the consumer lacks is fixed
+  here, never shadowed downstream.
 - Output is byte-deterministic: iterate `BTreeMap` and sorted vectors, never
   a hash map (`.claude/rules/reliability.md`); `rustfmt` from the pinned
   toolchain formats the output so `cargo fmt --check` and the emitter agree.

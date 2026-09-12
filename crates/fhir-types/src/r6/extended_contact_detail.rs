@@ -133,14 +133,30 @@ impl super::super::codec::Json for ExtendedContactDetail {
         let mut raw_period: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "purpose" => raw_purpose = Some(value),
-                "name" => raw_name = Some(value),
-                "telecom" => raw_telecom = Some(value),
-                "address" => raw_address = Some(value),
-                "organization" => raw_organization = Some(value),
-                "period" => raw_period = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "purpose" => {
+                    raw_purpose = Some(value);
+                }
+                "name" => {
+                    raw_name = Some(value);
+                }
+                "telecom" => {
+                    raw_telecom = Some(value);
+                }
+                "address" => {
+                    raw_address = Some(value);
+                }
+                "organization" => {
+                    raw_organization = Some(value);
+                }
+                "period" => {
+                    raw_period = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

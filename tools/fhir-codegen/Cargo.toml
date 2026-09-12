@@ -28,7 +28,9 @@ tempfile.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
-fhir-types.workspace = true
+# The tests read the wide root set too, so the generated crate is built with
+# every feature the emitter distinguishes.
+fhir-types = { workspace = true, features = ["resources"] }
 insta.workspace = true
 proptest.workspace = true
 

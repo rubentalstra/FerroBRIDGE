@@ -3,7 +3,7 @@
 [package]
 name = "fhir-types"
 description = "Generated per-version FHIR types and terminology operation contracts"
-version = "0.1.98"
+version = "0.1.99"
 edition.workspace = true
 rust-version.workspace = true
 # The one first-party crate under Apache-2.0 (docs/architecture.md section 4.1).
@@ -18,6 +18,24 @@ categories = ["data-structures", "encoding", "science"]
 # The crate line is published on crates.io; `include` is the packaged content.
 publish = true
 include = ["src/**", "README.md", "LICENSE"]
+
+[features]
+# The default set is every version module and the terminology root set, so a
+# dependant that names no feature gets the whole terminology surface.
+default = ["r4", "r4b", "r5", "r6", "terminology"]
+# One feature per FHIR version: each gates that version's module.
+r4 = []
+r4b = []
+r5 = []
+r6 = []
+# The terminology root set (https://hl7.org/fhir/R4B/terminology-module.html):
+# CodeSystem, ValueSet, ConceptMap, Parameters, OperationOutcome,
+# CapabilityStatement, TerminologyCapabilities, Bundle, the closure of the
+# types they reference, and the terminology operation contracts.
+terminology = []
+# Every concrete resource each package defines, with the complete closure of
+# the datatypes and primitives those resources reference.
+resources = ["terminology"]
 
 [lib]
 # Generated doc text is not a curated example set (.claude/rules/testing.md).

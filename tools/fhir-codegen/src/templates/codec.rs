@@ -419,6 +419,21 @@ pub trait Json: Sized {
     fn from_json(object: &Object, path: &mut Path) -> Result<Self, DecodeError>;
 }
 
+/// Decodes a resource straight into a box.
+///
+/// The resource enum matches over every resource type its features select, and
+/// a decoded resource is a large value, so building each one inside the match
+/// would size that one stack frame for the whole set. This call keeps each
+/// value in its own frame.
+///
+/// # Errors
+///
+/// Returns [`DecodeError`] for any deviation from the type's definition.
+#[inline(never)]
+pub fn boxed<T: Json>(object: &Object, path: &mut Path) -> Result<Box<T>, DecodeError> {
+    Ok(Box::new(T::from_json(object, path)?))
+}
+
 /// A FHIR primitive: a JSON value plus an optional element object.
 pub trait Primitive: Sized {
     /// The JSON value, `None` when only `id` or `extension` are present.

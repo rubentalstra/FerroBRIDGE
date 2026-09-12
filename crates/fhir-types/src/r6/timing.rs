@@ -128,13 +128,27 @@ impl super::super::codec::Json for Timing {
         let mut raw_code: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "modifierExtension" => raw_modifier_extension = Some(value),
-                "event" => raw_event = Some(value),
-                "_event" => raw_event_element = Some(value),
-                "repeat" => raw_repeat = Some(value),
-                "code" => raw_code = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "modifierExtension" => {
+                    raw_modifier_extension = Some(value);
+                }
+                "event" => {
+                    raw_event = Some(value);
+                }
+                "_event" => {
+                    raw_event_element = Some(value);
+                }
+                "repeat" => {
+                    raw_repeat = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
@@ -576,8 +590,12 @@ impl super::super::codec::Json for TimingRepeat {
         let mut raw_offset_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
                 "boundsDuration" => {
                     raw_bounds.value("Duration", value, path)?;
                 }
@@ -596,36 +614,96 @@ impl super::super::codec::Json for TimingRepeat {
                 "_boundsPeriod" => {
                     raw_bounds.element("Period", value, path)?;
                 }
-                "count" => raw_count = Some(value),
-                "_count" => raw_count_element = Some(value),
-                "countMax" => raw_count_max = Some(value),
-                "_countMax" => raw_count_max_element = Some(value),
-                "duration" => raw_duration = Some(value),
-                "_duration" => raw_duration_element = Some(value),
-                "durationMax" => raw_duration_max = Some(value),
-                "_durationMax" => raw_duration_max_element = Some(value),
-                "durationUnit" => raw_duration_unit = Some(value),
-                "_durationUnit" => raw_duration_unit_element = Some(value),
-                "frequency" => raw_frequency = Some(value),
-                "_frequency" => raw_frequency_element = Some(value),
-                "frequencyMax" => raw_frequency_max = Some(value),
-                "_frequencyMax" => raw_frequency_max_element = Some(value),
-                "period" => raw_period = Some(value),
-                "_period" => raw_period_element = Some(value),
-                "periodMax" => raw_period_max = Some(value),
-                "_periodMax" => raw_period_max_element = Some(value),
-                "periodUnit" => raw_period_unit = Some(value),
-                "_periodUnit" => raw_period_unit_element = Some(value),
-                "startOffset" => raw_start_offset = Some(value),
-                "endOffset" => raw_end_offset = Some(value),
-                "dayOfWeek" => raw_day_of_week = Some(value),
-                "_dayOfWeek" => raw_day_of_week_element = Some(value),
-                "timeOfDay" => raw_time_of_day = Some(value),
-                "_timeOfDay" => raw_time_of_day_element = Some(value),
-                "when" => raw_when = Some(value),
-                "_when" => raw_when_element = Some(value),
-                "offset" => raw_offset = Some(value),
-                "_offset" => raw_offset_element = Some(value),
+                "count" => {
+                    raw_count = Some(value);
+                }
+                "_count" => {
+                    raw_count_element = Some(value);
+                }
+                "countMax" => {
+                    raw_count_max = Some(value);
+                }
+                "_countMax" => {
+                    raw_count_max_element = Some(value);
+                }
+                "duration" => {
+                    raw_duration = Some(value);
+                }
+                "_duration" => {
+                    raw_duration_element = Some(value);
+                }
+                "durationMax" => {
+                    raw_duration_max = Some(value);
+                }
+                "_durationMax" => {
+                    raw_duration_max_element = Some(value);
+                }
+                "durationUnit" => {
+                    raw_duration_unit = Some(value);
+                }
+                "_durationUnit" => {
+                    raw_duration_unit_element = Some(value);
+                }
+                "frequency" => {
+                    raw_frequency = Some(value);
+                }
+                "_frequency" => {
+                    raw_frequency_element = Some(value);
+                }
+                "frequencyMax" => {
+                    raw_frequency_max = Some(value);
+                }
+                "_frequencyMax" => {
+                    raw_frequency_max_element = Some(value);
+                }
+                "period" => {
+                    raw_period = Some(value);
+                }
+                "_period" => {
+                    raw_period_element = Some(value);
+                }
+                "periodMax" => {
+                    raw_period_max = Some(value);
+                }
+                "_periodMax" => {
+                    raw_period_max_element = Some(value);
+                }
+                "periodUnit" => {
+                    raw_period_unit = Some(value);
+                }
+                "_periodUnit" => {
+                    raw_period_unit_element = Some(value);
+                }
+                "startOffset" => {
+                    raw_start_offset = Some(value);
+                }
+                "endOffset" => {
+                    raw_end_offset = Some(value);
+                }
+                "dayOfWeek" => {
+                    raw_day_of_week = Some(value);
+                }
+                "_dayOfWeek" => {
+                    raw_day_of_week_element = Some(value);
+                }
+                "timeOfDay" => {
+                    raw_time_of_day = Some(value);
+                }
+                "_timeOfDay" => {
+                    raw_time_of_day_element = Some(value);
+                }
+                "when" => {
+                    raw_when = Some(value);
+                }
+                "_when" => {
+                    raw_when_element = Some(value);
+                }
+                "offset" => {
+                    raw_offset = Some(value);
+                }
+                "_offset" => {
+                    raw_offset_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))

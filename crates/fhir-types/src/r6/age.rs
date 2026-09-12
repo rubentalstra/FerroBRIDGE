@@ -127,18 +127,42 @@ impl super::super::codec::Json for Age {
         let mut raw_code_element: Option<&super::super::codec::Value> = None;
         for (key, value) in object {
             match key.as_str() {
-                "id" => raw_id = Some(value),
-                "extension" => raw_extension = Some(value),
-                "value" => raw_value = Some(value),
-                "_value" => raw_value_element = Some(value),
-                "comparator" => raw_comparator = Some(value),
-                "_comparator" => raw_comparator_element = Some(value),
-                "unit" => raw_unit = Some(value),
-                "_unit" => raw_unit_element = Some(value),
-                "system" => raw_system = Some(value),
-                "_system" => raw_system_element = Some(value),
-                "code" => raw_code = Some(value),
-                "_code" => raw_code_element = Some(value),
+                "id" => {
+                    raw_id = Some(value);
+                }
+                "extension" => {
+                    raw_extension = Some(value);
+                }
+                "value" => {
+                    raw_value = Some(value);
+                }
+                "_value" => {
+                    raw_value_element = Some(value);
+                }
+                "comparator" => {
+                    raw_comparator = Some(value);
+                }
+                "_comparator" => {
+                    raw_comparator_element = Some(value);
+                }
+                "unit" => {
+                    raw_unit = Some(value);
+                }
+                "_unit" => {
+                    raw_unit_element = Some(value);
+                }
+                "system" => {
+                    raw_system = Some(value);
+                }
+                "_system" => {
+                    raw_system_element = Some(value);
+                }
+                "code" => {
+                    raw_code = Some(value);
+                }
+                "_code" => {
+                    raw_code_element = Some(value);
+                }
                 other => {
                     return path.with(other, |path| {
                         Err(path.error(super::super::codec::DecodeErrorKind::UnknownProperty))
