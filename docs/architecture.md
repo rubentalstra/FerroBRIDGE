@@ -59,6 +59,54 @@ second, and changed seven things:
 
 Sections 2, 4, 6, 9, 10, 12, 13, 14 and 15 carry the changes.
 
+## 0. The picture
+
+The bridge is one process beside a CDR. Everything it reads or writes crosses
+one of five edges, and no clinical data rests inside it.
+
+```mermaid
+flowchart LR
+    subgraph clients["Callers"]
+        FC["FHIR R4 client"]
+        FF["External FHIR facade or harness"]
+        OP["Operator: etl run, cdm init, vocab load"]
+    end
+    subgraph bridge["FerroBRIDGE, one binary"]
+        FAC["FHIR facade<br/>create, read, update, transaction, $validate, metadata"]
+        OPS["FHIRconnect operations<br/>$tofhir, $toopenehr"]
+        ENG_F["fhirconnect engine<br/>one program per profile and template"]
+        ENG_O["omocl engine<br/>record graph per composition"]
+        CORE["openehr-mapping-core<br/>header, loader, registry, paths, Web Template index"]
+        ID["Identity store (redb)<br/>FHIR ids, EHR ids, source ids"]
+        ETL["ETL runner<br/>AQL stream, COPY, watermark"]
+    end
+    subgraph outside["Configured deployments, never compile-time dependencies"]
+        CDR["openEHR CDR<br/>ITS-REST 1.1.0, canonical JSON"]
+        TERM["FHIR terminology server<br/>$lookup, $translate, $validate-code"]
+        CDM["OMOP CDM v5.4<br/>PostgreSQL"]
+        VOC["OHDSI vocabulary<br/>licence-gated, loaded by the operator"]
+        MAP["Mapping files<br/>FHIRconnect and OMOCL YAML"]
+    end
+    FC -->|"FHIR R4 REST"| FAC
+    FF -->|"Parameters, Bundle"| OPS
+    OP --> ETL
+    FAC --> ENG_F
+    OPS --> ENG_F
+    FAC <--> ID
+    ENG_F --> CORE
+    ENG_O --> CORE
+    ETL --> ENG_O
+    MAP -->|"loaded, validated, compiled once"| CORE
+    CORE -->|"OPT fetch, commit, read, AQL"| CDR
+    ENG_F -->|"external code systems only"| TERM
+    ETL -->|"typed rows, binary COPY"| CDM
+    VOC -->|"vocab load"| CDM
+    ENG_O -->|"concept resolution as SQL"| CDM
+```
+
+The change-feed adapter (section 5.1) is a sixth edge that arrives later, as
+FerroBRIDGE's own extension.
+
 ## 1. The two specifications are two languages
 
 FHIRconnect and OMOCL are written by the same author and share one header
@@ -111,6 +159,25 @@ projection out of one `DV_QUANTITY` node, dates taken from an enclosing
 context) have no counterpart in FHIRconnect, and FHIRconnect's recurrence
 model has none in OMOCL.
 
+```mermaid
+flowchart TB
+    H["One shared header<br/>grammar, type, metadata, spec.openEhrConfig.archetype"]
+    H --> FCF["FHIRconnect files<br/>model, extension, context"]
+    H --> OMF["OMOCL files<br/>records keyed by CDM target"]
+    subgraph core["openehr-mapping-core"]
+        L["YAML loader with anchors and positions"]
+        R["registry by metadata.name and archetype"]
+        P["RM-path model, ../ resolved against the anchor"]
+        W["Web Template index: node, RM type, occurrences"]
+    end
+    FCF --> core
+    OMF --> core
+    core --> FE["fhirconnect<br/>bidirectional interpreter over lenses"]
+    core --> OE["omocl<br/>one-directional interpreter"]
+    FE --> FS["FHIR sink<br/>R4 resources and Bundles"]
+    OE --> OS["OMOP sink<br/>CDM rows and FACT_RELATIONSHIP links"]
+```
+
 ## 2. Pinned versions
 
 The pins live in `docs/VERSIONS.md`; this table records the ground for each.
@@ -148,6 +215,18 @@ FHIRconnect and OMOCL paths are RM and archetype paths
 not executable: leaf RM types, occurrence limits and template node identifiers
 come from the **Web Template** built from the template's OPT. The ordered
 dependency is OPT, then Web Template, then path resolution, then composition.
+
+```mermaid
+flowchart LR
+    OPT["OPT 1.4 (canonical XML)<br/>GET /definition/template/adl1.4/{id}"] -->|"openehr-its opt14"| WT["Web Template<br/>built locally, one builder"]
+    WT -->|"bridge-owned index"| IDX["aqlPath index<br/>node, RM type, occurrences, node id"]
+    MP["Mapping path<br/>$archetype/data[at0001]/items[at0077]"] --> IDX
+    IDX --> RES["Resolved path<br/>leaf RM type, 1-based predicates"]
+    RES -->|"flat::build"| CMP["Canonical composition"]
+    CMP -->|"POST /ehr/{ehr_id}/composition"| CDR["CDR"]
+    CDR -->|"GET, canonical JSON"| CMP2["Canonical composition"]
+    CMP2 -->|"PATHABLE navigation"| RES
+```
 
 **What the openEHR crates provide, verified in the 0.0.64 sources.**
 `openehr-its` parses OPT 1.4 (`opt14`), builds the Web Template in the
@@ -224,6 +303,27 @@ recorded in the composition's `FEEDER_AUDIT`, which the RM defines for exactly
 this case (RM Common §FEEDER_AUDIT).
 
 ## 4. The FHIR side
+
+The FHIR side is a pipeline with one compile step and one interpreter, and
+two callers of that interpreter.
+
+```mermaid
+flowchart LR
+    F["FHIRconnect YAML<br/>model, extension, context"] --> M
+    subgraph M["fhirconnect::model"]
+        M1["published schemas, exercised<br/>(rejection set pinned)"]
+        M2["FerroBRIDGE strict schemas"]
+        M3["semantic validation"]
+        M1 --> M2 --> M3
+    end
+    M3 --> R["fhirconnect::resolve<br/>one immutable program per profile and template<br/>extension order pinned, paths pre-resolved"]
+    R --> E["fhirconnect::engine<br/>one traversal, direction parameter<br/>data-type lenses (GetPut, PutGet)"]
+    T["fhirconnect::tree<br/>bidirectional path model over the fhir-types Value tree<br/>guided by the element table"] --- E
+    WT["Web Template index<br/>(openehr-mapping-core)"] --- R
+    E --> O1["fhirconnect::operations<br/>$tofhir, $toopenehr"]
+    E --> O2["The facade<br/>R4 REST over the CDR"]
+    E -->|"external codes"| TS["Terminology client"]
+```
 
 ### 4.1 The FHIR model
 
@@ -601,6 +701,35 @@ expression is a load error: the reference CDR's connector let `where()` and
   (`{error, message, validationErrors}`) is carried inside
   `issue.diagnostics` and never returned raw.
 
+The inbound path, as one create:
+
+```mermaid
+sequenceDiagram
+    participant C as FHIR client
+    participant F as Facade
+    participant P as Program (compiled)
+    participant T as Terminology server
+    participant I as Identity store
+    participant D as CDR (ITS-REST)
+    C->>F: POST /Condition (application/fhir+json)
+    F->>F: media type, structural validation, meta.profile set
+    F->>P: select program by profile (templateId pins ties)
+    F->>I: source id and versionId seen before?
+    alt known source
+        I-->>F: composition uid: this is an update
+    else new source
+        I-->>F: none: this is a create
+    end
+    P->>T: $translate, $lookup for external codes (before any build)
+    T-->>P: typed outcomes (a failure refuses the unit)
+    P->>P: map, apply composition defaults, record FEEDER_AUDIT
+    P->>P: re-read through the strict RM reader
+    F->>D: resolve or create EHR (configured policy), POST or PUT composition, Prefer explicit
+    D-->>F: 201 or 422 with validationErrors
+    F->>I: record ids (entry uid or hash), versionId
+    F-->>C: 201 Location (FHIR URL), or OperationOutcome with the validator text verbatim
+```
+
 ### 4.7 The FHIRconnect REST API: `$tofhir` and `$toopenehr`
 
 The draft chapter (specification pull request #93, pinned in section 2)
@@ -645,6 +774,27 @@ leaves room:
   the pinned commit; the wire tests are labelled draft; the pin moves to the
   merged chapter when the specification releases it, and any difference is
   re-adjudicated then, never silently absorbed.
+
+```mermaid
+sequenceDiagram
+    participant H as Facade or harness
+    participant O as $tofhir
+    participant P as Program
+    participant W as Web Template index
+    H->>O: POST /$tofhir Parameters{composition, templateId?, context?}
+    O->>O: canonical or FLAT (FLAT needs templateId); FLAT converted at the edge
+    O->>P: select program by template_id and profile
+    P->>W: resolve every mapping path (pre-resolved at load)
+    P->>P: traverse openEHR to FHIR, lenses, unidirectional skips
+    alt an element cannot be mapped
+        P-->>O: typed refusal naming the element
+        O-->>H: OperationOutcome, no Bundle
+    else success
+        P-->>O: resources, the declared set (defaulted, skipped)
+        O->>O: add Provenance (agent.who from context or the device)
+        O-->>H: Bundle with resources, Provenance, OperationOutcome of information and warning issues
+    end
+```
 
 ### 4.8 Profile targets
 
@@ -755,6 +905,22 @@ because no concept exists. The reference engine has not moved since
   event names a composition, the adapter fetches it over ITS-REST and runs the
   same per-composition commit. The same adapter feeds the outbound FHIR lane
   (section 12).
+
+```mermaid
+flowchart TB
+    Q["POST /query/aql<br/>paged, consumed as a stream"] --> C["One composition<br/>(canonical JSON)"]
+    C --> E["omocl engine<br/>ordered first-match alternatives, Include, CustomMapping"]
+    E --> G["Record graph<br/>typed CDM rows and FACT_RELATIONSHIP links, natural keys"]
+    G --> R["Concept resolver<br/>SQL over CONCEPT and CONCEPT_RELATIONSHIP<br/>invalid_reason IS NULL, validity dates, deterministic order"]
+    R -->|"ambiguous"| X["typed error, unit refused"]
+    R -->|"no match"| Z["concept 0, source value kept, counted"]
+    R --> V["domain validated against type"]
+    V --> K["Side table<br/>natural key to surrogate id, watermark"]
+    K --> W["binary COPY<br/>one composition all-or-nothing"]
+    W --> DB[("OMOP CDM v5.4")]
+    W --> REP["Run report<br/>rows per table, concept 0, refusals and why"]
+    DB --> DER["Derived tables<br/>OBSERVATION_PERIOD, eras (published SQL), visits (configured AQL)"]
+```
 
 ### 5.2 The OMOCL interpreter
 
@@ -908,6 +1074,31 @@ published `openehr-*` crates do.
 | `tools/omop-cdm-codegen` | the CDM generator with its `emit --check` drift gate | hand-written | no |
 | `tools/ferrobridge-testkit` | the pin-matrix reader, fixtures, the synthetic vocabulary, the CDR and terminology stubs (`wiremock`), the container harness (`testcontainers`); a path-only dev-dependency | hand-written | no |
 
+```mermaid
+flowchart BT
+    FT["fhir-types<br/>(generated by tools/fhir-codegen)"]
+    OE["openehr-base, openehr-rm,<br/>openehr-its, openehr-query<br/>(crates.io)"]
+    MC["openehr-mapping-core"] --> OE
+    FC["fhirconnect"] --> MC
+    FC --> FT
+    OM["omocl"] --> MC
+    OC["omop-cdm<br/>(generated rows + hand-written resolver)"]
+    OM --> OC
+    CL["ferrobridge-openehr<br/>(ITS-REST client)"] --> OE
+    TC["ferrobridge-term<br/>(terminology client)"] --> FT
+    SV["app/ferrobridge-server<br/>(the one binary)"] --> FC
+    SV --> OM
+    SV --> OC
+    SV --> CL
+    SV --> TC
+    TK["tools/ferrobridge-testkit<br/>(path-only dev-dependency)"] -.-> SV
+    CG["tools/fhir-codegen"] -.->|"emits"| FT
+    OG["tools/omop-cdm-codegen"] -.->|"emits"| OC
+```
+
+An arrow points at a dependency. The dotted arrows are emission and test
+support, not runtime dependencies.
+
 **Seven published crates, one per concern** (owner decision 2026-09-05, after a
 duplication check against both siblings): a finer split into twelve was
 scaffolded and collapsed, because each language is one thing to a consumer
@@ -1024,6 +1215,19 @@ draft upstream change.
   resource updates rather than duplicates (section 4.6). The acknowledged
   failure mode (a re-sent Bundle omitting one resource reads as a different
   mapping) is documented, not hidden.
+
+  ```mermaid
+  flowchart TB
+      E["Entry in a composition version"] --> M{"Identity map has<br/>this entry?"}
+      M -->|"yes"| K["Use the recorded FHIR id<br/>(the map wins once written)"]
+      M -->|"no"| U{"Entry carries<br/>LOCATABLE.uid?"}
+      U -->|"yes"| A["id from the entry uid"]
+      U -->|"no"| B["id = SHA-256(versioned_object_uid, entry path, split occurrence)<br/>base32, 52 characters"]
+      A --> W["Record in the map"]
+      B --> W
+      W --> V["meta.versionId = version_tree_id"]
+      K --> V
+  ```
 - **Patient identity.** The REST API draft names the arrangement to aim for:
   the engine resolves an EHR id to a patient through whatever owns patient
   identity in the deployment, and `context.patient` is the caller's fallback.
@@ -1320,6 +1524,18 @@ Issues #22 and #23 carry the contracts; the decisions that shape them:
 Milestones are releases on the 0.0.x line. Each increment compiles, is tested,
 and is green before the next starts. The tracker carries the issues; this is
 the order and the reason for it.
+
+```mermaid
+flowchart LR
+    A["v0.0.2<br/>foundation:<br/>fhir-types move, core,<br/>clients, testkit, server shape,<br/>container, release lane"] --> B["v0.0.3<br/>FHIR round trip:<br/>fhirconnect, $tofhir and $toopenehr,<br/>facade, identity store"]
+    A --> C["v0.0.4<br/>OMOP round trip:<br/>omocl, vocabulary, COPY writer,<br/>etl and cdm init, conformance gate"]
+    B --> D["v0.0.5<br/>FHIR breadth:<br/>full lens matrix, reference,<br/>split, LINKED, batch, PROGRAMMED"]
+    C --> E["v0.0.6<br/>OMOP breadth:<br/>all targets, run report,<br/>Data Quality Dashboard port"]
+    D --> F["v0.0.7<br/>search over AQL projections"]
+    D --> G["v0.0.8<br/>EU profile targets:<br/>Base and Core, Laboratory, MPD"]
+    E --> H["v0.0.9<br/>change-feed adapter:<br/>incremental OMOP, outbound FHIR"]
+    B --> H
+```
 
 **v0.0.2, the foundation.** The workspace with every lint (#20); the vendor
 scripts and provenance for the corpora and the HL7 packages; `fhir-types` and

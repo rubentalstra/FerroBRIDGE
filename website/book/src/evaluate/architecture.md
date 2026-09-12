@@ -73,7 +73,22 @@ operations. It stores no clinical data. A transaction Bundle is all or nothing
 and a batch Bundle answers per entry, as FHIR R4 defines them. Bundles are
 split by the profiles in `meta.profile`, a resource that two mappings both need
 becomes a linked mapping, and unresolved references are fetched from the
-sending site with cycle protection.
+sending site with cycle protection. Beside the facade, the bridge serves the
+two operations the FHIRconnect specification is adding in its draft REST API
+chapter, `$tofhir` and `$toopenehr`, as the engine's own conformance surface;
+the facade is a client of the same in-process engine.
+
+```mermaid
+flowchart LR
+    F["FHIRconnect YAML<br/>model, extension, context"] --> M["model<br/>published schemas exercised,<br/>strict schemas, semantic checks"]
+    M --> R["resolve<br/>one immutable program<br/>per profile and template"]
+    R --> E["engine<br/>one traversal, both directions,<br/>data-type lenses"]
+    T["tree<br/>path model over FHIR JSON<br/>guided by the element table"] --- E
+    W["Web Template index"] --- R
+    E --> O1["$tofhir, $toopenehr"]
+    E --> O2["The facade over the CDR"]
+    E -->|"external codes only"| TS["Terminology server"]
+```
 
 FHIRconnect states that it "does not focus specifically on AQL and FHIRsearch",
 so FHIR search has no specification behind it here. The search design is
@@ -97,13 +112,25 @@ lands as `concept_id = 0` with the source value kept, which is what the CDM
 means by "no matching concept", and it is never dropped. The
 [OMOP ETL](../integrate/omop-etl.md) page has the detail.
 
+```mermaid
+flowchart TB
+    Q["AQL result set, streamed"] --> C["One composition"]
+    C --> E["omocl engine"]
+    E --> G["Record graph<br/>rows and FACT_RELATIONSHIP links"]
+    G --> R["Concept resolver<br/>SQL over the loaded vocabulary"]
+    R --> K["Side table<br/>natural key, surrogate id, watermark"]
+    K --> W["binary COPY<br/>one composition, all or nothing"]
+    W --> DB[("OMOP CDM v5.4")]
+    W --> REP["Run report<br/>rows, concept 0, refusals"]
+```
+
 ## Generated and hand-written
 
 Two models are generated, because both are published in machine-readable form
 and a hand-transcribed copy drifts from its source with no way to detect it.
 The FHIR model, the `fhir-types` crate, is emitted by `fhir-codegen` from the
-HL7 FHIR packages; it moved into this repository from the sibling terminology
-server, which now consumes it from crates.io. The OMOP CDM v5.4 row types are
+HL7 FHIR packages; it moves into this repository from the sibling terminology
+server, which then consumes it from crates.io. The OMOP CDM v5.4 row types are
 emitted from the OHDSI `CommonDataModel` field definitions, with the OHDSI
 PostgreSQL DDL vendored verbatim beside them. The openEHR model comes from the
 published `openehr-*` crates. Everything that makes FerroBRIDGE a bridge is
