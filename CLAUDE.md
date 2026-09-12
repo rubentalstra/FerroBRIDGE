@@ -55,12 +55,17 @@ v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 ## Repo map
 
 The Cargo workspace is a skeleton (#107): the root manifests with the full lint
-set, six placeholder library crates at 0.0.0 holding their crates.io names,
+set, five placeholder library crates at 0.0.0 holding their crates.io names,
 a thin `ferrobridge` binary that does nothing yet, and the testkit tool crate.
 Beside it:
 
 - `crates/fhir-types`: the generated FHIR model, Apache-2.0, emitted whole by
   the generator below and never hand-edited.
+- `crates/openehr-mapping-core`: the half of the mapping foundation both
+  languages share (#74): the header they standardize between them, the YAML
+  loader with anchors and source positions, the registry by mapping name and
+  archetype id, the diagnostic model, and the openEHR path model with the
+  `../` step resolved against an anchor.
 - `tools/fhir-codegen`: the generator, with the five vendored HL7 FHIR packages
   under `vendor/` (380 MB, a `PROVENANCE.md` each) as its only input.
 - `crates/omop-cdm`: the OMOP CDM v5.4 layer. `src/generated/` and `ddl/` are

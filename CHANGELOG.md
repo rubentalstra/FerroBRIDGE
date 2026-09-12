@@ -35,6 +35,21 @@ no binary to download yet.
   `omop-cdm-codegen-drift` CI job fails on any difference. Tests assert the
   generated column set of every table against OHDSI's DDL.
 
+- `crates/openehr-mapping-core` carries the half of the mapping foundation both
+  languages share (#74): the header FHIRconnect and OMOCL standardize between
+  them, with `GrammarVersion`, `MappingName`, `MappingVersion`, `MappingType`
+  and `ArchetypeId` as distinct types and everything a language adds under
+  `spec` kept as an opaque positioned node; a YAML loader over `serde-saphyr`
+  that resolves anchors, aliases and merge keys into a value tree where every
+  node carries its line and column, and refuses a duplicate key, an
+  unresolvable alias and a tab-indented file with a positioned diagnostic; a
+  registry keyed by mapping name and by archetype id that refuses a repeated
+  name naming both files; one `Diagnostic` type carrying file, position,
+  mapping name, model path, severity and code; and a `MappingPath` over the
+  `openehr-rm` BASE path parser that resolves the languages' own `../` step
+  against an anchor and refuses a step above its root. Both vendored corpora
+  load through the public seam in the test suite, which pins the exact set of
+  files this crate refuses and why.
 - The specification corpora under `docs/specs/` (#71), each fetched by a
   committed `scripts/vendor/*.sh` from the commit `docs/VERSIONS.md` pins and
   stamped with a `PROVENANCE.md`: the FHIRconnect specification source with its

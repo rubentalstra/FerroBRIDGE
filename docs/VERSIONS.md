@@ -54,10 +54,21 @@ carries the exact patch.
 | Item | Pin | Repeated in |
 |---|---|---|
 | `openehr-base` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-rm` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-rm` | 0.0.64 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
 | `openehr-its` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
 | `openehr-query` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
 | `openehr-am` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` (the AOM2 OPT2 types an ADL 2 template decodes into) |
+
+## Third-party crates
+
+A crate reaches this table only when `docs/architecture.md` §2 grounds the
+choice by name, so the ground and the pin never drift apart. Everything else
+stays in the root `Cargo.toml` `[workspace.dependencies]` alone, per §Rust
+dependency pins below.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| `serde-saphyr` | 1.2.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
 
 ## FHIR packages (the `fhir-types` generator input)
 
@@ -165,9 +176,10 @@ vendored tree (`.claude/rules/vendored-inputs.md`).
 ## Rust dependency pins
 
 The root `Cargo.toml` `[workspace.dependencies]` table is the authoritative,
-fully pinned third-party crate set once it exists. This file does not duplicate
-crate versions; on any discrepancy the manifest wins. A crate joins a member
-with `dep.workspace = true`.
+fully pinned third-party crate set. Beyond the openEHR model crates and the
+§Third-party crates table above, this file does not duplicate crate versions;
+on any discrepancy the manifest wins. A crate joins a member with
+`dep.workspace = true`.
 
 ## CI tool pins
 

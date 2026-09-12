@@ -36,9 +36,16 @@ allow = [
 ]
 confidence-threshold = 0.9
 # The project's own crates are BUSL-1.1 (LICENSE). The openEHR model crates
-# join this list when they are added (openehr-its, openehr-query are BUSL-1.1;
-# openehr-term is Apache-2.0 AND CC-BY-SA-3.0).
+# join this list as they are added (openehr-its, openehr-query are BUSL-1.1).
+#
+# openehr-term arrives transitively under openehr-rm. Its Rust code is
+# Apache-2.0; the CC-BY-SA-3.0 half covers only the official openEHR
+# terminology XML it redistributes verbatim from
+# https://github.com/openEHR/specifications-TERM. The bridge redistributes that
+# data unchanged with attribution, which is what the share-alike term asks, and
+# no first-party file derives from it.
 exceptions = [
+  { allow = ["Apache-2.0", "CC-BY-SA-3.0"], crate = "openehr-term" },
   { allow = ["BUSL-1.1"], crate = "openehr-mapping-core" },
   { allow = ["BUSL-1.1"], crate = "fhirconnect" },
   { allow = ["BUSL-1.1"], crate = "omocl" },
