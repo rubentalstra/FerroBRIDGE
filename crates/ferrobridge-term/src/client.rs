@@ -112,6 +112,33 @@ impl Client {
     /// caller decides which ones count;
     /// [`TranslateOutcome::accepted`] yields the `equivalent` and `equal` ones.
     ///
+    /// # Examples
+    ///
+    /// A deployment with no terminology server holds no client, and a
+    /// translation it cannot make is a refusal:
+    ///
+    /// ```rust,no_run
+    /// use ferrobridge_term::client::Client;
+    ///
+    /// # fn main() {
+    /// # let terminology: Option<Client> = None;
+    /// # let _call = async move {
+    /// let Some(client) = terminology.as_ref() else {
+    ///     return Err("no terminology server is configured".into());
+    /// };
+    /// let source = "http://example.org/source";
+    /// let target = "http://example.org/target";
+    /// let outcome = client.translate(source, "alpha", target, None).await?;
+    /// let Some(translated) = outcome.accepted().next() else {
+    ///     return Err("no equivalent translation".into());
+    /// };
+    /// let code = translated.concept.as_ref().and_then(|concept| concept.code.as_deref());
+    /// assert!(code.is_some(), "an accepted match names its target code");
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// # };
+    /// # }
+    /// ```
+    ///
     /// # Errors
     /// Returns [`Error::Refused`] when the server refused the operation, for
     /// example because it serves no such concept map, and [`Error`] otherwise

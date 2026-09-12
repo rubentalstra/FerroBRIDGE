@@ -4,10 +4,10 @@
 //! The FerroBRIDGE FHIR terminology client for `$lookup`, `$translate` and
 //! `$validate-code`.
 //!
-//! Three operations on one configured server: [`Client::lookup`] resolves a
-//! code's display, [`Client::translate`] maps a code into another system, and
-//! [`Client::validate_code`] tests membership of a value set.
-//! [`Client::batch`] sends several of them as one `batch` `Bundle` and answers
+//! Three operations on one configured server: [`client::Client::lookup`] resolves a
+//! code's display, [`client::Client::translate`] maps a code into another system, and
+//! [`client::Client::validate_code`] tests membership of a value set.
+//! [`client::Client::batch`] sends several of them as one `batch` `Bundle` and answers
 //! them by position.
 //!
 //! A negative answer an operation states in its own `out` parameters is an
