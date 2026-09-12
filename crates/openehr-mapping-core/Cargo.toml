@@ -21,5 +21,8 @@ include = ["src/**", "README.md", "LICENSE"]
 
 [dependencies]
 
+[dev-dependencies]
+ferrobridge-testkit.workspace = true
+
 [lints]
 workspace = true

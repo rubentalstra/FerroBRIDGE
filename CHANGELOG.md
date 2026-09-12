@@ -23,6 +23,12 @@ no binary to download yet.
 
 ### Added
 
+- The workspace root discipline is complete (#20): a composite
+  `.github/actions/setup-rust` action reads `rust-toolchain.toml` for every
+  Rust-tier job, and every workspace member carries one integration binary at
+  `tests/it/main.rs` (the foundation crate asserts the four `openehr-*` rows of
+  the pin matrix name one line; the server test drives the library run path;
+  the testkit tests its own pin-matrix reader).
 - The Cargo workspace skeleton (#107): the root manifest with every lint the
   reliability rule names, the release profile, `rust-toolchain.toml`,
   `rustfmt.toml`, `clippy.toml`, `deny.toml` and a committed `Cargo.lock`;

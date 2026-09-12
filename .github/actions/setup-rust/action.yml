@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+name: Install the Rust toolchain
+description: >-
+  Install the toolchain rust-toolchain.toml pins, with the components a job
+  asks for. The calling job checks out the repository first: a local action
+  path (./.github/actions/setup-rust) resolves only after checkout, so this
+  action does not check out. The channel is read from rust-toolchain.toml by
+  the wrapped action, so the pin lives in one file (docs/VERSIONS.md).
+inputs:
+  components:
+    description: Comma-separated toolchain components (rustfmt, clippy), none by default.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+      with:
+        components: ${{ inputs.components }}
