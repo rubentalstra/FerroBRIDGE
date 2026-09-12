@@ -52,3 +52,6 @@
   is killed with exit 143 when two generated giants compile together; lint
   per package with cargo hack, never the all-features union of fhir-types;
   2026-09-12
+- [PostgreSQL 18](postgresql-18.md): every PostgreSQL the project tests
+  against or documents is the latest release (18.6 on 2026-09-12), never 16;
+  owner ruling 2026-09-12
