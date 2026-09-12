@@ -137,6 +137,13 @@ Each tier-2 job installs the toolchain through the composite
 `rust-toolchain.toml`, and takes the `components` a job asks for (`rustfmt`,
 `clippy`), so the pin lives in one file.
 
+Every cargo invocation in the workflow runs with `CARGO_BUILD_JOBS=2` (a
+workflow-level `env:`): the hosted runner has four cores and seven gigabytes,
+and compiling the full-feature `fhir-types` beside `openehr-am`, `reqwest` and
+the other large crates in parallel exceeded that memory and got the job killed
+with exit 143 and no diagnostic. Two crates at a time is slower and never
+killed. No specification governs this: our own design.
+
 ## Triggers and concurrency
 
 `push` to `main`, `pull_request` against `main`, `merge_group`, and

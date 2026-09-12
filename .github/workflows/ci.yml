@@ -34,6 +34,14 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # No permissions by default: each job grants its own.
+# The hosted runner has four cores and seven gigabytes. Compiling the
+# full-feature fhir-types beside openehr-am, reqwest and the other large crates
+# in parallel exceeds that memory and the runner kills the job (exit 143, no
+# diagnostic), so every cargo invocation builds two crates at a time. Slower,
+# never killed.
+env:
+  CARGO_BUILD_JOBS: "2"
+
 permissions: {}
 
 jobs:
