@@ -48,3 +48,6 @@ dependencies = [
 [[package]]
 name = "openehr-mapping-core"
 version = "0.0.0"
+dependencies = [
+ "ferrobridge-testkit",
+]
