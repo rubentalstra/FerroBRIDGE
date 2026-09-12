@@ -60,6 +60,17 @@ no binary to download yet.
   gives the type such a path resolves to. A test walks every vendored
   `StructureDefinition` of the emitted set and asserts the table agrees element
   by element.
+- `ferrobridge-openehr` is the openEHR ITS-REST 1.1.0 client (#76): every call
+  answers with an outcome enum whose variants are the statuses the governing
+  operation documents, each carrying the upstream body, and a refused
+  connection, a timeout, a `5xx` and a `401` are typed errors that keep the
+  status, the body and the `WWW-Authenticate` challenge. It covers the EHR,
+  COMPOSITION, CONTRIBUTION, AQL and template surfaces, sends `Prefer`
+  explicitly on every request, sends `If-Match` as the bare quoted
+  `version_uid`, sends the three 1.1.0 committal metadata headers on a commit,
+  and fetches a template over both generations, `adl1.4` first and `adl2` on a
+  `404` or a `406`. Timeout and bounded `backon` retry apply to idempotent
+  calls only.
 - The specification corpora under `docs/specs/` (#71), each fetched by a
   committed `scripts/vendor/*.sh` from the commit `docs/VERSIONS.md` pins and
   stamped with a `PROVENANCE.md`: the FHIRconnect specification source with its

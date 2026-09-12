@@ -66,6 +66,9 @@ Beside it:
   loader with anchors and source positions, the registry by mapping name and
   archetype id, the diagnostic model, and the openEHR path model with the
   `../` step resolved against an anchor.
+- `crates/ferrobridge-openehr`: the hand-written ITS-REST 1.1.0 client (#76),
+  one outcome enum per call with a variant per documented status, `wiremock`
+  contract tests beside it.
 - `tools/fhir-codegen`: the generator, with the five vendored HL7 FHIR packages
   under `vendor/` (380 MB, a `PROVENANCE.md` each) as its only input.
 - `crates/omop-cdm`: the OMOP CDM v5.4 layer. `src/generated/` and `ddl/` are
