@@ -20,9 +20,9 @@ thiserror.workspace = true
 tokio = { workspace = true, features = ["time"] }
 wiremock.workspace = true
 
+[dev-dependencies]
 # The corpus suite re-hashes the vendored FHIRconnect schemas, so it needs a
 # sha256 the workspace does not otherwise carry.
-[dev-dependencies]
 sha2.workspace = true
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "time"] }
 

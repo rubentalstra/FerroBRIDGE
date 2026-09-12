@@ -55,3 +55,6 @@
 - [PostgreSQL 18](postgresql-18.md): every PostgreSQL the project tests
   against or documents is the latest release (18.6 on 2026-09-12), never 16;
   owner ruling 2026-09-12
+- [End-to-end gate](e2e-gate.md): container tests run only with
+  `FERROBRIDGE_E2E=1` through the testkit harness; images pinned by digest and
+  checked by the versions guard; 2026-09-12
