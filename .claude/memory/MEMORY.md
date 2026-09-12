@@ -48,3 +48,7 @@
 - [Mermaid diagrams](mermaid-diagrams.md): the architecture carries mermaid
   diagrams; render every fence with mermaid-cli against the installed Chrome
   before a pull request; a semicolon ends a sequence message; 2026-09-12
+- [CI runner memory](ci-runner-memory.md): a workspace-wide check or clippy
+  is killed with exit 143 when two generated giants compile together; lint
+  per package with cargo hack, never the all-features union of fhir-types;
+  2026-09-12
