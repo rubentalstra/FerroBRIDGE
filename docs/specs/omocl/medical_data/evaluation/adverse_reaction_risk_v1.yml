@@ -1,0 +1,31 @@
+grammar: OMOCL/v1.0.0
+type: model
+metadata:
+  name: adverse_reaction_risk_v1
+  version: 1.0.0
+spec: # OHDSI OMOP v5.4
+  system: OMOP
+  version: 5.4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.adverse_reaction_risk.v1
+
+mappings:
+  - type: "Observation"
+    concept_id:
+      alternatives:
+        - code: 35626089 #SNOMED Abnormal immune process (qualifier value)
+    observation_date:
+      alternatives:
+        - path: "/data[at0001]/items[at0027]" #onset of reaction
+        - path: "../context"
+    value:
+      alternatives:
+        - path: "/data[at0001]/items[at0002]"  # Substance, mandatory since the WHAT is essential here
+    unit:
+      optional: true
+      alternatives:
+        - path: "/data[at0001]/items[at0058]" # type of immune reaction
+    qualifier:
+      alternatives:
+        - path: "/data[at0001]/items[at0063]" # status, enforce since could be refuted
+

@@ -1,0 +1,88 @@
+= Context Mappings
+:navtitle: Context Mappings
+
+The extension and model mappings introduced represent individual pieces of mappings
+that need to be combined to successfully map a composition or profile.
+On the other hand, context mappings act as imports.
+
+== Header
+The header is of the `type: context`. It does not contain an openEHR or FHIR-specific part.
+
+[source,yaml]
+----
+grammar: FHIRConnect/v0.0.1
+type: context
+metadata:
+  name:  KDS_Prozedur.context
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+----
+
+== profileUrl & templateId
+The `profile.url` defines the profile being mapped, as specified in the `meta.url` of a FHIR profile instance.
+The `profile.version` defines what version of the profile this mapping is for.
+The `template.id` defines the template being mapped by these files. It must reference the exact ID of the template.
+The `template.sem_ver` defines what version of the template is mapped.
+
+[source,yaml]
+----
+context:
+  profile:
+    url: "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+    version: "2025.0.0"
+  template:
+    id: "KDS_Prozedur"
+    sem_ver: "10.0.0"
+----
+
+== Archetypes & Extensions
+The next keys are the `archetypes`, which reference all model mappings used for this template-profile mapping
+by their header name.
+The `extensions` key defines which extensions are loaded for the model mappings contained in the `archetypes`.
+An extension is not always required. Each time a model mapping is called as part of this context,
+and it has an extension, the extension is applied.
+For example, if model mapping A references (`slotArchetype`) another model mapping B,
+and B has an extension C, then extension C is applied.
+
+[source,yaml]
+----
+
+context:
+  profile:
+    url: "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+    version: "2025.0.0"
+  template:
+    id: "KDS_Prozedur"
+    sem_ver: "10.0.0"
+  archetypes:
+    - "ACTION.procedure.v1"
+    - "CLUSTER.case_identification.v0"
+  extensions:
+    - "KDS_procedure.v1"
+----
+
+== Start
+The `start` key defines where the engine should begin the mapping.
+Typically, the engine starts from this mapping and resolves all references from there.
+The model mapping name is used here.
+In the example below, the engine would start the mapping at the `KDS_procedure.v1` extension,
+since this extends the `ACTION.procedure.v1`.
+
+[source,yaml]
+----
+context:
+  profile:
+    url: "https://www.medizininformatik-initiative.de/fhir/core/modul-prozedur/StructureDefinition/Procedure"
+    version: "2025.0.0"
+  template:
+    id: "KDS_Prozedur"
+    sem_ver: "10.0.0"
+  archetypes:
+    - "ACTION.procedure.v1"
+    - "CLUSTER.case_identification.v0"
+  extensions:
+    - "KDS_procedure.v1"
+  start: "ACTION.procedure.v1"
+----

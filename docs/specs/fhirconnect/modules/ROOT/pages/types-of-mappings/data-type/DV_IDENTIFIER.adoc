@@ -1,0 +1,23 @@
+= DV_IDENTIFIER
+
+== Identifier
+
+https://hl7.org/fhir/R4/datatypes.html#Duration[Identifier]
+to https://specifications.openehr.org/releases/RM/Release-1.1.0/data_types.html#_dv_identifier_class[DV_IDENTIFIER]
+
+This has several problems. The `type` is a `coding` in FHIR and the `assigner` a `reference` to an
+Organization. In openEHR the mapped fields are `string`. To capture some of the FHIR logic,
+the `type.codings` first `code` should be transformed as described in <<types-of-mappings/data-type/CODE_PHRASE.adoc#string, Coding to String>>.
+
+[cols="^1,^1,^2,^1,^1,^2", options="header"]
+|===
+| FHIRpath           | Cardinality | Comment  | openEHR              | Cardinality | Comment
+| use                | 0..1               |          | -                    | -                     |
+| period             | 0..1               |          | -                    | -                     |
+| assigner           | 0..1               |          | assigner             | 0..1                  | see <<types-of-mappings/data-type/String.adoc#references, String to Reference>>
+| value              | 0..1               |          | id                   | 1..1                  |
+| type.coding        | 0..1               | take first appearance           | type                 | 0..1                  | see <<types-of-mappings/data-type/CODE_PHRASE.adoc#string, Coding to String>>
+| -                  | -                  |          | issuer               | 0..1                  |
+|===
+
+

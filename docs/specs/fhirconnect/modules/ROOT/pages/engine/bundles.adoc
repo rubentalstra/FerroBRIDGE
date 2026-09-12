@@ -1,0 +1,30 @@
+= Bundles
+:navtitle: Bundles
+
+FHIR data is typically sent in Bundles and contains references.
+These references must be processed in a specific way.
+
+== Bundles
+
+Bundles contain a collection of resources.
+The FHIRconnect engine needs to split these Bundles into smaller collections to process them.
+
+The context mapping files contain a list of profile URLs.
+Using this list, the engine must divide the Bundle into manageable parts.
+
+In this example, two context files are provided: one for Diagnoses and one for Procedures.
+The engine splits the Bundle into two separate ones for processing.
+
+image::Bundlles.drawio.png[]
+
+Sometimes, resources are contained within a mapping but are also related to another mapping.
+
+For example, the Encounter in the diagram could be mapped to an Encounter in openEHR,
+but it is also referenced by Diagnose A.
+
+For such cases, **linked mappings** are used.
+See xref:types-of-mappings/concept-type/concept-mappings.adoc[].
+
+In this case, the Diagnosis mapping would link to the Encounter mapping.
+As a result, in addition to processing its own mapping, the Diagnosis mapping
+would also trigger the Encounter mapping.

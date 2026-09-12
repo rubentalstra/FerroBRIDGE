@@ -1,0 +1,163 @@
+= DV_CODED_TEXT
+
+Inherits from DV_TEXT.
+
+== CodeableConcept
+
+https://hl7.org/fhir/R4/datatypes.html#codeableconcept[CodeableConcept]
+to https://specifications.openehr.org/releases/RM/latest/data_types.html#_dv_coded_text_class[DV_CODED_TEXT].
+
+FHIRconnect engine checks, if the defining_code requires a specific terminology like e.g. SNOMED-CT that is also contained in the coding.
+If yes, this one should be transformed into the defining_code instead of the first one.
+This can only be done, if both FHIR and openEHR reference the same terminology id for that element.
+
+Otherwise, FHIRconnect transforms the first appearance of coding into the defining_code.
+Each further coding is transformed into the term_mappings.
+
+[IMPORTANT]
+====
+We recommend to resolve the code display using a terminology server when mapping to openEHR, since the value is mandatory
+in openEHR.
+
+Alternatively the coding.code can be used if a term server is not an option for mapping the value
+====
+
+[cols="^1,^1,^2,^1,^1,^2",options="header"]
+|===
+| FHIRpath        | Cardinality | Comment                                                 | openEHR              | Cardinality | Comment
+| coding          | 0..n               | either first one or the one with the same terminology_system | defining_code    | 1..1                 | see xref:types-of-mappings/data-type/CODE_PHRASE.adoc[]
+| coding.display  | 0..1               | `display` of `coding` of first row, resolve via term server recommended             | defining_code/preferred_term | 0..1               |
+| text            | 0..1               |                                                         | value                | 1..1                 |
+|__ coding.display __ | 0..1                | if `text` emtpy take first appearance, resolve via term server recommended                                         | value                | 1..1                 | not for openEHR->FHIR
+|__ coding.code __ | 0..1                   | if `display` emtpy take first appearance                                         | value                | 1..1                 | not for openEHR->FHIR
+| -               | -                  |                                                         | hyperlink            | 0..1                 |
+| -               | -                  |                                                         | formatting           | 0..1                 |
+| coding          | 0..n               | Each one that was not mapped in defining_code           | mappings             | 0..n                 | see xref:types-of-mappings/data-type/TERM_MAPPING.adoc[]
+| -               | -                  |                                                         | language             | 0..1                 |
+| -               | -                  |                                                         | encoding             | 0..1                 |
+|===
+
+
+
+
+
+Example, added a numerator to fever word in order to better identify which one goes where.
+
+[source,json]
+----
+{
+   "_type" : "DV_CODED_TEXT",
+    "value" : "Fever1",
+    "defining_code" : {
+      "_type" : "CODE_PHRASE",
+      "terminology_id" : {
+        "_type" : "TERMINOLOGY_ID",
+        "value" : "http://loinc.org"
+      },
+      "code_string" : "LP74849-8",
+      "preferred_term": "Fever2"
+    },
+  "mappings": [
+    {
+      "_type": "TERM_MAPPING",
+      "match": "=",
+      "target": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "http://snomed.info/sct"
+        },
+        "code_string": "386661006",
+        "preferred_term": "Fever3"
+      }
+    }
+  ]
+}
+----
+
+To:
+
+[source,json]
+----
+"code": {
+        "coding":  [
+            {
+                "system": "http://loinc.org",
+                "code": "LP74849-8",
+                "display": "Fever2"
+            },
+            {
+                "system": "http://snomed.info/sct",
+                "code": "386661006",
+                "display": "Fever3"
+            }
+        ],
+      "text": "Fever1"
+    },
+}
+----
+
+== Coding
+
+https://hl7.org/fhir/R4/datatypes.html#Coding[Coding] to https://specifications.openehr.org/releases/RM/latest/data_types.html#_dv_coded_text_class[DV_CODED_TEXT].
+
+[IMPORTANT]
+====
+We recommend to resolve the code display using a terminology server when mapping to openEHR, since the value is mandatory
+in openEHR.
+====
+
+[cols="^1,^1,^2,^1,^1,^2",options="header"]
+|===
+| FHIRpath  | Cardinality | Comment  | openEHR  | Cardinality | Comment
+| system    | 0..1  |  | defining_code/terminology_id/name  | 1..1  |
+| version   | 0..1  |         | defining_code/terminology_id/version_id | 1..1  | populate with emtpy string if not provided
+| code      | 0..1  |  | defining_code/code_string  | 1..1  |
+| display   | 0..1  | resolve via termserver is recommended       | value  | 1..1  |
+|__ code __ | 0..1                   | if `display` emtpy  | value                | 1..1                 | not for openEHR->FHIR
+| userSelected | 0..1  |         | -  | -  |
+| -         | -  |         | preferred_term  | 0..1   |
+| -         | -  |         | hyperlink  | 0..1   |
+| -         | -  |         | formatting  | 0..1   |
+| -         | -  |         | mappings  | 0..1   |
+| -         | -  |         | language  | 0..1   |
+| -         | -  |         | encoding  | 0..1   |
+|===
+
+
+Example:
+
+[source,json]
+----
+{
+   "_type" : "DV_CODED_TEXT",
+    "value" : "Fever",
+    "defining_code" : {
+      "_type" : "CODE_PHRASE",
+      "terminology_id" : {
+        "_type" : "TERMINOLOGY_ID",
+        "value" : "http://loinc.org"
+      },
+      "code_string" : "LP74849-8"
+    }
+}
+----
+
+To:
+
+[source,json]
+----
+"coding":  [
+  {
+    "system": "http://loinc.org",
+    "code": "LP74849-8",
+    "display": "Fever"
+  }
+}
+----
+
+== STRING
+
+https://hl7.org/fhir/R4/datatypes.html#string[String] to  https://specifications.openehr.org/releases/RM/latest/data_types.html#_dv_coded_text_class[DV_CODED_TEXT]
+
+A transformation from FHIR string to openEHR CODABLE_CONCEPT is not possible,

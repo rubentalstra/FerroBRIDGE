@@ -1,0 +1,59 @@
+= FHIRconnect Specification Documentation
+:navtitle: Introduction
+
+== DISCLAIMER
+
+FHIRconnect is the result of a research project.
+To support our research, please cite one of our papers instead of referencing our GitHub repository in scientific articles.
+You can find an overview of papers about FHIRconnect here.
+If you are unsure which paper to cite, we recommend this one:
+
+*WIP*
+
+Thank you!
+
+== About FHIRconnect
+
+FHIRconnect is a mapping specification for bidirectional mapping between openEHR and FHIR. The goal is to create a
+mapping language that communities can use to transform data between these standards. The markup language used to express
+the mappings is YAML.
+
+FHIRconnect aims to be both comprehensive and simple to use
+while providing all necessary functions for mapping.
+
+Beyond transformation, the specification and resulting files should also serve as documentation
+on how these mappings should be performed.
+Even if vendors do not implement FHIRconnect, they will still have documentation
+on how data should be transformed.
+This is particularly important for maintaining consistency when mapping both standards across different institutions.
+
+The initial draft of https://github.com/better-care/fhir-connect-mapping-spec[FHIRconnect] was done by https://www.better.care[Better]
+, this version is a major overhaul.
+
+The official mapping library of FHIRconnect is maintained
+https://github.com/SevKohler/FHIRconnect-mapping-lib/tree/main[here].
+
+== Current Issues and Example Mappings
+
+You can find current issues related to the specification in the
+https://github.com/SevKohler/FHIRconnect-spec[repository] under the "Issues" tab on GitHub.
+
+The repository also contains a library of mappings.
+Currently, these include mappings for KDS, the German core dataset for research,
+as well as general archetype mappings.
+
+Please note that some templates are still being reworked.
+Additionally, some of the mapped templates contain outdated and low-quality archetypes
+created for Highmed eight years ago (specifically, the `org.highmed` archetypes).
+We are currently in the process of refactoring these.
+
+== Maintaining the Specification
+
+For comments, suggestions, and general discussions,
+please use the https://github.com/SevKohler/FHIRconnect-spec[Issues] tab on GitHub.
+
+== Contributors
+
+* Diego Bosca
+* Gašper Andrejc
+* Severin Kohler

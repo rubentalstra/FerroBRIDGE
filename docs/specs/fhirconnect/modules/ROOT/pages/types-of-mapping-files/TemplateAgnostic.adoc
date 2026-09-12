@@ -1,0 +1,61 @@
+= Template Agnostic
+:navtitle: Template Agnostic
+
+
+One of the major advantages, besides being able to reuse model mappings, is that the transformation
+of openEHR-to-FHIR is template agnostic.
+FHIR has the problem that each initiative adds new fields in different ways.
+In FHIR, this is done by adding extensions, and fields are often used differently.
+A recent https://pubmed.ncbi.nlm.nih.gov/37128432/[publication] shows that 35% of the fields
+contained in an implementation guide are extensions.
+When converting back and forth between FHIR datasets, these fields can either be missing on
+one side or provided in another profile, or they may be modeled differently.
+This makes the transformation between FHIR initiatives difficult, as the integration process has to deal with different representations and missing data that was not modeled.
+
+== FHIR mappings and the persistence problem
+
+When using FHIR for persistence this 35% results in an integration problem.
+
+image::TemplateAgnostic2.drawio.png[]
+
+In this example there is no profile that contain both extensions and regularity. So, for integrating
+between FHIR profiles, a new profile that captures all three fields would need to be modeled.
+This profile would then be extended for each new field introduced by a each FHIR initiative.
+If these fields are modeled differently between initiatives, it results in even more integration processes.
+There are other problems like differences between releases (FHIR has https://hl7.org/fhir/history.html[6 versions as of now])
+and missing standardization of composer, etc. pp. See the https://build.fhir.org/fivews.html[fiveWs] page 
+for an analysis on the semantics of different resource attributes.
+
+== How agnostic archetype mappings solve this issue
+FHIRconnect solves this issue.
+The mappings defined from openEHR-to-FHIR are based on archetypes and map using extensions into a profile.
+Therefore, the data contained in openEHR does not need to be stored in e.g. a new template.
+
+image::TemplateAgnostic.drawio.png[]
+
+Here, two different templates populate different fields of the same archetype.
+The mapping is executed from openEHR-to-FHIR based on the archetype.
+The extension mapping may change how some paths of the archetype are mapped to Profile 1 or Profile 2,
+but this is independent of the template and relates to the profile.
+Therefore, once we write a mapping for Profile 1, each archetype in an openEHR CDR can be mapped
+to that specific profile (if no mandatory field is missing).
+The downside here is that FHIR initiatives are modeled in smaller scopes for exchange purposes, and parts of the data
+contained in archetypes definition are often not modeled in the FHIR profiles, leading to data loss.
+
+In regard to FHIR releases, currently FHIRconnect was designed to map R4.
+Adapting other releases like R5 could only require editing the paths of the mappings files
+and marking them with R5 in the header. This has not been reviewed extensively, so problems may arise.
+
+This provides the possibility to convert data between different FHIR projects in an easy manner by using openEHR as a cannonical model, e.g. transforming
+data from the german-core dataset (KDS) to the EEHRxF FHIR-profiles and back.
+
+== Modeling recommendation
+
+For mapping FHIR-to-openEHR, the template used can be seen as an ingest for the FHIR profile.
+FHIR profiles are mostly designed for exchange and not for recording clinical data inside institutions.
+Therefore, a split between data-capture and FHIR templates is sometimes recommended to
+avoid infringing on the primary data-capture templates.
+Hereby, the mandatory fields (1..1) should be contained otherwise the mapping can not be executed.
+Yet, it is not always mandatory.
+
+

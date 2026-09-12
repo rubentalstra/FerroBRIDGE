@@ -1,0 +1,133 @@
+= Manual mappings
+:navtitle:  Manual mappings
+
+Sometimes paths cannot be automatically transformed, or a path must be set to a static value. For this the manual mappings
+where introduced. Manual mappings are initialized using the `manual:` key which is followed by a name.
+This manual mapping defines what standard the mapping applies to (openehr, fhir, or both openehr and fhir). This is followed
+by a list of paths `- path:` and the value we map `- value:`. Several paths can be set at the same time.
+
+[source,yaml]
+----
+  - name: "ISMTransition"
+    with:
+      fhir: "$resource" #there needs to be a mapping table
+      openehr: "$archetype/ism_transition/current_state"
+    manual:
+      - name: "initial"
+        fhir:
+          - path: "status"
+            value: "unknown"
+        openehrCondition:
+          targetRoot: "$openehrRoot"
+          targetAttribute: "defining_code/code_string"
+          operator: "one of"
+          criteria: "524"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "openehr"
+          - path: "value"
+            value: "Initial"
+          - path: "defining_code/code_string"
+            value: "524"
+        fhirCondition:
+          targetRoot: "$fhirRoot"
+          targetAttribute: "status"
+          operator: "one of"
+          criteria: "unknown"
+
+      - name: "planned"
+        fhir:
+          - path: "status"
+            value: "preparation"
+        openehrCondition:
+          targetRoot: "$openehrRoot"
+          targetAttribute: "defining_code/code_string"
+          operator: "one of"
+          criteria: "526"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "openehr"
+          - path: "value"
+            value: "Planned"
+          - path: "defining_code/code_string"
+            value: "526"
+        fhirCondition:
+          targetRoot: "$fhirRoot"
+          targetAttribute: "status"
+          operator: "one of"
+          criteria: "preparation"
+
+----
+Inside manual mapping method, paths do not overwrite each other.
+Full FHIR or openEHR elements are created from all given paths. For example `defining_code/terminology_id/value` and `defining_code/code_string`
+are merged together in the same data element and do not overwrite.
+
+Another typical use case would be to hardcode, extension urls in FHIR.
+[source,yaml]
+----
+  - name: "periodOnsetStart"  # if append name needs to be the same we are appending to
+    extension: "add"
+    with:
+      fhir: "$fhirRoot.start.extension"
+      openehr: "$archetype/items[at0001]"
+      type: "CODEABLECONCEPT"
+    fhirCondition:
+      targetRoot: "$fhirRoot.start.extension" #parent selector from jsonpath-plus its like ..
+      targetAttribute: "url"
+      operator: "one of"
+      criteria: "[http://fhir.de/StructureDefinition/lebensphase]"
+    followedBy:
+      mappings:
+        - name: "extension"
+          with:
+            fhir: "$fhirRoot"
+          manual:
+            - name: "physicalType"
+              fhir:
+                - path: "url"
+                  value: "http://fhir.de/StructureDefinition/lebensphase"
+----
+
+== ConceptMaps
+In general manual mappings are simple in nature, but require maintenance.
+To mitigate this the use of https://build.fhir.org/conceptmap.html[FHIR ConceptMaps] is recommended.
+These can be used in the FHIRconnect spec using the `conceptmap:` key, that points to the conceptMap Url.
+
+[source,yaml]
+----
+mappings:
+  - name: "periodOnsetStart"  # if append name needs to be the same we are appending to
+    with:
+      fhir: "$fhirRoot.start.extension.value"
+      openehr: "$archetype/items[at0001]"
+    fhirCondition:
+      targetRoot: "$fhirRoot.start.extension" #parent selector from jsonpath-plus its like ..
+      targetAttribute: "url"
+      operator: "one of"
+      criteria: "http://fhir.de/StructureDefinition/lebensphase"
+    conceptmap: "http://url-of-the-conceptmap" # ConceptMap.url
+----
+
+The concept map can also be directly attached inside the header, this way all codes contained in the
+conceptmap will be transformed using the conceptmap, if it appears in the mapping.
+
+[source,yaml]
+----
+grammar: FHIRConnect/v0.0.1
+type: model
+metadata:
+  name:  CLUSTER.problem_qualifier.v2
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-CLUSTER.problem_qualifier.v2
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+  conceptmap: "http://url-of-the-conceptmap" # ConceptMap.url
+----
+
+How FHIR Connect engine resolves this concept map and does the translation of codes is outside the domain of this
+FHIR Connect specification. It is, however advised that https://build.fhir.org/terminology-service.html[FHIR Terminology Service Implementation Guide]
+is followed and translation is done following the https://build.fhir.org/conceptmap-operation-translate.html[$translate] operation description.

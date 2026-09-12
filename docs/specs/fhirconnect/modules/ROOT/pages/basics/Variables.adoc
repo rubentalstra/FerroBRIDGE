@@ -1,0 +1,131 @@
+= Variables
+:navtitle: Variables
+
+Variables are used to address specific parts of the models. Modeling variables/references are required to create
+reusable paths.
+
+[width="100%",cols="18%,82%",options="header",]
+|===
+|Variable |Description
+|`$resource` |Path of the root resource
+
+|`$fhirRoot` |Points to the parent FHIR path used in the previous mapping step
+
+|`$archetype` |Path of the root archetype
+
+|`$openehrRoot` |Points to the parent openEHR path used in the previous mapping step
+
+|`$composition` |Path of the root composition
+
+|`$reference` |Helper to indicate a skipped path, due to resolving a reference
+
+|`$context` |Values passed in on the REST call (operational mappings only)
+|===
+
+== `$archetype` and `$resource`
+
+`$resource` and `$archetype` point to the root of the resource or archetype.
+Both would be resolved as follows:
+
+[source,yaml]
+----
+..
+spec:
+..
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+    revision: 1.4.1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "dateTime" # name of the mapping
+    with:
+      fhir: "$resource.onset" # "Condition.onset"
+      openehr: "$archetype/data[at0001]/items[at0077]"  #"/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]/items[at0077]"
+----
+
+== `$composition`
+
+`$composition` is used to address elements that are not inside the archetype but are part of the context of the surrounding
+composition that contains it. Typically, this is used to map elements like the composer, etc.
+
+[source,yaml]
+----
+  - name: "composer"
+    with:
+      fhir: "$resource.performer"
+      openehr: "$composition/composer"
+----
+
+== `$openehrRoot` and `$fhirRoot`
+
+`$openehrRoot` and `$fhirRoot` are used to access a path from the parent mapping.
+Mappings in FHIRConnect are top-down and can be nested. Each nested path always accesses the parent path
+and adds a new child to it. If you want to point to the parent instead of a child, you must use the root variables.
+
+Example:
+
+[source,yaml]
+----
+  - name: "status"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype/items[at0073]/value"
+    manual:
+      - name: "registered"
+        fhir:
+          path: "status"
+          value: "registered"
+        openehrCondition:
+          targetRoot: "$openehrRoot/defining_code" # $archetype/items[at0073]/value/defining_code
+          targetAttribute: "code_string"
+          operator: "one of"
+          criteria: "at0107"
+----
+
+== `$reference`
+
+Sometimes, there is no direct openEHR mapping available. Typically, this happens when another FHIR resource type needs
+to be created. OpenEHR usually bundles all the information contained in a composition, whereas in FHIR, this information
+is typically spread across multiple resources. The `$reference` variable indicates that there is no direct mapping to
+openEHR. Usually, this is handled in the following method.
+
+Example:
+
+[source,yaml]
+----
+  - name: "specimen"
+    with:
+      fhir: "$resource.specimen.reference"
+      openehr: "$reference" # no direct path mapping use $reference
+    reference:
+      resourceType: "Specimen"
+      mappings:
+        - name: "specimenReference"
+          with:
+            fhir: "$fhirRoot"
+            openehr: "$archetype/data[at0003]/data[at0065]/items[openEHR-EHR-CLUSTER.specimen.v1]"
+          slotArchetype: "CLUSTER.specimen.v1"
+----
+
+== `$context`
+
+`$context` holds values passed in on the REST call. It is used in
+xref:types-of-mapping-files/operational-mappings.adoc[operational mappings] only, and
+only for values that are not in the composition. A context value is referenced from a
+`manual` `value`.
+
+Example:
+
+[source,yaml]
+----
+  - name: "agentWho"
+    with:
+      fhir: "$resource.agent.who"
+    manual:
+      - name: "who"
+        fhir:
+          - path: "$fhirRoot"
+            value: "$context.who" # dynamic value from the REST call, not a literal
+----

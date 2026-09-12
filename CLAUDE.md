@@ -63,6 +63,11 @@ Beside it:
   the generator below and never hand-edited.
 - `tools/fhir-codegen`: the generator, with the five vendored HL7 FHIR packages
   under `vendor/` (380 MB, a `PROVENANCE.md` each) as its only input.
+- `docs/specs/`: the vendored specification corpora (#71), one directory per
+  corpus with a `PROVENANCE.md`, fetched by `scripts/vendor/*.sh` from the pins
+  in `docs/VERSIONS.md`: FHIRconnect with its schemas and the draft REST API
+  chapter, the FHIRconnect mapping library, OMOCL, the OMOP CDM v5.4
+  definitions and PostgreSQL DDL, and the ITS-REST OpenAPI documents.
 - `.claude/`: the working discipline. `rules/` (the path-scoped and standing
   rules), `hooks/`, `skills/`, `agents/`, `memory/`.
 - `scripts/gh/`: the tracker helpers (`rel.sh`, `project.sh`, `labels.sh`).

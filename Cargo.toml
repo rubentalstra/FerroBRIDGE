@@ -33,6 +33,7 @@ tempfile = "3.27.0"
 # Test-only.
 insta = { version = "1.48.0", features = ["json"] }
 proptest = "1.11.0"
+sha2 = "0.11.0"
 # Published from this workspace, so the requirement carries both a path and a
 # version: cargo resolves the path locally and the version on crates.io.
 fhir-types = { path = "crates/fhir-types", version = "0.1.98" }
