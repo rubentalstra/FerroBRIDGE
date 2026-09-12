@@ -142,9 +142,11 @@ workflow-level `env:`), and clippy never lints the all-features union of
 `fhir-types` (four versions, every resource, one crate): that single compile
 exceeded the hosted runner's seven gigabytes and got the job killed with exit
 143 and no diagnostic, and it is not a surface any consumer builds. The
-`clippy` job lints the workspace at default features; the `clippy-fhir-types`
-matrix lints `fhir-types` per version with `resources`, which is what a
-consumer builds. Locally, `cargo clippy --workspace --all-targets
+`clippy` job lints the workspace at default features in two steps (`cargo
+check` compiles the dependencies first, then clippy lints the members one at a
+time, because a dependency compile beside the clippy pass over `fhir-types`
+was the peak that got the job killed); the `clippy-fhir-types` matrix lints
+`fhir-types` per version with `resources`, which is what a consumer builds. Locally, `cargo clippy --workspace --all-targets
 --all-features` still runs on a machine with the memory for it. No
 specification governs this: our own design.
 
