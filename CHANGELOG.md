@@ -36,23 +36,31 @@ no binary to download yet.
 
 ### Changed
 
+- `docs/architecture.md` is rewritten as the output of the third research
+  pass (2026-09-12): the `fhir-types` move is re-baselined on the crate as it
+  is today (no cargo features, a lexical-precision `Value` instead of
+  `serde_json::Value`, an XML-schema element table without cardinality, a
+  crate line at 0.1.97 still published by the sibling); the draft FHIRconnect
+  REST API (`$tofhir`, `$toopenehr`, specification pull request #93) becomes
+  the engine surface beside the facade and ships ahead of it; FHIR identity
+  takes the entry `uid` first per the upstream revision (pull request #94)
+  with the hash as the fallback; the reference engine's 3.0.x behaviour
+  changes are adjudicated (plural condition keys with OR semantics, lexical
+  date and time preservation, no invented `DV_PROPORTION` extension URLs,
+  refusal instead of warn-and-continue); a carry-over register records every
+  decided behaviour, test invariant and known defect of the reference CDR's
+  retiring FHIR connector with a disposition; the EHDS priority categories
+  and the HL7 Europe guides become the planned profile targets in order (Base
+  and Core, Laboratory, Medication, then Patient Summary), authored here and
+  never a conformance claim; the build order gains v0.0.8 (the EU targets)
+  and v0.0.9 (the change-feed adapter).
+- `docs/VERSIONS.md` moves the `openehr-*` crates to 0.0.64 and the
+  `fhir-types` floor to the sibling's latest release, pins the draft REST API
+  chapter by pull-request commit, and gains a profile-package section that
+  fills as contexts are authored. `CLAUDE.md` states the move as pending.
 - `docs/architecture.md` §7 collapses the published crate set from twelve to
   seven (one crate per language, with modules), after a duplication check
   against both sibling projects; the tracker issues keep the module work units.
-
-### Added
-
-- The Cargo workspace skeleton (#107): the root manifest with every lint the
-  reliability rule names, the release profile, `rust-toolchain.toml`,
-  `rustfmt.toml`, `clippy.toml`, `deny.toml` and a committed `Cargo.lock`;
-  eleven placeholder library crates at version 0.0.0, published to reserve
-  their names, each carrying its pinned specification version as a constant
-  that an integration test checks against the pin matrix; a thin
-  `ferrobridge` binary over a library that does nothing yet; and the
-  `ferrobridge-testkit` tool crate with the pin-matrix reader. CI tier 2 is
-  active from this change on.
-
-### Changed
 
 - `docs/architecture.md` is rewritten as the output of the second research
   pass (2026-09-05): the FHIR model is generated in this repository (the

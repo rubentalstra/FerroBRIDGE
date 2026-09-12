@@ -7,22 +7,57 @@ FerroBRIDGE is a standalone bridge between openEHR and two interoperability
 targets: HL7 FHIR, driven by the FHIRconnect specification, and the OMOP Common
 Data Model, driven by the OMOCL specification. It runs beside an openEHR CDR
 that it reaches only over the openEHR ITS-REST API. This document is the design
-of record. It is the output of two research passes over the primary sources,
-on 2026-09-03 and 2026-09-05, whose full reports are recorded on issue #1. Every
-decision below names its ground. Where a specification is silent, the decision
-is labelled as FerroBRIDGE's own. Where a specification contradicts itself or
-another specification, the contradiction is named and carried as an
-`upstream-report` issue.
+of record. It is the output of three research passes over the primary sources,
+on 2026-09-03, 2026-09-05 and 2026-09-12, whose full reports are recorded on
+issue #1. Every decision below names its ground. Where a specification is
+silent, the decision is labelled as FerroBRIDGE's own. Where a specification
+contradicts itself or another specification, the contradiction is named and
+carried as an `upstream-report` issue.
 
-The second pass changed six things the first pass had wrong or had not seen:
-the FHIR model crate the facade was going to stand on carries no clinical
-resources, so the crate and its generator move into this repository; the
-FHIRconnect JSON schemas reject three of the specification's own mapping types and 24 of the 106 published library files; the FHIRconnect
-`../` operator is not openEHR path syntax; the OMOCL column vocabulary is the
-language's own, not the CDM's; every OMOP CDM v5.4 primary key is a 32-bit
-integer; and the openEHR crates already carry a composition builder and the
-ITS-REST data types, so the openEHR layer is thinner than planned in one place
-and thicker in another. Sections 3, 4, 5, 7 and 8 carry the corrections.
+The third pass re-read every pin and both sibling servers a week after the
+second, and changed seven things:
+
+1. **The FHIR model move has not started, and its premise moved.** The
+   sibling terminology server still generates and publishes `fhir-types`; the
+   crate went from 0.1.43 to 0.1.97 in the week, has no cargo features, keeps
+   a lexical-precision `Value` of its own instead of `serde_json::Value`, and
+   its element table is an XML-codec input without cardinality. The decision
+   to move stands; its scope is restated in section 4.1 and section 10, and
+   the crate line floor is re-baselined.
+2. **FHIRconnect is growing a REST API.** A draft chapter (specification pull
+   request #93, open since 2026-08-20) defines `$tofhir` and `$toopenehr` as
+   FHIR operations, and the reference engine implements it (openFHIR 3.0.0,
+   2026-09-04). FerroBRIDGE adopts the draft as its engine surface beside the
+   facade (section 4.7), pinned by commit and labelled draft.
+3. **The identity recommendation is changing upstream.** Pull request #94
+   replaces "a hash of the Composition UID and the Entry Path" with
+   `LOCATABLE.uid` of the entries. Section 9 takes the entry `uid` first and
+   keeps the hash as the fallback.
+4. **The reference engine moved under the design.** openFHIR 3.0.0 rewrote
+   condition evaluation (plural keys, OR semantics across target attributes),
+   preserves time-zone offsets, always emits `Provenance`, reports partial
+   results as `OperationOutcome` warnings, and invents two extension URLs for
+   `DV_PROPORTION`. Section 4.4 records what FerroBRIDGE takes and what it
+   refuses.
+5. **The CDR's own FHIR connector is retiring into this project.** The
+   reference CDR decided (its issue #3080) to remove its in-tree FHIR
+   connector once FerroBRIDGE ships its first round trip. Section 12 is the
+   carry-over register: every decided behaviour, test invariant and known
+   defect of that connector, with a disposition, so nothing is lost silently
+   and nothing wrong is copied.
+6. **The profile targets have a name.** The EHDS regulation fixes six
+   priority categories; the HL7 Europe implementation guides are the current
+   proxy for their exchange format, all on FHIR R4, and the FHIRconnect
+   library already carries one EEHRxF context. Section 4.8 sets the planned
+   targets and their order; the reference CDR's decision to author no profile
+   mapping (its issue #3206) is inherited here, where the mappings belong.
+7. **The pins moved where the crates did.** The `openehr-*` crates are at
+   0.0.64; the specification corpora did not move (every pinned commit is
+   still the head of its default branch); OMOP CDM v5.5.0 shipped and stays
+   tracked, never assumed; Eos, the OMOCL reference engine, has had no commit
+   since 2026-03-09.
+
+Sections 2, 4, 6, 9, 10, 12, 13, 14 and 15 carry the changes.
 
 ## 1. The two specifications are two languages
 
@@ -79,22 +114,32 @@ model has none in OMOCL.
 ## 2. Pinned versions
 
 The pins live in `docs/VERSIONS.md`; this table records the ground for each.
-A corpus is pinned by commit, never by a moving tag or a `latest` URL.
+A corpus is pinned by commit, never by a moving tag or a `latest` URL. Every
+corpus commit below was re-checked on 2026-09-12 and is still the head of its
+default branch.
 
 | Component | Pin | Ground |
 |---|---|---|
 | FHIRconnect | v1.0.0 (specification source `SevKohler/FHIRconnect-spec` at `195b07fdb4c78da0432fdd1e9dbd127b81be6165` (2026-07-22); `model-mapping.schema.json` sha256 `6a925151c029e10ef11ccfc2eaafbbf441eea97ffec8ea9e0cd0b8493871d852`; `contextual-mapping.schema.json` sha256 `a96d600dfa7faacb1b2d8919a20554bed5699a636efd7f903d601b71cae15832`) | the only released version; both published draft-07 schemas are the machine-readable half of the authority and are vendored verbatim; they are defective in seven places (section 4.2), so they are exercised as evidence, never as the sole validator |
-| FHIRconnect mapping library | `SevKohler/FHIRconnect-mapping-lib` at `6bd4c19a2f96821c04fbeed3c6f6c190fd85825b` (2026-06-05), 106 mapping files | the conformance corpus, never an oracle: 24 files fail the published schema, 5 cross-references dangle, 6 files share one `metadata.name`; the library is seven weeks behind the specification and covers none of its operational-mapping chapter |
-| FHIR | R4 (4.0.1), package `hl7.fhir.r4.core` 4.0.1 (CC0) | the only value the FHIRconnect schemas admit for `spec.version`; the mapping library targets R4; the prose says other releases "should" work and nothing is tested |
+| FHIRconnect REST API (draft) | specification pull request #93, head `2bf2a2fe91bae2ae659cda1665826567ea81b4af` (`engine/rest-api.adoc`, the `ToFhir` and `ToOpenEhr` FSH operation definitions) | an unmerged chapter the reference engine already implements (openFHIR 3.0.0); FerroBRIDGE implements it as a draft, pinned by commit, and re-adjudicates on merge (section 4.7) |
+| FHIRconnect mapping library | `SevKohler/FHIRconnect-mapping-lib` at `6bd4c19a2f96821c04fbeed3c6f6c190fd85825b` (2026-06-05), 107 YAML mapping files (52 `model`, 55 `projects`) | the conformance corpus, never an oracle: 24 files fail the published schema, 5 cross-references dangle, 6 files share one `metadata.name`; the 12 German KDS contexts pin profile version 2025.0.0 and every module has moved past it; the one EEHRxF context pins Laboratory 0.1.1 against a published 2.0.0 and declares a `sem_ver` its own OPT contradicts (section 4.8) |
+| FHIR | R4 (4.0.1), package `hl7.fhir.r4.core` 4.0.1 (CC0) | the only value the FHIRconnect schemas admit for `spec.version`; the mapping library targets R4; every EHDS-category HL7 Europe guide has an R4 line (section 4.8) |
 | OMOCL | v1.0.0 (grammar `OMOCL/v1.0.0`; corpus `SevKohler/OMOCL` at `dd42574fdb074c02cbe077a0c49b1bb5bae28f35`, 2026-04-26, 202 files, Apache-2.0) | the only released grammar. The git tag `v1.0.0` carries pre-grammar files headed `engine: EOS/v0.0.62`; the grammar string first appears at tag `v1.0.1`, so the corpus is pinned by commit. No JSON schema is published; the grammar is two railroad images and four syntax tables |
 | OMOP CDM | v5.4 (`OHDSI/CommonDataModel` tag `v5.4.3`, 2026-08-04; licence Apache License 2.0 per `DESCRIPTION`, the repository has no `LICENSE` file) | the only version OMOCL files declare (`spec.system: OMOP`, `spec.version: 5.4`) and the only one the reference engine supports; the CSV table and field definitions and the rendered PostgreSQL DDL are the machine-readable input. v5.5.0 shipped 2026-08-25 and is tracked, never assumed |
 | openEHR ITS-REST | 1.1.0 (OpenAPI at `openEHR/specifications-ITS-REST` tag `Release-1.1.0`, CC-BY-ND-3.0; modules EHR, Query and Definition, `STABLE`) | the released REST API a conformant CDR speaks; Admin and Demographic are `x-status: DEVELOPMENT` in the same release and the bridge does not depend on them; every tagged OAS file says `info.version: latest`, so provenance records tag and blob |
-| `openehr-base` | 0.0.61 (minor line 0.0; Apache-2.0) | the RM foundation types, including partial ISO 8601 dates (section 3) |
-| `openehr-rm` | 0.0.61 (Apache-2.0) | the RM 1.1.0 model, its canonical JSON codec and the BASE path parser |
-| `openehr-its` | 0.0.61 (BUSL-1.1 AND Apache-2.0) | the OPT 1.4 codec, the Web Template builder, the FLAT and canonical JSON codecs, the composition builder, the ITS-REST 1.1.0 data types |
-| `openehr-query` | 0.0.61 (BUSL-1.1) | the AQL 1.1.0 parser and canonical printer. `openehr-term` (Apache-2.0 AND CC-BY-SA-3.0), `openehr-am` and `openehr-lang` arrive transitively |
-| `fhir-types` | 0.1.43 is the last release from the sibling terminology server and the floor of this repository's crate line | the FHIR model, generated here from the vendored HL7 packages from the first bridge release on (section 4.1); the sibling then consumes it from crates.io |
-| FHIR terminology operations | R4, R4B tolerant | `CodeSystem/$lookup`, `ConceptMap/$translate`, `ValueSet/$validate-code`; a server may answer R4 or R4B |
+| `openehr-base` | 0.0.64 (minor line 0.0; Apache-2.0) | the RM foundation types, including partial ISO 8601 dates (section 3); the line moved from 0.0.61 to 0.0.64 between passes with no change to the surfaces named here |
+| `openehr-rm` | 0.0.64 (Apache-2.0) | the RM 1.1.0 model, its canonical JSON codec and the BASE path parser |
+| `openehr-its` | 0.0.64 (BUSL-1.1 AND Apache-2.0) | the OPT 1.4 codec, the Web Template builder, the FLAT and canonical JSON codecs, the composition builder, the ITS-REST 1.1.0 data types; 0.0.64 adds a browser-capable feature set (`flat`, `opt14`, `json`, `rest-server`), so the bridge takes `default-features = false` and names what it uses |
+| `openehr-query` | 0.0.64 (BUSL-1.1) | the AQL 1.1.0 parser and canonical printer. `openehr-term` (Apache-2.0 AND CC-BY-SA-3.0), `openehr-am` and `openehr-lang` arrive transitively |
+| `fhir-types` | 0.1.97 is the sibling terminology server's current release (2026-09-12) and the floor of this repository's crate line | the FHIR model, generated here from the vendored HL7 packages once the move lands (section 4.1); until then the sibling publishes, the floor follows its latest release, and the first publish from here is the next patch above whatever the sibling last shipped |
+| openFHIR, the FHIRconnect reference engine | 3.0.1 (2026-09-09), read for behaviour only | never an oracle; section 4.4 records the 3.0.0 behaviour changes and what the bridge takes |
+| Eos, the OMOCL reference engine | 0.0.62 (2024-03-20), last commit 2026-03-09 | never an oracle; dormant, so its behaviour is prior art with no expected movement |
+| FHIR terminology operations | R4, R4B tolerant | `CodeSystem/$lookup`, `ConceptMap/$translate`, `ValueSet/$validate-code`; a server may answer R4 or R4B; the reference server selects the version by path (section 6) |
+
+**Profile packages, the mapping targets.** No profile package is pinned for
+codegen; each is pinned as the target a context mapping names, and
+`docs/VERSIONS.md` gains a row per package the moment a context targeting it
+is authored. The candidates, read 2026-09-12, are in section 4.8.
 
 ## 3. The openEHR side
 
@@ -104,7 +149,7 @@ not executable: leaf RM types, occurrence limits and template node identifiers
 come from the **Web Template** built from the template's OPT. The ordered
 dependency is OPT, then Web Template, then path resolution, then composition.
 
-**What the openEHR crates provide, verified in the 0.0.61 sources.**
+**What the openEHR crates provide, verified in the 0.0.64 sources.**
 `openehr-its` parses OPT 1.4 (`opt14`), builds the Web Template in the
 Better and EHRbase shape (`tree`, `id`, `rmType`, `aqlPath`, `inputs`),
 converts between FLAT, STRUCTURED and canonical JSON, and builds a canonical
@@ -121,24 +166,30 @@ private), and the HTTP client (the crates generate data types and server
 traits, no client). `openehr-adl` is not needed: the bridge reads OPT 1.4 from
 the CDR and never sees ADL source.
 
-**The Web Template is built locally, never fetched.** The crate's `WebTemplate`
-type serialises and does not deserialise, so the ITS-REST
-`Accept: application/openehr.wt+json` form cannot be consumed. The bridge
-fetches the OPT (`GET /definition/template/adl1.4/{template_id}`, canonical
-XML) and builds the Web Template with the crate. This is also the safer path:
-the FLAT node-id uniqueness rule in the Simplified Formats specification does
-not fix sibling order, so two conformant servers can name the same node
-differently, and a bridge that regenerated node ids against a foreign Web
-Template would mis-key values.
+**The Web Template is built locally, never fetched.** The crate's builder-side
+`WebTemplate` type serialises and does not deserialise (still true at 0.0.64;
+the generated ITS-REST `definition::WebTemplate` type does deserialise, but it
+is the OpenAPI schema shape, not the builder's model, and carries no `inputs`
+resolution). The bridge fetches the OPT
+(`GET /definition/template/adl1.4/{template_id}`, canonical XML) and builds
+the Web Template with the crate. This is also the safer path: the FLAT node-id
+uniqueness rule in the Simplified Formats specification does not fix sibling
+order, so two conformant servers can name the same node differently, and a
+bridge that regenerated node ids against a foreign Web Template would mis-key
+values. The reference CDR does serve `application/openehr.wt+json`; the
+bridge does not depend on it.
 
 **The wire is canonical JSON.** Canonical JSON is the mandatory composition
 representation in ITS-REST 1.1.0; FLAT and STRUCTURED are optional. The
 mapping engines resolve paths against the canonical RM tree (the approach the
 OMOCL reference engine takes, in 56 lines against 534 for the FLAT route in the
 FHIRconnect reference engine), build the composition with the crate's builder,
-and commit and read canonical JSON. FLAT never crosses the wire. Two index
-bases meet here and must never be confused: RM positional predicates are
-1-based (BASE §Paths and Locators), FLAT `:n` indices are 0-based.
+and commit and read canonical JSON. FLAT never crosses the CDR wire. The one
+place FLAT appears is the FHIRconnect REST API (section 4.7), which requires an
+engine to accept and emit both serialisations; the crate's converters cover
+that at the edge. Two index bases meet here and must never be confused: RM
+positional predicates are 1-based (BASE §Paths and Locators), FLAT `:n`
+indices are 0-based.
 
 **The ITS-REST surface the bridge consumes:** `POST /ehr`,
 `GET /ehr?subject_id=&subject_namespace=`, `GET /ehr/{ehr_id}`;
@@ -158,7 +209,9 @@ composition, which the client surfaces as a typed "deleted" outcome, never as
 an absent value. The commit metadata headers (`openEHR-VERSION`,
 `openEHR-AUDIT_DETAILS`, `openEHR-TEMPLATE_ID`) exist only in the prose and
 are absent from the OpenAPI; the client sends them from the prose and the gap
-is reported upstream.
+is reported upstream. The reference CDR accepts both the 1.1.0 value-carrying
+form and the deprecated 1.0.3 path-in-name form; the client sends the 1.1.0
+form only.
 
 Composition-level fields have no FHIR counterpart. FHIRconnect requires the
 `start` mapping to slot a reusable `COMPOSITION.<archetype>.<Resource>` mapping
@@ -175,43 +228,72 @@ this case (RM Common §FEEDER_AUDIT).
 ### 4.1 The FHIR model
 
 The first pass recorded that the published `fhir-types` crate "already carries
-per-version FHIR types" for the facade. It does not. `fhir-types` 0.1.43
-carries the terminology root set (`CodeSystem`, `ValueSet`, `ConceptMap`,
+per-version FHIR types" for the facade. It does not. The crate carries the
+terminology root set (`CodeSystem`, `ValueSet`, `ConceptMap`,
 `TerminologyCapabilities`, `CapabilityStatement`, `Bundle`, `Parameters`,
 `OperationOutcome`) and the closure of datatypes they reference, with a strict
 codec (unknown properties refused, lexical primitives kept, choice types
-handled) and an element table the XML codec reads. It has no `Condition`,
-`Observation`, `Patient` or any other clinical resource.
+handled). It has no `Condition`, `Observation`, `Patient` or any other clinical
+resource.
 
-**Decision (owner, 2026-09-05): `fhir-types` and its generator move into this
-repository, and the bridge generates the shared FHIR model.** The crate and
-`fhir-codegen` come from the sibling terminology server together with their
-vendored HL7 packages (R4, R4B, R5, R6, THO), their drift gate and their tests;
-the sibling then consumes `fhir-types` from crates.io behind a terminology-only
-feature set, so its build does not grow. The generator's declared root set
-widens to every resource in each package, gated by a `resources` feature, with
-per-version features so a consumer pays for one version; its element table
-(type name, element, kind, choice alternatives, `min` and `max`) becomes public
-API, because that table is what a path-driven engine needs most; and the codec
-gains a `serde_json::Value` entry point. The ground for the move: the bridge is
-the crate's widest consumer and will drive its evolution from here on (146
-resources, the element table, the `Value` codec), the sibling's needs are eight
-resources and a stable set of operation contracts, and the bridge takes no
-other crate from the sibling once `fhir-terminology` is struck, so the
-dependency is a straight line. The recorded costs: about 380 MB of vendored
-packages including versions the bridge does not use, terminology operation
-descriptors emitted for the sibling's sake, and a `fhir-types` fix the sibling
-needs riding this repository's crate lane (a same-day dispatch publish, never a
-product release). The crate line continues from 0.1.43.
+**Decision (owner, 2026-09-05, re-baselined 2026-09-12): `fhir-types` and its
+generator move into this repository, and the bridge generates the shared FHIR
+model.** The third pass found the move not started on either side and the
+crate's facts changed under the decision. The restated scope:
 
-Rejected: widening the crate in place in the sibling (its tracker records the
-request, closed as not planned: the widest consumer would then depend on the
-narrowest one's release lane); a separate repository for the crate (refused by the owner); the
-`fhir` crate (146 R4 resources, one author, 407 downloads in 90 days, a
-five-way licence disjunction, and the owner's own read of its code quality);
-`fhir-model` 0.13.0 (R4B and R5 oriented, no element table); `helios-fhir`
-0.2.1 (4 MB, no declared MSRV, its FHIRPath sibling is a binary's worth of
-dependencies); every FHIRPath evaluator as a model source (evaluation only).
+- **The crate line floor follows the sibling's latest release.** The sibling
+  published nine releases after 0.1.43 and is at 0.1.97; the first publish
+  from here is the next patch above whatever it last shipped, and the sibling
+  freezes its `fhir-types` bumps the day this repository publishes (its issue
+  #300 is the sibling's half of the move and is blocked on that first
+  publish). Every day of delay widens the gap, so the move is the first unit
+  of the foundation release (section 14).
+- **Cargo features are new work, because the crate has none.** All four
+  version modules (`r4`, `r4b`, `r5`, `r6`) compile unconditionally today.
+  The move adds per-version features, a `terminology` feature that reproduces
+  today's root set, and a `resources` feature that widens the declared root
+  set to every `kind: resource` StructureDefinition per package (146 in R4)
+  with its complete closure, default off, so the sibling's switch to
+  `default-features = false` shrinks its build instead of growing it.
+- **The element table is new work, because what exists serves the XML codec.**
+  The crate exposes per-version `Schemas` (`TypeSchema`, `FieldSchema` with
+  `name`, `kind`, `many: bool`) sorted by name for the XML codec. A
+  path-driven engine needs `min` and `max`, the element path, the choice
+  suffix table and `contentReference`. The generator already lowers a
+  `Cardinality` and discards it at `many = card == Many`; the move emits it
+  as public, documented API.
+- **The `Value` entry point is an adapter, not a replacement.** The second
+  pass asked for a `serde_json::Value` codec; the sibling has since moved the
+  crate off `serde_json::Value` to its own lexical-precision `Value` (its
+  issue #483: a decimal must round-trip byte-identically, and
+  `arbitrary_precision` was being forced on every dependent). That reason is
+  the bridge's reason too. The bridge's path model works over the crate's
+  `Value`; a fallible `serde_json::Value` conversion exists at the HTTP edge
+  only.
+- **The licence boundary is recorded, not assumed.** The crate is Apache-2.0
+  in the sibling (generated from CC0 packages) inside a BUSL-1.1 repository,
+  and this repository's rule is that code is never copied between the
+  siblings because each is its own Licensed Work. Moving the crate is the
+  owner's decision and the moved crate keeps Apache-2.0; `docs/VERSIONS.md`
+  and `NOTICE` record it as the one first-party crate under a different
+  licence, and `scripts/checks/versions.sh` is taught the exception in the
+  same change.
+- **The vendored packages cost 379 MB.** Five HL7 packages with provenance.
+  They are fetched by a committed script with checksum verification; whether
+  they are committed or fetched on demand in CI is decided in the move issue
+  on the measured clone cost, never by leaving provenance out.
+
+The ground for the move is unchanged: the bridge is the crate's widest
+consumer and will drive its evolution from here on, the sibling's needs are
+eight resources and a stable set of operation contracts, and the reference CDR
+also plans to decode its terminology wire through the crate's R4B module (its
+issue #3085), so three servers consume one generated model. Rejected: widening
+the crate in place in the sibling (closed as not planned there); a separate
+repository for the crate (refused by the owner); the `fhir` crate (146 R4
+resources, one author, a five-way licence disjunction, and the owner's own
+read of its code quality); `fhir-model` 0.13.0 (R4B and R5 oriented, no
+element table; the reference CDR's connector used it and is dropping it);
+`helios-fhir` 0.2.1; every FHIRPath evaluator as a model source.
 
 `fhir-terminology` is struck from the design. It is a terminology server over
 a code-system provider seam and its manifest pulls in the SNOMED, ICD-11 and
@@ -225,14 +307,16 @@ The published schemas are defective in ways that matter. The model schema sets
 `additionalProperties: false` on a mapping and omits `mappingCode`, `link`,
 `participationsFunction` and mapping-level `conceptmap`, so three of the eight
 concept-type mappings the prose defines (PROGRAMMED, LINKED, PARTICIPATION)
-cannot appear in a schema-valid file, and 24 of the 106 library files fail
+cannot appear in a schema-valid file, and 24 of the 107 library files fail
 their own schema. `manual` is typed as an array with object `properties` and no
 `items`, so it validates nothing. `hierarchy.split.openehr` sits outside
 `properties` and is unvalidated. The `type` enum sits at mapping level where no
 file writes it; every file writes `type` inside `with`, where the schema leaves
 it a free string. `operator` and `unidirectional` have no enum. Conditions are
 documented as an array ("Notice that the condition is an array") and typed as
-an object. Each is an `upstream-report` issue.
+an object. The context schema makes `profile.url` and `profile.version`
+optional strings with no format, while the prose calls the profile URL list
+plural and the schema holds one. Each is an `upstream-report` issue.
 
 **Decision:** the AST is hand-written Rust, and validation is three layers:
 
@@ -259,7 +343,7 @@ an object. Each is an `upstream-report` issue.
 
 Rejected: a schema-derived AST (the schema is too defective to derive from,
 and it would inherit the `manual` and `hierarchy` holes); validating against
-the published schema alone (22.6% of the corpus would be refused, including
+the published schema alone (22.4% of the corpus would be refused, including
 the model mapping the first round trip uses).
 
 **Keyword casing is an adjudication, recorded on the tracker.** The library
@@ -274,6 +358,21 @@ compared case-insensitively, a value outside the documented set is refused, and
 a test asserts both spellings pass and a third is refused. This is
 FerroBRIDGE's own decision on a specification contradiction, reported upstream
 with the library fixes it implies.
+
+**Condition keys are plural, and the singular forms are accepted as aliases.**
+The schema documents `targetAttributes` and `criterias` as arrays with OR
+semantics across attributes; the reference engine evaluated only the first
+attribute until 3.0.0 and carried singular `targetAttribute` and `criteria`
+fields it has now removed, normalising the singular spelling at load. The
+bridge's AST accepts both spellings, evaluates every attribute with OR, and a
+test pins that a two-attribute condition matches on the second.
+
+**Header-level `unidirectional` is refused until the schema admits it.** The
+reference engine accepts `unidirectional` in the file header as a default for
+every mapping (its 2.2.5 release); the pinned schemas do not define it, and a
+closed header rejects it. The bridge refuses it with a diagnostic naming the
+schema and files the question upstream, so a corpus file that depends on the
+engine extension is a recorded defect, never a silent pass.
 
 ### 4.3 Context resolution: one immutable program per (profile, template)
 
@@ -312,7 +411,14 @@ is silent:**
   against the instance; `template.sem_ver` against the OPT) are a refusal at
   load when they disagree, as the first pass decided. A missing `sem_ver` or
   `profile.version` is accepted, because the schema makes them optional, and
-  the program records "unpinned".
+  the program records "unpinned". The library's own EEHRxF context declares
+  `template.sem_ver: "0.1.0"` beside an OPT whose `sem_ver` is
+  `9.0.0-alpha.1`, so that file is a recorded load error under this rule.
+- A context is selected by the instance's `meta.profile` set membership on
+  the FHIR side and by `template_id` on the openEHR side; `templateId` on the
+  REST API (section 4.7) pins the choice when several contexts share a
+  profile or a template, and an ambiguous selection without it is a refusal
+  naming the candidates.
 
 ### 4.4 The interpreter: one engine, both directions
 
@@ -348,7 +454,8 @@ ours:
 - `manual` paths inside one entry merge into one element; a `manual` entry and
   a `with` mapping writing the same `0..1` node follow the top-down rule
   (ours; the specification scopes the merge guarantee to "inside manual
-  mapping method").
+  mapping method"). The reference engine's `manual` blocks with several
+  nested paths overwrote themselves until 3.0.0; a test pins the merge.
 - `../` and `^` are resolved at compile time against `$openehrRoot` and
   `$fhirRoot`. `^` is a prefix operator: `^` names the parent of the current
   FHIR anchor, `^^` its parent, and a `^` that would step above `$resource` is
@@ -363,10 +470,34 @@ ours:
   type or FHIR element type is a refusal, never a best-effort conversion (the
   specification delegates strictness to the vendor; this is the vendor's
   answer).
+- **Date and time values keep their lexical form and offset in both
+  directions.** openEHR partial dates stay lexical in `openehr-base`, FHIR
+  primitives stay lexical in `fhir-types`, and the lens copies the offset it
+  was given and never adds one. The reference engine re-rendered `dateTime`
+  and `instant` in the server's zone and truncated fractional seconds until
+  3.0.0 and 3.0.1; the matrix pins `Z`, `+00:00`, `+01:00` and sub-second
+  precision as byte-identical round trips.
+- **A `DV_PROPORTION` that is not a percentage is a refusal, not an invented
+  extension.** FHIR `Quantity` cannot carry a denominator, so only a percent
+  has a faithful representation. The reference engine now emits two extension
+  URLs of its own (`proportion-denominator`, `proportion-kind`) and infers
+  `|type` from the denominator on the way back. Neither URL is defined by any
+  specification, so the bridge does not write them; a mapping that needs the
+  ratio names a target that can carry it (`Ratio`, or a profile extension by
+  canonical URL), and an unmapped non-percent proportion is a typed refusal
+  naming the element. The gap is reported upstream (the specification's own
+  open issue on date and proportion combinations is the place).
 - PROGRAMMED mappings (`mappingCode`) are first-party Rust functions in a
   registry with a typed interface over the canonical model; an unknown code is
   a load error. The library depends on eight codes, six of them the Dosage and
   Timing gap the specification defers to its next version.
+- **A skipped element is a first-class outcome, never silence.** The
+  reference engine now threads an issue collector through both engines and
+  reports skipped elements as `warning` and `incomplete` issues. FerroBRIDGE's
+  default is stricter: an element the program cannot map is a refusal of the
+  unit (section 9). What survives as a warning is the declared set (defaulted
+  composition fields, `unidirectional` skips, fields the program lists as
+  unmapped), and that set is asserted exactly by the round-trip tests.
 
 ### 4.5 The FHIR path model
 
@@ -376,30 +507,47 @@ ecosystem offers a bidirectional path model over FHIR JSON; every FHIRPath
 crate is evaluation-only and dependency-heavy (33 non-optional dependencies in
 the one with a published compliance figure).
 
-**Decision:** a hand-written path model over a JSON tree, guided by the element
-table from `fhir-types`: navigation by element name, choice-type resolution
-(`onset` with `ofType(Period)` becomes the `onsetPeriod` key), repeating
-elements as arrays, primitive extensions in the `_element` sibling form
-(<https://hl7.org/fhir/R4/json.html>). The three FHIRPath forms the mapping
-library uses on the read side (`ofType()` and `as()`, `extension(url)`,
-`resolve()`) are implemented as path-model operations. A general FHIRPath
-evaluator is not adopted; if a real mapping corpus needs one, it goes behind a
-cargo feature.
+**Decision:** a hand-written path model over the `fhir-types` `Value` tree,
+guided by the element table: navigation by element name, choice-type
+resolution (`onset` with `ofType(Period)` becomes the `onsetPeriod` key),
+repeating elements as arrays, primitive extensions in the `_element` sibling
+form (<https://hl7.org/fhir/R4/json.html>). The three FHIRPath forms the
+mapping library uses on the read side (`ofType()` and `as()`,
+`extension(url)`, `resolve()`) are implemented as path-model operations. A
+general FHIRPath evaluator is not adopted; if a real mapping corpus needs one,
+it goes behind a cargo feature. Every path expression is classified at load as
+writable or read-only, and a mapping that would write through a read-only
+expression is a load error: the reference CDR's connector let `where()` and
+`first()` paths through and its reverse direction silently contributed nothing
+(section 12).
 
 ### 4.6 The facade
 
 - **Facade, never store.** FerroBRIDGE exposes a FHIR R4 REST facade (create,
   update, read, transaction and batch Bundles with `If-None-Exist` and
   `If-Match` conditional forms, <https://hl7.org/fhir/R4/http.html>) and maps
-  each request onto CDR operations. It stores no clinical data of its own. No
-  prior art exists for this exact shape: the FHIRconnect reference engine
-  exposes only `$tofhir` and `$toopenehr`, and the one bridge with a FHIR
-  server surface embeds a FHIR store beside the CDR. The facade is chosen so a
-  FHIR client sees one server.
+  each request onto CDR operations. It stores no clinical data of its own. The
+  facade is chosen so a FHIR client sees one server; the FHIRconnect REST API
+  chapter says the same from the other side ("A FHIRconnect engine is
+  typically invoked from a FHIR facade rather than being one itself"), and
+  FerroBRIDGE is both, with the engine surface in section 4.7 the facade
+  calls in-process.
+- **`GET [base]/metadata` answers a `CapabilityStatement`** naming exactly the
+  resource types, interactions, operations and search parameters the loaded
+  programs support (<https://hl7.org/fhir/R4/capabilitystatement.html>); a
+  type with no loaded context is `not-supported`. The reference CDR's
+  connector had no conformance statement and a client could not discover it.
 - **Transaction is all-or-nothing, batch is per entry**, as R4 defines them. A
   transaction Bundle that cannot be mapped in full is refused with one
   `OperationOutcome` naming every failing entry and nothing is committed; a
   batch returns a per-entry outcome and counts failures.
+- **Create is conditional and idempotent by source identity.** A resource that
+  arrives with the same `id` and `meta.versionId` as one already mapped
+  resolves through the identity map (section 9) to an update of the same
+  composition, never a second composition; `If-None-Exist` is honoured as R4
+  defines it; a `PUT` without `If-Match` on a resource the map knows is a
+  version conflict check against the CDR's `ETag`. The reference CDR's
+  connector created a new composition on every `POST` and had no update path.
 - **Bundles are split by profile**, following the specification's engine
   chapter, with one correction: the chapter keys on `meta.url`, which does not
   exist in R4; the element is `meta.profile`, a list, so matching is set
@@ -408,22 +556,149 @@ cargo feature.
   protection; a reference that cannot be fetched is a refusal, because the
   chapter's "the engine proceeds with the mapping" contradicts its own
   strictness chapter and the strict reading wins.
+- **A read-side Bundle is well formed.** One entry per composition per
+  resource type (two programs over one template do not double an entry), a
+  unique `fullUrl` per entry, `entry.search.mode`, `Bundle.total` as the
+  total number of matches or absent, `link[self]` and `link[next]` when
+  paged, deterministic ordering by composition commit time then version uid,
+  and `Content-Type: application/fhir+json` on every response. Each of these
+  is a defect the reference CDR's connector shipped (section 12) and each is
+  a wire test here.
+- **Requests speak FHIR media types.** `application/fhir+json` is accepted and
+  produced; `application/json` is accepted; anything else is `415`. A
+  malformed `_count` is `400 invalid`, never ignored.
+- **`$validate` is a dry run that commits nothing.** `POST [base]/{type}/$validate`
+  runs the full inbound path (program selection, mapping, composition build,
+  the CDR's own template validation through a commit the bridge never
+  finalises, or the CDR's validation operation where it offers one) and
+  answers `200` with an `OperationOutcome` whose issues are `information`
+  when the resource would commit and `error` with the validator's message
+  verbatim when it would not. The operation-level statuses mirror the create
+  path (no program, out of scope) so the dry run cannot lie about the door it
+  models. The test proves "commits nothing" by counting versions before and
+  after, the only honest proof.
 - **Search is unspecified** by FHIRconnect ("does not focus specifically on
   AQL and FHIRsearch"). FerroBRIDGE's search is its own design, built after the
   round trips: an AQL projection per resource type declared beside the context
   mapping, executed over `POST /query/aql`, with the `CapabilityStatement`
   stating exactly which search parameters each resource supports and refusing
-  the rest with an `OperationOutcome`. Labelled as FerroBRIDGE's extension
-  wherever it appears.
+  the rest with an `OperationOutcome`. `patient` and `_id` are distinct
+  parameters and a subject is verified, never echoed. Labelled as
+  FerroBRIDGE's extension wherever it appears.
 - **Status codes are mapped as types**, from the ITS-REST outcome to the FHIR
   outcome, in a table that is FerroBRIDGE's own design with both sides cited
   and every row pinned by a wire test: a CDR `422` (template validation) is a
-  facade `422` with the CDR's `validationErrors` in `issue.diagnostics`; a CDR
-  `412` is a `412` with the current `ETag`; a CDR `404` on a deleted
-  composition is a `410`; a CDR `401` propagates `WWW-Authenticate` and is
-  never turned into a `403`; a CDR `405` or `415` is a facade `500`, because it
-  means the bridge chose a call the CDR does not offer; any CDR `5xx` is a
-  `502` carrying the upstream status, never an empty Bundle.
+  facade `422` with the CDR's `validationErrors` in `issue.diagnostics`
+  verbatim; a CDR `412` is a `412` with the current `ETag`; a CDR `404` on a
+  deleted composition is a `410`; a CDR `401` propagates `WWW-Authenticate`
+  and is never turned into a `403`; a CDR `405` or `415` is a facade `500`,
+  because it means the bridge chose a call the CDR does not offer; any CDR
+  `5xx` is a `502` carrying the upstream status, never an empty Bundle. A
+  disabled facade has no route, so it answers `404`, never `403`: capability
+  is not authorisation.
+- **Two error vocabularies never mix on one wire.** Everything the facade
+  authors is an `OperationOutcome`; an upstream openEHR error body
+  (`{error, message, validationErrors}`) is carried inside
+  `issue.diagnostics` and never returned raw.
+
+### 4.7 The FHIRconnect REST API: `$tofhir` and `$toopenehr`
+
+The draft chapter (specification pull request #93, pinned in section 2)
+defines two FHIR operations against the service base, both `POST`, both pure
+transformations that change no server state:
+
+- `POST [base]/$tofhir` takes a `Parameters` resource whose `composition`
+  parameter carries the openEHR composition as a JSON string (canonical or
+  FLAT; FLAT requires `templateId`) and an optional `context` group
+  (`ehr_id`, `patient`, `who`, `onBehalfOf`), and answers a `Bundle` of the
+  mapped resources plus an engine-generated `Provenance` on every run, with an
+  `OperationOutcome` entry for warnings.
+- `POST [base]/$toopenehr` takes a `Bundle` and `templateId` and `format`
+  (`canonical`, the default, or `flat`), and answers `Parameters` with the
+  composition string and an optional `outcome`.
+- The chapter defines `application/openehr+json` for the openEHR payload and a
+  direct, un-enveloped form (`POST [base]/tofhir` with the composition as the
+  body) that is explicitly outside the FHIR implementation guide.
+
+**Decision:** FerroBRIDGE implements both operations and the direct form, in
+the FHIR round-trip release ahead of the facade's own create and read
+(section 14), because they are the specification's own conformance surface
+for exactly the transformation the round trip proves, they need no CDR, and
+they are what an external facade or a test harness calls. The facade of
+section 4.6 is a client of the same in-process engine, so the two surfaces
+cannot disagree. Three pins on the draft, FerroBRIDGE's own where the draft
+leaves room:
+
+- **Strictness is the default, and the `outcome` parameter is where the
+  declared set goes.** The draft says a partial result "MAY be returned
+  together with issues" and points at the strictness chapter. FerroBRIDGE
+  answers a failed mapping with an `OperationOutcome` and no composition (or
+  no Bundle), and a successful one with the declared set of defaulted and
+  skipped elements as `information` and `warning` issues, so a caller can
+  never mistake a partial composition for a complete one.
+- **`context.patient` is honoured as the draft states it** (the caller's value
+  takes precedence; the engine never requires it; a call that omits it
+  resolves the subject through the identity map). A Bundle that references
+  more than one subject is a refusal, not the reference engine's warning: one
+  Bundle maps to one composition, and a mixed-subject Bundle cannot be one.
+- **The chapter is a draft.** Its FSH operation definitions are vendored at
+  the pinned commit; the wire tests are labelled draft; the pin moves to the
+  merged chapter when the specification releases it, and any difference is
+  re-adjudicated then, never silently absorbed.
+
+### 4.8 Profile targets
+
+The European Health Data Space regulation (Regulation (EU) 2025/327,
+<https://eur-lex.europa.eu/eli/reg/2025/327/oj>) fixes six priority
+categories of personal electronic health data (Article 14 and Annex I: patient
+summaries, electronic prescriptions, electronic dispensations, medical imaging
+studies and reports, medical test results including laboratory reports, and
+discharge reports) and requires them in the European electronic health record
+exchange format (Article 15), whose content the Commission fixes by
+implementing act. The regulation applies from 2027-03-26, with the exchange
+obligations phased by category group from 2029-03-26 and 2031-03-26
+(Article 105). The implementing act for the format is a planned initiative
+(`PLAN/2026/837`, published 2026-03-30, adoption due 2027-03-26) with no
+published draft on 2026-09-12, so **no profile version is legally pinned**,
+and every target below is a candidate, never a conformance claim. The HL7
+Europe implementation guides are the current best proxy for the format, and
+every category has an R4 line, so the R4 pin costs nothing (read 2026-09-12
+from each guide's `package-list.json` and `ImplementationGuide` resource):
+
+| Target | Package | Version, status, FHIR | Order and reason |
+|---|---|---|---|
+| HL7 Europe Base and Core | `hl7.fhir.eu.base` | 2.0.0, STU 2 active, R4 4.0.1 (2026-04-27) | first: Laboratory, MPD and EPS all depend on it; the profiles every other guide reuses (`patient-eu-core`, `practitioner-eu-core`, `organization-eu-core`, `composition-eu-core`, `condition-eu-core`, `medicalTestResult-eu-core`) |
+| HL7 Europe Laboratory Report | `hl7.fhir.eu.laboratory` | 2.0.0, STU 2 active, R4 (2026-05-05) | second: the one category with a published non-ballot profile set, a published model map from the EHDS logical model, and an openEHR artefact already in the FHIRconnect library (`EHDS - Laboratory report.opt`, the `eehrxf_lab` context, pinned at Laboratory 0.1.1); upgrading that context is the cheapest first EU round trip |
+| HL7 Europe Medication Prescription and Dispense | `hl7.fhir.eu.mpd` | 1.0.0, STU 1 active, R4 (2026-05-11) | third: four profiles, covers both prescriptions and dispensations, the earlier obligation date |
+| HL7 Europe Patient Summary | `hl7.fhir.eu.eps` | 1.0.0-ballot, draft, R4 (2026-06-06); declares conformance with IPS 2.0.0 while IPS is at 2.0.1 (STU 2, R4, 2026-06-19) | planned, not pinned: the canonicals are stable enough to design against, the constraints will move before STU 1 |
+| HL7 Europe Imaging Report | `hl7.fhir.eu.imaging` | 1.0.0-ballot, draft, R4 (2026-03-16); key-image selection profiled on `Basic` because R4 has no `ImagingSelection`; depends on `ihe.iti.mhd` and `fhir.dicom` | deferred: an R4 workaround set with two heavy dependencies |
+| HL7 Europe Hospital Discharge Report | `hl7.fhir.eu.hdr` | 0.1.0-ballot, draft, R4 (2025-06-03); depends on superseded Base 0.1.0-ballot, Laboratory 0.1.1 and IPS 1.1.0 | deferred outright: fifteen months stale, everything built on it would be rewritten |
+
+**What the mapping library targets today** is the German core data set: 12
+contexts over seven Medizininformatik-Initiative modules, all at profile
+version 2025.0.0, each module since moved (2025.0.1 to 2026.0.3). The
+specification names the EU format as the intended second target ("transforming
+data from the german-core dataset (KDS) to the EEHRxF FHIR-profiles and
+back"), and a FHIRconnect v1.0.0 context addresses a profile by canonical URL
+and version with no grammar change; what it cannot express is an R5 target
+(`spec.version` is the enum `["R4"]`), and no EHDS-category guide is R5-only.
+
+**Decision:** profile mappings are authored in this repository, in the
+specification's own customisation mechanism (a context and its extensions per
+target), one target at a time in the order above, each with a round-trip test
+that asserts the profile's own elements and never a free-text sink. The
+reference CDR recorded the decision to author no profile mapping itself (its
+issue #3206) with two reopen triggers: the implementing act adopted, or
+FerroBRIDGE shipping its first round trip. The second trigger is this
+project's third release, so the obligation lands here, and the readiness
+matrix the CDR publishes per category (committed template, target profile,
+transform proven) is reproduced here from the same generated source. Two
+categories (dispensations, discharge reports) have no template in the openEHR
+international CKM, which publishes no EHDS template today; that is a corpus
+gap recorded as such, never filled with a hand-authored template. No openEHR
+Foundation position on the exchange format was found, and no HL7 Europe guide
+or Xt-EHR deliverable references openEHR; the library's laboratory OPT is the
+one concrete openEHR-to-EEHRxF artefact.
 
 ## 5. The OMOP side
 
@@ -436,7 +711,8 @@ archetypes, 91.5% of them landing in `MEASUREMENT` and `OBSERVATION`; 8.65% of
 primary concept ids resolving to concept `0`, a figure the authors say
 underestimates the gap; one diagnosis needing more than twenty linked records;
 every required `FACT_RELATIONSHIP` carrying `relationship_concept_id = 0`
-because no concept exists.
+because no concept exists. The reference engine has not moved since
+2026-03-09, so this is a stable body of prior art.
 
 ### 5.1 The ETL
 
@@ -467,11 +743,18 @@ because no concept exists.
   refused and why. A required date is never synthesised; a record missing one
   is refused with a typed error naming the element (the 2026 paper names
   default-filled dates as a documented failure mode).
-- An incremental mode has no specification behind it: ITS-REST 1.1.0 defines
-  no change notification, subscription or bulk export (verified over the three
-  `STABLE` OpenAPI documents). If FerroBRIDGE consumes a CDR's change events,
-  that is FerroBRIDGE's own extension, labelled as such, and the batch path
-  stays the conformant baseline.
+- **The batch path is the conformant baseline; a change feed is an adapter.**
+  ITS-REST 1.1.0 defines no change notification, subscription or bulk export
+  (verified over the three `STABLE` OpenAPI documents). The reference CDR
+  publishes every commit through a transactional outbox to AMQP as its own
+  extension, and its planned secondary-use read model (its issue #3160) names
+  OMOP CDM as a target fed from that stream. FerroBRIDGE's incremental mode is
+  therefore a configured change-feed adapter whose reference source is that
+  stream, built after the batch round trip, labelled as FerroBRIDGE's
+  extension, and never a reason for the batch path to lose exactness: an
+  event names a composition, the adapter fetches it over ITS-REST and runs the
+  same per-composition commit. The same adapter feeds the outbound FHIR lane
+  (section 12).
 
 ### 5.2 The OMOCL interpreter
 
@@ -566,34 +849,61 @@ The FHIR side needs three operations on a FHIR terminology server: `$lookup`
 (the specification recommends resolving a code's display through a terminology
 server because `DV_CODED_TEXT.value` is mandatory while FHIR `display` is not),
 `$translate` for `conceptmap` references, and `$validate-code`. The server is
-configured, never assumed; the client is version-tolerant across R4 and R4B;
-the request and response contracts come from `fhir-types::r4::operations`. A
-failed lookup is a typed error carrying the upstream status and body. Whether a
-missing display then refuses the mapping or falls back to `coding.code` is a
-deployment setting whose default is refusal, because the specification offers
-the fallback as an "alternatively", not a rule. The OMOP side uses the local
-vocabulary tables (section 5.3).
+configured, never assumed; the request and response contracts come from
+`fhir-types::r4::operations`. A failed lookup is a typed error carrying the
+upstream status and body. Whether a missing display then refuses the mapping or
+falls back to `coding.code` is a deployment setting whose default is refusal,
+because the specification offers the fallback as an "alternatively", not a
+rule. A `translate` with no configured server fails closed: the source code is
+never passed through under the target system, and an untranslatable optional
+code writes nothing rather than a wrong terminology assertion (two invariants
+the reference CDR's connector pinned by test, section 12).
+
+**The reference server's wire, read 2026-09-12, shapes the client without
+being its oracle.** FerroTERM selects the FHIR version by path (`/r4`,
+`/r4b`, `/r5`, `/r6` served concurrently), so the configured base URL carries
+the version and the client sends R4 requests to an R4 base and tolerates R4B
+answers; it enforces no authentication of its own and expects a reverse proxy
+to, so the client's credentials are configuration that may be empty; it
+answers every error as an `OperationOutcome` whose `details.coding` may carry
+a `tx-issue-type` code, which the client surfaces in its typed error; it
+refuses an unpaged `$expand` above a size limit, so the client always sends
+`count` and pages; and it accepts a batch `Bundle` of operations, which the
+client uses for display resolution over a whole resource set. The reference
+CDR's own terminology client is R4B-only and is being cut down against the
+same server (its issue #3085); the bridge does not reuse it.
+
+**Archetype-local codes never leave the bridge.** Most coded fields in an
+archetype are constrained by a local `at`-code list, and no terminology server
+can address those unless a producer derives `CodeSystem`, `ValueSet` and
+`ConceptMap` resources from the archetype and loads them (the reference server
+serves such resources through its ordinary operations once loaded, and mints
+no canonical of its own). The bridge holds the OPT, so a local code's rubric
+comes from the Web Template's localised names and a `term_binding` from the
+OPT itself; only external code systems go to the terminology server. The OMOP
+side uses the local vocabulary tables (section 5.3).
 
 ## 7. Workspace layout
 
 The Business Source License 1.1 throughout for the project's own crates
-(`LICENSE`); vendored upstream artefacts keep their own terms. The library
-crates are published to crates.io (owner decision 2026-09-05), with a lockstep
-crate version line beside the product version; the server and the tools are
-not. Every name below was free on crates.io on 2026-09-05. "openEHR" is a
-registered trademark of the openEHR Foundation and the crate descriptions say
-so, as the published `openehr-*` crates do.
+(`LICENSE`); vendored upstream artefacts keep their own terms, and the moved
+`fhir-types` keeps Apache-2.0 (section 4.1). The library crates are published
+to crates.io (owner decision 2026-09-05), with a lockstep crate version line
+beside the product version; the server and the tools are not. Every name below
+was reserved on crates.io on 2026-09-05 at 0.0.0. "openEHR" is a registered
+trademark of the openEHR Foundation and the crate descriptions say so, as the
+published `openehr-*` crates do.
 
 | Crate | Role | Kind | Published |
 |---|---|---|---|
 | `openehr-mapping-core` | the one shared foundation: the header model; the YAML loader (`serde-saphyr`: anchors, aliases, merge keys, source positions); the archetype-keyed mapping registry; the diagnostic model (file, YAML path, mapping name, model path); the RM-path model with `../` resolution; the `aqlPath` index over a Web Template with leaf RM type resolution; relative path derivation; composition build and read over `openehr-its` and `openehr-rm` | hand-written | yes |
 | `fhir-types` | the FHIR model: per-version resources, datatypes and primitives with the strict JSON and XML codecs, the terminology operation contracts, the public element table; emitted by `tools/fhir-codegen` from the vendored HL7 packages | generated | yes (inherited line) |
-| `fhirconnect` | the FHIRconnect language as one crate with one module per stage: `model` (the AST, FerroBRIDGE's strict schemas, the published schemas vendored and exercised, semantic validation), `resolve` (one immutable program per profile and template, the extension ordering and collision rules), `tree` (the bidirectional path model over FHIR JSON guided by the `fhir-types` element table: choice types, repeating elements, primitive extensions, the three read-side FHIRPath forms), `engine` (the bidirectional interpreter, the data-type lens matrix, the PROGRAMMED registry) | hand-written | yes |
+| `fhirconnect` | the FHIRconnect language as one crate with one module per stage: `model` (the AST, FerroBRIDGE's strict schemas, the published schemas vendored and exercised, semantic validation), `resolve` (one immutable program per profile and template, the extension ordering and collision rules), `tree` (the bidirectional path model over the `fhir-types` `Value` tree guided by the element table: choice types, repeating elements, primitive extensions, the three read-side FHIRPath forms, writable versus read-only classification), `engine` (the bidirectional interpreter, the data-type lens matrix, the PROGRAMMED registry), `operations` (the `$tofhir` and `$toopenehr` contracts of section 4.7 over `fhir-types`) | hand-written | yes |
 | `omocl` | the OMOCL language as one crate: `model` (the AST, FerroBRIDGE's authored JSON schema, the key-to-column projection tables, validation) and `engine` (the one-directional interpreter emitting record graphs of typed CDM rows, the `CustomMapping` registry) | hand-written | yes |
 | `omop-cdm` | CDM v5.4 row types and column metadata generated from the OHDSI field definitions; the OHDSI PostgreSQL DDL vendored verbatim and embedded; the vocabulary loader and concept resolver; the derived-table runners; the `COPY` writer | generated plus hand-written | yes |
 | `ferrobridge-openehr` | the ITS-REST client over `reqwest`, with the `openehr-its` data types, `backon` retry, typed outcomes per status | hand-written | yes |
 | `ferrobridge-term` | the FHIR terminology client over `fhir-types` | hand-written | yes |
-| `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade and the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `redb` identity store | hand-written | no |
+| `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade, the FHIRconnect operations, the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `redb` identity store; the change-feed adapter | hand-written | no |
 | `tools/fhir-codegen` | the FHIR generator moved from the sibling, with its `emit --check` drift gate and its vendored packages | hand-written | no |
 | `tools/omop-cdm-codegen` | the CDM generator with its `emit --check` drift gate | hand-written | no |
 | `tools/ferrobridge-testkit` | the pin-matrix reader, fixtures, the synthetic vocabulary, the CDR and terminology stubs (`wiremock`), the container harness (`testcontainers`); a path-only dev-dependency | hand-written | no |
@@ -606,7 +916,9 @@ extra crate costs a manifest, a publish step, a version-guard entry and a
 Trusted Publishing pair for nothing a consumer needs. A module becomes a crate
 only when a second consumer appears. Nothing here duplicates a sibling: the
 terminology server's code-system loaders, indexes and server crate stay out
-(section 4.1), and the openEHR crates are consumed, never copied (section 3).
+(section 4.1), the openEHR crates are consumed, never copied (section 3), and
+the reference CDR's connector is a register of behaviour, never a source
+(section 12).
 
 **One binary.** The server and the batch ETL share the mapping crates, the
 CDR client and the identity model, so they are one binary with subcommands.
@@ -614,13 +926,29 @@ The decisive reasons are operational: one exec-form `ENTRYPOINT` makes both
 `serve` and `etl run` PID 1 with `SIGTERM` delivered directly, and a
 Kubernetes `CronJob` or `Job` sets `args:` without overriding `command:`; with
 two binaries a missing override silently starts a server in a Job that never
-completes. It also halves the attestation and SBOM surface (section 12). If a
+completes. It also halves the attestation and SBOM surface (section 13). If a
 deployment wants a server image with no database client, that is a cargo
 feature on the one crate, never a second binary.
 
-**Dependencies, verified against crates.io on 2026-09-05** and recorded in
+**The server shape, from both siblings' running code.** The binary boots from
+environment and file configuration with `deny_unknown_fields`, every
+credential reachable through a `_file` sibling read at boot, and a
+`_file` beside a non-default inline value a boot error; a `tracing`
+subscriber that picks JSON or pretty output by whether stdout is a terminal;
+`X-Request-Id` echoed or minted, validated to printable ASCII so a header
+cannot inject a log line; one request log line with method, route, status and
+latency and never a body; `/health/liveness` and `/health/readiness` over a
+registry of per-subsystem indicators (CDR reachable, terminology reachable,
+CDM reachable, programs loaded); graceful shutdown on `SIGTERM` and `SIGINT`
+with a bounded drain; and a `CatchPanicLayer` that turns an unwound panic into
+a `500` `OperationOutcome`, which the terminology sibling lacks (its panic
+drops the connection) and the CDR has. Every optional lane (the facade, the
+change-feed adapter, the outbound stream) is off until configured, and a lane
+that carries identifiable data says so at start-up.
+
+**Dependencies, verified against crates.io on 2026-09-12** and recorded in
 `docs/VERSIONS.md`: `openehr-base`, `openehr-rm`, `openehr-its`,
-`openehr-query` 0.0.61; `serde-saphyr` 1.2.0 (the
+`openehr-query` 0.0.64; `serde-saphyr` 1.2.0 (the
 maintained serde YAML with anchors, aliases, merge keys and spans;
 `serde_yaml` is archived, `serde-yaml-ng` and `serde_yml` unmaintained);
 `jsonschema` 0.53.0 with `default-features = false`; `axum` 0.8.9, `tower-http`
@@ -629,10 +957,11 @@ queries and `tokio-postgres` 0.7.18 for binary `COPY`; `redb` 4.2.0 for the
 identity store; `jiff` 0.2.35 for the bridge's own timestamps (openEHR partial
 dates stay in their lexical form in `openehr-base`; FHIR primitives keep theirs
 in `fhir-types`); `sha2` 0.11.0; `insta`, `proptest`, `wiremock`,
-`testcontainers` 0.27.3 for tests. Consuming `openehr-its` pulls in `axum`,
-`moka`, `jsonschema` and `quick-xml` as hard dependencies, an accepted cost
-recorded here. `openehr-adl`, `fhir-terminology` and every FHIRPath crate stay
-out.
+`testcontainers` 0.27.3 for tests. Consuming `openehr-its` with
+`default-features = false` and the `opt14`, `flat` and `json` features keeps
+`axum`, `moka` and the server traits out; the remaining hard transitive cost
+(`jsonschema`, `quick-xml`) is accepted and recorded here. `openehr-adl`,
+`fhir-terminology`, `fhir-model` and every FHIRPath crate stay out.
 
 ## 8. What each seam carries
 
@@ -644,9 +973,9 @@ out.
 - `fhirconnect::resolve` to `fhirconnect::engine`: one immutable program, an
   `Arc`-shared value, with every path pre-resolved to a Web Template node or a
   FHIR element and every occurrence index structured.
-- `fhirconnect` to the facade: a composition tree plus a list of
-  defaulted fields and warnings, or a FHIR resource set plus the same, or a
-  typed refusal naming every failing element.
+- `fhirconnect` to the facade and to `fhirconnect::operations`: a composition
+  tree plus a list of defaulted fields and warnings, or a FHIR resource set
+  plus the same, or a typed refusal naming every failing element.
 - `omocl` to `omop-cdm`: a record graph of typed rows for one
   composition, with natural keys, plus counted outcomes.
 - `ferrobridge-openehr` to everything above it: typed results per call, with
@@ -663,27 +992,46 @@ they meet.
 ## 9. Identity, failure and the specification's recommendations
 
 The FHIRconnect engine chapter is explicitly "recommendations". FerroBRIDGE
-pins each as its own decision, and the second pass tightened three of them.
+pins each as its own decision, and the third pass moved one of them with the
+draft upstream change.
 
-- **FHIR identity.** The specification recommends a deterministic id as a hash
-  of the composition UID and the entry path
-  (<https://sevkohler.github.io/FHIRconnect-spec/build/site/FHIRconnect/v1.0.0/engine/id-management.html>).
-  Two facts pin the shape. FHIR R4 `Resource.id` is `[A-Za-z0-9\-\.]{1,64}` and
-  "once assigned, this value never changes" (<https://hl7.org/fhir/R4/resource.html>).
-  An openEHR `OBJECT_VERSION_ID` is `object_id::creating_system_id::version_tree_id`,
-  and only the leading `object_id` (the `versioned_object_uid`) is stable
-  across updates (RM Common §OBJECT_VERSION_ID). So the id is a SHA-256 over
-  (`versioned_object_uid`, entry path, split occurrence), rendered as 52
-  lowercase base32 characters with no padding, which fits the FHIR id grammar
-  and stays stable across composition versions; `meta.versionId` carries the
-  `version_tree_id`. A hash over the full version id would change the FHIR id
-  on every update and break the FHIR rule. The specification's recommended key
-  is not unique under a `hierarchy` split, so the split occurrence is part of
-  the input. The id map (`redb`) records patient identifier to `ehr_id`,
-  external to internal resource id, and internal resource id to composition
-  uid, so a `PUT` resolves and a re-sent Bundle is recognised. The acknowledged
+- **FHIR identity.** The released chapter recommends a deterministic id as a
+  hash of the composition UID and the entry path
+  (<https://sevkohler.github.io/FHIRconnect-spec/build/site/FHIRconnect/v1.0.0/engine/id-management.html>);
+  the open revision (specification pull request #94) recommends the
+  `LOCATABLE.uid` of the composition's entries instead, citing the BASE
+  uid-based predicate. Three facts pin the shape. FHIR R4 `Resource.id` is
+  `[A-Za-z0-9\-\.]{1,64}` and "once assigned, this value never changes"
+  (<https://hl7.org/fhir/R4/resource.html>). An openEHR `OBJECT_VERSION_ID` is
+  `object_id::creating_system_id::version_tree_id`, and only the leading
+  `object_id` (the `versioned_object_uid`) is stable across updates (RM Common
+  §OBJECT_VERSION_ID). An entry's `LOCATABLE.uid` is optional in the RM and
+  most CDRs and templates leave it unset, so it cannot be the only input. So
+  the id is derived from the entry's `uid` when the entry carries one, and
+  otherwise from a SHA-256 over (`versioned_object_uid`, entry path, split
+  occurrence), rendered as 52 lowercase base32 characters with no padding,
+  which fits the FHIR id grammar and stays stable across composition
+  versions; `meta.versionId` carries the `version_tree_id`. Whichever input
+  produced the id, the identity map records it, and the map wins from then
+  on, so an entry that gains a `uid` in a later version does not change its
+  FHIR id. A hash over the full version id would change the FHIR id on every
+  update and break the FHIR rule. The released recommendation's key is not
+  unique under a `hierarchy` split, so the split occurrence is part of the
+  input. The id map (`redb`) records patient identifier to `ehr_id`, external
+  to internal resource id, internal resource id to composition uid, and
+  source resource `id` and `meta.versionId` to the mapping that consumed
+  them, so a `PUT` resolves, a re-sent Bundle is recognised, and a re-sent
+  resource updates rather than duplicates (section 4.6). The acknowledged
   failure mode (a re-sent Bundle omitting one resource reads as a different
   mapping) is documented, not hidden.
+- **Patient identity.** The REST API draft names the arrangement to aim for:
+  the engine resolves an EHR id to a patient through whatever owns patient
+  identity in the deployment, and `context.patient` is the caller's fallback.
+  FerroBRIDGE's identity map is that local table; a configured external
+  resolver is a later adapter behind the same seam. `person_id` maps one
+  `ehr_id` to one person on the OMOP side; reconciling one person across
+  several EHRs is a deployment decision the CDM leaves to the ETL, and the
+  bridge does not guess it.
 - **OMOP identity.** Every CDM v5.4 primary key is a 32-bit `integer`
   (`OMOP_CDMv5.4_Field_Level.csv`), so a content hash cannot be the surrogate
   key: the birthday bound puts a collision near 65,000 rows. The surrogate keys
@@ -692,10 +1040,8 @@ pins each as its own decision, and the second pass tightened three of them.
   archetype path, occurrence) to the surrogate id and the load watermark. That
   table is what lets a re-run replace its earlier rows, and it keeps the
   openEHR identity in `*_source_value` as the OHDSI convention reserves it
-  (The Book of OHDSI, ETL chapter). `person_id` maps one `ehr_id` to one
-  person; reconciling one person across several EHRs is a deployment decision
-  the CDM leaves to the ETL, and the bridge does not guess it. No specification
-  governs this: our own design.
+  (The Book of OHDSI, ETL chapter). No specification governs this: our own
+  design.
 - **Failure policy.** Element-level failure is a typed error that fails the
   unit or is reported as a first-class issue; it is never a log line. FHIR:
   transaction all-or-nothing, batch per entry (section 4.6). OMOP: one
@@ -712,10 +1058,20 @@ pins each as its own decision, and the second pass tightened three of them.
   revision, template `sem_ver` and profile version is a refusal at load time
   (section 4.3).
 - **Provenance.** Inbound, every defaulted or engine-set value is recorded in
-  `FEEDER_AUDIT`; outbound, a `Provenance` resource with `entity.role =
-  derivation` names the composition version (<https://hl7.org/fhir/R4/provenance.html>).
-  The CDM has no provenance element, so the OMOP side records provenance in the
-  bridge-owned side table only. No specification governs this: our own design.
+  `FEEDER_AUDIT` (`originating_system_item_ids` carrying the source resource
+  `id` and type, `originating_system_audit.version_id` carrying
+  `meta.versionId`, `system_id` naming the bridge); outbound, a `Provenance`
+  resource with `entity.role = derivation` names the composition version and
+  is present in every `$tofhir` Bundle (<https://hl7.org/fhir/R4/provenance.html>).
+  The CDM has no provenance element, so the OMOP side records provenance in
+  the bridge-owned side table only. No specification governs the shape beyond
+  those two: our own design.
+- **Tenancy.** The reference CDR scopes its mapping rows per tenant with
+  row-level security and keeps its outbound watermark deliberately unscoped
+  (one integer, no tenant data). FerroBRIDGE's mapping set is a file tree per
+  deployment and its identity map is one store per configured CDR; a
+  multi-tenant deployment runs one bridge per tenant. Recorded as a decision
+  so the single-store shape is never mistaken for an oversight.
 
 ## 10. The generated layer and the vendored inputs
 
@@ -730,8 +1086,11 @@ verification. Root set per version: every `kind: resource` StructureDefinition
 behind the `resources` feature, the terminology root set otherwise, each with
 the complete closure of the datatypes and primitives it references, plus the
 terminology `OperationDefinition`s. Output: the typed structs, the strict codecs
-(<https://hl7.org/fhir/R4/json.html>), the element table, the operation
-contracts; byte-deterministic; `emit --check` in CI.
+over the crate's lexical `Value` (<https://hl7.org/fhir/R4/json.html>), the
+element table with `min`, `max`, choice alternatives and `contentReference`,
+the operation contracts; byte-deterministic; `emit --check` in CI. The move
+lands the generator as it is in the sibling first, then widens it; the drift
+gate runs from the first commit.
 
 **Generated by FerroBRIDGE, the CDM:** the `omop-cdm` row types and column metadata,
 from `OMOP_CDMv5.4_Field_Level.csv` and `OMOP_CDMv5.4_Table_Level.csv` at tag
@@ -758,14 +1117,17 @@ OPT and Web Template codecs (`openehr-*`, from the BMM and the OpenAPI).
 (the published FHIRconnect schema is too defective to derive from, and OMOCL
 has none), FerroBRIDGE's strict schemas for both languages, the compilers, the
 interpreters, the data-type lens matrix, the path models, the clients, the
-facade and the ETL runner.
+facade, the operations and the ETL runner.
 
 **Vendored verbatim with provenance**, each by a committed
 `scripts/vendor/*.sh` and each read by a test or a generator: the two
-FHIRconnect schemas; the FHIRconnect mapping library; the OMOCL corpus; the
-CDM CSV definitions and PostgreSQL DDL; the three `STABLE` ITS-REST OpenAPI
-documents (read by the client's contract tests); the five HL7 packages the
-FHIR generator reads.
+FHIRconnect schemas; the draft REST API chapter and its FSH operation
+definitions at the pinned pull-request commit; the FHIRconnect mapping
+library; the OMOCL corpus; the CDM CSV definitions and PostgreSQL DDL; the
+three `STABLE` ITS-REST OpenAPI documents (read by the client's contract
+tests); the five HL7 packages the FHIR generator reads; and, when a context
+targeting it is authored, the HL7 Europe and MII profile packages of section
+4.8, each pinned by version in `docs/VERSIONS.md`.
 
 ## 11. Verification
 
@@ -788,10 +1150,11 @@ FHIR generator reads.
   the published `KDS_diagnose.context` cannot load strictly: its
   `KDS_composition.Condition` extension extends a name that does not exist and
   the `CLUSTER.lebensphase.v0` model file has a null `mappings`. Writing a
-  project context is the specification's own customisation mechanism. An R4
-  `Condition` is committed to a CDR over ITS-REST as canonical JSON, read
-  back, mapped to FHIR again, and equal modulo the declared set; the library
-  defects are reported upstream.
+  project context is the specification's own customisation mechanism. The
+  round trip runs first through `$tofhir` and `$toopenehr` with no CDR, then
+  an R4 `Condition` is committed to a CDR over ITS-REST as canonical JSON,
+  read back, mapped to FHIR again, and equal modulo the declared set; the
+  library defects are reported upstream.
 - **The first OMOP round trip (v0.0.4):** the published
   `Laboratory_test_analyte_v1` and `Laboratory_test_result_v1` files verbatim,
   emitting `MEASUREMENT` rows and the `FACT_RELATIONSHIP` rows of the one
@@ -799,20 +1162,126 @@ FHIR generator reads.
   DDL, with a real Athena vocabulary loaded outside CI and the synthetic
   vocabulary fixture inside it, resolved `concept_id`s asserted, unmapped codes
   landing as `0` and counted, and a second run producing an identical database.
+- **The carry-over conformance cases** of section 12 are wire tests from the
+  release that touches each surface: one entry per composition, the fail-closed
+  translate pair, the dry run proved by row count, the media types, the
+  conformance statement, an OBSERVATION template with events round-tripping
+  (the shape the retired connector never proved), and the per-category
+  round trips asserting profile elements.
 - **The OMOP acceptance gate** is the OHDSI Data Quality Dashboard's check set
   (Blacketer et al., JAMIA 2021, doi:10.1093/jamia/ocab132), run against the
   populated database outside CI, and a Rust port of its conformance and
   completeness checks that the bridge can run itself inside CI.
 - **There is no external conformance suite for either language** and no second
   implementation of OMOCL, so FerroBRIDGE's corpus tests are the conformance
-  instrument (issue #24) and a candidate outbound contribution.
+  instrument (issue #24) and a candidate outbound contribution. The draft REST
+  API's FSH operation definitions are the first upstream-authored conformance
+  artefact for FHIRconnect, and the bridge's wire tests read them.
 - The composed test stack runs an openEHR CDR, reached over ITS-REST only, a
   FHIR terminology server and a PostgreSQL CDM; all three are configured
   deployments, never compile-time dependencies. The unit and integration
   layers stub the two servers with `wiremock`; only the end-to-end layer runs
   real ones.
 
-## 12. Supply chain and release
+## 12. The retired connector: what carries over
+
+The reference CDR shipped a FHIR connector of its own before FHIRconnect
+existed: mapping rows in a database table with a FHIRPath-lite source dialect
+and FLAT targets, an R4 surface at `/fhir/r4` for four starter types, an
+outbox-driven AMQP stream of reverse-mapped resources, and an operator screen.
+Its tracker retires it in favour of FerroBRIDGE once the first round trip
+ships (its issue #3080), and keeps only what serves openEHR conformance and
+IHE audit (the terminology client behind the openEHR service model's
+terminology interface, the ATNA and BALP `AuditEvent` rendering with its
+ITI-81 query, and the subject-proxy frame executor). Nothing is ported: the
+mapping dialect leaves with the connector, and this project's rule is that
+sibling code is prior art, never a source. What carries over is the record of
+what it decided, so a behaviour found the hard way there is a test here, and a
+defect there is not repeated. The full register is on issue #1; the dispositions
+that shape the design:
+
+**Reproduced as conformance cases** (section 11):
+
+- One Bundle entry per composition per type with unique `fullUrl`s and
+  `total` counting resources, the regression its issue #2579 pinned.
+- `translate` fails closed with no provider, calls `$translate` before the
+  composition build with the resource's own system and code, and an
+  untranslatable optional code writes nothing (its issue #2458).
+- `$validate` answers `200` with `information` or the validator's rejection
+  verbatim, mirrors the create path's operation-level statuses, and is proved
+  to commit nothing by counting versions (its issue #342).
+- Invalid mapped content is `422` carrying the CDR validator's message
+  verbatim and nothing stored.
+- A disabled surface is `404`, a type outside the loaded programs is
+  `not-supported`, a type inside them with no program is `not-found`; the
+  three are distinct on the wire.
+- An unknown patient is an empty `searchset`, never a `404`; a missing
+  mandatory scope is `400`; an empty store answers `200` with the FHIR media
+  type.
+- `FEEDER_AUDIT` carries the source resource id and type, the source version
+  id and the bridge's system id; an absent id is recorded as unknown, never
+  invented.
+- Each EHDS category's committed template builds a Web Template, its example
+  composition flattens above a recorded floor, and a leaf derived from the
+  corpus (never hand-picked, so a corpus refresh cannot silently pass) round
+  trips; the target is the profile's own element (section 4.8).
+- Both PHI-carrying lanes default off, use a distinct exchange or endpoint
+  from any non-clinical event stream, redact credentials in every rendering,
+  and warn at install time.
+- A probe suite that distinguishes off (`404`), on (`200`), and a `5xx` as a
+  different defect, and reports uncovered rather than passing when the
+  observed condition never arises.
+
+**Reproduced as design rules** (sections 4.6, 4.7, 7, 9): the conformance
+statement; conditional, idempotent create; well-formed Bundles with paging and
+deterministic order; FHIR media types accepted; `application/openehr+json` at
+the engine edge; the operator surface never commits clinical data and edits a
+mapping as the verbatim file, never through a second model; only a `404`
+means "not mounted"; one diagnostic reader for both error vocabularies; a
+mapping cannot name a template the CDR has not loaded; every credential has a
+file route; each consumer owns its own watermark; the outbound lane is an
+adapter over a change feed with a durable dead-letter store, a retraction
+message for a deleted composition, and delivery at least once with the
+watermark advanced only after publish. From the mapping and ingest paths: a
+`$translate` answer counts only when its equivalence is `equivalent` or
+`equal`, and the translated concept's own display wins over the source text;
+every terminology call is made and ordered deterministically before any
+composition is built, so a terminology fault never leaves a half-built
+document; one instant per ingest serves every defaulted time; the built
+composition is re-read through the strict RM reader before it is sent, so a
+bad document never reaches the CDR; an EHR is resolved by subject id and
+namespace and created on first sight only under a configured policy, with the
+`EHR_STATUS.subject` shape (`PARTY_SELF` over a `PARTY_REF` whose `GENERIC_ID`
+scheme is the namespace) pinned by test; every declared `meta.profile` is
+considered, never only the first; `Prefer` is honoured and `Location` names
+the FHIR resource, with the openEHR version uid carried in `meta.source`; and
+a clinical resource is never emitted without a subject.
+
+**Consciously not copied**, each a recorded defect or limitation there:
+`Content-Type: application/fhir+json` refused with `415`; reverse-mapped
+resources missing `status`, `code` and `meta.profile`; a new composition on
+every `POST` with no update or delete path; `Bundle.total` equal to the page
+size; no `link`, `search.mode`, `Bundle.id` or `meta`; an unparseable `_count`
+ignored; a date transform that validates nothing; an unknown code system
+silently written as `terminology_id = "local"`; a reverse path parser that is
+not the inverse of the forward one; silent skips on malformed segments and
+non-parsing rows; poison messages dropped to the log with an in-memory
+budget; no delete notification; a read facade that ignores the requested
+profile; AQL without `ORDER BY`; a `patient` parameter that means an EHR id
+when it looks like a UUID and echoes an unverified subject otherwise; a
+mapping format with no version field; and the OBSERVATION-with-events shape
+never proven to round-trip.
+
+**Inherited obligations:** the readiness matrix per priority category and the
+profile-mapping decision of section 4.8 (its issues #3171 and #3206); the
+OMOP target of its secondary-use read model (its issue #3160) as the reference
+consumer of the change-feed adapter of section 5.1; and the typed-versus-untyped
+FHIR adjudication it recorded (its issues #1828 and #1885: version pinning,
+silent drop of unknown members, compile cost), which section 4.1 answers with
+a generated, strict, per-version model whose codec refuses unknown members
+rather than dropping them.
+
+## 13. Supply chain and release
 
 No specification governs this: our own design, on the SLSA v1.2 build levels
 (<https://slsa.dev/spec/v1.2/levels>) and GitHub's artifact-attestation guidance
@@ -836,7 +1305,9 @@ Issues #22 and #23 carry the contracts; the decisions that shape them:
   order through Trusted Publishing, with a dry run on every pull request, a
   crate-version guard, and both drift gates (`fhir-codegen`, `omop-cdm-codegen`) ahead of the
   publish dry run so a published generated crate never disagrees with its
-  generator.
+  generator. The `fhir-types` Trusted Publisher moves from the sibling's
+  repository to this one in the same change that publishes the first release
+  from here.
 - **The Athena vocabulary and every licence-gated input stay out** of the
   image, the release assets, the build context and CI (section 5.3).
 - **The quickstart `compose.yaml`** adds a PostgreSQL CDM with a required
@@ -844,7 +1315,7 @@ Issues #22 and #23 carry the contracts; the decisions that shape them:
   `vocab-load` profile over a read-only bind mount, and optional CDR and
   terminology server profiles pinned by digest.
 
-## 13. Build order
+## 14. Build order
 
 Milestones are releases on the 0.0.x line. Each increment compiles, is tested,
 and is green before the next starts. The tracker carries the issues; this is
@@ -852,18 +1323,24 @@ the order and the reason for it.
 
 **v0.0.2, the foundation.** The workspace with every lint (#20); the vendor
 scripts and provenance for the corpora and the HL7 packages; `fhir-types` and
-`fhir-codegen` moved in from the sibling and republished from here;
-`openehr-mapping-core`; `omop-cdm` with its generator and drift gate (the
-generated layer lands with the workspace); `ferrobridge-openehr`;
-`ferrobridge-term`; the testkit; the server shape (#21); the container (#22); the release lane
-with the crates leg (#23); the first publish of every crate at 0.1.0. Nothing
-maps yet; everything the mapping needs exists and is published.
+`fhir-codegen` moved in from the sibling as the first unit, published from
+here at the next patch above the sibling's last release, and the sibling's
+freeze confirmed on its tracker; then the features, the element table and the
+`Value` adapter of section 4.1; `openehr-mapping-core`; `omop-cdm` with its
+generator and drift gate (the generated layer lands with the workspace);
+`ferrobridge-openehr`; `ferrobridge-term`; the testkit; the server shape
+(#21); the container (#22); the release lane with the crates leg (#23).
+Nothing maps yet; everything the mapping needs exists and is published.
 
 **v0.0.3, the FHIR round trip.** The `fhirconnect` crate: its `tree`, `model`,
 `resolve` and `engine` modules, with the data-type lens matrix for the types
-the round trip touches; the facade's create, read, update and
-transaction; the identity store; the round trip of section 11. Depends on the
-`resources` feature of `fhir-types` (v0.0.2).
+the round trip touches; the `operations` module and the `$tofhir` and
+`$toopenehr` endpoints of section 4.7 first, proving the round trip with no
+CDR; then the facade's conformance statement, create, read, update,
+`$validate` and transaction; the identity store; the round trip of section
+11 against a CDR; the carry-over cases that touch these surfaces. Depends on
+the `resources` feature of `fhir-types` (v0.0.2). This release is the trigger
+the reference CDR's tracker waits for (its issues #3080 and #3206).
 
 **v0.0.4, the OMOP round trip.** The `omocl` crate: its `model` module with
 the authored schema and its `engine` module; the vocabulary loader after the Athena format is pinned; the
@@ -875,8 +1352,8 @@ over both corpora (#24); the round trip of section 11.
 **v0.0.5, FHIR breadth.** The full data-type matrix; `reference`, `hierarchy`
 split, LINKED and bundle splitting by `meta.profile`; reference fetching with
 cycle protection; batch; the PROGRAMMED registry with the eight library codes;
-terminology display resolution; `CapabilityStatement`; the full library
-compiles or every failure is a recorded library defect.
+terminology display resolution; the full library compiles or every failure is
+a recorded library defect; the OBSERVATION-with-events round trip.
 
 **v0.0.6, OMOP breadth.** The remaining eight OMOCL targets; the full
 key-to-column projection; domain validation over the whole library; the run
@@ -887,44 +1364,88 @@ loads or every failure is a recorded defect.
 context mapping, the `CapabilityStatement` declaring exactly what is
 supported, labelled as FerroBRIDGE's extension.
 
-## 14. Decision register
+**v0.0.8, the EU profile targets.** HL7 Europe Base and Core, then the
+Laboratory Report (upgrading the library's EEHRxF context from 0.1.1 to
+2.0.0), then Medication Prescription and Dispense, each a context with
+extensions and a round trip asserting profile elements; the readiness matrix
+per priority category published from generated metadata; the profile
+packages pinned in `docs/VERSIONS.md`. Patient Summary follows when its guide
+leaves ballot.
+
+**v0.0.9, the change feed.** The change-feed adapter of section 5.1 with the
+reference CDR's outbox stream as its first source, driving the incremental
+OMOP load and the outbound FHIR lane, with a durable dead-letter store, a
+retraction message, and delivery at least once. Labelled as FerroBRIDGE's
+extension.
+
+## 15. Decision register
 
 | Decision | Choice | Ground | Rejected |
 |---|---|---|---|
 | Engine shape | one foundation, two interpreters, two sinks | the two grammars share a header and nothing structural (section 1) | one intermediate representation over both |
-| FHIR model | `fhir-types` and `fhir-codegen` move into this repository; the bridge generates the shared FHIR model | the bridge is the widest consumer and drives the crate's evolution; one generator across both products; no crate flows the other way | widening in place in the sibling, a separate repository, `fhir` 4.2.2 (risk profile, code quality), `fhir-model`, `helios-fhir` |
-| Mapping AST | hand-written types; published schema exercised; own strict schema; semantic validation | the published schema rejects 3 of 8 mapping types and 24 of 106 files (section 4.2) | schema-derived AST; published schema as the validator |
+| FHIR model | `fhir-types` and `fhir-codegen` move into this repository; the bridge generates the shared FHIR model; features, element table and `Value` adapter are new work; the floor follows the sibling's latest release | the bridge is the widest consumer and drives the crate's evolution; three servers consume one model; no crate flows the other way (section 4.1) | widening in place in the sibling, a separate repository, `fhir` 4.2.2, `fhir-model`, `helios-fhir` |
+| JSON value type | the crate's lexical-precision `Value`; `serde_json::Value` only as a fallible edge conversion | a decimal must round-trip byte-identically (the sibling's #483) | `serde_json::Value` with `arbitrary_precision` forced on every dependent |
+| Mapping AST | hand-written types; published schema exercised; own strict schema; semantic validation | the published schema rejects 3 of 8 mapping types and 24 of 107 files (section 4.2) | schema-derived AST; published schema as the validator |
 | Keyword casing | keys exact; keyword values case-insensitive within the documented set | the specification's own text is case-inconsistent; recorded and reported | refuse (breaks the first-milestone file); accept anything |
+| Condition keys | plural keys with OR semantics; singular spellings accepted as aliases | the schema documents plural arrays; the reference engine converged on it in 3.0.0 | first-attribute-only evaluation |
+| Header `unidirectional` | refused until the schema admits it | the pinned schemas do not define it; a closed header rejects it | the reference engine's extension |
 | Mapping execution | compile once into an immutable program, interpret per record | Kersten et al. 2018; the reference engine's per-request rebuild and unordered extensions | interpret the YAML tree per request; code generation per mapping |
 | Extension order | declaration order, collisions are load errors | specification silent; reference engine nondeterministic (section 4.3) | last-writer-wins |
 | Direction | one engine, lens converters, direction enters at conditions, `unidirectional`, defaults | Weber and Ho 2020; the specification's input-side rule | two engines; two converter sets |
-| FHIR path handling | own bidirectional path model over JSON with the element table | `with.fhir` is written; `^` is not FHIRPath; no crate writes | a FHIRPath evaluator (all read-only, heavy) |
-| openEHR wire | canonical JSON; Web Template built locally from the OPT | canonical is mandatory in ITS-REST; `WebTemplate` does not deserialise; node ids are server-specific | FLAT on the wire; fetching `wt+json` |
-| FHIR identity | SHA-256 over (`versioned_object_uid`, path, split occurrence), base32, plus a recorded map | FHIR id grammar and immutability; the version id changes per update | hash of the full version id; random ids (no round-trip test possible) |
+| Date and time | lexical form and offset preserved both ways | the RM and FHIR both define lexical primitives; the reference engine's zone re-rendering was a defect | normalising to UTC |
+| Non-percent `DV_PROPORTION` | refusal unless a mapping names a carrier | no specification defines the reference engine's extension URLs | invented extension URLs |
+| Partial results | refusal by default; the declared set as `information` and `warning` issues | the strictness chapter; a partial composition indistinguishable from a complete one is the failure class this project exists to prevent | the reference engine's warn-and-continue |
+| FHIR path handling | own bidirectional path model over the `Value` tree with the element table; every expression classified writable or read-only at load | `with.fhir` is written; `^` is not FHIRPath; no crate writes; the retired connector's reverse path silently wrote nothing | a FHIRPath evaluator (all read-only, heavy) |
+| Engine surface | `$tofhir` and `$toopenehr` per the draft chapter, pinned by commit, ahead of the facade | the specification's own conformance surface; no CDR needed; an external facade can call it | facade only |
+| openEHR wire | canonical JSON; Web Template built locally from the OPT; FLAT only at the operations edge | canonical is mandatory in ITS-REST; `WebTemplate` does not deserialise; node ids are server-specific; the draft API requires both serialisations | FLAT on the CDR wire; fetching `wt+json` |
+| FHIR identity | the entry `uid` when present, else SHA-256 over (`versioned_object_uid`, path, split occurrence), base32, plus a recorded map that wins once written | FHIR id grammar and immutability; the version id changes per update; the upstream revision (PR #94) names `LOCATABLE.uid`, which is optional in the RM | hash of the full version id; random ids; `uid` only |
+| Create semantics | conditional and idempotent by source `id` and `meta.versionId` through the identity map | R4 conditional create; the retired connector duplicated on every `POST` | a new composition per `POST` |
 | OMOP identity | sequences plus a bridge-owned natural-key side table | every CDM 5.4 key is a 32-bit integer | content-hash surrogate keys (collide near 65k rows) |
 | OMOP commit unit | one composition's record graph, all-or-nothing, with a watermark | more than twenty linked records per diagnosis (arXiv:2607.27208) | row batches |
 | OMOP table routing | `type` is the declaration, the concept's domain is validated against it | the CDM's domain rule; the reference engine ignores it | route by domain; trust `type` blind |
 | `alternatives` | ordered first-match | the only reading the library is consistent with | all-match; merge |
+| Incremental mode | a change-feed adapter over a configured stream, after the batch round trip, running the same per-composition commit | ITS-REST defines no feed; the reference CDR's outbox is the reference source | polling AQL by time; a bespoke feed |
+| Local codes | rubrics and bindings from the Web Template and OPT; only external systems go to the terminology server | the bridge holds the OPT; no specification defines a canonical for archetype-local terminology | `$lookup` for every code |
+| Profile targets | HL7 Europe Base and Core, Laboratory, MPD in that order; EPS planned, imaging and discharge deferred; authored here, never a conformance claim | R4 lines exist for every category; Laboratory has a published model map and an openEHR artefact; the legal pin does not exist (section 4.8) | waiting for the implementing act; pinning ballots |
+| Tenancy | one bridge per tenant; one mapping tree and one identity store per configured CDR | a file tree has no row-level security; the retired connector's scoping was a database property | a tenant column in the identity store |
 | One binary or two | one binary with subcommands | PID 1 and `args:` in Kubernetes; half the attestation surface | a server and an ETL binary |
 | Crates | published, lockstep line, Trusted Publishing | owner decision 2026-09-05 | unpublished |
 | YAML parser | `serde-saphyr` 1.2.0 | anchors, aliases, merge keys, spans, maintained | `serde_yaml` (archived), `serde-yaml-ng`, `serde_yml` |
 | Bulk load | binary `COPY` via `tokio-postgres`, `sqlx` for checked queries | throughput; the reference engine's per-row persist is its ceiling | ORM-style inserts |
 
-## 15. What is deliberately outside, and what is reported upstream
+## 16. What is deliberately outside, and what is reported upstream
 
 Outside: demographics (FHIRconnect sends resources to an unspecified external
 endpoint, and the ITS-REST Demographic API is `DEVELOPMENT`), FHIR
 Subscriptions (never mentioned), a materialised FHIR store, OMOP CDM versions
-other than 5.4, and OMOP to openEHR (OMOCL has no construct for it). Each is a
-tracker issue, not silence.
+other than 5.4, OMOP to openEHR (OMOCL has no construct for it), and the IHE
+audit and terminology-binding concerns that stay with the CDR (section 12).
+Each is a tracker issue, not silence.
 
 Reported upstream as `upstream-report` issues, each with the citation and the
-resolution sought: the FHIRconnect schema defects and the three schema-invalid
-mapping types; the `meta.url` element that does not exist in R4; the `../`
-claim about openEHR; the `^` operator's one-sentence definition; the FHIRconnect
-library's duplicate names, dangling references and mis-cased keywords; the
-OMOCL grammar images that document a header no file uses and a
-`ProcedureOccurrence` table naming condition columns; the CDM `Integer`
-datatype typo; the ITS-REST OpenAPI's missing commit headers and contradictory
-error schemas; the reference OMOP engine's concept resolution without validity
-filters.
+resolution sought. On 2026-09-12 none had yet been filed on the upstream
+trackers; filing is the owner's action, and each report is first checked
+against the specification's own open issues so a duplicate is a comment there
+rather than a new issue (the specification already tracks the composition
+layer, the REST API, terminology, date and period combinations, the LINK
+output, missing RM fields and the `DV_QUANTITY` unit). The reports: the
+FHIRconnect schema defects and the three schema-invalid mapping types; the
+`meta.url` element that does not exist in R4, in both the bundles and the
+context chapters; the plural profile list the prose describes against the
+single profile the schema holds; the `FHIRConnect/v0.0.1` grammar string in
+the v1.0.0 context example; the R5 the prose invites against the schema's
+`["R4"]`; the `../` claim about openEHR; the `^` operator's one-sentence
+definition; header-level `unidirectional`; the undefined `DV_PROPORTION`
+extension URLs; the FHIRconnect library's duplicate names, dangling
+references, mis-cased keywords, stale profile versions and the EEHRxF
+context's `sem_ver` contradiction; the OMOCL grammar images that document a
+header no file uses and a `ProcedureOccurrence` table naming condition
+columns; the CDM `Integer` datatype typo; the ITS-REST OpenAPI's missing
+commit headers and contradictory error schemas; the reference OMOP engine's
+concept resolution without validity filters; and, to HL7 Europe, the
+discharge-report snapshot unreachable through its version history.
+
+Tracked, not reported: the draft REST API chapter and the identity revision
+(specification pull requests #93 and #94), re-adjudicated on merge; OMOP CDM
+v5.5.0; the HL7 Europe guides in ballot; the implementing act for the
+exchange format.

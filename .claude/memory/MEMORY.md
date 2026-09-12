@@ -25,7 +25,7 @@
   reference CDR and FerroTERM at `../FerroTERM` the reference terminology
   server; both are read-only prior art from here and never edited from this
   repository; a tracker issue in a sibling may be filed from here when the
-  owner asks (2026-09-05, FerroTERM #298)
+  owner asks (2026-09-05, FerroTERM #300)
 - [Domain ferrobridge.eu](domain-ferrobridge-eu.md): the public domain is a
   Pages setting mirroring ferroterm.eu, never a `CNAME` file; owner 2026-09-04
 - [Milestones 0.0.x](milestones-0-0-x.md): milestones start at v0.0.1 and step
@@ -42,3 +42,6 @@
   library crates are published to crates.io on the sibling model (`crates/*`
   published, `app/*` and `tools/*` never), so the release lane carries a
   crates.io leg and every `pub` surface is designed as API from the start
+- [Subagent reports go to a file](subagent-reports-to-file.md): a long
+  agent report is written to the scratchpad by the agent, because a truncated
+  result is lost and a finished agent cannot be resumed; 2026-09-12
