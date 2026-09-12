@@ -69,6 +69,11 @@ Beside it:
 - `crates/ferrobridge-openehr`: the hand-written ITS-REST 1.1.0 client (#76),
   one outcome enum per call with a variant per documented status, `wiremock`
   contract tests beside it.
+- `crates/ferrobridge-term`: the FHIR terminology client (#77) for
+  `CodeSystem/$lookup`, `ConceptMap/$translate` and
+  `ValueSet/$validate-code`, R4 and R4B over the generated `fhir-types`
+  operation contracts, with the batch form and a `tx-issue-type` coding
+  surfaced in every typed error.
 - `tools/fhir-codegen`: the generator, with the five vendored HL7 FHIR packages
   under `vendor/` (380 MB, a `PROVENANCE.md` each) as its only input.
 - `crates/omop-cdm`: the OMOP CDM v5.4 layer. `src/generated/` and `ddl/` are

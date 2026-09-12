@@ -20,9 +20,25 @@ publish = true
 include = ["src/**", "README.md", "LICENSE"]
 
 [dependencies]
+backon.workspace = true
+# The two wire versions the client speaks, with the terminology root set that
+# carries Parameters, OperationOutcome, Bundle and the operation contracts.
+fhir-types = { workspace = true, features = ["r4", "r4b", "terminology"] }
+http.workspace = true
+reqwest.workspace = true
+secrecy.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+url.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
+http.workspace = true
+secrecy.workspace = true
+serde_json.workspace = true
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "time"] }
+wiremock.workspace = true
 
 [lints]
 workspace = true

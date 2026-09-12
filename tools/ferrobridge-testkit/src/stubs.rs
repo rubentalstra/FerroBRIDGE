@@ -81,12 +81,28 @@ pub mod its_rest {
     }
 }
 
-/// The FHIR R4 `Parameters` the terminology operations return.
+/// The FHIR `Parameters`, `OperationOutcome` and `Bundle` the terminology
+/// operations return.
+///
+/// R4 and R4B write these bodies identically, so one set of shapes stubs both
+/// releases; only the base path a server serves them under differs.
 pub mod terminology {
     use wiremock::ResponseTemplate;
 
-    /// The FHIR JSON media type of R4.
+    /// The FHIR JSON media type (<https://hl7.org/fhir/R4/http.html#mime-type>).
     const FHIR_JSON: &str = "application/fhir+json";
+
+    /// The `tx-issue-type` code system of the FHIR tools implementation guide
+    /// (<https://build.fhir.org/ig/FHIR/fhir-tools-ig/CodeSystem-tx-issue-type.html>).
+    pub const TX_ISSUE_TYPE: &str = "http://hl7.org/fhir/tools/CodeSystem/tx-issue-type";
+
+    /// One `designation` part of a `CodeSystem/$lookup` answer, as a language
+    /// and its text value.
+    pub type Designation<'a> = (&'a str, &'a str);
+
+    /// One `property` part of a `CodeSystem/$lookup` answer, as a code, the
+    /// `value[x]` member name, and the value that member carries.
+    pub type Property<'a> = (&'a str, &'a str, serde_json::Value);
 
     /// Returns the `Parameters` of `CodeSystem/$lookup`.
     ///
@@ -94,6 +110,37 @@ pub mod terminology {
     /// (`OperationDefinition-CodeSystem-lookup`, R4).
     #[must_use]
     pub fn lookup(name: &str, display: &str, version: Option<&str>) -> ResponseTemplate {
+        fhir_parameters(&lookup_body(name, display, version, &[], &[]))
+    }
+
+    /// Returns the `Parameters` of `CodeSystem/$lookup` with its `designation`
+    /// and `property` parts.
+    #[must_use]
+    pub fn lookup_detailed(
+        name: &str,
+        display: &str,
+        version: Option<&str>,
+        designations: &[Designation<'_>],
+        properties: &[Property<'_>],
+    ) -> ResponseTemplate {
+        fhir_parameters(&lookup_body(
+            name,
+            display,
+            version,
+            designations,
+            properties,
+        ))
+    }
+
+    /// Returns the out parameters of `CodeSystem/$lookup`.
+    #[must_use]
+    pub fn lookup_body(
+        name: &str,
+        display: &str,
+        version: Option<&str>,
+        designations: &[Designation<'_>],
+        properties: &[Property<'_>],
+    ) -> Vec<serde_json::Value> {
         let mut parameters = vec![
             serde_json::json!({"name": "name", "valueString": name}),
             serde_json::json!({"name": "display", "valueString": display}),
@@ -101,7 +148,25 @@ pub mod terminology {
         if let Some(version) = version {
             parameters.push(serde_json::json!({"name": "version", "valueString": version}));
         }
-        fhir_parameters(&parameters)
+        for (language, value) in designations {
+            parameters.push(serde_json::json!({
+                "name": "designation",
+                "part": [
+                    {"name": "language", "valueCode": language},
+                    {"name": "value", "valueString": value},
+                ],
+            }));
+        }
+        for (code, member, value) in properties {
+            let mut held = serde_json::Map::new();
+            held.insert("name".to_owned(), serde_json::Value::from("value"));
+            held.insert((*member).to_owned(), value.clone());
+            parameters.push(serde_json::json!({
+                "name": "property",
+                "part": [{"name": "code", "valueCode": code}, held],
+            }));
+        }
+        parameters
     }
 
     /// Returns the `Parameters` of `ConceptMap/$translate` with one match.
@@ -115,20 +180,40 @@ pub mod terminology {
         target_code: &str,
         target_display: &str,
     ) -> ResponseTemplate {
-        fhir_parameters(&[
-            serde_json::json!({"name": "result", "valueBoolean": true}),
-            serde_json::json!({
+        fhir_parameters(&translate_body(&[(
+            equivalence,
+            target_system,
+            target_code,
+            target_display,
+        )]))
+    }
+
+    /// Returns the out parameters of `ConceptMap/$translate`, one `match` per
+    /// entry of `matches`.
+    #[must_use]
+    pub fn translate_body(matches: &[(&str, &str, &str, &str)]) -> Vec<serde_json::Value> {
+        let mut parameters = vec![serde_json::json!({"name": "result", "valueBoolean": true})];
+        for (equivalence, system, code, display) in matches {
+            parameters.push(serde_json::json!({
                 "name": "match",
                 "part": [
                     {"name": "equivalence", "valueCode": equivalence},
                     {"name": "concept", "valueCoding": {
-                        "system": target_system,
-                        "code": target_code,
-                        "display": target_display,
+                        "system": system,
+                        "code": code,
+                        "display": display,
                     }},
                 ],
-            }),
-        ])
+            }));
+        }
+        parameters
+    }
+
+    /// Returns the `Parameters` of `ConceptMap/$translate` with several
+    /// matches, so a caller can check one equivalence per match.
+    #[must_use]
+    pub fn translate_matches(matches: &[(&str, &str, &str, &str)]) -> ResponseTemplate {
+        fhir_parameters(&translate_body(matches))
     }
 
     /// Returns the `Parameters` of `ConceptMap/$translate` with no match.
@@ -154,6 +239,21 @@ pub mod terminology {
         display: Option<&str>,
         message: Option<&str>,
     ) -> ResponseTemplate {
+        fhir_parameters(&validate_code_body(result, display, message, None))
+    }
+
+    /// Returns the out parameters of `ValueSet/$validate-code`.
+    ///
+    /// `issues` is the itemised `OperationOutcome` the terminology ecosystem
+    /// asks for beside a false `result`
+    /// (<https://hl7.org/fhir/uv/tx-ecosystem/requirements.html>).
+    #[must_use]
+    pub fn validate_code_body(
+        result: bool,
+        display: Option<&str>,
+        message: Option<&str>,
+        issues: Option<serde_json::Value>,
+    ) -> Vec<serde_json::Value> {
         let mut parameters = vec![serde_json::json!({"name": "result", "valueBoolean": result})];
         if let Some(display) = display {
             parameters.push(serde_json::json!({"name": "display", "valueString": display}));
@@ -161,17 +261,112 @@ pub mod terminology {
         if let Some(message) = message {
             parameters.push(serde_json::json!({"name": "message", "valueString": message}));
         }
-        fhir_parameters(&parameters)
+        if let Some(issues) = issues {
+            parameters.push(serde_json::json!({"name": "issues", "resource": issues}));
+        }
+        parameters
     }
 
-    /// Returns a `200` carrying `parameters` as a FHIR R4 `Parameters`.
-    fn fhir_parameters(parameters: &[serde_json::Value]) -> ResponseTemplate {
+    /// Returns the `Parameters` of a `ValueSet/$validate-code` that refused
+    /// the code, with the `issues` outcome beside the message.
+    #[must_use]
+    pub fn validate_code_invalid(message: &str, tx_issue_type: &str) -> ResponseTemplate {
+        let issues = outcome_body("code-invalid", Some(tx_issue_type), message);
+        fhir_parameters(&validate_code_body(
+            false,
+            None,
+            Some(message),
+            Some(issues),
+        ))
+    }
+
+    /// Returns the `OperationOutcome` body of a refused operation.
+    ///
+    /// A failed operation answers "an `OperationOutcome` resource with error
+    /// details" (<https://hl7.org/fhir/R4/operations.html>), and a terminology
+    /// server classifies the failure with a [`TX_ISSUE_TYPE`] coding in
+    /// `issue.details.coding`.
+    #[must_use]
+    pub fn outcome_body(
+        issue_code: &str,
+        tx_issue_type: Option<&str>,
+        diagnostics: &str,
+    ) -> serde_json::Value {
+        let mut details = serde_json::json!({"text": diagnostics});
+        if let Some(tx_issue_type) = tx_issue_type {
+            details = serde_json::json!({
+                "coding": [{"system": TX_ISSUE_TYPE, "code": tx_issue_type}],
+                "text": diagnostics,
+            });
+        }
+        serde_json::json!({
+            "resourceType": "OperationOutcome",
+            "issue": [{
+                "severity": "error",
+                "code": issue_code,
+                "details": details,
+                "diagnostics": diagnostics,
+            }],
+        })
+    }
+
+    /// Returns `status` carrying the `OperationOutcome` of a refused
+    /// operation.
+    #[must_use]
+    pub fn outcome(
+        status: u16,
+        issue_code: &str,
+        tx_issue_type: Option<&str>,
+        diagnostics: &str,
+    ) -> ResponseTemplate {
+        let body = outcome_body(issue_code, tx_issue_type, diagnostics);
+        ResponseTemplate::new(status)
+            .insert_header("Content-Type", FHIR_JSON)
+            .set_body_string(body.to_string())
+    }
+
+    /// Returns the `batch-response` `Bundle` of a batch, one entry per
+    /// request in the order they were sent.
+    ///
+    /// Each entry carries "the status code returned by processing this entry"
+    /// as an HTTP status line and the resource that request would have
+    /// answered on its own
+    /// (<https://hl7.org/fhir/R4/bundle-definitions.html#Bundle.entry.response.status>).
+    #[must_use]
+    pub fn batch_response(entries: &[(&str, serde_json::Value)]) -> ResponseTemplate {
+        let entry: Vec<serde_json::Value> = entries
+            .iter()
+            .map(|(status, resource)| {
+                serde_json::json!({
+                    "resource": resource,
+                    "response": {"status": status},
+                })
+            })
+            .collect();
         let body = serde_json::json!({
-            "resourceType": "Parameters",
-            "parameter": parameters,
+            "resourceType": "Bundle",
+            "type": "batch-response",
+            "entry": entry,
         });
         ResponseTemplate::new(200)
             .insert_header("Content-Type", FHIR_JSON)
             .set_body_string(body.to_string())
+    }
+
+    /// Returns a `Parameters` resource carrying `parameters`, the body an
+    /// operation answers with.
+    #[must_use]
+    pub fn parameters_resource(parameters: &[serde_json::Value]) -> serde_json::Value {
+        serde_json::json!({
+            "resourceType": "Parameters",
+            "parameter": parameters,
+        })
+    }
+
+    /// Returns a `200` carrying `parameters` as a FHIR `Parameters`.
+    fn fhir_parameters(parameters: &[serde_json::Value]) -> ResponseTemplate {
+        ResponseTemplate::new(200)
+            .insert_header("Content-Type", FHIR_JSON)
+            .set_body_string(parameters_resource(parameters).to_string())
     }
 }

@@ -1,0 +1,26 @@
+{
+  "resourceType": "ValueSet",
+  "id": "ferrobridge-members",
+  "url": "http://example.org/fhir/ValueSet/ferrobridge-members",
+  "version": "1.0.0",
+  "name": "FerroBridgeSyntheticMembers",
+  "title": "FerroBRIDGE synthetic value set",
+  "status": "active",
+  "experimental": true,
+  "publisher": "FerroBRIDGE test fixtures",
+  "description": "The one-member value set the FerroBRIDGE tests validate against.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://example.org/fhir/CodeSystem/ferrobridge-source",
+        "version": "1.0.0",
+        "concept": [
+          {
+            "code": "alpha",
+            "display": "Alpha finding"
+          }
+        ]
+      }
+    ]
+  }
+}

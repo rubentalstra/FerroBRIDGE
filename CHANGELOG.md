@@ -23,6 +23,27 @@ no binary to download yet.
 
 ### Added
 
+- `crates/ferrobridge-term`, the FHIR terminology client (#77):
+  `CodeSystem/$lookup` resolves a code's display, `ConceptMap/$translate` maps
+  a code into another system, `ValueSet/$validate-code` tests membership of a
+  value set, and `batch` sends several of them as one `batch` `Bundle` that is
+  answered by position. R4 and R4B are both read, over the generated
+  `fhir-types` operation contracts rather than hand-written JSON; the two
+  releases declare the same parameters for these operations, so the configured
+  wire version selects the decoder. A negative answer an operation states in
+  its own `out` parameters is an outcome, and every refusal is a typed error
+  carrying the upstream status, the body, and any `tx-issue-type` coding the
+  `OperationOutcome` holds. A missing display is a `NotFound` outcome, never an
+  empty string; a `translate` refusal fails closed and is never a missing
+  translation; every match is returned with its equivalence and `accepted()`
+  yields the `equivalent` and `equal` ones alone, so a `wider` or `inexact`
+  match never reaches a target system. Retry covers connect failures, timeouts
+  and `5xx`, and the `POST` form is retried because the three operations
+  declare `affectsState: false`. The testkit gains the `terminology()`
+  container, the synthetic `CodeSystem`, `ValueSet` and `ConceptMap` the
+  reference server loads, the `OperationOutcome` and `batch-response` stubs,
+  and a pin row for the terminology server image.
+
 - The container harness, the upstream stubs and the synthetic fixtures in
   `tools/ferrobridge-testkit` (#78), with the two end-to-end tests they carry.
   `containers` starts PostgreSQL 18.6 and the reference openEHR CDR with its

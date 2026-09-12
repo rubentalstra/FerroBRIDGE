@@ -1,0 +1,44 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "ferrobridge-source-to-target",
+  "url": "http://example.org/fhir/ConceptMap/ferrobridge-source-to-target",
+  "version": "1.0.0",
+  "name": "FerroBridgeSyntheticSourceToTarget",
+  "title": "FerroBRIDGE synthetic concept map",
+  "status": "active",
+  "experimental": true,
+  "publisher": "FerroBRIDGE test fixtures",
+  "description": "The synthetic map the FerroBRIDGE tests translate through.",
+  "sourceUri": "http://example.org/fhir/CodeSystem/ferrobridge-source",
+  "targetUri": "http://example.org/fhir/CodeSystem/ferrobridge-target",
+  "group": [
+    {
+      "source": "http://example.org/fhir/CodeSystem/ferrobridge-source",
+      "target": "http://example.org/fhir/CodeSystem/ferrobridge-target",
+      "element": [
+        {
+          "code": "alpha",
+          "display": "Alpha finding",
+          "target": [
+            {
+              "code": "A1",
+              "display": "Target alpha",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "beta",
+          "display": "Beta finding",
+          "target": [
+            {
+              "code": "B1",
+              "display": "Target beta group",
+              "equivalence": "wider"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

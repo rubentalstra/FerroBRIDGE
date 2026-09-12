@@ -1,0 +1,25 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "ferrobridge-target",
+  "url": "http://example.org/fhir/CodeSystem/ferrobridge-target",
+  "version": "1.0.0",
+  "name": "FerroBridgeSyntheticTarget",
+  "title": "FerroBRIDGE synthetic target code system",
+  "status": "active",
+  "experimental": true,
+  "publisher": "FerroBRIDGE test fixtures",
+  "description": "The synthetic code system the FerroBRIDGE tests translate into.",
+  "caseSensitive": true,
+  "content": "complete",
+  "count": 2,
+  "concept": [
+    {
+      "code": "A1",
+      "display": "Target alpha"
+    },
+    {
+      "code": "B1",
+      "display": "Target beta group"
+    }
+  ]
+}

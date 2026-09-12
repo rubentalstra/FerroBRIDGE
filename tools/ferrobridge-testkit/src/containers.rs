@@ -5,15 +5,15 @@
 //!
 //! A container-backed test asks [`e2e_enabled`] first and returns without
 //! touching Docker when the gate is unset, so the ordinary suite stays offline.
-//! Every image is pinned by tag and digest in [`POSTGRES`], [`CDR`] and
-//! [`CDR_POSTGRES`], which `docs/VERSIONS.md` repeats and
+//! Every image is pinned by tag and digest in [`POSTGRES`], [`CDR`],
+//! [`CDR_POSTGRES`] and [`TERMINOLOGY`], which `docs/VERSIONS.md` repeats and
 //! `scripts/checks/versions.sh` compares.
 //!
 //! No specification governs the harness; it is FerroBRIDGE's own design.
 
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
-use testcontainers::core::{Healthcheck, IntoContainerPort, WaitFor};
+use testcontainers::core::{AccessMode, Healthcheck, IntoContainerPort, Mount, WaitFor};
 use testcontainers::runners::AsyncRunner;
 use testcontainers::{ContainerAsync, GenericImage, ImageExt};
 
@@ -28,6 +28,16 @@ const POSTGRES_PORT: u16 = 5432;
 
 /// The HTTP port the reference CDR listens on inside its container.
 const CDR_PORT: u16 = 8080;
+
+/// The HTTP port the reference terminology server listens on inside its
+/// container.
+const TERMINOLOGY_PORT: u16 = 8080;
+
+/// Where the synthetic terminology fixtures are mounted in the container.
+const TERMINOLOGY_RESOURCES: &str = "/data/codesystems";
+
+/// The fixture directory the mount reads, absolute at compile time.
+const TERMINOLOGY_FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/fixtures/terminology");
 
 /// The login role, its password and its database in the PostgreSQL container.
 const POSTGRES_ROLE: &str = "ferrobridge";
@@ -125,6 +135,16 @@ pub const CDR_POSTGRES: PinnedImage = PinnedImage {
     digest: "sha256:e094461744fa8510ca8c1c4ecde4460474befb00b310ba41f7d9ff6e67e181bc",
 };
 
+/// The reference FHIR terminology server.
+///
+/// It serves each FHIR release under its own path prefix (`/r4`, `/r4b`,
+/// `/r5`, `/r6`), which is why [`Terminology::base_url`] takes the release.
+pub const TERMINOLOGY: PinnedImage = PinnedImage {
+    repository: "ghcr.io/rubentalstra/ferroterm",
+    tag: "0.1.3",
+    digest: "sha256:b1ef80382e03c2474bfec2ec57a698d83314e1290dd0cb5a2612ea208bde020c",
+};
+
 /// A container could not be started, or did not become usable.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -212,6 +232,87 @@ impl Cdr {
     pub fn database(&self) -> &ContainerAsync<GenericImage> {
         &self.database
     }
+}
+
+/// A started reference terminology server, torn down when it is dropped.
+#[derive(Debug)]
+pub struct Terminology {
+    /// The server itself, owned so that its lifetime is this value's.
+    container: ContainerAsync<GenericImage>,
+    /// The origin the server is reachable at, with no path.
+    origin: String,
+}
+
+impl Terminology {
+    /// Returns the FHIR service base URL of `release`.
+    ///
+    /// `release` is the path segment the server serves that FHIR release
+    /// under, for example `r4` or `r4b`.
+    #[must_use]
+    pub fn base_url(&self, release: &str) -> String {
+        format!("{}/{release}", self.origin)
+    }
+
+    /// Returns the origin the server is reachable at, with no path.
+    #[must_use]
+    pub fn origin(&self) -> &str {
+        &self.origin
+    }
+
+    /// Returns the server container.
+    #[must_use]
+    pub fn container(&self) -> &ContainerAsync<GenericImage> {
+        &self.container
+    }
+}
+
+/// Starts the reference terminology server over the synthetic terminology
+/// fixtures and waits for its readiness endpoint.
+///
+/// The image reads `FERROTERM_CODESYSTEMS` as a directory of FHIR resources,
+/// so `fixtures/terminology` is bind-mounted read-only and the synthetic
+/// `CodeSystem`, `ValueSet` and `ConceptMap` are served through the ordinary
+/// operations. The server enforces no authentication of its own, so the
+/// returned base URL needs no credentials.
+///
+/// # Errors
+///
+/// Returns [`HarnessError::Container`] when Docker refuses the container,
+/// [`HarnessError::Probe`] when the readiness probe cannot be sent, and
+/// [`HarnessError::NotReady`] when the server does not answer it in time.
+pub async fn terminology() -> Result<Terminology, HarnessError> {
+    let fixtures = Mount::bind_mount(TERMINOLOGY_FIXTURES, TERMINOLOGY_RESOURCES)
+        .with_access_mode(AccessMode::ReadOnly);
+    let container = TERMINOLOGY
+        .image()
+        .with_wait_for(WaitFor::message_on_stdout("listening"))
+        .with_exposed_port(TERMINOLOGY_PORT.tcp())
+        .with_mount(fixtures)
+        .with_env_var("FERROTERM_CODESYSTEMS", TERMINOLOGY_RESOURCES)
+        .with_env_var("FERROTERM_UI", "off")
+        .start()
+        .await
+        .map_err(|source| HarnessError::Container {
+            image: TERMINOLOGY.repository,
+            source,
+        })?;
+    let host = container
+        .get_host()
+        .await
+        .map_err(|source| HarnessError::Container {
+            image: TERMINOLOGY.repository,
+            source,
+        })?;
+    let port = container
+        .get_host_port_ipv4(TERMINOLOGY_PORT.tcp())
+        .await
+        .map_err(|source| HarnessError::Container {
+            image: TERMINOLOGY.repository,
+            source,
+        })?;
+    let origin = format!("http://{host}:{port}");
+    await_readiness(&format!("{origin}/health")).await?;
+    Ok(Terminology { container, origin })
 }
 
 /// Starts a PostgreSQL and returns it with the URL of its login role.
@@ -373,11 +474,11 @@ async fn await_readiness(url: &str) -> Result<(), HarnessError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CDR, CDR_POSTGRES, POSTGRES, PinnedImage};
+    use super::{CDR, CDR_POSTGRES, POSTGRES, PinnedImage, TERMINOLOGY};
 
     #[test]
     fn every_pin_names_a_tag_and_a_digest() {
-        for image in [POSTGRES, CDR, CDR_POSTGRES] {
+        for image in [POSTGRES, CDR, CDR_POSTGRES, TERMINOLOGY] {
             assert!(!image.tag.is_empty(), "{} has no tag", image.repository);
             assert!(
                 image.digest.starts_with("sha256:"),

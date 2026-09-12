@@ -27,6 +27,49 @@ pub const MINIMAL_EVALUATION_COMPOSITION: &str =
 pub const MINIMAL_EVALUATION_NOTE: &str =
     "A synthetic note committed by the FerroBRIDGE end-to-end test";
 
+/// A synthetic FHIR R4 `CodeSystem` with two concepts.
+pub const TERM_SOURCE_CODE_SYSTEM: &str =
+    include_str!("../fixtures/terminology/codesystem-source.json");
+
+/// A synthetic FHIR R4 `CodeSystem` the concept map translates into.
+pub const TERM_TARGET_CODE_SYSTEM: &str =
+    include_str!("../fixtures/terminology/codesystem-target.json");
+
+/// A synthetic FHIR R4 `ValueSet` holding one of the two source concepts.
+pub const TERM_VALUE_SET: &str = include_str!("../fixtures/terminology/valueset-members.json");
+
+/// A synthetic FHIR R4 `ConceptMap` from the source system to the target one.
+pub const TERM_CONCEPT_MAP: &str =
+    include_str!("../fixtures/terminology/conceptmap-source-to-target.json");
+
+/// The canonical URL of [`TERM_SOURCE_CODE_SYSTEM`].
+pub const TERM_SOURCE_SYSTEM: &str = "http://example.org/fhir/CodeSystem/ferrobridge-source";
+
+/// The canonical URL of [`TERM_TARGET_CODE_SYSTEM`].
+pub const TERM_TARGET_SYSTEM: &str = "http://example.org/fhir/CodeSystem/ferrobridge-target";
+
+/// The canonical URL of [`TERM_VALUE_SET`].
+pub const TERM_VALUE_SET_URL: &str = "http://example.org/fhir/ValueSet/ferrobridge-members";
+
+/// The canonical URL of [`TERM_CONCEPT_MAP`].
+pub const TERM_CONCEPT_MAP_URL: &str =
+    "http://example.org/fhir/ConceptMap/ferrobridge-source-to-target";
+
+/// The source concept that is a value-set member and maps `equivalent`.
+pub const TERM_MEMBER_CODE: &str = "alpha";
+
+/// The display of [`TERM_MEMBER_CODE`].
+pub const TERM_MEMBER_DISPLAY: &str = "Alpha finding";
+
+/// The target code [`TERM_MEMBER_CODE`] maps to.
+pub const TERM_MEMBER_TARGET_CODE: &str = "A1";
+
+/// The source concept that is not a value-set member and maps `wider`.
+pub const TERM_NON_MEMBER_CODE: &str = "beta";
+
+/// A code no fixture defines, for the not-found cases.
+pub const TERM_UNKNOWN_CODE: &str = "gamma";
+
 /// A synthetic FHIR R4 `Condition`.
 pub const R4_CONDITION: &str = include_str!("../fixtures/fhir/r4/condition.json");
 
@@ -57,6 +100,47 @@ mod tests {
         assert!(MINIMAL_EVALUATION_OPT.contains(MINIMAL_EVALUATION_TEMPLATE_ID));
         assert!(MINIMAL_EVALUATION_COMPOSITION.contains(MINIMAL_EVALUATION_TEMPLATE_ID));
         assert!(MINIMAL_EVALUATION_COMPOSITION.contains(MINIMAL_EVALUATION_NOTE));
+    }
+
+    #[test]
+    fn the_terminology_fixtures_name_their_canonicals_and_codes() {
+        use super::{
+            TERM_CONCEPT_MAP, TERM_CONCEPT_MAP_URL, TERM_MEMBER_CODE, TERM_MEMBER_DISPLAY,
+            TERM_MEMBER_TARGET_CODE, TERM_NON_MEMBER_CODE, TERM_SOURCE_CODE_SYSTEM,
+            TERM_SOURCE_SYSTEM, TERM_TARGET_CODE_SYSTEM, TERM_TARGET_SYSTEM, TERM_UNKNOWN_CODE,
+            TERM_VALUE_SET, TERM_VALUE_SET_URL,
+        };
+        assert!(TERM_SOURCE_CODE_SYSTEM.contains(TERM_SOURCE_SYSTEM));
+        assert!(TERM_SOURCE_CODE_SYSTEM.contains(TERM_MEMBER_DISPLAY));
+        assert!(TERM_TARGET_CODE_SYSTEM.contains(TERM_TARGET_SYSTEM));
+        assert!(TERM_TARGET_CODE_SYSTEM.contains(TERM_MEMBER_TARGET_CODE));
+        assert!(TERM_VALUE_SET.contains(TERM_VALUE_SET_URL));
+        assert!(TERM_CONCEPT_MAP.contains(TERM_CONCEPT_MAP_URL));
+        assert!(
+            TERM_VALUE_SET.contains(TERM_MEMBER_CODE),
+            "the member is not in the value set"
+        );
+        assert!(
+            !TERM_VALUE_SET.contains(TERM_NON_MEMBER_CODE),
+            "the non-member is in the value set"
+        );
+        for fixture in [
+            TERM_SOURCE_CODE_SYSTEM,
+            TERM_TARGET_CODE_SYSTEM,
+            TERM_VALUE_SET,
+            TERM_CONCEPT_MAP,
+        ] {
+            assert!(
+                !fixture.contains(TERM_UNKNOWN_CODE),
+                "a fixture defines the code the not-found cases rely on being absent"
+            );
+            for url in fixture.split("http://").skip(1) {
+                assert!(
+                    url.starts_with("example.org/"),
+                    "a terminology fixture names a URL outside http://example.org"
+                );
+            }
+        }
     }
 
     #[test]
