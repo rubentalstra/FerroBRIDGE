@@ -115,11 +115,11 @@ No suppression was recorded and the audit path was not narrowed
 - `.dockerignore`: denies everything but a staged `dist/` tree, so no source
   or build output enters a container build context.
 
-Each tier-2 job installs the toolchain with a digest-pinned
-`actions-rust-lang/setup-rust-toolchain` step of its own, which reads the
-channel from `rust-toolchain.toml` when that file exists. Issue #20 lands the
-workspace, the toolchain file, and a `./.github/actions/setup-rust` composite
-action; each of those six steps carries a `TODO(#20)` marking the line to lift.
+Each tier-2 job installs the toolchain through the composite
+`./.github/actions/setup-rust` action, which wraps a digest-pinned
+`actions-rust-lang/setup-rust-toolchain` step, reads the channel from
+`rust-toolchain.toml`, and takes the `components` a job asks for (`rustfmt`,
+`clippy`), so the pin lives in one file.
 
 ## Triggers and concurrency
 
