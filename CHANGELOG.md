@@ -23,6 +23,11 @@ no binary to download yet.
 
 ### Added
 
+- `docs/architecture.md` carries ten mermaid diagrams: the system picture, the
+  two languages over one foundation, the openEHR path pipeline, the FHIRconnect
+  pipeline, the inbound create and the `$tofhir` sequences, the OMOP ETL flow,
+  the crate graph, the FHIR identity derivation and the build order; the book's
+  architecture tour gains the FHIRconnect pipeline and the ETL flow.
 - The workspace root discipline is complete (#20): a composite
   `.github/actions/setup-rust` action reads `rust-toolchain.toml` for every
   Rust-tier job, and every workspace member carries one integration binary at

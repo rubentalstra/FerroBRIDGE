@@ -30,6 +30,8 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/openehr-path/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/openehr-path/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tools/ferrobridge-testkit/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/app/ferrobridge-server/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tools/ferrobridge-testkit/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
