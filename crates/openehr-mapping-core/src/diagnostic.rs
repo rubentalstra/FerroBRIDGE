@@ -139,6 +139,17 @@ pub enum DiagnosticCode {
     MalformedPath,
     /// A mapping path walks above the root of the anchor it resolves against.
     PathAboveAnchorRoot,
+    /// An operational template does not build a Web Template.
+    TemplateBuild,
+    /// An ADL 2 template identifies its nodes with id-codes.
+    IdCodedTemplate,
+    /// A built Web Template carries a node the index cannot read.
+    MalformedTemplate,
+    /// A mapping path names no node of the template it resolves against.
+    UnknownTemplatePath,
+    /// A composition does not build or does not validate against its
+    /// template.
+    InvalidComposition,
     /// A code raised by a language crate built on this foundation.
     Language(LanguageCode),
 }
@@ -163,6 +174,11 @@ impl DiagnosticCode {
             Self::DuplicateMappingName => "duplicate-mapping-name",
             Self::MalformedPath => "malformed-path",
             Self::PathAboveAnchorRoot => "path-above-anchor-root",
+            Self::TemplateBuild => "template-build",
+            Self::IdCodedTemplate => "id-coded-template",
+            Self::MalformedTemplate => "malformed-template",
+            Self::UnknownTemplatePath => "unknown-template-path",
+            Self::InvalidComposition => "invalid-composition",
             Self::Language(ref code) => code.as_str(),
         }
     }

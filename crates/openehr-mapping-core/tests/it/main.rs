@@ -12,3 +12,4 @@ mod malformed;
 mod paths;
 mod pins;
 mod registry;
+mod web_template;
