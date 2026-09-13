@@ -46,6 +46,10 @@ fhir-types = { path = "crates/fhir-types", version = "0.1.102", default-features
 # Path-only, with no version: cargo strips the dev-dependency from a packaged
 # crates/* manifest instead of looking it up on crates.io.
 ferrobridge-testkit = { path = "tools/ferrobridge-testkit" }
+# Path-only too: the unpublished server is their one consumer here, so no
+# packaged manifest renders a version requirement for either.
+ferrobridge-openehr = { path = "crates/ferrobridge-openehr" }
+ferrobridge-term = { path = "crates/ferrobridge-term" }
 # The openEHR model, from the published crates (docs/architecture.md section 3).
 # openehr-its takes rest-server beside flat because the ITS-REST 1.1.0 transport
 # DTOs (Error, Identifier, ResultSet, NewContribution) ride that feature at
@@ -64,6 +68,16 @@ url = "2.5.8"
 http = "1.5.0"
 secrecy = "0.10.3"
 tracing = "0.1.44"
+# The server's console: the env filter, the JSON line format and the pretty one.
+tracing-subscriber = { version = "0.3.23", default-features = false, features = ["std", "fmt", "env-filter", "json", "ansi"] }
+# The server's HTTP stack and the middleware the binary shape needs.
+axum = "0.8.9"
+tower = "0.5.3"
+tower-http = { version = "0.7.1", default-features = false, features = ["trace", "catch-panic", "request-id", "timeout", "limit"] }
+# The configuration file format, parsed into the server's Config tree.
+toml = { version = "1.1.6", default-features = false, features = ["std", "parse", "display", "serde"] }
+# The minted request id when a client sends none or sends an illegal one.
+uuid = { version = "1.26.1", default-features = false, features = ["v4", "std"] }
 futures-core = "0.3.34"
 futures-util = { version = "0.3.34", default-features = false, features = ["alloc"] }
 tokio = { version = "1.53.1", default-features = false }

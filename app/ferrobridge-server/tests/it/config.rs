@@ -1,0 +1,339 @@
+// SPDX-FileCopyrightText: Ruben Talstra
+// SPDX-License-Identifier: BUSL-1.1
+
+//! The configuration contract: the file, the environment over it, the `_file`
+//! secrets, and every refusal.
+
+use ferrobridge_server::config::{Config, Error};
+use secrecy::ExposeSecret;
+use std::collections::BTreeMap;
+use std::error::Error as StdError;
+use std::io::Write;
+use std::time::Duration;
+
+/// A file with every section set, so a test can override one key at a time.
+const FULL: &str = r#"
+[server]
+listen = "0.0.0.0:9000"
+request_timeout_ms = 1000
+shutdown_timeout_ms = 2000
+body_limit_bytes = 4096
+
+[telemetry]
+format = "json"
+filter = "debug"
+logged_query_parameters = ["_count"]
+
+[cdr]
+base_url = "http://cdr.invalid/v1"
+timeout_ms = 5000
+
+[cdr.retry]
+max_attempts = 5
+initial_backoff_ms = 10
+max_backoff_ms = 20
+
+[terminology]
+base_url = "http://tx.invalid/r4"
+wire_version = "r4b"
+
+[cdm]
+url = "postgres://bridge@db.invalid/cdm"
+"#;
+
+/// Returns the environment map a single override makes.
+fn env(name: &str, value: &str) -> BTreeMap<String, String> {
+    BTreeMap::from([(name.to_owned(), value.to_owned())])
+}
+
+#[test]
+fn a_file_states_every_section_and_the_resolver_reads_it() -> Result<(), Box<dyn StdError>> {
+    let settings = Config::from_sources(Some(FULL), &BTreeMap::new())?.resolve()?;
+    assert_eq!("0.0.0.0:9000", settings.server.listen.to_string());
+    assert_eq!(Duration::from_millis(1000), settings.server.request_timeout);
+    assert_eq!(
+        Duration::from_millis(2000),
+        settings.server.shutdown_timeout
+    );
+    assert_eq!(4096, settings.server.body_limit);
+    assert_eq!(
+        vec![String::from("_count")],
+        settings.telemetry.logged_query_parameters
+    );
+    let cdr = settings.cdr.as_ref().ok_or("the CDR lane is on")?;
+    assert_eq!("http://cdr.invalid/v1", cdr.base_url.as_str());
+    assert_eq!(5, cdr.retry.max_attempts);
+    assert_eq!(Duration::from_millis(10), cdr.retry.initial_backoff);
+    let terminology = settings.terminology.as_ref().ok_or("the lane is on")?;
+    assert_eq!(
+        ferrobridge_term::config::WireVersion::R4B,
+        terminology.wire_version
+    );
+    assert_eq!(
+        Some("postgres://bridge@db.invalid/cdm"),
+        settings.cdm_url.as_ref().map(ExposeSecret::expose_secret)
+    );
+    Ok(())
+}
+
+#[test]
+fn an_environment_override_wins_over_the_file() -> Result<(), Box<dyn StdError>> {
+    let settings = Config::from_sources(
+        Some(FULL),
+        &env("FERROBRIDGE__SERVER__LISTEN", "127.0.0.1:7777"),
+    )?
+    .resolve()?;
+    assert_eq!("127.0.0.1:7777", settings.server.listen.to_string());
+    Ok(())
+}
+
+#[test]
+fn an_environment_override_reaches_a_nested_section_and_keeps_its_type()
+-> Result<(), Box<dyn StdError>> {
+    let settings = Config::from_sources(
+        Some(FULL),
+        &env("FERROBRIDGE__CDR__RETRY__MAX_ATTEMPTS", "9"),
+    )?
+    .resolve()?;
+    let cdr = settings.cdr.as_ref().ok_or("the CDR lane is on")?;
+    assert_eq!(9, cdr.retry.max_attempts);
+    Ok(())
+}
+
+#[test]
+fn an_environment_override_turns_a_lane_on_with_no_file_at_all() -> Result<(), Box<dyn StdError>> {
+    let environment = BTreeMap::from([
+        (
+            String::from("FERROBRIDGE__CDR__BASE_URL"),
+            String::from("http://cdr.invalid/v1"),
+        ),
+        (
+            String::from("FERROBRIDGE__CDR__CREDENTIALS__BEARER_TOKEN"),
+            String::from("synthetic-token"),
+        ),
+    ]);
+    let settings = Config::from_sources(None, &environment)?.resolve()?;
+    let cdr = settings.cdr.as_ref().ok_or("the CDR lane is on")?;
+    assert!(cdr.credentials.is_some(), "the token reached the client");
+    assert!(
+        settings.terminology.is_none(),
+        "a lane with no section stays off"
+    );
+    assert!(settings.cdm_url.is_none());
+    Ok(())
+}
+
+#[test]
+fn a_secret_file_sibling_is_read_at_boot() -> Result<(), Box<dyn StdError>> {
+    let mut file = tempfile::NamedTempFile::new()?;
+    writeln!(file, "synthetic-token")?;
+    let text = format!(
+        "[cdr]\nbase_url = \"http://cdr.invalid/v1\"\n\n[cdr.credentials]\nbearer_token_file = {:?}\n",
+        file.path()
+    );
+
+    let settings = Config::from_sources(Some(&text), &BTreeMap::new())?.resolve()?;
+    let cdr = settings.cdr.as_ref().ok_or("the CDR lane is on")?;
+    match cdr.credentials.as_ref() {
+        Some(ferrobridge_openehr::config::Credentials::Bearer(token)) => {
+            assert_eq!(
+                "synthetic-token",
+                token.expose_secret(),
+                "the trailing newline of the file is not part of the secret"
+            );
+        }
+        other => return Err(format!("expected a bearer token, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[test]
+fn a_cdm_url_file_sibling_is_read_at_boot() -> Result<(), Box<dyn StdError>> {
+    let mut file = tempfile::NamedTempFile::new()?;
+    writeln!(file, "postgres://bridge@db.invalid/cdm")?;
+    let text = format!("[cdm]\nurl_file = {:?}\n", file.path());
+
+    let settings = Config::from_sources(Some(&text), &BTreeMap::new())?.resolve()?;
+    assert_eq!(
+        Some("postgres://bridge@db.invalid/cdm"),
+        settings.cdm_url.as_ref().map(ExposeSecret::expose_secret)
+    );
+    Ok(())
+}
+
+#[test]
+fn a_value_and_its_file_sibling_together_refuse_to_boot() -> Result<(), Box<dyn StdError>> {
+    let text = concat!(
+        "[cdr]\nbase_url = \"http://cdr.invalid/v1\"\n\n",
+        "[cdr.credentials]\nbearer_token = \"inline\"\nbearer_token_file = \"/run/secrets/token\"\n",
+    );
+
+    let error = Config::from_sources(Some(text), &BTreeMap::new())?
+        .resolve()
+        .expect_err("a secret set twice is a boot error");
+    match &error {
+        Error::Conflict { key } => assert_eq!("cdr.credentials.bearer_token", key),
+        other => return Err(format!("expected a conflict, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[test]
+fn a_secret_file_that_cannot_be_read_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
+    let text = concat!(
+        "[cdr]\nbase_url = \"http://cdr.invalid/v1\"\n\n",
+        "[cdr.credentials]\nbearer_token_file = \"/nonexistent/token\"\n",
+    );
+
+    let error = Config::from_sources(Some(text), &BTreeMap::new())?
+        .resolve()
+        .expect_err("an unreadable secret is a boot error");
+    match &error {
+        Error::Secret { key, .. } => {
+            assert_eq!("cdr.credentials.bearer_token_file", key);
+            assert!(
+                StdError::source(&error).is_some(),
+                "the refusal keeps the file system's own cause"
+            );
+        }
+        other => return Err(format!("expected a secret error, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[test]
+fn an_unknown_key_refuses_to_boot_and_the_message_names_it() -> Result<(), Box<dyn StdError>> {
+    let error = Config::from_sources(Some("[server]\nlisten_port = 8080\n"), &BTreeMap::new())
+        .expect_err("an unknown key is a boot error");
+    let Error::Parse { source } = &error else {
+        return Err(format!("expected a parse error, got {error:?}").into());
+    };
+    assert!(
+        source.to_string().contains("listen_port"),
+        "the refusal names the key: {source}"
+    );
+    Ok(())
+}
+
+#[test]
+fn an_unknown_section_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
+    let error = Config::from_sources(Some("[cache]\nsize = 1\n"), &BTreeMap::new())
+        .expect_err("an unknown section is a boot error");
+    let Error::Parse { source } = &error else {
+        return Err(format!("expected a parse error, got {error:?}").into());
+    };
+    assert!(source.to_string().contains("cache"), "{source}");
+    Ok(())
+}
+
+#[test]
+fn a_value_of_the_wrong_type_refuses_to_boot_and_the_message_names_its_key()
+-> Result<(), Box<dyn StdError>> {
+    let error = Config::from_sources(
+        Some("[server]\nrequest_timeout_ms = \"thirty seconds\"\n"),
+        &BTreeMap::new(),
+    )
+    .expect_err("a string is not a millisecond count");
+    let Error::Parse { source } = &error else {
+        return Err(format!("expected a parse error, got {error:?}").into());
+    };
+    assert!(
+        source.to_string().contains("request_timeout_ms"),
+        "the refusal names the key: {source}"
+    );
+    Ok(())
+}
+
+#[test]
+fn an_unknown_log_format_refuses_to_boot_and_names_its_key() -> Result<(), Box<dyn StdError>> {
+    let error = Config::from_sources(Some("[telemetry]\nformat = \"xml\"\n"), &BTreeMap::new())
+        .expect_err("xml is not a rendering");
+    let Error::Parse { source } = &error else {
+        return Err(format!("expected a parse error, got {error:?}").into());
+    };
+    let rendered = source.to_string();
+    assert!(rendered.contains("format"), "{rendered}");
+    assert!(rendered.contains("xml"), "{rendered}");
+    Ok(())
+}
+
+#[test]
+fn a_bad_listen_address_a_bad_url_and_a_bad_release_each_name_their_key()
+-> Result<(), Box<dyn StdError>> {
+    let listen = Config::from_sources(Some("[server]\nlisten = \"nowhere\"\n"), &BTreeMap::new())?
+        .resolve()
+        .expect_err("nowhere is not a socket address");
+    match &listen {
+        Error::Listen { key, .. } => assert_eq!("server.listen", key),
+        other => return Err(format!("expected a listen error, got {other:?}").into()),
+    }
+
+    let url = Config::from_sources(Some("[cdr]\nbase_url = \"not a url\"\n"), &BTreeMap::new())?
+        .resolve()
+        .expect_err("that is not a URL");
+    match &url {
+        Error::Url { key, .. } => assert_eq!("cdr.base_url", key),
+        other => return Err(format!("expected a URL error, got {other:?}").into()),
+    }
+
+    let release = Config::from_sources(
+        Some("[terminology]\nbase_url = \"http://tx.invalid/r5\"\nwire_version = \"r5\"\n"),
+        &BTreeMap::new(),
+    )?
+    .resolve()
+    .expect_err("this client does not speak R5");
+    match &release {
+        Error::WireVersion { key, value } => {
+            assert_eq!("terminology.wire_version", key);
+            assert_eq!("r5", value);
+        }
+        other => return Err(format!("expected a release error, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[test]
+fn a_section_that_is_present_and_names_no_url_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
+    let error = Config::from_sources(Some("[cdr]\ntimeout_ms = 1000\n"), &BTreeMap::new())?
+        .resolve()
+        .expect_err("a CDR lane with no base URL cannot start");
+    match &error {
+        Error::Missing { key } => assert_eq!("cdr.base_url", key),
+        other => return Err(format!("expected a missing key, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[test]
+fn a_credentials_section_naming_two_schemes_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
+    let text = concat!(
+        "[cdr]\nbase_url = \"http://cdr.invalid/v1\"\n\n",
+        "[cdr.credentials]\nbearer_token = \"t\"\nuser = \"bridge\"\npassword = \"p\"\n",
+    );
+
+    let error = Config::from_sources(Some(text), &BTreeMap::new())?
+        .resolve()
+        .expect_err("one scheme at a time");
+    match &error {
+        Error::Scheme { section } => assert_eq!("cdr.credentials", section),
+        other => return Err(format!("expected a scheme error, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[test]
+fn a_user_without_a_password_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
+    let text = concat!(
+        "[cdr]\nbase_url = \"http://cdr.invalid/v1\"\n\n",
+        "[cdr.credentials]\nuser = \"bridge\"\n",
+    );
+
+    let error = Config::from_sources(Some(text), &BTreeMap::new())?
+        .resolve()
+        .expect_err("basic authentication needs both halves");
+    match &error {
+        Error::Missing { key } => assert_eq!("cdr.credentials.password", key),
+        other => return Err(format!("expected a missing key, got {other:?}").into()),
+    }
+    Ok(())
+}

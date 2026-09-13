@@ -17,6 +17,10 @@ use url::Url;
 /// The FHIR JSON media type (<https://hl7.org/fhir/R4/http.html#mime-type>).
 pub const FHIR_JSON: &str = "application/fhir+json";
 
+/// The path of the capability statement a FHIR server publishes
+/// (<https://hl7.org/fhir/R4/http.html#capabilities>).
+const METADATA: &str = "metadata";
+
 /// One request, described so that every attempt builds the same thing.
 struct Call {
     /// The operation, as `Resource/$code`, or the batch marker.
@@ -80,6 +84,52 @@ impl Client {
     #[must_use]
     pub fn config(&self) -> &Config {
         &self.config
+    }
+
+    /// Returns the status the server answers `GET [base]/metadata` with.
+    ///
+    /// Every FHIR REST server states its capabilities at that path
+    /// (<https://hl7.org/fhir/R4/http.html#capabilities>), so a reachability
+    /// question needs no terminology operation. The call is sent once and
+    /// every status is returned as it stands, `401` and `404` included.
+    ///
+    /// # Errors
+    /// Returns [`Error::BaseUrl`] when the base URL cannot carry a path,
+    /// [`Error::Timeout`] when the server did not answer inside the configured
+    /// budget, and [`Error::Transport`] when the request never reached it.
+    pub async fn reachability(&self) -> Result<StatusCode, Error> {
+        let url = self.url(METADATA)?;
+        let request = self
+            .authorize(self.http.request(Method::GET, url.clone()))
+            .header(ACCEPT, FHIR_JSON);
+        let response = request.send().await.map_err(|source| {
+            if source.is_timeout() {
+                Error::Timeout {
+                    url: url.clone(),
+                    source,
+                }
+            } else {
+                Error::Transport {
+                    url: url.clone(),
+                    source,
+                }
+            }
+        })?;
+        let status = response.status();
+        tracing::debug!(path = url.path(), status = %status, "the terminology server answered a probe");
+        Ok(status)
+    }
+
+    /// Returns `request` carrying the configured credentials, when there are
+    /// any.
+    fn authorize(&self, request: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        match self.config.credentials.as_ref() {
+            None => request,
+            Some(Credentials::Bearer(token)) => request.bearer_auth(token.expose_secret()),
+            Some(Credentials::Basic { user, password }) => {
+                request.basic_auth(user, Some(password.expose_secret()))
+            }
+        }
     }
 
     /// Resolves the display of `code` in `system`.
@@ -308,14 +358,7 @@ impl Client {
             .header(ACCEPT, FHIR_JSON)
             .header(CONTENT_TYPE, FHIR_JSON)
             .body(call.body.clone());
-        if let Some(credentials) = self.config.credentials.as_ref() {
-            request = match credentials {
-                Credentials::Bearer(token) => request.bearer_auth(token.expose_secret()),
-                Credentials::Basic { user, password } => {
-                    request.basic_auth(user, Some(password.expose_secret()))
-                }
-            };
-        }
+        request = self.authorize(request);
 
         let response = request.send().await.map_err(|source| {
             if source.is_timeout() {

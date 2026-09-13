@@ -221,3 +221,34 @@ async fn an_undocumented_status_is_an_error_carrying_the_body() -> Result<(), Bo
     }
     Ok(())
 }
+
+#[tokio::test]
+async fn a_reachability_probe_reports_every_status_the_service_answers()
+-> Result<(), Box<dyn Error>> {
+    for answered in [200_u16, 401, 404, 503] {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path("/v1"))
+            .respond_with(ResponseTemplate::new(answered))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let status = support::client(&server)?.reachability().await?;
+        assert_eq!(answered, status.as_u16(), "the probe reports what it saw");
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_reachability_probe_that_never_connects_is_a_transport_error()
+-> Result<(), Box<dyn Error>> {
+    let config = Config::new("http://127.0.0.1:1/v1".parse()?).with_timeout(Duration::from_secs(2));
+
+    let outcome = Client::new(config)?.reachability().await;
+    assert!(
+        matches!(outcome, Err(ClientError::Transport { .. })),
+        "an unreachable service is a typed transport error"
+    );
+    Ok(())
+}

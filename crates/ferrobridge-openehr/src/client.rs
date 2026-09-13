@@ -191,6 +191,52 @@ impl Client {
         &self.config
     }
 
+    /// Returns the status the service answers a `GET` on its base URL with.
+    ///
+    /// The call is sent once, with the configured credentials and timeout, and
+    /// every status the service produces is returned as it stands, `401` and
+    /// `404` included: the question is whether the service answered, and a
+    /// caller reading reachability decides what each status means.
+    ///
+    /// # Errors
+    /// Returns [`Error::Timeout`] when the service did not answer inside the
+    /// configured budget and [`Error::Transport`] when the request never
+    /// reached it.
+    pub async fn reachability(&self) -> Result<StatusCode, Error> {
+        let url = self.config.base_url.clone();
+        let request = self
+            .authorize(self.http.request(Method::GET, url.clone()))
+            .header(ACCEPT, CANONICAL_JSON);
+        let response = request.send().await.map_err(|source| {
+            if source.is_timeout() {
+                Error::Timeout {
+                    url: url.clone(),
+                    source,
+                }
+            } else {
+                Error::Transport {
+                    url: url.clone(),
+                    source,
+                }
+            }
+        })?;
+        let status = response.status();
+        tracing::debug!(path = url.path(), status = %status, "the openEHR service answered a probe");
+        Ok(status)
+    }
+
+    /// Returns `request` carrying the configured credentials, when there are
+    /// any.
+    fn authorize(&self, request: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        match self.config.credentials.as_ref() {
+            None => request,
+            Some(Credentials::Bearer(token)) => request.bearer_auth(token.expose_secret()),
+            Some(Credentials::Basic { user, password }) => {
+                request.basic_auth(user, Some(password.expose_secret()))
+            }
+        }
+    }
+
     /// Returns the absolute URL of `segments` under the configured base.
     ///
     /// Every segment is percent-encoded, so a template identifier with a space
@@ -250,14 +296,7 @@ impl Client {
         if let Some(request_id) = self.request_id.as_ref() {
             request = request.header(REQUEST_ID, request_id.as_str());
         }
-        if let Some(credentials) = self.config.credentials.as_ref() {
-            request = match credentials {
-                Credentials::Bearer(token) => request.bearer_auth(token.expose_secret()),
-                Credentials::Basic { user, password } => {
-                    request.basic_auth(user, Some(password.expose_secret()))
-                }
-            };
-        }
+        request = self.authorize(request);
         if let Some(if_match) = call.if_match.as_ref() {
             request = request.header(IF_MATCH, if_match);
         }
