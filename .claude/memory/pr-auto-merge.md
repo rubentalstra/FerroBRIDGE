@@ -27,3 +27,12 @@ hand-off: GitHub merges the moment the check passes. The repository has
 never reports, so an armed auto-merge waits. In that window say so in the
 hand-off and let the owner merge through the admin bypass; never use
 `--admin` without asking.
+
+**Inside a worktree:** when auto-merge fires while the command is still
+running, `gh pr merge --auto --squash --delete-branch` ends with `fatal:
+'main' is already used by worktree at …`, because its final local cleanup
+tries to check out `main`, which the primary checkout holds. The merge and
+the remote branch deletion already succeeded; confirm with `gh pr view
+--json state,mergedAt` and never read that line as a failed merge. After the
+merge the orchestrator removes the worktree (`git worktree remove --force`),
+an owner instruction from 2026-09-12.
