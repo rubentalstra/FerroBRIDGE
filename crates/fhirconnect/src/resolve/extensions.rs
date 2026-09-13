@@ -146,7 +146,11 @@ pub(crate) fn apply<'a>(
 /// "This extension method adds a mapping method to the model mapping. It is
 /// always added at the bottom of the model mapping file"
 /// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
-/// §Add).
+/// §Add). The same section says an `add` "can also overwrite prior methods to
+/// the same path", which the bottom position gives on its own: the added
+/// method is the last one that writes that path. A repeated `name` is another
+/// matter, because `appendTo` and `overwrite` address a method by it, so that
+/// is a refusal.
 fn add<'a>(
     extension: &'a ModelMappingFile,
     method: &'a Mapping,

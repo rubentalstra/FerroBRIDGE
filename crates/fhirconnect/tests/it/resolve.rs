@@ -483,6 +483,75 @@ fn an_append_without_a_target_is_refused() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn an_append_to_naming_no_method_of_the_model_is_refused() -> Result<(), Box<dyn Error>> {
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "extension.yml",
+            extension(
+                "synthetic_extension",
+                "EVALUATION.synthetic.v1",
+                "mappings:\n  - name: \"extra\"\n    extension: \"append\"\n    appendTo: \"absent\"\n    followedBy:\n      mappings:\n        - name: \"child\"\n          with:\n            fhir: \"$resource.note.text\"\n            openehr: \"$archetype/data[at0001]/items[at0069]\"\n",
+            ),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-extension-target"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(message.contains("absent"), "{message}");
+    Ok(())
+}
+
+/// "The value used is the name of the mapping method. This can be also the
+/// child method. The path then would be `appendTo: parent.child`"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
+/// §Append).
+#[test]
+fn an_append_to_reaches_a_nested_method_by_its_dotted_name() -> Result<(), Box<dyn Error>> {
+    let parent = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    followedBy:\n      mappings:\n        - name: \"coding\"\n          with:\n            fhir: \"coding\"\n            openehr: \"$archetype/data[at0001]/items[at0002]\"\n";
+    let files = [
+        ("model.yml", start_model(parent)),
+        (
+            "extension.yml",
+            extension(
+                "synthetic_extension",
+                "EVALUATION.synthetic.v1",
+                "mappings:\n  - name: \"extra\"\n    extension: \"append\"\n    appendTo: \"problem.coding\"\n    followedBy:\n      mappings:\n        - name: \"display\"\n          with:\n            fhir: \"display\"\n            openehr: \"$archetype/data[at0001]/items[at0069]\"\n",
+            ),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let appended = program
+        .mappings()
+        .first()
+        .ok_or("the parent mapping")?
+        .followed_by()
+        .first()
+        .ok_or("the child mapping")?
+        .followed_by()
+        .first()
+        .ok_or("the appended mapping")?;
+    assert_eq!(appended.name(), "problem.coding.display");
+    Ok(())
+}
+
+#[test]
 fn an_extension_method_naming_no_method_of_the_model_is_refused() -> Result<(), Box<dyn Error>> {
     let files = [
         ("model.yml", start_model(PROBLEM)),
