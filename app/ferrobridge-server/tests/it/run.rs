@@ -33,6 +33,29 @@ fn every_job_but_serve_exits_two_and_names_the_issue_that_lands_it() {
 }
 
 #[test]
+fn the_binary_prints_the_issue_that_lands_each_refused_job() {
+    for (argv, issue) in [
+        (["etl", "run"], "#91"),
+        (["cdm", "init"], "#91"),
+        (["vocab", "load"], "#91"),
+        (["mapping", "check"], "#82"),
+    ] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_ferrobridge"))
+            .args(argv)
+            .output()
+            .expect("the binary runs");
+        assert_eq!(
+            Some(i32::from(EXIT_UNAVAILABLE_JOB)),
+            output.status.code(),
+            "{argv:?}"
+        );
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(stderr.contains(issue), "{argv:?} names {issue}: {stderr}");
+        assert_eq!(1, stderr.lines().count(), "one line, not a backtrace");
+    }
+}
+
+#[test]
 fn no_job_at_all_is_a_usage_refusal() {
     assert_eq!(
         rendered(ExitCode::from(EXIT_UNAVAILABLE_JOB)),
