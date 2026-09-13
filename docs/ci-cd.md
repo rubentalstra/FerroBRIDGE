@@ -240,7 +240,7 @@ to apply; this table is the reasoning behind each.
 | `BranchProtectionID` | accepted as is. The four warnings (settings do not apply to administrators, no required approvers, no required CODEOWNERS review, last-push approval off) each cost a single maintainer the ability to merge their own work. The enforcement that does hold is the `conclusion` required check, the pull-request requirement, signed commits, and the `release-tags` ruleset. Revisit when the maintainer set grows |
 | `CodeReviewID` | accepted as is, the same root cause: a solo maintainer approves no changesets |
 | `MaintainedID` | clears with time. It scores 0 only because the repository is under 90 days old |
-| `CIIBestPracticesID` | waits on registration at bestpractices.dev, an owner action tracked in the table below |
+| `CIIBestPracticesID` | registered on 2026-09-13 as bestpractices.dev project 14612; the check reads the registration and clears on the next run |
 | `FuzzingID` | tracked as its own v0.0.3 issue: `cargo fuzz` targets over the YAML mapping loader and the openEHR path parser |
 | `SASTID` | already satisfied. CodeQL runs on every pull request and every push to `main`; the score lagged because its Rust job was gated off until the workspace landed |
 | `SecurityPolicyID` | fixed in #47, which gave `SECURITY.md` the link the check looks for |
@@ -321,7 +321,7 @@ the state on 2026-09-05.
 | The `SONAR_TOKEN` secret, with SonarQube Cloud's Automatic Analysis off (`.claude/rules/ai-code-review.md`) | done |
 | Pages publishes from GitHub Actions and serves `ferrobridge.eu` with HTTPS enforced; the apex A records point at the four GitHub Pages addresses, `www` is a CNAME to `rubentalstra.github.io`, and the domain is verified for the account | done |
 | The roadmap board and the label bootstrap (`scripts/gh/labels.sh`) | done |
-| Registration at bestpractices.dev, with the returned badge added to the README | open: this is what clears the `CIIBestPracticesID` Scorecard check, whatever the badge score turns out to be |
+| Registration at bestpractices.dev | done 2026-09-13: project 14612 (<https://www.bestpractices.dev/en/projects/14612>). The badge stays out of the README while the level reads "in progress"; it joins when the self-assessment is filled in from the draft on #19 and the level is worth showing (#62). The passing level is out of reach under BUSL-1.1, since `floss_license` is a MUST |
 | Dismissing the Scorecard alerts decided above as accepted trade-offs, in the Security tab | open: the decisions are recorded here; only the owner can dismiss an alert |
 | Immutable releases, the repository setting that stops a published release's notes and assets from being edited | done: enabled by the owner. It is not reported by the REST API, so read it in Settings rather than from `gh api` (`docs/release.md`) |
 | A `crates-io` environment with a required reviewer, and crates.io Trusted Publishing entries per crate for `release.yml` and `publish-crates.yml` | open: both lanes exist and call `scripts/release/publish-crates.sh` (#72), so what is left is the owner's side. The first version of each crate (0.0.0, the name reservation) was published locally by the owner on 2026-09-05 (#107), since a crate's first release cannot use OIDC; `fhir-types` already exists on crates.io and its Trusted Publisher entries move here from the sibling terminology server |
