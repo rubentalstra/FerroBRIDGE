@@ -16,8 +16,9 @@ an entry under **[Unreleased]** in the same PR. Cutting a release renames
 FerroBRIDGE is in its design phase, and the architecture is the output of the
 research program on
 [issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1). Releases on
-the 0.0.x line carry the repository, its gates, and its documentation; there is
-no binary to download yet.
+the 0.0.x line carry the repository, its gates, and its documentation. From the
+first tag they also carry a Linux binary per architecture and a container
+image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ## [Unreleased]
 

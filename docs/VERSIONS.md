@@ -175,9 +175,9 @@ name with a 0.0.0 placeholder (#107), a version outside the line.
 
 ## Language and runtime
 
-No Cargo workspace exists yet. Issue #20 stands one up and adopts every value
-below: `rust-toolchain.toml` carries the toolchain, and the root `Cargo.toml`
-carries the edition, the resolver, and the MSRV.
+`rust-toolchain.toml` carries the toolchain, and the root `Cargo.toml` carries
+the edition, the resolver and the MSRV (#20). The release lane builds every
+published binary on this toolchain, with no cache.
 
 | Item | Pin | Repeated in |
 |---|---|---|
