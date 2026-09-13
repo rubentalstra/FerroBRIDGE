@@ -1048,9 +1048,15 @@ name = "fhirconnect"
 version = "0.0.0"
 dependencies = [
  "ferrobridge-testkit",
+<<<<<<< HEAD
  "insta",
  "jsonschema",
  "openehr-mapping-core",
+=======
+ "fhir-types",
+ "insta",
+ "proptest",
+>>>>>>> 77cac78e (feat(fhirconnect): the bidirectional FHIR path model over the element table)
  "serde_json",
  "thiserror",
 ]

@@ -20,14 +20,24 @@ publish = true
 include = ["src/**", "schemas/**", "README.md", "LICENSE"]
 
 [dependencies]
+<<<<<<< HEAD
 jsonschema.workspace = true
 openehr-mapping-core.workspace = true
 serde_json.workspace = true
+=======
+# The generated FHIR model: the lexical `Value` tree the path model walks and
+# the element table that guides it (docs/architecture.md section 4.1).
+fhir-types = { workspace = true, features = ["r4", "resources"] }
+>>>>>>> 77cac78e (feat(fhirconnect): the bidirectional FHIR path model over the element table)
 thiserror.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
 insta.workspace = true
+<<<<<<< HEAD
+=======
+proptest.workspace = true
+>>>>>>> 77cac78e (feat(fhirconnect): the bidirectional FHIR path model over the element table)
 
 [lints]
 workspace = true

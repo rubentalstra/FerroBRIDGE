@@ -29,4 +29,4 @@ disallowed-types = [
 
 # Product, specification and organisation names are words, not code, in
 # documentation.
-doc-valid-idents = ["FerroBRIDGE", "openEHR", "FHIRconnect", "OMOCL", "OHDSI", ".."]
+doc-valid-idents = ["FerroBRIDGE", "openEHR", "FHIRconnect", "FHIRPath", "JSONPath", "OMOCL", "OHDSI", ".."]
