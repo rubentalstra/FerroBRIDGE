@@ -63,7 +63,9 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          open="$(gh issue list --state open --json number,title \
+          # --limit well past the open count: the default page is 30 issues,
+          # and a report that scrolled off it would be reopened every week.
+          open="$(gh issue list --state open --limit 500 --json number,title \
             --jq "[.[] | select(.title == \"$TITLE\")] | length")"
           if [ "$open" -ne 0 ]; then
             echo "an open issue already carries this report; not opening a second"
