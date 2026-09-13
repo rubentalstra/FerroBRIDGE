@@ -44,3 +44,13 @@ it's done right now it's an very very big mess". After every merge run
 and every `worktree-agent-*` branch, and keep only `main` plus branches
 with an open pull request. Every branch with work on it is pushed the
 moment it has a commit; nothing lives only locally.
+
+**Branch from `origin/HEAD`, never from the local `main`:** on 2026-09-13 a
+fix branch was cut from a local `main` that was several merges behind, and
+a `git reset --soft origin/HEAD` on it turned the stale working tree into a
+commit that deleted the very workflow it meant to edit. Every new branch
+starts with `git fetch origin && git checkout -b <type>/<slug> origin/HEAD`,
+and a commit is made with named paths (`git add <files>`), never `git add
+-A` from the root after a local build in an excluded crate: the fuzz build
+tree (a gigabyte of objects) was swept into a commit that way and GitHub
+refused the push on file size.

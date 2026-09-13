@@ -503,9 +503,12 @@ plural and the schema holds one. Each is an `upstream-report` issue.
    validates or carries an adjudicated skip naming the defect.
 3. **Semantic validation the schema cannot express:** `targetRoot` resolves to
    the same node as `with`; `criteria` is absent for `empty` and `not empty`
-   and present otherwise; `appendTo`, `slotArchetype`, `spec.extends`,
+   and present otherwise; `slotArchetype`, `spec.extends`,
    `context.archetypes`, `context.extensions` and `context.start` each name a
-   loaded `metadata.name`; `metadata.name` is unique across the loaded set;
+   loaded `metadata.name`, and `appendTo` names a mapping of the extended
+   model by its `name`, a dotted `parent.child` for a nested one
+   (`extension-mapping.adoc` §Append); `metadata.name` is unique across the
+   loaded set;
    `extension` methods appear only in `type: extension` files; `openehr:
    "$reference"` is mandatory on a `reference` mapping; `mappingCode` names a
    registered function; every path resolves against the Web Template or the
@@ -538,12 +541,14 @@ fields it has now removed, normalising the singular spelling at load. The
 bridge's AST accepts both spellings, evaluates every attribute with OR, and a
 test pins that a two-attribute condition matches on the second.
 
-**Header-level `unidirectional` is refused until the schema admits it.** The
-reference engine accepts `unidirectional` in the file header as a default for
-every mapping (its 2.2.5 release); the pinned schemas do not define it, and a
-closed header rejects it. The bridge refuses it with a diagnostic naming the
-schema and files the question upstream, so a corpus file that depends on the
-engine extension is a recorded defect, never a silent pass.
+**A document-root `unidirectional` is refused; `spec.unidirectional` is the
+documented form.** The published model schema defines `unidirectional` under
+`spec` (`model-mapping.schema.json`, and `basics/main.adoc` §Direction), and
+the bridge accepts it there as the file-wide default. The reference engine
+also accepts the key at the document root (its 2.2.5 release); no pinned
+schema defines that placement, and a closed root rejects it. The bridge
+refuses it with a diagnostic naming the schema, so a corpus file that depends
+on the engine extension is a recorded defect, never a silent pass.
 
 ### 4.3 Context resolution: one immutable program per (profile, template)
 
@@ -574,9 +579,10 @@ is silent:**
 - A duplicate `metadata.name` across the loaded set is a load error (the
   specification calls the name "a unique id"). The library's six files named
   `KDS_composition` cannot load together; the corpus test records that.
-- `spec.extends`, `slotArchetype`, `appendTo` and `context.start` resolve by
-  `metadata.name` only. There is no directory scope in the specification and
-  the bridge invents none.
+- `spec.extends`, `slotArchetype` and `context.start` resolve by
+  `metadata.name` only, and `appendTo` by the mapping `name` inside the
+  extended model. There is no directory scope in the specification and the
+  bridge invents none.
 - The version selectors the specification lacks (which `metadata.version` of a
   name loads; `spec.openEhrConfig.revision` against the OPT; `profile.version`
   against the instance; `template.sem_ver` against the OPT) are a refusal at
@@ -1679,7 +1685,7 @@ extension.
 | Mapping AST | hand-written types; published schema exercised; own strict schema; semantic validation | the published schema rejects 3 of 8 mapping types and 24 of 107 files (section 4.2) | schema-derived AST; published schema as the validator |
 | Keyword casing | keys exact; keyword values case-insensitive within the documented set | the specification's own text is case-inconsistent; recorded and reported | refuse (breaks the first-milestone file); accept anything |
 | Condition keys | plural keys with OR semantics; singular spellings accepted as aliases | the schema documents plural arrays; the reference engine converged on it in 3.0.0 | first-attribute-only evaluation |
-| Header `unidirectional` | refused until the schema admits it | the pinned schemas do not define it; a closed header rejects it | the reference engine's extension |
+| Document-root `unidirectional` | refused; `spec.unidirectional` accepted | the published schema defines the key under `spec`, not at the root; a closed root rejects it | the reference engine's extension |
 | Mapping execution | compile once into an immutable program, interpret per record | Kersten et al. 2018; the reference engine's per-request rebuild and unordered extensions | interpret the YAML tree per request; code generation per mapping |
 | Extension order | declaration order, collisions are load errors | specification silent; reference engine nondeterministic (section 4.3) | last-writer-wins |
 | Direction | one engine, lens converters, direction enters at conditions, `unidirectional`, defaults | Weber and Ho 2020; the specification's input-side rule | two engines; two converter sets |
@@ -1730,7 +1736,7 @@ context chapters; the plural profile list the prose describes against the
 single profile the schema holds; the `FHIRConnect/v0.0.1` grammar string in
 the v1.0.0 context example; the R5 the prose invites against the schema's
 `["R4"]`; the `../` claim about openEHR; the `^` operator's one-sentence
-definition; header-level `unidirectional`; the undefined `DV_PROPORTION`
+definition; document-root `unidirectional`; the undefined `DV_PROPORTION`
 extension URLs; the FHIRconnect library's duplicate names, dangling
 references, mis-cased keywords, stale profile versions and the EEHRxF
 context's `sem_ver` contradiction; the OMOCL grammar images that document a

@@ -80,7 +80,9 @@ for manifest in crates/*/Cargo.toml; do
   # A here-string, not a pipe: `grep -q` closes its input on the first match,
   # and under `pipefail` the SIGPIPE'd writer would fail the whole test.
   packaged=0
-  if grep -qE "^${crate}/(src/|README\.md$|LICENSE$|Cargo\.toml$)" <<<"$changed"; then
+  # Everything a manifest's `include` can ship: src, the schemas a crate embeds,
+  # the README, the licence and the manifest itself.
+  if grep -qE "^${crate}/(src/|schemas/|README\.md$|LICENSE$|Cargo\.toml$)" <<<"$changed"; then
     packaged=1
   fi
   if [[ "$packaged" -eq 0 ]]; then
