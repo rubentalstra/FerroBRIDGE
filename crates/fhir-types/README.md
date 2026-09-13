@@ -41,7 +41,8 @@ is applied at generation and marked per parameter.
 ## The element table
 
 Each version module carries `schema::SCHEMAS`, the elements of every type it
-emits in definition order. Per element it holds the `ElementDefinition` path,
+emits in definition order, over the table types in the crate-level
+`fhir_types::schema` module. Per element it holds the `ElementDefinition` path,
 `min`, `max`, the type codes the definition lists, the `contentReference`
 target, and the kind the XML codec reads. `Schemas::element` resolves a dotted
 element path through complex types, backbone elements and content references,
@@ -67,6 +68,14 @@ assert_eq!(
 
 A type the enabled features leave out is absent from the table, so a path into
 it resolves to `None`.
+
+The table also carries `Element` (<https://hl7.org/fhir/R4/element.html>) with
+its `id` and `extension`, although no emitted field targets it. FHIR JSON
+writes a primitive's `id` and `extension` in a sibling member named with a
+leading underscore (`_birthDate`, <https://hl7.org/fhir/R4/json.html>), and a
+consumer walking a path resolves that member's contents against this entry. It
+is a table-only entry: the crate emits no `Element` Rust type, because an
+element whose type is `Element` becomes its own nested struct.
 
 ## JSON and decimal precision
 

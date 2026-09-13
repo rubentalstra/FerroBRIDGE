@@ -76,6 +76,17 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   refusal names the element path the table holds. A write applies to a copy and
   replaces the document only when every step succeeded.
 
+### Fixed
+
+- The element table `fhir-types` emits now carries `Element` with its `id` and
+  `extension`, so a table-driven consumer resolves the members of a primitive's
+  underscore sibling (`_birthDate`) against the definition rather than against
+  its own constants (#168). The entry is table-only: no `Element` Rust type is
+  emitted, because an element typed `Element` becomes its own nested struct.
+  The table types (`Schemas`, `TypeSchema`, `FieldSchema`, `Kind`, `ValueKind`)
+  moved from `fhir_types::xml` to `fhir_types::schema` in the same change, and
+  `Schemas::is_resource` is public.
+
 ## [0.0.2] - 2026-09-13
 
 The foundation release. `v0.0.2-rc.1`, cut the same day, rehearsed the new

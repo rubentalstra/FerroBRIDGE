@@ -30,4 +30,5 @@ pub mod r4b;
 pub mod r5;
 #[cfg(feature = "r6")]
 pub mod r6;
+pub mod schema;
 pub mod xml;

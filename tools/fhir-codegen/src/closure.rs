@@ -25,6 +25,16 @@ use crate::snapshot::{ElementShape, ResolveError, ResolvedElement, ResolvedStruc
 /// as the `Resource` enum over the root set.
 pub const STRUCTURAL_TYPES: [&str; 3] = ["BackboneElement", "Element", "Resource"];
 
+/// The base type of every element, resolved for the element table alone.
+///
+/// The FHIR JSON representation carries a primitive's `id` and `extension` in
+/// a sibling member named with a leading underscore
+/// (<https://hl7.org/fhir/R4/json.html>), and that member's shape is `Element`
+/// (<https://hl7.org/fhir/R4/element.html>). No emitted field targets the
+/// type, so it stays a structural type for the closure and joins the model as
+/// a table-only entry ([`crate::lower::TypeDef::table_only`]).
+pub const ELEMENT_TYPE: &str = "Element";
+
 /// A failure while computing the closure.
 #[derive(Debug, thiserror::Error)]
 pub enum ClosureError {
@@ -53,6 +63,7 @@ pub enum ClosureError {
 #[derive(Debug)]
 pub struct TypeClosure {
     structures: BTreeMap<String, ResolvedStructure>,
+    element: ResolvedStructure,
     roots: BTreeSet<String>,
     scopes: BTreeMap<String, RootScope>,
 }
@@ -90,6 +101,7 @@ impl TypeClosure {
             .collect();
         Ok(Self {
             structures,
+            element: resolve_named(package, ELEMENT_TYPE, "(the element table)")?,
             roots: roots
                 .resources
                 .values()
@@ -103,6 +115,12 @@ impl TypeClosure {
     #[must_use]
     pub fn structures(&self) -> &BTreeMap<String, ResolvedStructure> {
         &self.structures
+    }
+
+    /// The base `Element` structure, for the table-only entry.
+    #[must_use]
+    pub fn element(&self) -> &ResolvedStructure {
+        &self.element
     }
 
     /// The names of the root resources.

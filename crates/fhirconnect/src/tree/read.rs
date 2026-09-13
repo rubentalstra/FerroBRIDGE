@@ -262,7 +262,7 @@ fn alternative(
     cursor: &Cursor<'_>,
     element: &str,
     stem: &str,
-    variants: &[(&'static str, fhir_types::xml::Kind)],
+    variants: &[(&'static str, fhir_types::schema::Kind)],
 ) -> Result<Option<&'static str>, ReadError> {
     let object = cursor.value.as_object().ok_or_else(|| ReadError::Shape {
         element: String::from(element),

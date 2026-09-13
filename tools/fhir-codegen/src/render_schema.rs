@@ -5,10 +5,12 @@
 //! order, each with its path, cardinality, type codes, content reference, and
 //! the kind the XML codec needs.
 //!
-//! The table is the one input of the runtime XML module (`xml.rs`) and the one
-//! source of the element model a path-driven consumer walks
+//! The table is the one input of the runtime XML codec and the one source of
+//! the element model a path-driven consumer walks
 //! (<https://hl7.org/fhir/R4/elementdefinition.html>), so the generated
-//! footprint stays one static per version.
+//! footprint stays one static per version over the types in `schema.rs`. It
+//! carries the table-only `Element` entry that a primitive's `_name` sibling
+//! resolves against (<https://hl7.org/fhir/R4/json.html>).
 
 use std::fmt::{self, Write};
 
@@ -27,9 +29,9 @@ pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
     out.push_str(
         "//! The element table of the version's types: each element's path, cardinality,\n//! type codes, content reference and XML kind, in definition order\n//! (<https://hl7.org/fhir/R4/elementdefinition.html>).\n\n",
     );
-    out.push_str("use super::super::xml::Schemas;\n");
+    out.push_str("use super::super::schema::Schemas;\n");
     out.push_str(&RootScope::Terminology.cfg());
-    out.push_str("use super::super::xml::{FieldSchema, Kind, TypeSchema, ValueKind};\n\n");
+    out.push_str("use super::super::schema::{FieldSchema, Kind, TypeSchema, ValueKind};\n\n");
     out.push_str("/// The version's schema.\n");
     out.push_str("pub static SCHEMAS: Schemas = Schemas {\n    types: &[\n");
     for ty in model.types.values() {

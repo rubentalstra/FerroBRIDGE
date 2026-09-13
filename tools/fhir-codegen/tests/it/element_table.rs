@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 use std::fs;
 
 use fhir_codegen::package::Package;
-use fhir_types::xml::{Kind, Schemas, TypeSchema, ValueKind};
+use fhir_types::schema::{Kind, Schemas, TypeSchema, ValueKind};
 use serde_json::Value;
 
 use crate::packages;

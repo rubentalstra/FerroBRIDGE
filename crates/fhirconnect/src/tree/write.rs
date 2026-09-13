@@ -15,7 +15,7 @@
 
 use fhir_types::codec::Object;
 use fhir_types::codec::Value;
-use fhir_types::xml::ValueKind;
+use fhir_types::schema::ValueKind;
 
 use crate::tree::Occurrence;
 use crate::tree::element::Field;
