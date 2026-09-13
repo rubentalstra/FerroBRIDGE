@@ -334,3 +334,44 @@ fn a_path_the_table_does_not_know_resolves_to_nothing() {
         "the element path reaches it"
     );
 }
+
+/// The FHIR type each package names behind `Element.id`'s `System.String`.
+///
+/// The 4.3.0 package types it `id` where the other three type it `string`, so
+/// the emitted table carries the package's own answer per version.
+const ELEMENT_ID_TYPE: [(&str, &str); 4] = [
+    ("r4", "string"),
+    ("r4b", "id"),
+    ("r5", "string"),
+    ("r6", "string"),
+];
+
+#[test]
+fn every_version_carries_the_element_entry_a_primitive_s_sibling_resolves_against() {
+    for ((module, schemas), (named, id_type)) in tables().into_iter().zip(ELEMENT_ID_TYPE) {
+        assert_eq!(module, named, "the tables follow the package order");
+        let element = schemas
+            .type_named("Element")
+            .unwrap_or_else(|| panic!("{module} emits Element"));
+        assert_eq!(element.path, "Element", "{module}: the definition's path");
+        let members: Vec<(&str, Kind, u32, Option<u32>, &[&str])> = element
+            .fields
+            .iter()
+            .map(|field| (field.name, field.kind, field.min, field.max, field.types))
+            .collect();
+        assert_eq!(
+            members,
+            [
+                ("id", Kind::Attribute, 0, Some(1), &[id_type][..]),
+                (
+                    "extension",
+                    Kind::Complex("Extension"),
+                    0,
+                    None,
+                    &["Extension"][..],
+                ),
+            ],
+            "{module}: the two members Element defines"
+        );
+    }
+}

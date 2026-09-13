@@ -51,10 +51,15 @@ fn emitting_twice_is_byte_identical_and_check_passes() {
     let second = tempfile::tempdir().expect("tempdir");
     let report = emit(&r4b_only(first.path(), false)).expect("first emit");
     emit(&r4b_only(second.path(), false)).expect("second emit");
-    assert_eq!(report.types.get("r4b"), Some(&893));
+    // The 893 types with a Rust type of their own, plus the table-only `Element`.
+    assert_eq!(report.types.get("r4b"), Some(&894));
     // The version's types, operations, `mod.rs`, and `schema.rs`, plus `lib.rs`,
-    // `codec.rs`, `operation.rs`, and `xml.rs`.
-    assert_eq!(report.files.len(), 197);
+    // `codec.rs`, `operation.rs`, `schema.rs`, and `xml.rs`.
+    assert_eq!(report.files.len(), 198);
+    assert!(
+        !report.files.contains(&String::from("r4b/element.rs")),
+        "the table-only Element entry claims no module of its own"
+    );
     let a: Vec<String> = tree(&first.path().join("src"))
         .into_iter()
         .map(|(_, c)| c)
