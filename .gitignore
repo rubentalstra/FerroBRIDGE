@@ -48,3 +48,10 @@
 # release asset (docs/release.md); a local rehearsal leaves the rest behind.
 *.cdx.json
 >>>>>>> 5811bcb5 (ci(release): the asset set, the pins and the verification record (#23))
+
+# The fuzz crate builds outside the workspace; its build tree, corpora and
+# crash artifacts never enter the repository (#155).
+fuzz/target/
+fuzz/corpus/
+fuzz/artifacts/
+fuzz/coverage/
