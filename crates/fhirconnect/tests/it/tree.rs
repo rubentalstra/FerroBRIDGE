@@ -344,6 +344,23 @@ fn an_unknown_element_names_the_type_that_defines_none() -> Result<(), Box<dyn E
 }
 
 #[test]
+fn a_type_specifier_that_names_no_fhir_type_is_refused() -> Result<(), Box<dyn Error>> {
+    let path: FhirPath = "$resource.onset.ofType(DateTimeType)".parse()?;
+    let Err(ResolveError::ChoiceType {
+        element,
+        requested,
+        admitted,
+    }) = resolve(&SCHEMAS, "Condition", &path)
+    else {
+        panic!("a type specifier naming no FHIR type should have been refused")
+    };
+    assert_eq!(element, "Condition.onset[x]");
+    assert_eq!(requested, "DateTimeType");
+    assert_eq!(admitted, "DateTime, Age, Period, Range, String");
+    Ok(())
+}
+
+#[test]
 fn a_choice_type_the_element_does_not_admit_names_the_element() -> Result<(), Box<dyn Error>> {
     let mut document = document("Condition");
     let refused = set(
