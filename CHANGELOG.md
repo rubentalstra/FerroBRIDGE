@@ -266,6 +266,15 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Fixed
 
+- `scripts/site/assemble.sh` renders the book into a temporary directory and
+  copies from there (#58), so assembling the site no longer rebuilds
+  `website/book/book/` in the source tree. The usage header says so.
+- `cargo deny check` prints zero warnings (#145). The licence check now covers
+  dev-dependencies (`include-dev = true`), which is what the `openehr-adl`
+  exception needed to fire at all, and each of the ten `multiple-versions`
+  duplicates carries a `skip` entry naming the older version and the crates
+  that require it. `multiple-versions` stays at `warn`, so a new duplicate
+  still shows.
 - The server's request log line now covers every outcome (#21 follow-up): the
   log middleware sits outside the panic catcher, the request timeout and the
   body-size ceiling, so a caught panic, a `408` and a `413` each leave their
@@ -274,6 +283,24 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Changed
 
+- Two guards join the repository, and the book explains the version lines
+  behind them. `scripts/checks/favicon-sync.sh` fails when a book theme favicon
+  differs from the brand mark it copies, and runs in tier 1 of `ci.yml` (#52).
+  `.github/workflows/pin-freshness.yml` reads every pin no Dependabot ecosystem
+  covers, the analyzer versions in `ci.yml` and the documentation toolchain,
+  against the newest upstream release each week, and opens one issue when a pin
+  is behind rather than failing red (#35). `.claude/hooks/`
+  `crate_version_bump_guard.sh` runs the crate bump guard before a `git commit`
+  or a `git push`, so packaged content that moves without a version bump is
+  refused where the fix is one edit (#79). The book gains an Operate page on
+  the two version lines and Contribute pages on the bump rule and on cutting a
+  release (#79, #66).
+- `docs/ci-cd.md` records what watches each class of pin and that no Dependabot
+  ecosystem is failing any more now that both manifests exist (#41), why the
+  GitHub licence field reads `NOASSERTION` and why no layout change can fix it
+  (#45), and a decision for each open Scorecard alert, including the
+  branch-protection and code-review trade-offs a single maintainer accepts
+  (#48).
 - Both generators now write the two SPDX tags directly under the
   `@generated … DO NOT EDIT.` banner, which keeps the first line (#129):
   Apache-2.0 for `crates/fhir-types`, the crate's own licence, and BUSL-1.1 for

@@ -33,12 +33,21 @@ the committed guards, so both are live code from day one and both need a gate.
 | `hadolint` | every tracked Dockerfile under `.hadolint.yaml` (`failure-threshold: warning`) |
 | `comment-style` | `scripts/checks/comment-style.sh --all` |
 | `versions` | `scripts/checks/versions.sh` |
+| `favicon-sync` | `scripts/checks/favicon-sync.sh` |
 
 `hadolint` runs against a real recipe since #22: `docker/Dockerfile`, the one
 tracked Dockerfile, whose digest-pinned `FROM` the `versions` job checks
 against `docs/VERSIONS.md` in the same tier. `versions` still skips the checks
 whose subject file is absent, reporting each skip with its reason, so it gains
 teeth as files appear.
+
+`favicon-sync` covers a duplication the other guards cannot see. The book's
+mdBook theme reads its favicon from `website/book/theme/favicon.svg` and
+`favicon.png`, which are copies of `assets/brand/favicon.svg` and its 32-pixel
+raster. The mark therefore exists twice, the regeneration block in
+`assets/brand/README.md` writes both, and nothing checked that someone had run
+it. The guard compares each copy with its source byte for byte and names the
+file that differs (#52).
 
 **Tier 2 is written now and gated off.** A `detect` job checks out and looks
 for a root `Cargo.toml`, publishing a boolean output. Every Rust job carries
@@ -151,6 +160,91 @@ window on a compromised release, which is the attack this control exists for.
 No suppression was recorded and the audit path was not narrowed
 (`.claude/rules/ai-code-review.md`).
 
+## Every pin, and what watches it
+
+A pin nothing watches goes stale silently, so each class of pin names its
+mechanism here.
+
+| Pin | Watched by |
+|---|---|
+| `uses:` references in `.github/workflows/**` and `.github/actions/**` | Dependabot, `github-actions` ecosystem |
+| the workspace dependency table in the root `Cargo.toml` | Dependabot, `cargo` ecosystem |
+| the digest-pinned `FROM` of `docker/Dockerfile` | Dependabot, `docker` ecosystem at `/docker` |
+| the analyzer versions in `ci.yml` and the documentation toolchain in `.github/actions/docs-toolchain` | `pin-freshness.yml`, weekly |
+| the container image tags in `compose.yaml` and the harness constants | `scripts/checks/versions.sh` against `docs/VERSIONS.md` |
+
+All three Dependabot ecosystems resolve something today. The `cargo` and
+`docker` entries were inert until their manifests landed, and inert meant
+failing: each weekly job ended `dependency_file_not_found`, which is the noise
+#41 was filed against. The root `Cargo.toml` landed with #107 and
+`docker/Dockerfile` with #22, and the `docker` entry now names the real path
+rather than covering two candidates, so no expected failure remains. Dependabot
+update runs are not exposed by the REST API; read them under Insights,
+Dependency graph, Dependabot.
+
+**Dependabot does not cover an analyzer version**, and that is the gap
+`pin-freshness.yml` fills (#35). The `github-actions` ecosystem reads a `uses:`
+reference. It does not read `rhysd/actionlint:1.7.12@sha256:…` inside a `run:`
+block, it does not read `tool: zizmor@1.29.0` passed to an installer as an
+input, and it does not read a commit a vendor script fetches an asset from.
+`taiki-e/install-action` carries neither actionlint nor hadolint in its
+manifest list, and neither is a crate, so its `cargo-binstall` fallback cannot
+reach them either; both stay on their official images, pinned by tag and by
+digest.
+
+`scripts/checks/pin-freshness.sh` reads each of those pins from
+`docs/VERSIONS.md` and compares it with the newest release of the upstream
+project, which is the tag the image and the installer both carry. The workflow
+runs it every Monday and on dispatch. When a pin is behind it opens one issue
+carrying the report, and when an open issue already carries that report it adds
+nothing. A pin it could not read fails the job, so a network failure never
+reads as a fresh pin.
+
+It opens an issue rather than failing red. A weekly red job on a lint version
+teaches a maintainer to ignore red jobs, which is the habit #41 identified as
+the actual risk.
+
+## Why the GitHub licence field reads NOASSERTION
+
+`gh api repos/rubentalstra/FerroBRIDGE --jq .license` returns `NOASSERTION`
+("Other"), and it will keep returning it. This is not a defect in `LICENSE`
+(#45).
+
+GitHub detects a repository licence with
+[licensee](https://github.com/licensee/licensee), which matches the licence
+file against the crowdsourced set on
+[choosealicense.com](https://github.com/github/choosealicense.com/tree/gh-pages/_licenses).
+That set holds 46 licences and BUSL-1.1 is not one of them; the nearest
+identifier in it, `bsl-1.0`, is the Boost Software License. With no BUSL-1.1
+entry to match, no layout of the file can produce a match, and a layout change
+would be a change to the licence text for a detector rather than for a reader.
+The same call returns `NOASSERTION` for `hashicorp/terraform` and
+`hashicorp/vault`, which carry the canonical BUSL-1.1 template in full, and for
+FerroEHR and FerroTERM.
+
+What the licence field cannot say, other channels do: `LICENSE` and `NOTICE`
+carry the terms, every first-party file carries an
+`SPDX-License-Identifier: BUSL-1.1` header that `scripts/checks/versions.sh`
+enforces, and each published crate carries `license = "BUSL-1.1"` in its
+manifest, which is what crates.io and `cargo deny` read. Do not change a term
+to satisfy a detector.
+
+## Scorecard alerts: the decisions
+
+OpenSSF Scorecard reports seven checks against this repository. Each is decided
+rather than left open (#48). The dismissals in the Security tab are the owner's
+to apply; this table is the reasoning behind each.
+
+| Check | Decision |
+|---|---|
+| `BranchProtectionID` | accepted as is. The four warnings (settings do not apply to administrators, no required approvers, no required CODEOWNERS review, last-push approval off) each cost a single maintainer the ability to merge their own work. The enforcement that does hold is the `conclusion` required check, the pull-request requirement, signed commits, and the `release-tags` ruleset. Revisit when the maintainer set grows |
+| `CodeReviewID` | accepted as is, the same root cause: a solo maintainer approves no changesets |
+| `MaintainedID` | clears with time. It scores 0 only because the repository is under 90 days old |
+| `CIIBestPracticesID` | waits on registration at bestpractices.dev, an owner action tracked in the table below |
+| `FuzzingID` | tracked as its own v0.0.3 issue: `cargo fuzz` targets over the YAML mapping loader and the openEHR path parser |
+| `SASTID` | already satisfied. CodeQL runs on every pull request and every push to `main`; the score lagged because its Rust job was gated off until the workspace landed |
+| `SecurityPolicyID` | fixed in #47, which gave `SECURITY.md` the link the check looks for |
+
 ## Configuration this workflow reads
 
 - `.github/actionlint.yaml`: no self-hosted runner labels, and the
@@ -227,7 +321,8 @@ the state on 2026-09-05.
 | The `SONAR_TOKEN` secret, with SonarQube Cloud's Automatic Analysis off (`.claude/rules/ai-code-review.md`) | done |
 | Pages publishes from GitHub Actions and serves `ferrobridge.eu` with HTTPS enforced; the apex A records point at the four GitHub Pages addresses, `www` is a CNAME to `rubentalstra.github.io`, and the domain is verified for the account | done |
 | The roadmap board and the label bootstrap (`scripts/gh/labels.sh`) | done |
-| Registration at bestpractices.dev, with the returned badge added to the README | open |
+| Registration at bestpractices.dev, with the returned badge added to the README | open: this is what clears the `CIIBestPracticesID` Scorecard check, whatever the badge score turns out to be |
+| Dismissing the Scorecard alerts decided above as accepted trade-offs, in the Security tab | open: the decisions are recorded here; only the owner can dismiss an alert |
 | Immutable releases, the repository setting that stops a published release's notes and assets from being edited | done: enabled by the owner. It is not reported by the REST API, so read it in Settings rather than from `gh api` (`docs/release.md`) |
 | A `crates-io` environment with a required reviewer, and crates.io Trusted Publishing entries per crate for `release.yml` and `publish-crates.yml` | open: both lanes exist and call `scripts/release/publish-crates.sh` (#72), so what is left is the owner's side. The first version of each crate (0.0.0, the name reservation) was published locally by the owner on 2026-09-05 (#107), since a crate's first release cannot use OIDC; `fhir-types` already exists on crates.io and its Trusted Publisher entries move here from the sibling terminology server |
 
@@ -244,5 +339,13 @@ instead, which keeps the ruleset stable as the pipeline grows.
 - zizmor: <https://docs.zizmor.sh/>
 - actionlint: <https://github.com/rhysd/actionlint>
 - hadolint: <https://github.com/hadolint/hadolint>
+- Dependabot options reference:
+  <https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference>
+- Licensing a repository, and what licensee looks at:
+  <https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/licensing-a-repository>
+  and
+  <https://github.com/licensee/licensee/blob/main/docs/what-we-look-at.md>
+- Scorecard checks:
+  <https://github.com/ossf/scorecard/blob/main/docs/checks.md>
 - Required status checks and rulesets:
   <https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets>

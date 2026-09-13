@@ -113,21 +113,25 @@ and the testkit tool crate. Beside it:
 - `.claude/`: the working discipline. `rules/` (the path-scoped and standing
   rules), `hooks/`, `skills/`, `agents/`, `memory/`.
 - `scripts/gh/`: the tracker helpers (`rel.sh`, `project.sh`, `labels.sh`).
-- `scripts/checks/`: the committed guards (`comment-style.sh`, and
-  `versions.sh`, which fails when a file disagrees with the `docs/VERSIONS.md`
-  pin matrix or claims a licence other than `BUSL-1.1`).
+- `scripts/checks/`: the committed guards. `comment-style.sh`; `versions.sh`,
+  which fails when a file disagrees with the `docs/VERSIONS.md` pin matrix or
+  claims a licence other than `BUSL-1.1`; `crate-version-guard.sh`, the crate
+  bump rule; `favicon-sync.sh`, the book theme favicon against the brand mark;
+  and `pin-freshness.sh`, every pin no ecosystem watches against its newest
+  upstream release.
 - `.github/`: issue and pull-request templates, CODEOWNERS, Dependabot, and
-  nine workflows (CI, Docs, Scorecard, CodeQL, SonarQube Cloud, Release,
-  Release build, Release image, Publish crates). `ci.yml` runs its workflow,
-  shell, container and guard tier beside the Rust tier; its `conclusion` job is
-  the single required check on `main` (`docs/ci-cd.md`). `release.yml` is
-  dormant until a `v*` tag is pushed and cuts a release from the changelog
-  section, and its `crates` leg publishes the library crates through Trusted
-  Publishing. `release-build.yml` and `release-image.yml` are the two reusable
-  workflows it calls, which is what puts the signing identity out of reach of
-  caller-defined steps (SLSA Build Level 3); they produce the attested
-  tarballs, the two SBOMs per target and the multi-platform GHCR image
-  (`docs/release.md`).
+  ten workflows (CI, Docs, Scorecard, CodeQL, SonarQube Cloud, Release,
+  Release build, Release image, Publish crates, Pin freshness). `ci.yml` runs
+  its workflow, shell, container and guard tier beside the Rust tier; its
+  `conclusion` job is the single required check on `main` (`docs/ci-cd.md`).
+  `release.yml` is dormant until a `v*` tag is pushed and cuts a release from
+  the changelog section, and its `crates` leg publishes the library crates
+  through Trusted Publishing. `release-build.yml` and `release-image.yml` are
+  the two reusable workflows it calls, which is what puts the signing identity
+  out of reach of caller-defined steps (SLSA Build Level 3); they produce the
+  attested tarballs, the two SBOMs per target and the multi-platform GHCR image
+  (`docs/release.md`). `pin-freshness.yml` reads every pin no Dependabot
+  ecosystem covers against its newest upstream release each week.
 - Root markdown: this file, `README.md`, and the community and governance set.
 
 When the workspace lands, each crate carries its own `CLAUDE.md` with
