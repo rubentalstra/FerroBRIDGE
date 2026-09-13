@@ -270,3 +270,102 @@ fn the_request_log_carries_no_request_body() {
         logs.text()
     );
 }
+
+/// Sends `request` through `router` under a capturing JSON subscriber and
+/// returns the status with everything the request wrote to the log.
+fn logged(router: Router, request: Request<Body>) -> (StatusCode, String) {
+    let logs = support::Logs::default();
+    let capture = subscriber(Rendering::Json, "info", false, logs.clone());
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .expect("a runtime");
+    let status = tracing::subscriber::with_default(capture, || {
+        runtime.block_on(async {
+            let response = router.oneshot(request).await.expect("an answer");
+            response.status()
+        })
+    });
+    (status, logs.text())
+}
+
+#[test]
+fn a_caught_panic_leaves_its_request_line() {
+    let router = with_middleware(
+        Router::new().route(
+            "/boom",
+            get(|| async {
+                panic!("the handler gave up");
+                #[expect(unreachable_code, reason = "the route panics by design")]
+                StatusCode::OK
+            }),
+        ),
+        support::state(),
+        &support::settings(),
+    );
+    let request = Request::get("/boom")
+        .header(request_id::HEADER, "corr-panic-log")
+        .body(Body::empty())
+        .expect("a request");
+
+    let (status, text) = logged(router, request);
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status);
+    assert!(text.contains("\"route\":\"/boom\""), "{text}");
+    assert!(text.contains("\"status\":500"), "{text}");
+    assert!(text.contains("\"request_id\":\"corr-panic-log\""), "{text}");
+    assert_eq!(
+        1,
+        text.matches("\"message\":\"request\"").count(),
+        "one line: {text}"
+    );
+}
+
+#[test]
+fn a_timeout_leaves_its_request_line() {
+    let mut settings = support::settings();
+    settings.request_timeout = Duration::from_millis(20);
+    let router = with_middleware(
+        Router::new().route(
+            "/slow",
+            get(|| async {
+                tokio::time::sleep(Duration::from_secs(5)).await;
+                StatusCode::OK
+            }),
+        ),
+        support::state(),
+        &settings,
+    );
+    let request = Request::get("/slow")
+        .body(Body::empty())
+        .expect("a request");
+
+    let (status, text) = logged(router, request);
+    assert_eq!(StatusCode::REQUEST_TIMEOUT, status);
+    assert!(text.contains("\"route\":\"/slow\""), "{text}");
+    assert!(text.contains("\"status\":408"), "{text}");
+    assert_eq!(
+        1,
+        text.matches("\"message\":\"request\"").count(),
+        "one line: {text}"
+    );
+}
+
+#[test]
+fn a_refused_oversized_body_leaves_its_request_line() {
+    let settings = support::settings();
+    let oversized = "x".repeat(settings.body_limit + 1);
+    let request = Request::post("/health/liveness")
+        .header(header::CONTENT_LENGTH, oversized.len())
+        .body(Body::from(oversized))
+        .expect("a request");
+
+    let (status, text) = logged(app(), request);
+    assert_eq!(StatusCode::PAYLOAD_TOO_LARGE, status);
+    assert!(text.contains("\"route\":\"/health/liveness\""), "{text}");
+    assert!(text.contains("\"status\":413"), "{text}");
+    assert_eq!(
+        1,
+        text.matches("\"message\":\"request\"").count(),
+        "one line: {text}"
+    );
+}
