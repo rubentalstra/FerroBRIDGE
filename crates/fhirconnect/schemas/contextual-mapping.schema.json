@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ferrobridge.eu/schemas/fhirconnect/v1.0.0/contextual-mapping.schema.json",
+  "title": "FerroBRIDGE strict FHIRConnect context mapping schema",
+  "description": "A closed reading of the FHIRconnect v1.0.0 context mapping file, authored from the specification prose and the published contextual-mapping.schema.json. README.md beside this file records every difference from the published schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["grammar", "type", "metadata", "spec", "context"],
+  "properties": {
+    "grammar": {
+      "type": "string",
+      "pattern": "^FHIRConnect/v[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["context"]
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "version"],
+      "properties": {
+        "system": { "type": "string", "enum": ["FHIR"] },
+        "version": { "type": "string", "enum": ["R4"] }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "template", "archetypes", "start"],
+      "properties": {
+        "profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "url": { "type": "string", "minLength": 1 },
+            "version": { "type": "string", "minLength": 1 }
+          }
+        },
+        "template": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "sem_ver": { "type": "string", "minLength": 1 }
+          }
+        },
+        "archetypes": { "$ref": "#/definitions/nameList" },
+        "extensions": { "$ref": "#/definitions/nameList" },
+        "operational": { "$ref": "#/definitions/nameList" },
+        "start": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "definitions": {
+    "nameList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}
