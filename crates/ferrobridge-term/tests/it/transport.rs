@@ -221,3 +221,34 @@ async fn an_unreachable_server_is_a_transport_error() -> Result<(), Box<dyn StdE
     assert!(error.is_retryable(), "a refused connection is transient");
     Ok(())
 }
+
+#[tokio::test]
+async fn a_reachability_probe_reads_the_capability_statement_route() -> Result<(), Box<dyn StdError>>
+{
+    for answered in [200_u16, 401, 404, 503] {
+        let server = MockServer::start().await;
+        Mock::given(method("GET"))
+            .and(path(format!("/{}/metadata", release_path(WireVersion::R4))))
+            .respond_with(ResponseTemplate::new(answered))
+            .expect(1)
+            .mount(&server)
+            .await;
+
+        let status = client(&server, WireVersion::R4)?.reachability().await?;
+        assert_eq!(answered, status.as_u16(), "the probe reports what it saw");
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_reachability_probe_that_never_connects_is_a_transport_error()
+-> Result<(), Box<dyn StdError>> {
+    let config = Config::new("http://127.0.0.1:1/r4".parse()?, WireVersion::R4);
+
+    let outcome = Client::new(config)?.reachability().await;
+    assert!(
+        matches!(outcome, Err(Error::Transport { .. })),
+        "an unreachable server is a typed transport error"
+    );
+    Ok(())
+}
