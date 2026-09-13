@@ -54,9 +54,10 @@ v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 
 ## Repo map
 
-The Cargo workspace is a skeleton (#107): the root manifests with the full lint
-set, five placeholder library crates at 0.0.0 holding their crates.io names,
-and the testkit tool crate. Beside it:
+The Cargo workspace (#107) holds the root manifests with the full lint set,
+seven library crates (six at 0.0.0, the version that holds their crates.io
+names until a first publish, and `fhir-types` on its own published line), and
+the testkit tool crate. Beside it:
 
 - `app/ferrobridge-server`: the one binary, `ferrobridge` (#21). A thin
   `main.rs` over the library run path, the five subcommands, the TOML and

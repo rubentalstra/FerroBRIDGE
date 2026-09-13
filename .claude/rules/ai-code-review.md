@@ -10,10 +10,9 @@ way" quality gate). It exists as a second opinion beside the local gates and
 CodeQL, and it also reads the trees the Rust gates never see: shell, workflow
 YAML, and JSON.
 
-The repository is in its design phase, so today the lane runs the
-multi-language sweep only. Rust is analyzed first-party once a workspace exists
-(the analyzer runs Clippy itself over the workspace), and the coverage import
-joins the lane in the same change (`ci-cd.md`).
+The lane runs the multi-language sweep and the Rust analysis (the analyzer
+runs Clippy itself over the workspace), and imports the lcov report the
+coverage step writes one workspace member at a time (`ci-cd.md`).
 
 It is a **second opinion**. It is not authority, and it gates no merge.
 

@@ -161,13 +161,13 @@ target the MII Kerndatensatz modules at 2025.0.0).
 
 ## Crate line
 
-The library crates are published to crates.io on one lockstep crate version
-line, distinct from the product version (owner decision 2026-09-05). The line
-inherits `fhir-types`, whose latest release from the sibling was the floor:
-the sibling published 0.1.97 on 2026-09-12, so the line from here starts at
-0.1.98 and moves one patch with every change to the crate's packaged content
-(`.claude/rules/crates-publishing.md`). Every other library crate holds its
-name with a 0.0.0 placeholder (#107), a version outside the line.
+The library crates are published to crates.io on one crate version line,
+distinct from the product version (owner decision 2026-09-05). The line is
+`fhir-types`' own: the sibling published 0.1.97 on 2026-09-12, the first
+release from here was 0.1.98, and the line moves one patch with every change
+to the crate's packaged content (`.claude/rules/crates-publishing.md`). Every
+other library crate holds its name with a 0.0.0 placeholder (#107), outside
+the line until its first publish, when it joins at the line's current value.
 
 | Item | Pin | Repeated in |
 |---|---|---|
