@@ -663,6 +663,9 @@ pub enum Method {
     Slot {
         /// The model mapping the slot names.
         model: MappingName,
+        /// The preprocessor of that file and of every extension applied to it,
+        /// in application order, which gates the slotted mappings.
+        preprocessors: Vec<Preprocessor>,
         /// Its compiled mappings, under this mapping's anchors.
         mappings: Vec<Mapping>,
     },
@@ -881,9 +884,14 @@ impl Mapping {
             Method::Value => {}
             Method::Slot {
                 ref model,
+                ref preprocessors,
                 ref mappings,
             } => {
                 writeln!(f, "{inner}slotArchetype {model}")?;
+                let under = "  ".repeat(depth.saturating_add(2));
+                for preprocessor in preprocessors {
+                    render_preprocessor(f, &under, preprocessor)?;
+                }
                 for mapping in mappings {
                     mapping.render(f, depth.saturating_add(2))?;
                 }
@@ -918,6 +926,56 @@ impl Mapping {
         }
         Ok(())
     }
+}
+
+/// Writes one file's compiled preprocessor.
+fn render_preprocessor(
+    f: &mut fmt::Formatter<'_>,
+    pad: &str,
+    preprocessor: &Preprocessor,
+) -> fmt::Result {
+    if preprocessor.is_empty() {
+        return Ok(());
+    }
+    writeln!(f, "{pad}preprocessor {}", preprocessor.model())?;
+    let inner = format!("{pad}  ");
+    for (label, condition) in [
+        ("fhirCondition", preprocessor.fhir_condition()),
+        ("openehrCondition", preprocessor.openehr_condition()),
+    ] {
+        if let Some(condition) = condition {
+            render_condition(f, &inner, label, condition)?;
+        }
+    }
+    if let Some(hierarchy) = preprocessor.hierarchy() {
+        writeln!(f, "{inner}hierarchy")?;
+        if let Some(fhir) = hierarchy.fhir() {
+            writeln!(f, "{inner}  fhir {fhir}")?;
+        }
+        if let Some(openehr) = hierarchy.openehr() {
+            writeln!(f, "{inner}  openehr {openehr}")?;
+        }
+        for (label, split) in [
+            ("split fhir", hierarchy.split_fhir()),
+            ("split openehr", hierarchy.split_openehr()),
+        ] {
+            let Some(split) = split else {
+                continue;
+            };
+            writeln!(
+                f,
+                "{inner}  {label} create {}",
+                split.create().unwrap_or("-")
+            )?;
+            if let Some(path) = split.path() {
+                writeln!(f, "{inner}    path {path}")?;
+            }
+            for unique in split.unique() {
+                writeln!(f, "{inner}    unique {unique}")?;
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Writes one compiled condition.
@@ -1010,7 +1068,73 @@ impl Split {
     }
 }
 
-/// The compiled `preprocessor.hierarchy` of the start model mapping.
+/// The compiled `preprocessor` of one model or extension mapping file.
+///
+/// A preprocessor condition "defines that the mapping file is only executed if
+/// the given condition is met"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
+/// §Conditions in the preprocessor), so the gate belongs to the file that
+/// wrote it. One program carries one of these per contributing file, which is
+/// how a slotted model mapping and an extension keep their own gates.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Preprocessor {
+    model: MappingName,
+    fhir_condition: Option<Condition>,
+    openehr_condition: Option<Condition>,
+    hierarchy: Option<Hierarchy>,
+}
+
+impl Preprocessor {
+    /// Assembles the compiled preprocessor of one file.
+    #[must_use]
+    pub const fn new(
+        model: MappingName,
+        fhir_condition: Option<Condition>,
+        openehr_condition: Option<Condition>,
+        hierarchy: Option<Hierarchy>,
+    ) -> Self {
+        Self {
+            model,
+            fhir_condition,
+            openehr_condition,
+            hierarchy,
+        }
+    }
+
+    /// Returns the `metadata.name` of the file the preprocessor came from.
+    #[must_use]
+    pub const fn model(&self) -> &MappingName {
+        &self.model
+    }
+
+    /// Returns the gate the FHIR to openEHR direction evaluates.
+    #[must_use]
+    pub const fn fhir_condition(&self) -> Option<&Condition> {
+        self.fhir_condition.as_ref()
+    }
+
+    /// Returns the gate the openEHR to FHIR direction evaluates.
+    #[must_use]
+    pub const fn openehr_condition(&self) -> Option<&Condition> {
+        self.openehr_condition.as_ref()
+    }
+
+    /// Returns the hierarchy realignment the file writes.
+    #[must_use]
+    pub const fn hierarchy(&self) -> Option<&Hierarchy> {
+        self.hierarchy.as_ref()
+    }
+
+    /// Whether the file's preprocessor carries nothing the engine runs.
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.fhir_condition.is_none()
+            && self.openehr_condition.is_none()
+            && self.hierarchy.is_none()
+    }
+}
+
+/// The compiled `preprocessor.hierarchy` of one mapping file.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Hierarchy {
     fhir: Option<FhirTarget>,
@@ -1075,9 +1199,7 @@ pub struct Program {
     start: MappingName,
     models: Vec<ModelBinding>,
     operational: Vec<MappingName>,
-    hierarchy: Option<Hierarchy>,
-    fhir_condition: Option<Condition>,
-    openehr_condition: Option<Condition>,
+    preprocessors: Vec<Preprocessor>,
     mappings: Vec<Mapping>,
 }
 
@@ -1098,12 +1220,9 @@ pub struct ProgramParts {
     pub models: Vec<ModelBinding>,
     /// The operational mappings the context declares.
     pub operational: Vec<MappingName>,
-    /// The compiled `preprocessor.hierarchy`.
-    pub hierarchy: Option<Hierarchy>,
-    /// The preprocessor condition the FHIR to openEHR direction evaluates.
-    pub fhir_condition: Option<Condition>,
-    /// The preprocessor condition the openEHR to FHIR direction evaluates.
-    pub openehr_condition: Option<Condition>,
+    /// The compiled preprocessor of the start model mapping and of every
+    /// extension applied to it, in application order.
+    pub preprocessors: Vec<Preprocessor>,
     /// The compiled mappings, in execution order.
     pub mappings: Vec<Mapping>,
 }
@@ -1120,9 +1239,7 @@ impl Program {
             start: parts.start,
             models: parts.models,
             operational: parts.operational,
-            hierarchy: parts.hierarchy,
-            fhir_condition: parts.fhir_condition,
-            openehr_condition: parts.openehr_condition,
+            preprocessors: parts.preprocessors,
             mappings: parts.mappings,
         }
     }
@@ -1169,24 +1286,40 @@ impl Program {
         &self.operational
     }
 
+    /// Returns the preprocessor of every file that gates this program, in
+    /// application order: the start model mapping first, then its extensions.
+    #[must_use]
+    pub fn preprocessors(&self) -> &[Preprocessor] {
+        &self.preprocessors
+    }
+
+    /// Returns the preprocessor of the start model mapping.
+    #[must_use]
+    pub fn preprocessor(&self) -> Option<&Preprocessor> {
+        self.preprocessors
+            .iter()
+            .find(|preprocessor| preprocessor.model() == &self.start)
+    }
+
     /// Returns the compiled hierarchy mapping, when the start model has one.
     #[must_use]
-    pub const fn hierarchy(&self) -> Option<&Hierarchy> {
-        self.hierarchy.as_ref()
+    pub fn hierarchy(&self) -> Option<&Hierarchy> {
+        self.preprocessor().and_then(Preprocessor::hierarchy)
     }
 
-    /// Returns the preprocessor condition the FHIR to openEHR direction
-    /// evaluates.
+    /// Returns the preprocessor condition of the start model mapping the FHIR
+    /// to openEHR direction evaluates.
     #[must_use]
-    pub const fn fhir_condition(&self) -> Option<&Condition> {
-        self.fhir_condition.as_ref()
+    pub fn fhir_condition(&self) -> Option<&Condition> {
+        self.preprocessor().and_then(Preprocessor::fhir_condition)
     }
 
-    /// Returns the preprocessor condition the openEHR to FHIR direction
-    /// evaluates.
+    /// Returns the preprocessor condition of the start model mapping the
+    /// openEHR to FHIR direction evaluates.
     #[must_use]
-    pub const fn openehr_condition(&self) -> Option<&Condition> {
-        self.openehr_condition.as_ref()
+    pub fn openehr_condition(&self) -> Option<&Condition> {
+        self.preprocessor()
+            .and_then(Preprocessor::openehr_condition)
     }
 
     /// Returns the compiled mappings, in execution order.
@@ -1221,36 +1354,8 @@ impl fmt::Display for Program {
         for operational in &self.operational {
             writeln!(f, "  operational {operational}")?;
         }
-        if let Some(ref hierarchy) = self.hierarchy {
-            writeln!(f, "  hierarchy")?;
-            if let Some(fhir) = hierarchy.fhir() {
-                writeln!(f, "    fhir {fhir}")?;
-            }
-            if let Some(openehr) = hierarchy.openehr() {
-                writeln!(f, "    openehr {openehr}")?;
-            }
-            for (label, split) in [
-                ("split fhir", hierarchy.split_fhir()),
-                ("split openehr", hierarchy.split_openehr()),
-            ] {
-                if let Some(split) = split {
-                    writeln!(f, "    {label} create {}", split.create().unwrap_or("-"))?;
-                    if let Some(path) = split.path() {
-                        writeln!(f, "      path {path}")?;
-                    }
-                    for unique in split.unique() {
-                        writeln!(f, "      unique {unique}")?;
-                    }
-                }
-            }
-        }
-        for (label, condition) in [
-            ("fhirCondition", self.fhir_condition.as_ref()),
-            ("openehrCondition", self.openehr_condition.as_ref()),
-        ] {
-            if let Some(condition) = condition {
-                render_condition(f, "  ", label, condition)?;
-            }
+        for preprocessor in &self.preprocessors {
+            render_preprocessor(f, "  ", preprocessor)?;
         }
         for mapping in &self.mappings {
             mapping.render(f, 1)?;

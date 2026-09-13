@@ -22,6 +22,7 @@ use fhirconnect::model::parse::lower_context;
 use fhirconnect::model::parse::lower_model;
 use fhirconnect::model::semantic::StaticMappingCodes;
 use fhirconnect::resolve::compile::compile;
+use fhirconnect::resolve::program::Method;
 use fhirconnect::resolve::program::Pin;
 use fhirconnect::resolve::program::Program;
 use fhirconnect::resolve::program::TemplateId;
@@ -1135,6 +1136,84 @@ fn an_openehr_path_naming_no_node_of_the_template_is_refused() -> Result<(), Box
     assert_eq!(codes(&diagnostics), vec!["fc-unknown-template-node"]);
     let message = diagnostics.first().ok_or("one refusal")?.message();
     assert!(message.contains("at9999"), "{message}");
+    Ok(())
+}
+
+/// "This logic defines that the mapping file is only executed if the given
+/// condition is met"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
+/// §Conditions in the preprocessor), so a slotted file keeps its own gate.
+#[test]
+fn the_preprocessor_of_a_slotted_model_reaches_the_slot() -> Result<(), Box<dyn Error>> {
+    let start = "mappings:\n  - name: \"qualifier\"\n    with:\n      fhir: \"$fhirRoot\"\n      openehr: \"$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.problem_qualifier.v2]\"\n    slotArchetype: \"CLUSTER.synthetic.v2\"\n";
+    let slotted = "preprocessor:\n  openehrCondition:\n    targetRoot: \"$archetype\"\n    targetAttribute: \"items[at0063]\"\n    operator: \"not empty\"\nmappings:\n  - name: \"code\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/items[at0063]\"\n";
+    let files = [
+        ("model.yml", start_model(start)),
+        (
+            "slotted.yml",
+            model(
+                "CLUSTER.synthetic.v2",
+                "openEHR-EHR-CLUSTER.problem_qualifier.v2",
+                slotted,
+            ),
+        ),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let method = program
+        .mappings()
+        .first()
+        .ok_or("the slot mapping")?
+        .method();
+    let Method::Slot {
+        ref preprocessors, ..
+    } = *method
+    else {
+        return Err(format!("the mapping compiled to {method:?}").into());
+    };
+    let gate = preprocessors.first().ok_or("the slotted file's gate")?;
+    assert_eq!(gate.model().as_str(), "CLUSTER.synthetic.v2");
+    assert!(gate.openehr_condition().is_some());
+    assert!(!gate.is_empty());
+    Ok(())
+}
+
+/// An extension file is a file, so its own preprocessor gates the program
+/// beside the start model mapping's.
+#[test]
+fn the_preprocessor_of_an_extension_reaches_the_program() -> Result<(), Box<dyn Error>> {
+    let body = "preprocessor:\n  fhirCondition:\n    targetRoot: \"$resource.verificationStatus\"\n    targetAttribute: \"coding\"\n    operator: \"not empty\"\nmappings:\n  - name: \"note\"\n    extension: \"add\"\n    with:\n      fhir: \"$resource.note.text\"\n      openehr: \"$archetype/data[at0001]/items[at0069]\"\n";
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "extension.yml",
+            extension("synthetic_extension", "EVALUATION.synthetic.v1", body),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let names: Vec<&str> = program
+        .preprocessors()
+        .iter()
+        .map(|preprocessor| preprocessor.model().as_str())
+        .collect();
+    assert_eq!(names, vec!["synthetic_extension"]);
+    assert!(program.preprocessor().is_none(), "the start model has none");
+    let gate = program.preprocessors().first().ok_or("the gate")?;
+    assert!(gate.fhir_condition().is_some());
     Ok(())
 }
 

@@ -11,8 +11,9 @@ program ferrobridge_diagnose.context
     extension ferrobridge_problem_diagnose
   model CLUSTER.problem_qualifier.v2 version 0.0.1-alpha archetype openEHR-EHR-CLUSTER.problem_qualifier.v2 revision 2.0.1
     extension KDS_problem_qualifier
-  fhirCondition not of [entered-in-error] on fhir $resource -> Condition complex writable
-    attribute fhir $resource.verificationStatus.coding.code -> Coding.code primitive writable
+  preprocessor EVALUATION.problem_diagnosis.v1
+    fhirCondition not of [entered-in-error] on fhir $resource -> Condition complex writable
+      attribute fhir $resource.verificationStatus.coding.code -> Coding.code primitive writable
   mapping contextStartTime from EVALUATION.problem_diagnosis.v1
     fhir $resource.recordedDate -> Condition.recordedDate primitive writable
     openehr /context/start_time -> /context/start_time DV_DATE_TIME

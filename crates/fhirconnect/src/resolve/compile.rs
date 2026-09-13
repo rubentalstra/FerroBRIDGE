@@ -65,6 +65,7 @@ use crate::resolve::program::Method;
 use crate::resolve::program::ModelBinding;
 use crate::resolve::program::OpenehrTarget;
 use crate::resolve::program::Pin;
+use crate::resolve::program::Preprocessor;
 use crate::resolve::program::ProfileBinding;
 use crate::resolve::program::ProfileUrl;
 use crate::resolve::program::Program;
@@ -211,7 +212,7 @@ impl<'a> Compiler<'a> {
         };
         let merged = self.merge(start);
         let mappings = self.mappings(&merged.mappings, &scope);
-        let (fhir_condition, openehr_condition, hierarchy) = self.preprocessor(start, &scope);
+        let preprocessors = self.preprocessors(start, &scope);
         Some(Program::new(ProgramParts {
             context: context.clone(),
             profile,
@@ -224,9 +225,7 @@ impl<'a> Compiler<'a> {
                 .iter()
                 .map(|name| name.value().clone())
                 .collect(),
-            hierarchy,
-            fhir_condition,
-            openehr_condition,
+            preprocessors,
             mappings,
         }))
     }
@@ -356,11 +355,10 @@ impl<'a> Compiler<'a> {
         found
     }
 
-    /// Applies the extensions that extend `model`, in declaration order.
-    fn merge(&mut self, model: &'a ModelMappingFile) -> Merged<'a> {
+    /// Returns the extensions that extend `model`, in declaration order.
+    fn extensions_for(&self, model: &'a ModelMappingFile) -> Vec<&'a ModelMappingFile> {
         let name = model.header().name().value();
-        let mine: Vec<&'a ModelMappingFile> = self
-            .extensions
+        self.extensions
             .iter()
             .copied()
             .filter(|extension| {
@@ -370,7 +368,13 @@ impl<'a> Compiler<'a> {
                     .as_ref()
                     .is_some_and(|extends| extends.value() == name)
             })
-            .collect();
+            .collect()
+    }
+
+    /// Applies the extensions that extend `model`, in declaration order.
+    fn merge(&mut self, model: &'a ModelMappingFile) -> Merged<'a> {
+        let name = model.header().name().value();
+        let mine = self.extensions_for(model);
         let merged = apply(model, &mine, &mut self.diagnostics);
         if !self.models.iter().any(|model| model.name() == name) {
             self.models.push(ModelBinding::new(
@@ -527,19 +531,25 @@ impl<'a> Compiler<'a> {
         ));
     }
 
-    /// Compiles the preprocessor of the start model mapping.
-    fn preprocessor(
-        &mut self,
-        model: &'a ModelMappingFile,
-        scope: &Scope,
-    ) -> (
-        Option<CompiledCondition>,
-        Option<CompiledCondition>,
-        Option<Hierarchy>,
-    ) {
-        let Some(preprocessor) = model.preprocessor() else {
-            return (None, None, None);
-        };
+    /// Compiles the preprocessor of `model` and of every extension of it.
+    ///
+    /// A preprocessor gates the file that wrote it
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
+    /// §Conditions in the preprocessor), and an extension file is a file, so
+    /// each contributes its own gate under the same anchors.
+    fn preprocessors(&mut self, model: &'a ModelMappingFile, scope: &Scope) -> Vec<Preprocessor> {
+        let mut found = Vec::new();
+        for file in core::iter::once(model).chain(self.extensions_for(model)) {
+            if let Some(compiled) = self.preprocessor(file, scope) {
+                found.push(compiled);
+            }
+        }
+        found
+    }
+
+    /// Compiles the preprocessor of one model or extension mapping file.
+    fn preprocessor(&mut self, model: &'a ModelMappingFile, scope: &Scope) -> Option<Preprocessor> {
+        let preprocessor = model.preprocessor()?;
         let path = ModelPath::root().field("preprocessor");
         let fhir = preprocessor.fhir_condition.as_ref().and_then(|condition| {
             self.condition(
@@ -602,7 +612,12 @@ impl<'a> Compiler<'a> {
                     }),
             )
         });
-        (fhir, openehr, hierarchy)
+        Some(Preprocessor::new(
+            model.header().name().value().clone(),
+            fhir,
+            openehr,
+            hierarchy,
+        ))
     }
 
     /// Compiles one side of a `hierarchy.split`.
@@ -906,6 +921,7 @@ impl<'a> Compiler<'a> {
         let merged = self.merge(slotted);
         Method::Slot {
             model: slot.value().clone(),
+            preprocessors: self.preprocessors(slotted, &inner),
             mappings: self.mappings(&merged.mappings, &inner),
         }
     }
