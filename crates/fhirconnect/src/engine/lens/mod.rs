@@ -36,6 +36,13 @@
 //! specification governs it.
 
 pub mod code_phrase;
+pub mod coded_text;
+pub mod date_time;
+pub mod interval;
+pub mod party;
+pub mod proportion;
+pub mod term_mapping;
+pub mod text;
 
 use core::fmt;
 

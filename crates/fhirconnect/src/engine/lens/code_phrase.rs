@@ -155,7 +155,7 @@ pub fn terminology_id(system: &str, version: &str) -> TerminologyId {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::CELL;
     use super::CodePhraseLens;
     use super::terminology_id;
