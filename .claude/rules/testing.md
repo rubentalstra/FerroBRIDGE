@@ -70,6 +70,17 @@ that runs them.
   test. Never paste a real clinical document, a real patient identifier, or an
   extract from a production system into the repository.
 
+## Fuzz findings
+
+The `fuzz/` crate feeds arbitrary bytes to the parsers a caller reaches first
+(`docs/ci-cd.md` §The fuzz lane). A finding is a panic, an abort or a hang in
+library code: that is a violation of `reliability.md` (no panicking path on
+caller-controlled input) and becomes a `bug` issue with the reproducing input
+committed as a regression seed under `fuzz/seeds/<target>/` and a unit test
+asserting the typed `Err`. A parser returning `Err` on garbage is the correct
+answer and is never a finding; never "fix" one by making the parser accept
+more.
+
 ## Where tests live
 
 Unit tests live beside the code they test (`#[cfg(test)] mod tests` in the same

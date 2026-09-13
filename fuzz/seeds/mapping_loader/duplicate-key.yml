@@ -1,0 +1,11 @@
+grammar: OMOCL/v1.0.0
+type: model
+metadata:
+  name: duplicated.v0
+  version: 1.0.0
+spec:
+  system: OMOP
+  version: 5.4
+  openEhrConfig:
+    archetype: openEHR-EHR-CLUSTER.device.v1
+  version: 5.4

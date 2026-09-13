@@ -22,6 +22,14 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ## [Unreleased]
 
+### Added
+
+- A `fuzz/` crate with `cargo fuzz` targets over the YAML mapping loader and
+  the openEHR mapping-path parser, seeded from the synthetic fixtures and a
+  sample of the vendored mapping library, run weekly and on dispatch by
+  `.github/workflows/fuzz.yml` on a nightly toolchain (#155). The lane is
+  time-boxed and never a pull-request gate; a panic or a hang is the finding.
+
 ## [0.0.2] - 2026-09-13
 
 The foundation release. `v0.0.2-rc.1`, cut the same day, rehearsed the new

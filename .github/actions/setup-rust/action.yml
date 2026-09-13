@@ -30,6 +30,14 @@ inputs:
       default key.
     required: false
     default: ""
+  toolchain:
+    description: >-
+      A toolchain channel that overrides rust-toolchain.toml; empty by default,
+      which reads the pinned file. Only the fuzz lane sets it ("nightly"):
+      cargo-fuzz needs sanitizer flags stable does not carry, and nothing built
+      there ships.
+    required: false
+    default: ""
   cache-save-if:
     description: >-
       An expression deciding whether the cache is saved after the job; "true"
@@ -43,6 +51,7 @@ runs:
       with:
         components: ${{ inputs.components }}
         target: ${{ inputs.target }}
+        toolchain: ${{ inputs.toolchain }}
         cache: ${{ inputs.cache }}
         cache-shared-key: ${{ inputs.cache-shared-key }}
         cache-save-if: ${{ inputs.cache-save-if }}

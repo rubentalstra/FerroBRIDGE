@@ -274,6 +274,7 @@ release without a reviewed change (`docs/release.md`).
 |---|---|---|
 | `cargo-auditable` | 0.7.5 | `.github/workflows/release-build.yml` |
 | `cargo-cyclonedx` | 0.5.9 | `.github/workflows/release-build.yml` |
+| `cargo-fuzz` | 0.13.2 | `.github/workflows/fuzz.yml` (the fuzz lane, the one nightly-toolchain job; #155) |
 | `syft` | 1.51.1 | `.github/workflows/release-build.yml`, `.github/workflows/release-image.yml` |
 
 `scripts/checks/versions.sh` reads every `tool:` line of the two release
