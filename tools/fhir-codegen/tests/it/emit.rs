@@ -77,6 +77,13 @@ fn every_generated_file_carries_the_banner() {
             "{path} starts with the banner"
         );
         assert!(content.contains("DO NOT EDIT"), "{path} says DO NOT EDIT");
+        // The banner holds the first line and the SPDX tags follow it (#129).
+        assert!(
+            content.contains(
+                "\n// SPDX-FileCopyrightText: Ruben Talstra\n// SPDX-License-Identifier: Apache-2.0\n"
+            ),
+            "{path} carries the SPDX tags under the banner"
+        );
     }
     let lib = fs::read_to_string(dir.path().join("src/lib.rs")).expect("lib.rs");
     // Each version module is behind its own feature (#120).

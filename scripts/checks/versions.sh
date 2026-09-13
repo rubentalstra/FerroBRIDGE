@@ -406,12 +406,15 @@ if [ -f LICENSE ]; then
   fi
   # crates/fhir-types is excepted: it is the one first-party crate under
   # Apache-2.0 (docs/architecture.md section 4.1), generated from the CC0 HL7
-  # FHIR packages and published so any Rust project can depend on it.
+  # FHIR packages and published so any Rust project can depend on it. The SPDX
+  # tag is anchored to the start of its line, after an optional comment marker,
+  # so a header claim is caught while the same text quoted inside a string
+  # literal (the emitter that writes that crate's header) is not.
   while IFS= read -r hit; do
     [ -n "$hit" ] || continue
     bad "stale licence claim at $hit"
     stale=1
-  done < <(git grep -n -E 'SPDX-License-Identifier: (MIT|Apache-2\.0)|License-MIT|License-Apache|^license = "(MIT|Apache-2\.0)"|^license: (MIT|Apache-2\.0)|image\.licenses="?(MIT|Apache)' \
+  done < <(git grep -n -E '^[[:space:]]*([/#*]+|<!--)?[[:space:]]*SPDX-License-Identifier: (MIT|Apache-2\.0)|License-MIT|License-Apache|^license = "(MIT|Apache-2\.0)"|^license: (MIT|Apache-2\.0)|image\.licenses="?(MIT|Apache)' \
     -- ':!LICENSE' ':!CHANGELOG.md' ':!scripts/checks/versions.sh' ':(glob,exclude)**/vendor/**' \
     ':(glob,exclude)docs/specs/**' ':(glob,exclude)crates/fhir-types/**' || true)
   [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types excepted, Apache-2.0)"

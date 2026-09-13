@@ -20,6 +20,11 @@ version = 2
 # Permissive licences a BUSL-1.1 project can depend on (and that its Apache 2.0
 # Change License admits). Copyleft is not allowed by default; a weak-copyleft
 # dependency gets a crate-scoped exceptions entry with its reason.
+#
+# Every entry below is carried by a crate in the current graph, so cargo deny
+# reports no unencountered licence. A licence joins the list the day a
+# dependency needs it, with the reason it is acceptable here, and leaves when
+# the last crate carrying it does.
 allow = [
   "Apache-2.0",
   "Apache-2.0 WITH LLVM-exception",

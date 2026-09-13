@@ -42,7 +42,7 @@ proptest = "1.11.0"
 sha2 = "0.11.0"
 # Published from this workspace, so the requirement carries both a path and a
 # version: cargo resolves the path locally and the version on crates.io.
-fhir-types = { path = "crates/fhir-types", version = "0.1.101", default-features = false }
+fhir-types = { path = "crates/fhir-types", version = "0.1.102", default-features = false }
 # Path-only, with no version: cargo strips the dev-dependency from a packaged
 # crates/* manifest instead of looking it up on crates.io.
 ferrobridge-testkit = { path = "tools/ferrobridge-testkit" }
