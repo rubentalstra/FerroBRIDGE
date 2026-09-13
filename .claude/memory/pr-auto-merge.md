@@ -36,3 +36,11 @@ the remote branch deletion already succeeded; confirm with `gh pr view
 --json state,mergedAt` and never read that line as a failed merge. After the
 merge the orchestrator removes the worktree (`git worktree remove --force`),
 an owner instruction from 2026-09-12.
+**Local branches:** a merged pull request leaves its local branch behind,
+and a worker's `worktree-agent-*` branch stays after its worktree is
+removed. The owner on 2026-09-13: "you need to delete the local branch if
+it's done right now it's an very very big mess". After every merge run
+`git fetch --prune`, delete every local branch whose upstream is `[gone]`
+and every `worktree-agent-*` branch, and keep only `main` plus branches
+with an open pull request. Every branch with work on it is pushed the
+moment it has a commit; nothing lives only locally.
