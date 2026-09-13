@@ -14,6 +14,9 @@ use crate::health::{Check, HealthIndicator, IndicatorState};
 
 // TODO(#91): the CDM indicator, once the writer owns the database connection.
 
+// TODO(#85): carry the inbound request id onto the outbound call
+// (`Client::with_request_id`) once a handler makes one.
+
 /// The openEHR CDR probe.
 #[derive(Debug, Clone)]
 pub struct Cdr {
