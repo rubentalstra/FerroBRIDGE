@@ -335,6 +335,10 @@ fn a_path_the_table_does_not_know_resolves_to_nothing() {
     );
 }
 
+/// One emitted element, as the `Element` assertions compare it: the name, the
+/// kind, the cardinality bounds and the type codes.
+type Member<'a> = (&'a str, Kind, u32, Option<u32>, &'a [&'a str]);
+
 /// The FHIR type each package names behind `Element.id`'s `System.String`.
 ///
 /// The 4.3.0 package types it `id` where the other three type it `string`, so
@@ -354,7 +358,7 @@ fn every_version_carries_the_element_entry_a_primitive_s_sibling_resolves_agains
             .type_named("Element")
             .unwrap_or_else(|| panic!("{module} emits Element"));
         assert_eq!(element.path, "Element", "{module}: the definition's path");
-        let members: Vec<(&str, Kind, u32, Option<u32>, &[&str])> = element
+        let members: Vec<Member<'_>> = element
             .fields
             .iter()
             .map(|field| (field.name, field.kind, field.min, field.max, field.types))
