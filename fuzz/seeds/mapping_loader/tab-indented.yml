@@ -1,0 +1,5 @@
+grammar: OMOCL/v1.0.0
+type: model
+metadata:
+	name: tabbed.v0
+	version: 1.0.0

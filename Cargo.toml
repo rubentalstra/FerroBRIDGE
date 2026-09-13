@@ -4,6 +4,9 @@
 [workspace]
 resolver = "3"
 members = ["crates/*", "app/*", "tools/*"]
+# The fuzz crate needs a nightly toolchain for cargo-fuzz and stays outside the
+# workspace; .github/workflows/fuzz.yml builds it on its own (#155).
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "0.0.2"

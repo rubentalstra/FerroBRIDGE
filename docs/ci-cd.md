@@ -241,7 +241,7 @@ to apply; this table is the reasoning behind each.
 | `CodeReviewID` | accepted as is, the same root cause: a solo maintainer approves no changesets |
 | `MaintainedID` | clears with time. It scores 0 only because the repository is under 90 days old |
 | `CIIBestPracticesID` | registered on 2026-09-13 as bestpractices.dev project 14612; the check reads the registration and clears on the next run |
-| `FuzzingID` | tracked as its own v0.0.3 issue: `cargo fuzz` targets over the YAML mapping loader and the openEHR path parser |
+| `FuzzingID` | `cargo fuzz` targets over the YAML mapping loader and the openEHR mapping-path parser run weekly from `fuzz.yml` (#155); Scorecard detects OSS-Fuzz and ClusterFuzzLite registrations, so the check scores only once the project registers there, a second step worth taking when the targets prove useful |
 | `SASTID` | already satisfied. CodeQL runs on every pull request and every push to `main`; the score lagged because its Rust job was gated off until the workspace landed |
 | `SecurityPolicyID` | fixed in #47, which gave `SECURITY.md` the link the check looks for |
 
@@ -297,6 +297,22 @@ The composite `./.github/actions/setup-rust` is shared with `ci.yml` and takes
 a `target` and a `cache` input for this reason: a publishing lane passes
 `cache: "false"`, because a cache an untrusted run could poison must never feed
 a release.
+
+## The fuzz lane beside this one
+
+`.github/workflows/fuzz.yml` runs the two `cargo fuzz` targets of the `fuzz/`
+crate (the YAML mapping loader and the openEHR mapping-path parser of
+`openehr-mapping-core`) every Wednesday and on dispatch, five minutes per
+target by default. It is a time-boxed search rather than a pass-or-fail check,
+so it is never a pull-request gate and never a `conclusion` input. A panic, an
+abort or a hang is a defect: the run fails and uploads the reproducing input as
+an artifact for 90 days, and the finding becomes a `bug` issue with the input
+attached. An `Err` from the parser is the correct answer and is never a
+finding. The lane is the one job on a nightly toolchain, through the
+`toolchain` input of the `setup-rust` composite, because cargo-fuzz needs
+sanitizer flags stable does not carry; the `fuzz/` crate is excluded from the
+workspace so the product stays on the pinned stable toolchain. Its
+`cargo-fuzz` pin is a `docs/VERSIONS.md` row the versions guard checks.
 
 ## Triggers and concurrency
 

@@ -278,12 +278,12 @@ else
   note "no .github/workflows/ci.yml yet, skipped"
 fi
 
-echo "== release tool pins (.github/workflows/release-*.yml <-> docs/VERSIONS.md)"
+echo "== release and fuzz tool pins (.github/workflows/{release-*,fuzz}.yml <-> docs/VERSIONS.md)"
 # Every version of TOOL that the release workflows install, deduplicated, so a
 # tool named in both files has to carry the same pin in both.
 release_tool_pins() {
   local tool="$1" wf
-  for wf in .github/workflows/release-build.yml .github/workflows/release-image.yml; do
+  for wf in .github/workflows/release-build.yml .github/workflows/release-image.yml .github/workflows/fuzz.yml; do
     [ -f "$wf" ] || continue
     sed -nE "s|^[[:space:]]*tool:[[:space:]]*${tool}@([^[:space:]]+).*|\1|p" "$wf"
   done | sort -u
@@ -291,7 +291,7 @@ release_tool_pins() {
 
 if [ -f .github/workflows/release-build.yml ] || [ -f .github/workflows/release-image.yml ]; then
   agreed=0
-  for tool in cargo-auditable cargo-cyclonedx syft; do
+  for tool in cargo-auditable cargo-cyclonedx syft cargo-fuzz; do
     want="$(pin_of "$tool" docs/VERSIONS.md)"
     found="$(release_tool_pins "$tool")"
     if [ -z "$want" ]; then

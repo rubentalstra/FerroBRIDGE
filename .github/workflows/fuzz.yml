@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+# The fuzz targets, run weekly for a bounded time (#155).
+#
+# Two parsers read text a caller controls before anything else does: the YAML
+# mapping loader and the openEHR mapping-path parser. Each is fed arbitrary
+# bytes from its seed corpus. A panic, an abort or a hang is a defect and the
+# run uploads the input that reproduces it; an Err is the parser doing its job.
+#
+# This is a time-boxed run, never a pass-or-fail gate, so it is scheduled and
+# dispatched rather than run per pull request (docs/ci-cd.md). It is also the
+# one place a nightly toolchain appears: cargo-fuzz builds with sanitizer flags
+# that need it (https://rust-fuzz.github.io/book/cargo-fuzz.html). Nothing
+# built here ships.
+name: Fuzz
+
+on:
+  schedule:
+    - cron: "17 4 * * 3"
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: How long to run each target.
+        type: string
+        default: "300"
+
+permissions: {}
+
+concurrency:
+  group: fuzz
+  cancel-in-progress: false
+
+jobs:
+  fuzz:
+    name: fuzz (${{ matrix.target }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - mapping_loader
+          - mapping_path
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+        with:
+          toolchain: nightly
+          cache-shared-key: fuzz
+      - uses: taiki-e/install-action@84f5ac3124727fb3d284d4d22ee9ab3654fd09a6 # v2.87.7
+        with:
+          tool: cargo-fuzz@0.13.2
+      - name: Run the target over its seeds
+        env:
+          TARGET: ${{ matrix.target }}
+          SECONDS_PER_TARGET: ${{ inputs.seconds || '300' }}
+        run: |
+          set -euo pipefail
+          mkdir -p "fuzz/corpus/${TARGET}"
+          cp "fuzz/seeds/${TARGET}"/* "fuzz/corpus/${TARGET}/"
+          cargo fuzz run "${TARGET}" "fuzz/corpus/${TARGET}" \
+            -- -max_total_time="${SECONDS_PER_TARGET}" -rss_limit_mb=4096
+      - name: Upload what reproduces a crash
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fuzz-${{ matrix.target }}
+          path: fuzz/artifacts/${{ matrix.target }}/
+          retention-days: 90
+          if-no-files-found: ignore
