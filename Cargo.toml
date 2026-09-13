@@ -85,7 +85,7 @@ tokio = { version = "1.53.1", default-features = false }
 wiremock = "0.6.5"
 # The end-to-end lane's container harness and the PostgreSQL client the CDM
 # catalogue is read with (docs/VERSIONS.md).
-testcontainers = "0.27.3"
+testcontainers = "0.28.0"
 tokio-postgres = "0.7.18"
 
 # The reliability bar (.claude/rules/reliability.md). Groups sit at priority -1
