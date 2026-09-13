@@ -1048,9 +1048,11 @@ name = "fhirconnect"
 version = "0.0.0"
 dependencies = [
  "ferrobridge-testkit",
+ "fhir-types",
  "insta",
  "jsonschema",
  "openehr-mapping-core",
+ "proptest",
  "serde_json",
  "thiserror",
 ]

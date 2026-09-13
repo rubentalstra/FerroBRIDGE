@@ -23,11 +23,15 @@ include = ["src/**", "schemas/**", "README.md", "LICENSE"]
 jsonschema.workspace = true
 openehr-mapping-core.workspace = true
 serde_json.workspace = true
+# The generated FHIR model: the lexical `Value` tree the path model walks and
+# the element table that guides it (docs/architecture.md section 4.1).
+fhir-types = { workspace = true, features = ["r4", "resources"] }
 thiserror.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
 insta.workspace = true
+proptest.workspace = true
 
 [lints]
 workspace = true

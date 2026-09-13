@@ -59,6 +59,22 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   about its own keyword values, so `openEHR->fhir` and `$openEHRRoot` are
   admitted beside `openehr->fhir` and `$openehrRoot`. YAML keys stay exact,
   because the published schemas fix them with a JSON Schema `enum`.
+- `fhirconnect::tree`, the bidirectional path model behind `with.fhir` (#81).
+  It parses the expression FHIRconnect writes, including the two head forms the
+  specification adds (`$resource` and `$fhirRoot`) and the `^` parent operator,
+  resolves it against the R4 element table `fhir-types` emits, and reads and
+  writes it over that crate's lexical `Value` tree. Navigation is by element
+  name; a choice element resolves through `ofType()`, `as()` or the suffixed
+  element name; a repeating element is an array addressed by a structured
+  occurrence index; `extension(url)` selects or creates the entry carrying that
+  url; and a primitive's `extension` lives in the sibling member named with a
+  leading underscore, the FHIR JSON representation. `resolve()` returns a
+  deferred outcome carrying the reference and the steps still to apply, and
+  fetches nothing. Every expression is classified when it is parsed, so a
+  mapping whose write side names a filtering expression (`where()`, `first()`,
+  `last()`, an index) is refused with the offending step named, and every other
+  refusal names the element path the table holds. A write applies to a copy and
+  replaces the document only when every step succeeded.
 
 ## [0.0.2] - 2026-09-13
 

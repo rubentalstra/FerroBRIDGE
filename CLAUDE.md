@@ -75,6 +75,11 @@ the testkit tool crate. Beside it:
   loader with anchors and source positions, the registry by mapping name and
   archetype id, the diagnostic model, and the openEHR path model with the
   `../` step resolved against an anchor.
+- `crates/fhirconnect`: the FHIRconnect language. `tree` is the bidirectional
+  path model behind `with.fhir` (#81): the expression parser with the
+  `$resource`, `$fhirRoot` and `^` heads, the resolver over the `fhir-types`
+  element table, and read and write over that crate's lexical `Value` tree,
+  with every expression classified writable or read-only when it is parsed.
 - `crates/ferrobridge-openehr`: the hand-written ITS-REST 1.1.0 client (#76),
   one outcome enum per call with a variant per documented status, `wiremock`
   contract tests beside it.
