@@ -24,6 +24,35 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- `fhirconnect::resolve`, context resolution into one immutable program per
+  context mapping (#83). `compile` selects the start model mapping, applies the
+  extensions the context declares in declaration order and file order, and
+  resolves every path on both sides once: the FHIR side is bound to its anchor
+  and resolved against the element table with its writability, and the openEHR
+  side to a node of the Web Template with the repeating nodes on the way to it
+  as its occurrence axes. The rules the specification leaves open are the
+  bridge's own and each is refused rather than guessed: an `add` whose name
+  collides, an `append` that carries mapping logic or names no target, an
+  `overwrite` of a missing method, two extensions overwriting one name, an
+  extension method on a nested mapping, a `slotArchetype` cycle, a template
+  identifier or `sem_ver` the context and the template disagree on, an
+  archetype revision the template's identifier contradicts, and a write side
+  that names a filtering expression. A program carries the profile and template
+  it was compiled against, each optional version recorded as pinned or
+  unpinned, and `select` picks one by `meta.profile` membership on the FHIR
+  side or by template identifier on the openEHR side, refusing an ambiguous
+  selection by naming the candidates.
+- The diagnosis chain of the vendored FHIRconnect mapping library compiles into
+  one program, snapshot-tested, from the published model and extension files
+  plus a FerroBRIDGE-authored context and extension, against a synthetic
+  operational template in the testkit.
+- `openehr_mapping_core::index::node_id_matches` and
+  `archetype_release_version`, the two archetype-identifier comparisons a
+  mapping language needs outside a path: an identifier is matched in its
+  interface form, and only an ADL 2 identifier states the release version below
+  its major. `ResolvedNode::rm_path` hands back the `aqlPath` the index already
+  parsed, so a consumer never re-parses it and the empty path of the root node
+  reads as the composition root.
 - A `fuzz/` crate with `cargo fuzz` targets over the YAML mapping loader and
   the openEHR mapping-path parser, seeded from the synthetic fixtures and a
   sample of the vendored mapping library, run weekly and on dispatch by

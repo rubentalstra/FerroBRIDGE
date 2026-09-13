@@ -17,6 +17,16 @@ pub const MINIMAL_EVALUATION_OPT: &str = include_str!("../fixtures/opt/minimal_e
 /// The template identifier [`MINIMAL_EVALUATION_OPT`] declares.
 pub const MINIMAL_EVALUATION_TEMPLATE_ID: &str = "ferrobridge.minimal_evaluation.v1";
 
+/// A synthetic operational template shaped like a diagnosis mapping chain.
+///
+/// One `COMPOSITION` holds one `EVALUATION` with the at-codes and the two
+/// slotted `CLUSTER`s the diagnosis mappings of the FHIRconnect mapping
+/// library write. The template identifier is `ferrobridge.diagnose.v1`.
+pub const DIAGNOSE_OPT: &str = include_str!("../fixtures/opt/diagnose.opt");
+
+/// The template identifier [`DIAGNOSE_OPT`] declares.
+pub const DIAGNOSE_TEMPLATE_ID: &str = "ferrobridge.diagnose.v1";
+
 /// A synthetic canonical COMPOSITION built against
 /// [`MINIMAL_EVALUATION_OPT`].
 pub const MINIMAL_EVALUATION_COMPOSITION: &str =

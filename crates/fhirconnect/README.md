@@ -36,6 +36,32 @@ module parses the expression itself, resolves it against the element table
 - **A write is all or nothing.** It applies to a copy and replaces the document
   only when every step succeeded.
 
+## The resolve module
+
+`fhirconnect::resolve` compiles one context mapping into one immutable program,
+once, at load. It picks the start model mapping, applies the extensions the
+context declares, checks the four version selectors, and pre-resolves every
+path on both sides: the FHIR side against the element table with its
+writability, the openEHR side to a node of the Web Template with the repeating
+nodes above it as structured occurrence axes. The interpreter runs that program
+per request and parses no path.
+
+- **The program never changes after it is built.** Its fields are private, no
+  method takes `&mut self`, and it travels behind an `Arc`.
+- **The rules the specification leaves open are refusals, not guesses.**
+  Extensions apply in declaration order and, within one file, in file order; an
+  `add` whose name collides, an `append` carrying mapping logic, an `overwrite`
+  of a missing method and two extensions overwriting one name each refuse with
+  both mappings named.
+- **A version disagreement is a refusal and a missing selector is recorded.**
+  `metadata.version`, `openEhrConfig.revision`, `profile.version` and
+  `template.sem_ver` are each checked against what the files and the template
+  carry, and an optional selector nothing pins reads as unpinned.
+- **A program is selected by identity.** The FHIR side matches the profile set
+  an instance claims in `meta.profile`, the openEHR side the template a
+  composition names, and an ambiguous selection with nothing pinning it refuses
+  by naming the candidates.
+
 ## Licence
 
 Business Source License 1.1 (`LICENSE`): free for every non-production use and

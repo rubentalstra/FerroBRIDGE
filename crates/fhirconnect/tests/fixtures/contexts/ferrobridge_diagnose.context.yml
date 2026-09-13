@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored context over the diagnosis chain of the vendored
+# FHIRconnect mapping library: it starts at the published
+# EVALUATION.problem_diagnosis.v1, loads the published CLUSTER model mappings
+# it slots, applies the published KDS_problem_qualifier extension and the
+# extension beside this file, and maps them onto the synthetic
+# ferrobridge.diagnose.v1 template of the testkit. The profile URL is
+# example.org, which RFC 6761 section 6.5 reserves for examples.
+grammar: FHIRConnect/v1.0.0
+type: context
+metadata:
+  name: ferrobridge_diagnose.context
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+context:
+  profile:
+    url: "http://example.org/fhir/StructureDefinition/ferrobridge-diagnosis"
+    version: "1.0.0"
+  template:
+    id: "ferrobridge.diagnose.v1"
+  archetypes:
+    - "EVALUATION.problem_diagnosis.v1"
+    - "CLUSTER.problem_qualifier.v2"
+  extensions:
+    - "ferrobridge_problem_diagnose"
+    - "KDS_problem_qualifier"
+  start: "EVALUATION.problem_diagnosis.v1"

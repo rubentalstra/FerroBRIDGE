@@ -16,6 +16,8 @@ pub mod model;
 /// A mapping file writes it in its `grammar` header (<https://sevkohler.github.io/FHIRconnect-spec/build/site/FHIRconnect/v1.0.0/basics/main.html>).
 pub const GRAMMAR: &str = "FHIRConnect/v1.0.0";
 
+pub mod resolve;
+
 pub mod tree;
 
 // TODO(#1): the implementation this crate name is reserved for.
