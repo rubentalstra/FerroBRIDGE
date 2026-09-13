@@ -697,7 +697,10 @@ fn constraint_bindings_of(
 /// Parses one `aqlPath` of a Web Template node.
 ///
 /// The root of a template carries the empty path, which the openEHR path
-/// grammar does not spell, so it becomes the path with no segments.
+/// grammar does not spell, so it becomes the path with no segments. That is
+/// the one place an empty string is a path: `RmPath::from_str("")` refuses
+/// it, so a consumer reads a node's path through [`ResolvedNode::rm_path`]
+/// rather than parsing the `aqlPath` string itself.
 fn parse_aql_path(path: &str) -> Result<RmPath, PathError> {
     if path.is_empty() {
         return Ok(RmPath {

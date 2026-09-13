@@ -9,9 +9,26 @@ Part of [FerroBRIDGE](https://ferrobridge.eu), a pure-Rust bridge between
 openEHR and two interoperability targets: HL7 FHIR through the FHIRconnect
 specification, and the OMOP Common Data Model through the OMOCL specification.
 
-Version 0.0.0 reserves the crate name. The implementation lands with
-[FerroBRIDGE issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1),
-and the design is recorded in the repository's architecture document.
+Version 0.0.0 holds the crate name on crates.io until the first publish. The
+crate is built module by module under
+[FerroBRIDGE issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1);
+the design is recorded in the repository's architecture document.
+
+## The model module
+
+`fhirconnect::model` is the mapping file model and the three layers that
+validate it. `ast` carries one positioned Rust type per construct a model,
+extension or context file may hold; `parse` lowers the positioned YAML tree the
+shared loader in `openehr-mapping-core` produces, refusing an unknown key, a
+node of the wrong kind and a keyword value outside its documented set (keyword
+values compare case-insensitively, YAML keys are exact); `schema` validates the
+same document against the two schemas FHIRconnect publishes and against the
+stricter pair this crate ships under `schemas/`; `semantic` checks what a schema
+cannot express, such as a `targetRoot` that is not a child of its `with` path or
+a cross-file reference that names no loaded mapping; `load` runs all of it over
+one file or a whole set and returns every diagnostic rather than the first. The
+vendored mapping library is exercised by tests that pin the exact set the
+published schemas refuse, so an upstream schema fix fails a test here.
 
 ## The tree module
 
