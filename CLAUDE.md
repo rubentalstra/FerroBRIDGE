@@ -104,6 +104,12 @@ and the testkit tool crate. Beside it:
   in `docs/VERSIONS.md`: FHIRconnect with its schemas and the draft REST API
   chapter, the FHIRconnect mapping library, OMOCL, the OMOP CDM v5.4
   definitions and PostgreSQL DDL, and the ITS-REST OpenAPI documents.
+- `docker/Dockerfile`: the container recipe (#22), one stage on distroless
+  static pinned by index digest, copying the binary the release lane stages
+  under `dist/<os>_<arch>/`; it compiles nothing.
+- `compose.yaml`: the quickstart that runs the published image with the
+  hardening set, file secrets, and the `cdm`, `cdm-init` and `vocab-load`
+  profiles over the pinned PostgreSQL.
 - `.claude/`: the working discipline. `rules/` (the path-scoped and standing
   rules), `hooks/`, `skills/`, `agents/`, `memory/`.
 - `scripts/gh/`: the tracker helpers (`rel.sh`, `project.sh`, `labels.sh`).

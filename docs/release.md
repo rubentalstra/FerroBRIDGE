@@ -52,16 +52,29 @@ Concurrency is `cancel-in-progress: false`. A second tag push queues behind the
 first, because a release cancelled part-way through publishing is worse than a
 slow one.
 
+## The staging layout the image build expects
+
+`docker/Dockerfile` compiles nothing. It copies one already-built binary out of
+the build context, at `dist/${TARGETOS}_${TARGETARCH}/ferrobridge`, so
+`build-binaries` stages the static musl binary it produced and attested at
+`dist/linux_amd64/ferrobridge` and `dist/linux_arm64/ferrobridge` before the
+image lane runs `docker buildx build -f docker/Dockerfile --platform
+linux/amd64,linux/arm64 .`. `.dockerignore` denies everything but `dist/`, so
+nothing else reaches the builder, and `.gitignore` keeps the staged tree out of
+git. The same two commands reproduce the build on a laptop from a locally
+cross-compiled binary. The image lane itself lands with #23.
+
 ## Before the tag
 
 1. **The milestone is empty.** `gh issue list --milestone vX.Y.Z --state open`
    answers nothing, or the owner calls the cut and moves the stragglers to the
    next milestone.
 2. **The version moves in every file the pin matrix names.** Today that is
-   `CITATION.cff` and the product-version row of `docs/VERSIONS.md`; the root
-   `Cargo.toml` `[workspace.package]` `version` joins them when the workspace
-   lands. `scripts/checks/versions.sh` fails on any file left behind, and the
-   `plan` job checks the same files against the tag.
+   `CITATION.cff`, the product-version row of `docs/VERSIONS.md`, the root
+   `Cargo.toml` `[workspace.package]` `version`, and the
+   `ghcr.io/rubentalstra/ferrobridge` image tag default in `compose.yaml`.
+   `scripts/checks/versions.sh` fails on any file left behind, and the `plan`
+   job checks the same files against the tag.
 3. **The changelog names the release.** `[Unreleased]` becomes the version and
    the date, with a fresh empty `[Unreleased]` above it and a new link
    reference. What sits under the version heading is what the release notes
