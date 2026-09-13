@@ -13,7 +13,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::closure::{STRUCTURAL_TYPES, TypeClosure};
+use crate::closure::{ELEMENT_TYPE, STRUCTURAL_TYPES, TypeClosure};
 use crate::fhir::StructureKind;
 use crate::naming::{backbone_name, field_name, module_name, type_name};
 use crate::roots::RootScope;
@@ -225,6 +225,9 @@ pub struct TypeDef {
     pub is_primitive: bool,
     /// Whether the type is a root-set resource.
     pub is_resource: bool,
+    /// Whether the type is emitted into the element table alone, with no Rust
+    /// type of its own ([`crate::closure::ELEMENT_TYPE`]).
+    pub table_only: bool,
     /// The Rust name of the type this one specializes (`baseDefinition`), for
     /// a primitive: `Code` and `Id` specialize `String`, `Canonical` and `Url`
     /// specialize `Uri` (<https://hl7.org/fhir/R5/datatypes.html#primitive>).
@@ -247,6 +250,8 @@ struct Placement<'a> {
     is_primitive: bool,
     /// Whether the structure is a root-set resource.
     is_resource: bool,
+    /// Whether the structure is emitted into the element table alone.
+    table_only: bool,
 }
 
 impl<'a> Placement<'a> {
@@ -258,6 +263,7 @@ impl<'a> Placement<'a> {
             scope: self.scope,
             is_primitive: false,
             is_resource: false,
+            table_only: self.table_only,
         }
     }
 }
@@ -309,7 +315,12 @@ impl VersionModule {
                 String::from("(the primitives)"),
             ),
             (RESOURCE_MODULE.to_owned(), RESOURCE_ENUM.to_owned()),
+            (
+                module_name(ELEMENT_TYPE),
+                String::from("(the element table)"),
+            ),
         ]);
+        lower_element_table_entry(&mut model, closure.element())?;
         for structure in closure.structures().values() {
             let is_primitive = structure.kind == StructureKind::PrimitiveType;
             let name = type_name(&structure.name);
@@ -337,6 +348,7 @@ impl VersionModule {
                     .unwrap_or(RootScope::Resources),
                 is_primitive,
                 is_resource: closure.roots().contains(&structure.name),
+                table_only: false,
             };
             lower_struct(&mut model, structure, &root_path, placement)?;
         }
@@ -354,6 +366,7 @@ impl VersionModule {
             kind: TypeKind::ResourceEnum { resources },
             is_primitive: false,
             is_resource: false,
+            table_only: false,
             base: None,
             scope: RootScope::Terminology,
         }, "the Resource enum")?;
@@ -370,6 +383,7 @@ impl VersionModule {
             kind: TypeKind::UnknownResource,
             is_primitive: false,
             is_resource: false,
+            table_only: false,
             scope: RootScope::Terminology,
             base: None,
         }, "the UnknownResource struct")?;
@@ -407,10 +421,12 @@ impl VersionModule {
     }
 
     /// The modules of the model, in name order, each with its types in name order.
+    ///
+    /// A table-only type has no Rust type, so it appears in no module.
     #[must_use]
     pub fn modules(&self) -> BTreeMap<&str, Vec<&TypeDef>> {
         let mut modules: BTreeMap<&str, Vec<&TypeDef>> = BTreeMap::new();
-        for ty in self.types.values() {
+        for ty in self.types.values().filter(|ty| !ty.table_only) {
             modules.entry(ty.module.as_str()).or_default().push(ty);
         }
         modules
@@ -541,6 +557,31 @@ fn contained_types(kind: &TypeKind, out: &mut BTreeSet<String>) {
     }
 }
 
+/// Lowers the base `Element` structure as a table-only entry.
+///
+/// The entry exists so a table-driven consumer resolves the `id` and
+/// `extension` of a primitive's `_name` sibling
+/// (<https://hl7.org/fhir/R4/json.html>) against the definition's own elements
+/// (<https://hl7.org/fhir/R4/element.html>). It carries the terminology scope
+/// because every enabled feature set needs it, and no Rust type is emitted for
+/// it: an element typed `Element` lowers to its own nested struct instead.
+fn lower_element_table_entry(
+    model: &mut VersionModule,
+    structure: &ResolvedStructure,
+) -> Result<(), LowerError> {
+    let name = type_name(&structure.name);
+    let module = module_name(&name);
+    let placement = Placement {
+        name: &name,
+        module: &module,
+        scope: RootScope::Terminology,
+        is_primitive: false,
+        is_resource: false,
+        table_only: true,
+    };
+    lower_struct(model, structure, &structure.name, placement)
+}
+
 fn lower_struct(
     model: &mut VersionModule,
     structure: &ResolvedStructure,
@@ -553,6 +594,7 @@ fn lower_struct(
         scope,
         is_primitive,
         is_resource,
+        table_only,
     } = placement;
     let root_docs = structure.element(path).map(docs_of).unwrap_or_default();
     let mut fields = Vec::new();
@@ -591,6 +633,7 @@ fn lower_struct(
                         is_primitive: false,
                         base: None,
                         is_resource: false,
+                        table_only: placement.table_only,
                         scope,
                     },
                     &element.path,
@@ -626,6 +669,7 @@ fn lower_struct(
             kind: TypeKind::Struct { fields },
             is_primitive,
             is_resource,
+            table_only,
             base: is_primitive
                 .then_some(structure.base_definition.as_deref())
                 .flatten()

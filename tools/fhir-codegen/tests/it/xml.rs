@@ -10,7 +10,8 @@ use std::path::PathBuf;
 
 use fhir_types::codec::Value;
 use fhir_types::codec::{DecodeErrorKind, Json, expect_object};
-use fhir_types::xml::{Schemas, from_xml, to_xml};
+use fhir_types::schema::Schemas;
+use fhir_types::xml::{from_xml, to_xml};
 use proptest::prelude::*;
 
 use crate::vendor_dir;

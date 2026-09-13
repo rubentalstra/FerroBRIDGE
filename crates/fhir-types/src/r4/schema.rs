@@ -6,9 +6,9 @@
 //! type codes, content reference and XML kind, in definition order
 //! (<https://hl7.org/fhir/R4/elementdefinition.html>).
 
-use super::super::xml::Schemas;
+use super::super::schema::Schemas;
 #[cfg(feature = "terminology")]
-use super::super::xml::{FieldSchema, Kind, TypeSchema, ValueKind};
+use super::super::schema::{FieldSchema, Kind, TypeSchema, ValueKind};
 
 /// The version's schema.
 pub static SCHEMAS: Schemas = Schemas {
@@ -24945,6 +24945,33 @@ pub static SCHEMAS: Schemas = Schemas {
                     max: Some(1),
                     many: false,
                     types: &["integer"],
+                    content_reference: None,
+                },
+            ],
+        },
+        #[cfg(feature = "terminology")]
+        TypeSchema {
+            name: "Element",
+            path: "Element",
+            fields: &[
+                FieldSchema {
+                    name: "id",
+                    path: "Element.id",
+                    kind: Kind::Attribute,
+                    min: 0,
+                    max: Some(1),
+                    many: false,
+                    types: &["string"],
+                    content_reference: None,
+                },
+                FieldSchema {
+                    name: "extension",
+                    path: "Element.extension",
+                    kind: Kind::Complex("Extension"),
+                    min: 0,
+                    max: None,
+                    many: true,
+                    types: &["Extension"],
                     content_reference: None,
                 },
             ],

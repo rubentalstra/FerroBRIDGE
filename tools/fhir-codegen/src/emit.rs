@@ -168,6 +168,10 @@ fn render_files(models: &[VersionModule]) -> Result<BTreeMap<String, String>, Em
         format!("{crate_banner}{}", include_str!("templates/codec.rs")),
     );
     files.insert(
+        String::from("schema.rs"),
+        format!("{crate_banner}{}", include_str!("templates/schema.rs")),
+    );
+    files.insert(
         String::from("xml.rs"),
         format!("{crate_banner}{}", include_str!("templates/xml.rs")),
     );

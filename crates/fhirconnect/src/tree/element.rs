@@ -17,11 +17,11 @@
 //! named type it disappears, and on a reference it becomes the deferred
 //! resolution the engine finishes.
 
-use fhir_types::xml::FieldSchema;
-use fhir_types::xml::Kind;
-use fhir_types::xml::Schemas;
-use fhir_types::xml::TypeSchema;
-use fhir_types::xml::ValueKind;
+use fhir_types::schema::FieldSchema;
+use fhir_types::schema::Kind;
+use fhir_types::schema::Schemas;
+use fhir_types::schema::TypeSchema;
+use fhir_types::schema::ValueKind;
 
 use crate::tree::error::ResolveError;
 use crate::tree::path::FhirPath;
@@ -48,7 +48,7 @@ impl Table for Schemas {
     }
 
     fn is_resource(&self, name: &str) -> bool {
-        self.resources.binary_search(&name).is_ok()
+        Self::is_resource(self, name)
     }
 }
 
@@ -284,22 +284,16 @@ pub fn resolve<T: Table + ?Sized>(
 /// (<https://hl7.org/fhir/R4/fhirpath.html>, §Additional functions).
 const REFERENTIAL: [&str; 3] = ["uri", "canonical", "url"];
 
-/// The `id` every element carries, for the sibling object of a primitive.
+/// The table entry a primitive's underscore sibling resolves against.
 ///
 /// A primitive's `id` and `extension` live in the member named with a leading
 /// underscore (<https://hl7.org/fhir/R4/json.html>), and both come from
-/// `Element` itself (<https://hl7.org/fhir/R4/element.html>).
-const ELEMENT_ID: (&str, Kind, u32, Option<u32>, &[&str]) =
-    ("id", Kind::Attribute, 0, Some(1), &["string"]);
+/// `Element` itself (<https://hl7.org/fhir/R4/element.html>), which the table
+/// carries as its own type.
+const ELEMENT_TYPE: &str = "Element";
 
-/// The `extension` every element carries.
-const ELEMENT_EXTENSION: (&str, Kind, u32, Option<u32>, &[&str]) = (
-    "extension",
-    Kind::Complex("Extension"),
-    0,
-    None,
-    &["Extension"],
-);
+/// The element name of the extension list every element carries.
+const EXTENSION_ELEMENT: &str = "extension";
 
 /// The resolver's state as it walks the steps.
 struct Walk<'table, T: Table + ?Sized> {
@@ -382,28 +376,38 @@ impl<T: Table + ?Sized> Walk<'_, T> {
 
     /// Steps into the `id` or `extension` of a primitive's sibling object.
     fn primitive_member(&mut self, name: &str) -> Result<(), ResolveError> {
-        let (element, kind, min, max, types) = match name {
-            "id" => ELEMENT_ID,
-            "extension" => ELEMENT_EXTENSION,
-            _ => {
-                return Err(ResolveError::NoChildren {
-                    element: self.owner.clone(),
-                    name: String::from(name),
-                });
-            }
-        };
-        let path = format!("{}.{element}", self.owner);
+        let field = self.element_member(name)?;
+        let path = format!("{}.{}", self.owner, field.name);
         self.owner.clone_from(&path);
-        self.location = self.landing(kind)?;
+        self.location = self.landing(field.kind)?;
         self.moves.push(Move::Member(Field {
             path,
-            key: String::from(element),
-            kind,
-            min,
-            max,
-            types,
+            key: String::from(field.name),
+            kind: field.kind,
+            min: field.min,
+            max: field.max,
+            types: field.types,
         }));
         Ok(())
+    }
+
+    /// The `Element` member `name`, from the table's own `Element` entry.
+    fn element_member(&self, name: &str) -> Result<&'static FieldSchema, ResolveError> {
+        let schema =
+            self.table
+                .type_named(ELEMENT_TYPE)
+                .ok_or_else(|| ResolveError::UnknownElement {
+                    owner: self.owner.clone(),
+                    name: String::from(ELEMENT_TYPE),
+                })?;
+        schema
+            .fields
+            .iter()
+            .find(|field| field.name == name)
+            .ok_or_else(|| ResolveError::NoChildren {
+                element: self.owner.clone(),
+                name: String::from(name),
+            })
     }
 
     /// Moves the last member onto the sibling that carries a primitive's `id`
@@ -544,18 +548,23 @@ impl<T: Table + ?Sized> Walk<'_, T> {
     /// Steps into the extension with `url`.
     fn extension(&mut self, url: &str) -> Result<(), ResolveError> {
         if matches!(self.location, Location::Primitive(_) | Location::Attribute) {
-            self.enter_primitive_element("extension")?;
+            self.enter_primitive_element(EXTENSION_ELEMENT)?;
         }
-        let (element, kind, min, max, types) = ELEMENT_EXTENSION;
-        let path = match &self.location {
+        let (field, path) = match &self.location {
             Location::Complex(schema) => {
-                let field = named(schema, element).ok_or_else(|| ResolveError::UnknownElement {
-                    owner: String::from(schema.path),
-                    name: String::from(element),
+                let (field, _, _) = named(schema, EXTENSION_ELEMENT).ok_or_else(|| {
+                    ResolveError::UnknownElement {
+                        owner: String::from(schema.path),
+                        name: String::from(EXTENSION_ELEMENT),
+                    }
                 })?;
-                String::from(field.0.path)
+                (field, String::from(field.path))
             }
-            Location::PrimitiveElement => format!("{}.{element}", self.owner),
+            Location::PrimitiveElement => {
+                let field = self.element_member(EXTENSION_ELEMENT)?;
+                let path = format!("{}.{EXTENSION_ELEMENT}", self.owner);
+                (field, path)
+            }
             Location::Choice(choice) => {
                 return Err(ResolveError::UnresolvedChoice {
                     element: choice.clone(),
@@ -569,20 +578,20 @@ impl<T: Table + ?Sized> Walk<'_, T> {
             Location::Primitive(_) | Location::Attribute | Location::Deferred => {
                 return Err(ResolveError::NoChildren {
                     element: self.owner.clone(),
-                    name: String::from(element),
+                    name: String::from(EXTENSION_ELEMENT),
                 });
             }
         };
         self.owner.clone_from(&path);
-        self.location = self.landing(kind)?;
+        self.location = self.landing(field.kind)?;
         self.moves.push(Move::Extension {
             field: Field {
                 path,
-                key: String::from(element),
-                kind,
-                min,
-                max,
-                types,
+                key: String::from(field.name),
+                kind: field.kind,
+                min: field.min,
+                max: field.max,
+                types: field.types,
             },
             url: String::from(url),
         });
@@ -694,8 +703,8 @@ fn named(schema: &'static TypeSchema, name: &str) -> Option<(&'static FieldSchem
 #[expect(clippy::panic_in_result_fn, reason = "test assertions")]
 mod tests {
     use fhir_types::r4::schema::SCHEMAS;
-    use fhir_types::xml::Kind;
-    use fhir_types::xml::ValueKind;
+    use fhir_types::schema::Kind;
+    use fhir_types::schema::ValueKind;
 
     use crate::tree::element::Location;
     use crate::tree::element::Move;
@@ -791,6 +800,47 @@ mod tests {
             resolved.location(),
             &Location::Complex(SCHEMAS.type_named("Extension").ok_or("no Extension type")?)
         );
+        Ok(())
+    }
+
+    #[test]
+    fn the_underscore_sibling_reads_its_members_from_the_element_table()
+    -> Result<(), Box<dyn core::error::Error>> {
+        let element = SCHEMAS.type_named("Element").ok_or("no Element type")?;
+        let id = resolved("Condition", "$resource.recordedDate.id")?;
+        assert_eq!(keys(&id), ["_recordedDate", "id"]);
+        assert_eq!(id.leaf(), "Condition.recordedDate.id");
+        assert_eq!(id.location(), &Location::Attribute);
+        let extension = resolved("Condition", "$resource.recordedDate.extension")?;
+        assert_eq!(keys(&extension), ["_recordedDate", "extension"]);
+        let Some(Move::Member(field)) = extension.moves().last() else {
+            panic!("the last move should be `extension`")
+        };
+        assert_eq!(
+            (field.kind(), field.min(), field.max(), field.types()),
+            element
+                .fields
+                .iter()
+                .find(|candidate| candidate.name == "extension")
+                .map(|candidate| (
+                    candidate.kind,
+                    candidate.min,
+                    candidate.max,
+                    candidate.types
+                ))
+                .ok_or("Element states no extension")?
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn a_member_the_element_table_does_not_state_is_refused() -> Result<(), ParseError> {
+        let path = "$resource.recordedDate.value".parse()?;
+        assert!(matches!(
+            resolve(&SCHEMAS, "Condition", &path),
+            Err(ResolveError::NoChildren { ref element, ref name })
+                if element == "Condition.recordedDate" && name == "value"
+        ));
         Ok(())
     }
 

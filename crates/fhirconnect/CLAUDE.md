@@ -17,14 +17,14 @@ and never route a clinical value through `f64`.
 ## The element table is the authority, and it is generated
 
 What an element is, whether it repeats, which types a choice admits and where a
-content reference lands all come from `fhir_types::xml::Schemas`, the element
-table the generator emits from the vendored HL7 packages. Nothing here restates
-a fact about FHIR that the table already carries. A gap in the table is a
-generator change plus a regeneration, never a hand-written constant in this
-crate (`.claude/rules/codegen.md`). The one exception is the pair of members
-the JSON representation gives a primitive's sibling object, `id` and
-`extension`, which are `Element`'s own and which the table does not emit as a
-type of its own (<https://hl7.org/fhir/R4/element.html>).
+content reference lands all come from `fhir_types::schema::Schemas`, the element
+table the generator emits from the vendored HL7 packages. That includes the two
+members the JSON representation gives a primitive's sibling object, `id` and
+`extension`, which the table carries as its own `Element` entry
+(<https://hl7.org/fhir/R4/element.html>). Nothing here restates a fact about
+FHIR that the table already carries. A gap in the table is a generator change
+plus a regeneration, never a hand-written constant in this crate
+(`.claude/rules/codegen.md`).
 
 `tree::element::Table` is what the path model asks of a version's table, so
 R4B and R5 plug in through the same trait. Only R4 is wired today.
