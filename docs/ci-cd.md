@@ -8,7 +8,8 @@ OWASP GitHub Actions Security Cheat Sheet, OpenSSF Scorecard, and the zizmor
 audit set. The enforceable discipline is `.claude/rules/ci-cd.md`, which this
 document does not repeat. What follows is the design of
 `.github/workflows/ci.yml` and the reason it is shaped this way. The release
-lane borrows the same two-tier gate and is documented in `docs/release.md`.
+lane is three files of its own and is documented in `docs/release.md`; what it
+shares with this one is the pinning discipline and the tool pins below.
 
 ## The problem
 
@@ -177,6 +178,32 @@ which is what a consumer builds; the all-features union (four versions, every
 resource, one crate) is no consumer's surface and is not linted in CI. No
 specification governs this: our own design.
 
+## The release lane beside this one
+
+`release.yml` is dormant until a `v*` tag is pushed, and it calls two reusable
+workflows that this one never touches. They are named here because they share
+this file's pinning rules and because Dependabot's `github-actions` ecosystem
+bumps their actions along with `ci.yml`'s: all three live under
+`.github/workflows/`, which is the directory Dependabot and the zizmor and
+actionlint lanes read.
+
+| Workflow | Runs | Tools it pins |
+|---|---|---|
+| `release.yml` | on a `v*` tag: plan, draft, the two calls, publish, crates.io | none of its own |
+| `release-build.yml` | called once per target, on a runner of that architecture | `cargo-auditable`, `cargo-cyclonedx`, `syft` |
+| `release-image.yml` | called once the musl binaries exist | `syft` |
+
+Those three versions are rows of `docs/VERSIONS.md`, and
+`scripts/checks/versions.sh` reads every `tool:` line of the two release
+workflows back against them, the same way it reads `ci.yml`'s four analyzers.
+They decide what a consumer can prove about a published binary, so a floating
+version would change the contents of a release with no reviewed change.
+
+The composite `./.github/actions/setup-rust` is shared with `ci.yml` and takes
+a `target` and a `cache` input for this reason: a publishing lane passes
+`cache: "false"`, because a cache an untrusted run could poison must never feed
+a release.
+
 ## Triggers and concurrency
 
 `push` to `main`, `pull_request` against `main`, `merge_group`, and
@@ -196,7 +223,7 @@ the state on 2026-09-05.
 | `main` ruleset: requires a pull request, signed commits, and the `conclusion` status check with the strict up-to-date policy; deletions and non-fast-forward pushes blocked | done |
 | Code scanning in advanced setup, with the CodeQL default setup off so `codeql.yml` is the analysis path | done |
 | Secret scanning with push protection, Dependabot alerts, and Dependabot security updates | done |
-| Artifact attestations, for the release lane when it lands | done |
+| Artifact attestations, which the release lane's provenance and SBOM bundles are stored against | done |
 | The `SONAR_TOKEN` secret, with SonarQube Cloud's Automatic Analysis off (`.claude/rules/ai-code-review.md`) | done |
 | Pages publishes from GitHub Actions and serves `ferrobridge.eu` with HTTPS enforced; the apex A records point at the four GitHub Pages addresses, `www` is a CNAME to `rubentalstra.github.io`, and the domain is verified for the account | done |
 | The roadmap board and the label bootstrap (`scripts/gh/labels.sh`) | done |

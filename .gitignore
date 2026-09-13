@@ -31,6 +31,7 @@
 /website/book/book/
 /_site/
 
+<<<<<<< HEAD
 # The container build context: the release lane stages one static binary per
 # platform under dist/<os>_<arch>/ and docker/Dockerfile copies it
 # (docs/release.md). Built artefacts, never committed.
@@ -41,3 +42,9 @@
 # profile bind-mounts. Neither ever enters this repository.
 /secrets/
 /vocabulary/
+=======
+# The CycloneDX documents cargo-cyclonedx writes beside each member's
+# Cargo.toml. The release lane renames the one it ships and uploads it as a
+# release asset (docs/release.md); a local rehearsal leaves the rest behind.
+*.cdx.json
+>>>>>>> 5811bcb5 (ci(release): the asset set, the pins and the verification record (#23))

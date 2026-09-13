@@ -16,8 +16,9 @@ an entry under **[Unreleased]** in the same PR. Cutting a release renames
 FerroBRIDGE is in its design phase, and the architecture is the output of the
 research program on
 [issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1). Releases on
-the 0.0.x line carry the repository, its gates, and its documentation; there is
-no binary to download yet.
+the 0.0.x line carry the repository, its gates, and its documentation. From the
+first tag they also carry a Linux binary per architecture and a container
+image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ## [Unreleased]
 
@@ -69,6 +70,27 @@ no binary to download yet.
   and the quickstart's PostgreSQL pin; the `docker` Dependabot entry points at
   `/docker`; and the book gains an Operate page for the image, the variables,
   the probe and the CDM profiles.
+- The release lane at SLSA v1.2 Build Level 3 (#23). `release.yml` keeps the
+  tag, the draft and the publish, and its build jobs become `uses:` calls to
+  two new reusable workflows, which is what puts the signing identity out of
+  reach of caller-defined steps. `release-build.yml` builds one native target
+  per call on a runner of that architecture, with no cache and with
+  `cargo auditable`, and produces the tarball carrying the binary, `LICENSE`,
+  `NOTICE` and `README.md`, its SHA-256 checksum, a CycloneDX SBOM of the
+  source graph at spec version 1.5, a syft SBOM read from the shipped binary,
+  Sigstore bundles for all three attestations, and the provenance DSSE envelope
+  as `.intoto.jsonl`, refused unless it carries the SLSA v1 predicate type.
+  `release-image.yml` verifies this run's musl tarballs against the build
+  lane's signer identity before staging them, pushes
+  `ghcr.io/rubentalstra/ferrobridge` for `linux/amd64` and `linux/arm64`,
+  attests the index and both platform manifests as OCI referrers, and verifies
+  its own output the way a consumer would. `finalize-release` names the
+  required asset set in full and refuses to publish a short release; a
+  pre-release publishes with `--latest=false`. `SECURITY.md` carries the
+  `gh attestation verify` commands for a tarball and for the image and says
+  what each one proves, and the pinned tool versions are guarded by
+  `scripts/checks/versions.sh`.
+
 - `crates/ferrobridge-term`, the FHIR terminology client (#77):
   `CodeSystem/$lookup` resolves a code's display, `ConceptMap/$translate` maps
   a code into another system, `ValueSet/$validate-code` tests membership of a

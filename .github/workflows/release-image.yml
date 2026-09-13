@@ -1,0 +1,291 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+# The release image, as a REUSABLE workflow: the container built from the
+# attested static binaries and pushed to GHCR with provenance and SBOM
+# attestations.
+#
+# It is a reusable workflow for the same reason release-build.yml is one. SLSA
+# v1.2 Build Level 3 needs the signing identity out of reach of caller-defined
+# steps, and a `workflow_call` job runs on its own VM that a caller cannot add
+# steps to
+# (https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-and-reusable-workflows-to-achieve-slsa-v1-build-level-3).
+#
+# The inputs it copies are the musl tarballs release-build.yml produced in THIS
+# run, taken from the run's artifacts rather than from the draft release: an
+# artifact is bound to the run that uploaded it, while a release asset is
+# whatever happens to be attached when this job reads it. Each tarball is
+# verified against release-build.yml's signer identity before it is extracted,
+# so the image provenance chains to attested inputs.
+#
+# What lands in the registry for one release:
+#   - the image index (linux/amd64, linux/arm64) tagged <version>, and for a
+#     non-prerelease also <major>.<minor> and latest, with OCI labels and with
+#     annotations on the index and on both manifests;
+#   - GitHub attestations pushed as OCI referrers: SLSA provenance for the
+#     index and for each platform manifest, and an SPDX SBOM per platform.
+#
+# Verify a published image (the tag resolves to the index):
+#   gh attestation verify oci://ghcr.io/rubentalstra/ferrobridge:<version> \
+#     --repo rubentalstra/FerroBRIDGE \
+#     --signer-workflow rubentalstra/FerroBRIDGE/.github/workflows/release-image.yml
+name: Release image (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: The vX.Y.Z tag being released.
+        required: true
+        type: string
+      version:
+        description: The tag without its leading v, which is the image tag.
+        required: true
+        type: string
+    outputs:
+      digest:
+        description: The digest of the pushed image index.
+        value: ${{ jobs.image.outputs.digest }}
+
+permissions: {}
+
+env:
+  # Lowercase by GHCR's rule; the owner segment is derived, never typed.
+  IMAGE: ghcr.io/${{ github.repository_owner }}/ferrobridge
+  # Annotate the index as well as the manifests: GHCR reads the package
+  # description from the index
+  # (https://docs.docker.com/build/ci/github-actions/annotations/).
+  DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # the attestations API, to verify the inputs
+      packages: write # push the image and its attestations to GHCR
+      id-token: write # Sigstore, for the provenance and SBOM attestations
+      attestations: write # store them against this repository
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      # github.sha in a called workflow is the caller's, which is the commit
+      # the tag points at. docker/Dockerfile is read from it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      # The musl binaries are the static ones, which is what runs on distroless
+      # static.
+      - name: Download the linux/amd64 tarball
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ferrobridge-${{ inputs.tag }}-x86_64-unknown-linux-musl
+          path: tarballs/amd64
+      - name: Download the linux/arm64 tarball
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ferrobridge-${{ inputs.tag }}-aarch64-unknown-linux-musl
+          path: tarballs/arm64
+
+      # Refuse any input the build lane did not attest: the image's provenance
+      # is worth exactly as much as the binaries it copies. The staged layout
+      # is the one docker/Dockerfile copies from,
+      # dist/${TARGETOS}_${TARGETARCH}/ferrobridge.
+      - name: Verify the tarballs against the build lane and stage the binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          for arch in amd64 arm64; do
+            case "$arch" in
+              amd64) target=x86_64-unknown-linux-musl ;;
+              arm64) target=aarch64-unknown-linux-musl ;;
+              *) echo "::error::unknown arch ${arch}" >&2; exit 1 ;;
+            esac
+            tarball="tarballs/${arch}/ferrobridge-${TAG}-${target}.tar.gz"
+            gh attestation verify "$tarball" \
+              --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/release-build.yml"
+            mkdir -p "dist/linux_${arch}"
+            tar -C "dist/linux_${arch}" -xzf "$tarball" ferrobridge
+            test -x "dist/linux_${arch}/ferrobridge"
+          done
+
+      # The docker-container driver builds both platforms from one build. No
+      # QEMU: emulation is what runs commands for a foreign architecture, and
+      # docker/Dockerfile runs none. It is a single stage that copies a binary
+      # already built for each platform by the lane above, so buildx assembles
+      # both manifests without executing anything
+      # (https://docs.docker.com/build/building/multi-platform/).
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # Tags: the version, and for a release that is not a pre-release also its
+      # major.minor and latest, both skipped for a pre-release by the action's
+      # own semver rule. Tags are mutable on GHCR, so a consumer pins the
+      # digest this job prints.
+      - name: Image tags, labels and annotations
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ inputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag }}
+          # The action's own defaults add org.opencontainers.image.version,
+          # .revision and .created; these repeat the build-independent set
+          # docker/Dockerfile carries, so the two never disagree.
+          labels: |
+            org.opencontainers.image.title=FerroBRIDGE
+            org.opencontainers.image.description=A standalone bridge between openEHR and HL7 FHIR, driven by FHIRconnect, and the OMOP Common Data Model, driven by OMOCL
+            org.opencontainers.image.url=https://ferrobridge.eu
+            org.opencontainers.image.source=https://github.com/rubentalstra/FerroBRIDGE
+            org.opencontainers.image.vendor=FerroBRIDGE
+            org.opencontainers.image.licenses=BUSL-1.1
+          # The action derives its annotations from its own default labels, so
+          # the custom lines above never reach the index, and GHCR reads the
+          # package description from the index annotation. Hence the repeat.
+          annotations: |
+            org.opencontainers.image.title=FerroBRIDGE
+            org.opencontainers.image.description=A standalone bridge between openEHR and HL7 FHIR, driven by FHIRconnect, and the OMOP Common Data Model, driven by OMOCL
+            org.opencontainers.image.url=https://ferrobridge.eu
+            org.opencontainers.image.source=https://github.com/rubentalstra/FerroBRIDGE
+            org.opencontainers.image.vendor=FerroBRIDGE
+            org.opencontainers.image.licenses=BUSL-1.1
+
+      # Cold by construction, like the binary lane: no cache may influence a
+      # published artifact. BuildKit's own provenance and SBOM attestations are
+      # off, because the GitHub attestations below carry both, keyless-signed
+      # through Sigstore and verifiable with `gh attestation verify`, while
+      # BuildKit's are unsigned attestation manifests inside the index. Two
+      # provenance documents of different provenance-value on one image is a
+      # question for a consumer, not an answer.
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          no-cache: true
+          provenance: false
+          sbom: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+
+      - name: Resolve the platform manifests
+        id: manifests
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          index="$(docker buildx imagetools inspect "${IMAGE}@${DIGEST}" --raw)"
+          amd64="$(jq -r '.manifests[] | select(.platform.os == "linux" and .platform.architecture == "amd64") | .digest' <<< "$index")"
+          arm64="$(jq -r '.manifests[] | select(.platform.os == "linux" and .platform.architecture == "arm64") | .digest' <<< "$index")"
+          case "$amd64" in sha256:*) ;; *) echo "::error::no linux/amd64 manifest in ${DIGEST}" >&2; exit 1 ;; esac
+          case "$arm64" in sha256:*) ;; *) echo "::error::no linux/arm64 manifest in ${DIGEST}" >&2; exit 1 ;; esac
+          {
+            echo "amd64=$amd64"
+            echo "arm64=$arm64"
+          } >> "$GITHUB_OUTPUT"
+
+      # syft reads the dependency list cargo-auditable embedded in the binary,
+      # so the SBOM names the crates rather than the two files in the image.
+      - name: Install syft
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: syft@1.51.1
+      - name: Generate one SBOM per platform
+        env:
+          VERSION: ${{ inputs.version }}
+          AMD64: ${{ steps.manifests.outputs.amd64 }}
+          ARM64: ${{ steps.manifests.outputs.arm64 }}
+        run: |
+          set -euo pipefail
+          syft scan "registry:${IMAGE}@${AMD64}" --platform linux/amd64 \
+            -o "spdx-json=ferrobridge-${VERSION}-image-amd64.spdx.json"
+          syft scan "registry:${IMAGE}@${ARM64}" --platform linux/arm64 \
+            -o "spdx-json=ferrobridge-${VERSION}-image-arm64.spdx.json"
+          # A `pkg:cargo/` purl is produced only by syft's rust-audit
+          # cataloger, which reads the `.dep-v0` section cargo-auditable wrote
+          # into the binary. None of them means the image carries a binary the
+          # build lane did not produce that way.
+          for f in "ferrobridge-${VERSION}-image-amd64.spdx.json" "ferrobridge-${VERSION}-image-arm64.spdx.json"; do
+            if ! jq -e '[.packages[].externalRefs[]? | select(.referenceLocator | startswith("pkg:cargo/"))] | length > 0' "$f" > /dev/null; then
+              echo "::error::${f} carries no pkg:cargo purl; was the binary built with cargo auditable?" >&2
+              exit 1
+            fi
+          done
+
+      # `push-to-registry` stores each bundle as an OCI referrer of its
+      # subject, so a registry-side policy engine and `gh attestation verify
+      # --bundle-from-oci` both find it. The index carries provenance and each
+      # platform manifest carries provenance and its SBOM, so a consumer that
+      # resolved a platform digest verifies too.
+      - name: Attest the index provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+      - name: Attest the linux/amd64 provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.manifests.outputs.amd64 }}
+          push-to-registry: true
+      - name: Attest the linux/amd64 SBOM
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.manifests.outputs.amd64 }}
+          sbom-path: ferrobridge-${{ inputs.version }}-image-amd64.spdx.json
+          push-to-registry: true
+      - name: Attest the linux/arm64 provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.manifests.outputs.arm64 }}
+          push-to-registry: true
+      - name: Attest the linux/arm64 SBOM
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.manifests.outputs.arm64 }}
+          sbom-path: ferrobridge-${{ inputs.version }}-image-arm64.spdx.json
+          push-to-registry: true
+
+      # The lane checks its own output the way a consumer would, so a broken
+      # attestation fails the release rather than the first deployment.
+      - name: Verify the published image as a consumer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+          AMD64: ${{ steps.manifests.outputs.amd64 }}
+          ARM64: ${{ steps.manifests.outputs.arm64 }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          signer="${GITHUB_REPOSITORY}/.github/workflows/release-image.yml"
+          gh attestation verify "oci://${IMAGE}:${VERSION}" --repo "$GITHUB_REPOSITORY" --signer-workflow "$signer"
+          gh attestation verify "oci://${IMAGE}@${DIGEST}" --repo "$GITHUB_REPOSITORY" --signer-workflow "$signer"
+          for manifest in "$AMD64" "$ARM64"; do
+            gh attestation verify "oci://${IMAGE}@${manifest}" --repo "$GITHUB_REPOSITORY" --signer-workflow "$signer"
+            gh attestation verify "oci://${IMAGE}@${manifest}" --repo "$GITHUB_REPOSITORY" --signer-workflow "$signer" \
+              --predicate-type https://spdx.dev/Document/v2.3
+          done
+          {
+            echo "image ${IMAGE}:${VERSION}"
+            echo "index ${DIGEST}"
+            echo "amd64 ${AMD64}"
+            echo "arm64 ${ARM64}"
+          } >> "$GITHUB_STEP_SUMMARY"

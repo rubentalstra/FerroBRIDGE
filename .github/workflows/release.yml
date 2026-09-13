@@ -4,18 +4,22 @@
 # The release lane. One workflow owns the `v*` tag, and every ordering in it is
 # a `needs` edge:
 #
-#   plan ── github-release (draft) ── build-binaries ── finalize-release (publish) ── crates
+#   plan ── github-release (draft) ── build-binaries ─┬─ finalize-release ── crates
+#                                     └─ build-image ─┘
 #
-# The release is created as a DRAFT, the binaries are attached to it, and only
-# once the expected asset set is complete is it PUBLISHED. Publishing last
-# means a half-assembled release is never visible.
+# The release is created as a DRAFT, the binaries, their SBOMs and their
+# Sigstore bundles are attached to it, and only once the expected asset set is
+# complete is it PUBLISHED. Publishing last means a half-assembled release is
+# never visible, and a published release is immutable, so the draft is the only
+# window the uploads have.
 #
-# Two tiers, the same split ci.yml uses. `plan`, `github-release` and
-# `finalize-release` run on a repository with no code, because a pre-code
-# release is legitimate here: it carries the changelog section and nothing
-# else. `build-binaries` is gated behind the same root-Cargo.toml detection,
-# so it reports `skipped` today and activates by itself when the workspace
-# lands, with no edit to this file.
+# build-binaries and build-image are `uses:` calls AND NOTHING ELSE, which is
+# the deliberate shape rather than an accident of tidiness. SLSA v1.2 Build
+# Level 3 requires the signing material to be out of reach of the user-defined
+# build steps, and every step of one job shares one runner VM; a reusable
+# workflow's job cannot carry `steps:` from its caller, which makes the
+# regression unrepresentable rather than merely discouraged
+# (https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-and-reusable-workflows-to-achieve-slsa-v1-build-level-3).
 #
 # The workflow is dormant until a `v*` tag is pushed. It does not run on a push
 # to main, on a pull request, or in a merge group.
@@ -38,8 +42,8 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
-# No permissions by default: each job grants its own, and only the three jobs
-# that create, fill or publish the release get `contents: write`.
+# No permissions by default: each job grants its own, and the two build jobs
+# grant theirs to the reusable workflow they call.
 permissions: {}
 
 jobs:
@@ -47,7 +51,7 @@ jobs:
 
   plan:
     name: plan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: read
@@ -55,7 +59,6 @@ jobs:
       tag: ${{ steps.tag.outputs.tag }}
       version: ${{ steps.tag.outputs.version }}
       is-prerelease: ${{ steps.tag.outputs.is_prerelease }}
-      cargo: ${{ steps.workspace.outputs.cargo }}
       targets: ${{ steps.workspace.outputs.targets }}
     steps:
       - id: tag
@@ -105,9 +108,9 @@ jobs:
 
       - name: The tag matches the declared product version
         # Every file that declares the product version has to agree with the
-        # tag. Today that is CITATION.cff and the product row of
-        # docs/VERSIONS.md; the root Cargo.toml joins them the moment it
-        # exists, so the workspace needs no edit here.
+        # tag: the root Cargo.toml, CITATION.cff and the product row of
+        # docs/VERSIONS.md. The manifest is required, because the release
+        # promises binaries built from it.
         env:
           TAG: ${{ steps.tag.outputs.tag }}
           VERSION: ${{ steps.tag.outputs.version }}
@@ -126,17 +129,24 @@ jobs:
             fi
           }
 
-          if [ ! -f CITATION.cff ]; then
-            echo "::error::CITATION.cff is missing, so $TAG cannot be checked against a declared version." >&2
-            exit 1
-          fi
+          for required in Cargo.toml CITATION.cff docs/VERSIONS.md CHANGELOG.md compose.yaml; do
+            if [ ! -f "$required" ]; then
+              echo "::error::${required} is missing at ${TAG}, so this release cannot be cut." >&2
+              exit 1
+            fi
+          done
+
+          manifest="$(awk '
+            /^[[:space:]]*\[/ { h = $0; gsub(/[[:space:]]/, "", h); f = (h == "[workspace.package]"); next }
+            f && $0 ~ /^[[:space:]]*version[[:space:]]*=/ {
+              if (match($0, /"[^"]*"/)) { print substr($0, RSTART + 1, RLENGTH - 2); exit }
+            }
+          ' Cargo.toml)"
+          check "the root Cargo.toml [workspace.package] version" "$manifest"
+
           cff="$(sed -nE 's/^version:[[:space:]]*//p' CITATION.cff | head -n1 | tr -d '"'\''[:space:]')"
           check "CITATION.cff" "$cff"
 
-          if [ ! -f docs/VERSIONS.md ]; then
-            echo "::error::docs/VERSIONS.md is missing, so $TAG cannot be checked against the pin matrix." >&2
-            exit 1
-          fi
           # The first token of the second cell of the markdown row whose first
           # cell is "Product version", backticks and padding removed. Same
           # reading scripts/checks/versions.sh does.
@@ -151,18 +161,6 @@ jobs:
           ' docs/VERSIONS.md)"
           check "the docs/VERSIONS.md product-version row" "$matrix"
 
-          if [ -f Cargo.toml ]; then
-            manifest="$(awk '
-              /^[[:space:]]*\[/ { h = $0; gsub(/[[:space:]]/, "", h); f = (h == "[workspace.package]"); next }
-              f && $0 ~ /^[[:space:]]*version[[:space:]]*=/ {
-                if (match($0, /"[^"]*"/)) { print substr($0, RSTART + 1, RLENGTH - 2); exit }
-              }
-            ' Cargo.toml)"
-            check "the root Cargo.toml [workspace.package] version" "$manifest"
-          else
-            echo "no root Cargo.toml at $TAG: the manifest joins this check when the workspace lands."
-          fi
-
           [ "$fail" -eq 0 ] || exit 1
 
       - id: notes
@@ -175,10 +173,6 @@ jobs:
           VERSION: ${{ steps.tag.outputs.version }}
         run: |
           set -euo pipefail
-          if [ ! -f CHANGELOG.md ]; then
-            echo "::error::CHANGELOG.md is missing, so $VERSION has no release notes." >&2
-            exit 1
-          fi
           if ! grep -q "^## \[$VERSION\]" CHANGELOG.md; then
             echo "::error::CHANGELOG.md has no '## [$VERSION]' section. Cut the release before tagging: rename [Unreleased] to $VERSION with its date." >&2
             exit 1
@@ -200,27 +194,18 @@ jobs:
           cat release-notes.md
 
       - id: workspace
-        name: Detect the Cargo workspace and name the binary targets
-        # The same detection ci.yml tier 2 uses, for the same reason:
-        # hashFiles() is evaluated before checkout, when the workspace is
-        # empty, so a real detection step is the correct primitive.
-        #
+        name: Name the binary targets
         # The target set is emitted once, here, and read both by the
         # build-binaries matrix and by the finalize asset check, so the two
-        # cannot drift apart. Linux only, because the deliverable is a server.
-        # No specification governs this: our own design.
+        # cannot drift apart. Linux only, because the deliverable is a server,
+        # and one native runner per architecture, so there is no
+        # cross-compilation and no emulation anywhere in this lane. No
+        # specification governs this: our own design.
         run: |
           set -euo pipefail
-          if [ -f Cargo.toml ]; then
-            echo "cargo=true" >> "$GITHUB_OUTPUT"
-            echo "Cargo.toml present: the binary lane will run."
-          else
-            echo "cargo=false" >> "$GITHUB_OUTPUT"
-            echo "No Cargo.toml: the binary lane is skipped and this release promises no binaries."
-          fi
           targets='{"include":[
-            {"runner":"ubuntu-latest","target":"x86_64-unknown-linux-gnu"},
-            {"runner":"ubuntu-latest","target":"x86_64-unknown-linux-musl"},
+            {"runner":"ubuntu-24.04","target":"x86_64-unknown-linux-gnu"},
+            {"runner":"ubuntu-24.04","target":"x86_64-unknown-linux-musl"},
             {"runner":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-gnu"},
             {"runner":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-musl"}
           ]}'
@@ -237,11 +222,15 @@ jobs:
   github-release:
     name: github release (draft)
     needs: plan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: write # create the GitHub release
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
       - name: Download the release notes
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -288,93 +277,61 @@ jobs:
               ;;
           esac
 
-  # ---- build-binaries: gated on the workspace, skipped today ----------------
-
-  # TODO(#23): this job becomes a call to a reusable workflow
-  # (`on: workflow_call`) that also emits SLSA build provenance, a CycloneDX
-  # SBOM, and the Sigstore bundles for both. The isolation is the point: SLSA
-  # Build Level 3 requires the signing material to sit out of reach of
-  # user-defined build steps, and a job's steps all share one runner VM
-  # (https://slsa.dev/spec/v1.0/levels). Everything below then moves into that
-  # workflow unchanged, and this job keeps its name, its gate and its place in
-  # the graph.
-  build-binaries:
-    name: binaries (${{ matrix.target }})
-    needs: [plan, github-release]
-    if: needs.plan.outputs.cargo == 'true'
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.targets) }}
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
-    permissions:
-      contents: write # attach the archives to the draft release
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          ref: ${{ github.sha }}
-      # No cache in a publishing lane: a cache an untrusted run could poison
-      # must never feed a release, so this builds from the checkout and
-      # nothing else.
-      - uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
-        with:
-          target: ${{ matrix.target }}
-          cache: false
-      - name: Build the release binaries
-        env:
-          TARGET: ${{ matrix.target }}
-        run: cargo build --release --locked --workspace --bins --target "$TARGET"
-      - name: Package the binaries with their checksum
-        env:
-          TAG: ${{ needs.plan.outputs.tag }}
-          TARGET: ${{ matrix.target }}
-        run: |
-          set -euo pipefail
-          # The binary names come from the workspace itself, so this step needs
-          # no edit when a binary is added or renamed.
-          bins=()
-          while IFS= read -r name; do
-            if [ -n "$name" ]; then
-              bins+=("$name")
-            fi
-          done < <(cargo metadata --format-version 1 --no-deps --locked \
-            | jq -r '.packages[].targets[] | select(.kind | index("bin")) | .name' | sort -u)
-          if [ "${#bins[@]}" -eq 0 ]; then
-            echo "::error::the workspace declares no bin target, so this release can attach no binary." >&2
-            exit 1
-          fi
-          printf 'packaging: %s\n' "${bins[@]}"
-          mkdir -p dist
-          archive="ferrobridge-${TAG}-${TARGET}.tar.gz"
-          tar -czf "dist/${archive}" -C "target/${TARGET}/release" "${bins[@]}"
-          (cd dist && sha256sum "${archive}" > "${archive}.sha256sum")
-          cat "dist/${archive}.sha256sum"
-      - name: Attach the archive to the draft release
+      # The quickstart compose file rides along as a release asset: it pulls
+      # the image this tag publishes, so a downloader never clones the
+      # repository.
+      - name: Attach the quickstart compose file
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.plan.outputs.tag }}
-          TARGET: ${{ matrix.target }}
-        run: |
-          set -euo pipefail
-          archive="ferrobridge-${TAG}-${TARGET}.tar.gz"
-          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
-            "dist/${archive}" "dist/${archive}.sha256sum"
+        run: gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber compose.yaml
+
+  # ---- build-binaries: the SLSA Build L3 lane, once per target --------------
+
+  # A call and nothing else. See the graph comment at the top of this file:
+  # the isolation is what makes the provenance unforgeable, and a job that
+  # carries `uses:` cannot also carry `steps:`.
+  build-binaries:
+    name: binaries (${{ matrix.target }})
+    needs: [plan, github-release]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.targets) }}
+    # Declared on both sides: a called workflow receives the caller's token
+    # permissions, and GitHub's Build L3 guide asks for the same set in both
+    # places.
+    permissions:
+      contents: write # attach the per-target assets to the draft release
+      id-token: write # Sigstore, for the provenance and SBOM attestations
+      attestations: write # store them against this repository
+    uses: ./.github/workflows/release-build.yml
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+      target: ${{ matrix.target }}
+      runner: ${{ matrix.runner }}
+
+  # ---- build-image: the container from the attested musl binaries -----------
+
+  # A call and nothing else, for the same Build L3 reason.
+  build-image:
+    name: image (linux/amd64, linux/arm64)
+    needs: [plan, build-binaries]
+    permissions:
+      contents: read # the attestations API, to verify the inputs
+      packages: write # push the image and its attestations to GHCR
+      id-token: write # Sigstore, for the provenance and SBOM attestations
+      attestations: write # store them against this repository
+    uses: ./.github/workflows/release-image.yml
+    with:
+      tag: ${{ needs.plan.outputs.tag }}
+      version: ${{ needs.plan.outputs.version }}
 
   # ---- finalize-release: verify the asset set, then PUBLISH -----------------
 
   finalize-release:
     name: github release (publish)
-    needs: [plan, github-release, build-binaries]
-    # build-binaries is skipped while there is no workspace, and a skipped
-    # `needs` job skips its dependents by default, so the results are read
-    # explicitly. A skip is a pass here; a failure is not.
-    if: >-
-      always()
-      && needs.plan.result == 'success'
-      && needs.github-release.result == 'success'
-      && (needs.build-binaries.result == 'success' || needs.build-binaries.result == 'skipped')
-    runs-on: ubuntu-latest
+    needs: [plan, github-release, build-binaries, build-image]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: write # publish the release
@@ -383,43 +340,51 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.plan.outputs.tag }}
-          HAVE_BINARIES: ${{ needs.plan.outputs.cargo }}
           TARGETS: ${{ needs.plan.outputs.targets }}
         run: |
           set -euo pipefail
           assets="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
           echo "attached assets:"
           printf '%s\n' "$assets"
-          if [ "$HAVE_BINARIES" != "true" ]; then
-            if [ -n "$assets" ]; then
-              echo "::error::the draft carries assets that a release with no workspace does not promise." >&2
-              exit 1
-            fi
-            echo "this version promises no binaries, and the draft carries none."
-            exit 0
-          fi
           missing=""
-          # grep -Fxq: fixed string, whole line, so ".tar.gz" is not satisfied
-          # by ".tar.gz.sha256sum".
-          # TODO(#23): extend this suffix list with the provenance, SBOM and
-          # Sigstore bundle names once the attested build lane emits them.
+          # Every suffix release-build.yml uploads, per target. `grep -Fxq` is
+          # a fixed string matched whole-line, so ".tar.gz" is not satisfied by
+          # ".tar.gz.sha256sum".
           while IFS= read -r target; do
-            for suffix in ".tar.gz" ".tar.gz.sha256sum"; do
+            for suffix in \
+              ".tar.gz" \
+              ".tar.gz.sha256sum" \
+              ".tar.gz.sigstore.json" \
+              ".tar.gz.sbom.sigstore.json" \
+              ".tar.gz.build-sbom.sigstore.json" \
+              ".tar.gz.intoto.jsonl" \
+              ".cdx.json" \
+              ".spdx.json"; do
               printf '%s\n' "$assets" | grep -Fxq "ferrobridge-${TAG}-${target}${suffix}" \
                 || missing="$missing ferrobridge-${TAG}-${target}${suffix}"
             done
           done < <(printf '%s' "$TARGETS" | jq -r '.include[].target')
+          printf '%s\n' "$assets" | grep -Fxq "compose.yaml" || missing="$missing compose.yaml"
           if [ -n "$missing" ]; then
             echo "::error::the draft is missing assets, so it will not be published:$missing" >&2
             exit 1
           fi
           echo "every expected asset is attached."
 
+      # `make_latest` marks this release as the repository's latest, which a
+      # pre-release must never be.
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.plan.outputs.tag }}
-        run: gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+          IS_PRERELEASE: ${{ needs.plan.outputs.is-prerelease }}
+        run: |
+          set -euo pipefail
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest=false
+          else
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          fi
 
   # ---- crates.io: the library crates, after the release is public -----------
 
@@ -431,8 +396,7 @@ jobs:
   crates:
     name: crates.io
     needs: [plan, finalize-release]
-    if: needs.plan.outputs.cargo == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     environment: crates-io
     # Shared with publish-crates.yml: two runs uploading the same immutable

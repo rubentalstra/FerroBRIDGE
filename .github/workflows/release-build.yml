@@ -1,0 +1,280 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+
+# The release build, as a REUSABLE workflow: the SLSA v1.2 Build Level 3 lane.
+#
+# WHY THIS IS ITS OWN FILE, which is the whole point of it. Build L3 requires
+# that the secret material authenticating the provenance is not accessible to
+# the environment running the user-defined build steps
+# (https://slsa.dev/spec/v1.2/build-requirements). An `actions/attest-*` step
+# inside an ordinary job does not satisfy that: every step of a job shares one
+# runner VM, so a build step could reach the signing material. That one clause
+# is what separates Build L2 from L3.
+#
+# GitHub's documented remedy is to move the build AND its attestation into a
+# reusable workflow, which runs on its own VM and whose steps a caller cannot
+# add to: a caller passes the declared inputs and nothing else
+# (https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-and-reusable-workflows-to-achieve-slsa-v1-build-level-3).
+# The build definition therefore stops being caller-defined, and the Fulcio
+# certificate names THIS workflow as the signer, which a consumer can demand:
+#
+#   gh attestation verify ferrobridge-<tag>-<target>.tar.gz \
+#     --repo rubentalstra/FerroBRIDGE \
+#     --signer-workflow rubentalstra/FerroBRIDGE/.github/workflows/release-build.yml
+#
+# That flag is the consumer-visible prize: a verifier can insist an artifact
+# came from this lane rather than from any workflow in this repository.
+name: Release build (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: The vX.Y.Z tag being built.
+        required: true
+        type: string
+      target:
+        description: The Rust target triple to build.
+        required: true
+        type: string
+      runner:
+        description: The runner label whose architecture matches the target.
+        required: true
+        type: string
+
+permissions: {}
+
+# The hosted runner has four cores and seven gigabytes, and a workspace-wide
+# compile schedules the two generated giants side by side and is killed with
+# exit 143 and no diagnostic. This lane builds one package, and it builds it
+# two crates at a time for the same reason ci.yml does (docs/ci-cd.md).
+env:
+  CARGO_BUILD_JOBS: "2"
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: write # attach the per-target assets to the draft release
+      id-token: write # Sigstore, for the provenance and SBOM attestations
+      attestations: write # store them against this repository
+    steps:
+      # The `github` context of a called workflow is the CALLER's, so
+      # github.sha is the commit the tag points at, and the caller's plan job
+      # has already refused a dispatch that is not at its tag
+      # (https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      # Cold by construction rather than by hope: the wrapped toolchain action
+      # restores a rust-cache entry unless told otherwise, and a cache an
+      # untrusted run could poison must never feed a release. A cache is an
+      # input this build did not declare.
+      - uses: ./.github/actions/setup-rust
+        with:
+          target: ${{ inputs.target }}
+          cache: "false"
+
+      # musl needs its C toolchain for the link step. Every target here builds
+      # on a runner of its own architecture, so there is no cross toolchain and
+      # no emulation.
+      - name: Install the musl toolchain
+        if: ${{ contains(inputs.target, 'musl') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends musl-tools
+
+      # cargo-auditable embeds the compressed dependency list in the binary's
+      # own `.dep-v0` section, so the SHIPPED artifact self-describes to syft,
+      # trivy and osv-scanner even when no SBOM travelled with it
+      # (https://github.com/rust-secure-code/cargo-auditable). syft reads that
+      # section below, which is why this install comes first.
+      - name: Install cargo-auditable
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: cargo-auditable@0.7.5
+
+      - name: Build the server
+        env:
+          TARGET: ${{ inputs.target }}
+        run: cargo auditable build --release --locked -p ferrobridge-server --target "$TARGET"
+
+      - name: Package the binary with its licence, notice and readme
+        env:
+          TAG: ${{ inputs.tag }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          asset="ferrobridge-${TAG}-${TARGET}.tar.gz"
+          mkdir -p pkg
+          cp "target/${TARGET}/release/ferrobridge" pkg/ferrobridge
+          cp LICENSE NOTICE README.md pkg/
+          strip pkg/ferrobridge
+          # A flat archive: the image lane extracts the one member it needs by
+          # name, and an operator drops the binary where they want it.
+          tar -C pkg -czf "$asset" ferrobridge LICENSE NOTICE README.md
+          # A plain checksum beside the tarball, the only verification open to
+          # an operator with neither `gh` nor a network path to Sigstore. It is
+          # NOT a signature and detects only a corrupt or truncated download;
+          # only the Sigstore bundle answers who built this. It records the
+          # bare filename, so `sha256sum -c` works in whatever directory the
+          # two files landed in.
+          sha256sum "$asset" > "${asset}.sha256sum"
+          cat "${asset}.sha256sum"
+          {
+            echo "ASSET=$asset"
+            echo "CHECKSUM=${asset}.sha256sum"
+          } >> "$GITHUB_ENV"
+
+      # Two SBOMs, because they answer different questions. CycloneDX from the
+      # source graph records the DIRECT versus TRANSITIVE edges that make an
+      # SBOM actionable; the syft document below reads what the shipped binary
+      # actually carries.
+      - name: Install cargo-cyclonedx
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: cargo-cyclonedx@0.5.9
+      - name: Generate the dependency SBOM
+        env:
+          TAG: ${{ inputs.tag }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          # `--describe binaries` makes each document describe one binary and
+          # its dependency graph, which is what a consumer of the tarball
+          # wants. `--spec-version 1.5` is the highest cargo-cyclonedx emits
+          # and its default is 1.3, so dropping the flag would silently
+          # downgrade every release.
+          cargo cyclonedx \
+            --manifest-path app/ferrobridge-server/Cargo.toml \
+            --format json --describe binaries --spec-version 1.5
+          # cargo-cyclonedx walks every member of the workspace and names each
+          # document after the binary it describes, so the one this release
+          # ships is selected by path rather than by stem, and the tool crates'
+          # documents stay where they were written. Exactly one match is the
+          # invariant: the server crate declares one [[bin]], and a second file
+          # here would mean the document being uploaded is a guess.
+          sbom="ferrobridge-${TAG}-${TARGET}.cdx.json"
+          matches="$(find app/ferrobridge-server -maxdepth 1 -name '*.cdx.json' | sort)"
+          count="$(printf '%s' "$matches" | grep -c . || true)"
+          if [ "$count" != "1" ]; then
+            echo "::error::expected one .cdx.json beside app/ferrobridge-server/Cargo.toml, found ${count}" >&2
+            exit 1
+          fi
+          mv "$matches" "$sbom"
+          echo "SBOM=$sbom" >> "$GITHUB_ENV"
+
+      - name: Install syft
+        uses: taiki-e/install-action@e67fa11c4b9316fa714ddf0abed07a0c3143b95b # v2.87.4
+        with:
+          tool: syft@1.51.1
+      - name: Generate the build SBOM from the shipped binary
+        env:
+          TAG: ${{ inputs.tag }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          build_sbom="ferrobridge-${TAG}-${TARGET}.spdx.json"
+          syft scan "file:pkg/ferrobridge" -o "spdx-json=${build_sbom}"
+          # A `pkg:cargo/` purl is produced only by syft's rust-audit
+          # cataloger, which reads the `.dep-v0` section cargo-auditable wrote.
+          # None of them means the build lost `cargo auditable`, and that fails
+          # the release rather than shipping an SBOM that describes nothing.
+          # The count is not asserted: a binary whose crate has no dependencies
+          # yet carries exactly one, itself.
+          if ! jq -e '[.packages[].externalRefs[]? | select(.referenceLocator | startswith("pkg:cargo/"))] | length > 0' "$build_sbom" > /dev/null; then
+            echo "::error::${build_sbom} carries no pkg:cargo purl; was the binary built with cargo auditable?" >&2
+            exit 1
+          fi
+          echo "BUILD_SBOM=$build_sbom" >> "$GITHUB_ENV"
+
+      - name: Attest the build provenance
+        id: provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ env.ASSET }}
+      - name: Attest the dependency SBOM
+        id: sbom-attestation
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: ${{ env.ASSET }}
+          sbom-path: ${{ env.SBOM }}
+      - name: Attest the build SBOM
+        id: build-sbom-attestation
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: ${{ env.ASSET }}
+          sbom-path: ${{ env.BUILD_SBOM }}
+
+      # The attestations live in GitHub's attestations API, which is what `gh
+      # attestation verify` reads with no --bundle flag. Publishing them as
+      # assets adds offline verification and visibility to scanners that read a
+      # release's file list: OpenSSF Scorecard's signed-releases check matches
+      # filename suffixes, `.sigstore.json` for a signature and
+      # `.intoto.jsonl` for provenance, and scores the second one higher
+      # (https://github.com/ossf/scorecard/blob/main/docs/checks.md#signed-releases).
+      - name: Publish the attestations as release assets
+        env:
+          ASSET_NAME: ${{ env.ASSET }}
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom-attestation.outputs.bundle-path }}
+          BUILD_SBOM_BUNDLE: ${{ steps.build-sbom-attestation.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          cp "$PROVENANCE_BUNDLE" "${ASSET_NAME}.sigstore.json"
+          cp "$SBOM_BUNDLE" "${ASSET_NAME}.sbom.sigstore.json"
+          cp "$BUILD_SBOM_BUNDLE" "${ASSET_NAME}.build-sbom.sigstore.json"
+          # The `.intoto.jsonl` is a re-container of the bundle's already
+          # DSSE-wrapped in-toto statement, one envelope per line.
+          jq -c '.dsseEnvelope' "$PROVENANCE_BUNDLE" > "${ASSET_NAME}.intoto.jsonl"
+          payload_type="$(jq -r '.payloadType' "${ASSET_NAME}.intoto.jsonl")"
+          if [ "$payload_type" != "application/vnd.in-toto+json" ]; then
+            echo "::error::the provenance envelope is not in-toto (payloadType=${payload_type})" >&2
+            exit 1
+          fi
+          predicate="$(jq -r '.payload' "${ASSET_NAME}.intoto.jsonl" | base64 -d | jq -r '.predicateType')"
+          if [ "$predicate" != "https://slsa.dev/provenance/v1" ]; then
+            echo "::error::the provenance predicate is not SLSA v1 (${predicate})" >&2
+            exit 1
+          fi
+          echo "provenance: ${predicate}"
+
+      # The image lane takes the musl tarballs from this run's artifacts rather
+      # than from the draft release, and re-verifies each one against this
+      # workflow's signer identity before extracting it. The artifact is bound
+      # to this run; a release asset is whatever is attached at the moment the
+      # image job reads it.
+      - name: Hand the tarball to the image lane
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ferrobridge-${{ inputs.tag }}-${{ inputs.target }}
+          path: ${{ env.ASSET }}
+          if-no-files-found: error
+          retention-days: 1
+
+      # The release is still a DRAFT here and stays one: the caller's finalize
+      # job publishes it after every target has attached its assets. Release
+      # immutability freezes a PUBLISHED release, so publishing here would lock
+      # the other three targets out.
+      - name: Attach every asset to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          ASSET_NAME: ${{ env.ASSET }}
+          CHECKSUM_NAME: ${{ env.CHECKSUM }}
+          SBOM_NAME: ${{ env.SBOM }}
+          BUILD_SBOM_NAME: ${{ env.BUILD_SBOM }}
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+            "$ASSET_NAME" \
+            "$CHECKSUM_NAME" \
+            "$SBOM_NAME" \
+            "$BUILD_SBOM_NAME" \
+            "${ASSET_NAME}.sigstore.json" \
+            "${ASSET_NAME}.sbom.sigstore.json" \
+            "${ASSET_NAME}.build-sbom.sigstore.json" \
+            "${ASSET_NAME}.intoto.jsonl"

@@ -19,7 +19,9 @@
 #                          product-version row, and against the root Cargo.toml
 #                          [workspace.package] version once that exists.
 #   5. CI tool pins        the zizmor, actionlint, shellcheck and hadolint
-#                          versions .github/workflows/ci.yml installs, against
+#                          versions .github/workflows/ci.yml installs, and the
+#                          cargo-auditable, cargo-cyclonedx and syft versions
+#                          the two release workflows install, against
 #                          docs/VERSIONS.md.
 #   6. docs toolchain      the mdBook, mdbook-toc and mdbook-mermaid defaults of
 #                          .github/actions/docs-toolchain/action.yml against
@@ -274,6 +276,40 @@ if [ -f .github/workflows/ci.yml ]; then
   done
 else
   note "no .github/workflows/ci.yml yet, skipped"
+fi
+
+echo "== release tool pins (.github/workflows/release-*.yml <-> docs/VERSIONS.md)"
+# Every version of TOOL that the release workflows install, deduplicated, so a
+# tool named in both files has to carry the same pin in both.
+release_tool_pins() {
+  local tool="$1" wf
+  for wf in .github/workflows/release-build.yml .github/workflows/release-image.yml; do
+    [ -f "$wf" ] || continue
+    sed -nE "s|^[[:space:]]*tool:[[:space:]]*${tool}@([^[:space:]]+).*|\1|p" "$wf"
+  done | sort -u
+}
+
+if [ -f .github/workflows/release-build.yml ] || [ -f .github/workflows/release-image.yml ]; then
+  agreed=0
+  for tool in cargo-auditable cargo-cyclonedx syft; do
+    want="$(pin_of "$tool" docs/VERSIONS.md)"
+    found="$(release_tool_pins "$tool")"
+    if [ -z "$want" ]; then
+      bad "docs/VERSIONS.md has no '$tool' row"
+    elif [ -z "$found" ]; then
+      bad "the release workflows pin no $tool version"
+    elif [ "$(printf '%s\n' "$found" | wc -l | tr -d '[:space:]')" != "1" ]; then
+      bad "$tool: the release workflows disagree ($(printf '%s' "$found" | tr '\n' ' '))"
+    elif [ "$found" != "$want" ]; then
+      bad "$tool: the release workflows pin $found, docs/VERSIONS.md pins $want"
+    else
+      agreed=$((agreed + 1))
+      note "OK: $tool $found"
+    fi
+  done
+  [ "$agreed" -eq 3 ] && note "OK: all three release tool pins agree"
+else
+  note "no release-build.yml or release-image.yml yet, skipped"
 fi
 
 echo "== docs toolchain (.github/actions/docs-toolchain <-> docs/VERSIONS.md)"
