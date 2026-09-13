@@ -1736,7 +1736,7 @@ context chapters; the plural profile list the prose describes against the
 single profile the schema holds; the `FHIRConnect/v0.0.1` grammar string in
 the v1.0.0 context example; the R5 the prose invites against the schema's
 `["R4"]`; the `../` claim about openEHR; the `^` operator's one-sentence
-definition; header-level `unidirectional`; the undefined `DV_PROPORTION`
+definition; document-root `unidirectional`; the undefined `DV_PROPORTION`
 extension URLs; the FHIRconnect library's duplicate names, dangling
 references, mis-cased keywords, stale profile versions and the EEHRxF
 context's `sem_ver` contradiction; the OMOCL grammar images that document a
