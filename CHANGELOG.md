@@ -271,6 +271,11 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   body-size ceiling, so a caught panic, a `408` and a `413` each leave their
   one `request` line with the route, the status and the request id, where
   before they left none.
+- The SonarQube Cloud coverage step compiles and instruments one workspace
+  member at a time and merges the profiles into the single `lcov.info` Sonar
+  imports (#146); the workspace-wide all-features form was killed on the
+  runner with exit 143 and never produced a report. The step now fails when
+  the report carries zero line records.
 
 ### Changed
 
