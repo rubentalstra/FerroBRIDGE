@@ -9,6 +9,8 @@
 //! FerroBRIDGE issue #1 and follows the repository's architecture document.
 #![doc(test(attr(deny(warnings))))]
 
+pub mod engine;
+
 pub mod model;
 
 /// The FHIRconnect grammar this crate implements.

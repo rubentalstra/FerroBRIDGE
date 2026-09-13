@@ -24,6 +24,10 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- `fhirconnect::engine`, the bidirectional interpreter over one
+  traversal (#84). The data-type chapter is a set of lenses, each written
+  once and run both ways under the well-behaved-lens laws.
+
 - `fhirconnect::resolve`, context resolution into one immutable program per
   context mapping (#83). `compile` selects the start model mapping, applies the
   extensions the context declares in declaration order and file order, and
