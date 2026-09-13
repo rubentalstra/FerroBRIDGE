@@ -1,0 +1,241 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ferrobridge.eu/schemas/fhirconnect/v1.0.0/model-mapping.schema.json",
+  "title": "FerroBRIDGE strict FHIRConnect model mapping schema",
+  "description": "A closed reading of the FHIRconnect v1.0.0 model and extension mapping file, authored from the specification prose and the published model-mapping.schema.json. README.md beside this file records every difference from the published schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["grammar", "type", "metadata", "spec"],
+  "properties": {
+    "grammar": {
+      "type": "string",
+      "pattern": "^FHIRConnect/v[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["model", "extension"]
+    },
+    "metadata": { "$ref": "#/definitions/metadata" },
+    "spec": { "$ref": "#/definitions/spec" },
+    "preprocessor": { "$ref": "#/definitions/preprocessor" },
+    "mappings": { "$ref": "#/definitions/mappings" }
+  },
+  "definitions": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "version"],
+      "properties": {
+        "system": { "type": "string", "enum": ["FHIR"] },
+        "version": { "type": "string", "enum": ["R4"] },
+        "extends": { "type": "string", "minLength": 1 },
+        "unidirectional": { "$ref": "#/definitions/direction" },
+        "conceptmap": { "type": "string", "minLength": 1 },
+        "openEhrConfig": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["archetype"],
+          "properties": {
+            "archetype": { "type": "string", "minLength": 1 },
+            "revision": { "type": "string", "minLength": 1 }
+          }
+        },
+        "fhirConfig": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["structureDefinition"],
+          "properties": {
+            "structureDefinition": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    },
+    "direction": {
+      "type": "string",
+      "pattern": "^([oO][pP][eE][nN][eE][hH][rR]->[fF][hH][iI][rR]|[fF][hH][iI][rR]->[oO][pP][eE][nN][eE][hH][rR])$"
+    },
+    "dataType": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "QUANTITY",
+        "DATETIME",
+        "CODEABLECONCEPT",
+        "CODING",
+        "STRING",
+        "DOSAGE",
+        "ID",
+        "IDENTIFIER",
+        "PROPORTION"
+      ]
+    },
+    "path": { "type": "string", "minLength": 1 },
+    "pathList": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/path" }
+    },
+    "textOrTextList": {
+      "anyOf": [
+        { "type": "string" },
+        { "type": "array", "items": { "type": "string" } }
+      ]
+    },
+    "condition": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["targetRoot", "operator"],
+      "properties": {
+        "targetRoot": { "$ref": "#/definitions/path" },
+        "targetAttribute": { "$ref": "#/definitions/path" },
+        "targetAttributes": { "$ref": "#/definitions/pathList" },
+        "operator": {
+          "type": "string",
+          "enum": ["one of", "not of", "empty", "not empty", "type"]
+        },
+        "criteria": { "$ref": "#/definitions/textOrTextList" },
+        "criterias": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "identifying": { "type": "boolean" }
+      }
+    },
+    "with": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fhir": { "$ref": "#/definitions/path" },
+        "openehr": { "$ref": "#/definitions/path" },
+        "type": { "$ref": "#/definitions/dataType" },
+        "value": { "type": "string" }
+      }
+    },
+    "manualPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "value"],
+      "properties": {
+        "path": { "$ref": "#/definitions/path" },
+        "value": { "type": "string" }
+      }
+    },
+    "manualPaths": {
+      "anyOf": [
+        { "$ref": "#/definitions/manualPath" },
+        { "type": "array", "items": { "$ref": "#/definitions/manualPath" } }
+      ]
+    },
+    "manual": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "fhir": { "$ref": "#/definitions/manualPaths" },
+          "openehr": { "$ref": "#/definitions/manualPaths" },
+          "fhirCondition": { "$ref": "#/definitions/condition" },
+          "openehrCondition": { "$ref": "#/definitions/condition" },
+          "value": { "type": "string" },
+          "unidirectional": { "$ref": "#/definitions/direction" }
+        }
+      }
+    },
+    "link": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "meaning": { "type": "string" },
+        "type": { "type": "string" }
+      }
+    },
+    "splitTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": { "type": "string", "minLength": 1 },
+        "path": { "$ref": "#/definitions/path" },
+        "unique": { "$ref": "#/definitions/pathList" }
+      }
+    },
+    "hierarchy": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "with": { "$ref": "#/definitions/with" },
+        "split": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fhir": { "$ref": "#/definitions/splitTarget" },
+            "openehr": { "$ref": "#/definitions/splitTarget" }
+          }
+        }
+      }
+    },
+    "preprocessor": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "fhirCondition": { "$ref": "#/definitions/condition" },
+        "openehrCondition": { "$ref": "#/definitions/condition" },
+        "hierarchy": { "$ref": "#/definitions/hierarchy" }
+      }
+    },
+    "mappings": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/mapping" }
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/definitions/dataType" },
+        "extension": {
+          "type": "string",
+          "enum": ["add", "append", "overwrite"]
+        },
+        "appendTo": { "type": "string", "minLength": 1 },
+        "with": { "$ref": "#/definitions/with" },
+        "unidirectional": { "$ref": "#/definitions/direction" },
+        "manual": { "$ref": "#/definitions/manual" },
+        "fhirCondition": { "$ref": "#/definitions/condition" },
+        "openehrCondition": { "$ref": "#/definitions/condition" },
+        "followedBy": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["mappings"],
+          "properties": {
+            "mappings": { "$ref": "#/definitions/mappings" }
+          }
+        },
+        "reference": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["resourceType", "mappings"],
+          "properties": {
+            "resourceType": { "type": "string", "minLength": 1 },
+            "mappings": { "$ref": "#/definitions/mappings" }
+          }
+        },
+        "slotArchetype": { "type": ["string", "null"] },
+        "mappingCode": { "type": "string", "minLength": 1 },
+        "link": { "$ref": "#/definitions/link" },
+        "participationsFunction": { "type": "string", "minLength": 1 },
+        "conceptmap": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

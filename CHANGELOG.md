@@ -29,6 +29,36 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   sample of the vendored mapping library, run weekly and on dispatch by
   `.github/workflows/fuzz.yml` on a nightly toolchain (#155). The lane is
   time-boxed and never a pull-request gate; a panic or a hang is the finding.
+- `fhirconnect::model`, the FHIRconnect file model and its three validation
+  layers (#82). `ast` carries one Rust type per construct a model, extension
+  or context mapping file may hold, each node positioned at the YAML it was
+  read from; `parse` lowers the positioned tree the shared loader returns and
+  refuses an unknown key, a node of the wrong kind and a keyword value outside
+  its documented set; `schema` compiles JSON Schema over both the schemas
+  FHIRconnect publishes and the stricter pair this crate ships under
+  `schemas/`; `semantic` applies the rules a schema cannot express (a
+  condition's `criteria` against its operator, a `targetRoot` that names a
+  child of the `with` path it filters, an extension method outside an extension
+  file, a `reference` mapping without `$reference`, a `mappingCode` naming no
+  registered function, and every cross-file reference against the loaded set);
+  and `load` runs all of it over one file or a whole set, returning every
+  diagnostic rather than the first.
+- The vendored FHIRconnect mapping library is exercised by all three layers.
+  One test pins the exact set the published schemas refuse (24 of the 107
+  files, 34 errors, over `link`, `mappingCode` and a null `mappings`), so an
+  upstream schema fix fails the test and forces a re-adjudication; another
+  pins that this crate's schemas accept every file except the three that write
+  `mappings` with no value; a third pins the library's own defects, including
+  six duplicate `metadata.name` declarations and eleven cross-references that
+  name no loaded mapping.
+
+### Changed
+
+- Keyword values compare case-insensitively inside their documented set, and a
+  value outside the set is refused. The FHIRconnect text is case-inconsistent
+  about its own keyword values, so `openEHR->fhir` and `$openEHRRoot` are
+  admitted beside `openehr->fhir` and `$openehrRoot`. YAML keys stay exact,
+  because the published schemas fix them with a JSON Schema `enum`.
 
 ## [0.0.2] - 2026-09-13
 

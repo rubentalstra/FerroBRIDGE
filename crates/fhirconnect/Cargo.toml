@@ -17,12 +17,17 @@ keywords = ["fhirconnect", "fhir", "openehr", "mapping", "healthcare"]
 categories = ["parser-implementations", "science"]
 # The crate line is published on crates.io; include is the packaged content.
 publish = true
-include = ["src/**", "README.md", "LICENSE"]
+include = ["src/**", "schemas/**", "README.md", "LICENSE"]
 
 [dependencies]
+jsonschema.workspace = true
+openehr-mapping-core.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
+insta.workspace = true
 
 [lints]
 workspace = true
