@@ -198,6 +198,25 @@ no binary to download yet.
 
 ### Changed
 
+- Both generators now write the two SPDX tags directly under the
+  `@generated … DO NOT EDIT.` banner, which keeps the first line (#129):
+  Apache-2.0 for `crates/fhir-types`, the crate's own licence, and BUSL-1.1 for
+  `crates/omop-cdm`'s generated tree and the provenance note beside the copied
+  DDL. The four copied DDL files are vendored upstream material and carry no
+  header of ours. `scripts/checks/versions.sh` anchors its SPDX pattern to the
+  start of a line, so it still catches a header claim and no longer reads the
+  emitter's own string literal as one. `fhir-types` moves to 0.1.102, its
+  packaged bytes having changed. `fhir-codegen` also refuses a
+  `contentReference` whose target is outside the emitted closure or behind a
+  narrower feature than the element referencing it (#133), naming the element
+  path and the reference; the vendored packages are consistent today, so the
+  generated tree is unchanged. `deny.toml` records the rule its allow list
+  follows (#134): a licence joins the list the day a dependency needs it, with
+  the reason it is acceptable here, and leaves when the last crate carrying it
+  does. All four licences the issue named are carried by crates in the current
+  graph, so none is pruned and `cargo deny check` reports no unencountered
+  licence.
+
 - `docs/architecture.md` is rewritten as the output of the third research
   pass (2026-09-12): the `fhir-types` move is re-baselined on the crate as it
   is today (no cargo features, a lexical-precision `Value` instead of

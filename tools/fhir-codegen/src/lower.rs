@@ -65,6 +65,28 @@ pub enum LowerError {
         /// The second type name.
         second: String,
     },
+    /// A `contentReference` names an element the emitted closure does not hold.
+    #[error("{path} references {reference}, which the emitted closure does not hold")]
+    UnresolvedContentReference {
+        /// The referencing element path.
+        path: String,
+        /// The reference, as the element spells it.
+        reference: String,
+    },
+    /// A `contentReference` names an element behind a narrower feature.
+    #[error(
+        "{path} is emitted behind the {feature} feature and references {reference}, which is emitted behind {target_feature}"
+    )]
+    ContentReferenceOutOfScope {
+        /// The referencing element path.
+        path: String,
+        /// The reference, as the element spells it.
+        reference: String,
+        /// The feature gating the referencing element.
+        feature: &'static str,
+        /// The feature gating the referenced element.
+        target_feature: &'static str,
+    },
 }
 
 /// How many values a field holds.
@@ -261,13 +283,17 @@ impl VersionModule {
     /// # Errors
     ///
     /// Returns [`LowerError`] for a non-choice element with several types, a
-    /// choice with none, or two structures lowering to one Rust name.
+    /// choice with none, two structures lowering to one Rust name, or a
+    /// `contentReference` the closure does not hold in a wide enough scope.
     pub fn lower(
         closure: &TypeClosure,
         version_module: &str,
         package_name: &str,
         package_version: &str,
     ) -> Result<Self, LowerError> {
+        check_content_references(closure.structures(), |name| {
+            closure.scope(name).unwrap_or(RootScope::Resources)
+        })?;
         let mut model = Self {
             name: version_module.to_owned(),
             package_name: package_name.to_owned(),
@@ -624,6 +650,60 @@ fn type_codes(shape: &ElementShape) -> Vec<String> {
     }
 }
 
+/// Refuses a `contentReference` the emitted tree cannot spell.
+///
+/// An element with a `contentReference` takes the children of the element it
+/// names (<https://hl7.org/fhir/R4/elementdefinition.html#ElementDefinition.contentReference>),
+/// which the emitter writes as that element's backbone type. The type exists
+/// only when its structure is in the closure and its feature is enabled
+/// wherever the referencing element is, so the target's scope has to be at
+/// least as wide as the referrer's.
+fn check_content_references(
+    structures: &BTreeMap<String, ResolvedStructure>,
+    scope_of: impl Fn(&str) -> RootScope,
+) -> Result<(), LowerError> {
+    for structure in structures.values() {
+        let scope = scope_of(&structure.name);
+        for element in &structure.elements {
+            let ElementShape::ContentReference {
+                structure: url,
+                path: target_path,
+            } = &element.shape
+            else {
+                continue;
+            };
+            let reference = url.as_ref().map_or_else(
+                || format!("#{target_path}"),
+                |url| format!("{url}#{target_path}"),
+            );
+            let unresolved = || LowerError::UnresolvedContentReference {
+                path: element.path.clone(),
+                reference: reference.clone(),
+            };
+            let target = match url {
+                None => structure,
+                Some(url) => structures
+                    .values()
+                    .find(|candidate| &candidate.url == url)
+                    .ok_or_else(unresolved)?,
+            };
+            if target.element(target_path).is_none() {
+                return Err(unresolved());
+            }
+            let target_scope = scope_of(&target.name);
+            if target_scope > scope {
+                return Err(LowerError::ContentReferenceOutOfScope {
+                    path: element.path.clone(),
+                    reference,
+                    feature: scope.feature(),
+                    target_feature: target_scope.feature(),
+                });
+            }
+        }
+    }
+    Ok(())
+}
+
 /// The element path a `contentReference` names, without the leading `#`.
 fn content_reference_of(shape: &ElementShape) -> Option<String> {
     match shape {
@@ -816,7 +896,141 @@ impl TarjanSearch<'_> {
 mod tests {
     use std::collections::{BTreeMap, BTreeSet};
 
-    use super::strongly_connected_components;
+    use super::{
+        ElementShape, LowerError, Max, ResolvedElement, ResolvedStructure, RootScope,
+        StructureKind, check_content_references, strongly_connected_components,
+    };
+
+    /// The canonical URL the synthetic structure named `name` carries.
+    fn url_of(name: &str) -> String {
+        format!("http://example.org/StructureDefinition/{name}")
+    }
+
+    fn element(path: &str, shape: ElementShape) -> ResolvedElement {
+        ResolvedElement {
+            id: None,
+            path: path.to_owned(),
+            min: 0,
+            max: Max::Bounded(1),
+            shape,
+            binding: None,
+            short: None,
+            definition: None,
+            is_modifier: false,
+            is_summary: false,
+        }
+    }
+
+    /// Two structures: `Narrow` holds one element referencing `reference`, and
+    /// `Wide` holds the backbone element `Wide.item` that reference names.
+    fn two_structures(reference: ElementShape) -> BTreeMap<String, ResolvedStructure> {
+        let structure = |name: &str, elements: Vec<ResolvedElement>| ResolvedStructure {
+            url: url_of(name),
+            name: name.to_owned(),
+            kind: StructureKind::Resource,
+            is_abstract: false,
+            base_definition: None,
+            elements,
+        };
+        BTreeMap::from([
+            (
+                String::from("Narrow"),
+                structure(
+                    "Narrow",
+                    vec![
+                        element("Narrow", ElementShape::Root),
+                        element("Narrow.link", reference),
+                    ],
+                ),
+            ),
+            (
+                String::from("Wide"),
+                structure(
+                    "Wide",
+                    vec![
+                        element("Wide", ElementShape::Root),
+                        element("Wide.item", ElementShape::Typed(Vec::new())),
+                    ],
+                ),
+            ),
+        ])
+    }
+
+    /// `Narrow` is behind `terminology`, `Wide` behind `resources`.
+    fn split_scopes(name: &str) -> RootScope {
+        if name == "Narrow" {
+            RootScope::Terminology
+        } else {
+            RootScope::Resources
+        }
+    }
+
+    #[test]
+    fn a_content_reference_into_a_narrower_feature_is_refused() {
+        let structures = two_structures(ElementShape::ContentReference {
+            structure: Some(url_of("Wide")),
+            path: String::from("Wide.item"),
+        });
+        match check_content_references(&structures, split_scopes) {
+            Err(LowerError::ContentReferenceOutOfScope {
+                path,
+                feature,
+                target_feature,
+                ..
+            }) => {
+                assert_eq!(path, "Narrow.link");
+                assert_eq!(feature, "terminology");
+                assert_eq!(target_feature, "resources");
+            }
+            other => panic!("expected ContentReferenceOutOfScope, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn a_content_reference_to_a_structure_outside_the_closure_is_refused() {
+        let structures = two_structures(ElementShape::ContentReference {
+            structure: Some(url_of("Absent")),
+            path: String::from("Absent.item"),
+        });
+        match check_content_references(&structures, split_scopes) {
+            Err(LowerError::UnresolvedContentReference { path, reference }) => {
+                assert_eq!(path, "Narrow.link");
+                assert_eq!(
+                    reference,
+                    "http://example.org/StructureDefinition/Absent#Absent.item"
+                );
+            }
+            other => panic!("expected UnresolvedContentReference, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn a_content_reference_to_an_element_the_target_lacks_is_refused() {
+        let structures = two_structures(ElementShape::ContentReference {
+            structure: Some(url_of("Wide")),
+            path: String::from("Wide.nowhere"),
+        });
+        assert!(matches!(
+            check_content_references(&structures, split_scopes),
+            Err(LowerError::UnresolvedContentReference { .. })
+        ));
+    }
+
+    #[test]
+    fn a_content_reference_into_a_wider_feature_is_accepted() {
+        let structures = two_structures(ElementShape::ContentReference {
+            structure: Some(url_of("Wide")),
+            path: String::from("Wide.item"),
+        });
+        let wider = |name: &str| {
+            if name == "Narrow" {
+                RootScope::Resources
+            } else {
+                RootScope::Terminology
+            }
+        };
+        assert!(check_content_references(&structures, wider).is_ok());
+    }
 
     fn graph(pairs: &[(&str, &str)]) -> BTreeMap<String, BTreeSet<String>> {
         let mut edges: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();

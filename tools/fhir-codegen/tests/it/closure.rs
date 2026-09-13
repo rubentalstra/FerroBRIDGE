@@ -7,7 +7,7 @@ use std::fs;
 use fhir_codegen::closure::TypeClosure;
 use fhir_codegen::fhir::StructureKind;
 use fhir_codegen::lower::{Cardinality, Target, TypeKind, VersionModule};
-use fhir_codegen::naming::type_name;
+use fhir_codegen::naming::{backbone_name, type_name};
 use fhir_codegen::package::Package;
 use fhir_codegen::roots::{RootScope, RootSet};
 
@@ -468,4 +468,52 @@ fn r5_integer64_is_an_i64_and_expansion_carries_properties() {
     };
     let value = fields.iter().find(|f| f.name == "value").expect("value[x]");
     assert_eq!(value.ty.card, Cardinality::One);
+}
+
+#[test]
+fn every_content_reference_targets_a_type_in_a_scope_at_least_as_wide() {
+    for (module, _, package) in packages() {
+        // The scopes are recomputed from the narrow root set here rather than
+        // read off the model, so the assertion does not rest on the value the
+        // emitter itself wrote.
+        let roots = RootSet::select(package).expect("the terminology root set selects");
+        let narrow =
+            TypeClosure::compute(package, &roots).expect("the terminology closure computes");
+        let terminology: BTreeSet<String> =
+            VersionModule::lower(&narrow, module, "package", "version")
+                .expect("the terminology model lowers")
+                .types
+                .into_keys()
+                .collect();
+        let (_, model) = wide(module, package);
+        let mut references = 0_usize;
+        for ty in model.types.values() {
+            let TypeKind::Struct { fields } = &ty.kind else {
+                continue;
+            };
+            for field in fields {
+                let Some(path) = field.content_reference.as_deref() else {
+                    continue;
+                };
+                references += 1;
+                let target = backbone_name(path);
+                assert!(
+                    model.types.contains_key(&target),
+                    "{module}: {} references {path}, which lowers to {target}, a type the model does not hold",
+                    field.path
+                );
+                if terminology.contains(&ty.name) {
+                    assert!(
+                        terminology.contains(&target),
+                        "{module}: {} is behind terminology and references {target}, which only resources reaches",
+                        field.path
+                    );
+                }
+            }
+        }
+        assert!(
+            references > 0,
+            "{module}: the package carries content references"
+        );
+    }
 }
