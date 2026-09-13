@@ -17,6 +17,12 @@ ignore = []
 
 [licenses]
 version = 2
+# cargo-deny leaves dev-dependencies out of the licence check by default, on
+# the ground that they reach no downstream crate and no binary. They are
+# compiled here and in CI, so the check covers them: without this, the licence
+# of insta, proptest and openehr-adl is never read at all
+# (https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html).
+include-dev = true
 # Permissive licences a BUSL-1.1 project can depend on (and that its Apache 2.0
 # Change License admits). Copyleft is not allowed by default; a weak-copyleft
 # dependency gets a crate-scoped exceptions entry with its reason.
@@ -74,7 +80,25 @@ wildcards = "deny"
 # registry. External wildcards stay denied.
 allow-wildcard-paths = true
 deny = []
-skip = []
+# Each entry names a duplicate that is inherent to the pinned set: a transitive
+# crate holding an older major that nothing in this workspace can move, because
+# the requirement belongs to a dependency's manifest. The entry names the older
+# version, so a new duplicate of the same crate still warns, and cargo deny
+# reports the entry as unmatched once upstream catches up, which is how it
+# deletes itself. Every entry was read off `cargo deny check bans` on
+# 2026-09-13 (#145).
+skip = [
+  { crate = "base64@0.22.1", reason = "bollard, wiremock, tonic, hyper-util, postgres-protocol and docker_credential still require 0.22; reqwest and ureq are already on 0.23" },
+  { crate = "getrandom@0.2.17", reason = "ring 0.17 alone requires 0.2; everything else in the graph is on 0.3 or 0.4" },
+  { crate = "getrandom@0.3.4", reason = "rand_core 0.9, under proptest and bollard, requires 0.3; the pinned set is on rand 0.10 and getrandom 0.4" },
+  { crate = "hashbrown@0.15.5", reason = "chumsky 0.13, under the openehr language crates, requires 0.15; indexmap is on 0.17" },
+  { crate = "r-efi@5.3.0", reason = "a UEFI-target crate under getrandom 0.3, which is itself skipped above" },
+  { crate = "rand@0.9.5", reason = "bollard and proptest require 0.9; the pinned set is on rand 0.10" },
+  { crate = "rand_core@0.9.5", reason = "the core half of the same rand 0.9 duplicate" },
+  { crate = "syn@2.0.119", reason = "thirteen proc-macro crates still require syn 2; serde, thiserror, tokio and clap have moved to syn 3" },
+  { crate = "tower-http@0.6.11", reason = "reqwest 0.13.5 requires 0.6; the server is on the pinned 0.7" },
+  { crate = "windows-sys@0.52.0", reason = "ring 0.17 alone requires 0.52; every other Windows consumer is on 0.61" },
+]
 skip-tree = []
 
 [sources]

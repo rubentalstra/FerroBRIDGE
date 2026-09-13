@@ -18,11 +18,12 @@ build.
 
 ## What runs today
 
-Nine workflows:
+Ten workflows:
 
 - `.github/workflows/ci.yml`: the two-tier gate. Tier 1 runs now (zizmor,
   actionlint, shellcheck, hadolint, the comment-style guard, the versions
-  guard); tier 2 is the Rust set, gated behind a `detect` job that looks for a
+  guard, the favicon guard); tier 2 is the Rust set, gated behind a `detect`
+  job that looks for a
   root `Cargo.toml`. The `conclusion` job is the single required status check
   on `main`. The design is `docs/ci-cd.md`.
 - `.github/workflows/scorecard.yml`: OpenSSF Scorecard, an independent score of
@@ -58,6 +59,11 @@ Nine workflows:
   its own output as a consumer would. Both are reusable workflows because SLSA
   Build Level 3 needs the signing identity out of reach of caller-defined
   steps.
+- `.github/workflows/pin-freshness.yml`: the weekly freshness read over every
+  pin no Dependabot ecosystem covers, the analyzer versions in `ci.yml` and the
+  documentation toolchain. It opens one issue when a pin is behind its newest
+  upstream release and fails only when a release could not be read
+  (`docs/ci-cd.md`).
 - `.github/workflows/publish-crates.yml`: the between-releases crates.io lane,
   a manual dispatch that is a dry run unless `publish` is set. It shares
   `scripts/release/publish-crates.sh` with the release lane; the rules are
