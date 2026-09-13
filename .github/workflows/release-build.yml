@@ -143,10 +143,11 @@ jobs:
           TARGET: ${{ inputs.target }}
         run: |
           set -euo pipefail
-          # Scoped to the binary-producing crate, so the document describes the
-          # released artifact rather than the whole workspace. `--spec-version
-          # 1.5` is the highest cargo-cyclonedx emits and its default is 1.3,
-          # so dropping the flag would silently downgrade every release.
+          # `--describe binaries` makes each document describe one binary and
+          # its dependency graph, which is what a consumer of the tarball
+          # wants. `--spec-version 1.5` is the highest cargo-cyclonedx emits
+          # and its default is 1.3, so dropping the flag would silently
+          # downgrade every release.
           cargo cyclonedx \
             --manifest-path app/ferrobridge-server/Cargo.toml \
             --format json --describe binaries --spec-version 1.5
@@ -178,12 +179,14 @@ jobs:
           set -euo pipefail
           build_sbom="ferrobridge-${TAG}-${TARGET}.spdx.json"
           syft scan "file:pkg/ferrobridge" -o "spdx-json=${build_sbom}"
-          # syft reads the dependency list cargo-auditable embedded in the
-          # binary, so the document names the crates. A document with only the
-          # file itself means the build lost `cargo auditable`, and that fails
+          # A `pkg:cargo/` purl is produced only by syft's rust-audit
+          # cataloger, which reads the `.dep-v0` section cargo-auditable wrote.
+          # None of them means the build lost `cargo auditable`, and that fails
           # the release rather than shipping an SBOM that describes nothing.
-          if ! jq -e '.packages | length > 2' "$build_sbom" > /dev/null; then
-            echo "::error::${build_sbom} lists no crate dependencies; was the binary built with cargo auditable?" >&2
+          # The count is not asserted: a binary whose crate has no dependencies
+          # yet carries exactly one, itself.
+          if ! jq -e '[.packages[].externalRefs[]? | select(.referenceLocator | startswith("pkg:cargo/"))] | length > 0' "$build_sbom" > /dev/null; then
+            echo "::error::${build_sbom} carries no pkg:cargo purl; was the binary built with cargo auditable?" >&2
             exit 1
           fi
           echo "BUILD_SBOM=$build_sbom" >> "$GITHUB_ENV"
