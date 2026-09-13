@@ -1707,7 +1707,7 @@ extension.
 | YAML parser | `serde-saphyr` 1.2.0 | anchors, aliases, merge keys, spans, maintained | `serde_yaml` (archived), `serde-yaml-ng`, `serde_yml` |
 | Bulk load | binary `COPY` via `tokio-postgres`, `sqlx` for checked queries | throughput; the reference engine's per-row persist is its ceiling | ORM-style inserts |
 
-## 16. What is deliberately outside, and what is reported upstream
+## 16. What is deliberately outside, and what is recorded as an upstream report
 
 Outside: demographics (FHIRconnect sends resources to an unspecified external
 endpoint, and the ITS-REST Demographic API is `DEVELOPMENT`), FHIR
@@ -1716,13 +1716,14 @@ other than 5.4, OMOP to openEHR (OMOCL has no construct for it), and the IHE
 audit and terminology-binding concerns that stay with the CDR (section 12).
 Each is a tracker issue, not silence.
 
-Reported upstream as `upstream-report` issues, each with the citation and the
-resolution sought. On 2026-09-12 none had yet been filed on the upstream
-trackers; filing is the owner's action, and each report is first checked
-against the specification's own open issues so a duplicate is a comment there
-rather than a new issue (the specification already tracks the composition
-layer, the REST API, terminology, date and period combinations, the LINK
-output, missing RM fields and the `DV_QUANTITY` unit). The reports: the
+Recorded as `upstream-report` issues, each with the citation and the
+resolution an upstream would need. The issues are the record and stay in this
+tracker, outside any milestone; nothing is filed on the specifications' own
+trackers (owner decision 2026-09-13). Each report was checked against the
+specification's own open issues so that it names what is already tracked
+there (the composition layer, the REST API, terminology, date and period
+combinations, the LINK output, missing RM fields and the `DV_QUANTITY` unit).
+The reports: the
 FHIRconnect schema defects and the three schema-invalid mapping types; the
 `meta.url` element that does not exist in R4, in both the bundles and the
 context chapters; the plural profile list the prose describes against the

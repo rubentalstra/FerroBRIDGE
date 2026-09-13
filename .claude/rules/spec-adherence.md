@@ -93,10 +93,12 @@ published URLs above are the same content at the pinned version.
   found against a reference server is attributed against the specification
   before anything is changed, and if the defect is theirs it is reported to
   that project rather than worked around here.
-- **A defect in a published specification is reported outbound.** File it as an
-  `upstream-report` issue (`issue-workflow.md`) with what the specification
-  says, what this implementation does, and the resolution sought. Do not encode
-  a workaround with no record.
+- **A defect in a published specification is recorded as an `upstream-report`
+  issue** (`issue-workflow.md`) with what the specification says, what this
+  implementation does, and the resolution an upstream would need. The issue
+  is the record and stays in this tracker; nothing is filed on an external
+  tracker, and no issue asks anyone to do so (owner decision 2026-09-13). Do
+  not encode a workaround with no record.
 - Subagents doing spec-facing work must be handed the relevant sections or URLs
   in their prompt, and reviewers verify claims against them.
 
