@@ -21,8 +21,10 @@ releases, and a release is cut when its milestone has no open issue left.
   OpenSSF Scorecard, CodeQL over the workflow files, and SonarQube Cloud's
   multi-language sweep.
 - The release lane, which turns a signed `vX.Y.Z` tag into a GitHub release
-  whose notes are the changelog section for that version. Its binary build is
-  gated on the Cargo workspace and is skipped until that lands.
+  whose notes are the changelog section for that version. It builds a Linux
+  binary per architecture and the container image in isolated reusable
+  workflows, so each carries provenance and an SBOM you can verify against the
+  workflow that signed it.
 - This documentation site.
 
 The Cargo workspace is a skeleton: the root manifests with the full lint set,
