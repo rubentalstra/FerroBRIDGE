@@ -18,7 +18,7 @@
 //! - [`element`] resolves a path against the element table of one FHIR
 //!   version, naming every element it traverses.
 //! - [`read`] evaluates a resolved path over a document.
-//! - [`write`] sets a value at a writable path, creating what the element
+//! - [`mod@write`] sets a value at a writable path, creating what the element
 //!   table's cardinality says to create.
 //! - [`error`] holds the error types the four steps return.
 //!

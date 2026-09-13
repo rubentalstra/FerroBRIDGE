@@ -29,7 +29,6 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   sample of the vendored mapping library, run weekly and on dispatch by
   `.github/workflows/fuzz.yml` on a nightly toolchain (#155). The lane is
   time-boxed and never a pull-request gate; a panic or a hang is the finding.
-<<<<<<< HEAD
 - `fhirconnect::model`, the FHIRconnect file model and its three validation
   layers (#82). `ast` carries one Rust type per construct a model, extension
   or context mapping file may hold, each node positioned at the YAML it was
@@ -60,7 +59,6 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   about its own keyword values, so `openEHR->fhir` and `$openEHRRoot` are
   admitted beside `openehr->fhir` and `$openehrRoot`. YAML keys stay exact,
   because the published schemas fix them with a JSON Schema `enum`.
-=======
 - `fhirconnect::tree`, the bidirectional path model behind `with.fhir` (#81).
   It parses the expression FHIRconnect writes, including the two head forms the
   specification adds (`$resource` and `$fhirRoot`) and the `^` parent operator,
@@ -77,7 +75,6 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   `last()`, an index) is refused with the offending step named, and every other
   refusal names the element path the table holds. A write applies to a copy and
   replaces the document only when every step succeeded.
->>>>>>> 77cac78e (feat(fhirconnect): the bidirectional FHIR path model over the element table)
 
 ## [0.0.2] - 2026-09-13
 
