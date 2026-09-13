@@ -22,6 +22,8 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ## [Unreleased]
 
+## [0.0.2-rc.1] - 2026-09-13
+
 ### Added
 
 - `app/ferrobridge-server`, the `ferrobridge` binary shape (#21): a thin
@@ -531,5 +533,6 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   after each version. Every header, the README badge and licensing section,
   and the community and governance documents name it (#12).
 
-[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.2-rc.1...HEAD
+[0.0.2-rc.1]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.1...v0.0.2-rc.1
 [0.0.1]: https://github.com/rubentalstra/FerroBRIDGE/releases/tag/v0.0.1
