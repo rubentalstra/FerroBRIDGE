@@ -50,7 +50,9 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   `archetype_release_version`, the two archetype-identifier comparisons a
   mapping language needs outside a path: an identifier is matched in its
   interface form, and only an ADL 2 identifier states the release version below
-  its major.
+  its major. `ResolvedNode::rm_path` hands back the `aqlPath` the index already
+  parsed, so a consumer never re-parses it and the empty path of the root node
+  reads as the composition root.
 - A `fuzz/` crate with `cargo fuzz` targets over the YAML mapping loader and
   the openEHR mapping-path parser, seeded from the synthetic fixtures and a
   sample of the vendored mapping library, run weekly and on dispatch by
