@@ -590,7 +590,10 @@ is silent:**
   `profile.version` is accepted, because the schema makes them optional, and
   the program records "unpinned". The library's own EEHRxF context declares
   `template.sem_ver: "0.1.0"` beside an OPT whose `sem_ver` is
-  `9.0.0-alpha.1`, so that file is a recorded load error under this rule.
+  `9.0.0-alpha.1`; that file is a recorded load error, refused earlier at the
+  dangling-reference rule (one of its extensions names no loaded mapping,
+  #101), so compilation never reaches its selector, and the pair is pinned by
+  an isolated test on the selector instead.
 - A context is selected by the instance's `meta.profile` set membership on
   the FHIR side and by `template_id` on the openEHR side; `templateId` on the
   REST API (section 4.7) pins the choice when several contexts share a
