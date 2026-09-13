@@ -87,6 +87,13 @@ fn every_generated_file_carries_the_banner() -> Result<(), Box<dyn Error>> {
             ),
             "{relative} does not open with the generated banner"
         );
+        // The banner holds the first line and the SPDX tags follow it (#129).
+        assert!(
+            text.contains(
+                "\n// SPDX-FileCopyrightText: Ruben Talstra\n// SPDX-License-Identifier: BUSL-1.1\n"
+            ),
+            "{relative} does not carry the SPDX tags under the banner"
+        );
     }
     Ok(())
 }
