@@ -1,6 +1,6 @@
 ---
 name: ci-runner-memory
-description: A workspace-wide cargo check or clippy is killed on the hosted runner (exit 143, no diagnostic) because two generated giants compile side by side; lint and check one package at a time with cargo hack, and never lint the all-features union of fhir-types in CI
+description: A workspace-wide cargo check, clippy or instrumented test build is killed on the hosted runner (exit 143, no diagnostic) because two generated giants compile side by side; lint and check one package at a time with cargo hack, and never lint the all-features union of fhir-types in CI
 metadata:
   type: feedback
 ---
@@ -26,3 +26,10 @@ job that compiles the workspace uses the per-package form from the start.
 Locally the all-features clippy still runs on a machine with the memory. A
 143 with no diagnostic is memory, never a lint: read the log for the runner
 shutdown line before changing code.
+
+The same shape killed the SonarQube coverage lane on 2026-09-13 (#146): its
+`cargo llvm-cov nextest --workspace --all-features` step never produced an
+lcov file, so the coverage Sonar imported was nothing. The lane now runs
+`cargo llvm-cov nextest --no-report -p <package>` per workspace member and
+merges with `cargo llvm-cov report`; the step fails when the report has zero
+line records, so a silent empty import cannot come back.

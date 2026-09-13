@@ -35,16 +35,20 @@ OHDSI vocabulary.
 
 The FHIR model is the `fhir-types` crate, generated in this repository from the
 HL7 FHIR packages (R4 4.0.1, R4B 4.3.0, R5 5.0.0, R6 6.0.0-ballot5, THO 7.3.0)
-and published to crates.io; its version line continues from 0.1.43, the last
-release from the sibling project it moved from. The openEHR model comes from
-four published crates, pinned on their 0.0 minor line:
+and published to crates.io; its version line continues the one the sibling
+project published up to 0.1.97 before the crate moved here, and the current
+pin is the `fhir-types` row of `docs/VERSIONS.md`. The openEHR model comes
+from six published crates, pinned together on their 0.0 minor line (0.0.64
+today; the pin matrix is the authority):
 
-| Crate | Version | Used for |
-|---|---|---|
-| `openehr-base` | 0.0.61 | the RM foundation types, including partial dates |
-| `openehr-rm` | 0.0.61 | the RM 1.1.0 model, its canonical JSON codec, the path parser |
-| `openehr-its` | 0.0.61 | the OPT 1.4 codec, the Web Template builder, the composition builder, the ITS-REST data types |
-| `openehr-query` | 0.0.61 | the AQL 1.1.0 parser and printer |
+| Crate | Used for |
+|---|---|
+| `openehr-base` | the RM foundation types, including partial dates |
+| `openehr-rm` | the RM 1.1.0 model, its canonical JSON codec, the path parser |
+| `openehr-its` | the OPT 1.4 codec, the Web Template builder, the composition builder, the ITS-REST data types |
+| `openehr-query` | the AQL 1.1.0 parser and printer |
+| `openehr-am` | the AOM2 types an ADL 2 template decodes into |
+| `openehr-adl` | test only: compiles the ADL 2 fixtures from their `.adls` sources |
 
 ## Language and toolchain
 

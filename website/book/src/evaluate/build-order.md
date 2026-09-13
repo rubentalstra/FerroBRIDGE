@@ -27,10 +27,13 @@ releases, and a release is cut when its milestone has no open issue left.
   workflow that signed it.
 - This documentation site.
 
-The Cargo workspace is a skeleton: the root manifests with the full lint set,
-eleven placeholder library crates at version 0.0.0 that hold their names on
-crates.io, a thin `ferrobridge` binary that does nothing yet, and a test
-support crate. There is no container image and no release with a binary.
+The Cargo workspace holds the foundation: the generated FHIR model and OMOP
+CDM layer, the shared mapping core, the ITS-REST and terminology clients, the
+`ferrobridge` binary with its `serve` surface (configuration, telemetry,
+health and readiness, graceful shutdown), the test support crate, the
+distroless container image with its compose quickstart, and the release lane
+that builds and attests both. The FHIR and OMOP round trips are the next two
+releases.
 
 ## What comes next
 
