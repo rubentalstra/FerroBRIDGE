@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored context that reaches the published
+# CLUSTER.anatomical_location.v1 through the slot the published
+# EVALUATION.problem_diagnosis.v1 writes, with no extension applied. It exists
+# to pin the refusal that slot produces: the cluster writes $resource where the
+# slot anchor was meant, so its condition resolves against the enclosing
+# resource.
+grammar: FHIRConnect/v1.0.0
+type: context
+metadata:
+  name: ferrobridge_anatomical.context
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+context:
+  profile:
+    url: "http://example.org/fhir/StructureDefinition/ferrobridge-anatomical"
+  template:
+    id: "ferrobridge.diagnose.v1"
+  archetypes:
+    - "EVALUATION.problem_diagnosis.v1"
+    - "CLUSTER.anatomical_location.v1"
+  start: "EVALUATION.problem_diagnosis.v1"

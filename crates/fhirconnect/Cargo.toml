@@ -22,6 +22,10 @@ include = ["src/**", "schemas/**", "README.md", "LICENSE"]
 [dependencies]
 jsonschema.workspace = true
 openehr-mapping-core.workspace = true
+# The openEHR RM path model the mapping foundation resolves a path into
+# (docs/architecture.md section 3); the foundation returns its types, so this
+# crate names the same crate rather than re-exporting them.
+openehr-rm.workspace = true
 serde_json.workspace = true
 # The generated FHIR model: the lexical `Value` tree the path model walks and
 # the element table that guides it (docs/architecture.md section 4.1).
@@ -31,6 +35,9 @@ thiserror.workspace = true
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
 insta.workspace = true
+# The operational-template parser the resolve tests build their Web Template
+# with; the crate itself takes the built template from its caller.
+openehr-its.workspace = true
 proptest.workspace = true
 
 [lints]

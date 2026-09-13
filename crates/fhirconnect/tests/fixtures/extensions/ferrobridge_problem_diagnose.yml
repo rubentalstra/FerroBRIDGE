@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored extension of the published
+# EVALUATION.problem_diagnosis.v1, shaped like the diagnosis extension of the
+# mapping library and exercising all three extension methods. Every code system
+# is example.org, which RFC 6761 section 6.5 reserves for examples.
+grammar: FHIRConnect/v1.0.0
+type: extension
+metadata:
+  name: ferrobridge_problem_diagnose
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  extends: EVALUATION.problem_diagnosis.v1
+
+mappings:
+  - name: "problemQualifier"
+    extension: "add"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.problem_qualifier.v2]"
+    slotArchetype: "CLUSTER.problem_qualifier.v2"
+
+  - name: "assertedDate"
+    extension: "add"
+    unidirectional: "openehr->fhir"
+    with:
+      fhir: "$resource.recordedDate"
+      openehr: "$archetype/data[at0001]/items[at0003]"
+      type: "DATETIME"
+
+  - name: "codedProblemDiagnose"
+    extension: "append"
+    appendTo: "problemDiagnose"
+    followedBy:
+      mappings:
+        - name: "coding"
+          with:
+            fhir: "coding"
+            openehr: "$openehrRoot"
+          fhirCondition:
+            targetRoot: "coding"
+            targetAttribute: "system"
+            operator: "one of"
+            criteria: "http://example.org/fhir/CodeSystem/ferrobridge-diagnosis"
+          followedBy:
+            mappings:
+              - name: "codingSystem"
+                with:
+                  fhir: "$fhirRoot"
+                manual:
+                  - name: "system"
+                    fhir:
+                      - path: "system"
+                        value: "http://example.org/fhir/CodeSystem/ferrobridge-diagnosis"
+
+              - name: "certainty"
+                with:
+                  fhir: "extension"
+                  openehr: "$archetype/data[at0001]/items[at0073]"
+                fhirCondition:
+                  targetRoot: "extension"
+                  targetAttribute: "url"
+                  operator: "one of"
+                  criteria: "http://example.org/fhir/StructureDefinition/diagnostic-certainty"
+                followedBy:
+                  mappings:
+                    - name: "certaintyValue"
+                      with:
+                        fhir: "value.ofType(Coding)"
+                        openehr: "$archetype/data[at0001]/items[at0073]"
+                        type: "CODING"
+
+  - name: "bodySiteCluster"
+    extension: "overwrite"
+    with:
+      fhir: "$resource.bodySite.text"
+      openehr: "$archetype/data[at0012]/items[at0013]"
+      type: "STRING"
+
+  - name: "dateTime"
+    extension: "overwrite"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype"
+      type: "NONE"
+    followedBy:
+      mappings:
+        - name: "onset"
+          with:
+            fhir: "onset.ofType(dateTime)"
+            openehr: "data[at0001]/items[at0077]"
+            type: "DATETIME"
+          openehrCondition:
+            targetRoot: "$archetype/data[at0001]"
+            targetAttributes:
+              - "items[at0077]"
+            operator: "not empty"
