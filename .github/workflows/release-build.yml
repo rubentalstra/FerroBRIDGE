@@ -149,17 +149,21 @@ jobs:
           # so dropping the flag would silently downgrade every release.
           cargo cyclonedx \
             --manifest-path app/ferrobridge-server/Cargo.toml \
-            --format json --describe binaries --spec-version 1.5 --locked
-          # cargo-cyclonedx names the file after the binary; find it rather
-          # than hard-coding the stem, then rename it after the asset it
-          # describes.
-          src="$(find app/ferrobridge-server -maxdepth 1 -name '*.cdx.json' | head -n1)"
-          if [ -z "$src" ]; then
-            echo "::error::cargo-cyclonedx produced no .cdx.json" >&2
+            --format json --describe binaries --spec-version 1.5
+          # cargo-cyclonedx walks every member of the workspace and names each
+          # document after the binary it describes, so the one this release
+          # ships is selected by path rather than by stem, and the tool crates'
+          # documents stay where they were written. Exactly one match is the
+          # invariant: the server crate declares one [[bin]], and a second file
+          # here would mean the document being uploaded is a guess.
+          sbom="ferrobridge-${TAG}-${TARGET}.cdx.json"
+          matches="$(find app/ferrobridge-server -maxdepth 1 -name '*.cdx.json' | sort)"
+          count="$(printf '%s' "$matches" | grep -c . || true)"
+          if [ "$count" != "1" ]; then
+            echo "::error::expected one .cdx.json beside app/ferrobridge-server/Cargo.toml, found ${count}" >&2
             exit 1
           fi
-          sbom="ferrobridge-${TAG}-${TARGET}.cdx.json"
-          mv "$src" "$sbom"
+          mv "$matches" "$sbom"
           echo "SBOM=$sbom" >> "$GITHUB_ENV"
 
       - name: Install syft

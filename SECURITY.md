@@ -77,10 +77,56 @@ server a deployment points the bridge at (report those to that project), and an
 issue that requires an already-compromised host or a misconfiguration outside
 FerroBRIDGE's control.
 
-## How releases will be verified
+## Verifying a release
 
-There is no release yet. When releases begin, binaries are built in an isolated
-reusable workflow (SLSA Build Level 3) and published with a SHA-256 checksum, a
-Sigstore build-provenance bundle, and a CycloneDX dependency SBOM, verifiable
-with `gh attestation verify` (`.claude/rules/ci-cd.md`). This section gains the
-exact command with the first release, and claims nothing before then.
+Every binary and every image is built in an isolated reusable workflow, which
+is what puts the signing identity out of reach of the build steps (SLSA v1.2
+Build Level 3). The commands below are how you check that, and they need
+[GitHub CLI](https://cli.github.com/) 2.49 or later. There is no release yet,
+so the first tag is what they first apply to.
+
+**The tarball came from this repository's release-build lane.**
+
+```sh
+gh attestation verify ferrobridge-vX.Y.Z-<target>.tar.gz \
+  --repo rubentalstra/FerroBRIDGE \
+  --signer-workflow rubentalstra/FerroBRIDGE/.github/workflows/release-build.yml
+```
+
+This proves that the exact bytes you downloaded were built by that workflow, in
+this repository, at a commit the attestation names. `--signer-workflow` is the
+load-bearing half: without it, any workflow in the repository would satisfy the
+check.
+
+**The image came from this repository's release-image lane.**
+
+```sh
+gh attestation verify oci://ghcr.io/rubentalstra/ferrobridge:X.Y.Z \
+  --repo rubentalstra/FerroBRIDGE \
+  --signer-workflow rubentalstra/FerroBRIDGE/.github/workflows/release-image.yml
+```
+
+The same proof for the image index the tag resolves to. Each platform manifest
+carries its own provenance and an SPDX SBOM. To check one of those, pass
+`oci://ghcr.io/rubentalstra/ferrobridge@sha256:<manifest digest>` in place of
+the tag, and add `--predicate-type https://spdx.dev/Document/v2.3` to read the
+SBOM attestation in place of the provenance.
+
+**The download is not corrupt.**
+
+```sh
+sha256sum -c ferrobridge-vX.Y.Z-<target>.tar.gz.sha256sum
+```
+
+This proves only that the file matches the checksum published beside it. It is
+not a signature, and it says nothing about who built the file: an attacker who
+can replace the tarball can replace the checksum. Use it to catch a truncated
+download, and use `gh attestation verify` for everything else.
+
+Each release also carries two SBOMs per target, a CycloneDX document of the
+source dependency graph (`.cdx.json`) and an SPDX document read from the
+shipped binary (`.spdx.json`), both attested; the Sigstore bundles
+(`.sigstore.json`) and the provenance envelope (`.intoto.jsonl`) for offline
+verification; and the dependency list embedded in the binary itself by
+`cargo auditable`, which `syft`, `trivy`, `grype` and `osv-scanner` read
+directly. The lane that produces them is `docs/release.md`.

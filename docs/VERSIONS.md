@@ -262,6 +262,24 @@ container images, pinned by tag and by digest.
 Keep the locally installed versions on these numbers, so a finding costs a
 local run rather than a CI round trip (`.claude/rules/ci-cd.md`).
 
+## Release tool pins
+
+The release lane builds and describes every published artifact with three more
+tools, each fetched by the same digest-pinned `taiki-e/install-action`, which
+verifies the upstream release checksum. They decide what a consumer can prove
+about a binary, so a floating version here would change the contents of a
+release without a reviewed change (`docs/release.md`).
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| `cargo-auditable` | 0.7.5 | `.github/workflows/release-build.yml` |
+| `cargo-cyclonedx` | 0.5.9 | `.github/workflows/release-build.yml` |
+| `syft` | 1.51.1 | `.github/workflows/release-build.yml`, `.github/workflows/release-image.yml` |
+
+`scripts/checks/versions.sh` reads every `tool:` line of the two release
+workflows back against these rows, so a bump moves one row and the workflows
+follow it.
+
 ## GitHub Actions pins
 
 Every `uses:` in `.github/workflows/**` is pinned to a full commit SHA with a

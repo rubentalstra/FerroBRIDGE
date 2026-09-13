@@ -18,7 +18,7 @@ build.
 
 ## What runs today
 
-Seven workflows. Six of them work on a repository with no code:
+Nine workflows:
 
 - `.github/workflows/ci.yml`: the two-tier gate. Tier 1 runs now (zizmor,
   actionlint, shellcheck, hadolint, the comment-style guard, the versions
@@ -43,21 +43,27 @@ Seven workflows. Six of them work on a repository with no code:
 - `.github/workflows/release.yml`: the release lane, dormant until a `v*` tag
   is pushed. It validates the tag, checks it against every file that declares
   the product version, takes the release notes from the matching
-  `CHANGELOG.md` section, creates the release as a draft, and publishes only
-  after the expected asset set is complete. Its binary lane sits behind the
-  same root-`Cargo.toml` detection and is skipped until the workspace lands.
-  Its `crates` leg uploads the library crates to crates.io after the release is
+  `CHANGELOG.md` section, creates the release as a draft, calls the two lanes
+  below, and publishes only after the expected asset set is complete. Its
+  `crates` leg uploads the library crates to crates.io after the release is
   public. The checklist a cut follows is `docs/release.md` (#63).
+- `.github/workflows/release-build.yml`: the reusable per-target binary lane
+  (#23). `cargo auditable` build with no cache, the tarball and its checksum,
+  a CycloneDX source SBOM and a syft build SBOM, three attestations, and the
+  provenance envelope checked before upload.
+- `.github/workflows/release-image.yml`: the reusable image lane (#23). It
+  verifies this run's musl tarballs against the build lane's signer identity,
+  stages them for `docker/Dockerfile`, pushes the multi-platform image to GHCR,
+  attests the index and both platform manifests as OCI referrers, and verifies
+  its own output as a consumer would. Both are reusable workflows because SLSA
+  Build Level 3 needs the signing identity out of reach of caller-defined
+  steps.
 - `.github/workflows/publish-crates.yml`: the between-releases crates.io lane,
   a manual dispatch that is a dry run unless `publish` is set. It shares
   `scripts/release/publish-crates.sh` with the release lane; the rules are
   `crates-publishing.md`. This is the one workflow that needs the Cargo
   workspace to do anything.
 
-The Rust lanes in `ci.yml`, `codeql.yml` and `sonar.yml` are written and gated
-off, so they need no edit when the workspace lands. `.github/dependabot.yml`
-carries the same property: its `cargo` and `docker` entries are inert until
-their manifests exist, and so does the binary lane of `release.yml`.
 `.github/release.yml` is a different file from the workflow: it configures
 GitHub's auto-generated release notes, which the lane never uses, because a
 release ships the hand-curated changelog section or it fails.
@@ -109,7 +115,7 @@ crate-version guard on pull requests (`scripts/checks/crate-version-guard.sh`);
 at `--all`. **Always `--locked`**, so CI fails on
 lockfile drift rather than on registry drift. Commit `Cargo.lock`.
 
-## Supply chain (the shape a release lane takes)
+## Supply chain (the release lane, `docs/release.md`)
 
 - **A release builds in a REUSABLE workflow** (`on: workflow_call`) so the
   builder is isolated and the signing identity is unreachable from build steps.
