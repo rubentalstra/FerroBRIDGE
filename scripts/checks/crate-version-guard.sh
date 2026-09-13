@@ -14,6 +14,11 @@
 #
 #   crate-version-guard.sh <base-ref> [head-ref]
 #
+# The head ref may be the literal WORKTREE, which compares the base with the
+# tree as it stands rather than with a commit. That is what the pre-commit hook
+# passes: the manifests and Cargo.lock are read from disk either way, so the
+# changed set has to come from the same place to agree with them.
+#
 # Exit 0 when no packaged content changed, or every member whose packaged
 # content changed also moved its version, with the root requirement and
 # Cargo.lock following. Exit 1 otherwise. The `no-crate-bump` pull-request label
@@ -22,10 +27,22 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-base="${1:?usage: crate-version-guard.sh <base-ref> [head-ref]}"
+base="${1:?usage: crate-version-guard.sh <base-ref> [head-ref|WORKTREE]}"
 head="${2:-HEAD}"
 
-changed="$(git diff --name-only "$base" "$head" --)"
+# `git diff <base> -- …` with no second ref reads the working tree, which is
+# the WORKTREE head; everything else names two commits.
+changed_paths() {
+  if [[ "$head" = "WORKTREE" ]]; then git diff --name-only "$base" --; else git diff --name-only "$base" "$head" --; fi
+}
+diff_text() {
+  if [[ "$head" = "WORKTREE" ]]; then git diff "$base" -- "$@"; else git diff "$base" "$head" -- "$@"; fi
+}
+head_file() {
+  if [[ "$head" = "WORKTREE" ]]; then cat "$1"; else git show "$head:$1"; fi
+}
+
+changed="$(changed_paths)"
 
 # Only the `[workspace.dependencies]` table renders into a packaged manifest;
 # the `[workspace.package]` keys (the product `version`, edition, licence) are
@@ -38,10 +55,10 @@ workspace_dependencies() {
 # table actually declares on either side.
 touched_dependencies=""
 if grep -qx 'Cargo.toml' <<<"$changed"; then
-  diff_names="$(git diff "$base" "$head" -- Cargo.toml |
+  diff_names="$(diff_text Cargo.toml |
     grep -E '^[+-][A-Za-z0-9_-]+[[:space:]]*=' |
     sed -E 's/^[+-]//; s/[[:space:]]*=.*//' | sort -u || true)"
-  dependency_names="$( { git show "$head:Cargo.toml"; git show "$base:Cargo.toml"; } | workspace_dependencies)"
+  dependency_names="$( { head_file Cargo.toml; git show "$base:Cargo.toml"; } | workspace_dependencies)"
   for name in $diff_names; do
     grep -qx "$name" <<<"$dependency_names" || continue
     touched_dependencies="$touched_dependencies $name"
