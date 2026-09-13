@@ -18,10 +18,11 @@ and the two say the same thing.
    answers nothing, or the owner calls the cut and moves the stragglers to the
    next milestone.
 2. **The product version moves in every file that declares it.** Today that is
-   `CITATION.cff` and the product row of `docs/VERSIONS.md`, plus the root
-   `Cargo.toml` `[workspace.package]` `version`. `scripts/checks/versions.sh`
-   fails on any file left behind. This is the product line only; the library
-   crates keep their own versions ([crate versions](crate-versions.md)).
+   `CITATION.cff`, the product row of `docs/VERSIONS.md`, the root `Cargo.toml`
+   `[workspace.package]` `version`, and the image tag default in
+   `compose.yaml`. `scripts/checks/versions.sh` fails on any file left behind.
+   This is the product line only; the library crates keep their own versions
+   ([crate versions](crate-versions.md)).
 3. **The changelog names the release.** `[Unreleased]` becomes the version and
    the date, with a fresh empty `[Unreleased]` above it and a new link
    reference. What sits under the version heading is what the release notes
@@ -47,20 +48,28 @@ unsigned tag is refused at push time.
 not run on a push to `main`, on a pull request, or in a merge group.
 
 ```text
-plan ── github-release (draft) ── build-binaries ── finalize-release (publish) ── crates
+plan ── github-release (draft) ── build-binaries ── build-image ── finalize-release (publish) ── crates
 ```
 
 - **plan** validates the tag shape, checks it against every file that declares
   the product version, and extracts the `## [X.Y.Z]` section of `CHANGELOG.md`
   as the release notes. A missing or empty section fails the release, so a cut
-  can never ship with notes generated from the commit range.
-- **github-release** creates the release as a draft carrying those notes. A
-  draft is mutable and invisible to anyone browsing releases, which is the
-  window the asset uploads need.
-- **build-binaries** builds the release artefacts.
+  can never ship with notes generated from the commit range. It also emits the
+  target matrix the build jobs and the asset check both read, so the two cannot
+  drift apart.
+- **github-release** creates the release as a draft carrying those notes and
+  attaches `compose.yaml`. A draft is mutable and invisible to anyone browsing
+  releases, which is the window the asset uploads need.
+- **build-binaries** calls the reusable `release-build.yml` once per target, on
+  a runner of that target's own architecture, with no cache and with
+  `cargo auditable`. Each call produces the tarball, its checksum, two SBOMs,
+  three Sigstore bundles and the provenance envelope.
+- **build-image** calls the reusable `release-image.yml` once the musl binaries
+  exist, verifies them against the build lane's signer identity, and pushes
+  `ghcr.io/rubentalstra/ferrobridge` for `linux/amd64` and `linux/arm64`.
 - **finalize-release** checks that the draft carries every asset this version
   promises, then publishes. Publishing last means a half-assembled release is
-  never visible.
+  never visible. A pre-release publishes with `--latest=false`.
 - **crates** uploads the `crates/*` members to crates.io once the release is
   public, so a refused upload never leaves a release half-cut. It runs in the
   `crates-io` environment, whose required reviewer pauses it until the owner
@@ -81,6 +90,13 @@ edited.
 non-fast-forward updates on `refs/tags/v*` and requires signatures, so a
 published `vX.Y.Z` cannot be moved to another commit and cannot be deleted.
 The commit a release names stays the commit it was cut from.
+
+**Every artefact carries verifiable provenance.** Each tarball ships a Sigstore
+bundle and a SLSA provenance envelope, and the image carries its attestations
+as OCI referrers. Because the build runs in a reusable workflow, the signing
+certificate names that workflow, so `gh attestation verify --signer-workflow`
+pins the artefact to the release lane rather than to any workflow in the
+repository. The commands are in `SECURITY.md`.
 
 **The crates are verified after upload.** The publish script reads the registry
 back rather than trusting the upload's exit status.
