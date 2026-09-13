@@ -224,6 +224,14 @@ no binary to download yet.
   nothing yet; and the `ferrobridge-testkit` tool crate with the pin-matrix
   reader. CI tier 2 is active from this change on.
 
+### Fixed
+
+- The server's request log line now covers every outcome (#21 follow-up): the
+  log middleware sits outside the panic catcher, the request timeout and the
+  body-size ceiling, so a caught panic, a `408` and a `413` each leave their
+  one `request` line with the route, the status and the request id, where
+  before they left none.
+
 ### Changed
 
 - Both generators now write the two SPDX tags directly under the

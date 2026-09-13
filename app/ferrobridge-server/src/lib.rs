@@ -190,21 +190,23 @@ pub fn router(state: Arc<AppState>, server: &ServerSettings) -> Router {
 ///
 /// Outermost first: the request-id normalizer, the layer that mints one, the
 /// panic renderer, the layer that propagates the id onto the response, the
-/// panic catcher, the request timeout, the body-size ceiling, and the request
-/// log. The renderer sits outside the propagate layer because it reads the id
-/// from the response the propagate layer has just stamped.
+/// request log, the panic catcher, the request timeout and the body-size
+/// ceiling. The renderer sits outside the propagate layer because it reads the
+/// id from the response the propagate layer has just stamped. The log sits
+/// outside the catcher, the timeout and the ceiling so a caught panic, a `408`
+/// and a `413` each leave their one request line like every other outcome.
 pub fn with_middleware(router: Router, state: Arc<AppState>, server: &ServerSettings) -> Router {
     router
-        .layer(axum::middleware::from_fn_with_state(
-            state,
-            request_log::log,
-        ))
         .layer(RequestBodyLimitLayer::new(server.body_limit))
         .layer(TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             server.request_timeout,
         ))
         .layer(CatchPanicLayer::custom(panic::caught))
+        .layer(axum::middleware::from_fn_with_state(
+            state,
+            request_log::log,
+        ))
         .layer(PropagateRequestIdLayer::new(request_id::HEADER))
         .layer(axum::middleware::map_response(panic::render))
         .layer(SetRequestIdLayer::new(request_id::HEADER, request_id::Mint))
