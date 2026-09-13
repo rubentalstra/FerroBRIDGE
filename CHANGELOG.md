@@ -306,6 +306,11 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   (#45), and a decision for each open Scorecard alert, including the
   branch-protection and code-review trade-offs a single maintainer accepts
   (#48).
+- Every Rust job goes through the `./.github/actions/setup-rust` composite
+  (#157), which gained `cache-shared-key` and `cache-save-if` inputs for the
+  coverage lane; the `actions-rust-lang/setup-rust-toolchain` digest now lives
+  in one file.
+
 - Both generators now write the two SPDX tags directly under the
   `@generated … DO NOT EDIT.` banner, which keeps the first line (#129):
   Apache-2.0 for `crates/fhir-types`, the crate's own licence, and BUSL-1.1 for
