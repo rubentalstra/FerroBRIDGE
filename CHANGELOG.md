@@ -115,6 +115,19 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   The table types (`Schemas`, `TypeSchema`, `FieldSchema`, `Kind`, `ValueKind`)
   moved from `fhir_types::xml` to `fhir_types::schema` in the same change, and
   `Schemas::is_resource` is public.
+- The conformance findings of the `fhirconnect` model and resolve review
+  (#177). An openEHR path that names more than one template node is now
+  `fc-ambiguous-template-node` naming the candidates instead of binding to
+  their parent; the reference-model attributes a path walks below the deepest
+  template node are checked against the `openehr-rm` attribute model; an
+  `append` refuses every key but `followedBy`; a condition and a
+  `hierarchy.split` path are read-only sites, so `where()`, `first()`,
+  `last()`, an index filter and `resolve()` are accepted there; a slotted or
+  extension file's `preprocessor` and a file-level `spec.conceptmap` and
+  `spec.unidirectional` reach the program; `^` crosses a `reference` boundary
+  into the enclosing resource; the model layer no longer refuses an `appendTo`
+  that another extension's `add` supplies; and every nested refusal names the
+  model path of the node it is about.
 
 ## [0.0.2] - 2026-09-13
 

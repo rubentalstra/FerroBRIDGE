@@ -31,18 +31,18 @@ program ferrobridge_diagnose.context
   mapping composer from EVALUATION.problem_diagnosis.v1
     fhir $resource.recorder -> Condition.recorder complex writable
     openehr /composer -> /composer PARTY_PROXY
-  mapping other_participations from EVALUATION.problem_diagnosis.v1
+  mapping other_participations from ferrobridge_problem_diagnose
     fhir $resource.asserter -> Condition.asserter complex writable
-    openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/diagnose/other_participations -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail diagnose/other_participations
+    openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/other_participations -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail other_participations
     type NONE
-    mapping other_participations.participationFunction from EVALUATION.problem_diagnosis.v1
+    mapping other_participations.participationFunction from ferrobridge_problem_diagnose
       fhir $resource.asserter -> Condition.asserter complex writable
-      openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/diagnose/other_participations -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail diagnose/other_participations
+      openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/other_participations -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail other_participations
       manual function
-        openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/diagnose/other_participations/function -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail diagnose/other_participations/function = asserter
-    mapping other_participations.performer from EVALUATION.problem_diagnosis.v1
+        openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/other_participations/function -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail other_participations/function = asserter
+    mapping other_participations.performer from ferrobridge_problem_diagnose
       fhir $resource.asserter -> Condition.asserter complex writable
-      openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/diagnose/other_participations -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail diagnose/other_participations
+      openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/other_participations -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail other_participations
   mapping provider from EVALUATION.problem_diagnosis.v1
     fhir $resource.recorder -> Condition.recorder complex writable
     openehr /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/provider -> /content[openEHR-EHR-EVALUATION.problem_diagnosis.v1] EVALUATION tail provider

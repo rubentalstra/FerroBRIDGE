@@ -35,6 +35,8 @@ use openehr_mapping_core::index::archetype_release_version;
 use openehr_mapping_core::index::node_id_matches;
 use openehr_mapping_core::path::MappingPath;
 use openehr_mapping_core::position::Located;
+use openehr_mapping_core::template::PathError;
+use openehr_rm::v1_2::model as rm_model;
 use openehr_rm::v1_2::paths::PathSegment;
 use openehr_rm::v1_2::paths::RmPath;
 
@@ -139,7 +141,7 @@ struct Compiler<'a> {
     template: &'a WebTemplateIndex,
     table: &'a dyn Table,
     codes: &'a dyn MappingCodeRegistry,
-    compacted: BTreeMap<String, &'a ResolvedNode>,
+    compacted: BTreeMap<String, Vec<&'a ResolvedNode>>,
     interior: BTreeSet<String>,
     extensions: Vec<&'a ModelMappingFile>,
     diagnostics: Vec<Diagnostic>,
@@ -1266,11 +1268,17 @@ impl<'a> Compiler<'a> {
                 tail,
                 occurrences(self.template, node),
             )),
-            Err(message) => {
+            Err(error) => {
+                let (code, message) = match error {
+                    LocateError::Unknown(message) => (ResolveCode::UnknownTemplateNode, message),
+                    LocateError::Ambiguous(message) => {
+                        (ResolveCode::AmbiguousTemplateNode, message)
+                    }
+                };
                 self.diagnostics.push(diagnostic(
                     file,
                     owner,
-                    ResolveCode::UnknownTemplateNode,
+                    code,
                     written.position(),
                     path,
                     message,
@@ -1290,7 +1298,7 @@ impl<'a> Compiler<'a> {
     /// the reference model or through a structure the template compacted away.
     /// A segment the template carries nowhere and that constrains a node
     /// identity is refused. No specification governs this: our own design.
-    fn locate(&self, path: &RmPath) -> Result<(&'a ResolvedNode, RmPath), String> {
+    fn locate(&self, path: &RmPath) -> Result<(&'a ResolvedNode, RmPath), LocateError> {
         let total = path.segments.len();
         for taken in (0..=total).rev() {
             let head = path.segments.get(..taken).unwrap_or_default();
@@ -1303,33 +1311,69 @@ impl<'a> Compiler<'a> {
                 absolute: false,
                 segments: tail.to_vec(),
             };
-            let found = self
-                .template
-                .at_rm_path(&prefix)
-                .ok()
-                .or_else(|| self.compacted.get(&prefix.to_string()).copied());
-            let Some(node) = found else {
-                continue;
+            let node = match self.template.at_rm_path(&prefix) {
+                Ok(node) => node,
+                Err(PathError::AmbiguousPath { .. }) => {
+                    return Err(self.ambiguity(&prefix, &self.template.all_at_rm_path(&prefix)));
+                }
+                Err(_) => match self.compacted.get(&prefix.to_string()).map(Vec::as_slice) {
+                    Some([only]) => *only,
+                    Some(several) if several.len() > 1 => {
+                        return Err(self.ambiguity(&prefix, several));
+                    }
+                    _ => continue,
+                },
             };
             let constrained = rest.segments.iter().find(|segment| constrains(segment));
             if let Some(segment) = constrained
                 && !self.interior.contains(&path.to_string())
             {
-                return Err(format!(
+                return Err(LocateError::Unknown(format!(
                     "the template `{}` has no node at `{path}`; the deepest node it reaches is \
                      `{}` and `{}` below it names a node identity the template does not carry",
                     self.template.template_id(),
                     node.aql_path().as_str(),
                     segment.attribute
-                ));
+                )));
+            }
+            if let Err(message) = rm_tail(node.rm_type(), &rest) {
+                return Err(LocateError::Unknown(format!(
+                    "the template `{}` reaches `{}` and `{path}` walks `{rest}` below it: \
+                     {message}",
+                    self.template.template_id(),
+                    node.aql_path().as_str()
+                )));
             }
             return Ok((node, rest));
         }
-        Err(format!(
+        Err(LocateError::Unknown(format!(
             "the template `{}` has no node at `{path}`",
             self.template.template_id()
+        )))
+    }
+
+    /// Builds the refusal for a path that names more than one template node.
+    fn ambiguity(&self, path: &RmPath, candidates: &[&ResolvedNode]) -> LocateError {
+        let named: Vec<&str> = candidates
+            .iter()
+            .map(|node| node.flat_id().as_str())
+            .collect();
+        LocateError::Ambiguous(format!(
+            "`{path}` names {} nodes of the template `{}`: {}",
+            named.len(),
+            self.template.template_id(),
+            named.join(", ")
         ))
     }
+}
+
+/// Why an openEHR path names no single node of the operational template.
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum LocateError {
+    /// No node of the template carries the path.
+    Unknown(String),
+    /// More than one node carries it, so nothing says which one is meant.
+    Ambiguous(String),
 }
 
 /// Returns the `$resource` expression every FHIR path is rooted at.
@@ -1347,6 +1391,70 @@ static RESOURCE_ROOT: LazyLock<FhirPath> = LazyLock::new(|| {
     let root = FhirPath::from_str("$resource").expect("`$resource` should parse as an expression");
     root
 });
+
+/// Checks the reference-model attributes an openEHR path walks below the
+/// deepest template node it reaches.
+///
+/// A Web Template carries the nodes an archetype constrains and stops there, so
+/// everything below the deepest one is plain reference model. The attribute
+/// model `openehr-rm` generates from the RM BMM is the oracle for it
+/// (<https://docs.rs/openehr-rm/0.0.64/openehr_rm/v1_2/model/fn.attribute.html>):
+/// an attribute is looked up on the node's type and on the concrete subtypes of
+/// it, because a declared type may be abstract (`ELEMENT.value` is
+/// `DATA_VALUE`) and the attribute then belongs to one of its descendants.
+///
+/// A type the model does not carry stops the walk rather than refusing it: the
+/// mapping is then checked as far as the model reaches and no further.
+fn rm_tail(rm_type: &str, tail: &RmPath) -> Result<(), String> {
+    let mut candidates = concrete_forms(rm_type);
+    if candidates.is_empty() {
+        return Ok(());
+    }
+    for segment in &tail.segments {
+        let attribute = segment.attribute.as_str();
+        let mut carried = false;
+        let mut next: Vec<&'static str> = Vec::new();
+        for candidate in &candidates {
+            let Some(found) = rm_model::attribute(candidate, attribute) else {
+                continue;
+            };
+            carried = true;
+            for form in concrete_forms(found.declared_type) {
+                if !next.contains(&form) {
+                    next.push(form);
+                }
+            }
+        }
+        if !carried {
+            return Err(format!(
+                "`{attribute}` is no attribute of `{}` in the openEHR reference model",
+                candidates.join("`, `")
+            ));
+        }
+        if next.is_empty() {
+            return Ok(());
+        }
+        candidates = next;
+    }
+    Ok(())
+}
+
+/// Returns the reference-model class plus every concrete class below it.
+///
+/// An empty result means the reference model carries no class of that name,
+/// which is what stops [`rm_tail`] rather than refusing.
+fn concrete_forms(rm_type: &str) -> Vec<&'static str> {
+    let Some(class) = rm_model::class(rm_type) else {
+        return Vec::new();
+    };
+    let mut forms: Vec<&'static str> = vec![class.name];
+    for descendant in class.descendants {
+        if !forms.contains(descendant) {
+            forms.push(descendant);
+        }
+    }
+    forms
+}
 
 /// Whether a path segment constrains which node it selects.
 fn constrains(segment: &PathSegment) -> bool {
@@ -1403,8 +1511,12 @@ fn interior_paths(template: &WebTemplateIndex) -> BTreeSet<String> {
     found
 }
 
-/// Maps the path a mapping writes for a compacted node onto that node.
-fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, &ResolvedNode> {
+/// Maps the path a mapping writes for a compacted node onto the nodes it
+/// reaches.
+///
+/// A shortened path that reaches more than one node keeps all of them, because
+/// binding the mapping to one of them would bind it to a node nothing named.
+fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, Vec<&ResolvedNode>> {
     let mut found: BTreeMap<String, Vec<&ResolvedNode>> = BTreeMap::new();
     for node in template.nodes() {
         let path = node.rm_path();
@@ -1423,10 +1535,4 @@ fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, &ResolvedNode
         found.entry(shortened.to_string()).or_default().push(node);
     }
     found
-        .into_iter()
-        .filter_map(|(key, nodes)| match *nodes.as_slice() {
-            [only] => Some((key, only)),
-            _ => None,
-        })
-        .collect()
 }

@@ -527,13 +527,9 @@ impl WebTemplateIndex {
     ///
     /// The path errors of [`WebTemplateIndex::resolve`], less the anchor.
     pub fn at_rm_path(&self, path: &RmPath) -> Result<&ResolvedNode, PathError> {
-        let matched: Vec<&Entry> = self
-            .entries
-            .iter()
-            .filter(|entry| matches_node(path, &entry.path, entry.name.as_deref()))
-            .collect();
+        let matched = self.all_at_rm_path(path);
         match *matched.as_slice() {
-            [only] => Ok(&only.node),
+            [only] => Ok(only),
             [] => Err(PathError::UnknownPath {
                 template_id: self.template_id().to_owned(),
                 path: path.to_string(),
@@ -545,6 +541,20 @@ impl WebTemplateIndex {
                 count: matched.len(),
             }),
         }
+    }
+
+    /// Returns every node an already-resolved openEHR path names.
+    ///
+    /// [`WebTemplateIndex::at_rm_path`] narrows this to one node and refuses
+    /// both the empty and the repeated case; a caller that has to name the
+    /// candidates of an ambiguity in its own diagnostic reads them here.
+    #[must_use]
+    pub fn all_at_rm_path(&self, path: &RmPath) -> Vec<&ResolvedNode> {
+        self.entries
+            .iter()
+            .filter(|entry| matches_node(path, &entry.path, entry.name.as_deref()))
+            .map(|entry| &entry.node)
+            .collect()
     }
 
     /// Returns the external terminology bindings of `node`.

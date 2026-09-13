@@ -339,6 +339,38 @@ fn rename_node(node: &mut WebTemplateNode, archetype: &str, full: &str) {
     }
 }
 
+/// Builds the diagnosis template with a second node beside `node_id`.
+///
+/// Two nodes of one archetype under one parent carry one `aqlPath` and are
+/// told apart by the runtime name the template fixes, which is the shape an
+/// openEHR path with no name predicate cannot resolve to one node
+/// (<https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/>).
+fn twinned_template(id: &str) -> Result<WebTemplateIndex, Box<dyn Error>> {
+    let opt = openehr_its::opt14::from_xml(ferrobridge_testkit::fixtures::DIAGNOSE_OPT)?;
+    let mut built = web_template(&TemplateSource::Opt14(Box::new(opt)))?;
+    assert!(twin_node(&mut built.tree, id), "the template carries {id}");
+    Ok(WebTemplateIndex::over(built, Generation::Adl14)?)
+}
+
+/// Inserts a clone of the child whose `id` or `nodeId` is `id` beside it.
+fn twin_node(node: &mut WebTemplateNode, id: &str) -> bool {
+    let found = node
+        .children
+        .iter()
+        .position(|child| child.id == id || child.node_id.as_deref() == Some(id));
+    if let Some(at) = found {
+        let Some(child) = node.children.get(at) else {
+            return false;
+        };
+        let mut twin = child.clone();
+        twin.id = format!("{}_twin", twin.id);
+        twin.name = Some(String::from("Second"));
+        node.children.insert(at.saturating_add(1), twin);
+        return true;
+    }
+    node.children.iter_mut().any(|child| twin_node(child, id))
+}
+
 /// Builds the diagnosis template under another identifier.
 fn renamed_template(id: &str) -> Result<WebTemplateIndex, Box<dyn Error>> {
     let opt = openehr_its::opt14::from_xml(ferrobridge_testkit::fixtures::DIAGNOSE_OPT)?;
@@ -1106,6 +1138,114 @@ fn an_openehr_path_naming_no_node_of_the_template_is_refused() -> Result<(), Box
     Ok(())
 }
 
+/// A path that reaches two nodes binds to neither: picking one would map a
+/// clinical value into a node nothing named, and shortening the path to their
+/// parent would lose the occurrence axis.
+#[test]
+fn an_openehr_path_naming_two_template_nodes_is_refused_naming_both() -> Result<(), Box<dyn Error>>
+{
+    let body = "mappings:\n  - name: \"contextStartTime\"\n    with:\n      fhir: \"$resource.recordedDate\"\n      openehr: \"$composition/context/start_time\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let index = twinned_template("start_time")?;
+    let diagnostics = compile(
+        &set,
+        &MappingName::new("synthetic.context")?,
+        &index,
+        &SCHEMAS,
+        &StaticMappingCodes::default(),
+    )
+    .err()
+    .ok_or("two nodes at one path is a refusal")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-ambiguous-template-node"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(message.contains("names 2 nodes"), "{message}");
+    assert!(message.contains("_twin"), "{message}");
+    Ok(())
+}
+
+/// The same refusal for a path the Web Template compacted: the builder folds
+/// an `ELEMENT` into its value node, so two `ELEMENT`s of one at-code share the
+/// one shortened path a mapping writes.
+#[test]
+fn a_compacted_openehr_path_naming_two_template_nodes_is_refused() -> Result<(), Box<dyn Error>> {
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let index = twinned_template("at0002")?;
+    let diagnostics = compile(
+        &set,
+        &MappingName::new("synthetic.context")?,
+        &index,
+        &SCHEMAS,
+        &StaticMappingCodes::default(),
+    )
+    .err()
+    .ok_or("two compacted nodes at one path is a refusal")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-ambiguous-template-node"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(message.contains("names 2 nodes"), "{message}");
+    Ok(())
+}
+
+/// An openEHR path may reach past the deepest template node into the reference
+/// model, and what it walks there is checked against the RM attribute model
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/ehr.html>).
+#[test]
+fn an_rm_tail_the_reference_model_does_not_define_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/not_an_attribute\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-template-node"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(
+        message.contains("`not_an_attribute` is no attribute of `EVALUATION`"),
+        "{message}"
+    );
+    Ok(())
+}
+
+/// The reference-model attribute an `ENTRY` carries resolves below the node.
+#[test]
+fn an_rm_tail_the_reference_model_defines_compiles() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"provider\"\n    with:\n      fhir: \"$resource.recorder\"\n      openehr: \"$archetype/other_participations/function\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let openehr = program
+        .mappings()
+        .first()
+        .ok_or("the compiled mapping")?
+        .openehr()
+        .ok_or("its openEHR side")?;
+    assert_eq!(openehr.tail().to_string(), "other_participations/function");
+    Ok(())
+}
+
 #[test]
 fn two_programs_sharing_a_profile_are_refused_without_a_pin() -> Result<(), Box<dyn Error>> {
     let programs = two_programs()?;
@@ -1179,10 +1319,46 @@ fn the_published_anatomical_location_slot_is_refused_naming_the_element()
     let diagnostics = program_of(&set, "ferrobridge_anatomical.context")
         .err()
         .ok_or("the published cluster resolves under a Condition")?;
-    assert_eq!(codes(&diagnostics), vec!["fc-unknown-fhir-element"]);
-    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert_eq!(
+        codes(&diagnostics),
+        vec![
+            "fc-unknown-fhir-element",
+            "fc-unknown-template-node",
+            "fc-unknown-template-node"
+        ]
+    );
+    let named = diagnostics
+        .iter()
+        .map(Diagnostic::message)
+        .find(|message| message.contains("`Condition` defines no element `coding`"));
+    assert!(named.is_some(), "{}", render(&diagnostics));
+    Ok(())
+}
+
+/// The published `other_participations` method writes
+/// `$archetype/diagnose/other_participations`, and the openEHR reference model
+/// gives `EVALUATION` no `diagnose` attribute
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/ehr.html>).
+/// Recorded on #101; the context this crate ships overwrites the method.
+#[test]
+fn the_published_evaluation_tail_outside_the_reference_model_is_refused()
+-> Result<(), Box<dyn Error>> {
+    let set = chain(&[
+        CONTEXT,
+        EXTENSION,
+        "contexts/ferrobridge_anatomical.context.yml",
+    ])
+    .map_err(|diagnostics| render(&diagnostics))?;
+    let diagnostics = program_of(&set, "ferrobridge_anatomical.context")
+        .err()
+        .ok_or("the published tail walks outside the reference model")?;
+    let message = diagnostics
+        .iter()
+        .map(Diagnostic::message)
+        .find(|message| message.contains("diagnose"))
+        .ok_or("a refusal naming the tail")?;
     assert!(
-        message.contains("`Condition` defines no element `coding`"),
+        message.contains("`diagnose` is no attribute of `EVALUATION`"),
         "{message}"
     );
     Ok(())
