@@ -16,6 +16,11 @@
 # The brand assets (assets/brand) and llms.txt live outside the landing
 # directory and are copied in here, because both are addressed from the site
 # root.
+#
+# The script leaves the source tree untouched. The book is rendered into a
+# temporary directory through `mdbook build --dest-dir` and copied from there,
+# so assembling the site on a tree you are mid-edit on never rebuilds
+# website/book/book/ behind your back (#58).
 
 set -euo pipefail
 
@@ -40,12 +45,20 @@ roadmap() {
     + ["</ul>"] | .[]'
 }
 
-mdbook build website/book
+# One temporary tree for the rendered book and one file for the roadmap block,
+# both removed on every exit path. `mdbook build --dest-dir` resolves a
+# relative path against the book root, so the absolute path mktemp returns is
+# what keeps the output out of website/book/.
+book="$(mktemp -d)"
+block="$(mktemp)"
+trap 'rm -rf "$book"; rm -f "$block"' EXIT
+
+mdbook build website/book --dest-dir "$book"
 
 rm -rf "${OUT:?}"
 mkdir -p "$OUT/docs"
 cp -R "$LANDING"/. "$OUT/"
-cp -R website/book/book/. "$OUT/docs/"
+cp -R "$book"/. "$OUT/docs/"
 
 # The brand directory holds the favicons the landing page links and the social
 # card its og:image names, so it has to reach the site root for those URLs to
@@ -56,9 +69,6 @@ cp -R assets/brand "$OUT/assets/"
 # The llms.txt convention puts the file at the site root, which is the one URL
 # that makes it useful.
 cp llms.txt "$OUT/llms.txt"
-
-block="$(mktemp)"
-trap 'rm -f "$block"' EXIT
 
 if roadmap > "$block" 2>/dev/null && [ -s "$block" ]; then
   awk -v blockfile="$block" '
