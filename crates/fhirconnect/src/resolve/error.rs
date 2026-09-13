@@ -61,6 +61,9 @@ pub enum ResolveCode {
     /// The archetype a model mapping declares is not the archetype of the
     /// node its `$archetype` resolves to.
     ArchetypeMismatch,
+    /// The archetype revision a model mapping pins is not the release version
+    /// the template's archetype identifier carries.
+    ArchetypeRevisionMismatch,
     /// The template carries no node for the archetype a model mapping
     /// declares, or carries more than one.
     UnresolvedArchetypeRoot,
@@ -101,6 +104,7 @@ impl ResolveCode {
             Self::UnknownTemplateNode => "fc-unknown-template-node",
             Self::UnboundPathVariable => "fc-unbound-path-variable",
             Self::ArchetypeMismatch => "fc-archetype-mismatch",
+            Self::ArchetypeRevisionMismatch => "fc-archetype-revision-mismatch",
             Self::UnresolvedArchetypeRoot => "fc-unresolved-archetype-root",
             Self::SlotCycle => "fc-slot-cycle",
             Self::ConflictingMappingMethods => "fc-conflicting-mapping-methods",
@@ -134,6 +138,7 @@ impl ResolveCode {
             Self::UnknownTemplateNode,
             Self::UnboundPathVariable,
             Self::ArchetypeMismatch,
+            Self::ArchetypeRevisionMismatch,
             Self::UnresolvedArchetypeRoot,
             Self::SlotCycle,
             Self::ConflictingMappingMethods,

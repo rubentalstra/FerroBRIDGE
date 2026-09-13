@@ -29,6 +29,7 @@ use fhirconnect::resolve::select::SelectError;
 use fhirconnect::resolve::select::select_by_profile;
 use fhirconnect::resolve::select::select_by_profile_pinned;
 use fhirconnect::resolve::select::select_by_template;
+use openehr_its::flat::webtemplate::model::WebTemplateNode;
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::header::MappingName;
 use openehr_mapping_core::index::WebTemplateIndex;
@@ -181,6 +182,17 @@ fn start_model(body: &str) -> String {
     )
 }
 
+/// The start model, pinning an archetype revision.
+fn revised_model(revision: &str, body: &str) -> String {
+    format!(
+        "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: \
+         EVALUATION.synthetic.v1\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  \
+         openEhrConfig:\n    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1\n    \
+         revision: \"{revision}\"\n  fhirConfig:\n    structureDefinition: \
+         http://hl7.org/fhir/StructureDefinition/Condition\n{body}"
+    )
+}
+
 /// The context body every small synthetic case in this test compiles.
 fn start_context(extensions: &[&str]) -> String {
     let listed = if extensions.is_empty() {
@@ -302,6 +314,29 @@ fn versioned_template(sem_ver: &str) -> Result<WebTemplateIndex, Box<dyn Error>>
     let mut built = web_template(&TemplateSource::Opt14(Box::new(opt)))?;
     built.sem_ver = Some(String::from(sem_ver));
     Ok(WebTemplateIndex::over(built, Generation::Adl2)?)
+}
+
+/// Builds the diagnosis template with one archetype identifier in full form.
+///
+/// A Web Template built over the ADL 1.4 route carries the interface form of
+/// an archetype identifier, and only the ADL 2 full form states a release
+/// version, so the pair of values the `revision` selector compares exists for
+/// an ADL 2 template alone.
+fn released_template(archetype: &str, full: &str) -> Result<WebTemplateIndex, Box<dyn Error>> {
+    let opt = openehr_its::opt14::from_xml(ferrobridge_testkit::fixtures::DIAGNOSE_OPT)?;
+    let mut built = web_template(&TemplateSource::Opt14(Box::new(opt)))?;
+    rename_node(&mut built.tree, archetype, full);
+    Ok(WebTemplateIndex::over(built, Generation::Adl2)?)
+}
+
+/// Rewrites the node id of every node of a tree that carries `archetype`.
+fn rename_node(node: &mut WebTemplateNode, archetype: &str, full: &str) {
+    if node.node_id.as_deref() == Some(archetype) {
+        node.node_id = Some(String::from(full));
+    }
+    for child in &mut node.children {
+        rename_node(child, archetype, full);
+    }
 }
 
 /// Builds the diagnosis template under another identifier.
@@ -699,6 +734,79 @@ fn the_program_records_the_version_of_every_model_it_compiled() -> Result<(), Bo
 }
 
 #[test]
+fn an_absent_revision_records_unpinned() -> Result<(), Box<dyn Error>> {
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let start = program.models().first().ok_or("the start model")?;
+    assert_eq!(start.revision(), &Pin::Unpinned);
+    Ok(())
+}
+
+#[test]
+fn a_revision_disagreeing_with_the_template_is_refused_naming_both() -> Result<(), Box<dyn Error>> {
+    let set = set_of(&[
+        ("model.yml", revised_model("1.4.0", PROBLEM).as_str()),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])).as_str(),
+        ),
+    ])?;
+    let index = released_template(
+        "openEHR-EHR-EVALUATION.problem_diagnosis.v1",
+        "openEHR-EHR-EVALUATION.problem_diagnosis.v1.4.1",
+    )?;
+    let diagnostics = compile(
+        &set,
+        &MappingName::new("synthetic.context")?,
+        &index,
+        &SCHEMAS,
+        &StaticMappingCodes::default(),
+    )
+    .err()
+    .ok_or("a revision disagreement is a refusal")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-archetype-revision-mismatch"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(message.contains("1.4.0"), "{message}");
+    assert!(message.contains("1.4.1"), "{message}");
+    Ok(())
+}
+
+#[test]
+fn a_revision_the_template_carries_compiles_against_the_full_archetype_id()
+-> Result<(), Box<dyn Error>> {
+    let set = set_of(&[
+        ("model.yml", revised_model("1.4.1", PROBLEM).as_str()),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])).as_str(),
+        ),
+    ])?;
+    let index = released_template(
+        "openEHR-EHR-EVALUATION.problem_diagnosis.v1",
+        "openEHR-EHR-EVALUATION.problem_diagnosis.v1.4.1",
+    )?;
+    let program = compile(
+        &set,
+        &MappingName::new("synthetic.context")?,
+        &index,
+        &SCHEMAS,
+        &StaticMappingCodes::default(),
+    )
+    .map_err(|diagnostics| render(&diagnostics))?;
+    let start = program.models().first().ok_or("the start model")?;
+    assert_eq!(start.revision(), &Pin::Pinned(String::from("1.4.1")));
+    Ok(())
+}
+
+#[test]
 fn an_archetype_the_slot_does_not_carry_is_refused_naming_both() -> Result<(), Box<dyn Error>> {
     let slot = "mappings:\n  - name: \"slot\"\n    with:\n      fhir: \"$resource\"\n      openehr: \"$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.problem_qualifier.v2]\"\n    slotArchetype: \"CLUSTER.other.v1\"\n";
     let files = [
@@ -914,6 +1022,10 @@ fn a_profile_version_the_program_does_not_pin_is_refused() -> Result<(), Box<dyn
     }
     Ok(())
 }
+/// The published cluster anchors on `$resource`, which is "Path of the root
+/// resource" (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`),
+/// so its condition reads `Condition.coding`, an element FHIR R4 does not
+/// define (<https://hl7.org/fhir/R4/condition.html>). Reported as #173.
 #[test]
 fn the_published_anatomical_location_slot_is_refused_naming_the_element()
 -> Result<(), Box<dyn Error>> {

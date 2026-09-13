@@ -35,9 +35,10 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   collides, an `append` that carries mapping logic or names no target, an
   `overwrite` of a missing method, two extensions overwriting one name, an
   extension method on a nested mapping, a `slotArchetype` cycle, a template
-  identifier or `sem_ver` the context and the template disagree on, and a write
-  side that names a filtering expression. A program carries the profile and
-  template it was compiled against, each optional version recorded as pinned or
+  identifier or `sem_ver` the context and the template disagree on, an
+  archetype revision the template's identifier contradicts, and a write side
+  that names a filtering expression. A program carries the profile and template
+  it was compiled against, each optional version recorded as pinned or
   unpinned, and `select` picks one by `meta.profile` membership on the FHIR
   side or by template identifier on the openEHR side, refusing an ambiguous
   selection by naming the candidates.
@@ -45,7 +46,11 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   one program, snapshot-tested, from the published model and extension files
   plus a FerroBRIDGE-authored context and extension, against a synthetic
   operational template in the testkit.
-
+- `openehr_mapping_core::index::node_id_matches` and
+  `archetype_release_version`, the two archetype-identifier comparisons a
+  mapping language needs outside a path: an identifier is matched in its
+  interface form, and only an ADL 2 identifier states the release version below
+  its major.
 - A `fuzz/` crate with `cargo fuzz` targets over the YAML mapping loader and
   the openEHR mapping-path parser, seeded from the synthetic fixtures and a
   sample of the vendored mapping library, run weekly and on dispatch by

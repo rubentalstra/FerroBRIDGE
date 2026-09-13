@@ -30,6 +30,8 @@ use openehr_mapping_core::header::MappingName;
 use openehr_mapping_core::header::MappingType;
 use openehr_mapping_core::index::ResolvedNode;
 use openehr_mapping_core::index::WebTemplateIndex;
+use openehr_mapping_core::index::archetype_release_version;
+use openehr_mapping_core::index::node_id_matches;
 use openehr_mapping_core::path::MappingPath;
 use openehr_mapping_core::position::Located;
 use openehr_rm::v1_2::paths::PathSegment;
@@ -444,13 +446,18 @@ impl<'a> Compiler<'a> {
             ));
             return None;
         };
-        let found: Vec<&ResolvedNode> = self
-            .template
+        let template = self.template;
+        let found: Vec<&ResolvedNode> = template
             .nodes()
-            .filter(|node| node.node_id() == Some(archetype.as_str()))
+            .filter(|node| {
+                node.node_id()
+                    .is_some_and(|carried| node_id_matches(archetype.as_str(), carried))
+            })
             .collect();
         if let [only] = *found.as_slice() {
-            return RmPath::from_str(only.aql_path().as_str()).ok();
+            let root = RmPath::from_str(only.aql_path().as_str()).ok();
+            self.check_revision(model, file, owner, only.node_id());
+            return root;
         }
         self.diagnostics.push(diagnostic(
             file,
@@ -460,11 +467,57 @@ impl<'a> Compiler<'a> {
             &path,
             format!(
                 "the template `{}` carries {} nodes for the archetype `{archetype}`",
-                self.template.template_id(),
+                template.template_id(),
                 found.len()
             ),
         ));
         None
+    }
+
+    /// Checks the revision a model mapping pins against the archetype the
+    /// template carries.
+    ///
+    /// `openEhrConfig.revision` "states what revision of the archetype this
+    /// mapping applies for"
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`, §Spec),
+    /// and an ADL 2 archetype identifier carries that release version below
+    /// its major. A template served over the ADL 1.4 route carries the
+    /// interface form alone, so there the pin is recorded and nothing is
+    /// compared.
+    fn check_revision(
+        &mut self,
+        model: &ModelMappingFile,
+        file: &Path,
+        owner: &MappingName,
+        carried: Option<&str>,
+    ) {
+        let Some(revision) = model.header().revision() else {
+            return;
+        };
+        let Some(pinned) = revision.as_text() else {
+            return;
+        };
+        let Some(release) = carried.and_then(archetype_release_version) else {
+            return;
+        };
+        if pinned == release {
+            return;
+        }
+        self.diagnostics.push(diagnostic(
+            file,
+            owner,
+            ResolveCode::ArchetypeRevisionMismatch,
+            revision.position(),
+            &ModelPath::root()
+                .field("spec")
+                .field("openEhrConfig")
+                .field("revision"),
+            format!(
+                "`{}` pins the archetype revision `{pinned}` and the template carries \
+                 `{release}`",
+                model.header().name().value()
+            ),
+        ));
     }
 
     /// Compiles the preprocessor of the start model mapping.
@@ -765,6 +818,13 @@ impl<'a> Compiler<'a> {
     }
 
     /// Compiles the model mapping a `slotArchetype` hands over to.
+    ///
+    /// The slot names the openEHR path the slotted mapping is transformed at
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/SlotArchetypes.adoc`),
+    /// so `$archetype` inside it is that path. The specification says nothing
+    /// about the FHIR side of the hand-over, so the slotted mapping keeps the
+    /// caller's `$fhirRoot` and `$resource` stays the enclosing resource. No
+    /// specification governs this: our own design.
     fn slot(
         &mut self,
         file: &'a ModelMappingFile,
@@ -803,22 +863,25 @@ impl<'a> Compiler<'a> {
             return Method::Value;
         }
         let archetype = archetype_of(slotted).cloned();
-        if let (Some(archetype), Ok((node, _))) = (archetype, self.locate(&scope.openehr))
-            && node.node_id() != Some(archetype.as_str())
-        {
-            self.diagnostics.push(diagnostic(
-                file.file(),
-                owner,
-                ResolveCode::ArchetypeMismatch,
-                slot.position(),
-                &at,
-                format!(
-                    "`{}` declares the archetype `{archetype}` and the slot resolves to the node \
-                     `{}`",
-                    slot.value(),
-                    node.node_id().unwrap_or("with no archetype")
-                ),
-            ));
+        if let (Some(archetype), Ok((node, _))) = (archetype, self.locate(&scope.openehr)) {
+            match node.node_id() {
+                Some(carried) if node_id_matches(archetype.as_str(), carried) => {
+                    self.check_revision(slotted, file.file(), owner, Some(carried));
+                }
+                carried => self.diagnostics.push(diagnostic(
+                    file.file(),
+                    owner,
+                    ResolveCode::ArchetypeMismatch,
+                    slot.position(),
+                    &at,
+                    format!(
+                        "`{}` declares the archetype `{archetype}` and the slot resolves to the \
+                         node `{}`",
+                        slot.value(),
+                        carried.unwrap_or("with no archetype")
+                    ),
+                )),
+            }
         }
         let mut chain = scope.chain.clone();
         chain.push(slot.value().clone());
@@ -1030,6 +1093,11 @@ impl<'a> Compiler<'a> {
 
     /// Binds one FHIR expression to its anchor and resolves it against the
     /// element table.
+    ///
+    /// A mapping runs both ways unless `unidirectional` pins it to one
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`,
+    /// §Direction), so an expression that cannot be written through is refused
+    /// here unless the mapping only ever reads FHIR.
     fn fhir_target(
         &mut self,
         file: &Path,

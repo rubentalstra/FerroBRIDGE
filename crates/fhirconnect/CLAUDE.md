@@ -49,6 +49,21 @@ the definition. A shape the element table contradicts is refused rather than
 read leniently, and a write applies to a copy so a refusal leaves no half-built
 element behind.
 
+## The program is immutable; the engine never parses a path
+
+`resolve::compile` is the one place a path is parsed, an anchor is bound, an
+extension is applied and a version selector is checked. What it returns is a
+`Program` with private fields, no `&mut self` method and an `Arc` around it, so
+nothing downstream can change what a context compiled to. The interpreter reads
+a resolved FHIR target, a resolved Web Template node and a structured
+occurrence axis; it never sees a path string and never reads a mapping file. A
+mapping that cannot be resolved is a refusal at load, never a failure on the
+request that first touches it.
+
+Every diagnostic the compiler raises is collected. A run reports every
+disagreement it found, because a mapping author fixing one refusal at a time is
+how a load loop turns into an afternoon.
+
 ## Tests
 
 The corpus under `docs/specs/fhirconnect-mapping-lib/` is evidence of what real

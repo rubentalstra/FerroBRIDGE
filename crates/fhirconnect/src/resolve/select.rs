@@ -10,7 +10,8 @@
 //! selects by set membership. The openEHR side selects by the template
 //! identifier a composition names. When several programs answer, the caller
 //! pins the choice with a template identifier, and an unpinned ambiguity is a
-//! refusal that names the candidates.
+//! refusal that names the candidates. FHIRconnect fixes no selection rule, so
+//! everything but the two identifiers read here is FerroBRIDGE's own design.
 
 use std::sync::Arc;
 
