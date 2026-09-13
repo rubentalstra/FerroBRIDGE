@@ -803,6 +803,51 @@ fn the_program_records_the_version_of_every_model_it_compiled() -> Result<(), Bo
 }
 
 #[test]
+fn a_context_the_set_does_not_hold_is_refused_naming_it() -> Result<(), Box<dyn Error>> {
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "absent.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-context"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(message.contains("absent.context"), "{message}");
+    Ok(())
+}
+
+/// The Web Template gives its root node the empty `aqlPath`, so a model
+/// mapping rooted at the composition archetype anchors `$archetype` at the
+/// root of the composition.
+#[test]
+fn a_model_mapping_rooted_at_the_composition_archetype_compiles() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"recorded\"\n    with:\n      fhir: \"$resource.recordedDate\"\n      openehr: \"$archetype/context/start_time\"\n";
+    let composition = model(
+        "COMPOSITION.synthetic.v1",
+        "openEHR-EHR-COMPOSITION.ferrobridge_report.v1",
+        body,
+    );
+    let declaration = context(
+        "synthetic.context",
+        "  profile:\n    url: \"http://example.org/fhir/StructureDefinition/synthetic\"\n  \
+         template:\n    id: \"ferrobridge.diagnose.v1\"\n  archetypes:\n    - \
+         \"COMPOSITION.synthetic.v1\"\n  start: \"COMPOSITION.synthetic.v1\"\n",
+    );
+    let set = set_of(&[
+        ("model.yml", composition.as_str()),
+        ("context.yml", declaration.as_str()),
+    ])?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let mapping = program.mappings().first().ok_or("one mapping")?;
+    let openehr = mapping.openehr().ok_or("the openEHR side")?;
+    assert_eq!(openehr.path().to_string(), "/context/start_time");
+    Ok(())
+}
+
+#[test]
 fn an_absent_revision_records_unpinned() -> Result<(), Box<dyn Error>> {
     let files = [
         ("model.yml", start_model(PROBLEM)),

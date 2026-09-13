@@ -20,6 +20,7 @@ use core::str::FromStr;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::LazyLock;
 
@@ -168,7 +169,17 @@ impl<'a> Compiler<'a> {
 
     /// Compiles one context, or returns `None` when it cannot start.
     fn run(&mut self, context: &MappingName) -> Option<Program> {
-        let file = self.set.context(context)?;
+        let Some(file) = self.set.context(context) else {
+            self.diagnostics.push(
+                Diagnostic::error(
+                    PathBuf::new(),
+                    ResolveCode::UnknownContext.into(),
+                    format!("`{context}` is no context mapping of the loaded set"),
+                )
+                .with_mapping_name(context.clone()),
+            );
+            return None;
+        };
         let declaration = file.context();
         let profile = Self::profile_of(file);
         let template = self.template_of(file);
@@ -455,9 +466,9 @@ impl<'a> Compiler<'a> {
             })
             .collect();
         if let [only] = *found.as_slice() {
-            let root = RmPath::from_str(only.aql_path().as_str()).ok();
+            let root = only.rm_path().clone();
             self.check_revision(model, file, owner, only.node_id());
-            return root;
+            return Some(root);
         }
         self.diagnostics.push(diagnostic(
             file,
@@ -1206,6 +1217,9 @@ impl<'a> Compiler<'a> {
                     absolute: true,
                     segments: Vec::new(),
                 },
+                // NOTE: `$reference` "indicates that there is no direct mapping
+                // to openEHR" (`basics/Variables.adoc`), so the mapping
+                // legitimately has no openEHR side rather than a broken one.
                 Ok(Variable::Reference) => return None,
                 Ok(Variable::Resource | Variable::FhirRoot | Variable::Context) | Err(_) => {
                     self.diagnostics.push(diagnostic(
@@ -1383,9 +1397,7 @@ fn archetype_of(model: &ModelMappingFile) -> Option<&ArchetypeId> {
 fn interior_paths(template: &WebTemplateIndex) -> BTreeSet<String> {
     let mut found = BTreeSet::new();
     for node in template.nodes() {
-        let Ok(path) = RmPath::from_str(node.aql_path().as_str()) else {
-            continue;
-        };
+        let path = node.rm_path();
         for taken in 1..path.segments.len() {
             let prefix = RmPath {
                 absolute: path.absolute,
@@ -1401,9 +1413,7 @@ fn interior_paths(template: &WebTemplateIndex) -> BTreeSet<String> {
 fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, &ResolvedNode> {
     let mut found: BTreeMap<String, Vec<&ResolvedNode>> = BTreeMap::new();
     for node in template.nodes() {
-        let Ok(path) = RmPath::from_str(node.aql_path().as_str()) else {
-            continue;
-        };
+        let path = node.rm_path();
         let kept = path
             .segments
             .iter()

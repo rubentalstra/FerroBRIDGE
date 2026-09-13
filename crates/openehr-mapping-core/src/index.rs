@@ -98,6 +98,8 @@ impl core::fmt::Display for FlatId {
 pub struct ResolvedNode {
     /// The `aqlPath` of the node.
     aql_path: AqlPath,
+    /// The same path, parsed.
+    rm_path: RmPath,
     /// The RM type the template constrains the node to.
     rm_type: String,
     /// The archetype node id, absent where the template constrains no node
@@ -120,6 +122,18 @@ impl ResolvedNode {
     #[must_use]
     pub const fn aql_path(&self) -> &AqlPath {
         &self.aql_path
+    }
+
+    /// Returns the `aqlPath` of the node as a parsed openEHR RM path.
+    ///
+    /// The index parses it once while it is built, so a caller that needs the
+    /// path structurally never re-parses it and never has a parse failure to
+    /// handle. The root node carries the empty `aqlPath`, which reads as the
+    /// absolute path of the composition (Simplified Formats, §Web Template
+    /// Metadata).
+    #[must_use]
+    pub const fn rm_path(&self) -> &RmPath {
+        &self.rm_path
     }
 
     /// Returns the RM type the template constrains the node to.
@@ -348,10 +362,17 @@ impl WebTemplateIndex {
             for (child, child_flat_id) in node.children.iter().zip(children.iter()).rev() {
                 stack.push((child, Some(index), child_flat_id.as_str().to_owned()));
             }
+            let path = parse_aql_path(&node.aql_path)?;
             entries.push(Entry {
-                node: resolved_node(node, generation, FlatId::new(flat_id), children)?,
+                node: resolved_node(
+                    node,
+                    generation,
+                    FlatId::new(flat_id),
+                    children,
+                    path.clone(),
+                )?,
                 id: node.id.clone(),
-                path: parse_aql_path(&node.aql_path)?,
+                path,
                 parent,
                 name: node.name.clone(),
                 bindings: bindings_of(node, generation),
@@ -606,6 +627,7 @@ fn resolved_node(
     generation: Generation,
     flat_id: FlatId,
     children: Vec<FlatId>,
+    rm_path: RmPath,
 ) -> Result<ResolvedNode, PathError> {
     let malformed = || PathError::MalformedOccurrences {
         aql_path: node.aql_path.clone(),
@@ -629,6 +651,7 @@ fn resolved_node(
     };
     Ok(ResolvedNode {
         aql_path: AqlPath::new(node.aql_path.clone()),
+        rm_path,
         rm_type: node.rm_type.clone(),
         node_id: node.node_id.clone().filter(|id| !id.is_empty()),
         min,
