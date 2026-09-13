@@ -62,7 +62,7 @@ name: ferrobridge
 
 services:
   ferrobridge:
-    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.2-rc.1}
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.2}
     container_name: ferrobridge
     restart: unless-stopped
     ports:
@@ -138,7 +138,7 @@ services:
   # TODO(#91): `cdm init` exits 2 today naming that issue, so this service is
   # the shape the job runs in rather than a working load.
   cdm-init:
-    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.2-rc.1}
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.2}
     profiles: [cdm]
     command: ["cdm", "init"]
     restart: "no"
@@ -165,7 +165,7 @@ services:
   # TODO(#91): `vocab load` exits 2 today naming that issue, so this service is
   # the shape the job runs in rather than a working load.
   vocab-load:
-    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.2-rc.1}
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.2}
     profiles: [vocab]
     command: ["vocab", "load"]
     restart: "no"
