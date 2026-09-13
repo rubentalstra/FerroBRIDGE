@@ -51,6 +51,24 @@ no binary to download yet.
   probe, one `GET` on the configured base and on `[base]/metadata`
   (<https://hl7.org/fhir/R4/http.html#capabilities>), so a readiness indicator
   asks whether the upstream answers at all without running an operation.
+- The container image and the quickstart (#22). `docker/Dockerfile` is one
+  stage on `gcr.io/distroless/static-debian13:nonroot`, pinned by the digest of
+  its image index, copying the static musl binary the release lane stages at
+  `dist/<os>_<arch>/ferrobridge`. It runs as uid 65532 written numerically,
+  binds `0.0.0.0:8080`, exposes 8080/tcp, and carries an exec-form `ENTRYPOINT`
+  with `serve` as the default command, so a Kubernetes `Job` sets `args:`
+  alone. It declares no `HEALTHCHECK`, because the base has no shell: the probe
+  is `GET /health/liveness` from outside, with `/health/readiness` answering
+  `503` and a JSON body naming each down upstream. `compose.yaml` at the
+  repository root is the quickstart: loopback port publishing with the Docker
+  DNAT firewall hazard documented, a read-only root filesystem, every
+  capability dropped, `no-new-privileges:true`, file secrets for the CDM URL
+  and the CDR credential, and the `cdm`, `cdm-init` and `vocab-load` profiles
+  over PostgreSQL 18.6. `scripts/checks/versions.sh` now checks the base-image
+  digest, the quickstart image tag against the product and workspace versions,
+  and the quickstart's PostgreSQL pin; the `docker` Dependabot entry points at
+  `/docker`; and the book gains an Operate page for the image, the variables,
+  the probe and the CDM profiles.
 - `crates/ferrobridge-term`, the FHIR terminology client (#77):
   `CodeSystem/$lookup` resolves a code's display, `ConceptMap/$translate` maps
   a code into another system, `ValueSet/$validate-code` tests membership of a

@@ -33,10 +33,11 @@ the committed guards, so both are live code from day one and both need a gate.
 | `comment-style` | `scripts/checks/comment-style.sh --all` |
 | `versions` | `scripts/checks/versions.sh` |
 
-Three of these report "nothing to check" on the current tree and gate from the
-first matching file: `hadolint` has no Dockerfile, `comment-style` has no `.rs`
-file, and `versions` skips the checks whose subject file is absent. They are in
-place before the files they guard, which is the point.
+`hadolint` runs against a real recipe since #22: `docker/Dockerfile`, the one
+tracked Dockerfile, whose digest-pinned `FROM` the `versions` job checks
+against `docs/VERSIONS.md` in the same tier. `versions` still skips the checks
+whose subject file is absent, reporting each skip with its reason, so it gains
+teeth as files appear.
 
 **Tier 2 is written now and gated off.** A `detect` job checks out and looks
 for a root `Cargo.toml`, publishing a boolean output. Every Rust job carries
@@ -155,7 +156,8 @@ No suppression was recorded and the audit path was not narrowed
   configuration-variables check disabled.
 - `.hadolint.yaml`: `failure-threshold: warning` plus the trusted registries.
 - `.dockerignore`: denies everything but a staged `dist/` tree, so no source
-  or build output enters a container build context.
+  or build output enters a container build context. `docker/Dockerfile` copies
+  exactly one file out of it, `dist/<os>_<arch>/ferrobridge`.
 
 Each tier-2 job installs the toolchain through the composite
 `./.github/actions/setup-rust` action, which wraps a digest-pinned

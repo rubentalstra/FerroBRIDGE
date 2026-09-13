@@ -110,6 +110,23 @@ PostgreSQL above: that image is built from `postgres:18.6` and carries the
 login role, the schemas and the extensions the CDR's migrations expect to find,
 which a bare PostgreSQL does not have.
 
+### The shipped image and the quickstart
+
+`docker/Dockerfile` builds on one more image, pinned by the digest of its image
+index, which is what Docker resolves for a multi-platform build.
+`scripts/checks/versions.sh` reads its `FROM` line back against this row, and
+Dependabot (`docker`, over `/docker`) proposes the bumps.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| Container base image | `gcr.io/distroless/static-debian13:nonroot@sha256:1c2c046bc09ed40fad370b599a0b1ae7987f55b01e247cf27a7c27cd97e5bbc7` | the `FROM` of `docker/Dockerfile`, and its `org.opencontainers.image.base.name` label without the digest |
+
+The quickstart `compose.yaml` pulls `ghcr.io/rubentalstra/ferrobridge` at the
+release it shipped with, so its tag is the product version below rather than a
+pin of its own, and the guard compares the two. Its CDM service runs the same
+`postgres:18.6` image the row above pins for the end-to-end lane, so a
+PostgreSQL bump moves one row and both readers follow it.
+
 The terminology server needs no database. It reads the synthetic `CodeSystem`,
 `ValueSet` and `ConceptMap` under
 `tools/ferrobridge-testkit/fixtures/terminology` from a read-only bind mount
@@ -180,7 +197,7 @@ version is 0.0.1.
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| Product version | 0.0.1 | root `Cargo.toml` `[workspace.package]` `version` (#20), `CITATION.cff` `version` (#18) |
+| Product version | 0.0.1 | root `Cargo.toml` `[workspace.package]` `version` (#20), `CITATION.cff` `version` (#18), the `ghcr.io/rubentalstra/ferrobridge` image tag default in `compose.yaml` (#22) |
 
 `CITATION.cff` tracks this row exactly, and the guard compares the two whenever
 `CITATION.cff` exists. Once the root `Cargo.toml` lands, the guard also compares
