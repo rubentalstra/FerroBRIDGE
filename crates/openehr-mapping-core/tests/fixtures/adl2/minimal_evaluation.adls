@@ -1,0 +1,39 @@
+-- SPDX-FileCopyrightText: Ruben Talstra
+-- SPDX-License-Identifier: BUSL-1.1
+-- Synthetic: the ADL 2 template that fills the COMPOSITION content slot with
+-- the at-coded EVALUATION of note_evaluation.adls.
+template (adl_version=2.4.0; rm_release=1.1.0)
+    openEHR-EHR-COMPOSITION.ferrobridge_minimal.v1.0.0
+
+language
+    original_language = <[ISO_639-1::en]>
+
+description
+    lifecycle_state = <"published">
+    original_author = <
+        ["name"] = <"FerroBRIDGE">
+    >
+    details = <
+        ["en"] = <
+            language = <[ISO_639-1::en]>
+            purpose = <"A synthetic composition authored for the FerroBRIDGE tests">
+            keywords = <"synthetic">
+        >
+    >
+
+definition
+    COMPOSITION[at0000] matches {
+        content matches {
+            use_archetype EVALUATION[openEHR-EHR-EVALUATION.ferrobridge_note.v1.0.0]
+        }
+    }
+
+terminology
+    term_definitions = <
+        ["en"] = <
+            ["at0000"] = <
+                text = <"Minimal evaluation">
+                description = <"A synthetic composition authored for the FerroBRIDGE tests">
+            >
+        >
+    >

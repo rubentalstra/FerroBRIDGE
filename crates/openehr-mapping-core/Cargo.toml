@@ -20,13 +20,20 @@ publish = true
 include = ["src/**", "README.md", "LICENSE"]
 
 [dependencies]
+openehr-am.workspace = true
+openehr-its.workspace = true
 openehr-rm.workspace = true
 serde.workspace = true
 serde-saphyr.workspace = true
+serde_json.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
+insta.workspace = true
+# Test-only: the ADL 2 fixtures under tests/fixtures are compiled from their
+# .adls sources by the suite that reads them (docs/VERSIONS.md).
+openehr-adl.workspace = true
 proptest.workspace = true
 
 [lints]

@@ -46,6 +46,9 @@ confidence-threshold = 0.9
 # no first-party file derives from it.
 exceptions = [
   { allow = ["BUSL-1.1", "Apache-2.0"], crate = "openehr-its" },
+  # openehr-adl is a dev-dependency of openehr-mapping-core alone: the ADL 2
+  # test fixtures are compiled from their .adls sources, so it never ships.
+  { allow = ["BUSL-1.1"], crate = "openehr-adl" },
   { allow = ["Apache-2.0", "CC-BY-SA-3.0"], crate = "openehr-term" },
   { allow = ["BUSL-1.1"], crate = "openehr-mapping-core" },
   { allow = ["BUSL-1.1"], crate = "fhirconnect" },

@@ -1,0 +1,115 @@
+---
+source: crates/openehr-mapping-core/tests/it/web_template.rs
+expression: composition.value()
+---
+{
+  "_type": "COMPOSITION",
+  "content": [
+    {
+      "_type": "EVALUATION",
+      "data": {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "at0001"
+        },
+        "archetype_node_id": "at0001",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Note text"
+            },
+            "archetype_node_id": "at0002",
+            "value": {
+              "_type": "DV_TEXT",
+              "value": "A synthetic note committed by the FerroBRIDGE end-to-end test"
+            }
+          }
+        ]
+      },
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "Synthetic note"
+      },
+      "archetype_node_id": "openEHR-EHR-EVALUATION.ferrobridge_note.v1",
+      "archetype_details": {
+        "_type": "ARCHETYPED",
+        "archetype_id": {
+          "_type": "ARCHETYPE_ID",
+          "value": "openEHR-EHR-EVALUATION.ferrobridge_note.v1"
+        },
+        "rm_version": "1.2.0"
+      },
+      "subject": {
+        "_type": "PARTY_SELF"
+      },
+      "language": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "ISO_639-1"
+        },
+        "code_string": "en"
+      },
+      "encoding": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "IANA_character-sets"
+        },
+        "code_string": "UTF-8"
+      }
+    }
+  ],
+  "name": {
+    "_type": "DV_TEXT",
+    "value": "Minimal evaluation"
+  },
+  "archetype_node_id": "openEHR-EHR-COMPOSITION.ferrobridge_minimal.v1",
+  "archetype_details": {
+    "_type": "ARCHETYPED",
+    "archetype_id": {
+      "_type": "ARCHETYPE_ID",
+      "value": "openEHR-EHR-COMPOSITION.ferrobridge_minimal.v1"
+    },
+    "rm_version": "1.2.0",
+    "template_id": {
+      "_type": "TEMPLATE_ID",
+      "value": "ferrobridge.minimal_evaluation.v1"
+    }
+  },
+  "category": {
+    "_type": "DV_CODED_TEXT",
+    "value": "event",
+    "defining_code": {
+      "_type": "CODE_PHRASE",
+      "terminology_id": {
+        "_type": "TERMINOLOGY_ID",
+        "value": "openehr"
+      },
+      "code_string": "433"
+    }
+  },
+  "language": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "_type": "TERMINOLOGY_ID",
+      "value": "ISO_639-1"
+    },
+    "code_string": "en"
+  },
+  "territory": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "_type": "TERMINOLOGY_ID",
+      "value": "ISO_3166-1"
+    },
+    "code_string": "NL"
+  },
+  "composer": {
+    "_type": "PARTY_IDENTIFIED",
+    "name": "FerroBRIDGE"
+  }
+}

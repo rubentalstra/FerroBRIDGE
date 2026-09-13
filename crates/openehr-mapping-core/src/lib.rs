@@ -19,13 +19,13 @@
 //! openEHR is a registered trademark of the openEHR Foundation.
 #![doc(test(attr(deny(warnings))))]
 
+pub mod composition;
 pub mod diagnostic;
 pub mod header;
+pub mod index;
 pub mod loader;
 pub mod path;
 pub mod position;
 pub mod registry;
+pub mod template;
 pub mod value;
-
-// TODO(#75): the Web Template index, relative path derivation, and composition
-// build and read over `openehr-its` and `openehr-rm`.

@@ -1,0 +1,60 @@
+-- SPDX-FileCopyrightText: Ruben Talstra
+-- SPDX-License-Identifier: BUSL-1.1
+-- Synthetic: the ADL 2 twin of the ADL 1.4 EVALUATION in
+-- tests/fixtures/adl14/note_evaluation.opt. At-coded node identifiers.
+archetype (adl_version=2.4.0; rm_release=1.1.0)
+    openEHR-EHR-EVALUATION.ferrobridge_note.v1.0.0
+
+language
+    original_language = <[ISO_639-1::en]>
+
+description
+    lifecycle_state = <"published">
+    original_author = <
+        ["name"] = <"FerroBRIDGE">
+    >
+    details = <
+        ["en"] = <
+            language = <[ISO_639-1::en]>
+            purpose = <"A synthetic evaluation authored for the FerroBRIDGE tests">
+            keywords = <"synthetic">
+        >
+    >
+
+definition
+    EVALUATION[at0000] matches {
+        data matches {
+            ITEM_TREE[at0001] matches {
+                items matches {
+                    ELEMENT[at0002] occurrences matches {1..1} matches {
+                        value matches {
+                            DV_TEXT matches {*}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+terminology
+    term_definitions = <
+        ["en"] = <
+            ["at0000"] = <
+                text = <"Synthetic note">
+                description = <"A synthetic evaluation authored for the FerroBRIDGE tests">
+            >
+            ["at0001"] = <
+                text = <"Tree">
+                description = <"The item tree of the synthetic note">
+            >
+            ["at0002"] = <
+                text = <"Note text">
+                description = <"The one text element of the synthetic note">
+            >
+        >
+    >
+    term_bindings = <
+        ["SNOMED-CT"] = <
+            ["at0002"] = <http://example.org/snomed/1000001>
+        >
+    >

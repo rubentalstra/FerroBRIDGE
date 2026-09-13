@@ -44,6 +44,14 @@ no binary to download yet.
   reference server loads, the `OperationOutcome` and `batch-response` stubs,
   and a pin row for the terminology server image.
 
+- `openehr-mapping-core` gains the path module (#75): the Web Template built
+  from either an OPT 1.4 or an ADL 2 OPT2 behind one `TemplateSource`, the
+  `aqlPath` index with RM type, occurrences and node id, mapping-path
+  resolution over it, the at-code versus id-code check that refuses an
+  id-coded ADL 2 template, relative path derivation, composition build and
+  read through `openehr-its` and `openehr-rm`, and the term-binding kind per
+  generation. The ADL 2 fixtures are compiled from synthetic `.adls` sources
+  with `openehr-adl` as a test-only dependency.
 - The container harness, the upstream stubs and the synthetic fixtures in
   `tools/ferrobridge-testkit` (#78), with the two end-to-end tests they carry.
   `containers` starts PostgreSQL 18.6 and the reference openEHR CDR with its
