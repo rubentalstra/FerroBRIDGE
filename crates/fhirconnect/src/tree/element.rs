@@ -60,6 +60,7 @@ pub struct Field {
     kind: Kind,
     min: u32,
     max: Option<u32>,
+    types: &'static [&'static str],
 }
 
 impl Field {
@@ -98,6 +99,15 @@ impl Field {
         self.max
     }
 
+    /// Returns the type codes the definition lists, in its order.
+    ///
+    /// A choice element lists every alternative and a content reference lists
+    /// none (<https://hl7.org/fhir/R4/elementdefinition.html>).
+    #[must_use]
+    pub const fn types(&self) -> &'static [&'static str] {
+        self.types
+    }
+
     /// Returns whether the element repeats, so the JSON holds an array.
     #[must_use]
     pub fn repeats(&self) -> bool {
@@ -112,6 +122,7 @@ impl Field {
             kind: self.kind,
             min: self.min,
             max: self.max,
+            types: self.types,
         }
     }
 }
@@ -267,16 +278,28 @@ pub fn resolve<T: Table + ?Sized>(
     })
 }
 
+/// The primitive type codes `resolve()` accepts.
+///
+/// `resolve()` reads "a string that is a uri (or canonical or url)"
+/// (<https://hl7.org/fhir/R4/fhirpath.html>, §Additional functions).
+const REFERENTIAL: [&str; 3] = ["uri", "canonical", "url"];
+
 /// The `id` every element carries, for the sibling object of a primitive.
 ///
 /// A primitive's `id` and `extension` live in the member named with a leading
 /// underscore (<https://hl7.org/fhir/R4/json.html>), and both come from
 /// `Element` itself (<https://hl7.org/fhir/R4/element.html>).
-const ELEMENT_ID: (&str, Kind, u32, Option<u32>) = ("id", Kind::Attribute, 0, Some(1));
+const ELEMENT_ID: (&str, Kind, u32, Option<u32>, &[&str]) =
+    ("id", Kind::Attribute, 0, Some(1), &["string"]);
 
 /// The `extension` every element carries.
-const ELEMENT_EXTENSION: (&str, Kind, u32, Option<u32>) =
-    ("extension", Kind::Complex("Extension"), 0, None);
+const ELEMENT_EXTENSION: (&str, Kind, u32, Option<u32>, &[&str]) = (
+    "extension",
+    Kind::Complex("Extension"),
+    0,
+    None,
+    &["Extension"],
+);
 
 /// The resolver's state as it walks the steps.
 struct Walk<'table, T: Table + ?Sized> {
@@ -341,6 +364,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
             kind,
             min: field.min,
             max: field.max,
+            types: field.types,
         };
         self.owner = String::from(field.path);
         if let Kind::Choice(variants) = kind {
@@ -358,7 +382,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
 
     /// Steps into the `id` or `extension` of a primitive's sibling object.
     fn primitive_member(&mut self, name: &str) -> Result<(), ResolveError> {
-        let (element, kind, min, max) = match name {
+        let (element, kind, min, max, types) = match name {
             "id" => ELEMENT_ID,
             "extension" => ELEMENT_EXTENSION,
             _ => {
@@ -377,6 +401,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
             kind,
             min,
             max,
+            types,
         }));
         Ok(())
     }
@@ -444,6 +469,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
             kind: *kind,
             min: field.min,
             max: field.max,
+            types: field.types,
         };
         self.location = self.landing(*kind)?;
         let last = self.moves.len().saturating_sub(1);
@@ -501,18 +527,17 @@ impl<T: Table + ?Sized> Walk<'_, T> {
                 actual: String::from("Element"),
             });
         };
-        let admitted = field
-            .path
-            .rsplit('.')
-            .next()
-            .is_some_and(|_| name.eq_ignore_ascii_case(&primitive_code(field)));
-        if admitted {
+        if field
+            .types
+            .iter()
+            .any(|code| code.eq_ignore_ascii_case(name))
+        {
             return Ok(());
         }
         Err(ResolveError::TypeAssertion {
             element: field.path.clone(),
             requested: String::from(name),
-            actual: primitive_code(field),
+            actual: field.types.join(", "),
         })
     }
 
@@ -521,7 +546,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
         if matches!(self.location, Location::Primitive(_) | Location::Attribute) {
             self.enter_primitive_element("extension")?;
         }
-        let (element, kind, min, max) = ELEMENT_EXTENSION;
+        let (element, kind, min, max, types) = ELEMENT_EXTENSION;
         let path = match &self.location {
             Location::Complex(schema) => {
                 let field = named(schema, element).ok_or_else(|| ResolveError::UnknownElement {
@@ -557,6 +582,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
                 kind,
                 min,
                 max,
+                types,
             },
             url: String::from(url),
         });
@@ -567,7 +593,12 @@ impl<T: Table + ?Sized> Walk<'_, T> {
     fn resolve_step(&mut self, rest: &[Step]) -> Result<(), ResolveError> {
         let referential = match &self.location {
             Location::Complex(schema) => schema.name == "Reference",
-            Location::Primitive(kind) => *kind == ValueKind::Text,
+            Location::Primitive(_) => match self.moves.last() {
+                Some(Move::Member(field)) => {
+                    field.types.iter().any(|code| REFERENTIAL.contains(code))
+                }
+                _ => false,
+            },
             Location::Attribute
             | Location::PrimitiveElement
             | Location::Choice(_)
@@ -634,19 +665,6 @@ impl<T: Table + ?Sized> Walk<'_, T> {
                 Location::Complex(schema)
             }
         })
-    }
-}
-
-/// The FHIR type code a primitive element carries.
-fn primitive_code(field: &Field) -> String {
-    match field.kind {
-        Kind::Attribute | Kind::Primitive(ValueKind::Text) | Kind::Xhtml => String::from("string"),
-        Kind::Primitive(ValueKind::Boolean) => String::from("boolean"),
-        Kind::Primitive(ValueKind::Integer) => String::from("integer"),
-        Kind::Primitive(ValueKind::Decimal) => String::from("decimal"),
-        Kind::Complex(name) => String::from(name),
-        Kind::Resource => String::from("Resource"),
-        Kind::Choice(_) => String::from("choice"),
     }
 }
 
@@ -844,6 +862,37 @@ mod tests {
             Err(ResolveError::TypeAssertion { ref requested, ref actual, .. })
                 if requested == "Quantity" && actual == "CodeableConcept"
         ));
+        Ok(())
+    }
+
+    #[test]
+    fn a_type_filter_on_a_primitive_reads_the_definition_s_own_type_code()
+    -> Result<(), Box<dyn core::error::Error>> {
+        let resolved = resolved("Condition", "$resource.recordedDate.as(DateTime)")?;
+        assert_eq!(keys(&resolved), ["recordedDate"]);
+        let refused = "$resource.recordedDate.as(Period)".parse()?;
+        assert!(matches!(
+            resolve(&SCHEMAS, "Condition", &refused),
+            Err(ResolveError::TypeAssertion { ref actual, .. }) if actual == "dateTime"
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn resolve_on_an_element_that_is_no_reference_is_refused() -> Result<(), ParseError> {
+        let path = "$resource.recordedDate.resolve()".parse()?;
+        assert!(matches!(
+            resolve(&SCHEMAS, "Condition", &path),
+            Err(ResolveError::NotAReference { ref element })
+                if element == "Condition.recordedDate"
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn resolve_on_a_canonical_primitive_defers() -> Result<(), Box<dyn core::error::Error>> {
+        let resolved = resolved("Condition", "$resource.meta.profile.resolve()")?;
+        assert_eq!(resolved.location(), &Location::Deferred);
         Ok(())
     }
 
