@@ -66,12 +66,35 @@ jobs:
         with:
           tool: cargo-llvm-cov,cargo-nextest
 
-      # The lcov file sonar.rust.lcov.reportPaths names. --no-tests=pass keeps
-      # a member with no tests from failing the run, the same flag the ci.yml
-      # test lane uses.
-      - name: Instrumented tests to lcov
+      # The lcov file sonar.rust.lcov.reportPaths names. One package at a time:
+      # a workspace-wide instrumented build schedules the two generated giants
+      # side by side and the runner kills it with exit 143 (#146), the same
+      # shape the clippy lane moved off. --no-report accumulates the profiles,
+      # the report step merges them into the single file Sonar imports.
+      # --no-tests=pass keeps a member with no tests from failing the run, the
+      # same flag the ci.yml test lane uses.
+      - name: Instrumented tests to lcov, one package at a time
         if: ${{ hashFiles('Cargo.toml') != '' }}
-        run: cargo llvm-cov nextest --locked --workspace --all-features --no-tests=pass --lcov --output-path lcov.info
+        env:
+          CARGO_BUILD_JOBS: "2"
+        run: |
+          set -euo pipefail
+          cargo llvm-cov clean --workspace
+          cargo metadata --no-deps --format-version 1 \
+            | jq -r '.packages[].name' \
+            | sort \
+            | while read -r package; do
+                echo "::group::${package}"
+                cargo llvm-cov nextest --locked --no-report --no-tests=pass -p "${package}"
+                echo "::endgroup::"
+              done
+          cargo llvm-cov report --lcov --output-path lcov.info
+          lines="$(grep -c '^DA:' lcov.info || true)"
+          echo "lcov.info carries ${lines} line records"
+          if [ "${lines}" = "0" ]; then
+            echo "the coverage report is empty" >&2
+            exit 1
+          fi
 
       # sonar.projectVersion anchors the "Previous version" New Code window: the
       # workspace version bumps at every release cut, so "new code" means "since
