@@ -48,7 +48,7 @@ impl Table for Schemas {
     }
 
     fn is_resource(&self, name: &str) -> bool {
-        self.resources.binary_search(&name).is_ok()
+        Self::is_resource(self, name)
     }
 }
 
