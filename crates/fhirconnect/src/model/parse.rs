@@ -403,6 +403,12 @@ impl Lowering {
     }
 
     /// Refuses a path whose head variable is outside the documented set.
+    ///
+    /// A `criteria` or a `manual` `value` is a literal rather than a path, so
+    /// neither is checked here even when it opens with a `$`; the one
+    /// documented `$context.who` value form
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`,
+    /// §`$context`) is read by the interpreter.
     fn check_path_variable(&mut self, text: &Located<String>, path: &ModelPath) {
         let value = text.value();
         if !value.starts_with('$') {
@@ -725,6 +731,9 @@ fn lower_mapping(
     lowering.refuse_unknown_keys(node, path, MAPPING_KEYS);
     let name = lowering.required_text(node, path, "name")?;
     let with = lower_with(lowering, node, path);
+    // NOTE: the published model schema puts the data-type enum at mapping
+    // level and every prose example writes it inside `with`, so both places
+    // lower into the one field.
     let mapping_type =
         lowering.optional_keyword::<DataType>(node, path, "type", ModelCode::InvalidDataType);
     let with = match (with, mapping_type) {

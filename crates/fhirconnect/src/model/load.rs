@@ -59,7 +59,12 @@ impl MappingSet {
     pub fn insert_model(&mut self, file: ModelMappingFile) -> Result<(), Box<Diagnostic>> {
         let name = file.header().name().value().clone();
         if let Some(first) = self.file_of(&name) {
-            return Err(Box::new(duplicate(&name, first, file.file(), file.header())));
+            return Err(Box::new(duplicate(
+                &name,
+                first,
+                file.file(),
+                file.header(),
+            )));
         }
         self.models.insert(name, file);
         Ok(())
@@ -74,7 +79,12 @@ impl MappingSet {
     pub fn insert_context(&mut self, file: ContextMappingFile) -> Result<(), Box<Diagnostic>> {
         let name = file.header().name().value().clone();
         if let Some(first) = self.file_of(&name) {
-            return Err(Box::new(duplicate(&name, first, file.file(), file.header())));
+            return Err(Box::new(duplicate(
+                &name,
+                first,
+                file.file(),
+                file.header(),
+            )));
         }
         self.contexts.insert(name, file);
         Ok(())
