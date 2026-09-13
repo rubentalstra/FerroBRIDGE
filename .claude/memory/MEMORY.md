@@ -58,3 +58,6 @@
 - [End-to-end gate](e2e-gate.md): container tests run only with
   `FERROBRIDGE_E2E=1` through the testkit harness; images pinned by digest and
   checked by the versions guard; 2026-09-12
+- [Merge queue with signed commits](merge-queue-signed.md): main requires signed, up-to-date branches; rebase locally, merge one at a time, never gh pr update-branch --rebase
+- [Release tag is mine](release-tag-is-mine.md): the session pushes every release and pre-release tag; never hand the tag to the owner
+- [Upstream reports carry no milestone](upstream-reports-no-milestone.md): an upstream-report issue is never in a milestone; the in-repo decision it forces is a separate, milestoned issue

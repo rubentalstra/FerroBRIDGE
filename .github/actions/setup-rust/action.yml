@@ -23,6 +23,19 @@ inputs:
       release (.claude/rules/ci-cd.md).
     required: false
     default: "true"
+  cache-shared-key:
+    description: >-
+      A shared cache key, for a lane whose cache is its own rather than the
+      job's (the coverage lane uses "sonar"). Empty means the wrapped action's
+      default key.
+    required: false
+    default: ""
+  cache-save-if:
+    description: >-
+      An expression deciding whether the cache is saved after the job; "true"
+      by default. The coverage lane saves only from main.
+    required: false
+    default: "true"
 runs:
   using: composite
   steps:
@@ -31,3 +44,5 @@ runs:
         components: ${{ inputs.components }}
         target: ${{ inputs.target }}
         cache: ${{ inputs.cache }}
+        cache-shared-key: ${{ inputs.cache-shared-key }}
+        cache-save-if: ${{ inputs.cache-save-if }}

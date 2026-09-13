@@ -50,10 +50,7 @@ jobs:
 
       - name: Install the Rust toolchain
         if: ${{ hashFiles('Cargo.toml') != '' }}
-        # TODO(#20): lift this step into ./.github/actions/setup-rust with the
-        # Cargo workspace; it reads the channel from rust-toolchain.toml, which
-        # that issue also lands.
-        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
+        uses: ./.github/actions/setup-rust
         with:
           # llvm-tools-preview carries the profdata reader cargo-llvm-cov needs.
           components: llvm-tools-preview

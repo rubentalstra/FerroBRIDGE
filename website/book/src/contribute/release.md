@@ -15,7 +15,7 @@ and the two say the same thing.
 ## Before the tag
 
 1. **The milestone is empty.** `gh issue list --milestone vX.Y.Z --state open`
-   answers nothing, or the owner calls the cut and moves the stragglers to the
+   answers nothing, or the cut is called and the stragglers move to the
    next milestone.
 2. **The product version moves in every file that declares it.** Today that is
    `CITATION.cff`, the product row of `docs/VERSIONS.md`, the root `Cargo.toml`
@@ -32,7 +32,8 @@ and the two say the same thing.
 
 ## The tag
 
-The signed tag is the owner's:
+The tag is signed and pushed from the working session that carried the
+milestone, right after the version-bump pull request merges:
 
 ```bash
 git tag -s vX.Y.Z -m "vX.Y.Z" <the merged release commit>

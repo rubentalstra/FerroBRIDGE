@@ -187,7 +187,7 @@ before a real cut.
 ## Before the tag
 
 1. **The milestone is empty.** `gh issue list --milestone vX.Y.Z --state open`
-   answers nothing, or the owner calls the cut and moves the stragglers to the
+   answers nothing, or the cut is called and the stragglers move to the
    next milestone.
 2. **The version moves in every file the pin matrix names:** the root
    `Cargo.toml` `[workspace.package]` `version`, `CITATION.cff`, the
@@ -212,7 +212,9 @@ before a real cut.
 
 ## The tag
 
-The signed tag is the owner's:
+The tag is signed and pushed from the working session that carried the
+milestone, right after the version-bump pull request merges; it is never a
+step handed to someone else:
 
 ```sh
 git tag -s vX.Y.Z -m "vX.Y.Z" <the merged release commit>

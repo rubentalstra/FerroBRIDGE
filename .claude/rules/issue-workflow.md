@@ -64,7 +64,10 @@ Bootstrap the labels once with `scripts/gh/labels.sh`.
 - **Outbound:** `upstream-report` for a report of a defect, contradiction, or
   silence in a published specification. The issue IS the report: it opens with
   a plain summary, then what the specification says (with citations), what this
-  implementation does, and the resolution sought upstream.
+  implementation does, and the resolution sought upstream. It never carries a
+  milestone: it closes when the upstream changes, on a timeline this repository
+  does not control, and the in-repo decision it forces is its own, milestoned
+  issue.
 
 ## Milestones = releases
 
