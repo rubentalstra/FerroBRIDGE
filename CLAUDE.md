@@ -56,8 +56,16 @@ v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 
 The Cargo workspace is a skeleton (#107): the root manifests with the full lint
 set, five placeholder library crates at 0.0.0 holding their crates.io names,
-a thin `ferrobridge` binary that does nothing yet, and the testkit tool crate.
-Beside it:
+and the testkit tool crate. Beside it:
+
+- `app/ferrobridge-server`: the one binary, `ferrobridge` (#21). A thin
+  `main.rs` over the library run path, the five subcommands, the TOML and
+  environment configuration tree with `_file` secrets and `deny_unknown_fields`
+  throughout, the `tracing` console, the request log that carries the matched
+  route and never a body, the health family over an indicator registry, the
+  `tower-http` stack (request id, panic catch, timeout, body ceiling), and the
+  bounded drain on `SIGTERM`. `serve` runs; the batch subcommands parse and
+  name the issue that lands each.
 
 - `crates/fhir-types`: the generated FHIR model, Apache-2.0, emitted whole by
   the generator below and never hand-edited.

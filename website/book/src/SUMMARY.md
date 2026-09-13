@@ -16,6 +16,7 @@
 # Operate
 
 - [What FerroBRIDGE runs beside](operate/deployment-shape.md)
+- [Configuring the server](operate/configuration.md)
 - [Failure and identity behaviour](operate/failure-and-identity.md)
 
 # Integrate

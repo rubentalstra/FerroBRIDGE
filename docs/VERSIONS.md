@@ -76,6 +76,12 @@ dependency pins below.
 | `http` | 1.5.0 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `secrecy` | 0.10.3 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `tracing` | 0.1.44 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `tracing-subscriber` | 0.3.23 | the root `Cargo.toml` `[workspace.dependencies]` (the server console) |
+| `axum` | 0.8.9 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
+| `tower-http` | 0.7.1 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
+| `tower` | 0.5.3 | the root `Cargo.toml` `[workspace.dependencies]` |
+| `toml` | 1.1.6 | the root `Cargo.toml` `[workspace.dependencies]` (the server configuration file) |
+| `uuid` | 1.26.1 | the root `Cargo.toml` `[workspace.dependencies]` (the minted request id) |
 | `futures-core`, `futures-util` | 0.3.34 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `tokio` | 1.53.1 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `wiremock` | 0.6.5 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |

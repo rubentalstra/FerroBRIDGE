@@ -23,6 +23,34 @@ no binary to download yet.
 
 ### Added
 
+- `app/ferrobridge-server`, the `ferrobridge` binary shape (#21): a thin
+  `main.rs` over a testable library run path, with `serve` plus the `etl run`,
+  `cdm init`, `vocab load` and `mapping check` subcommands, which parse and
+  exit 2 naming the issue that lands each. Configuration is an optional TOML
+  file, named by `--config` or `FERROBRIDGE_CONFIG`, with
+  `FERROBRIDGE__<SECTION>__<KEY>` environment variables over it; every struct
+  refuses an unknown key, every default lives inline in its own `Default` impl,
+  every credential is reachable through a `<key>_file` sibling read once at
+  boot, and a refused configuration exits 78. A lane is off until its section
+  is present, and a section that reaches identifiable data says so once at
+  start-up, naming the section and never a value. The console is `tracing` with
+  `auto`, `json` and `pretty` renderings, `auto` resolving by whether stdout is
+  a terminal, and a filter that does not parse falling back to the default and
+  logging the fallback. The HTTP surface is `GET /`, `GET /health/liveness` and
+  `GET /health/readiness`, the last over a registry of per-upstream indicators
+  that answers `503` while any of them is down. The middleware stack echoes an
+  `X-Request-Id` only when it is printable ASCII of at most 128 characters and
+  mints a version 4 UUID otherwise, renders a handler panic as a `500` with a
+  JSON body carrying the request id, answers `408` past the request timeout and
+  `413` past the body ceiling, and writes exactly one log line per request with
+  the method, the matched route, the status, the latency and the request id.
+  A body never reaches the log, and a query value only when the deployment
+  named its parameter. `SIGTERM` and `SIGINT` start a bounded drain.
+  The variable table is on the Operate page of the book.
+- `ferrobridge-openehr` and `ferrobridge-term` each gain a `reachability`
+  probe, one `GET` on the configured base and on `[base]/metadata`
+  (<https://hl7.org/fhir/R4/http.html#capabilities>), so a readiness indicator
+  asks whether the upstream answers at all without running an operation.
 - `crates/ferrobridge-term`, the FHIR terminology client (#77):
   `CodeSystem/$lookup` resolves a code's display, `ConceptMap/$translate` maps
   a code into another system, `ValueSet/$validate-code` tests membership of a
