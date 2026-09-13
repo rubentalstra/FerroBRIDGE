@@ -803,6 +803,33 @@ fn the_program_records_the_version_of_every_model_it_compiled() -> Result<(), Bo
 }
 
 #[test]
+fn an_unresolved_archetype_root_is_refused_in_the_model_file() -> Result<(), Box<dyn Error>> {
+    let files = [
+        (
+            "model.yml",
+            model(
+                "EVALUATION.synthetic.v1",
+                "openEHR-EHR-EVALUATION.absent.v1",
+                PROBLEM,
+            ),
+        ),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unresolved-archetype-root"]);
+    let refusal = diagnostics.first().ok_or("one refusal")?;
+    assert_eq!(refusal.file().to_string_lossy(), "model.yml");
+    assert_eq!(
+        refusal.mapping_name(),
+        Some(&MappingName::new("EVALUATION.synthetic.v1")?)
+    );
+    Ok(())
+}
+
+#[test]
 fn a_context_the_set_does_not_hold_is_refused_naming_it() -> Result<(), Box<dyn Error>> {
     let files = [
         ("model.yml", start_model(PROBLEM)),

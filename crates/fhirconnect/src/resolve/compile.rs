@@ -197,7 +197,7 @@ impl<'a> Compiler<'a> {
         })?;
         self.extensions = self.extensions_of(file);
         let resource = self.resource_of(start)?;
-        let archetype = self.archetype_root(start, file.file(), context)?;
+        let archetype = self.archetype_root(start)?;
         let scope = Scope {
             resource: resource.clone(),
             fhir: root_expression(),
@@ -433,12 +433,12 @@ impl<'a> Compiler<'a> {
 
     /// Returns the path of the node the model mapping's archetype is rooted
     /// at.
-    fn archetype_root(
-        &mut self,
-        model: &ModelMappingFile,
-        file: &Path,
-        owner: &MappingName,
-    ) -> Option<RmPath> {
+    ///
+    /// Every refusal here names the model mapping's own file, because the
+    /// position it carries is a position in that file.
+    fn archetype_root(&mut self, model: &ModelMappingFile) -> Option<RmPath> {
+        let file = model.file();
+        let owner = model.header().name().value();
         let path = ModelPath::root()
             .field("spec")
             .field("openEhrConfig")
@@ -467,7 +467,7 @@ impl<'a> Compiler<'a> {
             .collect();
         if let [only] = *found.as_slice() {
             let root = only.rm_path().clone();
-            self.check_revision(model, file, owner, only.node_id());
+            self.check_revision(model, only.node_id());
             return Some(root);
         }
         self.diagnostics.push(diagnostic(
@@ -495,13 +495,7 @@ impl<'a> Compiler<'a> {
     /// its major. A template served over the ADL 1.4 route carries the
     /// interface form alone, so there the pin is recorded and nothing is
     /// compared.
-    fn check_revision(
-        &mut self,
-        model: &ModelMappingFile,
-        file: &Path,
-        owner: &MappingName,
-        carried: Option<&str>,
-    ) {
+    fn check_revision(&mut self, model: &ModelMappingFile, carried: Option<&str>) {
         let Some(revision) = model.header().revision() else {
             return;
         };
@@ -515,8 +509,8 @@ impl<'a> Compiler<'a> {
             return;
         }
         self.diagnostics.push(diagnostic(
-            file,
-            owner,
+            model.file(),
+            model.header().name().value(),
             ResolveCode::ArchetypeRevisionMismatch,
             revision.position(),
             &ModelPath::root()
@@ -877,7 +871,7 @@ impl<'a> Compiler<'a> {
         if let (Some(archetype), Ok((node, _))) = (archetype, self.locate(&scope.openehr)) {
             match node.node_id() {
                 Some(carried) if node_id_matches(archetype.as_str(), carried) => {
-                    self.check_revision(slotted, file.file(), owner, Some(carried));
+                    self.check_revision(slotted, Some(carried));
                 }
                 carried => self.diagnostics.push(diagnostic(
                     file.file(),
