@@ -1,0 +1,205 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+#
+# The FerroBRIDGE quickstart, a standalone file: download it, create the two
+# secret files beside it, and run
+#
+#   docker compose up
+#   curl http://127.0.0.1:8080/health/liveness
+#
+# It pulls the published image (ghcr.io/rubentalstra/ferrobridge, pinned to the
+# release this file shipped with) and needs no repository checkout. The tag
+# below is bumped at every release cut and scripts/checks/versions.sh keeps it
+# equal to the workspace version.
+#
+# WHAT YOU PROVIDE. The bridge reaches an openEHR CDR over ITS-REST, a FHIR
+# terminology server, and (for the OMOP target) a CDM database. Every lane is
+# off until you configure it, so an unconfigured server answers `/` and
+# /health/liveness and nothing else. Turn a lane on by setting its variable in
+# your shell or in a .env file beside this one:
+#
+#   FERROBRIDGE__CDR__BASE_URL=https://cdr.example.org/openehr/v1
+#   FERROBRIDGE__CDR__CREDENTIALS__BEARER_TOKEN_FILE=/run/secrets/cdr_bearer_token
+#   FERROBRIDGE__TERMINOLOGY__BASE_URL=https://tx.example.org/r4
+#   FERROBRIDGE__CDM__URL_FILE=/run/secrets/cdm_url
+#
+# The names are the server's own: every key of the configuration tree is
+# reachable as FERROBRIDGE__<SECTION>__<KEY>, and every secret is read from the
+# file its `_file` sibling names rather than from the environment.
+#
+# SECRETS. The three files under ./secrets are yours to create before the first
+# `docker compose up`; compose refuses to start a service whose secret source
+# is missing. A file whose lane is off may be empty, because nothing reads it.
+# Never commit them.
+#
+#   mkdir -p secrets
+#   printf 'postgresql://ferrobridge:%s@cdm:5432/omop' "$PASSWORD" > secrets/cdm_url
+#   printf '%s' "$PASSWORD" > secrets/cdm_password
+#   : > secrets/cdr_bearer_token
+#
+# PORTS. The published port binds the loopback interface by default. A
+# published port is DNAT'd ahead of the host firewall's own chains, so a port
+# on 0.0.0.0 is reachable from the network even when the firewall says
+# otherwise (https://docs.docker.com/engine/network/packet-filtering-firewalls/).
+# To serve another machine, name the interface, or put a reverse proxy in
+# front:
+#
+#   FERROBRIDGE_BIND_HOST=10.0.0.7 docker compose up
+#
+# HEALTH. The image is distroless and has no shell, and the binary carries no
+# probe subcommand, so no service below declares a `healthcheck` over the
+# bridge. Probe it from outside: GET /health/liveness answers 200 while the
+# process is up, and GET /health/readiness answers 200 when every configured
+# upstream answered and 503 with a JSON body naming each one otherwise.
+#
+# PROFILES. The `cdm` profile stands up the OMOP CDM database and applies the
+# DDL; the `vocab` profile loads an OHDSI Athena export you downloaded
+# yourself. Neither runs on a plain `docker compose up`.
+
+# Without this the project is named after the directory the file sits in, and
+# the container, network and volume names move when you rename the directory.
+name: ferrobridge
+
+services:
+  ferrobridge:
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.1}
+    container_name: ferrobridge
+    restart: unless-stopped
+    ports:
+      - "${FERROBRIDGE_BIND_HOST:-127.0.0.1}:${FERROBRIDGE_PORT:-8080}:8080"
+    environment:
+      # The image sets the same value; it is repeated here so the address the
+      # container binds is visible in `docker compose config`.
+      FERROBRIDGE__SERVER__LISTEN: 0.0.0.0:8080
+      # An entry with a key and no value passes the variable through from your
+      # shell or .env ONLY when it is set there. That is what keeps an
+      # unconfigured lane off: an empty base URL would be a boot error, an
+      # absent one is a lane the server never starts.
+      FERROBRIDGE__CDR__BASE_URL:
+      FERROBRIDGE__CDR__CREDENTIALS__BEARER_TOKEN_FILE:
+      FERROBRIDGE__TERMINOLOGY__BASE_URL:
+      FERROBRIDGE__TERMINOLOGY__WIRE_VERSION:
+      FERROBRIDGE__CDM__URL_FILE:
+      # `auto` renders pretty output on a terminal and JSON otherwise.
+      FERROBRIDGE__TELEMETRY__FORMAT: ${FERROBRIDGE_LOG_FORMAT:-auto}
+      FERROBRIDGE__TELEMETRY__FILTER: ${FERROBRIDGE_LOG_FILTER:-info}
+    secrets:
+      - cdm_url
+      - cdr_bearer_token
+    # The server writes nothing: no cache, no scratch file, no upload
+    # directory, and every secret is read once at boot. So the root filesystem
+    # is read-only with no tmpfs beside it. Should a lane ever need a writable
+    # path, mount a tmpfs for that path alone rather than dropping this line.
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # The OMOP CDM database. The bridge writes CDM rows here and reads the loaded
+  # OHDSI vocabulary from it; the FHIR facade needs none of it.
+  #
+  #   docker compose --profile cdm up
+  #
+  # The password never reaches the environment: the official image reads
+  # POSTGRES_PASSWORD_FILE, so the value lives in ./secrets/cdm_password and in
+  # the connection URL in ./secrets/cdm_url, which must agree.
+  cdm:
+    image: postgres:18.6@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280
+    profiles: [cdm, vocab]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CDM_DATABASE:-omop}
+      POSTGRES_USER: ${CDM_USER:-ferrobridge}
+      POSTGRES_PASSWORD_FILE: /run/secrets/cdm_password
+    secrets:
+      - cdm_password
+    volumes:
+      - cdm-data:/var/lib/postgresql/data
+    # What gates cdm-init and vocab-load below: the server accepts connections
+    # only after the first-run initialisation has finished.
+    healthcheck:
+      test:
+        ["CMD", "pg_isready", "-U", "${CDM_USER:-ferrobridge}", "-d", "${CDM_DATABASE:-omop}"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 10
+    # The entrypoint starts as root to fix ownership and drops to the postgres
+    # user itself, so this image keeps the capabilities that needs and gains no
+    # new ones. The bridge above drops everything.
+    security_opt:
+      - no-new-privileges:true
+
+  # One shot: apply the OMOP CDM v5.4 DDL to the database above.
+  #
+  #   docker compose --profile cdm run --rm cdm-init
+  #
+  # TODO(#91): `cdm init` exits 2 today naming that issue, so this service is
+  # the shape the job runs in rather than a working load.
+  cdm-init:
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.1}
+    profiles: [cdm]
+    command: ["cdm", "init"]
+    restart: "no"
+    depends_on:
+      cdm:
+        condition: service_healthy
+    environment:
+      FERROBRIDGE__CDM__URL_FILE: /run/secrets/cdm_url
+    secrets:
+      - cdm_url
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # One shot: load an OHDSI Athena vocabulary export into the CDM database.
+  # The export is a licensed download you obtained yourself; it is bind-mounted
+  # read-only and no vocabulary byte ever enters the image or a release asset.
+  #
+  #   FERROBRIDGE_VOCAB_DIR=/srv/athena/2026-09 \
+  #     docker compose --profile vocab run --rm vocab-load
+  #
+  # TODO(#91): `vocab load` exits 2 today naming that issue, so this service is
+  # the shape the job runs in rather than a working load.
+  vocab-load:
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.1}
+    profiles: [vocab]
+    command: ["vocab", "load"]
+    restart: "no"
+    depends_on:
+      cdm:
+        condition: service_healthy
+    environment:
+      FERROBRIDGE__CDM__URL_FILE: /run/secrets/cdm_url
+    secrets:
+      - cdm_url
+    volumes:
+      - type: bind
+        source: ${FERROBRIDGE_VOCAB_DIR:-./vocabulary}
+        target: /vocabulary
+        read_only: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+secrets:
+  # The PostgreSQL connection URL the OMOP lane writes through, password
+  # included. Read once at boot and never logged.
+  cdm_url:
+    file: ${FERROBRIDGE_CDM_URL_FILE:-./secrets/cdm_url}
+  # The CDR credential, for a CDR that takes an RFC 6750 bearer token. For RFC
+  # 7617 basic authentication set FERROBRIDGE__CDR__CREDENTIALS__USER and point
+  # FERROBRIDGE__CDR__CREDENTIALS__PASSWORD_FILE at a secret of your own.
+  cdr_bearer_token:
+    file: ${FERROBRIDGE_CDR_BEARER_TOKEN_FILE:-./secrets/cdr_bearer_token}
+  # The password the CDM database is created with, read by the official image.
+  cdm_password:
+    file: ${FERROBRIDGE_CDM_PASSWORD_FILE:-./secrets/cdm_password}
+
+volumes:
+  cdm-data:

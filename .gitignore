@@ -30,3 +30,14 @@
 # .github/workflows/docs.yml renders both in CI.
 /website/book/book/
 /_site/
+
+# The container build context: the release lane stages one static binary per
+# platform under dist/<os>_<arch>/ and docker/Dockerfile copies it
+# (docs/release.md). Built artefacts, never committed.
+/dist/
+
+# The quickstart's operator-provided directories (compose.yaml): the secret
+# files the services read, and the OHDSI Athena vocabulary export the vocab
+# profile bind-mounts. Neither ever enters this repository.
+/secrets/
+/vocabulary/

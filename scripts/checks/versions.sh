@@ -26,9 +26,14 @@
 #                          docs/VERSIONS.md.
 #   7. container images    the PinnedImage constants of the testkit container
 #                          harness against the docs/VERSIONS.md image rows.
-#   8. vendored corpora    every docs/specs/*/PROVENANCE.md names the commit or
+#   8. image and compose   the FROM of docker/Dockerfile against the base-image
+#                          row, the compose.yaml PostgreSQL image against the
+#                          PostgreSQL row, and the compose.yaml bridge tag
+#                          against the product version and the workspace
+#                          version.
+#   9. vendored corpora    every docs/specs/*/PROVENANCE.md names the commit or
 #                          tag the docs/VERSIONS.md corpus row pins for it.
-#   9. licence             LICENSE is the Business Source License 1.1 and no
+#  10. licence             LICENSE is the Business Source License 1.1 and no
 #                          first-party file claims MIT or Apache-2.0 as its
 #                          own, crates/fhir-types excepted (Apache-2.0).
 #
@@ -337,6 +342,72 @@ if [ -f "$harness" ] && [ -f docs/VERSIONS.md ]; then
   [ "$agreed" -eq "$expected" ] && note "OK: all $expected container image pins agree"
 else
   note "no $harness yet, skipped"
+fi
+
+echo "== container recipe and quickstart (docker/Dockerfile, compose.yaml <-> docs/VERSIONS.md)"
+if [ -f docker/Dockerfile ] && [ -f docs/VERSIONS.md ]; then
+  base="$(sed -nE 's|^FROM[[:space:]]+([^[:space:]]+).*|\1|p' docker/Dockerfile | head -n1)"
+  want_base="$(pin_of "Container base image" docs/VERSIONS.md)"
+  if [ -z "$base" ]; then
+    bad "docker/Dockerfile has no FROM"
+  elif [ -z "$want_base" ]; then
+    bad "docs/VERSIONS.md has no 'Container base image' row"
+  elif [ "$base" != "$want_base" ]; then
+    bad "base image: docker/Dockerfile builds on $base, docs/VERSIONS.md pins $want_base"
+  else
+    note "OK: the base image is $base"
+  fi
+  # The digest belongs to the FROM alone; the base.name label names the tag it
+  # came from, so a bump that moves one and not the other is caught here.
+  label_base="$(sed -nE 's|.*org\.opencontainers\.image\.base\.name="([^"]+)".*|\1|p' docker/Dockerfile | head -n1)"
+  if [ -n "$label_base" ] && [ "${base%%@*}" != "$label_base" ]; then
+    bad "base image: the base.name label says $label_base, the FROM is ${base%%@*}"
+  fi
+else
+  note "no docker/Dockerfile yet, skipped"
+fi
+
+if [ -f compose.yaml ] && [ -f docs/VERSIONS.md ]; then
+  # Every ferrobridge image reference in the quickstart carries the same tag
+  # default, so the set is collapsed and a second value is drift by itself.
+  tags="$(sed -nE 's|^[[:space:]]*image:[[:space:]]*ghcr\.io/rubentalstra/ferrobridge:\$\{[A-Za-z_][A-Za-z0-9_]*:-([^}]+)\}[[:space:]]*$|\1|p' compose.yaml | sort -u)"
+  count="$(printf '%s\n' "$tags" | grep -c . || true)"
+  matrix_product="$(pin_of "Product version" docs/VERSIONS.md)"
+  if [ "$count" -eq 0 ]; then
+    bad "compose.yaml has no ghcr.io/rubentalstra/ferrobridge image tag default"
+  elif [ "$count" -ne 1 ]; then
+    bad "compose.yaml names more than one ferrobridge tag default: $(printf '%s' "$tags" | tr '\n' ' ')"
+  elif [ "$tags" != "$matrix_product" ]; then
+    bad "quickstart tag: compose.yaml pulls $tags, docs/VERSIONS.md pins the product version $matrix_product"
+  else
+    note "OK: the quickstart pulls $tags"
+    if [ -f Cargo.toml ]; then
+      workspace_ver="$(toml_val "[workspace.package]" version Cargo.toml)"
+      if [ -z "$workspace_ver" ]; then
+        note "root Cargo.toml has no [workspace.package] version yet, skipped"
+      elif [ "$tags" != "$workspace_ver" ]; then
+        bad "quickstart tag: compose.yaml pulls $tags, root Cargo.toml is at $workspace_ver"
+      else
+        note "OK: the quickstart tag matches the workspace version"
+      fi
+    else
+      note "no root Cargo.toml yet, skipped the quickstart tag comparison"
+    fi
+  fi
+
+  cdm_image="$(sed -nE 's|^[[:space:]]*image:[[:space:]]*(postgres:[^[:space:]]+)[[:space:]]*$|\1|p' compose.yaml | head -n1)"
+  want_pg="$(pin_of "PostgreSQL image" docs/VERSIONS.md)"
+  if [ -z "$cdm_image" ]; then
+    bad "compose.yaml has no digest-pinned postgres image"
+  elif [ -z "$want_pg" ]; then
+    bad "docs/VERSIONS.md has no 'PostgreSQL image' row"
+  elif [ "$cdm_image" != "$want_pg" ]; then
+    bad "CDM image: compose.yaml runs $cdm_image, docs/VERSIONS.md pins $want_pg"
+  else
+    note "OK: the CDM service runs $cdm_image"
+  fi
+else
+  note "no compose.yaml yet, skipped"
 fi
 
 echo "== vendored corpora (docs/specs/*/PROVENANCE.md <-> docs/VERSIONS.md)"

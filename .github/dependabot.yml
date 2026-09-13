@@ -3,11 +3,9 @@
 
 # .github/dependabot.yml: automated dependency updates.
 #
-# Three ecosystems. `github-actions` bumps the digest-pinned actions the
-# workflows in this directory use, and is the only one with anything to resolve
-# today. `cargo` and `docker` are inert until their manifests exist and
-# activate by themselves when they land, so the workspace change needs no edit
-# here.
+# Three ecosystems, all three live. `github-actions` bumps the digest-pinned
+# actions the workflows in this directory use, `cargo` the workspace
+# dependencies, and `docker` the digest-pinned base image of docker/Dockerfile.
 #
 # COOLDOWN is the delay between a release being published and this bot
 # proposing it, so a compromised or yanked release has a window to be caught
@@ -67,12 +65,12 @@ updates:
       prefix: "deps"
 
   - package-ecosystem: "docker"
-    # No container recipe exists yet and its path is not fixed, so both
-    # candidates are listed. `directories` accepts a list where `directory`
-    # takes one path.
-    directories:
-      - "/"
-      - "/docker"
+    # The one container recipe is docker/Dockerfile (#22). The image tags in
+    # compose.yaml are not this ecosystem's subject: the bridge tag is the
+    # workspace version, which the release cut moves and
+    # scripts/checks/versions.sh guards, and the PostgreSQL pin is a
+    # docs/VERSIONS.md row shared with the test harness.
+    directory: "/docker"
     labels:
       - "dependencies"
     schedule:
