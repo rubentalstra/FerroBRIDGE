@@ -1357,6 +1357,170 @@ fn the_direction_an_extension_file_pins_reaches_the_methods_it_adds() -> Result<
     Ok(())
 }
 
+/// `context.extensions` names extension files, so a model file listed there
+/// is refused rather than applied
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/contextual-mapping.adoc`).
+#[test]
+fn a_model_file_listed_under_extensions_is_refused() -> Result<(), Box<dyn Error>> {
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "other.yml",
+            model(
+                "CLUSTER.synthetic.v2",
+                "openEHR-EHR-CLUSTER.problem_qualifier.v2",
+                PROBLEM,
+            ),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["CLUSTER.synthetic.v2"]),
+            ),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-not-an-extension"]);
+    Ok(())
+}
+
+/// An extension file states what it extends with `spec.extends`
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-mapping.adoc`),
+/// so one that names nothing has no target to apply to.
+#[test]
+fn an_extension_that_extends_nothing_is_refused() -> Result<(), Box<dyn Error>> {
+    let orphan = String::from(
+        "grammar: FHIRConnect/v1.0.0\ntype: extension\nmetadata:\n  name: synthetic_extension\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\nmappings:\n  - name: \"note\"\n    extension: \"add\"\n    with:\n      fhir: \"$resource.note.text\"\n      openehr: \"$archetype/data[at0001]/items[at0069]\"\n",
+    );
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        ("extension.yml", orphan),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-extension-without-target"]);
+    Ok(())
+}
+
+/// `fhirConfig.structureDefinition` is "just information for the user"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`, §Spec) and
+/// the specification names no other source for the resource type, so the
+/// compiler needs it. No specification governs this: our own design.
+#[test]
+fn a_start_model_naming_no_structure_definition_is_refused() -> Result<(), Box<dyn Error>> {
+    let unnamed = format!(
+        "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: EVALUATION.synthetic.v1\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1\n{PROBLEM}"
+    );
+    let files = [
+        ("model.yml", unnamed),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-resource-type-unnamed"]);
+    Ok(())
+}
+
+/// The last segment of the canonical URL is the resource name for a base
+/// resource (<https://hl7.org/fhir/R4/structuredefinition.html>), so a URL
+/// whose last segment names no resource type of this FHIR version is refused.
+#[test]
+fn a_structure_definition_naming_no_resource_type_is_refused() -> Result<(), Box<dyn Error>> {
+    let unknown = format!(
+        "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: EVALUATION.synthetic.v1\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1\n  fhirConfig:\n    structureDefinition: http://hl7.org/fhir/StructureDefinition/Diagnosis\n{PROBLEM}"
+    );
+    let files = [
+        ("model.yml", unknown),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-resource-type"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(message.contains("Diagnosis"), "{message}");
+    Ok(())
+}
+
+#[test]
+fn a_fhir_expression_outside_the_grammar_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.category.where(coding.code = 'x'\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-malformed-fhir-path"]);
+    Ok(())
+}
+
+#[test]
+fn an_openehr_path_outside_the_grammar_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-malformed-openehr-path"]);
+    Ok(())
+}
+
+/// `$resource` is a FHIR-side variable
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`), so an
+/// openEHR path opening with it binds to no openEHR anchor.
+#[test]
+fn an_openehr_path_opening_with_a_fhir_variable_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$resource/data[at0001]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unbound-path-variable"]);
+    Ok(())
+}
+
+/// A mapping method is one of the concept types
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/concept-mappings.adoc`),
+/// so a method writing two of them says nothing about which one runs.
+#[test]
+fn a_mapping_writing_two_mapping_methods_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    link:\n      meaning: \"follow up\"\n    participationsFunction: \"performer\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-conflicting-mapping-methods"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(message.contains("link"), "{message}");
+    assert!(message.contains("participationsFunction"), "{message}");
+    Ok(())
+}
+
 #[test]
 fn a_mapping_code_the_engine_does_not_register_is_refused() -> Result<(), Box<dyn Error>> {
     let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    mappingCode: \"absentFunction\"\n";

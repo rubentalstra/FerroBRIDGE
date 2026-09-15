@@ -1360,6 +1360,100 @@ mod tests {
     }
 
     #[test]
+    fn a_mapping_without_a_name_is_refused() {
+        let document = load_str(
+            "nameless.yml",
+            &model("mappings:\n  - with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype\"\n"),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("a mapping with no name");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::MissingKey.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].name");
+    }
+
+    #[test]
+    fn a_with_that_is_not_a_block_is_refused() {
+        let document = load_str(
+            "kind.yml",
+            &model("mappings:\n  - name: \"a\"\n    with: \"$resource.code\"\n"),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("a with that is not a block");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::UnexpectedNodeKind.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].with");
+    }
+
+    #[test]
+    fn a_direction_outside_the_two_spellings_is_refused() {
+        let document = load_str(
+            "direction.yml",
+            &model("mappings:\n  - name: \"a\"\n    unidirectional: \"sideways\"\n"),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown direction");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidDirection.into());
+        assert_eq!(
+            diagnostic.model_path().to_string(),
+            "mappings[0].unidirectional"
+        );
+    }
+
+    #[test]
+    fn an_extension_method_outside_the_three_is_refused() {
+        let document = load_str(
+            "method.yml",
+            "grammar: FHIRConnect/v1.0.0\ntype: extension\nmetadata:\n  name: test_extension\n  \
+             version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  extends: \
+             EVALUATION.test.v1\nmappings:\n  - name: \"a\"\n    extension: \"replace\"\n",
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown extension method");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidExtensionMethod.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].extension");
+    }
+
+    #[test]
+    fn a_data_type_outside_the_enum_is_refused() {
+        let document = load_str(
+            "datatype.yml",
+            &model(
+                "mappings:\n  - name: \"a\"\n    with:\n      fhir: \"$resource\"\n      openehr: \
+                 \"$archetype\"\n      type: \"MONEY\"\n",
+            ),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown data type");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidDataType.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].with.type");
+    }
+
+    #[test]
+    fn a_condition_operator_outside_the_five_is_refused() {
+        let document = load_str(
+            "operator.yml",
+            &model(
+                "mappings:\n  - name: \"a\"\n    with:\n      fhir: \"$resource.code\"\n      \
+                 openehr: \"$archetype\"\n    fhirCondition:\n      targetRoot: \
+                 \"$resource.code\"\n      targetAttribute: \"coding.code\"\n      operator: \
+                 \"maybe\"\n",
+            ),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown operator");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidOperator.into());
+        assert_eq!(
+            diagnostic.model_path().to_string(),
+            "mappings[0].fhirCondition.operator"
+        );
+    }
+
+    #[test]
     fn a_model_file_is_refused_by_the_context_entry_point() {
         let document = load_str("model.yml", &model("mappings: []\n")).expect("a header");
         let diagnostics = lower_context(&document).expect_err("the wrong file type");
