@@ -15,7 +15,6 @@ use std::sync::Arc;
 use fhir_types::codec::Value;
 use fhir_types::r4::schema::SCHEMAS;
 use fhirconnect::engine::condition::Verdict;
-use fhirconnect::engine::condition::attached;
 use fhirconnect::engine::condition::evaluate;
 use fhirconnect::engine::condition::runs;
 use fhirconnect::engine::outcome::SkipReason;
@@ -32,11 +31,13 @@ use fhirconnect::model::parse::lower_context;
 use fhirconnect::model::parse::lower_model;
 use fhirconnect::model::semantic::StaticMappingCodes;
 use fhirconnect::resolve::compile::compile;
+use fhirconnect::resolve::program::Attachment;
 use fhirconnect::resolve::program::Condition;
 use fhirconnect::resolve::program::Mapping;
 use fhirconnect::resolve::program::MappingParts;
 use fhirconnect::resolve::program::Method;
 use fhirconnect::resolve::program::Pin;
+use fhirconnect::resolve::program::Preprocessor;
 use fhirconnect::resolve::program::ProfileBinding;
 use fhirconnect::resolve::program::ProfileUrl;
 use fhirconnect::resolve::program::Program;
@@ -166,15 +167,12 @@ fn verdict(name: &str) -> Result<Verdict, Box<dyn Error>> {
     let condition = mapping
         .fhir_condition()
         .ok_or_else(|| format!("{name} carries no fhirCondition"))?;
-    let input = mapping
-        .fhir()
-        .ok_or_else(|| format!("{name} carries no FHIR path"))?;
     let document = condition_document()?;
     Ok(evaluate(
         &SCHEMAS,
         &document,
         condition,
-        attached(condition, input.expression()),
+        condition.attachment() == Attachment::Element,
     )?)
 }
 
@@ -302,20 +300,20 @@ fn an_attached_condition_filters_and_an_unattached_one_gates() -> Result<(), Box
     let program = program()?;
     let filtering = mapping(&program, "identifierOneOf").ok_or("the identifier mapping")?;
     let gating = mapping(&program, "bodySiteEmpty").ok_or("the body-site mapping")?;
-    let filtering_input = filtering.fhir().ok_or("it carries a FHIR path")?;
-    let gating_input = gating.fhir().ok_or("it carries a FHIR path")?;
-    assert!(
-        attached(
-            filtering.fhir_condition().ok_or("a fhirCondition")?,
-            filtering_input.expression()
-        ),
+    assert_eq!(
+        filtering
+            .fhir_condition()
+            .ok_or("a fhirCondition")?
+            .attachment(),
+        Attachment::Element,
         "a targetRoot equal to the with path filters it"
     );
-    assert!(
-        !attached(
-            gating.fhir_condition().ok_or("a fhirCondition")?,
-            gating_input.expression()
-        ),
+    assert_eq!(
+        gating
+            .fhir_condition()
+            .ok_or("a fhirCondition")?
+            .attachment(),
+        Attachment::Unrelated,
         "a targetRoot pointing elsewhere is a gate"
     );
     Ok(())
@@ -570,6 +568,110 @@ fn a_slot_chain_that_reaches_a_model_twice_refuses() -> Result<(), Box<dyn Error
 }
 
 #[test]
+fn a_slotted_files_preprocessor_gate_skips_the_slot_when_it_closes() -> Result<(), Box<dyn Error>> {
+    // Conditions.adoc §Conditions in the preprocessor: the file-level condition
+    // "defines that the mapping file is only executed if the given condition
+    // is met". A slotted file keeps its gate, and a closed gate is a recorded
+    // skip rather than silence. The problem name is written outside the slot
+    // so the composition builds either way; the onset lives in the slotted
+    // file behind a gate that holds while the Condition has no coded bodySite.
+    let index = template()?;
+    let conditions = program()?;
+    let gate = mapping(&conditions, "bodySiteEmpty")
+        .and_then(Mapping::fhir_condition)
+        .ok_or("the body-site gate compiled")?
+        .clone();
+    let minimal = compiled("ferrobridge_diagnose_minimal")?;
+    let problem = mapping(&minimal, "problemDiagnose").ok_or("the problem mapping")?;
+    let onset = mapping(&minimal, "onset").ok_or("the onset mapping")?;
+    let model = MappingName::new("ferrobridge_diagnose_minimal")?;
+    let slot = Mapping::new(MappingParts {
+        method: Method::Slot {
+            model: model.clone(),
+            preprocessors: vec![Preprocessor::new(model.clone(), Some(gate), None, None)],
+            mappings: vec![onset.clone()],
+        },
+        ..slot_parts(&model, Vec::new())
+    });
+    let program = cyclic_program(&model, vec![problem.clone(), slot])?;
+    let written = "2026-01-02T03:04:05Z";
+    let closed_gate = |warning: &Warning| {
+        matches!(
+            *warning,
+            Warning::Skipped {
+                reason: SkipReason::PreprocessorGate { .. },
+                ..
+            }
+        )
+    };
+
+    let open = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_onset(written)?,
+        &NoMappingFunctions,
+        &defaults(),
+    )?;
+    assert!(
+        open.value().value().to_string().contains(written),
+        "a Condition with no bodySite keeps the gate open, so the slotted onset is written"
+    );
+    assert!(
+        !open.warnings().iter().any(closed_gate),
+        "an open gate records no skip: {:?}",
+        open.warnings()
+    );
+
+    let closed = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_onset_and_body_site(written)?,
+        &NoMappingFunctions,
+        &defaults(),
+    )?;
+    assert!(
+        !closed.value().value().to_string().contains(written),
+        "a coded bodySite closes the gate, so the slotted onset is not written"
+    );
+    assert!(
+        closed.warnings().contains(&Warning::Skipped {
+            mapping: String::from("slot"),
+            reason: SkipReason::PreprocessorGate {
+                model: String::from("ferrobridge_diagnose_minimal"),
+            },
+        }),
+        "the closed gate is a recorded skip: {:?}",
+        closed.warnings()
+    );
+    Ok(())
+}
+
+/// Returns the synthetic FHIR `Condition` with `onset` set and one coded
+/// `bodySite` added.
+fn condition_with_onset_and_body_site(onset: &str) -> Result<Value, Box<dyn Error>> {
+    let mut parsed: serde_json::Value =
+        serde_json::from_str(ferrobridge_testkit::fixtures::R4_CONDITION)?;
+    if let Some(object) = parsed.as_object_mut() {
+        object.insert(
+            String::from("onsetDateTime"),
+            serde_json::Value::String(String::from(onset)),
+        );
+        object.insert(
+            String::from("bodySite"),
+            serde_json::json!([{
+                "coding": [{
+                    "system": "http://example.org/fhir/sid/ferrobridge-site",
+                    "code": "SYN-SITE-1"
+                }]
+            }]),
+        );
+    }
+    Ok(Value::from_serde_json(parsed))
+}
+
+#[test]
 fn two_mappings_into_one_list_append_and_into_one_value_overwrite() -> Result<(), Box<dyn Error>> {
     // TransformingList.adoc: "the FHIR bodySite is 0..n, therefore both
     // entries would be appended into the bodySite". Overwriting.adoc: a
@@ -767,6 +869,7 @@ fn slot_parts(model: &MappingName, mappings: Vec<Mapping>) -> MappingParts {
         conceptmap: None,
         method: Method::Slot {
             model: model.clone(),
+            preprocessors: Vec::new(),
             mappings,
         },
         followed_by: Vec::new(),
@@ -793,9 +896,7 @@ fn cyclic_program(
         start: model.clone(),
         models: Vec::new(),
         operational: Vec::new(),
-        hierarchy: None,
-        fhir_condition: None,
-        openehr_condition: None,
+        preprocessors: Vec::new(),
         mappings,
     })))
 }

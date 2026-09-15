@@ -135,7 +135,7 @@ impl fmt::Display for Warning {
         match *self {
             Self::Skipped {
                 ref mapping,
-                reason,
+                ref reason,
             } => write!(f, "the mapping {mapping} did not run: {reason}"),
             Self::Defaulted { ref field } => write!(f, "the engine filled {field}"),
             Self::LastOfMany { ref path, dropped } => write!(
@@ -154,18 +154,30 @@ impl fmt::Display for Warning {
 }
 
 /// Why a mapping did not run.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SkipReason {
     /// The mapping's `unidirectional` names the other direction.
     Unidirectional,
+    /// A preprocessor gate of the slotted file did not admit the input.
+    PreprocessorGate {
+        /// The `metadata.name` of the slotted file whose gate closed.
+        model: String,
+    },
 }
 
 impl fmt::Display for SkipReason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let text = match *self {
-            Self::Unidirectional => "its unidirectional marker names the other direction",
-        };
-        f.write_str(text)
+        match *self {
+            Self::Unidirectional => {
+                f.write_str("its unidirectional marker names the other direction")
+            }
+            Self::PreprocessorGate { ref model } => {
+                write!(
+                    f,
+                    "the preprocessor gate of {model} did not admit the input"
+                )
+            }
+        }
     }
 }
 

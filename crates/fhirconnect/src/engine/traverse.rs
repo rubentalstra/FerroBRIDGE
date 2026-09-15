@@ -57,11 +57,14 @@ use crate::engine::recurrence::Placement;
 use crate::engine::rm::RmError;
 use crate::engine::rm::RmValue;
 use crate::model::ast::Direction;
+use crate::resolve::program::Attachment;
 use crate::resolve::program::FhirTarget;
 use crate::resolve::program::Manual;
+use crate::resolve::program::ManualValue;
 use crate::resolve::program::Mapping;
 use crate::resolve::program::Method;
 use crate::resolve::program::OpenehrTarget;
+use crate::resolve::program::Preprocessor;
 use crate::resolve::program::Program;
 use crate::resolve::program::Target;
 use crate::tree::Occurrence;
@@ -220,6 +223,15 @@ pub enum EngineError {
     NotApplicable {
         /// The context mapping the program compiled from.
         context: String,
+    },
+    /// A `manual` path writes a `$context` member and the run carries no call
+    /// context.
+    #[error("{mapping} writes `$context.{member}`, and this run carries no call context")]
+    ContextMember {
+        /// The dotted name of the manual entry.
+        mapping: String,
+        /// The `$context` member the path names.
+        member: String,
     },
     /// A condition could not be decided.
     #[error("the condition of {mapping} could not be decided")]
@@ -582,9 +594,10 @@ impl<T: Table + ?Sized> Run<'_, T> {
         };
         match self.direction {
             Direction::FhirToOpenehr => {
-                let attached = mapping
-                    .fhir()
-                    .is_some_and(|input| condition::attached(gate, input.expression()));
+                // NOTE: Conditions.adoc §targetRoot, a condition whose target is the
+                // `with` element filters that element's occurrences; the compiler
+                // decided the attachment over the anchored paths.
+                let attached = gate.attachment() == Attachment::Element;
                 let verdict = condition::evaluate(self.table, &self.fhir, gate, attached).map_err(
                     |source| EngineError::Condition {
                         mapping: String::from(mapping.name()),
@@ -811,7 +824,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
             return Ok(None);
         };
         if !input.tail().segments.is_empty() {
-            // TODO(#177): read the class the compiler validated for the tail.
+            // TODO(#189): read and write the tail through the RM attribute model.
             return Err(EngineError::UnresolvedTail {
                 mapping: String::from(mapping.name()),
                 node: String::from(node.aql_path().as_str()),
@@ -841,6 +854,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
             Method::Value => self.values(mapping, parent, inputs),
             Method::Slot {
                 ref model,
+                ref preprocessors,
                 ref mappings,
             } => {
                 let name = String::from(model.as_str());
@@ -851,8 +865,21 @@ impl<T: Table + ?Sized> Run<'_, T> {
                     });
                 }
                 let bindings = self.bindings(mapping, parent, inputs)?;
-                self.chain.push(name);
+                let mut admitted = Vec::with_capacity(bindings.len());
                 for binding in &bindings {
+                    if self.slot_admits(mapping, preprocessors, binding)? {
+                        admitted.push(binding);
+                    } else {
+                        self.warnings.push(Warning::Skipped {
+                            mapping: String::from(mapping.name()),
+                            reason: SkipReason::PreprocessorGate {
+                                model: name.clone(),
+                            },
+                        });
+                    }
+                }
+                self.chain.push(name);
+                for binding in admitted {
                     self.mappings(mappings, binding)?;
                 }
                 self.chain.pop();
@@ -871,6 +898,77 @@ impl<T: Table + ?Sized> Run<'_, T> {
             Method::Participation { .. } => Err(EngineError::Unsupported {
                 mapping: String::from(mapping.name()),
                 method: "participationsFunction",
+            }),
+        }
+    }
+
+    /// Returns whether every preprocessor gate of a slotted file admits the
+    /// input at `binding`.
+    ///
+    /// A file's preprocessor condition "defines that the mapping file is only
+    /// executed if the given condition is met" (`basics/Conditions.adoc`,
+    /// §Conditions in the preprocessor), read on the input side like every
+    /// condition, so a closed gate skips the slotted mappings for that
+    /// occurrence and the skip is a recorded outcome.
+    fn slot_admits(
+        &self,
+        mapping: &Mapping,
+        preprocessors: &[Preprocessor],
+        binding: &Binding,
+    ) -> Result<bool, EngineError> {
+        for preprocessor in preprocessors {
+            if let Some(hierarchy) = preprocessor.hierarchy()
+                && (hierarchy.split_fhir().is_some() || hierarchy.split_openehr().is_some())
+            {
+                // TODO(#186): run hierarchy.split of a slotted file.
+                return Err(EngineError::Unsupported {
+                    mapping: String::from(preprocessor.model().as_str()),
+                    method: "hierarchy.split",
+                });
+            }
+            let gate = match self.direction {
+                Direction::FhirToOpenehr => preprocessor.fhir_condition(),
+                Direction::OpenehrToFhir => preprocessor.openehr_condition(),
+            };
+            let Some(gate) = gate.filter(|gate| condition::runs(gate, self.direction)) else {
+                continue;
+            };
+            let holds = match self.direction {
+                Direction::FhirToOpenehr => {
+                    condition::evaluate(self.table, &self.fhir, gate, false)
+                        .map(|verdict| verdict.admits_any())
+                        .map_err(|source| EngineError::Condition {
+                            mapping: String::from(mapping.name()),
+                            source: Box::new(source),
+                        })?
+                }
+                Direction::OpenehrToFhir => {
+                    self.openehr_holds(preprocessor.model().as_str(), gate, &binding.openehr)?
+                }
+            };
+            if !holds {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
+    /// Returns the text a `manual` path writes.
+    ///
+    /// A `$context` member is a per-call value the operations surface hands
+    /// in; this run carries none, so naming one is a refusal rather than an
+    /// invented value.
+    // TODO(#114): the operations module hands the call context to the run.
+    fn manual_text<'v>(
+        mapping: &Mapping,
+        entry: &Manual,
+        value: &'v ManualValue,
+    ) -> Result<&'v str, EngineError> {
+        match *value {
+            ManualValue::Literal(ref text) => Ok(text.as_str()),
+            ManualValue::Context(ref member) => Err(EngineError::ContextMember {
+                mapping: format!("{}.{}", mapping.name(), entry.name()),
+                member: member.clone(),
             }),
         }
     }
@@ -957,7 +1055,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
                 };
                 let node = openehr.node();
                 if !openehr.tail().segments.is_empty() {
-                    // TODO(#177): read the class the compiler validated for the tail.
+                    // TODO(#189): read and write the tail through the RM attribute model.
                     return Err(EngineError::UnresolvedTail {
                         mapping: String::from(mapping.name()),
                         node: String::from(node.aql_path().as_str()),
@@ -1210,7 +1308,11 @@ impl<T: Table + ?Sized> Run<'_, T> {
                 .iter()
                 .map(|segment| segment.attribute.as_str())
                 .collect();
-            merge(&mut merged, &segments, path.value());
+            merge(
+                &mut merged,
+                &segments,
+                Self::manual_text(mapping, entry, path.value())?,
+            );
         }
         let Some(target) = node else {
             return Ok(());
@@ -1266,7 +1368,11 @@ impl<T: Table + ?Sized> Run<'_, T> {
                 &mut self.fhir,
                 target.expression(),
                 &occurrence,
-                Value::String(String::from(path.value())),
+                Value::String(String::from(Self::manual_text(
+                    mapping,
+                    entry,
+                    path.value(),
+                )?)),
             )
             .map_err(|source| EngineError::Write {
                 mapping: format!("{}.{}", mapping.name(), entry.name()),

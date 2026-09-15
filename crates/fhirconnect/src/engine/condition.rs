@@ -128,22 +128,6 @@ pub fn evaluate<T: Table + ?Sized>(
     Ok(Verdict::Filter(admitted))
 }
 
-/// Returns whether `condition` filters the occurrences of the input path.
-///
-/// Conditions.adoc §targetRoot makes a condition a filter when its
-/// `targetRoot` is the `with` path, "since the returned element is matched
-/// against the path in the `with` method", and a plain gate otherwise.
-// TODO(#177): read the attachment the compiler decided off the program.
-#[must_use]
-pub fn attached(condition: &Condition, input: &FhirPath) -> bool {
-    match *condition.target() {
-        crate::resolve::program::Target::Fhir(ref target) => {
-            target.expression().as_str() == input.as_str()
-        }
-        crate::resolve::program::Target::Openehr(_) => false,
-    }
-}
-
 /// Returns the resolved FHIR expression a condition target names.
 fn fhir_target(target: &crate::resolve::program::Target) -> Result<&FhirPath, ConditionError> {
     match *target {
