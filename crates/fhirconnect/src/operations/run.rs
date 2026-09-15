@@ -141,7 +141,7 @@ pub fn to_fhir<T: Table + ?Sized>(
         })?;
     let resource_type = String::from(program.resource().as_str());
     let mut object = object_of(outcome.value())?;
-    subject(table, &mut object, &resource_type, request.context());
+    subject(table, &mut object, &resource_type, request.context())?;
     let id = identity(&object, &composition, &resource_type)?;
     object.insert(String::from("id"), Value::String(id.clone()));
     let mapped =
@@ -323,34 +323,41 @@ fn is_fhir_id(text: &str) -> bool {
 /// require `context.patient`" (`engine/rest-api.adoc` §Resolving the patient).
 /// Which element carries the subject comes from the element table, never from
 /// a list written here.
+///
+/// # Errors
+///
+/// Returns [`OperationError::Encode`] when the reference the caller supplied
+/// does not render as JSON.
 fn subject<T: Table + ?Sized>(
     table: &T,
     object: &mut Object,
     resource_type: &str,
     context: Option<&CallContext>,
-) {
+) -> Result<(), OperationError> {
     let Some(patient) = context.and_then(CallContext::patient) else {
-        return;
+        return Ok(());
     };
+    // NOTE: a resource whose type defines no `subject` or `patient` element
+    // has nowhere to carry the override, which is a legitimate absence rather
+    // than a defect (<https://hl7.org/fhir/R4/element.html>).
     let Some(schema) = table.type_named(resource_type) else {
-        return;
+        return Ok(());
     };
     let Some(field) = schema
         .fields
         .iter()
         .find(|field| field.name == "subject" || field.name == "patient")
     else {
-        return;
+        return Ok(());
     };
-    let Ok(rendered) = Json::to_json(patient) else {
-        return;
-    };
+    let rendered = Json::to_json(patient).map_err(|source| OperationError::Encode { source })?;
     let value = if field.many {
         Value::Array(vec![Value::Object(rendered)])
     } else {
         Value::Object(rendered)
     };
     object.insert(String::from(field.name), value);
+    Ok(())
 }
 
 /// Returns one Bundle entry carrying `resource`.
