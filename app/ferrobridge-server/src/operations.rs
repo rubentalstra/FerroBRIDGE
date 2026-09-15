@@ -82,7 +82,7 @@ pub struct OperationQuery {
 /// deviation from the FHIR Operations framework" and keeps out of the
 /// FHIRconnect FHIR implementation guide.
 pub fn router(state: Arc<AppState>) -> Router {
-    // TODO(#85): declare the two operations in the CapabilityStatement the
+    // TODO(#194): declare the two operations in the CapabilityStatement the
     // facade publishes, and leave the two direct forms out of it.
     Router::new()
         .route("/fhir/$tofhir", post(to_fhir))
