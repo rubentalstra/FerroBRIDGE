@@ -32,7 +32,6 @@ use crate::model::ast::Mapping;
 use crate::model::ast::ModelMappingFile;
 use crate::model::ast::Variable;
 use crate::model::ast::With;
-use crate::model::ast::walk;
 use crate::model::error::ModelCode;
 use crate::model::load::MappingSet;
 
@@ -149,10 +148,31 @@ fn validate_model(
         );
     }
 
-    for mapping in walk(file.mappings()) {
-        let path = root.field("mappings").field(mapping.name.value());
+    for (mapping, path) in walk_paths(file.mappings(), &root) {
         validate_mapping(rules, mapping, &path, diagnostics);
     }
+}
+
+/// Walks a mapping tree, parents first, with the document path of each method.
+///
+/// The nesting a mapping can carry is `followedBy.mappings` and
+/// `reference.mappings`, so both are walked in document order and every
+/// diagnostic names the place the file writes rather than a name-keyed path
+/// the document does not have.
+fn walk_paths<'a>(mappings: &'a [Mapping], parent: &ModelPath) -> Vec<(&'a Mapping, ModelPath)> {
+    let at = parent.field("mappings");
+    let mut found = Vec::new();
+    for (index, mapping) in mappings.iter().enumerate() {
+        let path = at.index(index);
+        found.push((mapping, path.clone()));
+        if let Some(ref reference) = mapping.reference {
+            found.extend(walk_paths(&reference.mappings, &path.field("reference")));
+        }
+        if let Some(ref followed) = mapping.followed_by {
+            found.extend(walk_paths(&followed.mappings, &path.field("followedBy")));
+        }
+    }
+    found
 }
 
 /// Applies the condition rules to every entry of a `manual` mapping.

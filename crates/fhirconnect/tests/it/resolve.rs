@@ -1716,6 +1716,63 @@ fn the_program_looks_up_a_mapping_by_its_dotted_name() -> Result<(), Box<dyn Err
     Ok(())
 }
 
+/// A diagnostic names the place in the document it is about, so a refusal
+/// about a nested method carries its own depth rather than the index of the
+/// top-level method it hangs under.
+#[test]
+fn a_nested_refusal_names_its_own_depth() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    followedBy:\n      mappings:\n        - name: \"child\"\n          with:\n            fhir: \"$fhirRoot.text\"\n            openehr: \"$archetype/data[at0001]/items[at9999]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-template-node"]);
+    let diagnostic = diagnostics.first().ok_or("one refusal")?;
+    assert_eq!(
+        diagnostic.model_path().to_string(),
+        "mappings[0].followedBy.mappings[0].with.openehr"
+    );
+    Ok(())
+}
+
+/// A method an extension contributes belongs to the extension's file, so a
+/// refusal about it names that file and the place it sits there, never an
+/// index into the merged model mapping.
+#[test]
+fn a_refusal_about_an_added_method_names_the_extension_file() -> Result<(), Box<dyn Error>> {
+    let added = "mappings:\n  - name: \"note\"\n    extension: \"add\"\n    with:\n      fhir: \"$resource.note.text\"\n      openehr: \"$archetype/data[at0001]/items[at9999]\"\n";
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "extension.yml",
+            extension("synthetic_extension", "EVALUATION.synthetic.v1", added),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-template-node"]);
+    let diagnostic = diagnostics.first().ok_or("one refusal")?;
+    assert_eq!(
+        diagnostic.file().to_string_lossy().as_ref(),
+        "extension.yml"
+    );
+    assert_eq!(
+        diagnostic.model_path().to_string(),
+        "mappings[0].with.openehr"
+    );
+    Ok(())
+}
+
 #[test]
 fn a_mapping_code_the_engine_does_not_register_is_refused() -> Result<(), Box<dyn Error>> {
     let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    mappingCode: \"absentFunction\"\n";
@@ -1983,9 +2040,15 @@ fn a_profile_version_the_program_does_not_pin_is_refused() -> Result<(), Box<dyn
         .err()
         .ok_or("the instance claims another version")?;
     match error {
-        SelectError::ProfileVersion { wanted, pinned } => {
-            assert_eq!(wanted, "2.0.0");
-            assert_eq!(pinned, "1.0.0");
+        SelectError::ProfileVersion {
+            wanted,
+            ref mismatches,
+        } => {
+            assert!(wanted.contains("ferrobridge-diagnosis|2.0.0"), "{wanted}");
+            assert_eq!(mismatches.len(), 1, "{mismatches:?}");
+            let only = mismatches.first().ok_or("one mismatch")?;
+            assert!(only.contains("claims `2.0.0`"), "{only}");
+            assert!(only.contains("pins `1.0.0`"), "{only}");
         }
         other => return Err(format!("{other}").into()),
     }

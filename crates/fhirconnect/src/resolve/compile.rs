@@ -746,12 +746,15 @@ impl<'a> Compiler<'a> {
     }
 
     /// Compiles a list of mapping methods under one scope.
+    ///
+    /// Each node carries where it sits in the file that wrote it, so a nested
+    /// refusal names its own depth rather than the index of the top-level
+    /// method it hangs under.
     fn mappings(&mut self, nodes: &[Node<'a>], scope: &Scope) -> Vec<Mapping> {
         nodes
             .iter()
-            .enumerate()
-            .map(|(index, node)| {
-                let path = ModelPath::root().field("mappings").index(index);
+            .map(|node| {
+                let path = node.path.clone();
                 self.mapping(node, scope, &path)
             })
             .collect()
@@ -1378,39 +1381,7 @@ impl<'a> Compiler<'a> {
                 return None;
             }
         };
-        let anchor = match parsed
-            .variable()
-            .map(openehr_mapping_core::path::PathVariable::name)
-        {
-            None => scope.openehr.clone(),
-            Some(name) => match Variable::from_str(name) {
-                Ok(Variable::Archetype) => scope.archetype.clone(),
-                Ok(Variable::OpenehrRoot) => scope.openehr.clone(),
-                Ok(Variable::Composition) => RmPath {
-                    absolute: true,
-                    segments: Vec::new(),
-                },
-                // NOTE: `$reference` "indicates that there is no direct mapping
-                // to openEHR" (`basics/Variables.adoc`), so the mapping
-                // legitimately has no openEHR side rather than a broken one.
-                Ok(Variable::Reference) => return None,
-                Ok(Variable::Resource | Variable::FhirRoot | Variable::Context) | Err(_) => {
-                    self.diagnostics.push(diagnostic(
-                        file,
-                        owner,
-                        ResolveCode::UnboundPathVariable,
-                        written.position(),
-                        path,
-                        format!(
-                            "`{}` opens an openEHR path with `${name}`, which names no openEHR \
-                             anchor",
-                            written.value()
-                        ),
-                    ));
-                    return None;
-                }
-            },
-        };
+        let anchor = self.openehr_anchor(file, owner, written, scope, path, &parsed)?;
         let resolved = match parsed.resolve(&anchor) {
             Ok(resolved) => resolved,
             Err(error) => {
@@ -1439,12 +1410,31 @@ impl<'a> Compiler<'a> {
             return None;
         }
         match self.locate(&resolved) {
-            Ok((node, tail)) => Some(OpenehrTarget::new(
-                resolved,
-                node.clone(),
-                tail,
-                occurrences(self.template, node),
-            )),
+            Ok((node, tail)) => {
+                let occurrences = match occurrences(self.template, node) {
+                    Ok(axes) => axes,
+                    Err(error) => {
+                        self.diagnostics.push(diagnostic(
+                            file,
+                            owner,
+                            ResolveCode::UnknownTemplateNode,
+                            written.position(),
+                            path,
+                            format!(
+                                "the occurrence axes of `{}` do not resolve: {error}",
+                                node.flat_id().as_str()
+                            ),
+                        ));
+                        return None;
+                    }
+                };
+                Some(OpenehrTarget::new(
+                    resolved,
+                    node.clone(),
+                    tail,
+                    occurrences,
+                ))
+            }
             Err(error) => {
                 let (code, message) = match error {
                     LocateError::Unknown(message) => (ResolveCode::UnknownTemplateNode, message),
@@ -1459,6 +1449,55 @@ impl<'a> Compiler<'a> {
                     written.position(),
                     path,
                     message,
+                ));
+                None
+            }
+        }
+    }
+
+    /// Returns the path the variable an openEHR path opens with names.
+    ///
+    /// The five openEHR-side variables are `$archetype`, `$openehrRoot`,
+    /// `$composition` and `$reference`, plus the anchor a path with no
+    /// variable takes
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`).
+    fn openehr_anchor(
+        &mut self,
+        file: &Path,
+        owner: &MappingName,
+        written: &Located<String>,
+        scope: &Scope,
+        path: &ModelPath,
+        parsed: &MappingPath,
+    ) -> Option<RmPath> {
+        let Some(name) = parsed
+            .variable()
+            .map(openehr_mapping_core::path::PathVariable::name)
+        else {
+            return Some(scope.openehr.clone());
+        };
+        match Variable::from_str(name) {
+            Ok(Variable::Archetype) => Some(scope.archetype.clone()),
+            Ok(Variable::OpenehrRoot) => Some(scope.openehr.clone()),
+            Ok(Variable::Composition) => Some(RmPath {
+                absolute: true,
+                segments: Vec::new(),
+            }),
+            // NOTE: `$reference` "indicates that there is no direct mapping
+            // to openEHR" (`basics/Variables.adoc`), so the mapping
+            // legitimately has no openEHR side rather than a broken one.
+            Ok(Variable::Reference) => None,
+            Ok(Variable::Resource | Variable::FhirRoot | Variable::Context) | Err(_) => {
+                self.diagnostics.push(diagnostic(
+                    file,
+                    owner,
+                    ResolveCode::UnboundPathVariable,
+                    written.position(),
+                    path,
+                    format!(
+                        "`{}` opens an openEHR path with `${name}`, which names no openEHR anchor",
+                        written.value()
+                    ),
                 ));
                 None
             }
@@ -1693,10 +1732,16 @@ fn constrains(segment: &PathSegment) -> bool {
 }
 
 /// Returns the repeating nodes from the root down to `node`, outermost first.
+///
+/// # Errors
+///
+/// Returns the refusal the index raised for a prefix that is not simply
+/// absent, so a lost occurrence axis is a diagnostic rather than a node that
+/// silently stops repeating.
 fn occurrences(
     template: &WebTemplateIndex,
     node: &ResolvedNode,
-) -> Vec<openehr_mapping_core::index::FlatId> {
+) -> Result<Vec<openehr_mapping_core::index::FlatId>, PathError> {
     let mut axes = Vec::new();
     let mut prefix = String::new();
     for segment in node.flat_id().as_str().split('/') {
@@ -1705,14 +1750,19 @@ fn occurrences(
         }
         prefix.push_str(segment);
         let flat_id = openehr_mapping_core::index::FlatId::new(prefix.clone());
-        if template
-            .node_by_flat_id(&flat_id)
-            .is_ok_and(ResolvedNode::repeats)
-        {
+        let found = match template.node_by_flat_id(&flat_id) {
+            Ok(found) => found,
+            // NOTE: a flat id is built one level at a time and the index
+            // carries a node only where the builder kept one, so an unknown
+            // prefix is a level with no node of its own.
+            Err(PathError::UnknownNode { .. }) => continue,
+            Err(error) => return Err(error),
+        };
+        if found.repeats() {
             axes.push(flat_id);
         }
     }
-    axes
+    Ok(axes)
 }
 
 /// Returns the archetype a model mapping declares.

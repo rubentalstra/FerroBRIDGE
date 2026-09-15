@@ -37,6 +37,8 @@ pub(crate) struct Node<'a> {
     pub(crate) mapping: &'a Mapping,
     /// The file the method was read from.
     pub(crate) origin: &'a ModelMappingFile,
+    /// Where the method sits in that file's document model.
+    pub(crate) path: ModelPath,
     /// The methods that run after it.
     pub(crate) followed_by: Vec<Node<'a>>,
     /// The methods that populate a referenced resource.
@@ -45,30 +47,37 @@ pub(crate) struct Node<'a> {
 
 impl<'a> Node<'a> {
     /// Materializes one mapping method and everything nested under it.
-    fn of(mapping: &'a Mapping, origin: &'a ModelMappingFile) -> Self {
+    ///
+    /// `path` is where the method sits in `origin`, so a refusal about a node
+    /// an extension contributed names a place in the extension's own file
+    /// rather than a position in the merged tree.
+    fn of(mapping: &'a Mapping, origin: &'a ModelMappingFile, path: ModelPath) -> Self {
         let followed_by = mapping
             .followed_by
             .as_ref()
-            .map(|followed| Self::all(&followed.mappings, origin))
+            .map(|followed| Self::all(&followed.mappings, origin, &path.field("followedBy")))
             .unwrap_or_default();
         let reference = mapping
             .reference
             .as_ref()
-            .map(|reference| Self::all(&reference.mappings, origin))
+            .map(|reference| Self::all(&reference.mappings, origin, &path.field("reference")))
             .unwrap_or_default();
         Self {
             mapping,
             origin,
+            path,
             followed_by,
             reference,
         }
     }
 
-    /// Materializes a list of mapping methods.
-    fn all(mappings: &'a [Mapping], origin: &'a ModelMappingFile) -> Vec<Self> {
+    /// Materializes a list of mapping methods under `parent`.
+    fn all(mappings: &'a [Mapping], origin: &'a ModelMappingFile, parent: &ModelPath) -> Vec<Self> {
+        let at = parent.field("mappings");
         mappings
             .iter()
-            .map(|mapping| Self::of(mapping, origin))
+            .enumerate()
+            .map(|(index, mapping)| Self::of(mapping, origin, at.index(index)))
             .collect()
     }
 
@@ -96,7 +105,7 @@ pub(crate) fn apply<'a>(
     extensions: &[&'a ModelMappingFile],
     diagnostics: &mut Vec<Diagnostic>,
 ) -> Merged<'a> {
-    let mut mappings = Node::all(model.mappings(), model);
+    let mut mappings = Node::all(model.mappings(), model, &ModelPath::root());
     let mut applied = Vec::new();
     let mut overwritten: Vec<(String, &MappingName)> = Vec::new();
 
@@ -177,7 +186,7 @@ fn add<'a>(
         ));
         return;
     }
-    mappings.push(Node::of(method, extension));
+    mappings.push(Node::of(method, extension, path.clone()));
 }
 
 /// Appends the method's `followedBy` to the method `appendTo` names.
@@ -239,7 +248,7 @@ fn append<'a>(
     let appended = method
         .followed_by
         .as_ref()
-        .map(|followed| Node::all(&followed.mappings, extension))
+        .map(|followed| Node::all(&followed.mappings, extension, &path.field("followedBy")))
         .unwrap_or_default();
     node.followed_by.extend(appended);
 }
@@ -335,7 +344,7 @@ fn overwrite<'a>(
         ));
         return;
     };
-    *node = Node::of(method, extension);
+    *node = Node::of(method, extension, path.clone());
     overwritten.push((target, owner));
 }
 
