@@ -173,6 +173,16 @@ pub enum LensError {
         /// The direction the cell was run in.
         direction: Direction,
     },
+    /// The data-type chapter has no row for the pair a mapping names.
+    #[error("no data-type cell pairs {rm_type} with {kind} going {direction}")]
+    NoCell {
+        /// The openEHR class the Web Template node carries.
+        rm_type: String,
+        /// The FHIR element the mapping names.
+        kind: &'static str,
+        /// The direction the engine ran.
+        direction: Direction,
+    },
     /// A `DV_PROPORTION` that is not a percentage, with no named carrier.
     ///
     /// FHIR `Quantity` has no denominator, so only `pk_percent` has a

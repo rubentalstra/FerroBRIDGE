@@ -246,7 +246,10 @@ mod tests {
         );
         let deeper = positions_under(&[RmPosition::first()], Some(2)).expect("2 has a position");
         assert_eq!(
-            deeper.iter().map(|position| position.get()).collect::<Vec<u32>>(),
+            deeper
+                .iter()
+                .map(|position| position.get())
+                .collect::<Vec<u32>>(),
             [1, 3],
             "the parent position leads and the index follows"
         );
