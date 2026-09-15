@@ -959,11 +959,19 @@ dependencies = [
  "ferrobridge-openehr",
  "ferrobridge-term",
  "ferrobridge-testkit",
+ "fhir-types",
+ "fhirconnect",
  "http",
+ "jiff",
+ "openehr-its",
+ "openehr-mapping-core",
+ "openehr-rm",
+ "redb",
  "reqwest",
  "secrecy",
  "serde",
  "serde_json",
+ "sha2",
  "tempfile",
  "thiserror",
  "tokio",
@@ -2804,6 +2812,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "redb"
+version = "4.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb338a6c67830a61bed824b78c2bb034ab1ff401a20616bd7957524f4fdc2f22"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3542,7 +3559,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",

@@ -13,6 +13,7 @@
 
 pub mod cli;
 pub mod config;
+pub mod facade;
 pub mod health;
 pub mod indicators;
 pub mod panic;
