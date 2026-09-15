@@ -14,9 +14,6 @@ use crate::health::{Check, HealthIndicator, IndicatorState};
 
 // TODO(#91): the CDM indicator, once the writer owns the database connection.
 
-// TODO(#85): carry the inbound request id onto the outbound call
-// (`Client::with_request_id`) once a handler makes one.
-
 /// The openEHR CDR probe.
 #[derive(Debug, Clone)]
 pub struct Cdr {
@@ -64,6 +61,47 @@ impl HealthIndicator for Terminology {
 
     fn check(&self) -> Check<'_> {
         Box::pin(async move { classify(self.client.reachability().await.map_err(reason)) })
+    }
+}
+
+/// The identity-map probe.
+///
+/// The facade resolves every request through the identity store, so a store
+/// that cannot be read is a facade that cannot answer
+/// (`docs/architecture.md` §9).
+#[derive(Debug, Clone)]
+pub struct IdentityStore {
+    /// The store the probe reads.
+    store: std::sync::Arc<dyn crate::facade::identity::store::Store>,
+}
+
+impl IdentityStore {
+    /// Returns a probe over `store`.
+    #[must_use]
+    pub const fn new(store: std::sync::Arc<dyn crate::facade::identity::store::Store>) -> Self {
+        Self { store }
+    }
+}
+
+impl HealthIndicator for IdentityStore {
+    fn name(&self) -> &'static str {
+        "identity-store"
+    }
+
+    fn check(&self) -> Check<'_> {
+        Box::pin(async move {
+            // NOTE: no specification governs a health probe: our own design,
+            // and the read asks a key the map never holds, so the probe reads
+            // the store without touching a recorded identity.
+            let probe = crate::facade::identity::ExternalResourceId::new("ferrobridge-readiness");
+            match probe {
+                Err(error) => IndicatorState::down(reason(error)),
+                Ok(key) => match self.store.internal_of("OperationOutcome", &key) {
+                    Ok(_answered) => IndicatorState::up(),
+                    Err(error) => IndicatorState::down(reason(error)),
+                },
+            }
+        })
     }
 }
 

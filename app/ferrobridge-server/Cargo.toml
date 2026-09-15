@@ -26,10 +26,26 @@ axum.workspace = true
 clap.workspace = true
 ferrobridge-openehr.workspace = true
 ferrobridge-term.workspace = true
+# The generated FHIR R4 model the facade authors its wire bodies with.
+fhir-types = { workspace = true, features = ["r4", "resources"] }
+# The mapping language the facade runs: the loader, the compiler and the
+# bidirectional engine (docs/architecture.md section 4.6).
+fhirconnect.workspace = true
 http.workspace = true
+# The one clock: the instant every composition default of one ingest is taken
+# from.
+jiff.workspace = true
+openehr-base.workspace = true
+openehr-its.workspace = true
+openehr-mapping-core.workspace = true
+openehr-rm.workspace = true
+# The embedded identity store (docs/architecture.md section 9).
+redb.workspace = true
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+# The digest behind a derived FHIR resource id.
+sha2.workspace = true
 thiserror.workspace = true
 tokio = { workspace = true, features = ["rt-multi-thread", "macros", "net", "signal", "time", "sync"] }
 toml.workspace = true

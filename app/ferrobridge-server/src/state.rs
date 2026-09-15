@@ -22,6 +22,11 @@ pub struct AppState {
     health: Registry,
     /// The query parameter names whose values may reach the request log.
     logged_query_parameters: Vec<String>,
+    /// The FHIR facade, when its lane is on.
+    ///
+    /// A disabled facade is `None` and mounts no route, so a request answers
+    /// `404` rather than `403` (`docs/architecture.md` §4.6).
+    facade: Option<Arc<crate::facade::Facade>>,
 }
 
 impl AppState {
@@ -56,6 +61,7 @@ impl AppState {
         Ok(Self {
             health: Registry::new(indicators),
             logged_query_parameters: settings.telemetry.logged_query_parameters.clone(),
+            facade: None,
         })
     }
 
@@ -66,7 +72,28 @@ impl AppState {
         Self {
             health,
             logged_query_parameters: Vec::new(),
+            facade: None,
         }
+    }
+
+    /// Returns this state with `facade` mounted and its store probed.
+    ///
+    /// The identity-store indicator joins readiness with the facade, so a
+    /// deployment that does not run the facade does not report on a store it
+    /// has no use for.
+    #[must_use]
+    pub fn with_facade(mut self, facade: Arc<crate::facade::Facade>) -> Self {
+        self.health = self.health.and(Arc::new(indicators::IdentityStore::new(
+            facade.store_handle(),
+        )));
+        self.facade = Some(facade);
+        self
+    }
+
+    /// Returns the facade, when its lane is on.
+    #[must_use]
+    pub fn facade(&self) -> Option<&Arc<crate::facade::Facade>> {
+        self.facade.as_ref()
     }
 
     /// Returns this state with `names` as the query parameters it may log.

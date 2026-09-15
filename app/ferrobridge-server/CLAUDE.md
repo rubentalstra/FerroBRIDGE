@@ -28,11 +28,43 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   `panic = "unwind"`.** Keep both: an `abort` regression would make the `500`
   untestable by construction
   (<https://doc.rust-lang.org/cargo/reference/profiles.html#panic>).
-- **A status is a `StatusCode`**, compared as one. The facade's own status
-  table arrives with the facade.
+- **A status is a `StatusCode`**, compared as one. Every CDR answer becomes a
+  facade answer through the one table in `facade/status.rs`, and a new row
+  carries both citations (the ITS-REST operation, the R4 HTTP section) plus a
+  wire test. A handler never picks a status of its own beside it.
 - **Tests are one binary**, `tests/it/main.rs` plus one module per topic, and
   they drive the public seams: `run`, `Config::from_sources`, `router`,
   `with_middleware`, `serve_until`. A test that needs its own route builds one
   and hands it to `with_middleware`, so the stack under test is the shipped
   stack.
 - The upstream stubs are `wiremock`; every fixture is synthetic.
+
+## The facade (`src/facade/`)
+
+- **The facade never stores.** The CDR holds the clinical record; the facade
+  holds identity and nothing else. A cache of resource content, a local copy of
+  a composition, or a column with a mapped value in the identity store all
+  break the premise, and a test greps the store file for a mapped marker to
+  prove it stays out.
+- **Two error vocabularies never mix.** The CDR speaks `{error, message,
+  validationErrors}` and the wire speaks `OperationOutcome`. Everything the
+  facade authors is an `OperationOutcome` with an `issue.code` from the R4
+  value set; the openEHR body travels verbatim inside `issue.diagnostics` and
+  never reaches the wire as its own document.
+- **Ids are newtypes.** `EhrId`, `VersionedObjectUid` and `ObjectVersionId`
+  come from the ITS-REST client; `FhirResourceId`, `ExternalResourceId` and
+  `PersonId` are this side's. A function never takes a bare `String` where one
+  of them belongs, so a swapped argument is a compile error.
+- **The map wins once written.** A derived id is derived once. Changing the
+  derivation must never rename a resource a client already holds, so the store
+  is read before the derivation runs.
+- **Clinical content reaches neither a log line nor the identity store.** A
+  handler logs the matched route, the status and identifiers. A resource body,
+  a composition, and a CDR error body stay out of `tracing`, out of a `Debug`
+  rendering, and out of `redb`.
+- **A request path never panics.** No indexing, no slicing, no `unwrap`: every
+  refusal is a typed `Refusal` that renders as an `OperationOutcome`.
+- **A new interaction is four changes in one edit**: the route, the
+  `CapabilityStatement` it is declared in, the wire test, and the Integrate
+  page. An interaction the statement does not declare answers `404`, and one it
+  declares and the router does not mount is a lie.

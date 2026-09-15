@@ -13,6 +13,7 @@
 
 pub mod cli;
 pub mod config;
+pub mod facade;
 pub mod health;
 pub mod indicators;
 pub mod panic;
@@ -114,7 +115,14 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
         use anyhow::Context;
 
         settings.log_lanes();
-        let state = Arc::new(AppState::build(&settings).context("building the upstream clients")?);
+        let mut state = AppState::build(&settings).context("building the upstream clients")?;
+        if let Some(lane) = settings.facade.as_ref() {
+            let mounted = build_facade(&settings, lane)
+                .await
+                .context("starting the FHIR facade")?;
+            state = state.with_facade(Arc::new(mounted));
+        }
+        let state = Arc::new(state);
         tracing::info!(
             version = state::VERSION,
             indicators = state.health().names().join(","),
@@ -134,6 +142,55 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
         tracing::info!("ferrobridge stopped");
         Ok(())
     })
+}
+
+/// Builds the FHIR facade this deployment mounts.
+///
+/// The mapping set is read and compiled once, at boot, against the templates
+/// the CDR holds, so a mapping that does not compile refuses the start rather
+/// than the first request that touches it (`docs/architecture.md` §4.3). The
+/// identity store is opened here too, so a path that cannot be written is a
+/// boot error.
+async fn build_facade(
+    settings: &Settings,
+    lane: &config::FacadeSettings,
+) -> anyhow::Result<facade::Facade> {
+    use anyhow::Context;
+
+    let cdr = settings
+        .cdr
+        .as_ref()
+        .context("the facade needs a [cdr] section: it maps every request onto CDR operations")?;
+    let client = ferrobridge_openehr::client::Client::new(cdr.clone())
+        .context("building the CDR client the facade calls through")?;
+    let directory = settings
+        .mapping_directory
+        .as_ref()
+        .context("the facade needs [mappings] directory: it runs the mappings it finds there")?;
+    let set = facade::programs::read_set(directory).context("reading the mapping set")?;
+    let templates = facade::programs::fetch_templates(&set, &client)
+        .await
+        .context("fetching the templates the mappings name")?;
+    let programs =
+        facade::programs::compile_set(&set, &templates).context("compiling the mapping set")?;
+    tracing::info!(
+        programs = programs.len(),
+        types = programs
+            .resource_types()
+            .iter()
+            .cloned()
+            .collect::<Vec<String>>()
+            .join(","),
+        "the FHIR facade loaded its mapping set"
+    );
+    let store = facade::identity::redb_store::RedbStore::open(&lane.identity_store)
+        .with_context(|| format!("opening {}", lane.identity_store.display()))?;
+    Ok(facade::Facade::new(
+        programs,
+        Arc::new(store),
+        client,
+        lane.settings.clone(),
+    ))
 }
 
 /// Returns the exit code a command-line refusal deserves.
@@ -178,11 +235,14 @@ fn chain(error: &dyn std::error::Error) -> String {
 /// `GET /health/readiness` answers `200` when every registered indicator is up
 /// and `503` with each indicator's state otherwise.
 pub fn router(state: Arc<AppState>, server: &ServerSettings) -> Router {
-    let routes = Router::new()
+    let mut routes = Router::new()
         .route("/", get(root))
         .route("/health/liveness", get(liveness))
         .route("/health/readiness", get(readiness))
         .with_state(Arc::clone(&state));
+    if let Some(mounted) = state.facade() {
+        routes = routes.merge(facade::routes(Arc::clone(mounted)));
+    }
     with_middleware(routes, state, server)
 }
 

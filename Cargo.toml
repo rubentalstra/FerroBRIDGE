@@ -48,6 +48,8 @@ tempfile = "3.27.0"
 # Test-only.
 insta = { version = "1.48.0", features = ["json"] }
 proptest = "1.11.0"
+# The digest behind the derived FHIR resource id (docs/architecture.md
+# section 9) and the testkit's own checksums.
 sha2 = "0.11.0"
 # Published from this workspace, so the requirement carries both a path and a
 # version: cargo resolves the path locally and the version on crates.io.
@@ -60,6 +62,9 @@ ferrobridge-testkit = { path = "tools/ferrobridge-testkit" }
 # packaged manifest renders a version requirement for either.
 ferrobridge-openehr = { path = "crates/ferrobridge-openehr" }
 ferrobridge-term = { path = "crates/ferrobridge-term" }
+# The FHIRconnect language crate: the facade and the operations surface are
+# its two in-process consumers, so the requirement is path-only too.
+fhirconnect = { path = "crates/fhirconnect" }
 # The openEHR model, from the published crates (docs/architecture.md section 3).
 # openehr-its takes rest-server beside flat because the ITS-REST 1.1.0 transport
 # DTOs (Error, Identifier, ResultSet, NewContribution) ride that feature at
@@ -74,6 +79,13 @@ openehr-adl = "0.0.64"
 # "rustls"; it carries its own platform verifier and aws-lc-rs provider.
 reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "json", "http2"] }
 backon = "1.6.0"
+# The embedded identity store of the FHIR facade (docs/architecture.md
+# section 9), verified against crates.io on 2026-09-15.
+redb = "4.3.0"
+# The bridge's own timestamps: the one instant an ingest defaults every
+# composition field from (docs/architecture.md section 7). UTC only, so the
+# platform time-zone database features stay off.
+jiff = { version = "0.2.37", default-features = false, features = ["std"] }
 url = "2.5.8"
 http = "1.5.0"
 secrecy = "0.10.3"
