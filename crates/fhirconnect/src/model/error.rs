@@ -32,6 +32,8 @@ pub enum ModelCode {
     InvalidExtensionMethod,
     /// A `with.type` value is outside the data-type enum.
     InvalidDataType,
+    /// A mapping writes one data type and its `with` writes another.
+    ConflictingDataType,
     /// An `operator` value is outside the five documented operators.
     InvalidOperator,
     /// A `$name` variable is outside the seven documented variables.
@@ -73,6 +75,7 @@ impl ModelCode {
             Self::InvalidDirection => "fc-invalid-direction",
             Self::InvalidExtensionMethod => "fc-invalid-extension-method",
             Self::InvalidDataType => "fc-invalid-data-type",
+            Self::ConflictingDataType => "fc-conflicting-data-type",
             Self::InvalidOperator => "fc-invalid-operator",
             Self::UnknownPathVariable => "fc-unknown-path-variable",
             Self::RootUnidirectional => "fc-root-unidirectional",
@@ -100,6 +103,7 @@ impl ModelCode {
             Self::InvalidDirection,
             Self::InvalidExtensionMethod,
             Self::InvalidDataType,
+            Self::ConflictingDataType,
             Self::InvalidOperator,
             Self::UnknownPathVariable,
             Self::RootUnidirectional,

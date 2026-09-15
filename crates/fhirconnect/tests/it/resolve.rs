@@ -17,6 +17,8 @@ use fhir_types::r4::schema::SCHEMAS;
 use fhirconnect::model::ast::ContextMappingFile;
 use fhirconnect::model::ast::ModelMappingFile;
 use fhirconnect::model::load::MappingSet;
+use fhirconnect::model::load::load_context_file;
+use fhirconnect::model::load::load_model_file;
 use fhirconnect::model::load::load_set;
 use fhirconnect::model::parse::lower_context;
 use fhirconnect::model::parse::lower_model;
@@ -289,19 +291,48 @@ fn compiling_the_same_set_twice_yields_the_same_program() -> Result<(), Box<dyn 
     Ok(())
 }
 
+/// Inserts each file into one set in the order given.
+///
+/// `load_set` sorts the paths it is handed, so a permutation of its input
+/// never reaches the compiler. This is the seam that can genuinely see an
+/// order: the registry the compiler reads.
+fn inserted(paths: &[String]) -> Result<MappingSet, String> {
+    let mut set = MappingSet::new();
+    for path in paths {
+        if path.ends_with(".context.yml") {
+            let file = load_context_file(path).map_err(|diagnostics| render(&diagnostics))?;
+            set.insert_context(file)
+                .map_err(|error| error.to_string())?;
+        } else {
+            let file = load_model_file(path).map_err(|diagnostics| render(&diagnostics))?;
+            set.insert_model(file).map_err(|error| error.to_string())?;
+        }
+    }
+    Ok(set)
+}
+
+/// The files of the diagnosis chain, in the order they are written here.
+fn chain_paths() -> Vec<String> {
+    PUBLISHED
+        .iter()
+        .map(|file| format!("{CORPUS}/{file}"))
+        .chain(
+            [CONTEXT, EXTENSION]
+                .iter()
+                .map(|file| format!("{FIXTURES}/{file}")),
+        )
+        .collect()
+}
+
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(8))]
 
-    /// The file order the loader is handed never changes the program.
+    /// The order the files enter the set never changes the program.
     #[test]
     fn the_program_does_not_depend_on_the_order_the_files_load(
         seed in proptest::collection::vec(0_usize..64, 6),
     ) {
-        let mut files: Vec<String> = PUBLISHED
-            .iter()
-            .map(|file| format!("{CORPUS}/{file}"))
-            .chain([CONTEXT, EXTENSION].iter().map(|file| format!("{FIXTURES}/{file}")))
-            .collect();
+        let mut files = chain_paths();
         let mut keyed: Vec<(usize, String)> = seed
             .iter()
             .copied()
@@ -310,26 +341,18 @@ proptest! {
             .collect();
         keyed.sort_by_key(|(key, _)| *key);
         let shuffled: Vec<String> = keyed.into_iter().map(|(_, file)| file).collect();
-        let set = load_set(shuffled, &StaticMappingCodes::default())
-            .map_err(|diagnostics| TestCaseError::fail(render(&diagnostics)))?;
+        let set = inserted(&shuffled).map_err(TestCaseError::fail)?;
         let program = program_of(&set, "ferrobridge_diagnose.context")
             .map_err(|diagnostics| TestCaseError::fail(render(&diagnostics)))?;
         let expected = {
-            let set = load_set(
-                PUBLISHED
-                    .iter()
-                    .map(|file| format!("{CORPUS}/{file}"))
-                    .chain([CONTEXT, EXTENSION].iter().map(|file| format!("{FIXTURES}/{file}")))
-                    .collect::<Vec<String>>(),
-                &StaticMappingCodes::default(),
-            )
-            .map_err(|diagnostics| TestCaseError::fail(render(&diagnostics)))?;
+            let set = inserted(&chain_paths()).map_err(TestCaseError::fail)?;
             program_of(&set, "ferrobridge_diagnose.context")
                 .map_err(|diagnostics| TestCaseError::fail(render(&diagnostics)))?
         };
         proptest::prop_assert_eq!(program.to_string(), expected.to_string());
     }
 }
+
 /// Builds the diagnosis template with a semantic version it does not carry.
 ///
 /// The ADL 1.4 route serves an operational template with no semantic version,
