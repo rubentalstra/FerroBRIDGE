@@ -420,6 +420,7 @@ pub fn to_openehr<T: Table + ?Sized>(
         counters: BTreeMap::new(),
         chain: Vec::new(),
     };
+    run.admits_hierarchy()?;
     run.admits_context()?;
     run.mappings(program.mappings(), &Binding::default())?;
     run.apply_defaults(defaults);
@@ -462,6 +463,7 @@ pub fn to_fhir<T: Table + ?Sized>(
         counters: BTreeMap::new(),
         chain: Vec::new(),
     };
+    run.admits_hierarchy()?;
     run.mappings(program.mappings(), &Binding::default())?;
     Ok(Outcome::new(run.fhir, run.warnings))
 }
@@ -482,6 +484,25 @@ struct Run<'a, T: Table + ?Sized> {
 }
 
 impl<T: Table + ?Sized> Run<'_, T> {
+    /// Refuses a program whose context splits one side into several documents.
+    ///
+    /// `hierarchy.split` creates one resource or one event per occurrence, so
+    /// a run that ignored it would produce one document where the context asks
+    /// for several.
+    fn admits_hierarchy(&self) -> Result<(), EngineError> {
+        let Some(hierarchy) = self.program.hierarchy() else {
+            return Ok(());
+        };
+        if hierarchy.split_fhir().is_none() && hierarchy.split_openehr().is_none() {
+            return Ok(());
+        }
+        // TODO(#186): run hierarchy.split.
+        Err(EngineError::Unsupported {
+            mapping: String::from(self.program.context().as_str()),
+            method: "hierarchy.split",
+        })
+    }
+
     /// Refuses an input the program's own condition does not admit.
     fn admits_context(&self) -> Result<(), EngineError> {
         let Some(gate) = self.program.fhir_condition() else {
@@ -824,6 +845,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
                 Ok(bindings)
             }
             Method::Programmed { ref code } => self.programmed(mapping, parent, inputs, code),
+            // TODO(#186): run reference, link and participationsFunction.
             Method::Reference { .. } => Err(EngineError::Unsupported {
                 mapping: String::from(mapping.name()),
                 method: "reference",
