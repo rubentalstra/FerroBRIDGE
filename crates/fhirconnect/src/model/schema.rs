@@ -401,6 +401,46 @@ mod tests {
     }
 
     #[test]
+    fn an_openehr_condition_naming_no_attribute_is_refused_by_the_strict_schema() {
+        let source = format!(
+            "{MODEL}    openehrCondition:\n      targetRoot: \"$archetype\"\n      operator: \"not empty\"\n"
+        );
+        let document = load_str("model.yml", &source).expect("a well-formed header");
+        let schemas = strict::schemas().expect("the strict schemas compile");
+        let diagnostics = schemas.validate_document(&document);
+        assert_eq!(diagnostics.len(), 1, "{diagnostics:?}");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::SchemaViolation.into());
+    }
+
+    #[test]
+    fn either_openehr_condition_attribute_spelling_validates() {
+        for attribute in [
+            "      targetAttribute: \"items[at0071]\"\n",
+            "      targetAttributes:\n        - \"items[at0071]\"\n",
+        ] {
+            let source = format!(
+                "{MODEL}    openehrCondition:\n      targetRoot: \"$archetype\"\n      operator: \"not empty\"\n{attribute}"
+            );
+            let document = load_str("model.yml", &source).expect("a well-formed header");
+            let schemas = strict::schemas().expect("the strict schemas compile");
+            let diagnostics = schemas.validate_document(&document);
+            assert!(diagnostics.is_empty(), "{attribute}: {diagnostics:?}");
+        }
+    }
+
+    #[test]
+    fn a_fhir_condition_naming_no_attribute_validates() {
+        let source = format!(
+            "{MODEL}    fhirCondition:\n      targetRoot: \"$resource.code\"\n      operator: \"not empty\"\n"
+        );
+        let document = load_str("model.yml", &source).expect("a well-formed header");
+        let schemas = strict::schemas().expect("the strict schemas compile");
+        let diagnostics = schemas.validate_document(&document);
+        assert!(diagnostics.is_empty(), "{diagnostics:?}");
+    }
+
+    #[test]
     fn a_pointer_resolves_to_the_position_of_its_node() {
         let document =
             openehr_mapping_core::loader::parse_str("model.yml", MODEL).expect("well-formed YAML");
