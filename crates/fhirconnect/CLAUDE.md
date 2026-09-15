@@ -78,6 +78,17 @@ A skipped element is a typed outcome carried to the caller, never a log line,
 and the declared set of losses is closed: the round-trip tests assert it
 exactly. An element the program cannot map refuses the unit.
 
+## Where a mapping writes is one rule, applied to whichever side is the output
+
+The axes the parent mapping bound keep their instance; every repeating element
+below them takes a fresh instance per input occurrence, because FHIRconnect
+appends to a `0..n` path it does not iterate. An output with no repeating
+element below the parent holds one value, so a later mapping overwrites an
+earlier one and a `0..n` input leaves only its last occurrence. That one rule
+is what makes the specification's three recurrence examples come out as the
+specification draws them, in both directions, and the counter-examples come out
+wrong in the documented way rather than in some other way.
+
 ## Tests
 
 The corpus under `docs/specs/fhirconnect-mapping-lib/` is evidence of what real

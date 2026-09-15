@@ -24,7 +24,7 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
-- `fhirconnect::engine`, the first half of the bidirectional interpreter (#84).
+- `fhirconnect::engine`, the bidirectional interpreter (#84).
   A data-type cell of the specification's chapter is one lens, written once:
   `get` reads an openEHR reference-model value into its FHIR element and `put`
   writes it back with the openEHR value the target already holds, and each pair
@@ -46,6 +46,22 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   is), the five condition operators with the connectives the specification
   fixes, the three recurrence rules as structured occurrences, and the closed
   set of losses a run may declare.
+- One traversal runs a compiled program from either side (#84): `to_openehr`
+  reads a FHIR resource and builds a canonical composition, `to_fhir` reads a
+  composition and writes the resource the context names, and both walk the same
+  mapping list top-down. Where a mapping writes follows one rule on whichever
+  side is the output: the axes the parent bound keep their instance and every
+  repeating element below them takes a fresh one per input occurrence, so a
+  later mapping overwrites a single-valued output, two mappings append into a
+  repeating one, and a `0..n` input into a `0..1` output leaves its last
+  occurrence with the rest declared lost. A `manual` entry merges every path it
+  names into one element, a `slotArchetype` recurses with the whole chain
+  checked for a cycle, `type: NONE` only anchors what follows, and the composer
+  and context start time are defaulted going into openEHR and recorded. Every
+  refusal is typed and names the mapping: a value the element does not admit, a
+  required `1..1` child the input does not carry, a slot chain that closes on
+  itself, a `mappingCode` the registry does not hold, and the methods this
+  milestone does not run (`reference`, `link`, `participationsFunction`).
 
 - `fhirconnect::resolve`, context resolution into one immutable program per
   context mapping (#83). `compile` selects the start model mapping, applies the
@@ -69,6 +85,10 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   one program, snapshot-tested, from the published model and extension files
   plus a FerroBRIDGE-authored context and extension, against a synthetic
   operational template in the testkit.
+- `openehr_mapping_core::composition::NodeValue::under`, which writes a value
+  under a value-internal family of its node (#84). Not every part of a data
+  value is a datum suffix: Simplified Formats models an interval's `lower` and
+  `upper` and a term mapping's `_mapping:0/target` as paths below the node.
 - `openehr_mapping_core::index::node_id_matches` and
   `archetype_release_version`, the two archetype-identifier comparisons a
   mapping language needs outside a path: an identifier is matched in its

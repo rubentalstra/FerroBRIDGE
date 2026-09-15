@@ -781,8 +781,9 @@ impl<T: Table + ?Sized> Run<'_, T> {
             }
             return Ok(bindings);
         }
-        // NOTE: data-mappings.adoc, `type: NONE` "does not transform anything"
-        // and only anchors the mappings below it.
+        // NOTE: PopulatingAnEntry.adoc writes `type: NONE` on the parent whose
+        // `followedBy` children carry every value, so the parent anchors them
+        // and transforms nothing of its own (recorded as a silence in #185).
         if mapping.data_type() == Some(crate::model::ast::DataType::None) {
             return Ok(bindings);
         }

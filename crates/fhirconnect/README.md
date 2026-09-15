@@ -116,6 +116,23 @@ openEHR.
   the way to the target, so a `0..1` output is overwritten, a `0..n` output is
   appended to, and a child mapping writes under the occurrence its parent is
   bound to.
+- **One walk runs the program, from either side.** `to_openehr` reads a FHIR
+  resource and builds a composition through the Simplified Formats seam;
+  `to_fhir` reads a composition and writes the resource the context names. Both
+  run the same mapping list top-down: the input-side conditions, the input
+  occurrences, the data-type cell, the write, then the `followedBy` children
+  once per occurrence the parent bound. A `manual` entry merges every path it
+  names into one element, a `slotArchetype` recurses with the whole chain
+  checked for a cycle, and `type: NONE` writes nothing and only anchors what
+  follows.
+- **A missing required child refuses.** A `followedBy` child whose openEHR node
+  the template constrains to `1..1` and whose input carries nothing is
+  `EngineError::MissingRequired`, naming the node.
+- **The composition defaults apply going into openEHR only.** The composer and
+  the context start time carry the values the specification's own defaults
+  chapter suggests, and the language and territory are the caller's, because
+  the chapter assigns them to the project. Each one the engine fills is a
+  recorded loss.
 
 ## Licence
 
