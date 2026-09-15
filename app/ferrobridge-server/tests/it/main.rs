@@ -16,6 +16,7 @@
 
 mod config;
 mod facade;
+mod facade_e2e;
 mod http;
 mod readiness;
 mod run;

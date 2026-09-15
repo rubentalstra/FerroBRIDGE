@@ -17,9 +17,11 @@ use ferrobridge_openehr::ids::EhrId;
 use ferrobridge_openehr::ids::SubjectId;
 use ferrobridge_openehr::ids::SubjectNamespace;
 use ferrobridge_openehr::prefer::Prefer;
+use openehr_base::v1_3::base_types::identification::archetype_id::ArchetypeId;
 use openehr_base::v1_3::base_types::identification::generic_id::GenericId;
 use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
 use openehr_base::v1_3::base_types::identification::party_ref::PartyRef;
+use openehr_rm::v1_2::common::archetyped::archetyped::Archetyped;
 use openehr_rm::v1_2::common::generic::party_self::PartySelf;
 use openehr_rm::v1_2::data_types::text::dv_text::DvText;
 use openehr_rm::v1_2::data_types::text::dv_text::DvTextData;
@@ -37,6 +39,12 @@ const EHR_STATUS_ARCHETYPE: &str = "openEHR-EHR-EHR_STATUS.generic.v1";
 
 /// The reference-model class a subject reference points at.
 const PARTY_TYPE: &str = "PERSON";
+
+/// The openEHR Reference Model release this bridge writes.
+///
+/// The RM the composition and status types come from is Release 1.1.0
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/>).
+const RM_VERSION: &str = "1.1.0";
 
 /// Whether the facade may create an EHR it does not find.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -183,7 +191,16 @@ pub fn status_of(person: &PersonId) -> EhrStatus {
         archetype_node_id: String::from(EHR_STATUS_ARCHETYPE),
         uid: None,
         links: None,
-        archetype_details: None,
+        // NOTE: an `EHR_STATUS` is an archetype root, and
+        // `LOCATABLE.Archetyped_valid` makes `archetype_details` mandatory on
+        // one (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html>).
+        archetype_details: Some(Archetyped {
+            archetype_id: ArchetypeId {
+                value: String::from(EHR_STATUS_ARCHETYPE),
+            },
+            template_id: None,
+            rm_version: String::from(RM_VERSION),
+        }),
         feeder_audit: None,
         subject: PartySelf {
             external_ref: Some(PartyRef {
