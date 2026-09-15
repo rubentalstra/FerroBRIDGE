@@ -504,26 +504,40 @@ impl<T: Table + ?Sized> Run<'_, T> {
     }
 
     /// Refuses an input the program's own condition does not admit.
+    ///
+    /// The context's condition is the one the input side carries, the same
+    /// rule a mapping's condition follows (`basics/Conditions.adoc`).
     fn admits_context(&self) -> Result<(), EngineError> {
-        let Some(gate) = self.program.fhir_condition() else {
+        let gate = match self.direction {
+            Direction::FhirToOpenehr => self.program.fhir_condition(),
+            Direction::OpenehrToFhir => self.program.openehr_condition(),
+        };
+        let Some(gate) = gate.filter(|gate| condition::runs(gate, self.direction)) else {
             return Ok(());
         };
-        if !condition::runs(gate, self.direction) {
-            return Ok(());
-        }
-        let verdict =
-            condition::evaluate(self.table, &self.fhir, gate, false).map_err(|source| {
-                EngineError::Condition {
+        let admits = match self.direction {
+            Direction::FhirToOpenehr => condition::evaluate(self.table, &self.fhir, gate, false)
+                .map(|verdict| verdict.admits_any())
+                .map_err(|source| EngineError::Condition {
                     mapping: String::from(self.program.context().as_str()),
                     source: Box::new(source),
-                }
-            })?;
-        if verdict.admits_any() {
+                })?,
+            Direction::OpenehrToFhir => self.context_holds(gate)?,
+        };
+        if admits {
             return Ok(());
         }
         Err(EngineError::NotApplicable {
             context: String::from(self.program.context().as_str()),
         })
+    }
+
+    /// Returns whether the context's `openehrCondition` holds over the input.
+    fn context_holds(
+        &self,
+        gate: &crate::resolve::program::Condition,
+    ) -> Result<bool, EngineError> {
+        self.openehr_holds(self.program.context().as_str(), gate, &[])
     }
 
     /// Runs a list of mappings under one binding, in program order.
@@ -592,7 +606,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
                 let mut admitted = Vec::with_capacity(inputs.len());
                 for input in inputs {
                     let positions = Self::positions_at(mapping, &input)?;
-                    if self.openehr_holds(mapping, gate, &positions)? {
+                    if self.openehr_holds(mapping.name(), gate, &positions)? {
                         admitted.push(input);
                     }
                 }
@@ -609,7 +623,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
     /// true or false `Conditions.adoc` §targetRoot asks for.
     fn openehr_holds(
         &self,
-        mapping: &Mapping,
+        name: &str,
         gate: &crate::resolve::program::Condition,
         instance: &[RmPosition],
     ) -> Result<bool, EngineError> {
@@ -620,7 +634,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
         for attribute in gate.attributes() {
             let Target::Openehr(ref target) = *attribute else {
                 return Err(EngineError::Condition {
-                    mapping: String::from(mapping.name()),
+                    mapping: String::from(name),
                     source: Box::new(ConditionError::WrongSide),
                 });
             };
@@ -631,7 +645,7 @@ impl<T: Table + ?Sized> Run<'_, T> {
                 .index
                 .read(composition, target.node(), &positions)
                 .map_err(|source| EngineError::Template {
-                    mapping: String::from(mapping.name()),
+                    mapping: String::from(name),
                     node: String::from(target.node().aql_path().as_str()),
                     source: Box::new(source),
                 })?;
