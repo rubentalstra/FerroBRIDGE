@@ -407,6 +407,9 @@ fn check_condition(
 /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
 /// §targetRoot).
 fn is_proper_descendant(candidate: &str, ancestor: &str) -> bool {
+    // NOTE: the `not of` example under §criteria of that page writes the shape
+    // §targetRoot calls an error, and the rule is implemented as written
+    // (reported on issue #181).
     let Some(tail) = candidate.strip_prefix(ancestor) else {
         return false;
     };

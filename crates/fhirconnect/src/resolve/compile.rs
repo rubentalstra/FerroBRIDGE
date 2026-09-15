@@ -884,6 +884,9 @@ impl<'a> Compiler<'a> {
                 ));
                 return Method::Value;
             }
+            // NOTE: `path_operators.adoc` never says what `^` does at a
+            // `reference` boundary, and crossing it for no `^` is the reading
+            // its worked example needs (reported on issue #183).
             let mut enclosing = vec![Enclosing {
                 resource: scope.resource.clone(),
                 fhir: scope.fhir.clone(),

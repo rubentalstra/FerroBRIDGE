@@ -970,6 +970,9 @@ fn lower_condition(
     if matches!(*block.value(), MappingValue::Null) {
         return None;
     }
+    // NOTE: `Conditions.adoc` §type says the condition is an array, which the
+    // published schema and every published file contradict, so one object per
+    // key is what this reads (reported on issue #182).
     lowering.mapping(block, &block_path)?;
     lowering.refuse_unknown_keys(block, &block_path, CONDITION_KEYS);
 
