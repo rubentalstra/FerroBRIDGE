@@ -126,8 +126,19 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   extension file's `preprocessor` and a file-level `spec.conceptmap` and
   `spec.unidirectional` reach the program; `^` crosses a `reference` boundary
   into the enclosing resource; the model layer no longer refuses an `appendTo`
-  that another extension's `add` supplies; and every nested refusal names the
-  model path of the node it is about.
+  that another extension's `add` supplies; the strict schema requires
+  `targetAttribute` or `targetAttributes` on an `openehrCondition` again, as
+  the published one does; a mapping-level data type beside a `with.type` is
+  carried rather than dropped, and a disagreement between them is refused; and
+  every refusal names the file it is about and the place it sits there, at any
+  depth.
+- The program carries what the engine would otherwise re-derive from path text
+  (#177): a condition's attachment to the path it guards, a `manual` value as a
+  literal or a named `$context` member, a `hierarchy.split` `create` as one of
+  three elements, `FhirTarget::repeats()` beside the openEHR occurrence axes,
+  and `Program::mapping_named` for a dotted method name. The profile-version
+  refusal now names every program that claims the profile under another
+  version instead of the last one.
 
 ## [0.0.2] - 2026-09-13
 

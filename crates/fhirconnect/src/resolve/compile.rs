@@ -455,7 +455,9 @@ impl<'a> Compiler<'a> {
     /// §Spec) and names no other source for the resource type, so the compiler
     /// reads the last segment of that canonical URL, which is the resource
     /// name for a base resource
-    /// (<https://hl7.org/fhir/R4/structuredefinition.html>).
+    /// (<https://hl7.org/fhir/R4/structuredefinition.html>). Requiring the key
+    /// and deriving the resource type from it is FerroBRIDGE's own decision:
+    /// no specification governs this: our own design.
     fn resource_of(&mut self, model: &ModelMappingFile) -> Option<ResourceType> {
         let name = model.header().name().value();
         let path = ModelPath::root()
