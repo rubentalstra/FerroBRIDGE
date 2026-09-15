@@ -64,6 +64,20 @@ Every diagnostic the compiler raises is collected. A run reports every
 disagreement it found, because a mapping author fixing one refusal at a time is
 how a load loop turns into an afternoon.
 
+## Direction enters the engine at three points only
+
+A condition is evaluated on the input side, a `unidirectional` marker skips a
+mapping in the other direction, and the composition defaults apply going into
+openEHR. Everything else is written once, which is why a data-type cell is a
+lens: `get` and `put` live beside each other and are property-tested against
+each other both ways, so the two directions cannot drift apart. Two
+independently written direction functions are the duplication this shape
+exists to prevent.
+
+A skipped element is a typed outcome carried to the caller, never a log line,
+and the declared set of losses is closed: the round-trip tests assert it
+exactly. An element the program cannot map refuses the unit.
+
 ## Tests
 
 The corpus under `docs/specs/fhirconnect-mapping-lib/` is evidence of what real

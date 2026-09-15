@@ -25,4 +25,10 @@
 //! `unidirectional` key already parses into: it names the same two
 //! directions, and a second enum beside it would only need converting.
 
+pub mod condition;
+
 pub mod lens;
+
+pub mod outcome;
+
+pub mod recurrence;

@@ -24,9 +24,28 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
-- `fhirconnect::engine`, the bidirectional interpreter over one
-  traversal (#84). The data-type chapter is a set of lenses, each written
-  once and run both ways under the well-behaved-lens laws.
+- `fhirconnect::engine`, the first half of the bidirectional interpreter (#84).
+  A data-type cell of the specification's chapter is one lens, written once:
+  `get` reads an openEHR reference-model value into its FHIR element and `put`
+  writes it back with the openEHR value the target already holds, and each pair
+  carries the GetPut and PutGet laws as `proptest` properties over the subset
+  its table declares lossless. The cells are `DV_CODED_TEXT` against
+  `CodeableConcept` and against `Coding`, `CODE_PHRASE` and `TERM_MAPPING`
+  against `Coding`, `DV_TEXT` against `string`, `Coding` and `CodeableConcept`,
+  `DV_DATE_TIME` against `dateTime`, `DV_INTERVAL<DV_DATE_TIME>` against
+  `Period`, `PARTY_IDENTIFIED` against `Reference` with `DV_IDENTIFIER` beside
+  it, and `DV_PROPORTION` against `Quantity` for a percentage. A date and time
+  value keeps the text it came with, so `Z`, `+00:00`, `+01:00` and fractional
+  seconds survive both ways. An attribute the table marks as having no
+  counterpart is carried from the value the target holds; a value the target
+  would falsify refuses, so a `TERM_MAPPING` whose `match` is not `=`, a
+  `DV_PROPORTION` that is not a percentage, and a `Period` collapsed into a
+  `DV_DATE_TIME` where the page gives no rule are each a typed refusal naming
+  the element. Beside the cells, the module carries the direction rule
+  (`fhirCondition` runs when FHIR is the input, `openehrCondition` when openEHR
+  is), the five condition operators with the connectives the specification
+  fixes, the three recurrence rules as structured occurrences, and the closed
+  set of losses a run may declare.
 
 - `fhirconnect::resolve`, context resolution into one immutable program per
   context mapping (#83). `compile` selects the start model mapping, applies the

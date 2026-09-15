@@ -79,6 +79,44 @@ per request and parses no path.
   composition names, and an ambiguous selection with nothing pinning it refuses
   by naming the candidates.
 
+## The engine module
+
+`fhirconnect::engine` interprets a compiled program, and there is one traversal
+for both directions. The direction enters it in three places only: a condition
+is evaluated on the input side, a mapping whose `unidirectional` names the
+other direction is skipped, and the composition defaults apply going into
+openEHR.
+
+- **A data-type cell is written once as a lens.** `get` reads an openEHR
+  reference-model value into its FHIR element and `put` writes it back with the
+  openEHR value the target already holds, and the pair is tested against the
+  GetPut and PutGet laws as properties. The cells the FHIR round trip needs are
+  in: `DV_CODED_TEXT` against `CodeableConcept` and against `Coding`,
+  `CODE_PHRASE` against `Coding`, `TERM_MAPPING` against `Coding`, `DV_TEXT`
+  against `string`, `Coding` and `CodeableConcept`, `DV_DATE_TIME` against
+  `dateTime` and the one-way collapse of a `Period`,
+  `DV_INTERVAL<DV_DATE_TIME>` against `Period`, `PARTY_IDENTIFIED` against
+  `Reference` with `DV_IDENTIFIER` against `Identifier` beside it, and
+  `DV_PROPORTION` against `Quantity` for a percentage.
+- **A date and time value keeps the text it came with.** Both sides hold a
+  lexical string, so `Z`, `+00:00`, `+01:00` and fractional seconds survive;
+  the engine parses no timestamp and adds no offset.
+- **An attribute with no counterpart is carried, a falsified value refuses.**
+  `put` restores the attributes the data-type table marks `-` from the openEHR
+  value the target holds; a `TERM_MAPPING` whose `match` is not `=` asserts an
+  equivalence the data denies and is refused instead.
+- **A `DV_PROPORTION` that is not a percentage refuses.** FHIR `Quantity`
+  carries no denominator, and the engine writes no extension URL of its own for
+  one.
+- **A loss is a typed outcome, never a log line.** The declared set is a
+  `unidirectional` skip, a defaulted composition field, the occurrences a
+  `0..n` into a `0..1` dropped, a one-way data-type row, and a reference left
+  for the facade to resolve. Anything else refuses the unit.
+- **An occurrence is a structured index.** One entry per repeating element on
+  the way to the target, so a `0..1` output is overwritten, a `0..n` output is
+  appended to, and a child mapping writes under the occurrence its parent is
+  bound to.
+
 ## Licence
 
 Business Source License 1.1 (`LICENSE`): free for every non-production use and
