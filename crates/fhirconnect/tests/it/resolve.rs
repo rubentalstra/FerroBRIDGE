@@ -521,10 +521,9 @@ fn an_append_carrying_a_concept_key_is_refused() -> Result<(), Box<dyn Error>> {
             "fc-append-carries-mapping"
         ]
     );
-    let named: Vec<&str> = diagnostics
+    let named: Vec<String> = diagnostics
         .iter()
-        .filter_map(|diagnostic| diagnostic.model_path())
-        .map(|path| path.as_str())
+        .map(|diagnostic| diagnostic.model_path().to_string())
         .collect();
     for key in [
         "slotArchetype",
