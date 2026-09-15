@@ -173,6 +173,16 @@ fn bundle() -> Result<String, Box<dyn StdError>> {
     .to_string())
 }
 
+/// Returns the composition string the first answered parameter carries.
+fn composition_text(answer: &serde_json::Value) -> Result<&str, Box<dyn StdError>> {
+    answer
+        .get("parameter")
+        .and_then(|parameter| parameter.get(0))
+        .and_then(|first| first.get("valueString"))
+        .and_then(serde_json::Value::as_str)
+        .ok_or_else(|| Box::<dyn StdError>::from("the answer carries the composition"))
+}
+
 /// Maps the synthetic Bundle into a composition through `$toopenehr`.
 async fn composition(app: Router) -> Result<serde_json::Value, Box<dyn StdError>> {
     let (status, _, body) = call(
@@ -184,9 +194,7 @@ async fn composition(app: Router) -> Result<serde_json::Value, Box<dyn StdError>
     .await?;
     assert_eq!(StatusCode::OK, status, "{body}");
     let answer: serde_json::Value = serde_json::from_str(&body)?;
-    let text = answer["parameter"][0]["valueString"]
-        .as_str()
-        .ok_or("the answer carries the composition")?;
+    let text = composition_text(&answer)?;
     let mut built: serde_json::Value = serde_json::from_str(text)?;
     if let Some(object) = built.as_object_mut() {
         object.insert(
@@ -595,9 +603,7 @@ async fn the_enveloped_toopenehr_reads_a_parameters_body() -> Result<(), Box<dyn
     .await?;
     assert_eq!(StatusCode::OK, status, "{body}");
     let answer: serde_json::Value = serde_json::from_str(&body)?;
-    let text = answer["parameter"][0]["valueString"]
-        .as_str()
-        .ok_or("the answer carries the composition")?;
+    let text = composition_text(&answer)?;
     assert!(
         text.contains('/'),
         "the format parameter selected the flat serialization: {text}"
