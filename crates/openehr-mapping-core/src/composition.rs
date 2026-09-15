@@ -141,6 +141,8 @@ pub struct NodeValue {
     flat_id: FlatId,
     /// The instance of each repeating node on the way to the target.
     occurrences: Vec<RmPosition>,
+    /// The value-internal family below the node, outermost first.
+    sub_path: Vec<String>,
     /// The datum part of the value, when it is one part of a data value.
     datum: Option<String>,
     /// The value itself.
@@ -154,9 +156,23 @@ impl NodeValue {
         Self {
             flat_id: node.flat_id().clone(),
             occurrences: Vec::new(),
+            sub_path: Vec::new(),
             datum: None,
             value,
         }
+    }
+
+    /// Returns this value under a value-internal family of its node.
+    ///
+    /// Not every part of a data value is a datum suffix: an interval writes
+    /// `lower` and `upper`, and a term mapping writes `_mapping:0/target`,
+    /// which Simplified Formats models as paths below the node (§§
+    /// `DV_INTERVAL`, `TERM_MAPPING`). Each segment is written as it stands,
+    /// so an indexed family carries its own `:i`.
+    #[must_use]
+    pub fn under(mut self, sub_path: Vec<String>) -> Self {
+        self.sub_path = sub_path;
+        self
     }
 
     /// Returns this value with the instance of each repeating node on the way
@@ -354,6 +370,10 @@ impl WebTemplateIndex {
                 key.push(':');
                 key.push_str(&FlatIndex::from(position).get().to_string());
             }
+        }
+        for segment in &value.sub_path {
+            key.push('/');
+            key.push_str(segment);
         }
         if let Some(ref datum) = value.datum {
             key.push('|');

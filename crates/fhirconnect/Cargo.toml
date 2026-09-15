@@ -22,6 +22,9 @@ include = ["src/**", "schemas/**", "README.md", "LICENSE"]
 [dependencies]
 jsonschema.workspace = true
 openehr-mapping-core.workspace = true
+# The BASE identification types the RM data types carry, for the one field a
+# lens builds by hand (`CODE_PHRASE.terminology_id`).
+openehr-base.workspace = true
 # The openEHR RM path model the mapping foundation resolves a path into
 # (docs/architecture.md section 3); the foundation returns its types, so this
 # crate names the same crate rather than re-exporting them.

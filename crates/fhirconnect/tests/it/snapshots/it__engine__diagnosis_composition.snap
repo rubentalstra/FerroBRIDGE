@@ -1,0 +1,161 @@
+---
+source: crates/fhirconnect/tests/it/engine.rs
+expression: inbound.value().value()
+---
+{
+  "_type": "COMPOSITION",
+  "context": {
+    "_type": "EVENT_CONTEXT",
+    "start_time": {
+      "_type": "DV_DATE_TIME",
+      "value": "2026-09-13T08:00:00Z"
+    },
+    "setting": {
+      "_type": "DV_CODED_TEXT",
+      "value": "other care",
+      "defining_code": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "openehr"
+        },
+        "code_string": "238"
+      }
+    }
+  },
+  "content": [
+    {
+      "_type": "EVALUATION",
+      "data": {
+        "_type": "ITEM_TREE",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "at0001"
+        },
+        "archetype_node_id": "at0001",
+        "items": [
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Problem name"
+            },
+            "archetype_node_id": "at0002",
+            "value": {
+              "_type": "DV_TEXT",
+              "value": "Synthetic problem one",
+              "mappings": [
+                {
+                  "_type": "TERM_MAPPING",
+                  "match": "=",
+                  "target": {
+                    "_type": "CODE_PHRASE",
+                    "terminology_id": {
+                      "_type": "TERMINOLOGY_ID",
+                      "value": "http://example.org/fhir/CodeSystem/synthetic-problems"
+                    },
+                    "code_string": "SYN-001",
+                    "preferred_term": "Synthetic problem one"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "_type": "ELEMENT",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Date of onset"
+            },
+            "archetype_node_id": "at0077",
+            "value": {
+              "_type": "DV_DATE_TIME",
+              "value": "2026-09-12T09:00:00+02:00"
+            }
+          }
+        ]
+      },
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "Problem diagnosis"
+      },
+      "archetype_node_id": "openEHR-EHR-EVALUATION.problem_diagnosis.v1",
+      "archetype_details": {
+        "_type": "ARCHETYPED",
+        "archetype_id": {
+          "_type": "ARCHETYPE_ID",
+          "value": "openEHR-EHR-EVALUATION.problem_diagnosis.v1"
+        },
+        "rm_version": "1.2.0"
+      },
+      "subject": {
+        "_type": "PARTY_SELF"
+      },
+      "language": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "ISO_639-1"
+        },
+        "code_string": "en"
+      },
+      "encoding": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "IANA_character-sets"
+        },
+        "code_string": "UTF-8"
+      }
+    }
+  ],
+  "name": {
+    "_type": "DV_TEXT",
+    "value": "Diagnosis"
+  },
+  "archetype_node_id": "openEHR-EHR-COMPOSITION.ferrobridge_report.v1",
+  "archetype_details": {
+    "_type": "ARCHETYPED",
+    "archetype_id": {
+      "_type": "ARCHETYPE_ID",
+      "value": "openEHR-EHR-COMPOSITION.ferrobridge_report.v1"
+    },
+    "rm_version": "1.2.0",
+    "template_id": {
+      "_type": "TEMPLATE_ID",
+      "value": "ferrobridge.diagnose.v1"
+    }
+  },
+  "category": {
+    "_type": "DV_CODED_TEXT",
+    "value": "event",
+    "defining_code": {
+      "_type": "CODE_PHRASE",
+      "terminology_id": {
+        "_type": "TERMINOLOGY_ID",
+        "value": "openehr"
+      },
+      "code_string": "433"
+    }
+  },
+  "language": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "_type": "TERMINOLOGY_ID",
+      "value": "ISO_639-1"
+    },
+    "code_string": "en"
+  },
+  "territory": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "_type": "TERMINOLOGY_ID",
+      "value": "ISO_3166-1"
+    },
+    "code_string": "NL"
+  },
+  "composer": {
+    "_type": "PARTY_IDENTIFIED",
+    "name": "FHIRconnect"
+  }
+}

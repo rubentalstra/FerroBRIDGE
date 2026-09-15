@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose one child maps the problem name,
+# which the synthetic ferrobridge.diagnose.v1 template constrains to 1..1. It
+# exists so the engine can be driven over an input that does not carry it, and
+# refuse (Fail.adoc).
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_diagnose_required
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "diagnosis"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype"
+      type: "NONE"
+    followedBy:
+      mappings:
+        - name: "problemName"
+          with:
+            fhir: "code"
+            openehr: "data[at0001]/items[at0002]"
+            type: "CODEABLECONCEPT"

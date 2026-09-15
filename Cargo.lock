@@ -1051,6 +1051,7 @@ dependencies = [
  "fhir-types",
  "insta",
  "jsonschema",
+ "openehr-base",
  "openehr-its",
  "openehr-mapping-core",
  "openehr-rm",

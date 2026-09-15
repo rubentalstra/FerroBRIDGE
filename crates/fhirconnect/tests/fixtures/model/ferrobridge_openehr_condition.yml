@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose one mapping carries an
+# openehrCondition, so the engine can be driven over two compositions that
+# differ only in what the condition tests.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_openehr_condition
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "onsetWhenCommentPresent"
+    with:
+      fhir: "$resource.onset.ofType(dateTime)"
+      openehr: "$archetype/data[at0001]/items[at0077]"
+      type: "DATETIME"
+    openehrCondition:
+      targetRoot: "$archetype/data[at0001]"
+      targetAttributes:
+        - "items[at0069]"
+      operator: "not empty"
