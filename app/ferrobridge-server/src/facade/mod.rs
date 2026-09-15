@@ -14,7 +14,12 @@
 //! authors is an `OperationOutcome`, and an upstream openEHR error body
 //! travels inside `issue.diagnostics` rather than reaching the wire raw.
 
+pub mod capability;
+pub mod engine;
 pub mod identity;
 pub mod media;
 pub mod outcome;
+pub mod programs;
+pub mod reply;
+pub mod request;
 pub mod status;
