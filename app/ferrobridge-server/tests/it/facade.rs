@@ -102,10 +102,10 @@ impl Harness {
             .await
             .unwrap_or_default()
             .iter()
-            .filter(|request| {
+            .rev()
+            .find(|request| {
                 request.method.as_str() == method && request.url.path().starts_with(path_prefix)
             })
-            .next_back()
             .and_then(|request| serde_json::from_slice(&request.body).ok())
     }
 
