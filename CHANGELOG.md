@@ -24,6 +24,33 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- The FHIR R4 facade (#85), mounted under `/fhir` when `[facade] enabled` is
+  set and answering nothing at all when it is not, so a disabled facade is a
+  `404` rather than a `403`. It serves a `CapabilityStatement` built from the
+  mapping set the server compiled at boot, creates a resource as a composition
+  the CDR commits, reads one back out of its composition, updates one under
+  `If-Match`, commits a `transaction` Bundle as one openEHR contribution, and
+  answers `$validate` as a dry run that writes nothing. Every response is
+  `application/fhir+json`, and everything the facade authors is an
+  `OperationOutcome`: an openEHR error body travels verbatim inside
+  `issue.diagnostics` rather than reaching the wire as its own document. One
+  table maps each CDR answer to a FHIR answer with both sides cited, so a
+  template refusal is a `422` carrying its `validationErrors`, a deleted
+  composition is a `410`, a `401` keeps its `WWW-Authenticate`, and a CDR
+  failure is a `502` naming the upstream status instead of an empty success.
+- Identity for the facade (#85), in a `redb` file the lane opens at boot and
+  readiness probes. A resource id comes from the entry's `LOCATABLE.uid` when
+  it has one and otherwise from a digest over the version container, the entry
+  path and the split occurrence, so the same composition reads back under the
+  same id while `meta.versionId` moves with each new version. The map wins once
+  written, which is what makes a re-sent resource update the composition it
+  already produced instead of creating a second one. The store holds
+  identifiers and no clinical content, and a test greps the file to prove it.
+- `[facade]` and `[mappings]` configuration sections (#85): `enabled`,
+  `base_url`, `ehr_policy`, `identity_store`, `subject_namespace`, `system_id`,
+  `composition_language` and `composition_territory`, plus the directory the
+  mapping files are read from. An enabled facade needs `[cdr]`, a mapping
+  directory, and both composition fields, and refuses to start without them.
 - `fhirconnect::engine`, the bidirectional interpreter (#84).
   A data-type cell of the specification's chapter is one lens, written once:
   `get` reads an openEHR reference-model value into its FHIR element and `put`

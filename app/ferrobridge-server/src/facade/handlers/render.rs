@@ -87,8 +87,7 @@ pub(crate) fn render(
 ///
 /// A warning is a loss the specification itself declares, never a swallowed
 /// failure, and it carries a mapping name and an element path rather than a
-/// value, so the line holds no clinical content
-/// (`.claude/rules/reliability.md`).
+/// value, so the line holds no clinical content.
 pub(crate) fn log_warnings(rendered: &Rendered) {
     if rendered.warnings.is_empty() {
         return;

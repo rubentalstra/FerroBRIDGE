@@ -53,12 +53,36 @@ book.
 
 Readiness runs one indicator per configured upstream, on the request. A probe
 that reaches the upstream counts it up, `401` and `404` included; a `5xx` and a
-failure to connect count it down.
+failure to connect count it down. With the facade on, one more indicator reads
+the identity store.
 
 The middleware stack, outermost first: the request-id normalizer, the layer
 that mints one, the panic renderer, the layer that propagates the id, the panic
 catcher, the request timeout (`408`), the body ceiling (`413`), and the request
 log.
+
+## The FHIR facade
+
+`[facade] enabled = true` mounts the FHIR R4 surface under `/fhir`, over the
+CDR client and the mapping set `[mappings] directory` names. Off, it mounts no
+route, so a request answers `404` rather than `403`.
+
+| Route | Answer |
+|---|---|
+| `GET /fhir/metadata` | The `CapabilityStatement` of the loaded programs |
+| `POST /fhir/{type}` | Create, conditional through `If-None-Exist` |
+| `POST /fhir/{type}/$validate` | The dry run that commits nothing |
+| `GET /fhir/{type}/{id}` | Read |
+| `PUT /fhir/{type}/{id}` | Update, with `If-Match` |
+| `POST /fhir` | A `transaction` Bundle, committed as one contribution |
+
+The facade stores no clinical data. What it keeps is identity, in a `redb` file
+the lane opens at boot: a subject to its `ehr_id`, a resource id to the
+composition entry it came from, and the source identity of every resource it
+consumed, which is what makes a re-sent resource update one composition instead
+of creating a second. A CDR answer becomes a FHIR answer through one status
+table, with both sides cited per row. The book's Integrate page carries the
+surface in full.
 
 ## What reaches the log
 

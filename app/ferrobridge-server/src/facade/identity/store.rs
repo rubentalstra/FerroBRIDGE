@@ -32,7 +32,7 @@ use crate::facade::identity::record::internal_key;
 /// Why the identity store could not answer.
 ///
 /// Every variant carries its cause, so a `502` from the facade names the layer
-/// that refused (`.claude/rules/reliability.md` §An error carries its cause).
+/// that refused.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum StoreError {
@@ -88,8 +88,8 @@ pub enum StoreError {
 /// The identity map the facade resolves every request through.
 ///
 /// The trait is synchronous: `redb` is an embedded store with no I/O wait of
-/// its own, and a handler calls it between two awaits rather than across one
-/// (`.claude/rules/reliability.md` §Blocking never hides in async).
+/// its own, and a handler calls it between two awaits rather than across one,
+/// so no blocking call hides inside an await.
 pub trait Store: fmt::Debug + Send + Sync {
     /// Returns the EHR recorded for `patient`, when one is.
     ///

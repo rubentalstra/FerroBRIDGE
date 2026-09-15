@@ -15,7 +15,7 @@
 //! - a CDR `422` (template validation) is a facade `422` with the
 //!   `validationErrors` verbatim in `issue.diagnostics`;
 //! - a CDR `412` is a `412` carrying the current `ETag`;
-//! - a CDR `404` on a composition the CDR reports deleted is a `410`;
+//! - a composition the CDR reports deleted (a `204` on the read) is a `410`;
 //! - a CDR `401` propagates `WWW-Authenticate` and never becomes a `403`;
 //! - a CDR `405` or `415` is a `500`, because the bridge chose a call the CDR
 //!   does not offer;
@@ -250,8 +250,7 @@ pub fn diagnostics(upstream: &UpstreamError) -> String {
 ///
 /// The client returns [`Error`] only for a call that reached no documented
 /// answer, so every variant here is a bridge-side or transport-side fault and
-/// none of them is flattened into an empty value
-/// (`.claude/rules/reliability.md`).
+/// none of them is flattened into an empty value.
 #[must_use]
 pub fn of_client_error(error: &Error) -> Answer {
     match *error {

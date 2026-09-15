@@ -83,6 +83,8 @@ dependency pins below.
 | `tower` | 0.5.3 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `toml` | 1.1.6 | the root `Cargo.toml` `[workspace.dependencies]` (the server configuration file) |
 | `uuid` | 1.26.1 | the root `Cargo.toml` `[workspace.dependencies]` (the minted request id) |
+| `redb` | 4.3.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the facade identity store) |
+| `jiff` | 0.2.37 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the bridge's own timestamps) |
 | `futures-core`, `futures-util` | 0.3.34 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `tokio` | 1.53.1 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `wiremock` | 0.6.5 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |

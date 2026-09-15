@@ -1217,15 +1217,16 @@ drops the connection) and the CDR has. Every optional lane (the facade, the
 change-feed adapter, the outbound stream) is off until configured, and a lane
 that carries identifiable data says so at start-up.
 
-**Dependencies, verified against crates.io on 2026-09-12** and recorded in
+**Dependencies, verified against crates.io on 2026-09-12**, with `redb` and
+`jiff` re-verified on 2026-09-15 when the facade added them, and recorded in
 `docs/VERSIONS.md`: `openehr-base`, `openehr-rm`, `openehr-its`,
 `openehr-query` 0.0.64; `serde-saphyr` 1.2.0 (the
 maintained serde YAML with anchors, aliases, merge keys and spans;
 `serde_yaml` is archived, `serde-yaml-ng` and `serde_yml` unmaintained);
 `jsonschema` 0.56.0 with `default-features = false`; `axum` 0.8.9, `tower-http`
 0.7.1, `reqwest` 0.13.5 with rustls, `backon` 1.6.0; `sqlx` 0.9.0 for checked
-queries and `tokio-postgres` 0.7.18 for binary `COPY`; `redb` 4.2.0 for the
-identity store; `jiff` 0.2.35 for the bridge's own timestamps (openEHR partial
+queries and `tokio-postgres` 0.7.18 for binary `COPY`; `redb` 4.3.0 for the
+identity store; `jiff` 0.2.37 for the bridge's own timestamps (openEHR partial
 dates stay in their lexical form in `openehr-base`; FHIR primitives keep theirs
 in `fhir-types`); `sha2` 0.11.0; `insta`, `proptest`, `wiremock`,
 `testcontainers` 0.27.3 for tests. Consuming `openehr-its` with

@@ -126,8 +126,7 @@ impl fmt::Display for FhirResourceId {
 /// A sending system's id is opaque to this bridge: it is a key into the
 /// identity map and never a value the bridge writes into a document, so it is
 /// kept as sent and is not held to the R4 `id` grammar. The type is distinct
-/// from [`FhirResourceId`] so the two cannot be swapped at a call site
-/// (`.claude/rules/reliability.md` §Ids are distinct types).
+/// from [`FhirResourceId`] so the two cannot be swapped at a call site.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ExternalResourceId(String);
 

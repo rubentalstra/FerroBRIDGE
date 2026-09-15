@@ -109,6 +109,46 @@ server says so once at start-up.
 |---|---|---|---|
 | `url` | none, required when the section is present | yes | The PostgreSQL connection URL |
 
+### `[mappings]`
+
+Where the FHIRconnect files this deployment runs are read from. The facade and
+the mapping subcommands read the same set.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `directory` | none | The directory the mapping files are read from, recursively |
+
+### `[facade]`
+
+The FHIR R4 facade. It is off until `enabled` is true, and a disabled facade
+mounts no route, so a request to `/fhir` answers `404` rather than `403`. An
+enabled facade needs `[cdr]` and `[mappings] directory`: it compiles the
+mapping set at boot against the templates the CDR holds, so a mapping that does
+not compile refuses the start rather than the first request that touches it.
+This lane reaches identifiable data, and the server says so once at start-up.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | `false` | Whether the facade routes are mounted |
+| `base_url` | `http://127.0.0.1:8080/fhir` | The absolute FHIR service base a client reaches, which `Location` is written under |
+| `ehr_policy` | `existing` | `existing` writes only into an EHR the CDR already holds; `create_on_first_write` creates one for an unknown subject |
+| `identity_store` | `identity.redb` | The file the identity map is kept in, opened at boot and refused when it cannot be written |
+| `subject_namespace` | `ferrobridge` | The namespace a subject identifier is looked up in on the CDR |
+| `system_id` | `FerroBRIDGE` | The `AUDIT_DETAILS.system_id` every commit records |
+| `composition_language` | none, required | The `COMPOSITION.language` every commit carries, an ISO 639-1 code |
+| `composition_territory` | none, required | The `COMPOSITION.territory` every commit carries, an ISO 3166-1 code |
+
+The two composition fields have no default. FHIRconnect puts them on the
+project performing the mapping, and there is no correct language for a clinical
+record you did not write, so an enabled facade with either key unset is a boot
+error naming the key.
+
+The identity store holds identifiers: a subject to its `ehr_id`, a resource id
+to the composition it came from, and the source identity of every resource the
+facade consumed. No clinical content is written into it. Back it up with the
+CDR, because a lost map means the next create writes a second composition for a
+resource the CDR already holds.
+
 ## The secrets, in one place
 
 | Variable | File sibling |
@@ -151,4 +191,16 @@ bearer_token_file = "/run/secrets/cdr-token"
 [terminology]
 base_url = "https://tx.example.org/r4"
 wire_version = "r4"
+
+[mappings]
+directory = "/etc/ferrobridge/mappings"
+
+[facade]
+enabled = true
+base_url = "https://bridge.example.org/fhir"
+ehr_policy = "create_on_first_write"
+identity_store = "/var/lib/ferrobridge/identity.redb"
+subject_namespace = "https://example.org/fhir/sid/patient"
+composition_language = "en"
+composition_territory = "GB"
 ```

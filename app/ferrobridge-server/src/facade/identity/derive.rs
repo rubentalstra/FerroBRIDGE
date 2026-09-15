@@ -106,9 +106,9 @@ impl EntryKey {
 #[must_use]
 pub fn derive(key: &EntryKey, uid: Option<&str>) -> (FhirResourceId, Derivation) {
     if let Some(uid) = uid.filter(|uid| is_fhir_id(uid)) {
-        // NOTE: the constructor's grammar is exactly what `is_fhir_id` just
-        // checked, so this branch cannot fail; the digest is the answer if it
-        // ever did, rather than a panic on a request path.
+        // NOTE: the constructor holds the `Resource.id` grammar
+        // (<https://hl7.org/fhir/R4/resource.html>) that `is_fhir_id` just
+        // checked, so the digest answers a refusal that cannot happen.
         if let Ok(id) = FhirResourceId::new(uid) {
             return (id, Derivation::Uid);
         }
@@ -127,9 +127,9 @@ pub fn derive(key: &EntryKey, uid: Option<&str>) -> (FhirResourceId, Derivation)
 #[must_use]
 pub fn map_key(key: &EntryKey) -> ExternalResourceId {
     let digest = digest(key);
-    // NOTE: the digest is 52 base32 characters, which carry no control
-    // character, so the constructor cannot refuse; the fallback keeps the
-    // request path free of a panic (`.claude/rules/reliability.md`).
+    // The digest is 52 base32 characters, which carry no control character,
+    // so the constructor cannot refuse, and the fallback keeps the request
+    // path free of a panic.
     ExternalResourceId::new(digest.as_str())
         .unwrap_or_else(|_refusal| ExternalResourceId::of_digest(&digest))
 }
@@ -188,9 +188,9 @@ fn base32(bytes: &[u8]) -> String {
 /// Returns the alphabet character of one five-bit group.
 fn symbol(value: u32) -> char {
     let index = usize::try_from(value).unwrap_or(0);
-    // NOTE: `value` is masked to five bits, so the index is always inside the
-    // 32-entry alphabet; `get` keeps the request path free of a panicking
-    // index (`.claude/rules/reliability.md`).
+    // `value` is masked to five bits, so the index is always inside the
+    // 32-entry alphabet, and `get` keeps the request path free of a panicking
+    // index.
     ALPHABET.get(index).map_or('a', |&byte| char::from(byte))
 }
 

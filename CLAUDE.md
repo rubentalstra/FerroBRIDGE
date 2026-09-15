@@ -66,7 +66,12 @@ the testkit tool crate. Beside it:
   route and never a body, the health family over an indicator registry, the
   `tower-http` stack (request id, panic catch, timeout, body ceiling), and the
   bounded drain on `SIGTERM`. `serve` runs; the batch subcommands parse and
-  name the issue that lands each.
+  name the issue that lands each. `src/facade/` is the FHIR R4 facade (#85),
+  mounted under `/fhir` behind `[facade]`: the six interactions over the CDR,
+  the `redb` identity store with the derivation
+  `docs/architecture.md` §9 fixes, the one status table
+  from a CDR answer to a FHIR answer, and the `CapabilityStatement` built from
+  the loaded programs.
 
 - `crates/fhir-types`: the generated FHIR model, Apache-2.0, emitted whole by
   the generator below and never hand-edited.
