@@ -109,6 +109,40 @@ pub fn issue(status: StatusCode, one: Issue) -> Response {
     issues(status, &[one], &[])
 }
 
+/// A rendered answer a handler short-circuits with.
+///
+/// The response travels boxed inside this type: an unboxed `Response` in the
+/// `Err` arm would make every `Result` on a request path as large as an HTTP
+/// response (`clippy::result_large_err`).
+#[derive(Debug)]
+pub struct Refusal(Box<Response>);
+
+impl Refusal {
+    /// Returns `response` as a refusal.
+    #[must_use]
+    pub fn new(response: Response) -> Self {
+        Self(Box::new(response))
+    }
+
+    /// Returns the response this refusal carries.
+    #[must_use]
+    pub fn into_response(self) -> Response {
+        *self.0
+    }
+}
+
+/// Returns the refusal carrying one issue under `status`.
+#[must_use]
+pub fn refusal(status: StatusCode, one: Issue) -> Refusal {
+    Refusal::new(issue(status, one))
+}
+
+/// Returns the refusal carrying `issues` under `status`.
+#[must_use]
+pub fn refusals(status: StatusCode, issues: &[Issue], headers: &[Header]) -> Refusal {
+    Refusal::new(self::issues(status, issues, headers))
+}
+
 /// Returns an empty `200` answer with no body.
 ///
 /// `Prefer: return=minimal` asks for "an empty payload"

@@ -19,6 +19,7 @@
 
 use ferrobridge_openehr::ids::VersionedObjectUid;
 
+use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::is_fhir_id;
 
@@ -113,6 +114,24 @@ pub fn derive(key: &EntryKey, uid: Option<&str>) -> (FhirResourceId, Derivation)
         }
     }
     (digest(key), Derivation::Digest)
+}
+
+/// Returns the identity-map key of one entry.
+///
+/// The map is keyed by the digest over the version container, the entry path
+/// and the split occurrence, which is the one part of an entry's identity that
+/// does not move across composition versions. Keying on it is what makes the
+/// map win once written: an entry that gains a `LOCATABLE.uid` in a later
+/// version still resolves to the id the first version recorded
+/// (`docs/architecture.md` §9).
+#[must_use]
+pub fn map_key(key: &EntryKey) -> ExternalResourceId {
+    let digest = digest(key);
+    // NOTE: the digest is 52 base32 characters, which carry no control
+    // character, so the constructor cannot refuse; the fallback keeps the
+    // request path free of a panic (`.claude/rules/reliability.md`).
+    ExternalResourceId::new(digest.as_str())
+        .unwrap_or_else(|_refusal| ExternalResourceId::of_digest(&digest))
 }
 
 /// Returns the digest-derived id of `key`.

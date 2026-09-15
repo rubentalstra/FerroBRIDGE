@@ -153,6 +153,16 @@ impl ExternalResourceId {
         Ok(Self(text.to_owned()))
     }
 
+    /// Returns the external identity of one derived resource id.
+    ///
+    /// A derived id carries only base32 characters, so it is always a legal
+    /// external identity; this is the total conversion the identity-map key
+    /// takes (`docs/architecture.md` §9).
+    #[must_use]
+    pub fn of_digest(digest: &FhirResourceId) -> Self {
+        Self(digest.as_str().to_owned())
+    }
+
     /// Returns the id as the sending system wrote it.
     #[must_use]
     pub fn as_str(&self) -> &str {

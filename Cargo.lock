@@ -963,6 +963,7 @@ dependencies = [
  "fhirconnect",
  "http",
  "jiff",
+ "openehr-base",
  "openehr-its",
  "openehr-mapping-core",
  "openehr-rm",
