@@ -1320,15 +1320,29 @@ impl<T: Table + ?Sized> Run<'_, T> {
     }
 
     /// Runs the `followedBy` children of one mapping under its binding.
+    ///
+    /// "If we have a parent node with a `1..1` cardinality and a child node
+    /// with a `1..1` cardinality, the mapping should fail if the child is not
+    /// provided" (`engine/Fail.adoc`), so a child the template requires and
+    /// the input does not carry refuses the unit.
     fn children(&mut self, mapping: &Mapping, binding: &Binding) -> Result<(), EngineError> {
         for child in mapping.followed_by() {
-            let before = self.written.len();
             self.mapping(child, binding)?;
-            if self.direction == Direction::FhirToOpenehr
-                && self.written.len() == before
-                && let Some(target) = child.openehr()
-                && target.node().min().is_some_and(|min| min >= 1)
-                && child.direction().is_none_or(|only| only == self.direction)
+            if self.direction != Direction::FhirToOpenehr {
+                continue;
+            }
+            let Some(target) = child.openehr() else {
+                continue;
+            };
+            if target.node().min().is_none_or(|min| min < 1)
+                || child.direction().is_some_and(|only| only != self.direction)
+            {
+                continue;
+            }
+            if !self
+                .written
+                .iter()
+                .any(|written| written.flat_id == *target.node().flat_id())
             {
                 return Err(EngineError::MissingRequired {
                     mapping: String::from(child.name()),

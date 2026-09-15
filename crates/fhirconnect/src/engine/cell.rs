@@ -255,7 +255,6 @@ fn held_date_time(
 }
 
 /// Returns the held `DV_INTERVAL<DV_DATE_TIME>`, when the target holds one.
-#[expect(clippy::type_complexity, reason = "the generic interval spells out")]
 fn held_interval(
     existing: Option<&RmValue>,
 ) -> Option<
