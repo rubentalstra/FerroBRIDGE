@@ -250,10 +250,6 @@ fn validate_mapping(
         ));
     }
 
-    if let Some(ref append_to) = mapping.append_to {
-        check_append_target(rules.set, rules.file, name, append_to, path, diagnostics);
-    }
-
     if let Some(ref reference) = mapping.reference {
         let is_reference_variable = side(|with| with.openehr.as_ref()).is_some_and(|value| {
             Variable::from_str(value).is_ok_and(|variable| variable == Variable::Reference)
@@ -346,59 +342,6 @@ fn require_model(
             reference.value()
         ),
     ));
-}
-
-/// Refuses an `appendTo` that names no mapping method of the extended file.
-///
-/// "The method where it is to be appended to is referenced with the key
-/// `appendTo`. The value used is the name of the mapping method. This can be
-/// also the child method. The path then would be `appendTo: parent.child`"
-/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
-/// §Append).
-fn check_append_target(
-    set: &MappingSet,
-    file: &ModelMappingFile,
-    owner: &MappingName,
-    append_to: &Located<String>,
-    path: &ModelPath,
-    diagnostics: &mut Vec<Diagnostic>,
-) {
-    let Some(ref extends) = file.spec().extends else {
-        return;
-    };
-    let Some(extended) = set.model(extends.value()) else {
-        return;
-    };
-    if resolve_method(extended.mappings(), append_to.value()).is_some() {
-        return;
-    }
-    diagnostics.push(error(
-        file.file(),
-        owner,
-        ModelCode::UnknownAppendTarget,
-        append_to.position(),
-        &path.field("appendTo"),
-        format!(
-            "`{}` names no mapping method of `{}`",
-            append_to.value(),
-            extends.value()
-        ),
-    ));
-}
-
-/// Resolves a dotted `parent.child` mapping-method path.
-fn resolve_method<'a>(mappings: &'a [Mapping], dotted: &str) -> Option<&'a Mapping> {
-    let mut current: Option<&Mapping> = None;
-    let mut level: &[Mapping] = mappings;
-    for segment in dotted.split('.') {
-        let found = level.iter().find(|m| m.name.value() == segment)?;
-        current = Some(found);
-        level = found
-            .followed_by
-            .as_ref()
-            .map_or(&[][..], |followed| followed.mappings.as_slice());
-    }
-    current
 }
 
 /// Applies the two rules that hold for one condition.

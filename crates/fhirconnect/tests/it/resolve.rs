@@ -103,6 +103,25 @@ fn set_of(files: &[(&str, &str)]) -> Result<MappingSet, Box<dyn Error>> {
     Ok(set)
 }
 
+/// Loads named in-memory files through the whole loader.
+///
+/// [`set_of`] lowers each file on its own, which skips the strict schema and
+/// the semantic rules, so a case about either writes its files out and takes
+/// the entry point a real load takes. The directory is returned because it
+/// owns the files for as long as the test reads them.
+fn loaded_set(files: &[(&str, &str)]) -> Result<(tempfile::TempDir, MappingSet), Box<dyn Error>> {
+    let directory = tempfile::tempdir()?;
+    let mut paths = Vec::new();
+    for (name, text) in files {
+        let path = directory.path().join(name);
+        std::fs::write(&path, text)?;
+        paths.push(path);
+    }
+    let set = load_set(paths, &StaticMappingCodes::default())
+        .map_err(|diagnostics| render(&diagnostics))?;
+    Ok((directory, set))
+}
+
 /// Renders a diagnostic list as one error message.
 fn render(diagnostics: &[Diagnostic]) -> String {
     diagnostics
@@ -537,6 +556,50 @@ fn an_append_carrying_a_concept_key_is_refused() -> Result<(), Box<dyn Error>> {
             "{key} in {named:?}"
         );
     }
+    Ok(())
+}
+
+/// An `appendTo` is resolved against the model mapping the extensions of the
+/// context have been applied to, so a method one extension `add`s is a target
+/// the next extension may `append` to
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
+/// §Append). This case takes the whole loader, so the strict schema and the
+/// semantic rules run over it as they do on a real load.
+#[test]
+fn an_append_to_a_method_another_extension_added_loads_and_compiles() -> Result<(), Box<dyn Error>>
+{
+    let added = "mappings:\n  - name: \"note\"\n    extension: \"add\"\n    with:\n      fhir: \"$resource.note.text\"\n      openehr: \"$archetype/data[at0001]/items[at0069]\"\n";
+    let appended = "mappings:\n  - name: \"extra\"\n    extension: \"append\"\n    appendTo: \"note\"\n    followedBy:\n      mappings:\n        - name: \"authored\"\n          with:\n            fhir: \"$fhirRoot.id\"\n            openehr: \"$openehrRoot\"\n";
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "adds.yml",
+            extension("synthetic_add", "EVALUATION.synthetic.v1", added),
+        ),
+        (
+            "appends.yml",
+            extension("synthetic_append", "EVALUATION.synthetic.v1", appended),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_add", "synthetic_append"]),
+            ),
+        ),
+    ];
+    let (_directory, set) = loaded_set(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let names: Vec<&str> = program
+        .mappings()
+        .iter()
+        .map(fhirconnect::resolve::program::Mapping::name)
+        .collect();
+    assert_eq!(names, vec!["problem", "note"]);
+    let note = program.mappings().get(1).ok_or("the added method")?;
+    let child = note.followed_by().first().ok_or("the appended child")?;
+    assert_eq!(child.name(), "note.authored");
     Ok(())
 }
 

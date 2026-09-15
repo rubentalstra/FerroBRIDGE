@@ -39,6 +39,7 @@ insta.workspace = true
 # with; the crate itself takes the built template from its caller.
 openehr-its.workspace = true
 proptest.workspace = true
+tempfile.workspace = true
 
 [lints]
 workspace = true

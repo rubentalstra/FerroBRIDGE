@@ -53,8 +53,6 @@ pub enum ModelCode {
     CriteriaMissing,
     /// A cross-file reference names no loaded `metadata.name`.
     UnknownMappingReference,
-    /// An `appendTo` names no mapping method of the extended model mapping.
-    UnknownAppendTarget,
     /// An extension method appears in a file that is not `type: extension`.
     ExtensionMethodOutsideExtensionFile,
     /// A `reference` mapping does not write `openehr: "$reference"`.
@@ -85,7 +83,6 @@ impl ModelCode {
             Self::CriteriaNotAllowed => "fc-criteria-not-allowed",
             Self::CriteriaMissing => "fc-criteria-missing",
             Self::UnknownMappingReference => "fc-unknown-mapping-reference",
-            Self::UnknownAppendTarget => "fc-unknown-append-target",
             Self::ExtensionMethodOutsideExtensionFile => "fc-extension-method-outside-model",
             Self::ReferenceWithoutReferenceVariable => "fc-reference-without-reference-variable",
             Self::UnknownMappingCode => "fc-unknown-mapping-code",
@@ -113,7 +110,6 @@ impl ModelCode {
             Self::CriteriaNotAllowed,
             Self::CriteriaMissing,
             Self::UnknownMappingReference,
-            Self::UnknownAppendTarget,
             Self::ExtensionMethodOutsideExtensionFile,
             Self::ReferenceWithoutReferenceVariable,
             Self::UnknownMappingCode,
