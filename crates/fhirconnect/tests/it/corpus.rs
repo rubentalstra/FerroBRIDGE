@@ -326,84 +326,51 @@ fn the_strict_schemas_accept_the_four_keys_the_published_model_schema_omits()
     Ok(())
 }
 
+/// The refusals are pinned in the order a load raises them, which is file
+/// order through the loader and then document order through the semantic
+/// rules, so a rule that starts reporting somewhere else is a failing test
+/// rather than a silent reshuffle.
 #[test]
 fn the_corpus_semantic_refusals_are_the_pinned_set() -> Result<(), Box<dyn Error>> {
     let measured = corpus_diagnostics(&StaticMappingCodes::default())?;
     let expected = vec![
-        "model/action/org.openehr/procedure.v1.yml\tfc-condition-target-root-mismatch".to_owned(),
         "model/cluster/org.highmed/lebensphase.v0.yml\tfc-schema-violation".to_owned(),
         "model/cluster/org.highmed/study_details.v1.yml\tfc-schema-violation".to_owned(),
-        "model/cluster/org.openehr/dosage.v2.BackboneElement.yml\tfc-unknown-mapping-code"
-            .to_owned(),
+        "projects/org.highmed/KDS/diagnose/KDS_problem_diagnose.yml\tyaml-syntax".to_owned(),
+        "projects/org.highmed/KDS/laborauftrag/KDS_composition.yml\tduplicate-mapping-name".to_owned(),
+        "projects/org.highmed/KDS/person_pseudo/KDS_composition.yml\tduplicate-mapping-name".to_owned(),
+        "projects/org.highmed/KDS/person_pseudo/pseudo_person.context.yaml\tduplicate-mapping-name".to_owned(),
+        "projects/org.highmed/KDS/procedure/KDS_composition.yml\tduplicate-mapping-name".to_owned(),
+        "projects/org.highmed/KDS/studienteilnahme/KDS_informed_consent.yaml\tfc-schema-violation".to_owned(),
+        "projects/org.highmed/KDS/todesursache/KDS_composition.yml\tduplicate-mapping-name".to_owned(),
+        "projects/org.highmed/KDS/vitalstatus/KDS_composition.yml\tduplicate-mapping-name".to_owned(),
+        "projects/org.openehr/EEHRxF/lab/bundle/lab_composition.yml\tempty-document".to_owned(),
+        "model/action/org.openehr/procedure.v1.yml\tfc-condition-target-root-mismatch".to_owned(),
         "model/cluster/org.openehr/dosage.v2.yml\tfc-unknown-mapping-code".to_owned(),
         "model/cluster/org.openehr/dosage.v2.yml\tfc-unknown-mapping-code".to_owned(),
         "model/cluster/org.openehr/dosage.v2.yml\tfc-unknown-mapping-code".to_owned(),
         "model/cluster/org.openehr/dosage.v2.yml\tfc-unknown-mapping-code".to_owned(),
+        "model/cluster/org.openehr/dosage.v2.BackboneElement.yml\tfc-unknown-mapping-code".to_owned(),
+        "model/cluster/org.highmed/study_participation.v1.yml\tfc-unknown-mapping-reference".to_owned(),
         "model/cluster/org.openehr/timing_daily.v1.yml\tfc-unknown-mapping-code".to_owned(),
         "model/cluster/org.openehr/timing_non_daily.yml\tfc-unknown-mapping-code".to_owned(),
-        "model/cluster/org.highmed/study_participation.v1.yml\tfc-unknown-mapping-reference"
-            .to_owned(),
-        "model/composition/org.openehr/report-result.v1.Composition.yml\t\
-         fc-extension-method-outside-model"
-            .to_owned(),
-        "model/composition/org.openehr/report.v1.MedicationAdministration.yml\t\
-         fc-condition-target-root-mismatch"
-            .to_owned(),
-        "model/evaluation/org.openehr/cause_of_death.v1.yml\tfc-extension-method-outside-model"
-            .to_owned(),
-        "projects/org.highmed/KDS/diagnose/KDS_composition.yml\tfc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/diagnose/KDS_diagnose.context.yaml\t\
-         fc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/diagnose/KDS_diagnose.context.yaml\t\
-         fc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/diagnose/KDS_lebensphase.yml\tfc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/diagnose/KDS_problem_diagnose.yml\tyaml-syntax".to_owned(),
-        "projects/org.highmed/KDS/laborauftrag/KDS_composition.yml\tduplicate-mapping-name"
-            .to_owned(),
-        "projects/org.highmed/KDS/person/KDS_admin_entry_person.yml\tfc-unknown-mapping-code"
-            .to_owned(),
-        "projects/org.highmed/KDS/person/person.context.yaml\tfc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/person_pseudo/KDS_composition.yml\tduplicate-mapping-name"
-            .to_owned(),
-        "projects/org.highmed/KDS/person_pseudo/KDS_pseudo_admin_person.yml\t\
-         fc-unknown-mapping-code"
-            .to_owned(),
-        "projects/org.highmed/KDS/person_pseudo/KDS_pseudo_admin_person.yml\t\
-         fc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/person_pseudo/pseudo_person.context.yaml\t\
-         duplicate-mapping-name"
-            .to_owned(),
-        "projects/org.highmed/KDS/procedure/KDS_composition.yml\tduplicate-mapping-name".to_owned(),
-        "projects/org.highmed/KDS/studienteilnahme/KDS_informed_consent.yaml\t\
-         fc-schema-violation"
-            .to_owned(),
-        "projects/org.highmed/KDS/studienteilnahme/studienteilnahme.context.yaml\t\
-         fc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/studienteilnahme/studienteilnahme.context.yaml\t\
-         fc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.highmed/KDS/todesursache/KDS_composition.yml\tduplicate-mapping-name"
-            .to_owned(),
-        "projects/org.highmed/KDS/vitalstatus/KDS_composition.yml\tduplicate-mapping-name"
-            .to_owned(),
-        "projects/org.openehr/EEHRxF/lab/bundle/lab.context.yml\tfc-unknown-mapping-reference"
-            .to_owned(),
-        "projects/org.openehr/EEHRxF/lab/bundle/lab_composition.yml\tempty-document".to_owned(),
-        "projects/org.openehr/EEHRxF/lab/bundle/lab_result.yml\tfc-unknown-mapping-reference"
-            .to_owned(),
+        "model/composition/org.openehr/report-result.v1.Composition.yml\tfc-extension-method-outside-model".to_owned(),
+        "model/composition/org.openehr/report.v1.MedicationAdministration.yml\tfc-condition-target-root-mismatch".to_owned(),
+        "model/evaluation/org.openehr/cause_of_death.v1.yml\tfc-extension-method-outside-model".to_owned(),
+        "projects/org.highmed/KDS/person_pseudo/KDS_pseudo_admin_person.yml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.highmed/KDS/person_pseudo/KDS_pseudo_admin_person.yml\tfc-unknown-mapping-code".to_owned(),
+        "projects/org.highmed/KDS/person/KDS_admin_entry_person.yml\tfc-unknown-mapping-code".to_owned(),
+        "projects/org.highmed/KDS/diagnose/KDS_composition.yml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.highmed/KDS/diagnose/KDS_lebensphase.yml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.openehr/EEHRxF/lab/bundle/lab_result.yml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.highmed/KDS/person/person.context.yaml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.highmed/KDS/studienteilnahme/studienteilnahme.context.yaml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.highmed/KDS/studienteilnahme/studienteilnahme.context.yaml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.highmed/KDS/diagnose/KDS_diagnose.context.yaml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.highmed/KDS/diagnose/KDS_diagnose.context.yaml\tfc-unknown-mapping-reference".to_owned(),
+        "projects/org.openehr/EEHRxF/lab/bundle/lab.context.yml\tfc-unknown-mapping-reference".to_owned(),
     ];
-    let mut measured_sorted = measured.clone();
-    let mut expected_sorted = expected.clone();
-    measured_sorted.sort();
-    expected_sorted.sort();
-    assert_eq!(measured_sorted, expected_sorted);
+    assert_eq!(measured, expected);
     Ok(())
 }
 

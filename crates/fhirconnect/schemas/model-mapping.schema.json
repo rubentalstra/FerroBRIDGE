@@ -109,6 +109,20 @@
         "identifying": { "type": "boolean" }
       }
     },
+    "openehrCondition": {
+      "allOf": [
+        { "$ref": "#/definitions/condition" },
+        {
+          "if": { "type": "object" },
+          "then": {
+            "oneOf": [
+              { "required": ["targetAttribute"] },
+              { "required": ["targetAttributes"] }
+            ]
+          }
+        }
+      ]
+    },
     "with": {
       "type": "object",
       "additionalProperties": false,
@@ -188,7 +202,7 @@
       "additionalProperties": false,
       "properties": {
         "fhirCondition": { "$ref": "#/definitions/condition" },
-        "openehrCondition": { "$ref": "#/definitions/condition" },
+        "openehrCondition": { "$ref": "#/definitions/openehrCondition" },
         "hierarchy": { "$ref": "#/definitions/hierarchy" }
       }
     },
@@ -212,7 +226,7 @@
         "unidirectional": { "$ref": "#/definitions/direction" },
         "manual": { "$ref": "#/definitions/manual" },
         "fhirCondition": { "$ref": "#/definitions/condition" },
-        "openehrCondition": { "$ref": "#/definitions/condition" },
+        "openehrCondition": { "$ref": "#/definitions/openehrCondition" },
         "followedBy": {
           "type": ["object", "null"],
           "additionalProperties": false,

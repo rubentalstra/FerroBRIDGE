@@ -37,6 +37,8 @@ pub(crate) struct Node<'a> {
     pub(crate) mapping: &'a Mapping,
     /// The file the method was read from.
     pub(crate) origin: &'a ModelMappingFile,
+    /// Where the method sits in that file's document model.
+    pub(crate) path: ModelPath,
     /// The methods that run after it.
     pub(crate) followed_by: Vec<Node<'a>>,
     /// The methods that populate a referenced resource.
@@ -45,30 +47,37 @@ pub(crate) struct Node<'a> {
 
 impl<'a> Node<'a> {
     /// Materializes one mapping method and everything nested under it.
-    fn of(mapping: &'a Mapping, origin: &'a ModelMappingFile) -> Self {
+    ///
+    /// `path` is where the method sits in `origin`, so a refusal about a node
+    /// an extension contributed names a place in the extension's own file
+    /// rather than a position in the merged tree.
+    fn of(mapping: &'a Mapping, origin: &'a ModelMappingFile, path: ModelPath) -> Self {
         let followed_by = mapping
             .followed_by
             .as_ref()
-            .map(|followed| Self::all(&followed.mappings, origin))
+            .map(|followed| Self::all(&followed.mappings, origin, &path.field("followedBy")))
             .unwrap_or_default();
         let reference = mapping
             .reference
             .as_ref()
-            .map(|reference| Self::all(&reference.mappings, origin))
+            .map(|reference| Self::all(&reference.mappings, origin, &path.field("reference")))
             .unwrap_or_default();
         Self {
             mapping,
             origin,
+            path,
             followed_by,
             reference,
         }
     }
 
-    /// Materializes a list of mapping methods.
-    fn all(mappings: &'a [Mapping], origin: &'a ModelMappingFile) -> Vec<Self> {
+    /// Materializes a list of mapping methods under `parent`.
+    fn all(mappings: &'a [Mapping], origin: &'a ModelMappingFile, parent: &ModelPath) -> Vec<Self> {
+        let at = parent.field("mappings");
         mappings
             .iter()
-            .map(|mapping| Self::of(mapping, origin))
+            .enumerate()
+            .map(|(index, mapping)| Self::of(mapping, origin, at.index(index)))
             .collect()
     }
 
@@ -96,7 +105,7 @@ pub(crate) fn apply<'a>(
     extensions: &[&'a ModelMappingFile],
     diagnostics: &mut Vec<Diagnostic>,
 ) -> Merged<'a> {
-    let mut mappings = Node::all(model.mappings(), model);
+    let mut mappings = Node::all(model.mappings(), model, &ModelPath::root());
     let mut applied = Vec::new();
     let mut overwritten: Vec<(String, &MappingName)> = Vec::new();
 
@@ -177,7 +186,7 @@ fn add<'a>(
         ));
         return;
     }
-    mappings.push(Node::of(method, extension));
+    mappings.push(Node::of(method, extension, path.clone()));
 }
 
 /// Appends the method's `followedBy` to the method `appendTo` names.
@@ -195,18 +204,7 @@ fn append<'a>(
     diagnostics: &mut Vec<Diagnostic>,
 ) {
     let owner = extension.header().name().value();
-    let carried = [
-        method.with.as_ref().map(|with| ("with", with.position)),
-        method
-            .fhir_condition
-            .as_ref()
-            .map(|condition| ("fhirCondition", condition.position)),
-        method
-            .openehr_condition
-            .as_ref()
-            .map(|condition| ("openehrCondition", condition.position)),
-    ];
-    for (key, position) in carried.into_iter().flatten() {
+    for (key, position) in carried_keys(method) {
         diagnostics.push(refusal(
             extension,
             owner,
@@ -250,9 +248,60 @@ fn append<'a>(
     let appended = method
         .followed_by
         .as_ref()
-        .map(|followed| Node::all(&followed.mappings, extension))
+        .map(|followed| Node::all(&followed.mappings, extension, &path.field("followedBy")))
         .unwrap_or_default();
     node.followed_by.extend(appended);
+}
+
+/// Returns every key of an `append` beyond the four an append is made of.
+///
+/// An `append` carries `name`, `extension`, `appendTo` and `followedBy`, and
+/// "if more logic needs to be altered, the overwrite method must be used
+/// instead"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
+/// §Append), so every other key is refused rather than dropped.
+fn carried_keys(method: &Mapping) -> Vec<(&'static str, Position)> {
+    let carried = [
+        method.with.as_ref().map(|with| ("with", with.position)),
+        method
+            .fhir_condition
+            .as_ref()
+            .map(|condition| ("fhirCondition", condition.position)),
+        method
+            .openehr_condition
+            .as_ref()
+            .map(|condition| ("openehrCondition", condition.position)),
+        method
+            .manual
+            .first()
+            .map(|entry| ("manual", entry.position)),
+        method
+            .reference
+            .as_ref()
+            .map(|reference| ("reference", reference.position)),
+        method
+            .slot_archetype
+            .as_ref()
+            .map(|slot| ("slotArchetype", slot.position())),
+        method
+            .mapping_code
+            .as_ref()
+            .map(|code| ("mappingCode", code.position())),
+        method.link.as_ref().map(|link| ("link", link.position)),
+        method
+            .participations_function
+            .as_ref()
+            .map(|function| ("participationsFunction", function.position())),
+        method
+            .conceptmap
+            .as_ref()
+            .map(|conceptmap| ("conceptmap", conceptmap.position())),
+        method
+            .unidirectional
+            .as_ref()
+            .map(|direction| ("unidirectional", direction.position())),
+    ];
+    carried.into_iter().flatten().collect()
 }
 
 /// Replaces the method of the same name.
@@ -295,7 +344,7 @@ fn overwrite<'a>(
         ));
         return;
     };
-    *node = Node::of(method, extension);
+    *node = Node::of(method, extension, path.clone());
     overwritten.push((target, owner));
 }
 

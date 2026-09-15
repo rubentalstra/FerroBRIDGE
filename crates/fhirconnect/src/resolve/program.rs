@@ -14,6 +14,7 @@
 //! serialization, because nothing outside a test reads a program back.
 
 use core::fmt;
+use core::str::FromStr;
 
 use openehr_mapping_core::header::ArchetypeId;
 use openehr_mapping_core::header::MappingName;
@@ -27,6 +28,7 @@ use crate::model::ast::ConditionOperator;
 use crate::model::ast::DataType;
 use crate::model::ast::Direction;
 use crate::tree::element::Location;
+use crate::tree::element::Move;
 use crate::tree::element::Resolved;
 use crate::tree::path::FhirPath;
 use crate::tree::path::Writability;
@@ -334,6 +336,31 @@ impl FhirTarget {
     pub const fn writability(&self) -> &Writability {
         self.expression.writability()
     }
+
+    /// Returns whether the expression names many values.
+    ///
+    /// The element the walk ends on decides it, unless a later step picks one
+    /// of the values a document already holds: an index, an ordinal, a
+    /// predicate, or the `extension(url)` shortcut, whose url "is the
+    /// identity" of one extension
+    /// (<https://hl7.org/fhir/R4/extensibility.html>). This is the FHIR-side
+    /// counterpart of [`OpenehrTarget::occurrences`].
+    #[must_use]
+    pub fn repeats(&self) -> bool {
+        let mut repeats = false;
+        for step in self.resolved.moves() {
+            match *step {
+                Move::Member(ref field) | Move::Choice { ref field, .. } => {
+                    repeats = field.repeats();
+                }
+                Move::Extension { .. } | Move::Ordinal(_) | Move::Index(_) | Move::Predicate(_) => {
+                    repeats = false;
+                }
+                Move::Resolve { .. } => {}
+            }
+        }
+        repeats
+    }
 }
 
 impl fmt::Display for FhirTarget {
@@ -467,6 +494,61 @@ impl fmt::Display for Target {
     }
 }
 
+/// How a condition's `targetRoot` stands to the path it guards.
+///
+/// The `targetRoot` "defines what element is returned once filtered ... the
+/// returned element is matched against the path in the `with` method", and a
+/// condition may also "be unattached to the path contained in the `with:`
+/// method and point to a different path", which is "handled as simple
+/// true/false"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
+/// §targetRoot). The compiler decides which of the four it is, over the
+/// anchored paths, so the engine never compares path text.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Attachment {
+    /// The `targetRoot` is the guarded path, so the condition filters the
+    /// values that path maps.
+    Element,
+    /// The `targetRoot` is above the guarded path.
+    Ancestor,
+    /// The `targetRoot` is below the guarded path, which is the shape a
+    /// preprocessor gate writes and a mapping-level condition is refused for.
+    Descendant,
+    /// Neither path contains the other, so the condition is a plain true or
+    /// false test.
+    Unrelated,
+}
+
+impl fmt::Display for Attachment {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Self::Element => f.write_str("element"),
+            Self::Ancestor => f.write_str("ancestor"),
+            Self::Descendant => f.write_str("descendant"),
+            Self::Unrelated => f.write_str("unrelated"),
+        }
+    }
+}
+
+/// The parts of a compiled condition.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ConditionParts {
+    /// The direction that evaluates the condition.
+    pub direction: Direction,
+    /// The resolved `targetRoot`.
+    pub target: Target,
+    /// The resolved target attributes.
+    pub attributes: Vec<Target>,
+    /// The operator.
+    pub operator: ConditionOperator,
+    /// The values the operator tests against.
+    pub criteria: Vec<String>,
+    /// Whether the condition identifies the element it guards.
+    pub identifying: bool,
+    /// How the `targetRoot` stands to the path the condition guards.
+    pub attachment: Attachment,
+}
+
 /// A compiled `fhirCondition` or `openehrCondition`.
 ///
 /// A condition is evaluated on the input side only, so [`Condition::direction`]
@@ -479,27 +561,28 @@ pub struct Condition {
     operator: ConditionOperator,
     criteria: Vec<String>,
     identifying: bool,
+    attachment: Attachment,
 }
 
 impl Condition {
     /// Assembles a compiled condition.
     #[must_use]
-    pub const fn new(
-        direction: Direction,
-        target: Target,
-        attributes: Vec<Target>,
-        operator: ConditionOperator,
-        criteria: Vec<String>,
-        identifying: bool,
-    ) -> Self {
+    pub fn new(parts: ConditionParts) -> Self {
         Self {
-            direction,
-            target,
-            attributes,
-            operator,
-            criteria,
-            identifying,
+            direction: parts.direction,
+            target: parts.target,
+            attributes: parts.attributes,
+            operator: parts.operator,
+            criteria: parts.criteria,
+            identifying: parts.identifying,
+            attachment: parts.attachment,
         }
+    }
+
+    /// Returns how the `targetRoot` stands to the path this condition guards.
+    #[must_use]
+    pub const fn attachment(&self) -> Attachment {
+        self.attachment
     }
 
     /// Returns the direction that evaluates this condition.
@@ -539,17 +622,42 @@ impl Condition {
     }
 }
 
-/// One literal a `manual` entry writes at a resolved path.
+/// What a `manual` entry writes at a resolved path.
+///
+/// A value is a literal unless it names a `$context` member, which "holds
+/// values passed in on the REST call ... a context value is referenced from a
+/// `manual` `value`"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`,
+/// §`$context`), so the two are told apart when the mapping is compiled rather
+/// than on every request.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum ManualValue {
+    /// The text the mapping wrote.
+    Literal(String),
+    /// The name of the `$context` member the caller supplies.
+    Context(String),
+}
+
+impl fmt::Display for ManualValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Self::Literal(ref text) => f.write_str(text),
+            Self::Context(ref name) => write!(f, "$context.{name}"),
+        }
+    }
+}
+
+/// One value a `manual` entry writes at a resolved path.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ManualPath {
     target: Target,
-    value: String,
+    value: ManualValue,
 }
 
 impl ManualPath {
-    /// Pairs a resolved path with the literal written there.
+    /// Pairs a resolved path with the value written there.
     #[must_use]
-    pub const fn new(target: Target, value: String) -> Self {
+    pub const fn new(target: Target, value: ManualValue) -> Self {
         Self { target, value }
     }
 
@@ -559,9 +667,9 @@ impl ManualPath {
         &self.target
     }
 
-    /// Returns the literal.
+    /// Returns the value.
     #[must_use]
-    pub fn value(&self) -> &str {
+    pub const fn value(&self) -> &ManualValue {
         &self.value
     }
 }
@@ -663,6 +771,9 @@ pub enum Method {
     Slot {
         /// The model mapping the slot names.
         model: MappingName,
+        /// The preprocessor of that file and of every extension applied to it,
+        /// in application order, which gates the slotted mappings.
+        preprocessors: Vec<Preprocessor>,
         /// Its compiled mappings, under this mapping's anchors.
         mappings: Vec<Mapping>,
     },
@@ -736,7 +847,8 @@ pub struct MappingParts {
     pub openehr_condition: Option<Condition>,
     /// The manual entries of the mapping.
     pub manual: Vec<Manual>,
-    /// The concept map the mapping names.
+    /// The `ConceptMap.url` the codes of this method are translated through,
+    /// the method's own or the one its file's header attaches.
     pub conceptmap: Option<String>,
     /// What the mapping does beyond mapping its two paths.
     pub method: Method,
@@ -825,7 +937,14 @@ impl Mapping {
         &self.manual
     }
 
-    /// Returns the concept map the mapping names.
+    /// Returns the concept map the codes of this mapping translate through.
+    ///
+    /// The method's own `conceptmap` wins and a `spec.conceptmap` of the file
+    /// that contributed the method is the fallback: "the concept map can also
+    /// be directly attached inside the header, this way all codes contained in
+    /// the conceptmap will be transformed using the conceptmap"
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/manual.adoc`,
+    /// §`ConceptMaps`).
     #[must_use]
     pub fn conceptmap(&self) -> Option<&str> {
         self.conceptmap.as_deref()
@@ -881,9 +1000,14 @@ impl Mapping {
             Method::Value => {}
             Method::Slot {
                 ref model,
+                ref preprocessors,
                 ref mappings,
             } => {
                 writeln!(f, "{inner}slotArchetype {model}")?;
+                let under = "  ".repeat(depth.saturating_add(2));
+                for preprocessor in preprocessors {
+                    render_preprocessor(f, &under, preprocessor)?;
+                }
                 for mapping in mappings {
                     mapping.render(f, depth.saturating_add(2))?;
                 }
@@ -920,6 +1044,56 @@ impl Mapping {
     }
 }
 
+/// Writes one file's compiled preprocessor.
+fn render_preprocessor(
+    f: &mut fmt::Formatter<'_>,
+    pad: &str,
+    preprocessor: &Preprocessor,
+) -> fmt::Result {
+    if preprocessor.is_empty() {
+        return Ok(());
+    }
+    writeln!(f, "{pad}preprocessor {}", preprocessor.model())?;
+    let inner = format!("{pad}  ");
+    for (label, condition) in [
+        ("fhirCondition", preprocessor.fhir_condition()),
+        ("openehrCondition", preprocessor.openehr_condition()),
+    ] {
+        if let Some(condition) = condition {
+            render_condition(f, &inner, label, condition)?;
+        }
+    }
+    if let Some(hierarchy) = preprocessor.hierarchy() {
+        writeln!(f, "{inner}hierarchy")?;
+        if let Some(fhir) = hierarchy.fhir() {
+            writeln!(f, "{inner}  fhir {fhir}")?;
+        }
+        if let Some(openehr) = hierarchy.openehr() {
+            writeln!(f, "{inner}  openehr {openehr}")?;
+        }
+        for (label, split) in [
+            ("split fhir", hierarchy.split_fhir()),
+            ("split openehr", hierarchy.split_openehr()),
+        ] {
+            let Some(split) = split else {
+                continue;
+            };
+            writeln!(
+                f,
+                "{inner}  {label} create {}",
+                split.create().map_or("-", Create::as_str)
+            )?;
+            if let Some(path) = split.path() {
+                writeln!(f, "{inner}    path {path}")?;
+            }
+            for unique in split.unique() {
+                writeln!(f, "{inner}    unique {unique}")?;
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Writes one compiled condition.
 fn render_condition(
     f: &mut fmt::Formatter<'_>,
@@ -929,10 +1103,11 @@ fn render_condition(
 ) -> fmt::Result {
     writeln!(
         f,
-        "{pad}{label} {} {} on {}",
+        "{pad}{label} {} {} on {} ({})",
         condition.operator(),
         render_criteria(condition.criteria()),
-        condition.target()
+        condition.target(),
+        condition.attachment()
     )?;
     for attribute in condition.attributes() {
         writeln!(f, "{pad}  attribute {attribute}")?;
@@ -972,10 +1147,67 @@ fn render_manual(f: &mut fmt::Formatter<'_>, pad: &str, manual: &Manual) -> fmt:
     Ok(())
 }
 
+/// What one side of a `hierarchy.split` creates for each occurrence.
+///
+/// "The `create` method defines the element to create. In the case of a
+/// `resource` or `archetype`, this type is inferred by the FHIRconnect mapping
+/// file it is included in"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/HierarchyMappings.adoc`,
+/// §split), and its worked example writes `event` for the openEHR side. The
+/// specification enumerates no others and no schema constrains the key, so the
+/// closed set is FerroBRIDGE's own: no specification governs this: our own
+/// design.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Create {
+    /// A FHIR resource of the type the mapping file names.
+    Resource,
+    /// An openEHR `EVENT` of the archetype the mapping file names.
+    Event,
+    /// An openEHR archetype root of the type the mapping file names.
+    Archetype,
+}
+
+impl Create {
+    /// Returns the spelling a mapping file writes.
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Resource => "resource",
+            Self::Event => "event",
+            Self::Archetype => "archetype",
+        }
+    }
+
+    /// Every spelling the key admits, in declaration order.
+    #[must_use]
+    pub const fn admitted() -> &'static [&'static str] {
+        &["resource", "event", "archetype"]
+    }
+}
+
+impl fmt::Display for Create {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+impl FromStr for Create {
+    type Err = ();
+
+    fn from_str(text: &str) -> Result<Self, Self::Err> {
+        match text {
+            "resource" => Ok(Self::Resource),
+            "event" => Ok(Self::Event),
+            "archetype" => Ok(Self::Archetype),
+            _ => Err(()),
+        }
+    }
+}
+
 /// One side of a compiled `hierarchy.split`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Split {
-    create: Option<String>,
+    create: Option<Create>,
     path: Option<Target>,
     unique: Vec<Target>,
 }
@@ -983,7 +1215,7 @@ pub struct Split {
 impl Split {
     /// Assembles one side of a split.
     #[must_use]
-    pub const fn new(create: Option<String>, path: Option<Target>, unique: Vec<Target>) -> Self {
+    pub const fn new(create: Option<Create>, path: Option<Target>, unique: Vec<Target>) -> Self {
         Self {
             create,
             path,
@@ -993,8 +1225,8 @@ impl Split {
 
     /// Returns the element the split creates.
     #[must_use]
-    pub fn create(&self) -> Option<&str> {
-        self.create.as_deref()
+    pub const fn create(&self) -> Option<Create> {
+        self.create
     }
 
     /// Returns the resolved path the element is created at.
@@ -1010,7 +1242,73 @@ impl Split {
     }
 }
 
-/// The compiled `preprocessor.hierarchy` of the start model mapping.
+/// The compiled `preprocessor` of one model or extension mapping file.
+///
+/// A preprocessor condition "defines that the mapping file is only executed if
+/// the given condition is met"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
+/// §Conditions in the preprocessor), so the gate belongs to the file that
+/// wrote it. One program carries one of these per contributing file, which is
+/// how a slotted model mapping and an extension keep their own gates.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Preprocessor {
+    model: MappingName,
+    fhir_condition: Option<Condition>,
+    openehr_condition: Option<Condition>,
+    hierarchy: Option<Hierarchy>,
+}
+
+impl Preprocessor {
+    /// Assembles the compiled preprocessor of one file.
+    #[must_use]
+    pub const fn new(
+        model: MappingName,
+        fhir_condition: Option<Condition>,
+        openehr_condition: Option<Condition>,
+        hierarchy: Option<Hierarchy>,
+    ) -> Self {
+        Self {
+            model,
+            fhir_condition,
+            openehr_condition,
+            hierarchy,
+        }
+    }
+
+    /// Returns the `metadata.name` of the file the preprocessor came from.
+    #[must_use]
+    pub const fn model(&self) -> &MappingName {
+        &self.model
+    }
+
+    /// Returns the gate the FHIR to openEHR direction evaluates.
+    #[must_use]
+    pub const fn fhir_condition(&self) -> Option<&Condition> {
+        self.fhir_condition.as_ref()
+    }
+
+    /// Returns the gate the openEHR to FHIR direction evaluates.
+    #[must_use]
+    pub const fn openehr_condition(&self) -> Option<&Condition> {
+        self.openehr_condition.as_ref()
+    }
+
+    /// Returns the hierarchy realignment the file writes.
+    #[must_use]
+    pub const fn hierarchy(&self) -> Option<&Hierarchy> {
+        self.hierarchy.as_ref()
+    }
+
+    /// Whether the file's preprocessor carries nothing the engine runs.
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.fhir_condition.is_none()
+            && self.openehr_condition.is_none()
+            && self.hierarchy.is_none()
+    }
+}
+
+/// The compiled `preprocessor.hierarchy` of one mapping file.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Hierarchy {
     fhir: Option<FhirTarget>,
@@ -1075,9 +1373,7 @@ pub struct Program {
     start: MappingName,
     models: Vec<ModelBinding>,
     operational: Vec<MappingName>,
-    hierarchy: Option<Hierarchy>,
-    fhir_condition: Option<Condition>,
-    openehr_condition: Option<Condition>,
+    preprocessors: Vec<Preprocessor>,
     mappings: Vec<Mapping>,
 }
 
@@ -1098,12 +1394,9 @@ pub struct ProgramParts {
     pub models: Vec<ModelBinding>,
     /// The operational mappings the context declares.
     pub operational: Vec<MappingName>,
-    /// The compiled `preprocessor.hierarchy`.
-    pub hierarchy: Option<Hierarchy>,
-    /// The preprocessor condition the FHIR to openEHR direction evaluates.
-    pub fhir_condition: Option<Condition>,
-    /// The preprocessor condition the openEHR to FHIR direction evaluates.
-    pub openehr_condition: Option<Condition>,
+    /// The compiled preprocessor of the start model mapping and of every
+    /// extension applied to it, in application order.
+    pub preprocessors: Vec<Preprocessor>,
     /// The compiled mappings, in execution order.
     pub mappings: Vec<Mapping>,
 }
@@ -1120,9 +1413,7 @@ impl Program {
             start: parts.start,
             models: parts.models,
             operational: parts.operational,
-            hierarchy: parts.hierarchy,
-            fhir_condition: parts.fhir_condition,
-            openehr_condition: parts.openehr_condition,
+            preprocessors: parts.preprocessors,
             mappings: parts.mappings,
         }
     }
@@ -1169,24 +1460,40 @@ impl Program {
         &self.operational
     }
 
+    /// Returns the preprocessor of every file that gates this program, in
+    /// application order: the start model mapping first, then its extensions.
+    #[must_use]
+    pub fn preprocessors(&self) -> &[Preprocessor] {
+        &self.preprocessors
+    }
+
+    /// Returns the preprocessor of the start model mapping.
+    #[must_use]
+    pub fn preprocessor(&self) -> Option<&Preprocessor> {
+        self.preprocessors
+            .iter()
+            .find(|preprocessor| preprocessor.model() == &self.start)
+    }
+
     /// Returns the compiled hierarchy mapping, when the start model has one.
     #[must_use]
-    pub const fn hierarchy(&self) -> Option<&Hierarchy> {
-        self.hierarchy.as_ref()
+    pub fn hierarchy(&self) -> Option<&Hierarchy> {
+        self.preprocessor().and_then(Preprocessor::hierarchy)
     }
 
-    /// Returns the preprocessor condition the FHIR to openEHR direction
-    /// evaluates.
+    /// Returns the preprocessor condition of the start model mapping the FHIR
+    /// to openEHR direction evaluates.
     #[must_use]
-    pub const fn fhir_condition(&self) -> Option<&Condition> {
-        self.fhir_condition.as_ref()
+    pub fn fhir_condition(&self) -> Option<&Condition> {
+        self.preprocessor().and_then(Preprocessor::fhir_condition)
     }
 
-    /// Returns the preprocessor condition the openEHR to FHIR direction
-    /// evaluates.
+    /// Returns the preprocessor condition of the start model mapping the
+    /// openEHR to FHIR direction evaluates.
     #[must_use]
-    pub const fn openehr_condition(&self) -> Option<&Condition> {
-        self.openehr_condition.as_ref()
+    pub fn openehr_condition(&self) -> Option<&Condition> {
+        self.preprocessor()
+            .and_then(Preprocessor::openehr_condition)
     }
 
     /// Returns the compiled mappings, in execution order.
@@ -1194,6 +1501,39 @@ impl Program {
     pub fn mappings(&self) -> &[Mapping] {
         &self.mappings
     }
+
+    /// Returns the mapping method of this dotted name, at any depth.
+    ///
+    /// A method is addressed by its name, and "this can be also the child
+    /// method. The path then would be `appendTo: parent.child`"
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
+    /// §Append), which is the name a compiled mapping carries.
+    #[must_use]
+    pub fn mapping_named(&self, name: &str) -> Option<&Mapping> {
+        walk_mappings(&self.mappings).find(|mapping| mapping.name() == name)
+    }
+}
+
+/// Walks a mapping tree, parents first, through every nesting a method has.
+fn walk_mappings(mappings: &[Mapping]) -> impl Iterator<Item = &Mapping> {
+    let mut found: Vec<&Mapping> = Vec::new();
+    let mut stack: Vec<&Mapping> = mappings.iter().rev().collect();
+    while let Some(mapping) = stack.pop() {
+        found.push(mapping);
+        let nested = match *mapping.method() {
+            Method::Reference { ref mappings, .. } | Method::Slot { ref mappings, .. } => {
+                mappings.as_slice()
+            }
+            Method::Value
+            | Method::Link { .. }
+            | Method::Programmed { .. }
+            | Method::Participation { .. } => &[][..],
+        };
+        for child in nested.iter().chain(mapping.followed_by()).rev() {
+            stack.push(child);
+        }
+    }
+    found.into_iter()
 }
 
 impl fmt::Display for Program {
@@ -1221,36 +1561,8 @@ impl fmt::Display for Program {
         for operational in &self.operational {
             writeln!(f, "  operational {operational}")?;
         }
-        if let Some(ref hierarchy) = self.hierarchy {
-            writeln!(f, "  hierarchy")?;
-            if let Some(fhir) = hierarchy.fhir() {
-                writeln!(f, "    fhir {fhir}")?;
-            }
-            if let Some(openehr) = hierarchy.openehr() {
-                writeln!(f, "    openehr {openehr}")?;
-            }
-            for (label, split) in [
-                ("split fhir", hierarchy.split_fhir()),
-                ("split openehr", hierarchy.split_openehr()),
-            ] {
-                if let Some(split) = split {
-                    writeln!(f, "    {label} create {}", split.create().unwrap_or("-"))?;
-                    if let Some(path) = split.path() {
-                        writeln!(f, "      path {path}")?;
-                    }
-                    for unique in split.unique() {
-                        writeln!(f, "      unique {unique}")?;
-                    }
-                }
-            }
-        }
-        for (label, condition) in [
-            ("fhirCondition", self.fhir_condition.as_ref()),
-            ("openehrCondition", self.openehr_condition.as_ref()),
-        ] {
-            if let Some(condition) = condition {
-                render_condition(f, "  ", label, condition)?;
-            }
+        for preprocessor in &self.preprocessors {
+            render_preprocessor(f, "  ", preprocessor)?;
         }
         for mapping in &self.mappings {
             mapping.render(f, 1)?;

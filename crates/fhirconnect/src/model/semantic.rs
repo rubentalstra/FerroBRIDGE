@@ -32,7 +32,6 @@ use crate::model::ast::Mapping;
 use crate::model::ast::ModelMappingFile;
 use crate::model::ast::Variable;
 use crate::model::ast::With;
-use crate::model::ast::walk;
 use crate::model::error::ModelCode;
 use crate::model::load::MappingSet;
 
@@ -149,10 +148,31 @@ fn validate_model(
         );
     }
 
-    for mapping in walk(file.mappings()) {
-        let path = root.field("mappings").field(mapping.name.value());
+    for (mapping, path) in walk_paths(file.mappings(), &root) {
         validate_mapping(rules, mapping, &path, diagnostics);
     }
+}
+
+/// Walks a mapping tree, parents first, with the document path of each method.
+///
+/// The nesting a mapping can carry is `followedBy.mappings` and
+/// `reference.mappings`, so both are walked in document order and every
+/// diagnostic names the place the file writes rather than a name-keyed path
+/// the document does not have.
+fn walk_paths<'a>(mappings: &'a [Mapping], parent: &ModelPath) -> Vec<(&'a Mapping, ModelPath)> {
+    let at = parent.field("mappings");
+    let mut found = Vec::new();
+    for (index, mapping) in mappings.iter().enumerate() {
+        let path = at.index(index);
+        found.push((mapping, path.clone()));
+        if let Some(ref reference) = mapping.reference {
+            found.extend(walk_paths(&reference.mappings, &path.field("reference")));
+        }
+        if let Some(ref followed) = mapping.followed_by {
+            found.extend(walk_paths(&followed.mappings, &path.field("followedBy")));
+        }
+    }
+    found
 }
 
 /// Applies the condition rules to every entry of a `manual` mapping.
@@ -250,10 +270,6 @@ fn validate_mapping(
         ));
     }
 
-    if let Some(ref append_to) = mapping.append_to {
-        check_append_target(rules.set, rules.file, name, append_to, path, diagnostics);
-    }
-
     if let Some(ref reference) = mapping.reference {
         let is_reference_variable = side(|with| with.openehr.as_ref()).is_some_and(|value| {
             Variable::from_str(value).is_ok_and(|variable| variable == Variable::Reference)
@@ -348,59 +364,6 @@ fn require_model(
     ));
 }
 
-/// Refuses an `appendTo` that names no mapping method of the extended file.
-///
-/// "The method where it is to be appended to is referenced with the key
-/// `appendTo`. The value used is the name of the mapping method. This can be
-/// also the child method. The path then would be `appendTo: parent.child`"
-/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
-/// §Append).
-fn check_append_target(
-    set: &MappingSet,
-    file: &ModelMappingFile,
-    owner: &MappingName,
-    append_to: &Located<String>,
-    path: &ModelPath,
-    diagnostics: &mut Vec<Diagnostic>,
-) {
-    let Some(ref extends) = file.spec().extends else {
-        return;
-    };
-    let Some(extended) = set.model(extends.value()) else {
-        return;
-    };
-    if resolve_method(extended.mappings(), append_to.value()).is_some() {
-        return;
-    }
-    diagnostics.push(error(
-        file.file(),
-        owner,
-        ModelCode::UnknownAppendTarget,
-        append_to.position(),
-        &path.field("appendTo"),
-        format!(
-            "`{}` names no mapping method of `{}`",
-            append_to.value(),
-            extends.value()
-        ),
-    ));
-}
-
-/// Resolves a dotted `parent.child` mapping-method path.
-fn resolve_method<'a>(mappings: &'a [Mapping], dotted: &str) -> Option<&'a Mapping> {
-    let mut current: Option<&Mapping> = None;
-    let mut level: &[Mapping] = mappings;
-    for segment in dotted.split('.') {
-        let found = level.iter().find(|m| m.name.value() == segment)?;
-        current = Some(found);
-        level = found
-            .followed_by
-            .as_ref()
-            .map_or(&[][..], |followed| followed.mappings.as_slice());
-    }
-    current
-}
-
 /// Applies the two rules that hold for one condition.
 fn check_condition(
     file: &Path,
@@ -464,6 +427,9 @@ fn check_condition(
 /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
 /// §targetRoot).
 fn is_proper_descendant(candidate: &str, ancestor: &str) -> bool {
+    // NOTE: the `not of` example under §criteria of that page writes the shape
+    // §targetRoot calls an error, and the rule is implemented as written
+    // (reported on issue #181).
     let Some(tail) = candidate.strip_prefix(ancestor) else {
         return false;
     };

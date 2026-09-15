@@ -32,6 +32,8 @@ pub enum ModelCode {
     InvalidExtensionMethod,
     /// A `with.type` value is outside the data-type enum.
     InvalidDataType,
+    /// A mapping writes one data type and its `with` writes another.
+    ConflictingDataType,
     /// An `operator` value is outside the five documented operators.
     InvalidOperator,
     /// A `$name` variable is outside the seven documented variables.
@@ -53,8 +55,6 @@ pub enum ModelCode {
     CriteriaMissing,
     /// A cross-file reference names no loaded `metadata.name`.
     UnknownMappingReference,
-    /// An `appendTo` names no mapping method of the extended model mapping.
-    UnknownAppendTarget,
     /// An extension method appears in a file that is not `type: extension`.
     ExtensionMethodOutsideExtensionFile,
     /// A `reference` mapping does not write `openehr: "$reference"`.
@@ -75,6 +75,7 @@ impl ModelCode {
             Self::InvalidDirection => "fc-invalid-direction",
             Self::InvalidExtensionMethod => "fc-invalid-extension-method",
             Self::InvalidDataType => "fc-invalid-data-type",
+            Self::ConflictingDataType => "fc-conflicting-data-type",
             Self::InvalidOperator => "fc-invalid-operator",
             Self::UnknownPathVariable => "fc-unknown-path-variable",
             Self::RootUnidirectional => "fc-root-unidirectional",
@@ -85,7 +86,6 @@ impl ModelCode {
             Self::CriteriaNotAllowed => "fc-criteria-not-allowed",
             Self::CriteriaMissing => "fc-criteria-missing",
             Self::UnknownMappingReference => "fc-unknown-mapping-reference",
-            Self::UnknownAppendTarget => "fc-unknown-append-target",
             Self::ExtensionMethodOutsideExtensionFile => "fc-extension-method-outside-model",
             Self::ReferenceWithoutReferenceVariable => "fc-reference-without-reference-variable",
             Self::UnknownMappingCode => "fc-unknown-mapping-code",
@@ -103,6 +103,7 @@ impl ModelCode {
             Self::InvalidDirection,
             Self::InvalidExtensionMethod,
             Self::InvalidDataType,
+            Self::ConflictingDataType,
             Self::InvalidOperator,
             Self::UnknownPathVariable,
             Self::RootUnidirectional,
@@ -113,7 +114,6 @@ impl ModelCode {
             Self::CriteriaNotAllowed,
             Self::CriteriaMissing,
             Self::UnknownMappingReference,
-            Self::UnknownAppendTarget,
             Self::ExtensionMethodOutsideExtensionFile,
             Self::ReferenceWithoutReferenceVariable,
             Self::UnknownMappingCode,

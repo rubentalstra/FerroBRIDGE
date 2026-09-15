@@ -56,6 +56,9 @@ pub enum ResolveCode {
     MalformedOpenehrPath,
     /// A `with.openehr` path names no node of the operational template.
     UnknownTemplateNode,
+    /// A `with.openehr` path names more than one node of the operational
+    /// template, so nothing says which one it means.
+    AmbiguousTemplateNode,
     /// A path opens with a variable that names nothing here.
     UnboundPathVariable,
     /// The archetype a model mapping declares is not the archetype of the
@@ -71,6 +74,10 @@ pub enum ResolveCode {
     SlotCycle,
     /// A mapping carries two mapping methods that exclude each other.
     ConflictingMappingMethods,
+    /// A `hierarchy.split` `create` names no element the engine creates.
+    UnknownSplitCreate,
+    /// A `manual` value opens with `$context` and names no member of it.
+    MalformedContextValue,
     /// The template the context names is not the template compiled against.
     TemplateIdMismatch,
     /// The template version the context pins is not the one the template
@@ -102,12 +109,15 @@ impl ResolveCode {
             Self::ReadOnlyFhirWrite => "fc-read-only-fhir-write",
             Self::MalformedOpenehrPath => "fc-malformed-openehr-path",
             Self::UnknownTemplateNode => "fc-unknown-template-node",
+            Self::AmbiguousTemplateNode => "fc-ambiguous-template-node",
             Self::UnboundPathVariable => "fc-unbound-path-variable",
             Self::ArchetypeMismatch => "fc-archetype-mismatch",
             Self::ArchetypeRevisionMismatch => "fc-archetype-revision-mismatch",
             Self::UnresolvedArchetypeRoot => "fc-unresolved-archetype-root",
             Self::SlotCycle => "fc-slot-cycle",
             Self::ConflictingMappingMethods => "fc-conflicting-mapping-methods",
+            Self::UnknownSplitCreate => "fc-unknown-split-create",
+            Self::MalformedContextValue => "fc-malformed-context-value",
             Self::TemplateIdMismatch => "fc-template-id-mismatch",
             Self::TemplateSemVerMismatch => "fc-template-sem-ver-mismatch",
         }
@@ -136,12 +146,15 @@ impl ResolveCode {
             Self::ReadOnlyFhirWrite,
             Self::MalformedOpenehrPath,
             Self::UnknownTemplateNode,
+            Self::AmbiguousTemplateNode,
             Self::UnboundPathVariable,
             Self::ArchetypeMismatch,
             Self::ArchetypeRevisionMismatch,
             Self::UnresolvedArchetypeRoot,
             Self::SlotCycle,
             Self::ConflictingMappingMethods,
+            Self::UnknownSplitCreate,
+            Self::MalformedContextValue,
             Self::TemplateIdMismatch,
             Self::TemplateSemVerMismatch,
         ]

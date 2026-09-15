@@ -35,13 +35,18 @@ pub enum SelectError {
         /// The context name and template of each candidate.
         candidates: Vec<String>,
     },
-    /// The instance claims a profile version the program does not carry.
-    #[error("the instance claims `{wanted}` and the program pins `{pinned}`")]
+    /// Every program claiming the profile pins another version.
+    #[error(
+        "no compiled program answers {wanted}; {} claim a profile with another version: {}",
+        mismatches.len(),
+        mismatches.join(", ")
+    )]
     ProfileVersion {
-        /// The version the instance claims.
+        /// What was asked for.
         wanted: String,
-        /// The version the context pins.
-        pinned: String,
+        /// One line per program that claims the profile under another
+        /// version, in program order.
+        mismatches: Vec<String>,
     },
 }
 
@@ -54,8 +59,8 @@ pub enum SelectError {
 ///
 /// Returns [`SelectError::NoMatch`] when no program claims one of the
 /// profiles, [`SelectError::Ambiguous`] when more than one does, and
-/// [`SelectError::ProfileVersion`] when the instance pins a version the
-/// program does not carry.
+/// [`SelectError::ProfileVersion`], naming every program that claims the
+/// profile under another version, when that is why nothing matched.
 pub fn select_by_profile<'a>(
     programs: &'a [Arc<Program>],
     claimed: &[String],
@@ -78,7 +83,7 @@ pub fn select_by_profile_pinned<'a>(
 ) -> Result<&'a Arc<Program>, SelectError> {
     let wanted = format!("the profiles [{}]", claimed.join(", "));
     let mut found: Vec<&'a Arc<Program>> = Vec::new();
-    let mut version_refusal = None;
+    let mut mismatches: Vec<String> = Vec::new();
     for program in programs {
         let url = program.profile().url().as_str();
         let Some(entry) = claimed.iter().find(|entry| profile_url(entry) == url) else {
@@ -89,17 +94,19 @@ pub fn select_by_profile_pinned<'a>(
             program.profile().version().version(),
         ) && claimed_version != pinned
         {
-            version_refusal = Some(SelectError::ProfileVersion {
-                wanted: claimed_version.to_owned(),
-                pinned: pinned.to_owned(),
-            });
+            mismatches.push(format!(
+                "the instance claims `{claimed_version}` where {} pins `{pinned}`",
+                program.context()
+            ));
             continue;
         }
         found.push(program);
     }
-    narrow(found, template, wanted).map_err(|error| match (error, version_refusal) {
-        (SelectError::NoMatch { .. }, Some(refusal)) => refusal,
-        (error, _) => error,
+    narrow(found, template, wanted).map_err(|error| match error {
+        SelectError::NoMatch { wanted } if !mismatches.is_empty() => {
+            SelectError::ProfileVersion { wanted, mismatches }
+        }
+        error => error,
     })
 }
 

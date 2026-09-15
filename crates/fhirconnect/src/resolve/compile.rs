@@ -35,6 +35,8 @@ use openehr_mapping_core::index::archetype_release_version;
 use openehr_mapping_core::index::node_id_matches;
 use openehr_mapping_core::path::MappingPath;
 use openehr_mapping_core::position::Located;
+use openehr_mapping_core::template::PathError;
+use openehr_rm::v1_2::model as rm_model;
 use openehr_rm::v1_2::paths::PathSegment;
 use openehr_rm::v1_2::paths::RmPath;
 
@@ -53,16 +55,22 @@ use crate::resolve::extensions::Merged;
 use crate::resolve::extensions::Node;
 use crate::resolve::extensions::apply;
 use crate::resolve::extensions::diagnostic;
+use crate::resolve::program::Attachment;
 use crate::resolve::program::Condition as CompiledCondition;
+use crate::resolve::program::ConditionParts;
+use crate::resolve::program::Create;
 use crate::resolve::program::FhirTarget;
 use crate::resolve::program::Hierarchy;
 use crate::resolve::program::Manual;
+use crate::resolve::program::ManualPath;
+use crate::resolve::program::ManualValue;
 use crate::resolve::program::Mapping;
 use crate::resolve::program::MappingParts;
 use crate::resolve::program::Method;
 use crate::resolve::program::ModelBinding;
 use crate::resolve::program::OpenehrTarget;
 use crate::resolve::program::Pin;
+use crate::resolve::program::Preprocessor;
 use crate::resolve::program::ProfileBinding;
 use crate::resolve::program::ProfileUrl;
 use crate::resolve::program::Program;
@@ -116,6 +124,13 @@ struct Scope {
     openehr: RmPath,
     /// The direction the enclosing file or method pinned.
     direction: Option<Direction>,
+    /// The resources a `^` climbs into once it leaves this one, innermost
+    /// first.
+    enclosing: Vec<Enclosing>,
+    /// The file whose `spec` keys the enclosing methods inherit.
+    file: PathBuf,
+    /// The `spec.conceptmap` of that file, when it writes one.
+    conceptmap: Option<String>,
     /// The dotted name of the enclosing method, empty at the top level.
     prefix: String,
     /// The model mappings on the slot chain, the start first.
@@ -133,13 +148,49 @@ impl Scope {
     }
 }
 
+/// One resource a `reference` mapping was written inside.
+///
+/// A `^` that leaves the resource a `reference` initializes carries on in the
+/// expression that named the reference, which is what the worked `^^` example
+/// does
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/path_operators.adoc`,
+/// §Recurrence and parent elements).
+#[derive(Debug, Clone)]
+struct Enclosing {
+    /// The resource type `$resource` named there.
+    resource: ResourceType,
+    /// The expression that named the reference, rooted at that `$resource`.
+    fhir: FhirPath,
+}
+
+/// What a compiled FHIR expression is used for.
+///
+/// A mapping writes the FHIR side unless it is pinned to `fhir->openehr`
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`, §Direction),
+/// so a filtering step there is a refusal. A condition is "applied on the
+/// input data" and its own `targetAttribute` example is
+/// `$resource.identifier.where(type.coding.code="room")`
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`), and a
+/// `hierarchy` `with` and a `split.unique` are "used as an indicator" rather
+/// than transformed
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/HierarchyMappings.adoc`,
+/// §Hierarchy and unique values), so those sites only ever read.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Site {
+    /// The expression is written through, unless `direction` pins the mapping
+    /// to `fhir->openehr`.
+    Write(Option<Direction>),
+    /// The expression is only ever read, so a step that filters is legitimate.
+    ReadOnly,
+}
+
 /// The compiler's state for one run.
 struct Compiler<'a> {
     set: &'a MappingSet,
     template: &'a WebTemplateIndex,
     table: &'a dyn Table,
     codes: &'a dyn MappingCodeRegistry,
-    compacted: BTreeMap<String, &'a ResolvedNode>,
+    compacted: BTreeMap<String, Vec<&'a ResolvedNode>>,
     interior: BTreeSet<String>,
     extensions: Vec<&'a ModelMappingFile>,
     diagnostics: Vec<Diagnostic>,
@@ -204,12 +255,19 @@ impl<'a> Compiler<'a> {
             archetype: archetype.clone(),
             openehr: archetype,
             direction: start.spec().unidirectional.as_ref().map(|d| *d.value()),
+            enclosing: Vec::new(),
+            file: start.file().to_path_buf(),
+            conceptmap: start
+                .spec()
+                .conceptmap
+                .as_ref()
+                .map(|url| url.value().clone()),
             prefix: String::new(),
             chain: vec![start_name.clone()],
         };
         let merged = self.merge(start);
         let mappings = self.mappings(&merged.mappings, &scope);
-        let (fhir_condition, openehr_condition, hierarchy) = self.preprocessor(start, &scope);
+        let preprocessors = self.preprocessors(start, &scope);
         Some(Program::new(ProgramParts {
             context: context.clone(),
             profile,
@@ -222,9 +280,7 @@ impl<'a> Compiler<'a> {
                 .iter()
                 .map(|name| name.value().clone())
                 .collect(),
-            hierarchy,
-            fhir_condition,
-            openehr_condition,
+            preprocessors,
             mappings,
         }))
     }
@@ -354,11 +410,10 @@ impl<'a> Compiler<'a> {
         found
     }
 
-    /// Applies the extensions that extend `model`, in declaration order.
-    fn merge(&mut self, model: &'a ModelMappingFile) -> Merged<'a> {
+    /// Returns the extensions that extend `model`, in declaration order.
+    fn extensions_for(&self, model: &'a ModelMappingFile) -> Vec<&'a ModelMappingFile> {
         let name = model.header().name().value();
-        let mine: Vec<&'a ModelMappingFile> = self
-            .extensions
+        self.extensions
             .iter()
             .copied()
             .filter(|extension| {
@@ -368,7 +423,13 @@ impl<'a> Compiler<'a> {
                     .as_ref()
                     .is_some_and(|extends| extends.value() == name)
             })
-            .collect();
+            .collect()
+    }
+
+    /// Applies the extensions that extend `model`, in declaration order.
+    fn merge(&mut self, model: &'a ModelMappingFile) -> Merged<'a> {
+        let name = model.header().name().value();
+        let mine = self.extensions_for(model);
         let merged = apply(model, &mine, &mut self.diagnostics);
         if !self.models.iter().any(|model| model.name() == name) {
             self.models.push(ModelBinding::new(
@@ -394,7 +455,9 @@ impl<'a> Compiler<'a> {
     /// §Spec) and names no other source for the resource type, so the compiler
     /// reads the last segment of that canonical URL, which is the resource
     /// name for a base resource
-    /// (<https://hl7.org/fhir/R4/structuredefinition.html>).
+    /// (<https://hl7.org/fhir/R4/structuredefinition.html>). Requiring the key
+    /// and deriving the resource type from it is FerroBRIDGE's own decision:
+    /// no specification governs this: our own design.
     fn resource_of(&mut self, model: &ModelMappingFile) -> Option<ResourceType> {
         let name = model.header().name().value();
         let path = ModelPath::root()
@@ -525,19 +588,25 @@ impl<'a> Compiler<'a> {
         ));
     }
 
-    /// Compiles the preprocessor of the start model mapping.
-    fn preprocessor(
-        &mut self,
-        model: &'a ModelMappingFile,
-        scope: &Scope,
-    ) -> (
-        Option<CompiledCondition>,
-        Option<CompiledCondition>,
-        Option<Hierarchy>,
-    ) {
-        let Some(preprocessor) = model.preprocessor() else {
-            return (None, None, None);
-        };
+    /// Compiles the preprocessor of `model` and of every extension of it.
+    ///
+    /// A preprocessor gates the file that wrote it
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
+    /// §Conditions in the preprocessor), and an extension file is a file, so
+    /// each contributes its own gate under the same anchors.
+    fn preprocessors(&mut self, model: &'a ModelMappingFile, scope: &Scope) -> Vec<Preprocessor> {
+        let mut found = Vec::new();
+        for file in core::iter::once(model).chain(self.extensions_for(model)) {
+            if let Some(compiled) = self.preprocessor(file, scope) {
+                found.push(compiled);
+            }
+        }
+        found
+    }
+
+    /// Compiles the preprocessor of one model or extension mapping file.
+    fn preprocessor(&mut self, model: &'a ModelMappingFile, scope: &Scope) -> Option<Preprocessor> {
+        let preprocessor = model.preprocessor()?;
         let path = ModelPath::root().field("preprocessor");
         let fhir = preprocessor.fhir_condition.as_ref().and_then(|condition| {
             self.condition(
@@ -546,6 +615,7 @@ impl<'a> Compiler<'a> {
                 scope,
                 Direction::FhirToOpenehr,
                 &path.field("fhirCondition"),
+                scope.fhir.as_str(),
             )
         });
         let openehr = preprocessor
@@ -558,6 +628,7 @@ impl<'a> Compiler<'a> {
                     scope,
                     Direction::OpenehrToFhir,
                     &path.field("openehrCondition"),
+                    &scope.openehr.to_string(),
                 )
             });
         let hierarchy = preprocessor.hierarchy.as_ref().map(|hierarchy| {
@@ -600,7 +671,12 @@ impl<'a> Compiler<'a> {
                     }),
             )
         });
-        (fhir, openehr, hierarchy)
+        Some(Preprocessor::new(
+            model.header().name().value().clone(),
+            fhir,
+            openehr,
+            hierarchy,
+        ))
     }
 
     /// Compiles one side of a `hierarchy.split`.
@@ -621,8 +697,15 @@ impl<'a> Compiler<'a> {
         let created = target.path.as_ref().and_then(|written| {
             let at = path.field("path");
             if creates_fhir {
-                self.fhir_target(model.file(), owner, written, scope, &at, None)
-                    .map(|target| Target::Fhir(Box::new(target)))
+                self.fhir_target(
+                    model.file(),
+                    owner,
+                    written,
+                    scope,
+                    &at,
+                    Site::Write(scope.direction),
+                )
+                .map(|target| Target::Fhir(Box::new(target)))
             } else {
                 self.openehr_target(model.file(), owner, written, scope, &at)
                     .map(|target| Target::Openehr(Box::new(target)))
@@ -638,25 +721,42 @@ impl<'a> Compiler<'a> {
                     self.openehr_target(model.file(), owner, written, scope, &at)
                         .map(|target| Target::Openehr(Box::new(target)))
                 } else {
-                    self.fhir_target(model.file(), owner, written, scope, &at, None)
+                    self.fhir_target(model.file(), owner, written, scope, &at, Site::ReadOnly)
                         .map(|target| Target::Fhir(Box::new(target)))
                 }
             })
             .collect();
-        Split::new(
-            target.create.as_ref().map(|create| create.value().clone()),
-            created,
-            unique,
-        )
+        let create = target.create.as_ref().and_then(|written| {
+            let Ok(create) = Create::from_str(written.value()) else {
+                self.diagnostics.push(diagnostic(
+                    model.file(),
+                    owner,
+                    ResolveCode::UnknownSplitCreate,
+                    written.position(),
+                    &path.field("create"),
+                    format!(
+                        "`{}` names no element a split creates; the engine creates `{}`",
+                        written.value(),
+                        Create::admitted().join("`, `")
+                    ),
+                ));
+                return None;
+            };
+            Some(create)
+        });
+        Split::new(create, created, unique)
     }
 
     /// Compiles a list of mapping methods under one scope.
+    ///
+    /// Each node carries where it sits in the file that wrote it, so a nested
+    /// refusal names its own depth rather than the index of the top-level
+    /// method it hangs under.
     fn mappings(&mut self, nodes: &[Node<'a>], scope: &Scope) -> Vec<Mapping> {
         nodes
             .iter()
-            .enumerate()
-            .map(|(index, node)| {
-                let path = ModelPath::root().field("mappings").index(index);
+            .map(|node| {
+                let path = node.path.clone();
                 self.mapping(node, scope, &path)
             })
             .collect()
@@ -668,13 +768,20 @@ impl<'a> Compiler<'a> {
         let owner = file.header().name().value();
         let method = node.mapping;
         let name = scope.name_of(node.name());
+        let (inherited, conceptmap) = inherited_spec(file, scope);
         let direction = method
             .unidirectional
             .as_ref()
-            .map_or(scope.direction, |located| Some(*located.value()));
+            .map_or(inherited, |located| Some(*located.value()));
         let with = method.with.as_ref();
         let fhir = with.and_then(|with| {
-            self.fhir_side_with_direction(file, with, scope, &path.field("with"), direction)
+            self.fhir_side_at(
+                file,
+                with,
+                scope,
+                &path.field("with"),
+                Site::Write(direction),
+            )
         });
         let openehr =
             with.and_then(|with| self.openehr_side(file, with, scope, &path.field("with")));
@@ -686,25 +793,36 @@ impl<'a> Compiler<'a> {
                 .as_ref()
                 .map_or_else(|| scope.openehr.clone(), |target| target.path().clone()),
             direction,
+            file: file.file().to_path_buf(),
+            conceptmap: conceptmap.clone(),
             prefix: name.clone(),
             ..scope.clone()
         };
         let fhir_condition = method.fhir_condition.as_ref().and_then(|condition| {
+            let guard = fhir
+                .as_ref()
+                .map_or(scope.fhir.as_str(), |target| target.expression().as_str());
             self.condition(
                 file,
                 condition,
                 scope,
                 Direction::FhirToOpenehr,
                 &path.field("fhirCondition"),
+                guard,
             )
         });
         let openehr_condition = method.openehr_condition.as_ref().and_then(|condition| {
+            let guard = openehr.as_ref().map_or_else(
+                || scope.openehr.to_string(),
+                |target| target.path().to_string(),
+            );
             self.condition(
                 file,
                 condition,
                 scope,
                 Direction::OpenehrToFhir,
                 &path.field("openehrCondition"),
+                &guard,
             )
         });
         let manual = method
@@ -731,7 +849,8 @@ impl<'a> Compiler<'a> {
             conceptmap: method
                 .conceptmap
                 .as_ref()
-                .map(|conceptmap| conceptmap.value().clone()),
+                .map(|url| url.value().clone())
+                .or(conceptmap),
             method: method_kind,
             followed_by,
         })
@@ -780,9 +899,18 @@ impl<'a> Compiler<'a> {
                 ));
                 return Method::Value;
             }
+            // NOTE: `path_operators.adoc` never says what `^` does at a
+            // `reference` boundary, and crossing it for no `^` is the reading
+            // its worked example needs (reported on issue #183).
+            let mut enclosing = vec![Enclosing {
+                resource: scope.resource.clone(),
+                fhir: scope.fhir.clone(),
+            }];
+            enclosing.extend(scope.enclosing.iter().cloned());
             let inner = Scope {
                 resource: resource.clone(),
                 fhir: root_expression(),
+                enclosing,
                 ..scope.clone()
             };
             return Method::Reference {
@@ -897,6 +1025,12 @@ impl<'a> Compiler<'a> {
                 .unidirectional
                 .as_ref()
                 .map_or(scope.direction, |located| Some(*located.value())),
+            file: slotted.file().to_path_buf(),
+            conceptmap: slotted
+                .spec()
+                .conceptmap
+                .as_ref()
+                .map(|url| url.value().clone()),
             prefix: String::new(),
             chain,
             ..scope.clone()
@@ -904,6 +1038,7 @@ impl<'a> Compiler<'a> {
         let merged = self.merge(slotted);
         Method::Slot {
             model: slot.value().clone(),
+            preprocessors: self.preprocessors(slotted, &inner),
             mappings: self.mappings(&merged.mappings, &inner),
         }
     }
@@ -917,19 +1052,26 @@ impl<'a> Compiler<'a> {
         path: &ModelPath,
     ) -> Manual {
         let owner = file.header().name().value();
+        let pinned = entry
+            .unidirectional
+            .as_ref()
+            .map_or(scope.direction, |located| Some(*located.value()));
         let fhir = entry
             .fhir
             .iter()
             .enumerate()
             .filter_map(|(index, manual)| {
                 let at = path.field("fhir").index(index);
-                self.fhir_target(file.file(), owner, &manual.path, scope, &at, None)
-                    .map(|target| {
-                        crate::resolve::program::ManualPath::new(
-                            Target::Fhir(Box::new(target)),
-                            manual.value.value().clone(),
-                        )
-                    })
+                let value = self.manual_value(file, &manual.value, &at)?;
+                self.fhir_target(
+                    file.file(),
+                    owner,
+                    &manual.path,
+                    scope,
+                    &at,
+                    Site::Write(pinned),
+                )
+                .map(|target| ManualPath::new(Target::Fhir(Box::new(target)), value))
             })
             .collect();
         let openehr = entry
@@ -938,13 +1080,9 @@ impl<'a> Compiler<'a> {
             .enumerate()
             .filter_map(|(index, manual)| {
                 let at = path.field("openehr").index(index);
+                let value = self.manual_value(file, &manual.value, &at)?;
                 self.openehr_target(file.file(), owner, &manual.path, scope, &at)
-                    .map(|target| {
-                        crate::resolve::program::ManualPath::new(
-                            Target::Openehr(Box::new(target)),
-                            manual.value.value().clone(),
-                        )
-                    })
+                    .map(|target| ManualPath::new(Target::Openehr(Box::new(target)), value))
             })
             .collect();
         Manual::new(
@@ -958,6 +1096,7 @@ impl<'a> Compiler<'a> {
                     scope,
                     Direction::FhirToOpenehr,
                     &path.field("fhirCondition"),
+                    scope.fhir.as_str(),
                 )
             }),
             entry.openehr_condition.as_ref().and_then(|condition| {
@@ -967,11 +1106,43 @@ impl<'a> Compiler<'a> {
                     scope,
                     Direction::OpenehrToFhir,
                     &path.field("openehrCondition"),
+                    &scope.openehr.to_string(),
                 )
             }),
             entry.value.as_ref().map(|value| value.value().clone()),
             entry.unidirectional.as_ref().map(|value| *value.value()),
         )
+    }
+
+    /// Reads what one `manual` path writes: a literal or a `$context` member.
+    ///
+    /// "`$context` holds values passed in on the REST call ... a context value
+    /// is referenced from a `manual` `value`"
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`,
+    /// §`$context`), and every example names a member of it, so a bare
+    /// `$context` names no value and is refused.
+    fn manual_value(
+        &mut self,
+        file: &'a ModelMappingFile,
+        written: &Located<String>,
+        path: &ModelPath,
+    ) -> Option<ManualValue> {
+        let text = written.value();
+        let Some(rest) = text.strip_prefix("$context") else {
+            return Some(ManualValue::Literal(text.clone()));
+        };
+        let Some(member) = rest.strip_prefix('.').filter(|name| !name.is_empty()) else {
+            self.diagnostics.push(diagnostic(
+                file.file(),
+                file.header().name().value(),
+                ResolveCode::MalformedContextValue,
+                written.position(),
+                &path.field("value"),
+                format!("`{text}` names no `$context` member, so it carries no value"),
+            ));
+            return None;
+        };
+        Some(ManualValue::Context(member.to_owned()))
     }
 
     /// Compiles one condition, on the side the direction names.
@@ -982,6 +1153,7 @@ impl<'a> Compiler<'a> {
         scope: &Scope,
         direction: Direction,
         path: &ModelPath,
+        guard: &str,
     ) -> Option<CompiledCondition> {
         let owner = file.header().name().value();
         let on_fhir = direction == Direction::FhirToOpenehr;
@@ -992,7 +1164,7 @@ impl<'a> Compiler<'a> {
                 &condition.target_root,
                 scope,
                 &path.field("targetRoot"),
-                None,
+                Site::ReadOnly,
             )
             .map(|target| Target::Fhir(Box::new(target)))
         } else {
@@ -1022,7 +1194,7 @@ impl<'a> Compiler<'a> {
             .filter_map(|(index, attribute)| {
                 let at = path.field("targetAttributes").index(index);
                 if on_fhir {
-                    self.fhir_target(file.file(), owner, attribute, &inner, &at, None)
+                    self.fhir_target(file.file(), owner, attribute, &inner, &at, Site::ReadOnly)
                         .map(|target| Target::Fhir(Box::new(target)))
                 } else {
                     self.openehr_target(file.file(), owner, attribute, &inner, &at)
@@ -1030,24 +1202,26 @@ impl<'a> Compiler<'a> {
                 }
             })
             .collect();
-        Some(CompiledCondition::new(
+        let attachment = attachment_of(&root, guard);
+        Some(CompiledCondition::new(ConditionParts {
             direction,
-            root,
+            target: root,
             attributes,
-            *condition.operator.value(),
-            condition
+            operator: *condition.operator.value(),
+            criteria: condition
                 .criteria
                 .iter()
                 .map(|criteria| criteria.value().clone())
                 .collect(),
-            condition
+            identifying: condition
                 .identifying
                 .as_ref()
                 .is_some_and(|value| *value.value()),
-        ))
+            attachment,
+        }))
     }
 
-    /// Compiles the FHIR side of a `with`, with no direction check.
+    /// Compiles the FHIR side of a `hierarchy.with`, which is only read.
     fn fhir_side(
         &mut self,
         file: &'a ModelMappingFile,
@@ -1055,17 +1229,17 @@ impl<'a> Compiler<'a> {
         scope: &Scope,
         path: &ModelPath,
     ) -> Option<FhirTarget> {
-        self.fhir_side_with_direction(file, with, scope, path, None)
+        self.fhir_side_at(file, with, scope, path, Site::ReadOnly)
     }
 
     /// Compiles the FHIR side of a `with`.
-    fn fhir_side_with_direction(
+    fn fhir_side_at(
         &mut self,
         file: &'a ModelMappingFile,
         with: &With,
         scope: &Scope,
         path: &ModelPath,
-        direction: Option<Direction>,
+        site: Site,
     ) -> Option<FhirTarget> {
         let written = with.fhir.as_ref()?;
         self.fhir_target(
@@ -1074,7 +1248,7 @@ impl<'a> Compiler<'a> {
             written,
             scope,
             &path.field("fhir"),
-            direction,
+            site,
         )
     }
 
@@ -1102,7 +1276,9 @@ impl<'a> Compiler<'a> {
     /// A mapping runs both ways unless `unidirectional` pins it to one
     /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`,
     /// §Direction), so an expression that cannot be written through is refused
-    /// here unless the mapping only ever reads FHIR.
+    /// at a [`Site::Write`] unless the mapping only ever reads FHIR. A
+    /// [`Site::ReadOnly`] expression is never written, so it takes every step
+    /// the grammar defines.
     fn fhir_target(
         &mut self,
         file: &Path,
@@ -1110,7 +1286,7 @@ impl<'a> Compiler<'a> {
         written: &Located<String>,
         scope: &Scope,
         path: &ModelPath,
-        direction: Option<Direction>,
+        site: Site,
     ) -> Option<FhirTarget> {
         let expression = match FhirPath::from_str(written.value()) {
             Ok(expression) => expression,
@@ -1129,7 +1305,9 @@ impl<'a> Compiler<'a> {
                 return None;
             }
         };
-        let anchored = match expression.anchored(&scope.fhir) {
+        let mut anchors: Vec<&FhirPath> = vec![&scope.fhir];
+        anchors.extend(scope.enclosing.iter().map(|outer| &outer.fhir));
+        let (anchored, bound_in) = match expression.anchored_in(&anchors) {
             Ok(anchored) => anchored,
             Err(error) => {
                 self.diagnostics.push(diagnostic(
@@ -1143,7 +1321,12 @@ impl<'a> Compiler<'a> {
                 return None;
             }
         };
+        let resource = bound_in
+            .checked_sub(1)
+            .and_then(|outer| scope.enclosing.get(outer))
+            .map_or(&scope.resource, |outer| &outer.resource);
         if let Writability::ReadOnly { ref step, reason } = *anchored.writability()
+            && let Site::Write(direction) = site
             && direction != Some(Direction::FhirToOpenehr)
         {
             self.diagnostics.push(diagnostic(
@@ -1159,7 +1342,7 @@ impl<'a> Compiler<'a> {
             ));
             return None;
         }
-        match resolve_element(self.table, scope.resource.as_str(), &anchored) {
+        match resolve_element(self.table, resource.as_str(), &anchored) {
             Ok(resolved) => Some(FhirTarget::new(anchored, resolved)),
             Err(error) => {
                 self.diagnostics.push(diagnostic(
@@ -1199,39 +1382,7 @@ impl<'a> Compiler<'a> {
                 return None;
             }
         };
-        let anchor = match parsed
-            .variable()
-            .map(openehr_mapping_core::path::PathVariable::name)
-        {
-            None => scope.openehr.clone(),
-            Some(name) => match Variable::from_str(name) {
-                Ok(Variable::Archetype) => scope.archetype.clone(),
-                Ok(Variable::OpenehrRoot) => scope.openehr.clone(),
-                Ok(Variable::Composition) => RmPath {
-                    absolute: true,
-                    segments: Vec::new(),
-                },
-                // NOTE: `$reference` "indicates that there is no direct mapping
-                // to openEHR" (`basics/Variables.adoc`), so the mapping
-                // legitimately has no openEHR side rather than a broken one.
-                Ok(Variable::Reference) => return None,
-                Ok(Variable::Resource | Variable::FhirRoot | Variable::Context) | Err(_) => {
-                    self.diagnostics.push(diagnostic(
-                        file,
-                        owner,
-                        ResolveCode::UnboundPathVariable,
-                        written.position(),
-                        path,
-                        format!(
-                            "`{}` opens an openEHR path with `${name}`, which names no openEHR \
-                             anchor",
-                            written.value()
-                        ),
-                    ));
-                    return None;
-                }
-            },
-        };
+        let anchor = self.openehr_anchor(file, owner, written, scope, path, &parsed)?;
         let resolved = match parsed.resolve(&anchor) {
             Ok(resolved) => resolved,
             Err(error) => {
@@ -1260,20 +1411,94 @@ impl<'a> Compiler<'a> {
             return None;
         }
         match self.locate(&resolved) {
-            Ok((node, tail)) => Some(OpenehrTarget::new(
-                resolved,
-                node.clone(),
-                tail,
-                occurrences(self.template, node),
-            )),
-            Err(message) => {
+            Ok((node, tail)) => {
+                let occurrences = match occurrences(self.template, node) {
+                    Ok(axes) => axes,
+                    Err(error) => {
+                        self.diagnostics.push(diagnostic(
+                            file,
+                            owner,
+                            ResolveCode::UnknownTemplateNode,
+                            written.position(),
+                            path,
+                            format!(
+                                "the occurrence axes of `{}` do not resolve: {error}",
+                                node.flat_id().as_str()
+                            ),
+                        ));
+                        return None;
+                    }
+                };
+                Some(OpenehrTarget::new(
+                    resolved,
+                    node.clone(),
+                    tail,
+                    occurrences,
+                ))
+            }
+            Err(error) => {
+                let (code, message) = match error {
+                    LocateError::Unknown(message) => (ResolveCode::UnknownTemplateNode, message),
+                    LocateError::Ambiguous(message) => {
+                        (ResolveCode::AmbiguousTemplateNode, message)
+                    }
+                };
                 self.diagnostics.push(diagnostic(
                     file,
                     owner,
-                    ResolveCode::UnknownTemplateNode,
+                    code,
                     written.position(),
                     path,
                     message,
+                ));
+                None
+            }
+        }
+    }
+
+    /// Returns the path the variable an openEHR path opens with names.
+    ///
+    /// The five openEHR-side variables are `$archetype`, `$openehrRoot`,
+    /// `$composition` and `$reference`, plus the anchor a path with no
+    /// variable takes
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`).
+    fn openehr_anchor(
+        &mut self,
+        file: &Path,
+        owner: &MappingName,
+        written: &Located<String>,
+        scope: &Scope,
+        path: &ModelPath,
+        parsed: &MappingPath,
+    ) -> Option<RmPath> {
+        let Some(name) = parsed
+            .variable()
+            .map(openehr_mapping_core::path::PathVariable::name)
+        else {
+            return Some(scope.openehr.clone());
+        };
+        match Variable::from_str(name) {
+            Ok(Variable::Archetype) => Some(scope.archetype.clone()),
+            Ok(Variable::OpenehrRoot) => Some(scope.openehr.clone()),
+            Ok(Variable::Composition) => Some(RmPath {
+                absolute: true,
+                segments: Vec::new(),
+            }),
+            // NOTE: `$reference` "indicates that there is no direct mapping
+            // to openEHR" (`basics/Variables.adoc`), so the mapping
+            // legitimately has no openEHR side rather than a broken one.
+            Ok(Variable::Reference) => None,
+            Ok(Variable::Resource | Variable::FhirRoot | Variable::Context) | Err(_) => {
+                self.diagnostics.push(diagnostic(
+                    file,
+                    owner,
+                    ResolveCode::UnboundPathVariable,
+                    written.position(),
+                    path,
+                    format!(
+                        "`{}` opens an openEHR path with `${name}`, which names no openEHR anchor",
+                        written.value()
+                    ),
                 ));
                 None
             }
@@ -1290,7 +1515,7 @@ impl<'a> Compiler<'a> {
     /// the reference model or through a structure the template compacted away.
     /// A segment the template carries nowhere and that constrains a node
     /// identity is refused. No specification governs this: our own design.
-    fn locate(&self, path: &RmPath) -> Result<(&'a ResolvedNode, RmPath), String> {
+    fn locate(&self, path: &RmPath) -> Result<(&'a ResolvedNode, RmPath), LocateError> {
         let total = path.segments.len();
         for taken in (0..=total).rev() {
             let head = path.segments.get(..taken).unwrap_or_default();
@@ -1303,33 +1528,121 @@ impl<'a> Compiler<'a> {
                 absolute: false,
                 segments: tail.to_vec(),
             };
-            let found = self
-                .template
-                .at_rm_path(&prefix)
-                .ok()
-                .or_else(|| self.compacted.get(&prefix.to_string()).copied());
-            let Some(node) = found else {
-                continue;
+            let node = match self.template.at_rm_path(&prefix) {
+                Ok(node) => node,
+                Err(PathError::AmbiguousPath { .. }) => {
+                    return Err(self.ambiguity(&prefix, &self.template.all_at_rm_path(&prefix)));
+                }
+                Err(_) => match self.compacted.get(&prefix.to_string()).map(Vec::as_slice) {
+                    Some([only]) => *only,
+                    Some(several) if several.len() > 1 => {
+                        return Err(self.ambiguity(&prefix, several));
+                    }
+                    _ => continue,
+                },
             };
             let constrained = rest.segments.iter().find(|segment| constrains(segment));
             if let Some(segment) = constrained
                 && !self.interior.contains(&path.to_string())
             {
-                return Err(format!(
+                return Err(LocateError::Unknown(format!(
                     "the template `{}` has no node at `{path}`; the deepest node it reaches is \
                      `{}` and `{}` below it names a node identity the template does not carry",
                     self.template.template_id(),
                     node.aql_path().as_str(),
                     segment.attribute
-                ));
+                )));
+            }
+            if let Err(message) = rm_tail(node.rm_type(), &rest) {
+                return Err(LocateError::Unknown(format!(
+                    "the template `{}` reaches `{}` and `{path}` walks `{rest}` below it: \
+                     {message}",
+                    self.template.template_id(),
+                    node.aql_path().as_str()
+                )));
             }
             return Ok((node, rest));
         }
-        Err(format!(
+        Err(LocateError::Unknown(format!(
             "the template `{}` has no node at `{path}`",
             self.template.template_id()
+        )))
+    }
+
+    /// Builds the refusal for a path that names more than one template node.
+    fn ambiguity(&self, path: &RmPath, candidates: &[&ResolvedNode]) -> LocateError {
+        let named: Vec<&str> = candidates
+            .iter()
+            .map(|node| node.flat_id().as_str())
+            .collect();
+        LocateError::Ambiguous(format!(
+            "`{path}` names {} nodes of the template `{}`: {}",
+            named.len(),
+            self.template.template_id(),
+            named.join(", ")
         ))
     }
+}
+
+/// Why an openEHR path names no single node of the operational template.
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum LocateError {
+    /// No node of the template carries the path.
+    Unknown(String),
+    /// More than one node carries it, so nothing says which one is meant.
+    Ambiguous(String),
+}
+
+/// Returns the `spec` keys a method inherits from the file that wrote it.
+///
+/// An extension file is a file
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`),
+/// so its `spec` governs the methods it contributes, wherever they land in the
+/// merged model mapping.
+fn inherited_spec(file: &ModelMappingFile, scope: &Scope) -> (Option<Direction>, Option<String>) {
+    if file.file() == scope.file {
+        return (scope.direction, scope.conceptmap.clone());
+    }
+    let direction = file
+        .spec()
+        .unidirectional
+        .as_ref()
+        .map_or(scope.direction, |located| Some(*located.value()));
+    let conceptmap = file
+        .spec()
+        .conceptmap
+        .as_ref()
+        .map(|url| url.value().clone())
+        .or_else(|| scope.conceptmap.clone());
+    (direction, conceptmap)
+}
+
+/// Decides how a condition's `targetRoot` stands to the path it guards.
+///
+/// Both paths are anchored by the time this runs, so the comparison is over
+/// the resolved paths rather than the text a file wrote.
+fn attachment_of(root: &Target, guard: &str) -> Attachment {
+    let written = match *root {
+        Target::Fhir(ref target) => target.expression().as_str().to_owned(),
+        Target::Openehr(ref target) => target.path().to_string(),
+    };
+    if written == guard {
+        return Attachment::Element;
+    }
+    if walks_below(&written, guard) {
+        return Attachment::Descendant;
+    }
+    if walks_below(guard, &written) {
+        return Attachment::Ancestor;
+    }
+    Attachment::Unrelated
+}
+
+/// Whether `candidate` walks below `ancestor` in either path syntax.
+fn walks_below(candidate: &str, ancestor: &str) -> bool {
+    candidate
+        .strip_prefix(ancestor)
+        .is_some_and(|tail| tail.starts_with(['.', '/', '[']))
 }
 
 /// Returns the `$resource` expression every FHIR path is rooted at.
@@ -1348,6 +1661,70 @@ static RESOURCE_ROOT: LazyLock<FhirPath> = LazyLock::new(|| {
     root
 });
 
+/// Checks the reference-model attributes an openEHR path walks below the
+/// deepest template node it reaches.
+///
+/// A Web Template carries the nodes an archetype constrains and stops there, so
+/// everything below the deepest one is plain reference model. The attribute
+/// model `openehr-rm` generates from the RM BMM is the oracle for it
+/// (<https://docs.rs/openehr-rm/0.0.64/openehr_rm/v1_2/model/fn.attribute.html>):
+/// an attribute is looked up on the node's type and on the concrete subtypes of
+/// it, because a declared type may be abstract (`ELEMENT.value` is
+/// `DATA_VALUE`) and the attribute then belongs to one of its descendants.
+///
+/// A type the model does not carry stops the walk rather than refusing it: the
+/// mapping is then checked as far as the model reaches and no further.
+fn rm_tail(rm_type: &str, tail: &RmPath) -> Result<(), String> {
+    let mut candidates = concrete_forms(rm_type);
+    if candidates.is_empty() {
+        return Ok(());
+    }
+    for segment in &tail.segments {
+        let attribute = segment.attribute.as_str();
+        let mut carried = false;
+        let mut next: Vec<&'static str> = Vec::new();
+        for candidate in &candidates {
+            let Some(found) = rm_model::attribute(candidate, attribute) else {
+                continue;
+            };
+            carried = true;
+            for form in concrete_forms(found.declared_type) {
+                if !next.contains(&form) {
+                    next.push(form);
+                }
+            }
+        }
+        if !carried {
+            return Err(format!(
+                "`{attribute}` is no attribute of `{}` in the openEHR reference model",
+                candidates.join("`, `")
+            ));
+        }
+        if next.is_empty() {
+            return Ok(());
+        }
+        candidates = next;
+    }
+    Ok(())
+}
+
+/// Returns the reference-model class plus every concrete class below it.
+///
+/// An empty result means the reference model carries no class of that name,
+/// which is what stops [`rm_tail`] rather than refusing.
+fn concrete_forms(rm_type: &str) -> Vec<&'static str> {
+    let Some(class) = rm_model::class(rm_type) else {
+        return Vec::new();
+    };
+    let mut forms: Vec<&'static str> = vec![class.name];
+    for descendant in class.descendants {
+        if !forms.contains(descendant) {
+            forms.push(descendant);
+        }
+    }
+    forms
+}
+
 /// Whether a path segment constrains which node it selects.
 fn constrains(segment: &PathSegment) -> bool {
     segment.predicate.archetype_node_id.is_some()
@@ -1356,10 +1733,16 @@ fn constrains(segment: &PathSegment) -> bool {
 }
 
 /// Returns the repeating nodes from the root down to `node`, outermost first.
+///
+/// # Errors
+///
+/// Returns the refusal the index raised for a prefix that is not simply
+/// absent, so a lost occurrence axis is a diagnostic rather than a node that
+/// silently stops repeating.
 fn occurrences(
     template: &WebTemplateIndex,
     node: &ResolvedNode,
-) -> Vec<openehr_mapping_core::index::FlatId> {
+) -> Result<Vec<openehr_mapping_core::index::FlatId>, PathError> {
     let mut axes = Vec::new();
     let mut prefix = String::new();
     for segment in node.flat_id().as_str().split('/') {
@@ -1368,14 +1751,19 @@ fn occurrences(
         }
         prefix.push_str(segment);
         let flat_id = openehr_mapping_core::index::FlatId::new(prefix.clone());
-        if template
-            .node_by_flat_id(&flat_id)
-            .is_ok_and(ResolvedNode::repeats)
-        {
+        let found = match template.node_by_flat_id(&flat_id) {
+            Ok(found) => found,
+            // NOTE: a flat id is built one level at a time and the index
+            // carries a node only where the builder kept one, so an unknown
+            // prefix is a level with no node of its own.
+            Err(PathError::UnknownNode { .. }) => continue,
+            Err(error) => return Err(error),
+        };
+        if found.repeats() {
             axes.push(flat_id);
         }
     }
-    axes
+    Ok(axes)
 }
 
 /// Returns the archetype a model mapping declares.
@@ -1403,8 +1791,12 @@ fn interior_paths(template: &WebTemplateIndex) -> BTreeSet<String> {
     found
 }
 
-/// Maps the path a mapping writes for a compacted node onto that node.
-fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, &ResolvedNode> {
+/// Maps the path a mapping writes for a compacted node onto the nodes it
+/// reaches.
+///
+/// A shortened path that reaches more than one node keeps all of them, because
+/// binding the mapping to one of them would bind it to a node nothing named.
+fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, Vec<&ResolvedNode>> {
     let mut found: BTreeMap<String, Vec<&ResolvedNode>> = BTreeMap::new();
     for node in template.nodes() {
         let path = node.rm_path();
@@ -1423,10 +1815,4 @@ fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, &ResolvedNode
         found.entry(shortened.to_string()).or_default().push(node);
     }
     found
-        .into_iter()
-        .filter_map(|(key, nodes)| match *nodes.as_slice() {
-            [only] => Some((key, only)),
-            _ => None,
-        })
-        .collect()
 }

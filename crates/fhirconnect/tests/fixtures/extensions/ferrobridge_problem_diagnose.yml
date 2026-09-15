@@ -72,6 +72,31 @@ mappings:
                         openehr: "$archetype/data[at0001]/items[at0073]"
                         type: "CODING"
 
+  # The published method writes "$archetype/diagnose/other_participations" and
+  # EVALUATION has no "diagnose" attribute; ENTRY.other_participations is the
+  # RM attribute it means (openEHR RM 1.1.0, ENTRY). Recorded on #101.
+  - name: "other_participations"
+    extension: "overwrite"
+    with:
+      fhir: "$resource.asserter"
+      openehr: "$archetype/other_participations"
+      type: "NONE"
+    followedBy:
+      mappings:
+        - name: "participationFunction"
+          with:
+            fhir: "$fhirRoot"
+            openehr: "$openehrRoot"
+          manual:
+            - name: "function"
+              openehr:
+                - path: "function"
+                  value: "asserter"
+        - name: "performer"
+          with:
+            fhir: "$fhirRoot"
+            openehr: "$openehrRoot"
+
   - name: "bodySiteCluster"
     extension: "overwrite"
     with:

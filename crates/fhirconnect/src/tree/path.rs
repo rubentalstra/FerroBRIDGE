@@ -266,6 +266,54 @@ impl FhirPath {
         Ok(Self::assembled(Head::Resource, steps))
     }
 
+    /// Builds the expression this one names under a stack of anchors.
+    ///
+    /// `anchors` runs innermost first. A run of `^` that exhausts one anchor
+    /// carries on in the next, which is what the worked `^^` example needs:
+    /// its two `^` start at the root of a resource a `reference` mapping
+    /// initializes and reach an element of the enclosing resource
+    /// (<https://sevkohler.github.io/FHIRconnect-spec/build/site/FHIRconnect/v1.0.0/basics/path_operators.html>,
+    /// §Recurrence and parent elements). Crossing from one anchor to the next
+    /// costs no `^`, because the boundary is not a step of either path. The
+    /// index that comes back is the anchor the expression bound in.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`AnchorError::RelativeAnchor`] when an anchor it reaches is
+    /// itself not rooted at `$resource`, and [`AnchorError::AboveResource`]
+    /// when the run of `^` passes the root of the outermost anchor.
+    pub fn anchored_in(&self, anchors: &[&Self]) -> Result<(Self, usize), AnchorError> {
+        if self.head == Head::Resource {
+            return Ok((self.clone(), 0));
+        }
+        let requested = match self.head {
+            Head::Parent(count) => count.get(),
+            Head::Resource | Head::FhirRoot | Head::Anchor => 0,
+        };
+        let mut hops = requested;
+        for (index, anchor) in anchors.iter().enumerate() {
+            if anchor.head != Head::Resource {
+                return Err(AnchorError::RelativeAnchor {
+                    anchor: anchor.text.clone(),
+                });
+            }
+            if let Some(kept) = anchor.steps.len().checked_sub(hops) {
+                let mut steps: Vec<Step> = anchor.steps.iter().take(kept).cloned().collect();
+                steps.extend(self.steps.iter().cloned());
+                return Ok((Self::assembled(Head::Resource, steps), index));
+            }
+            hops = hops.saturating_sub(anchor.steps.len());
+        }
+        let outermost = anchors
+            .last()
+            .map_or_else(String::new, |anchor| anchor.text.clone());
+        Err(AnchorError::AboveResource {
+            expression: self.text.clone(),
+            anchor: outermost,
+            hops: requested,
+        })
+    }
+
     /// Assembles a path from a head and its steps, rendering and classifying
     /// it.
     fn assembled(head: Head, steps: Vec<Step>) -> Self {
@@ -824,6 +872,32 @@ mod tests {
         assert!(matches!(
             parse("^.use")?.anchored(&relative),
             Err(AnchorError::RelativeAnchor { .. })
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn a_caret_run_carries_on_in_the_next_anchor() -> Result<(), Box<dyn core::error::Error>> {
+        let inside = parse("$resource")?;
+        let outside = parse("$resource.diagnosis.condition.reference")?;
+        let (bound, index) = parse("^^.use.coding")?.anchored_in(&[&inside, &outside])?;
+        assert_eq!(bound.as_str(), "$resource.diagnosis.use.coding");
+        assert_eq!(index, 1, "the expression binds in the enclosing resource");
+        let (near, index) = parse("^.use")?.anchored_in(&[&inside, &outside])?;
+        assert_eq!(near.as_str(), "$resource.diagnosis.condition.use");
+        assert_eq!(index, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn a_caret_run_past_the_outermost_anchor_is_refused() -> Result<(), Box<dyn core::error::Error>>
+    {
+        let inside = parse("$resource")?;
+        let outside = parse("$resource.diagnosis")?;
+        let refused = parse("^^^.use")?.anchored_in(&[&inside, &outside]);
+        assert!(matches!(
+            refused,
+            Err(AnchorError::AboveResource { hops: 3, .. })
         ));
         Ok(())
     }

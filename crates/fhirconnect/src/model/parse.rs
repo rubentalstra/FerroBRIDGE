@@ -737,11 +737,31 @@ fn lower_mapping(
     let mapping_type =
         lowering.optional_keyword::<DataType>(node, path, "type", ModelCode::InvalidDataType);
     let with = match (with, mapping_type) {
-        (Some(mut with), Some(data_type)) if with.data_type.is_none() => {
-            with.data_type = Some(data_type);
-            Some(with)
+        (Some(mut written), Some(data_type)) => {
+            match written.data_type {
+                Some(ref inner) if inner.value() != data_type.value() => lowering.report(
+                    ModelCode::ConflictingDataType,
+                    data_type.position(),
+                    &path.field("type"),
+                    format!(
+                        "the mapping writes the data type `{}` and its `with` writes `{}`",
+                        data_type.value(),
+                        inner.value()
+                    ),
+                ),
+                Some(_) => {}
+                None => written.data_type = Some(data_type),
+            }
+            Some(written)
         }
-        (with, _) => with,
+        (None, Some(data_type)) => Some(With {
+            position: data_type.position(),
+            fhir: None,
+            openehr: None,
+            data_type: Some(data_type),
+            value: None,
+        }),
+        (written, None) => written,
     };
     Some(Mapping {
         position: node.position(),
@@ -970,6 +990,9 @@ fn lower_condition(
     if matches!(*block.value(), MappingValue::Null) {
         return None;
     }
+    // NOTE: `Conditions.adoc` §type says the condition is an array, which the
+    // published schema and every published file contradict, so one object per
+    // key is what this reads (reported on issue #182).
     lowering.mapping(block, &block_path)?;
     lowering.refuse_unknown_keys(block, &block_path, CONDITION_KEYS);
 
@@ -1357,6 +1380,136 @@ mod tests {
         assert_eq!(file.context().archetypes.len(), 1);
         assert_eq!(file.context().start.value().as_str(), "ACTION.procedure.v1");
         assert_eq!(file.context().position, Position::new(10, 3));
+    }
+
+    #[test]
+    fn a_mapping_without_a_name_is_refused() {
+        let document = load_str(
+            "nameless.yml",
+            &model("mappings:\n  - with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype\"\n"),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("a mapping with no name");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::MissingKey.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].name");
+    }
+
+    #[test]
+    fn a_with_that_is_not_a_block_is_refused() {
+        let document = load_str(
+            "kind.yml",
+            &model("mappings:\n  - name: \"a\"\n    with: \"$resource.code\"\n"),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("a with that is not a block");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::UnexpectedNodeKind.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].with");
+    }
+
+    #[test]
+    fn a_direction_outside_the_two_spellings_is_refused() {
+        let document = load_str(
+            "direction.yml",
+            &model("mappings:\n  - name: \"a\"\n    unidirectional: \"sideways\"\n"),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown direction");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidDirection.into());
+        assert_eq!(
+            diagnostic.model_path().to_string(),
+            "mappings[0].unidirectional"
+        );
+    }
+
+    #[test]
+    fn an_extension_method_outside_the_three_is_refused() {
+        let document = load_str(
+            "method.yml",
+            "grammar: FHIRConnect/v1.0.0\ntype: extension\nmetadata:\n  name: test_extension\n  \
+             version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  extends: \
+             EVALUATION.test.v1\nmappings:\n  - name: \"a\"\n    extension: \"replace\"\n",
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown extension method");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidExtensionMethod.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].extension");
+    }
+
+    #[test]
+    fn a_mapping_level_data_type_reaches_the_with() {
+        let document = load_str(
+            "level.yml",
+            &model("mappings:\n  - name: \"a\"\n    type: \"NONE\"\n"),
+        )
+        .expect("a well-formed header");
+        let file = lower_model(&document).expect("a well-formed model file");
+        let with = file
+            .mappings()
+            .first()
+            .and_then(|m| m.with.as_ref())
+            .expect("the data type reaches a with block of its own");
+        assert_eq!(
+            with.data_type.as_ref().map(|t| *t.value()),
+            Some(DataType::None)
+        );
+        assert!(with.fhir.is_none());
+    }
+
+    #[test]
+    fn two_disagreeing_data_types_are_refused() {
+        let document = load_str(
+            "both.yml",
+            &model(
+                "mappings:\n  - name: \"a\"\n    type: \"NONE\"\n    with:\n      fhir: \
+                 \"$resource\"\n      openehr: \"$archetype\"\n      type: \"CODING\"\n",
+            ),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("two data types that disagree");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::ConflictingDataType.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].type");
+    }
+
+    #[test]
+    fn a_data_type_outside_the_enum_is_refused() {
+        let document = load_str(
+            "datatype.yml",
+            &model(
+                "mappings:\n  - name: \"a\"\n    with:\n      fhir: \"$resource\"\n      openehr: \
+                 \"$archetype\"\n      type: \"MONEY\"\n",
+            ),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown data type");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidDataType.into());
+        assert_eq!(diagnostic.model_path().to_string(), "mappings[0].with.type");
+    }
+
+    #[test]
+    fn a_condition_operator_outside_the_five_is_refused() {
+        let document = load_str(
+            "operator.yml",
+            &model(
+                "mappings:\n  - name: \"a\"\n    with:\n      fhir: \"$resource.code\"\n      \
+                 openehr: \"$archetype\"\n    fhirCondition:\n      targetRoot: \
+                 \"$resource.code\"\n      targetAttribute: \"coding.code\"\n      operator: \
+                 \"maybe\"\n",
+            ),
+        )
+        .expect("a well-formed header");
+        let diagnostics = lower_model(&document).expect_err("an unknown operator");
+        let diagnostic = diagnostics.first().expect("one diagnostic");
+        assert_eq!(diagnostic.code(), &ModelCode::InvalidOperator.into());
+        assert_eq!(
+            diagnostic.model_path().to_string(),
+            "mappings[0].fhirCondition.operator"
+        );
     }
 
     #[test]
