@@ -301,6 +301,22 @@ mod tests {
             let back = PartyLens.put(&view, Some(&source)).expect("the view is complete");
             assert_eq!(back, source, "GetPut failed for {source:?}");
         }
+
+        #[test]
+        fn identifier_put_get(source in identifier()) {
+            let view: Identifier = IdentifierLens.get(&source).expect("an id is present");
+            let back = IdentifierLens.put(&view, None).expect("the view carries a value");
+            let again: Identifier = IdentifierLens.get(&back).expect("an id is present");
+            assert_eq!(again, view, "PutGet failed for {view:?}");
+        }
+
+        #[test]
+        fn party_put_get(source in party()) {
+            let view: Reference = PartyLens.get(&source).expect("the generated subset is carried");
+            let back = PartyLens.put(&view, None).expect("the view is complete");
+            let again: Reference = PartyLens.get(&back).expect("the generated subset is carried");
+            assert_eq!(again, view, "PutGet failed for {view:?}");
+        }
     }
 
     #[test]

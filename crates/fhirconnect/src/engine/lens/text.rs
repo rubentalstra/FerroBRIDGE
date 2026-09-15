@@ -280,6 +280,14 @@ mod tests {
             let back = TextLens.put(&view, Some(&source)).expect("the coding carries a display");
             assert_eq!(back, source, "GetPut failed for {source:?}");
         }
+
+        #[test]
+        fn coding_put_get(source in text_with(1..2)) {
+            let view: Coding = TextLens.get(&source).expect("one mapping is one coding");
+            let back: DvTextData = TextLens.put(&view, None).expect("the coding carries a display");
+            let again: Coding = TextLens.get(&back).expect("one mapping is one coding");
+            assert_eq!(again, view, "PutGet failed for {view:?}");
+        }
     }
 
     #[test]
