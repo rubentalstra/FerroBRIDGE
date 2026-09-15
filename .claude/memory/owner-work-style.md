@@ -36,3 +36,8 @@ which design intuitions to test, the owner answered: do your own proper
 research, find the best way forward, then fact-check whether it really is the
 best way, using white papers and industry best practice. The bar is a design
 a reader can check against published sources and disagree with on the merits.
+
+**Pause when asked.** On 2026-09-15 the owner asked to pause after two named
+pull requests merge before the next work unit starts. A pause instruction
+names a boundary; the work up to it finishes (merges, cleanup, the report),
+and nothing new is launched past it until the owner writes again.
