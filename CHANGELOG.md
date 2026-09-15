@@ -46,6 +46,10 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   written, which is what makes a re-sent resource update the composition it
   already produced instead of creating a second one. The store holds
   identifiers and no clinical content, and a test greps the file to prove it.
+- Provenance on every inbound commit (#85): the composition carries a
+  `FEEDER_AUDIT` naming the source resource's `id` and type, its
+  `meta.versionId`, and the configured `system_id`, with an absent id recorded
+  as unknown rather than invented.
 - `[facade]` and `[mappings]` configuration sections (#85): `enabled`,
   `base_url`, `ehr_policy`, `identity_store`, `subject_namespace`, `system_id`,
   `composition_language` and `composition_territory`, plus the directory the

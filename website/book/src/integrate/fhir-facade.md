@@ -108,6 +108,16 @@ That last table is what makes create idempotent. A resource re-sent with the
 same `id` and `meta.versionId` updates the composition it already produced
 instead of creating a second one.
 
+## Provenance
+
+Every composition the facade commits carries a `FEEDER_AUDIT`, which is the
+reference model's own element for data transformed into openEHR form: the
+source resource's `id` and type as an `originating_system_item_ids` entry, its
+`meta.versionId` as `originating_system_audit.version_id`, and the configured
+`system_id` naming the bridge. A source resource that carries no `id` is
+recorded as unknown, never given one. So a reader of the CDR can tell which
+FHIR resource a composition came from without asking the bridge.
+
 ## Writes
 
 A create resolves the subject to an EHR: the identity map first, then the CDR
