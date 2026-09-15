@@ -74,6 +74,10 @@ pub enum ResolveCode {
     SlotCycle,
     /// A mapping carries two mapping methods that exclude each other.
     ConflictingMappingMethods,
+    /// A `hierarchy.split` `create` names no element the engine creates.
+    UnknownSplitCreate,
+    /// A `manual` value opens with `$context` and names no member of it.
+    MalformedContextValue,
     /// The template the context names is not the template compiled against.
     TemplateIdMismatch,
     /// The template version the context pins is not the one the template
@@ -112,6 +116,8 @@ impl ResolveCode {
             Self::UnresolvedArchetypeRoot => "fc-unresolved-archetype-root",
             Self::SlotCycle => "fc-slot-cycle",
             Self::ConflictingMappingMethods => "fc-conflicting-mapping-methods",
+            Self::UnknownSplitCreate => "fc-unknown-split-create",
+            Self::MalformedContextValue => "fc-malformed-context-value",
             Self::TemplateIdMismatch => "fc-template-id-mismatch",
             Self::TemplateSemVerMismatch => "fc-template-sem-ver-mismatch",
         }
@@ -147,6 +153,8 @@ impl ResolveCode {
             Self::UnresolvedArchetypeRoot,
             Self::SlotCycle,
             Self::ConflictingMappingMethods,
+            Self::UnknownSplitCreate,
+            Self::MalformedContextValue,
             Self::TemplateIdMismatch,
             Self::TemplateSemVerMismatch,
         ]

@@ -55,10 +55,15 @@ use crate::resolve::extensions::Merged;
 use crate::resolve::extensions::Node;
 use crate::resolve::extensions::apply;
 use crate::resolve::extensions::diagnostic;
+use crate::resolve::program::Attachment;
 use crate::resolve::program::Condition as CompiledCondition;
+use crate::resolve::program::ConditionParts;
+use crate::resolve::program::Create;
 use crate::resolve::program::FhirTarget;
 use crate::resolve::program::Hierarchy;
 use crate::resolve::program::Manual;
+use crate::resolve::program::ManualPath;
+use crate::resolve::program::ManualValue;
 use crate::resolve::program::Mapping;
 use crate::resolve::program::MappingParts;
 use crate::resolve::program::Method;
@@ -608,6 +613,7 @@ impl<'a> Compiler<'a> {
                 scope,
                 Direction::FhirToOpenehr,
                 &path.field("fhirCondition"),
+                scope.fhir.as_str(),
             )
         });
         let openehr = preprocessor
@@ -620,6 +626,7 @@ impl<'a> Compiler<'a> {
                     scope,
                     Direction::OpenehrToFhir,
                     &path.field("openehrCondition"),
+                    &scope.openehr.to_string(),
                 )
             });
         let hierarchy = preprocessor.hierarchy.as_ref().map(|hierarchy| {
@@ -717,11 +724,25 @@ impl<'a> Compiler<'a> {
                 }
             })
             .collect();
-        Split::new(
-            target.create.as_ref().map(|create| create.value().clone()),
-            created,
-            unique,
-        )
+        let create = target.create.as_ref().and_then(|written| {
+            let Ok(create) = Create::from_str(written.value()) else {
+                self.diagnostics.push(diagnostic(
+                    model.file(),
+                    owner,
+                    ResolveCode::UnknownSplitCreate,
+                    written.position(),
+                    &path.field("create"),
+                    format!(
+                        "`{}` names no element a split creates; the engine creates `{}`",
+                        written.value(),
+                        Create::admitted().join("`, `")
+                    ),
+                ));
+                return None;
+            };
+            Some(create)
+        });
+        Split::new(create, created, unique)
     }
 
     /// Compiles a list of mapping methods under one scope.
@@ -742,27 +763,7 @@ impl<'a> Compiler<'a> {
         let owner = file.header().name().value();
         let method = node.mapping;
         let name = scope.name_of(node.name());
-        // NOTE: an extension file is a file
-        // (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`),
-        // so its `spec` governs the methods it contributes.
-        let contributed = file.file() != scope.file;
-        let inherited = if contributed {
-            file.spec()
-                .unidirectional
-                .as_ref()
-                .map_or(scope.direction, |located| Some(*located.value()))
-        } else {
-            scope.direction
-        };
-        let conceptmap = if contributed {
-            file.spec()
-                .conceptmap
-                .as_ref()
-                .map(|url| url.value().clone())
-                .or_else(|| scope.conceptmap.clone())
-        } else {
-            scope.conceptmap.clone()
-        };
+        let (inherited, conceptmap) = inherited_spec(file, scope);
         let direction = method
             .unidirectional
             .as_ref()
@@ -793,21 +794,30 @@ impl<'a> Compiler<'a> {
             ..scope.clone()
         };
         let fhir_condition = method.fhir_condition.as_ref().and_then(|condition| {
+            let guard = fhir
+                .as_ref()
+                .map_or(scope.fhir.as_str(), |target| target.expression().as_str());
             self.condition(
                 file,
                 condition,
                 scope,
                 Direction::FhirToOpenehr,
                 &path.field("fhirCondition"),
+                guard,
             )
         });
         let openehr_condition = method.openehr_condition.as_ref().and_then(|condition| {
+            let guard = openehr.as_ref().map_or_else(
+                || scope.openehr.to_string(),
+                |target| target.path().to_string(),
+            );
             self.condition(
                 file,
                 condition,
                 scope,
                 Direction::OpenehrToFhir,
                 &path.field("openehrCondition"),
+                &guard,
             )
         });
         let manual = method
@@ -1047,6 +1057,7 @@ impl<'a> Compiler<'a> {
             .enumerate()
             .filter_map(|(index, manual)| {
                 let at = path.field("fhir").index(index);
+                let value = self.manual_value(file, &manual.value, &at)?;
                 self.fhir_target(
                     file.file(),
                     owner,
@@ -1055,12 +1066,7 @@ impl<'a> Compiler<'a> {
                     &at,
                     Site::Write(pinned),
                 )
-                .map(|target| {
-                    crate::resolve::program::ManualPath::new(
-                        Target::Fhir(Box::new(target)),
-                        manual.value.value().clone(),
-                    )
-                })
+                .map(|target| ManualPath::new(Target::Fhir(Box::new(target)), value))
             })
             .collect();
         let openehr = entry
@@ -1069,13 +1075,9 @@ impl<'a> Compiler<'a> {
             .enumerate()
             .filter_map(|(index, manual)| {
                 let at = path.field("openehr").index(index);
+                let value = self.manual_value(file, &manual.value, &at)?;
                 self.openehr_target(file.file(), owner, &manual.path, scope, &at)
-                    .map(|target| {
-                        crate::resolve::program::ManualPath::new(
-                            Target::Openehr(Box::new(target)),
-                            manual.value.value().clone(),
-                        )
-                    })
+                    .map(|target| ManualPath::new(Target::Openehr(Box::new(target)), value))
             })
             .collect();
         Manual::new(
@@ -1089,6 +1091,7 @@ impl<'a> Compiler<'a> {
                     scope,
                     Direction::FhirToOpenehr,
                     &path.field("fhirCondition"),
+                    scope.fhir.as_str(),
                 )
             }),
             entry.openehr_condition.as_ref().and_then(|condition| {
@@ -1098,11 +1101,44 @@ impl<'a> Compiler<'a> {
                     scope,
                     Direction::OpenehrToFhir,
                     &path.field("openehrCondition"),
+                    &scope.openehr.to_string(),
                 )
             }),
             entry.value.as_ref().map(|value| value.value().clone()),
             entry.unidirectional.as_ref().map(|value| *value.value()),
         )
+    }
+
+    /// Reads what one `manual` path writes: a literal or a `$context` member.
+    ///
+    /// "`$context` holds values passed in on the REST call ... a context value
+    /// is referenced from a `manual` `value`"
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`,
+    /// §`$context`), and every example names a member of it, so a bare
+    /// `$context` names no value and is refused.
+    fn manual_value(
+        &mut self,
+        file: &'a ModelMappingFile,
+        written: &Located<String>,
+        path: &ModelPath,
+    ) -> Option<ManualValue> {
+        let text = written.value();
+        let Some(rest) = text.strip_prefix("$context") else {
+            return Some(ManualValue::Literal(text.clone()));
+        };
+        let member = rest.strip_prefix('.').unwrap_or_default();
+        if member.is_empty() {
+            self.diagnostics.push(diagnostic(
+                file.file(),
+                file.header().name().value(),
+                ResolveCode::MalformedContextValue,
+                written.position(),
+                &path.field("value"),
+                format!("`{text}` names no `$context` member, so it carries no value"),
+            ));
+            return None;
+        }
+        Some(ManualValue::Context(member.to_owned()))
     }
 
     /// Compiles one condition, on the side the direction names.
@@ -1113,6 +1149,7 @@ impl<'a> Compiler<'a> {
         scope: &Scope,
         direction: Direction,
         path: &ModelPath,
+        guard: &str,
     ) -> Option<CompiledCondition> {
         let owner = file.header().name().value();
         let on_fhir = direction == Direction::FhirToOpenehr;
@@ -1161,21 +1198,23 @@ impl<'a> Compiler<'a> {
                 }
             })
             .collect();
-        Some(CompiledCondition::new(
+        let attachment = attachment_of(&root, guard);
+        Some(CompiledCondition::new(ConditionParts {
             direction,
-            root,
+            target: root,
             attributes,
-            *condition.operator.value(),
-            condition
+            operator: *condition.operator.value(),
+            criteria: condition
                 .criteria
                 .iter()
                 .map(|criteria| criteria.value().clone())
                 .collect(),
-            condition
+            identifying: condition
                 .identifying
                 .as_ref()
                 .is_some_and(|value| *value.value()),
-        ))
+            attachment,
+        }))
     }
 
     /// Compiles the FHIR side of a `hierarchy.with`, which is only read.
@@ -1512,6 +1551,58 @@ enum LocateError {
     Unknown(String),
     /// More than one node carries it, so nothing says which one is meant.
     Ambiguous(String),
+}
+
+/// Returns the `spec` keys a method inherits from the file that wrote it.
+///
+/// An extension file is a file
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`),
+/// so its `spec` governs the methods it contributes, wherever they land in the
+/// merged model mapping.
+fn inherited_spec(file: &ModelMappingFile, scope: &Scope) -> (Option<Direction>, Option<String>) {
+    if file.file() == scope.file {
+        return (scope.direction, scope.conceptmap.clone());
+    }
+    let direction = file
+        .spec()
+        .unidirectional
+        .as_ref()
+        .map_or(scope.direction, |located| Some(*located.value()));
+    let conceptmap = file
+        .spec()
+        .conceptmap
+        .as_ref()
+        .map(|url| url.value().clone())
+        .or_else(|| scope.conceptmap.clone());
+    (direction, conceptmap)
+}
+
+/// Decides how a condition's `targetRoot` stands to the path it guards.
+///
+/// Both paths are anchored by the time this runs, so the comparison is over
+/// the resolved paths rather than the text a file wrote.
+fn attachment_of(root: &Target, guard: &str) -> Attachment {
+    let written = match *root {
+        Target::Fhir(ref target) => target.expression().as_str().to_owned(),
+        Target::Openehr(ref target) => target.path().to_string(),
+    };
+    if written == guard {
+        return Attachment::Element;
+    }
+    if walks_below(&written, guard) {
+        return Attachment::Descendant;
+    }
+    if walks_below(guard, &written) {
+        return Attachment::Ancestor;
+    }
+    Attachment::Unrelated
+}
+
+/// Whether `candidate` walks below `ancestor` in either path syntax.
+fn walks_below(candidate: &str, ancestor: &str) -> bool {
+    candidate
+        .strip_prefix(ancestor)
+        .is_some_and(|tail| tail.starts_with(['.', '/', '[']))
 }
 
 /// Returns the `$resource` expression every FHIR path is rooted at.

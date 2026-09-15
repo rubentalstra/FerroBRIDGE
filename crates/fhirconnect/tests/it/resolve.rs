@@ -22,6 +22,11 @@ use fhirconnect::model::parse::lower_context;
 use fhirconnect::model::parse::lower_model;
 use fhirconnect::model::semantic::StaticMappingCodes;
 use fhirconnect::resolve::compile::compile;
+use fhirconnect::resolve::program::Attachment;
+use fhirconnect::resolve::program::Create;
+use fhirconnect::resolve::program::ManualPath;
+use fhirconnect::resolve::program::ManualValue;
+use fhirconnect::resolve::program::Mapping;
 use fhirconnect::resolve::program::Method;
 use fhirconnect::resolve::program::Pin;
 use fhirconnect::resolve::program::Program;
@@ -591,11 +596,7 @@ fn an_append_to_a_method_another_extension_added_loads_and_compiles() -> Result<
     let (_directory, set) = loaded_set(&borrow(&files))?;
     let program =
         program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
-    let names: Vec<&str> = program
-        .mappings()
-        .iter()
-        .map(fhirconnect::resolve::program::Mapping::name)
-        .collect();
+    let names: Vec<&str> = program.mappings().iter().map(Mapping::name).collect();
     assert_eq!(names, vec!["problem", "note"]);
     let note = program.mappings().get(1).ok_or("the added method")?;
     let child = note.followed_by().first().ok_or("the appended child")?;
@@ -1553,6 +1554,165 @@ fn a_caret_run_climbs_out_of_a_referenced_resource() -> Result<(), Box<dyn Error
         target.expression().as_str(),
         "$resource.diagnosis.use.coding"
     );
+    Ok(())
+}
+
+/// "Conditions can also be unattached to the path contained in the `with:`
+/// method and point to a different path ... these paths are handled as simple
+/// true/false"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`,
+/// §targetAttribute), so the compiler decides the attachment rather than
+/// leaving the engine to compare path text.
+#[test]
+fn an_unattached_condition_compiles_as_unrelated() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    fhirCondition:\n      targetRoot: \"$resource.verificationStatus\"\n      targetAttribute: \"coding.code\"\n      operator: \"one of\"\n      criteria: \"confirmed\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let mapping = program.mappings().first().ok_or("one mapping")?;
+    let condition = mapping.fhir_condition().ok_or("the condition")?;
+    assert_eq!(condition.attachment(), Attachment::Unrelated);
+    Ok(())
+}
+
+/// `$context` "holds values passed in on the REST call ... a context value is
+/// referenced from a `manual` `value`"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`,
+/// §`$context`), so a compiled manual value says which of the two it is.
+#[test]
+fn a_manual_value_is_a_literal_or_a_context_member() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    manual:\n      - name: \"who\"\n        fhir:\n          - path: \"$fhirRoot.text\"\n            value: \"$context.who\"\n          - path: \"$fhirRoot.id\"\n            value: \"fixed\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let mapping = program.mappings().first().ok_or("one mapping")?;
+    let entry = mapping.manual().first().ok_or("the manual entry")?;
+    let values: Vec<&ManualValue> = entry.fhir().iter().map(ManualPath::value).collect();
+    assert_eq!(
+        values,
+        vec![
+            &ManualValue::Context(String::from("who")),
+            &ManualValue::Literal(String::from("fixed"))
+        ]
+    );
+    Ok(())
+}
+
+#[test]
+fn a_manual_value_naming_no_context_member_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    manual:\n      - name: \"who\"\n        fhir:\n          - path: \"$fhirRoot.text\"\n            value: \"$context\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-malformed-context-value"]);
+    Ok(())
+}
+
+/// "The `create` method defines the element to create. In the case of a
+/// `resource` or `archetype`, this type is inferred by the FHIRconnect mapping
+/// file it is included in"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/HierarchyMappings.adoc`,
+/// §split), and the worked example writes `event` for the openEHR side.
+#[test]
+fn a_split_creates_one_of_the_three_elements() -> Result<(), Box<dyn Error>> {
+    let body = "preprocessor:\n  hierarchy:\n    with:\n      fhir: \"$resource.category\"\n      openehr: \"$archetype/data[at0001]\"\n    split:\n      fhir:\n        create: \"resource\"\nmappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let hierarchy = program.hierarchy().ok_or("the hierarchy mapping")?;
+    let split = hierarchy.split_fhir().ok_or("the FHIR side of the split")?;
+    assert_eq!(split.create(), Some(Create::Resource));
+    Ok(())
+}
+
+#[test]
+fn a_split_creating_an_element_the_engine_does_not_make_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "preprocessor:\n  hierarchy:\n    with:\n      fhir: \"$resource.category\"\n      openehr: \"$archetype/data[at0001]\"\n    split:\n      fhir:\n        create: \"cluster\"\nmappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-split-create"]);
+    Ok(())
+}
+
+/// The engine needs to know whether a FHIR target carries many values, the
+/// counterpart of the openEHR occurrence axes.
+#[test]
+fn a_fhir_target_says_whether_it_repeats() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.category\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    followedBy:\n      mappings:\n        - name: \"one\"\n          unidirectional: \"fhir->openehr\"\n          with:\n            fhir: \"$resource.category.first()\"\n            openehr: \"$archetype/data[at0001]/items[at0002]\"\n        - name: \"scalar\"\n          with:\n            fhir: \"$resource.recordedDate\"\n            openehr: \"$archetype/data[at0001]/items[at0002]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let repeating = program.mappings().first().ok_or("one mapping")?;
+    assert!(repeating.fhir().ok_or("the FHIR side")?.repeats());
+    let narrowed = repeating.followed_by().first().ok_or("the first child")?;
+    assert!(!narrowed.fhir().ok_or("the FHIR side")?.repeats());
+    let scalar = repeating.followed_by().get(1).ok_or("the second child")?;
+    assert!(!scalar.fhir().ok_or("the FHIR side")?.repeats());
+    Ok(())
+}
+
+/// A method is addressed by its dotted name, so the program looks one up
+/// without the engine walking the tree
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
+/// §Append).
+#[test]
+fn the_program_looks_up_a_mapping_by_its_dotted_name() -> Result<(), Box<dyn Error>> {
+    let set = chain(&[CONTEXT, EXTENSION]).map_err(|diagnostics| render(&diagnostics))?;
+    let program = program_of(&set, "ferrobridge_diagnose.context")
+        .map_err(|diagnostics| render(&diagnostics))?;
+    let found = program
+        .mapping_named("problemDiagnose")
+        .ok_or("the start method")?;
+    assert_eq!(found.name(), "problemDiagnose");
+    let nested = program
+        .mappings()
+        .iter()
+        .find_map(|mapping| mapping.followed_by().first())
+        .ok_or("a nested method")?;
+    assert_eq!(
+        program.mapping_named(nested.name()).map(Mapping::name),
+        Some(nested.name())
+    );
+    assert!(program.mapping_named("noSuchMethod").is_none());
     Ok(())
 }
 
