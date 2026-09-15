@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose one mapping is a manual block
+# writing three openEHR paths that share a prefix, so the engine can be driven
+# over the merge rule of types-of-mappings/concept-type/manual.adoc.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_manual
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "certainty"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype/data[at0001]/items[at0073]"
+    manual:
+      - name: "confirmed"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0074"
+          - path: "value"
+            value: "Confirmed"
+        fhirCondition:
+          targetRoot: "$resource.verificationStatus"
+          targetAttribute: "coding.code"
+          operator: "one of"
+          criteria: "confirmed"

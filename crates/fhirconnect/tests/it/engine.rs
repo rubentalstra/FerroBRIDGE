@@ -611,6 +611,55 @@ fn two_mappings_into_one_list_append_and_into_one_value_overwrite() -> Result<()
 }
 
 #[test]
+fn a_manual_block_merges_its_paths_into_one_element() -> Result<(), Box<dyn Error>> {
+    // manual.adoc: "`defining_code/terminology_id/value` and
+    // `defining_code/code_string` are merged together in the same data element
+    // and do not overwrite".
+    let program = compiled("ferrobridge_manual")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_document()?,
+        &NoMappingFunctions,
+        &defaults(),
+    )?;
+    let node = index.node(&AqlPath::new(
+        "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]/items[at0073]/value",
+    ))?;
+    let written = index
+        .read(inbound.value(), node, &[])?
+        .ok_or("the manual block wrote the element")?;
+    assert_eq!(
+        written.get("_type").and_then(serde_json::Value::as_str),
+        Some("DV_CODED_TEXT"),
+        "the three paths built one coded text: {written}"
+    );
+    assert_eq!(
+        written
+            .get("defining_code")
+            .and_then(|code| code.get("code_string"))
+            .and_then(serde_json::Value::as_str),
+        Some("at0074")
+    );
+    assert_eq!(
+        written
+            .get("defining_code")
+            .and_then(|code| code.get("terminology_id"))
+            .and_then(|id| id.get("value"))
+            .and_then(serde_json::Value::as_str),
+        Some("local"),
+        "the terminology path did not overwrite the code path"
+    );
+    assert_eq!(
+        written.get("value").and_then(serde_json::Value::as_str),
+        Some("Confirmed")
+    );
+    Ok(())
+}
+
+#[test]
 fn an_openehr_condition_filters_when_openehr_is_the_input() -> Result<(), Box<dyn Error>> {
     // Conditions.adoc: "in case of openEHR to FHIR it's the other way around",
     // so the openehrCondition decides whether the mapping runs at all.
