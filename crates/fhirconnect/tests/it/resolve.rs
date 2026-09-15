@@ -1286,6 +1286,77 @@ fn an_ordinal_step_in_a_condition_is_accepted() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// "The concept map can also be directly attached inside the header, this way
+/// all codes contained in the conceptmap will be transformed using the
+/// conceptmap"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/manual.adoc`,
+/// §`ConceptMaps`), so a file-level `spec.conceptmap` reaches every method of
+/// that file and the method's own wins where it writes one.
+#[test]
+fn a_file_level_conceptmap_reaches_every_method_of_the_file() -> Result<(), Box<dyn Error>> {
+    let model = format!(
+        "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: EVALUATION.synthetic.v1\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  conceptmap: \"http://example.org/fhir/ConceptMap/header\"\n  openEhrConfig:\n    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1\n  fhirConfig:\n    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition\n{}",
+        "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    followedBy:\n      mappings:\n        - name: \"severity\"\n          conceptmap: \"http://example.org/fhir/ConceptMap/method\"\n          with:\n            fhir: \"$fhirRoot.text\"\n            openehr: \"$openehrRoot\"\n"
+    );
+    let files = [
+        ("model.yml", model),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let problem = program.mappings().first().ok_or("one mapping")?;
+    assert_eq!(
+        problem.conceptmap(),
+        Some("http://example.org/fhir/ConceptMap/header")
+    );
+    let severity = problem.followed_by().first().ok_or("the child")?;
+    assert_eq!(
+        severity.conceptmap(),
+        Some("http://example.org/fhir/ConceptMap/method")
+    );
+    Ok(())
+}
+
+/// An extension file carries its own `spec`, so the `unidirectional` it writes
+/// pins the methods it contributes and leaves the extended file's alone
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`, §Direction).
+#[test]
+fn the_direction_an_extension_file_pins_reaches_the_methods_it_adds() -> Result<(), Box<dyn Error>>
+{
+    let contributed = format!(
+        "grammar: FHIRConnect/v1.0.0\ntype: extension\nmetadata:\n  name: synthetic_extension\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  unidirectional: \"fhir->openehr\"\n  conceptmap: \"http://example.org/fhir/ConceptMap/extension\"\n  extends: EVALUATION.synthetic.v1\n{}",
+        "mappings:\n  - name: \"note\"\n    extension: \"add\"\n    with:\n      fhir: \"$resource.category.first().coding\"\n      openehr: \"$archetype/data[at0001]/items[at0069]\"\n"
+    );
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        ("extension.yml", contributed),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let problem = program.mappings().first().ok_or("the model's method")?;
+    assert_eq!(problem.direction(), None);
+    assert_eq!(problem.conceptmap(), None);
+    let note = program.mappings().get(1).ok_or("the added method")?;
+    assert_eq!(note.direction(), Some(Direction::FhirToOpenehr));
+    assert_eq!(
+        note.conceptmap(),
+        Some("http://example.org/fhir/ConceptMap/extension")
+    );
+    Ok(())
+}
+
 #[test]
 fn a_mapping_code_the_engine_does_not_register_is_refused() -> Result<(), Box<dyn Error>> {
     let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    mappingCode: \"absentFunction\"\n";

@@ -119,6 +119,10 @@ struct Scope {
     openehr: RmPath,
     /// The direction the enclosing file or method pinned.
     direction: Option<Direction>,
+    /// The file whose `spec` keys the enclosing methods inherit.
+    file: PathBuf,
+    /// The `spec.conceptmap` of that file, when it writes one.
+    conceptmap: Option<String>,
     /// The dotted name of the enclosing method, empty at the top level.
     prefix: String,
     /// The model mappings on the slot chain, the start first.
@@ -228,6 +232,12 @@ impl<'a> Compiler<'a> {
             archetype: archetype.clone(),
             openehr: archetype,
             direction: start.spec().unidirectional.as_ref().map(|d| *d.value()),
+            file: start.file().to_path_buf(),
+            conceptmap: start
+                .spec()
+                .conceptmap
+                .as_ref()
+                .map(|url| url.value().clone()),
             prefix: String::new(),
             chain: vec![start_name.clone()],
         };
@@ -713,10 +723,31 @@ impl<'a> Compiler<'a> {
         let owner = file.header().name().value();
         let method = node.mapping;
         let name = scope.name_of(node.name());
+        // NOTE: an extension file is a file
+        // (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`),
+        // so its `spec` governs the methods it contributes.
+        let contributed = file.file() != scope.file;
+        let inherited = if contributed {
+            file.spec()
+                .unidirectional
+                .as_ref()
+                .map_or(scope.direction, |located| Some(*located.value()))
+        } else {
+            scope.direction
+        };
+        let conceptmap = if contributed {
+            file.spec()
+                .conceptmap
+                .as_ref()
+                .map(|url| url.value().clone())
+                .or_else(|| scope.conceptmap.clone())
+        } else {
+            scope.conceptmap.clone()
+        };
         let direction = method
             .unidirectional
             .as_ref()
-            .map_or(scope.direction, |located| Some(*located.value()));
+            .map_or(inherited, |located| Some(*located.value()));
         let with = method.with.as_ref();
         let fhir = with.and_then(|with| {
             self.fhir_side_at(
@@ -737,6 +768,8 @@ impl<'a> Compiler<'a> {
                 .as_ref()
                 .map_or_else(|| scope.openehr.clone(), |target| target.path().clone()),
             direction,
+            file: file.file().to_path_buf(),
+            conceptmap: conceptmap.clone(),
             prefix: name.clone(),
             ..scope.clone()
         };
@@ -782,7 +815,8 @@ impl<'a> Compiler<'a> {
             conceptmap: method
                 .conceptmap
                 .as_ref()
-                .map(|conceptmap| conceptmap.value().clone()),
+                .map(|url| url.value().clone())
+                .or(conceptmap),
             method: method_kind,
             followed_by,
         })
@@ -948,6 +982,12 @@ impl<'a> Compiler<'a> {
                 .unidirectional
                 .as_ref()
                 .map_or(scope.direction, |located| Some(*located.value())),
+            file: slotted.file().to_path_buf(),
+            conceptmap: slotted
+                .spec()
+                .conceptmap
+                .as_ref()
+                .map(|url| url.value().clone()),
             prefix: String::new(),
             chain,
             ..scope.clone()

@@ -739,7 +739,8 @@ pub struct MappingParts {
     pub openehr_condition: Option<Condition>,
     /// The manual entries of the mapping.
     pub manual: Vec<Manual>,
-    /// The concept map the mapping names.
+    /// The `ConceptMap.url` the codes of this method are translated through,
+    /// the method's own or the one its file's header attaches.
     pub conceptmap: Option<String>,
     /// What the mapping does beyond mapping its two paths.
     pub method: Method,
@@ -828,7 +829,14 @@ impl Mapping {
         &self.manual
     }
 
-    /// Returns the concept map the mapping names.
+    /// Returns the concept map the codes of this mapping translate through.
+    ///
+    /// The method's own `conceptmap` wins and a `spec.conceptmap` of the file
+    /// that contributed the method is the fallback: "the concept map can also
+    /// be directly attached inside the header, this way all codes contained in
+    /// the conceptmap will be transformed using the conceptmap"
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/manual.adoc`,
+    /// §`ConceptMaps`).
     #[must_use]
     pub fn conceptmap(&self) -> Option<&str> {
         self.conceptmap.as_deref()
