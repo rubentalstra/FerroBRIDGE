@@ -50,6 +50,19 @@ book.
 | `GET /` | A JSON document naming the product and the version |
 | `GET /health/liveness` | `200` while the process is up |
 | `GET /health/readiness` | `200` when every indicator is up, `503` with each indicator's state otherwise |
+| `POST /fhir/$tofhir` | A `Parameters` in, a `collection` Bundle out |
+| `POST /fhir/$toopenehr` | A `Bundle` in, a `Parameters` with the composition out |
+| `POST /fhir/tofhir` | The composition itself in, the Bundle out |
+| `POST /fhir/toopenehr` | A FHIR body in, the composition itself out |
+
+The two `$` routes are the FHIRconnect operations of the specification's draft
+REST API chapter; the two bare routes are its direct form, which the chapter
+keeps outside the FHIR implementation guide. All four are served when
+`[mappings]` is configured and `[operations] enabled` is true, and answer `503`
+otherwise. They take `application/fhir+json` (the direct `tofhir` route takes
+`application/openehr+json`), answer `415` for anything else, and answer every
+refusal as an `OperationOutcome`. The Integrate page of the book carries the
+contract.
 
 Readiness runs one indicator per configured upstream, on the request. A probe
 that reaches the upstream counts it up, `401` and `404` included; a `5xx` and a

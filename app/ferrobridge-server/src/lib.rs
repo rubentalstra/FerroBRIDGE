@@ -16,6 +16,8 @@ pub mod config;
 pub mod facade;
 pub mod health;
 pub mod indicators;
+pub mod mappings;
+pub mod operations;
 pub mod panic;
 pub mod request_id;
 pub mod request_log;
@@ -233,13 +235,15 @@ fn chain(error: &dyn std::error::Error) -> String {
 /// `GET /` answers a small JSON document naming the product and its version,
 /// `GET /health/liveness` answers `200` while the process is up, and
 /// `GET /health/readiness` answers `200` when every registered indicator is up
-/// and `503` with each indicator's state otherwise.
+/// and `503` with each indicator's state otherwise. The two FHIRconnect
+/// operations and their direct forms are mounted under `/fhir`.
 pub fn router(state: Arc<AppState>, server: &ServerSettings) -> Router {
     let mut routes = Router::new()
         .route("/", get(root))
         .route("/health/liveness", get(liveness))
         .route("/health/readiness", get(readiness))
-        .with_state(Arc::clone(&state));
+        .with_state(Arc::clone(&state))
+        .merge(operations::router(Arc::clone(&state)));
     if let Some(mounted) = state.facade() {
         routes = routes.merge(facade::routes(Arc::clone(mounted)));
     }

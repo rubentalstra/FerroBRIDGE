@@ -140,7 +140,7 @@ pub fn to_fhir<T: Table + ?Sized>(
             source: Box::new(source),
         })?;
     let resource_type = String::from(program.resource().as_str());
-    let mut object = object_of(outcome.value(), &resource_type)?;
+    let mut object = object_of(outcome.value())?;
     subject(table, &mut object, &resource_type, request.context());
     let id = identity(&object, &composition, &resource_type)?;
     object.insert(String::from("id"), Value::String(id.clone()));
@@ -271,12 +271,11 @@ fn composition_uid(composition: &CanonicalComposition) -> Option<&str> {
 }
 
 /// Returns the mapped document as an object, or refuses it.
-fn object_of(document: &Value, resource_type: &str) -> Result<Object, OperationError> {
+fn object_of(document: &Value) -> Result<Object, OperationError> {
     match *document {
         Value::Object(ref object) => Ok(object.clone()),
-        _ => Err(OperationError::NoSubjectResource {
-            resource: String::from(resource_type),
-            context: String::from(resource_type),
+        _ => Err(OperationError::NotAnObject {
+            what: "mapped resource",
         }),
     }
 }

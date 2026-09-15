@@ -134,6 +134,40 @@ openEHR.
   the chapter assigns them to the project. Each one the engine fills is a
   recorded loss.
 
+## The operations module
+
+`operations` is the two FHIRconnect operations, `$tofhir` and `$toopenehr`,
+over the generated FHIR model. The governing text is the REST API chapter of
+the FHIRconnect specification, an unmerged draft (specification pull request
+#93) vendored at its pinned commit, read together with the FHIR R4 operations
+framework.
+
+- **The contracts follow the framework.** `contract` carries
+  `ToFhirRequest`/`ToFhirResponse` and `ToOpenehrRequest`/`ToOpenehrResponse`
+  with `from_parameters` and `to_parameters`, and the chapter's own worked
+  examples round trip through them. Reading is strict: a parameter the
+  operation does not declare, one given twice, one carrying the wrong value
+  type and a FLAT composition with no `templateId` are each a typed refusal
+  with the R4 issue code it renders as.
+- **A composition travels in either serialization.** `CompositionPayload` reads
+  canonical or FLAT, takes the template from `archetype_details.template_id`
+  where the payload carries one, and refuses a disagreement between the payload
+  and the `templateId` a caller pinned.
+- **Strictness is the default.** A run that cannot be performed answers an
+  `OperationOutcome` and no Bundle and no composition; a run that succeeded
+  reports the engine's declared losses as `information` and `warning` issues
+  beside the result.
+- **Every `$tofhir` Bundle carries one `Provenance`.** `target` covers every
+  mapped resource, `recorded` is the run time the caller passed, `agent.who` is
+  `context.who` or the caller's own `Device` reference, and one `entity` with
+  `role = derivation` names the composition.
+- **`context.patient` is a fallback, never a requirement.** When it is
+  supplied, it overwrites the subject the mapping resolved, at the element the
+  FHIR element table names. A Bundle that references more than one subject is
+  refused naming them, because one Bundle maps to one composition.
+- **The crate reads no clock and opens no socket.** The run timestamp and the
+  `Device` reference arrive in `run::Settings`.
+
 ## Licence
 
 Business Source License 1.1 (`LICENSE`): free for every non-production use and

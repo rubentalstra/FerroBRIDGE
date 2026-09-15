@@ -24,6 +24,7 @@
 # Integrate
 
 - [The FHIR facade](integrate/fhir-facade.md)
+- [The FHIRconnect operations](integrate/operations.md)
 - [The OMOP ETL](integrate/omop-etl.md)
 - [Writing and loading mappings](integrate/mappings.md)
 

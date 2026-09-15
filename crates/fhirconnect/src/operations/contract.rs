@@ -69,7 +69,7 @@ impl CompositionPayload {
     /// A canonical composition is the Reference Model structure and carries
     /// `_type`; a flat one is a single-level object of template paths and
     /// carries none. The draft names no discriminator, so reading `_type` is
-    /// FerroBRIDGE's own design.
+    /// FerroBRIDGE's own design (recorded on FerroBRIDGE issue #192).
     ///
     /// # Errors
     ///
@@ -390,8 +390,9 @@ impl ToOpenehrRequest {
     /// Reads the request from a `Parameters` resource.
     ///
     /// `ToOpenEhr.fsh` declares `bundle`, `templateId` and `format` as `in`
-    /// parameters, which is the enveloped form of the same call the chapter
-    /// describes as a bare `Bundle` body.
+    /// parameters, which is the enveloped form of the same call the chapter's
+    /// prose describes as a bare `Bundle` body; the two do not agree, and both
+    /// are read (recorded on FerroBRIDGE issue #192).
     ///
     /// # Errors
     ///

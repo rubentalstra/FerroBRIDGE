@@ -202,24 +202,20 @@ impl OperationError {
 
     /// Returns the text the outcome carries.
     ///
-    /// A mapping refusal renders its own message alone. Its cause chain
-    /// reaches into the value model, which reads clinical content, and a wire
-    /// body is the one place that must never carry any. No specification
-    /// governs this: our own design.
+    /// The whole cause chain is rendered, because a refusal naming only its
+    /// outermost layer tells a mapping author nothing. The text answers the
+    /// caller that sent the content and never reaches a log; "Diagnostic
+    /// information" is what `OperationOutcome.details` is for
+    /// (<https://hl7.org/fhir/R4/operationoutcome.html>).
     fn rendered(&self) -> String {
-        match *self {
-            Self::Mapping { ref source } => source.to_string(),
-            ref other => {
-                let mut line = other.to_string();
-                let mut cause: Option<&dyn core::error::Error> = core::error::Error::source(other);
-                while let Some(source) = cause {
-                    line.push_str(": ");
-                    line.push_str(&source.to_string());
-                    cause = source.source();
-                }
-                line
-            }
+        let mut line = self.to_string();
+        let mut cause: Option<&dyn core::error::Error> = core::error::Error::source(self);
+        while let Some(source) = cause {
+            line.push_str(": ");
+            line.push_str(&source.to_string());
+            cause = source.source();
         }
+        line
     }
 }
 
