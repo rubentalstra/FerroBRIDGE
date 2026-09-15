@@ -75,6 +75,15 @@ pub struct Facade {
     pub subject_namespace: String,
     /// The `AUDIT_DETAILS.system_id` every commit records.
     pub system_id: String,
+    /// The `COMPOSITION.language` every commit carries, ISO 639-1.
+    ///
+    /// The mapping specification puts this field on "the project performing
+    /// the mapping" (`engine/defaults-for-fields.adoc`), and a clinical record
+    /// has no correct default language, so the key is empty until a deployment
+    /// sets it and an enabled facade refuses to start without it.
+    pub composition_language: String,
+    /// The `COMPOSITION.territory` every commit carries, ISO 3166-1.
+    pub composition_territory: String,
 }
 
 impl Default for Facade {
@@ -86,6 +95,8 @@ impl Default for Facade {
             identity_store: PathBuf::from("identity.redb"),
             subject_namespace: String::from("ferrobridge"),
             system_id: String::from("FerroBRIDGE"),
+            composition_language: String::new(),
+            composition_territory: String::new(),
         }
     }
 }
@@ -494,10 +505,19 @@ fn resolve_facade(facade: &Facade) -> Result<FacadeSettings, Error> {
             });
         }
     };
-    if facade.base_url.is_empty() {
-        return Err(Error::Missing {
-            key: String::from("facade.base_url"),
-        });
+    for (key, value) in [
+        ("facade.base_url", &facade.base_url),
+        ("facade.composition_language", &facade.composition_language),
+        (
+            "facade.composition_territory",
+            &facade.composition_territory,
+        ),
+    ] {
+        if value.is_empty() {
+            return Err(Error::Missing {
+                key: String::from(key),
+            });
+        }
     }
     Ok(FacadeSettings {
         settings: crate::facade::Settings {
@@ -505,6 +525,8 @@ fn resolve_facade(facade: &Facade) -> Result<FacadeSettings, Error> {
             ehr_policy,
             subject_namespace: facade.subject_namespace.clone(),
             system_id: facade.system_id.clone(),
+            language: facade.composition_language.clone(),
+            territory: facade.composition_territory.clone(),
         },
         identity_store: facade.identity_store.clone(),
     })

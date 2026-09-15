@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# The model mapping the facade suite runs: the problem or diagnosis name and
+# its date of onset, over the synthetic ferrobridge.diagnose.v1 template of the
+# testkit.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_facade
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemDiagnose"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "onset"
+    with:
+      fhir: "$resource.onset.ofType(dateTime)"
+      openehr: "$archetype/data[at0001]/items[at0077]"
+      type: "DATETIME"

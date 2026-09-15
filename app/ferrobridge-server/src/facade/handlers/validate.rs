@@ -63,8 +63,13 @@ pub(crate) fn validate(
     // (`docs/architecture.md` §12), and this one is discarded with the
     // composition it builds.
     let now = jiff::Timestamp::now().to_string();
-    let built = match engine::inbound(program.program(), program.index(), inbound.document(), &now)
-    {
+    let built = match engine::inbound(
+        program.program(),
+        program.index(),
+        inbound.document(),
+        &now,
+        facade.settings(),
+    ) {
         Ok(outcome) => outcome,
         Err(error) => return Ok(invalid(&render::chain(&error))),
     };

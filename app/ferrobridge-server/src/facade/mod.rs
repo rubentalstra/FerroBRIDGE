@@ -61,6 +61,16 @@ pub struct Settings {
     pub subject_namespace: String,
     /// The `AUDIT_DETAILS.system_id` every commit records.
     pub system_id: String,
+    /// The `COMPOSITION.language` the facade writes, an ISO 639-1 code.
+    ///
+    /// `engine/defaults-for-fields.adoc` puts the composer and the context
+    /// start time on the engine and every other field on "the project
+    /// performing the mapping", so this deployment states it. There is no
+    /// correct default for the language of a clinical record, so the
+    /// configuration has none.
+    pub language: String,
+    /// The `COMPOSITION.territory` the facade writes, an ISO 3166-1 code.
+    pub territory: String,
 }
 
 /// Everything a facade handler reaches.

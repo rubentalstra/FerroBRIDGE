@@ -42,10 +42,14 @@ pub fn inbound(
     index: &WebTemplateIndex,
     document: &Value,
     now: &str,
+    settings: &crate::facade::Settings,
 ) -> Result<Outcome<CanonicalComposition>, EngineError> {
     // TODO(#95): run the terminology calls the concept mappings need here,
     // before any value is built, once the PROGRAMMED registry lands.
-    let defaults = Defaults::at(now).with_composer(COMPOSER);
+    let defaults = Defaults::at(now)
+        .with_composer(COMPOSER)
+        .with_language(&settings.language)
+        .with_territory(&settings.territory);
     to_openehr(
         program,
         &fhir_types::r4::schema::SCHEMAS,

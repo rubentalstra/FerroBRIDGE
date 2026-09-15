@@ -131,7 +131,7 @@ async fn resend(
     let container = VersionedObjectUid::new(&known.versioned_object_uid)
         .map_err(|error| store_identifier(&error))?;
     let preceding = precondition(client, headers, &ehr_id, &container).await?;
-    let composition = build(program, inbound)?;
+    let composition = build(facade, program, inbound)?;
     let rm = strict_read(&composition)?;
     let context = commit::context(
         commit::Change::Modification,
@@ -220,7 +220,7 @@ async fn commit_first(
     )
     .await
     .map_err(|error| ehr_refusal(&error))?;
-    let composition = build(program, inbound)?;
+    let composition = build(facade, program, inbound)?;
     let rm = strict_read(&composition)?;
     let context = commit::context(
         commit::Change::Creation,
@@ -470,14 +470,24 @@ fn template_pin(headers: &HeaderMap) -> Option<TemplateId> {
 }
 
 /// Runs the engine over one inbound resource.
-fn build(program: &Loaded, inbound: &Inbound) -> Result<CanonicalComposition, Refusal> {
+fn build(
+    facade: &Facade,
+    program: &Loaded,
+    inbound: &Inbound,
+) -> Result<CanonicalComposition, Refusal> {
     // NOTE: one instant serves every defaulted time of one ingest
     // (`docs/architecture.md` §12), so the clock is read once here.
     let now = jiff::Timestamp::now().to_string();
 
-    engine::inbound(program.program(), program.index(), inbound.document(), &now)
-        .map(fhirconnect::engine::outcome::Outcome::into_value)
-        .map_err(|error| render::engine_refusal(&error))
+    engine::inbound(
+        program.program(),
+        program.index(),
+        inbound.document(),
+        &now,
+        facade.settings(),
+    )
+    .map(fhirconnect::engine::outcome::Outcome::into_value)
+    .map_err(|error| render::engine_refusal(&error))
 }
 
 /// Re-reads a built composition through the strict RM reader.

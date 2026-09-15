@@ -221,6 +221,7 @@ fn map_one(
         program.index(),
         inbound.document(),
         &now,
+        facade.settings(),
     )
     .map_err(|error| {
         Issue::error(IssueType::Processing)
