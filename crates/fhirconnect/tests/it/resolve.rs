@@ -25,6 +25,7 @@ use fhirconnect::resolve::compile::compile;
 use fhirconnect::resolve::program::Method;
 use fhirconnect::resolve::program::Pin;
 use fhirconnect::resolve::program::Program;
+use fhirconnect::resolve::program::Target;
 use fhirconnect::resolve::program::TemplateId;
 use fhirconnect::resolve::select::SelectError;
 use fhirconnect::resolve::select::select_by_profile;
@@ -1153,6 +1154,72 @@ fn a_read_only_expression_is_accepted_where_only_fhir_is_read() -> Result<(), Bo
         program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
     let mapping = program.mappings().first().ok_or("one mapping")?;
     assert_eq!(mapping.direction(), Some(Direction::FhirToOpenehr));
+    Ok(())
+}
+
+/// "The condition is applied on the input data" and §targetAttribute itself
+/// writes `$resource.identifier.where(type.coding.code="room")`
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`), so a
+/// condition path is read and a step that filters belongs there.
+#[test]
+fn a_filtering_expression_in_a_condition_is_accepted() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    fhirCondition:\n      targetRoot: \"$resource.identifier.where(type.coding.code = 'room')\"\n      targetAttribute: \"value\"\n      operator: \"not empty\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let mapping = program.mappings().first().ok_or("one mapping")?;
+    let condition = mapping.fhir_condition().ok_or("the condition")?;
+    let Target::Fhir(ref root) = *condition.target() else {
+        return Err("the condition filters the FHIR side".into());
+    };
+    assert_eq!(
+        root.expression().as_str(),
+        "$resource.identifier.where(type.coding.code = 'room')"
+    );
+    assert!(matches!(
+        *root.writability(),
+        fhirconnect::tree::path::Writability::ReadOnly { .. }
+    ));
+    assert_eq!(condition.attributes().len(), 1);
+    Ok(())
+}
+
+/// The same holds for an ordinal step: a condition never writes, so `first()`
+/// in one is resolved rather than refused
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`).
+#[test]
+fn an_ordinal_step_in_a_condition_is_accepted() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    fhirCondition:\n      targetRoot: \"$resource.category.first()\"\n      targetAttribute: \"coding.code\"\n      operator: \"one of\"\n      criteria:\n        - \"encounter-diagnosis\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let mapping = program.mappings().first().ok_or("one mapping")?;
+    let condition = mapping.fhir_condition().ok_or("the condition")?;
+    let Target::Fhir(ref root) = *condition.target() else {
+        return Err("the condition filters the FHIR side".into());
+    };
+    assert_eq!(root.expression().as_str(), "$resource.category.first()");
+    let Some(Target::Fhir(attribute)) = condition.attributes().first() else {
+        return Err("the condition names one attribute".into());
+    };
+    assert_eq!(
+        attribute.expression().as_str(),
+        "$resource.category.first().coding.code"
+    );
     Ok(())
 }
 

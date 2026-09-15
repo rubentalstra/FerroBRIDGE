@@ -136,6 +136,27 @@ impl Scope {
     }
 }
 
+/// What a compiled FHIR expression is used for.
+///
+/// A mapping writes the FHIR side unless it is pinned to `fhir->openehr`
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`, §Direction),
+/// so a filtering step there is a refusal. A condition is "applied on the
+/// input data" and its own `targetAttribute` example is
+/// `$resource.identifier.where(type.coding.code="room")`
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Conditions.adoc`), and a
+/// `hierarchy` `with` and a `split.unique` are "used as an indicator" rather
+/// than transformed
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/concept-type/HierarchyMappings.adoc`,
+/// §Hierarchy and unique values), so those sites only ever read.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Site {
+    /// The expression is written through, unless `direction` pins the mapping
+    /// to `fhir->openehr`.
+    Write(Option<Direction>),
+    /// The expression is only ever read, so a step that filters is legitimate.
+    ReadOnly,
+}
+
 /// The compiler's state for one run.
 struct Compiler<'a> {
     set: &'a MappingSet,
@@ -638,8 +659,15 @@ impl<'a> Compiler<'a> {
         let created = target.path.as_ref().and_then(|written| {
             let at = path.field("path");
             if creates_fhir {
-                self.fhir_target(model.file(), owner, written, scope, &at, None)
-                    .map(|target| Target::Fhir(Box::new(target)))
+                self.fhir_target(
+                    model.file(),
+                    owner,
+                    written,
+                    scope,
+                    &at,
+                    Site::Write(scope.direction),
+                )
+                .map(|target| Target::Fhir(Box::new(target)))
             } else {
                 self.openehr_target(model.file(), owner, written, scope, &at)
                     .map(|target| Target::Openehr(Box::new(target)))
@@ -655,7 +683,7 @@ impl<'a> Compiler<'a> {
                     self.openehr_target(model.file(), owner, written, scope, &at)
                         .map(|target| Target::Openehr(Box::new(target)))
                 } else {
-                    self.fhir_target(model.file(), owner, written, scope, &at, None)
+                    self.fhir_target(model.file(), owner, written, scope, &at, Site::ReadOnly)
                         .map(|target| Target::Fhir(Box::new(target)))
                 }
             })
@@ -691,7 +719,13 @@ impl<'a> Compiler<'a> {
             .map_or(scope.direction, |located| Some(*located.value()));
         let with = method.with.as_ref();
         let fhir = with.and_then(|with| {
-            self.fhir_side_with_direction(file, with, scope, &path.field("with"), direction)
+            self.fhir_side_at(
+                file,
+                with,
+                scope,
+                &path.field("with"),
+                Site::Write(direction),
+            )
         });
         let openehr =
             with.and_then(|with| self.openehr_side(file, with, scope, &path.field("with")));
@@ -935,19 +969,30 @@ impl<'a> Compiler<'a> {
         path: &ModelPath,
     ) -> Manual {
         let owner = file.header().name().value();
+        let pinned = entry
+            .unidirectional
+            .as_ref()
+            .map_or(scope.direction, |located| Some(*located.value()));
         let fhir = entry
             .fhir
             .iter()
             .enumerate()
             .filter_map(|(index, manual)| {
                 let at = path.field("fhir").index(index);
-                self.fhir_target(file.file(), owner, &manual.path, scope, &at, None)
-                    .map(|target| {
-                        crate::resolve::program::ManualPath::new(
-                            Target::Fhir(Box::new(target)),
-                            manual.value.value().clone(),
-                        )
-                    })
+                self.fhir_target(
+                    file.file(),
+                    owner,
+                    &manual.path,
+                    scope,
+                    &at,
+                    Site::Write(pinned),
+                )
+                .map(|target| {
+                    crate::resolve::program::ManualPath::new(
+                        Target::Fhir(Box::new(target)),
+                        manual.value.value().clone(),
+                    )
+                })
             })
             .collect();
         let openehr = entry
@@ -1010,7 +1055,7 @@ impl<'a> Compiler<'a> {
                 &condition.target_root,
                 scope,
                 &path.field("targetRoot"),
-                None,
+                Site::ReadOnly,
             )
             .map(|target| Target::Fhir(Box::new(target)))
         } else {
@@ -1040,7 +1085,7 @@ impl<'a> Compiler<'a> {
             .filter_map(|(index, attribute)| {
                 let at = path.field("targetAttributes").index(index);
                 if on_fhir {
-                    self.fhir_target(file.file(), owner, attribute, &inner, &at, None)
+                    self.fhir_target(file.file(), owner, attribute, &inner, &at, Site::ReadOnly)
                         .map(|target| Target::Fhir(Box::new(target)))
                 } else {
                     self.openehr_target(file.file(), owner, attribute, &inner, &at)
@@ -1065,7 +1110,7 @@ impl<'a> Compiler<'a> {
         ))
     }
 
-    /// Compiles the FHIR side of a `with`, with no direction check.
+    /// Compiles the FHIR side of a `hierarchy.with`, which is only read.
     fn fhir_side(
         &mut self,
         file: &'a ModelMappingFile,
@@ -1073,17 +1118,17 @@ impl<'a> Compiler<'a> {
         scope: &Scope,
         path: &ModelPath,
     ) -> Option<FhirTarget> {
-        self.fhir_side_with_direction(file, with, scope, path, None)
+        self.fhir_side_at(file, with, scope, path, Site::ReadOnly)
     }
 
     /// Compiles the FHIR side of a `with`.
-    fn fhir_side_with_direction(
+    fn fhir_side_at(
         &mut self,
         file: &'a ModelMappingFile,
         with: &With,
         scope: &Scope,
         path: &ModelPath,
-        direction: Option<Direction>,
+        site: Site,
     ) -> Option<FhirTarget> {
         let written = with.fhir.as_ref()?;
         self.fhir_target(
@@ -1092,7 +1137,7 @@ impl<'a> Compiler<'a> {
             written,
             scope,
             &path.field("fhir"),
-            direction,
+            site,
         )
     }
 
@@ -1120,7 +1165,9 @@ impl<'a> Compiler<'a> {
     /// A mapping runs both ways unless `unidirectional` pins it to one
     /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/main.adoc`,
     /// §Direction), so an expression that cannot be written through is refused
-    /// here unless the mapping only ever reads FHIR.
+    /// at a [`Site::Write`] unless the mapping only ever reads FHIR. A
+    /// [`Site::ReadOnly`] expression is never written, so it takes every step
+    /// the grammar defines.
     fn fhir_target(
         &mut self,
         file: &Path,
@@ -1128,7 +1175,7 @@ impl<'a> Compiler<'a> {
         written: &Located<String>,
         scope: &Scope,
         path: &ModelPath,
-        direction: Option<Direction>,
+        site: Site,
     ) -> Option<FhirTarget> {
         let expression = match FhirPath::from_str(written.value()) {
             Ok(expression) => expression,
@@ -1162,6 +1209,7 @@ impl<'a> Compiler<'a> {
             }
         };
         if let Writability::ReadOnly { ref step, reason } = *anchored.writability()
+            && let Site::Write(direction) = site
             && direction != Some(Direction::FhirToOpenehr)
         {
             self.diagnostics.push(diagnostic(
