@@ -97,6 +97,14 @@ impl Registry {
         }
     }
 
+    /// Returns this registry with `indicator` registered after the others.
+    #[must_use]
+    pub fn and(self, indicator: Arc<dyn HealthIndicator>) -> Self {
+        let mut indicators: Vec<Arc<dyn HealthIndicator>> = self.indicators.to_vec();
+        indicators.push(indicator);
+        Self::new(indicators)
+    }
+
     /// Returns the names of the registered indicators, in registration order.
     #[must_use]
     pub fn names(&self) -> Vec<&'static str> {

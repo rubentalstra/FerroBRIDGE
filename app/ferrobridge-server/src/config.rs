@@ -41,6 +41,53 @@ pub struct Config {
     pub terminology: Option<Terminology>,
     /// The OMOP CDM database, when one is configured.
     pub cdm: Option<Cdm>,
+    /// Where the mapping files are read from.
+    pub mappings: Mappings,
+    /// The FHIR facade, off until its section turns it on.
+    pub facade: Facade,
+}
+
+/// Where the mapping files this deployment runs are read from.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Mappings {
+    /// The directory the FHIRconnect files are read from, recursively.
+    pub directory: Option<PathBuf>,
+}
+
+/// The FHIR R4 facade lane.
+///
+/// The lane is off until `enabled` is set, and a disabled facade mounts no
+/// route, so a request answers `404` rather than `403`
+/// (`docs/architecture.md` §4.6).
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Facade {
+    /// Whether the facade routes are mounted.
+    pub enabled: bool,
+    /// The absolute FHIR service base a client reaches this server at.
+    pub base_url: String,
+    /// The EHR policy: `existing` or `create_on_first_write`.
+    pub ehr_policy: String,
+    /// The file the identity map is kept in.
+    pub identity_store: PathBuf,
+    /// The namespace a literal subject reference is read in.
+    pub subject_namespace: String,
+    /// The `AUDIT_DETAILS.system_id` every commit records.
+    pub system_id: String,
+}
+
+impl Default for Facade {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            base_url: String::from("http://127.0.0.1:8080/fhir"),
+            ehr_policy: String::from("existing"),
+            identity_store: PathBuf::from("identity.redb"),
+            subject_namespace: String::from("ferrobridge"),
+            system_id: String::from("FerroBRIDGE"),
+        }
+    }
 }
 
 /// The HTTP surface.
@@ -270,6 +317,23 @@ pub enum Error {
         #[source]
         source: std::net::AddrParseError,
     },
+    /// The EHR policy names neither of the two values.
+    #[error("{key} is `{value}`; the policies are existing and create_on_first_write")]
+    EhrPolicy {
+        /// The key that holds it.
+        key: String,
+        /// The value it holds.
+        value: String,
+    },
+    /// The identity store could not be opened at boot.
+    #[error("the identity store at {} could not be opened", path.display())]
+    IdentityStore {
+        /// The path that was tried.
+        path: PathBuf,
+        /// What the store reported.
+        #[source]
+        source: Box<crate::facade::identity::store::StoreError>,
+    },
     /// A URL does not parse.
     #[error("{key} is not a URL")]
     Url {
@@ -399,8 +463,51 @@ impl Config {
                 .map(resolve_terminology)
                 .transpose()?,
             cdm_url: self.cdm.as_ref().map(resolve_cdm).transpose()?,
+            mapping_directory: self.mappings.directory.clone(),
+            facade: if self.facade.enabled {
+                Some(resolve_facade(&self.facade)?)
+            } else {
+                None
+            },
         })
     }
+}
+
+/// The facade lane, resolved.
+#[derive(Debug, Clone)]
+pub struct FacadeSettings {
+    /// What the facade itself was configured with.
+    pub settings: crate::facade::Settings,
+    /// The file the identity map is kept in.
+    pub identity_store: PathBuf,
+}
+
+/// Returns the facade settings `facade` describes.
+fn resolve_facade(facade: &Facade) -> Result<FacadeSettings, Error> {
+    let ehr_policy = match facade.ehr_policy.as_str() {
+        "existing" => crate::facade::ehr::Policy::Existing,
+        "create_on_first_write" => crate::facade::ehr::Policy::CreateOnFirstWrite,
+        _ => {
+            return Err(Error::EhrPolicy {
+                key: String::from("facade.ehr_policy"),
+                value: facade.ehr_policy.clone(),
+            });
+        }
+    };
+    if facade.base_url.is_empty() {
+        return Err(Error::Missing {
+            key: String::from("facade.base_url"),
+        });
+    }
+    Ok(FacadeSettings {
+        settings: crate::facade::Settings {
+            base_url: facade.base_url.clone(),
+            ehr_policy,
+            subject_namespace: facade.subject_namespace.clone(),
+            system_id: facade.system_id.clone(),
+        },
+        identity_store: facade.identity_store.clone(),
+    })
 }
 
 /// The settings the run path holds, with every secret already read.
@@ -416,6 +523,10 @@ pub struct Settings {
     pub terminology: Option<ferrobridge_term::config::Config>,
     /// The OMOP CDM connection URL, when the lane is on.
     pub cdm_url: Option<SecretString>,
+    /// The directory the mapping files are read from, when one is configured.
+    pub mapping_directory: Option<PathBuf>,
+    /// The facade lane, when it is on.
+    pub facade: Option<FacadeSettings>,
 }
 
 /// The HTTP surface, resolved.
@@ -465,6 +576,11 @@ impl Settings {
             tracing::info!("[cdm] is configured and carries identifiable data");
         } else {
             tracing::info!("no [cdm] section: the OMOP lane is off");
+        }
+        if self.facade.is_some() {
+            tracing::info!("[facade] is enabled and carries identifiable data");
+        } else {
+            tracing::info!("[facade] is not enabled: the FHIR facade mounts no route");
         }
     }
 }

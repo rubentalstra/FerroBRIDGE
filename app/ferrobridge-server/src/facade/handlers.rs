@@ -68,9 +68,16 @@ pub async fn read_route(
     headers: HeaderMap,
     uri: Uri,
 ) -> Response {
-    read::read(&facade, &resource_type, &id, &headers, &uri)
-        .await
-        .unwrap_or_else(Refusal::into_response)
+    read::read(
+        &facade,
+        &facade.client_for(&headers),
+        &resource_type,
+        &id,
+        &headers,
+        &uri,
+    )
+    .await
+    .unwrap_or_else(Refusal::into_response)
 }
 
 /// `PUT [base]/{type}/{id}`: update a resource the identity map knows.

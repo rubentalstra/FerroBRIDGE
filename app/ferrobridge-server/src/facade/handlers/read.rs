@@ -8,6 +8,7 @@
 //! map does not know is `404`; a composition the CDR reports deleted is `410`
 //! (`docs/architecture.md` §4.6).
 
+use ferrobridge_openehr::client::Client;
 use ferrobridge_openehr::composition::CompositionOutcome;
 use ferrobridge_openehr::composition::UidBasedId;
 use ferrobridge_openehr::ids::EhrId;
@@ -36,6 +37,7 @@ use crate::facade::status;
 /// `GET [base]/{type}/{id}`.
 pub(crate) async fn read(
     facade: &Facade,
+    client: &Client,
     resource_type: &str,
     id: &str,
     headers: &HeaderMap,
@@ -50,8 +52,9 @@ pub(crate) async fn read(
     let ehr_id = EhrId::new(&binding.ehr_id).map_err(|error| stored_identifier(&error))?;
     let container = VersionedObjectUid::new(&binding.versioned_object_uid)
         .map_err(|error| stored_identifier(&error))?;
-    let (version, composition) = fetch(facade, &ehr_id, &container, &binding.template_id).await?;
-    let source = render::composition_url(&facade.client().config().base_url, &ehr_id, &version)?;
+    let (version, composition) =
+        fetch(facade, client, &ehr_id, &container, &binding.template_id).await?;
+    let source = render::composition_url(&client.config().base_url, &ehr_id, &version)?;
     let rendered = render::render(
         program.program(),
         program.index(),
@@ -139,12 +142,12 @@ pub(crate) fn program_of<'a>(
 /// Fetches the latest version of one composition.
 pub(crate) async fn fetch(
     facade: &Facade,
+    client: &Client,
     ehr_id: &EhrId,
     container: &VersionedObjectUid,
     template_id: &str,
 ) -> Result<(ObjectVersionId, CanonicalComposition), Refusal> {
-    let answered = facade
-        .client()
+    let answered = client
         .composition(
             ehr_id,
             &UidBasedId::VersionedObject(container.clone()),
@@ -205,12 +208,11 @@ pub(crate) async fn fetch(
 
 /// Returns the latest version of one composition, for a precondition check.
 pub(crate) async fn latest_version(
-    facade: &Facade,
+    client: &Client,
     ehr_id: &EhrId,
     container: &VersionedObjectUid,
 ) -> Result<ObjectVersionId, Refusal> {
-    let answered = facade
-        .client()
+    let answered = client
         .composition(
             ehr_id,
             &UidBasedId::VersionedObject(container.clone()),

@@ -25,6 +25,8 @@ use http::header;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_rm::v1_2::composition::composition::Composition;
 
+use ferrobridge_openehr::client::Client;
+
 use crate::facade::Facade;
 use crate::facade::commit;
 use crate::facade::ehr;
@@ -60,14 +62,17 @@ pub(crate) async fn create(
     crate::facade::handlers::supported(facade, resource_type)?;
     let inbound = read::parse(body, resource_type)?;
     let program = select_program(facade, &inbound, headers)?;
+    let client = facade.client_for(headers);
 
     if let Some(known) = consumed(facade, &inbound)? {
-        return resend(facade, program, &inbound, &known, headers).await;
+        return resend(facade, &client, program, &inbound, &known, headers).await;
     }
-    if let Some(answer) = conditional::if_none_exist(facade, resource_type, headers).await? {
+    if let Some(answer) =
+        conditional::if_none_exist(facade, &client, resource_type, headers).await?
+    {
         return Ok(answer);
     }
-    let written = commit_first(facade, program, &inbound).await?;
+    let written = commit_first(facade, &client, program, &inbound).await?;
     answer(facade, program, &written, headers, StatusCode::CREATED)
 }
 
@@ -102,12 +107,21 @@ pub(crate) async fn update(
         internal_id: String::from(internal.as_str()),
         context: binding.context.clone(),
     };
-    resend(facade, program, &inbound, &known, headers).await
+    resend(
+        facade,
+        &facade.client_for(headers),
+        program,
+        &inbound,
+        &known,
+        headers,
+    )
+    .await
 }
 
 /// Runs the update path of a resource the identity map already placed.
 async fn resend(
     facade: &Facade,
+    client: &Client,
     program: &Loaded,
     inbound: &Inbound,
     known: &ConsumedSource,
@@ -116,7 +130,7 @@ async fn resend(
     let ehr_id = EhrId::new(&known.ehr_id).map_err(|error| store_identifier(&error))?;
     let container = VersionedObjectUid::new(&known.versioned_object_uid)
         .map_err(|error| store_identifier(&error))?;
-    let preceding = precondition(facade, headers, &ehr_id, &container).await?;
+    let preceding = precondition(client, headers, &ehr_id, &container).await?;
     let composition = build(program, inbound)?;
     let rm = strict_read(&composition)?;
     let context = commit::context(
@@ -130,8 +144,7 @@ async fn resend(
             Issue::error(IssueType::Exception).diagnosing(render::chain(&error)),
         )
     })?;
-    let answered = facade
-        .client()
+    let answered = client
         .update_composition(
             &ehr_id,
             &container,
@@ -185,6 +198,7 @@ async fn resend(
 /// Commits the first version of a composition for `inbound`.
 async fn commit_first(
     facade: &Facade,
+    client: &Client,
     program: &Loaded,
     inbound: &Inbound,
 ) -> Result<Written, Refusal> {
@@ -199,7 +213,7 @@ async fn commit_first(
             )
         })?;
     let ehr_id = ehr::resolve(
-        facade.client(),
+        client,
         facade.store(),
         &subject,
         facade.settings().ehr_policy,
@@ -219,8 +233,7 @@ async fn commit_first(
             Issue::error(IssueType::Exception).diagnosing(render::chain(&error)),
         )
     })?;
-    let answered = facade
-        .client()
+    let answered = client
         .create_composition(&ehr_id, &rm, &context, Prefer::Representation)
         .await
         .map_err(|error| refuse(&status::of_client_error(&error)))?;
@@ -397,7 +410,7 @@ fn answer(
 /// (`docs/architecture.md` §4.6): the facade reads the latest version and uses
 /// it, so a concurrent writer still produces the `412` the CDR answers.
 async fn precondition(
-    facade: &Facade,
+    client: &Client,
     headers: &HeaderMap,
     ehr_id: &EhrId,
     container: &VersionedObjectUid,
@@ -411,7 +424,7 @@ async fn precondition(
         })?;
         return read::version_of_etag(text, container);
     }
-    read::latest_version(facade, ehr_id, container).await
+    read::latest_version(client, ehr_id, container).await
 }
 
 /// Selects the program one inbound resource runs.

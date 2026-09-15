@@ -26,6 +26,8 @@ use openehr_its::rest::generated::ehr::NewContribution;
 use openehr_its::rest::generated::ehr::Versionable;
 use openehr_rm::v1_2::composition::composition::Composition;
 
+use ferrobridge_openehr::client::Client;
+
 use crate::facade::Facade;
 use crate::facade::commit;
 use crate::facade::ehr;
@@ -108,8 +110,9 @@ pub(crate) async fn transaction(
                 .diagnosing("the Bundle carries no entry this server maps"),
         ));
     };
+    let client = facade.client_for(headers);
     let ehr_id = ehr::resolve(
-        facade.client(),
+        &client,
         facade.store(),
         &subject,
         facade.settings().ehr_policy,
@@ -121,7 +124,7 @@ pub(crate) async fn transaction(
             Issue::error(IssueType::Processing).diagnosing(render::chain(&error)),
         )
     })?;
-    commit_all(facade, &ehr_id, &mapped).await
+    commit_all(facade, &client, &ehr_id, &mapped).await
 }
 
 /// Maps every entry, collecting the refusals rather than stopping at the first.
@@ -251,6 +254,7 @@ fn map_one(
 /// Commits every mapped entry as one CONTRIBUTION.
 async fn commit_all(
     facade: &Facade,
+    client: &Client,
     ehr_id: &EhrId,
     mapped: &[Mapped],
 ) -> Result<axum::response::Response, Refusal> {
@@ -270,8 +274,7 @@ async fn commit_all(
             .collect(),
         audit: commit::audit(commit::Change::Creation, system_id),
     };
-    let answered = facade
-        .client()
+    let answered = client
         .create_contribution(ehr_id, &contribution, Prefer::Minimal)
         .await
         .map_err(|error| write::refuse(&status::of_client_error(&error)))?;

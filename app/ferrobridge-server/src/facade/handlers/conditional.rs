@@ -38,6 +38,7 @@ const ANSWERED: [&str; 2] = ["_id", "identifier"];
 /// match or the `412` of several, already rendered.
 pub(crate) async fn if_none_exist(
     facade: &Facade,
+    client: &ferrobridge_openehr::client::Client,
     resource_type: &str,
     headers: &HeaderMap,
 ) -> Result<Option<axum::response::Response>, Refusal> {
@@ -55,6 +56,7 @@ pub(crate) async fn if_none_exist(
         [] => Ok(None),
         [only] => read::read(
             facade,
+            client,
             resource_type,
             only.as_str(),
             headers,

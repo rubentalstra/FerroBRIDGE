@@ -105,10 +105,29 @@ impl Facade {
         self.store.as_ref()
     }
 
+    /// Returns a handle on the identity map, for the readiness probe.
+    #[must_use]
+    pub fn store_handle(&self) -> Arc<dyn Store> {
+        Arc::clone(&self.store)
+    }
+
     /// Returns the CDR client.
     #[must_use]
     pub const fn client(&self) -> &Client {
         &self.client
+    }
+
+    /// Returns the CDR client one request calls through.
+    ///
+    /// The inbound `X-Request-Id` travels onto every outbound call, so one
+    /// correlation identifier covers the request and the CDR calls it makes.
+    #[must_use]
+    pub fn client_for(&self, headers: &http::HeaderMap) -> Client {
+        headers
+            .get(crate::request_id::HEADER)
+            .and_then(|value| value.to_str().ok())
+            .and_then(|text| ferrobridge_openehr::ids::RequestId::new(text).ok())
+            .map_or_else(|| self.client.clone(), |id| self.client.with_request_id(id))
     }
 
     /// Returns what the deployment configured.
