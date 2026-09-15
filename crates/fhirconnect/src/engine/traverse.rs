@@ -1463,6 +1463,8 @@ impl<T: Table + ?Sized> Run<'_, T> {
     }
 
     /// Fills the composition fields no mapping wrote.
+    // TODO(#187): carry the defaulted fields into the composition's
+    // FEEDER_AUDIT, not only into the outcome.
     fn apply_defaults(&mut self, defaults: &Defaults) {
         let composer = defaults.composer.clone();
         self.default_at("/composer", || {
