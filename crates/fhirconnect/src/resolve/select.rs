@@ -44,8 +44,8 @@ pub enum SelectError {
     ProfileVersion {
         /// What was asked for.
         wanted: String,
-        /// One `claimed versus pinned` line per program that claims the
-        /// profile, in program order.
+        /// One line per program that claims the profile under another
+        /// version, in program order.
         mismatches: Vec<String>,
     },
 }
@@ -95,7 +95,7 @@ pub fn select_by_profile_pinned<'a>(
         ) && claimed_version != pinned
         {
             mismatches.push(format!(
-                "{} claims `{claimed_version}` and pins `{pinned}`",
+                "the instance claims `{claimed_version}` where {} pins `{pinned}`",
                 program.context()
             ));
             continue;

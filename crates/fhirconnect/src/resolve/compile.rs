@@ -1131,8 +1131,7 @@ impl<'a> Compiler<'a> {
         let Some(rest) = text.strip_prefix("$context") else {
             return Some(ManualValue::Literal(text.clone()));
         };
-        let member = rest.strip_prefix('.').unwrap_or_default();
-        if member.is_empty() {
+        let Some(member) = rest.strip_prefix('.').filter(|name| !name.is_empty()) else {
             self.diagnostics.push(diagnostic(
                 file.file(),
                 file.header().name().value(),
@@ -1142,7 +1141,7 @@ impl<'a> Compiler<'a> {
                 format!("`{text}` names no `$context` member, so it carries no value"),
             ));
             return None;
-        }
+        };
         Some(ManualValue::Context(member.to_owned()))
     }
 

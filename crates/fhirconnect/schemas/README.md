@@ -49,7 +49,7 @@ A condition is one object per key here, which is what the published schemas
 type and what every file of the mapping library writes. `basics/Conditions.adoc`
 §type says "there can be more conditions ... notice that the condition is an
 array", which no schema and no published file agrees with; the contradiction is
-recorded as an `upstream-report` issue on this repository's tracker.
+recorded as the `upstream-report` issue #182 on this repository's tracker.
 
 ## Two case rules, and why they differ
 
