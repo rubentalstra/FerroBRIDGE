@@ -100,6 +100,8 @@ pub enum Error {
 /// template does not build, when the mapping files do not validate, and when a
 /// context does not compile against its template.
 pub fn load(settings: &MappingSettings) -> Result<ProgramSet, Error> {
+    // TODO(#85): take the operational templates from the CDR when `[cdr]` is
+    // configured, instead of the directory alone.
     let mut set = ProgramSet::new();
     let mut indices: Vec<WebTemplateIndex> = Vec::new();
     for path in files(&settings.templates, &[TEMPLATE_EXTENSION])? {

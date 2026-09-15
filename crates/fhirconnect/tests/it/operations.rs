@@ -872,3 +872,198 @@ fn a_template_pin_narrows_two_contexts_over_one_profile() -> Result<(), Box<dyn 
     );
     Ok(())
 }
+/// The EHR the draft chapter's own examples name.
+const EHR_ID: &str = "53d89df2-5501-4455-9a65-565a5d1ddb7c";
+
+/// The vendored FSH operation definitions of the draft chapter.
+const DRAFT_FSH: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../docs/specs/fhirconnect/draft-rest-api/rest/input/fsh/operations"
+);
+
+/// One parameter an FSH `OperationDefinition` declares.
+#[derive(Debug, Default)]
+struct Declared {
+    /// The parameter name, without the `#` the FSH code syntax carries.
+    name: String,
+    /// `in` or `out`.
+    usage: String,
+    /// The names of the parts the parameter groups.
+    parts: Vec<String>,
+}
+
+/// Reads the parameters one vendored FSH operation definition declares.
+///
+/// FSH assigns one path per line, so a parameter block opens with
+/// `* parameter[+]` and its members are indented under it
+/// (<https://hl7.org/fhir/uv/shorthand/reference.html>).
+fn fsh(file: &str) -> Result<Vec<Declared>, Box<dyn Error>> {
+    let text = std::fs::read_to_string(format!("{DRAFT_FSH}/{file}"))?;
+    let mut declared: Vec<Declared> = Vec::new();
+    for line in text.lines() {
+        let line = line.trim_end();
+        if line == "* parameter[+]" {
+            declared.push(Declared::default());
+            continue;
+        }
+        let Some(last) = declared.last_mut() else {
+            continue;
+        };
+        if let Some(name) = line.strip_prefix("  * name = #") {
+            last.name = String::from(name);
+        } else if let Some(usage) = line.strip_prefix("  * use = #") {
+            last.usage = String::from(usage);
+        } else if let Some(part) = line.strip_prefix("    * name = #") {
+            last.parts.push(String::from(part));
+        }
+    }
+    Ok(declared)
+}
+
+/// Returns a parameter carrying `text` as a `valueString`.
+fn string_parameter(name: &str, text: &str) -> ParametersParameter {
+    ParametersParameter {
+        name: fhir_types::r4::primitives::String::from(name),
+        value: Some(ParametersParameterValue::String(
+            fhir_types::r4::primitives::String::from(text),
+        )),
+        ..ParametersParameter::default()
+    }
+}
+
+/// Returns a parameter carrying a literal reference as a `valueReference`.
+fn reference_parameter(name: &str, text: &str) -> ParametersParameter {
+    ParametersParameter {
+        name: fhir_types::r4::primitives::String::from(name),
+        value: Some(ParametersParameterValue::Reference(Box::new(reference(
+            text,
+        )))),
+        ..ParametersParameter::default()
+    }
+}
+
+/// Returns the literal reference `carried` holds.
+fn literal(carried: Option<&Reference>) -> Option<String> {
+    carried
+        .and_then(|value| value.reference.as_ref())
+        .and_then(|value| value.value.clone())
+}
+
+#[test]
+fn the_tofhir_contract_reads_the_parameter_set_the_vendored_fsh_declares()
+-> Result<(), Box<dyn Error>> {
+    // ToFhir.fsh (draft) at the pinned commit, its declared parameter set.
+    let declared = fsh("ToFhir.fsh")?;
+    let outputs: Vec<&str> = declared
+        .iter()
+        .filter(|parameter| parameter.usage == "out")
+        .map(|parameter| parameter.name.as_str())
+        .collect();
+    assert_eq!(outputs, vec!["return"], "$tofhir answers one out parameter");
+
+    let committed = committed_composition()?;
+    let mut carried = Parameters::default();
+    for input in declared.iter().filter(|parameter| parameter.usage == "in") {
+        match input.name.as_str() {
+            "composition" => carried
+                .parameter
+                .push(string_parameter(&input.name, &committed.to_string())),
+            "templateId" => carried
+                .parameter
+                .push(string_parameter(&input.name, TEMPLATE)),
+            "context" => {
+                let mut group = ParametersParameter {
+                    name: fhir_types::r4::primitives::String::from(input.name.as_str()),
+                    ..ParametersParameter::default()
+                };
+                for part in &input.parts {
+                    group.part.push(match part.as_str() {
+                        "ehr_id" => string_parameter(part, EHR_ID),
+                        "patient" => reference_parameter(part, "Patient/123"),
+                        "who" => reference_parameter(part, "Practitioner/456"),
+                        "onBehalfOf" => reference_parameter(part, "Organization/charite"),
+                        other => {
+                            return Err(Box::<dyn Error>::from(format!(
+                                "ToFhir.fsh declares the context part `{other}`, which the contract does not read"
+                            )));
+                        }
+                    });
+                }
+                carried.parameter.push(group);
+            }
+            other => {
+                return Err(Box::<dyn Error>::from(format!(
+                    "ToFhir.fsh declares `{other}`, which the contract does not read"
+                )));
+            }
+        }
+    }
+
+    let request = ToFhirRequest::from_parameters(&carried)?;
+    let context = request.context().ok_or("the context group was read")?;
+    assert_eq!(context.ehr_id(), Some(EHR_ID));
+    assert_eq!(
+        literal(context.patient()),
+        Some(String::from("Patient/123"))
+    );
+    assert_eq!(
+        literal(context.who()),
+        Some(String::from("Practitioner/456"))
+    );
+    assert_eq!(
+        literal(context.on_behalf_of()),
+        Some(String::from("Organization/charite"))
+    );
+    Ok(())
+}
+
+#[test]
+fn the_toopenehr_contract_reads_the_parameter_set_the_vendored_fsh_declares()
+-> Result<(), Box<dyn Error>> {
+    // ToOpenEhr.fsh (draft) at the pinned commit, its declared parameter set.
+    let declared = fsh("ToOpenEhr.fsh")?;
+    let outputs: Vec<&str> = declared
+        .iter()
+        .filter(|parameter| parameter.usage == "out")
+        .map(|parameter| parameter.name.as_str())
+        .collect();
+    assert_eq!(
+        outputs,
+        vec!["composition", "outcome"],
+        "$toopenehr answers the composition and an optional outcome"
+    );
+
+    let mut carried = Parameters::default();
+    for input in declared.iter().filter(|parameter| parameter.usage == "in") {
+        match input.name.as_str() {
+            "bundle" => carried.parameter.push(ParametersParameter {
+                name: fhir_types::r4::primitives::String::from(input.name.as_str()),
+                resource: Some(Resource::Bundle(Box::new(bundle(vec![condition(
+                    SUBJECT_PROFILE,
+                )?])?))),
+                ..ParametersParameter::default()
+            }),
+            "templateId" => carried
+                .parameter
+                .push(string_parameter(&input.name, TEMPLATE)),
+            "format" => carried.parameter.push(ParametersParameter {
+                name: fhir_types::r4::primitives::String::from(input.name.as_str()),
+                value: Some(ParametersParameterValue::Code(Code::from("flat"))),
+                ..ParametersParameter::default()
+            }),
+            other => {
+                return Err(Box::<dyn Error>::from(format!(
+                    "ToOpenEhr.fsh declares `{other}`, which the contract does not read"
+                )));
+            }
+        }
+    }
+
+    let request = ToOpenehrRequest::from_parameters(&carried)?;
+    assert_eq!(request.format(), Format::Flat);
+    assert_eq!(
+        request.template_id().map(|id| String::from(id.as_str())),
+        Some(String::from(TEMPLATE))
+    );
+    Ok(())
+}
