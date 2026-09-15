@@ -11,6 +11,7 @@
 //! its `LOCATABLE.uid`.
 
 use fhir_types::codec::Value;
+use fhirconnect::engine::context::CallContext;
 use fhirconnect::engine::outcome::Outcome;
 use fhirconnect::engine::traverse::Defaults;
 use fhirconnect::engine::traverse::EngineError;
@@ -57,6 +58,7 @@ pub fn inbound(
         document,
         &NoMappingFunctions,
         &defaults,
+        &CallContext::new(),
     )
 }
 
@@ -76,6 +78,7 @@ pub fn outbound(
         index,
         composition,
         &NoMappingFunctions,
+        &CallContext::new(),
     )
 }
 

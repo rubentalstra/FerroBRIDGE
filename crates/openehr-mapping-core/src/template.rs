@@ -79,6 +79,24 @@ pub enum TemplateSource {
 }
 
 impl TemplateSource {
+    /// Reads an OPT 1.4 canonical XML document.
+    ///
+    /// This is the ADL 1.4 line of the two generations, the one an `.opt` file
+    /// on disk and the `adl1.4` route of ITS-REST both carry.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PathError::TemplateParse`] when the XML is not an OPT 1.4
+    /// operational template.
+    pub fn opt14(xml: &str) -> Result<Self, PathError> {
+        openehr_its::opt14::from_xml(xml)
+            .map(|template| Self::Opt14(Box::new(template)))
+            .map_err(|source| PathError::TemplateParse {
+                generation: Generation::Adl14,
+                source: Box::new(source),
+            })
+    }
+
     /// Returns the generation this template was served in.
     #[must_use]
     pub const fn generation(&self) -> Generation {
@@ -272,6 +290,15 @@ impl ConstraintBinding {
 /// Why a template, a path or a composition was refused.
 #[derive(Debug, thiserror::Error)]
 pub enum PathError {
+    /// The document is not an operational template of that generation.
+    #[error("the document is not an {generation} operational template")]
+    TemplateParse {
+        /// The generation the document was read as.
+        generation: Generation,
+        /// Why the reader refused it.
+        #[source]
+        source: Box<openehr_its::xml::runtime::XmlError>,
+    },
     /// The Web Template builder refused the operational template.
     #[error("the {generation} operational template does not build a web template")]
     TemplateBuild {
@@ -399,6 +426,15 @@ pub enum PathError {
         /// One rendered message per violation.
         messages: Vec<String>,
     },
+    /// The flattener refused a canonical composition.
+    #[error("the composition built against `{template_id}` does not flatten")]
+    CompositionFlatten {
+        /// The template the composition was built against.
+        template_id: String,
+        /// Why the flattener refused it.
+        #[source]
+        source: Box<FlatError>,
+    },
     /// The composition was built against another template.
     #[error("the composition names the template `{found}`, not `{expected}`")]
     TemplateMismatch {
@@ -414,7 +450,9 @@ impl PathError {
     #[must_use]
     pub const fn code(&self) -> DiagnosticCode {
         match *self {
-            Self::TemplateBuild { .. } => DiagnosticCode::TemplateBuild,
+            Self::TemplateParse { .. } | Self::TemplateBuild { .. } => {
+                DiagnosticCode::TemplateBuild
+            }
             Self::IdCodedTemplate { .. } => DiagnosticCode::IdCodedTemplate,
             Self::MalformedOccurrences { .. }
             | Self::MalformedAqlPath { .. }
@@ -426,6 +464,7 @@ impl PathError {
             | Self::NotADescendant { .. }
             | Self::OccurrenceCount { .. } => DiagnosticCode::UnknownTemplatePath,
             Self::CompositionBuild { .. }
+            | Self::CompositionFlatten { .. }
             | Self::InvalidComposition { .. }
             | Self::TemplateMismatch { .. } => DiagnosticCode::InvalidComposition,
         }

@@ -24,6 +24,30 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- `fhirconnect::operations` and the `$tofhir` and `$toopenehr` HTTP surface
+  (#114). The two operations the draft FHIRconnect REST API chapter defines
+  (specification pull request #93, pinned by commit) are served by
+  `ferrobridge serve`: `POST /fhir/$tofhir` takes a `Parameters` whose
+  `composition` is the openEHR composition as a JSON string, canonical or FLAT
+  with `templateId`, plus an optional `context` group of `ehr_id`, `patient`,
+  `who` and `onBehalfOf`, and answers a `collection` Bundle carrying the mapped
+  resources, exactly one `Provenance` and an `OperationOutcome` entry when the
+  run declared a loss; `POST /fhir/$toopenehr` takes a Bundle and answers a
+  `Parameters` with the composition string and an optional `outcome`. The
+  direct form the chapter keeps outside the FHIR implementation guide is served
+  too, as `POST /fhir/tofhir` with `Content-Type: application/openehr+json` and
+  `POST /fhir/toopenehr` answering in that media type. `templateId`, `format`
+  and `ehr_id` travel in the body or the query, with the body taking
+  precedence; a FLAT composition with no template is `400 required`; any other
+  media type is `415`; every refusal is an `OperationOutcome` with its R4 issue
+  code. Strictness is the default, so a failed mapping answers an outcome and
+  no Bundle or composition, a Bundle referencing more than one subject is
+  refused naming the subjects, and `context.patient` takes precedence over the
+  subject a mapping resolved without ever being required. The mapping set is
+  compiled once at boot from `[mappings] directory` and the new
+  `[mappings] templates` key, and `[operations]` carries the lane switch, the
+  `Device` reference the `Provenance` defaults to and the composition defaults
+  an inbound run applies.
 - The FHIR R4 facade (#85), mounted under `/fhir` when `[facade] enabled` is
   set and answering nothing at all when it is not, so a disabled facade is a
   `404` rather than a `403`. It serves a `CapabilityStatement` built from the

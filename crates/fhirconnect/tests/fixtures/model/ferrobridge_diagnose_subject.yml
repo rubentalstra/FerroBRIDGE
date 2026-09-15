@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# The minimal problem-diagnosis chain plus the subject the mapping resolves on
+# its own, so a $tofhir run that supplies no context.patient still produces a
+# Condition the R4 model admits (Condition.subject is 1..1). The reference is
+# synthetic and under example.org, which RFC 6761 section 6.5 reserves.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_diagnose_subject
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemDiagnose"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "onset"
+    with:
+      fhir: "$resource.onset.ofType(dateTime)"
+      openehr: "$archetype/data[at0001]/items[at0077]"
+      type: "DATETIME"
+
+  - name: "subject"
+    unidirectional: "openehr->fhir"
+    with:
+      fhir: "$resource.subject"
+    manual:
+      - name: "subjectReference"
+        fhir:
+          - path: "reference"
+            value: "Patient/synthetic-subject-0001"

@@ -310,6 +310,113 @@ impl WebTemplateIndex {
         })
     }
 
+    /// Builds a canonical composition from a FLAT document.
+    ///
+    /// FLAT (simSDT) is the single-level serialization whose keys are template
+    /// paths (Simplified Formats, §Flat format), the second form a composition
+    /// is exchanged in. `now` is the caller's current timestamp, used for the
+    /// `ctx/time` default alone; this crate reads no clock.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PathError::CompositionBuild`] when the reader or the builder
+    /// refuses the document and [`PathError::InvalidComposition`] when the
+    /// result does not validate against the template.
+    pub fn build_from_flat(
+        &self,
+        flat: &serde_json::Map<String, Value>,
+        now: &str,
+    ) -> Result<CanonicalComposition, PathError> {
+        let document = openehr_its::flat::sim::flat::parse_flat(flat).map_err(|source| {
+            PathError::CompositionBuild {
+                template_id: self.template_id().to_owned(),
+                source: Box::new(source),
+            }
+        })?;
+        let built =
+            openehr_its::flat::build::build_composition(&document, self.web_template(), now)
+                .map_err(|source| PathError::CompositionBuild {
+                    template_id: self.template_id().to_owned(),
+                    source: Box::new(source),
+                })?;
+        let messages = openehr_its::rm_instance::validate_composition(&built, self.web_template());
+        if !messages.is_empty() {
+            return Err(PathError::InvalidComposition {
+                template_id: self.template_id().to_owned(),
+                messages: messages
+                    .iter()
+                    .map(|message| format!("{}: {}", message.path, message.message))
+                    .collect(),
+            });
+        }
+        Ok(CanonicalComposition {
+            value: built,
+            template_id: self.template_id().to_owned(),
+            generation: self.generation(),
+        })
+    }
+
+    /// Wraps canonical JSON a caller handed in, validated against this
+    /// template.
+    ///
+    /// A composition that reaches the bridge from outside is validated before
+    /// anything reads it, so a document of another template is a refusal
+    /// rather than a read that answers nothing.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PathError::InvalidComposition`] when the document does not
+    /// validate against the template.
+    pub fn accept(&self, value: Value) -> Result<CanonicalComposition, PathError> {
+        let messages = openehr_its::rm_instance::validate_composition(&value, self.web_template());
+        if !messages.is_empty() {
+            return Err(PathError::InvalidComposition {
+                template_id: self.template_id().to_owned(),
+                messages: messages
+                    .iter()
+                    .map(|message| format!("{}: {}", message.path, message.message))
+                    .collect(),
+            });
+        }
+        Ok(CanonicalComposition {
+            value,
+            template_id: self.template_id().to_owned(),
+            generation: self.generation(),
+        })
+    }
+
+    /// Returns `composition` as a FLAT document.
+    ///
+    /// The template drives the walk, so the result is the same content in the
+    /// other serialization (Simplified Formats,
+    /// §Conversion Between Formats).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`PathError::TemplateMismatch`] when the composition was built
+    /// against another template and [`PathError::CompositionFlatten`] when the
+    /// flattener refuses it.
+    pub fn flatten(
+        &self,
+        composition: &CanonicalComposition,
+    ) -> Result<serde_json::Map<String, Value>, PathError> {
+        if composition.template_id != self.template_id() {
+            return Err(PathError::TemplateMismatch {
+                expected: self.template_id().to_owned(),
+                found: composition.template_id.clone(),
+            });
+        }
+        let document = openehr_its::flat::flatten::flatten_composition(
+            &composition.value,
+            self.web_template(),
+        )
+        .map_err(|source| PathError::CompositionFlatten {
+            template_id: self.template_id().to_owned(),
+            source: Box::new(source),
+        })?;
+        Ok(openehr_its::flat::sim::flat::emit_flat(&document))
+    }
+
     /// Reads the value of one node out of a composition.
     ///
     /// The occurrences name the instance of each repeating node on the way to

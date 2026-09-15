@@ -111,12 +111,19 @@ server says so once at start-up.
 
 ### `[mappings]`
 
-Where the FHIRconnect files this deployment runs are read from. The facade and
-the mapping subcommands read the same set.
+The FHIRconnect mapping set this deployment runs. The facade, the two
+FHIRconnect operations and the mapping subcommands read the same set. Both
+directories are read once at boot, and a mapping that does not compile refuses
+the start rather than the first request that touches it.
 
 | Key | Default | Meaning |
 |---|---|---|
-| `directory` | none | The directory the mapping files are read from, recursively |
+| `directory` | none | The directory the mapping files are read from, recursively (`.yml`, `.yaml`) |
+| `templates` | none | The directory holding the operational templates the mappings compile against, as OPT 1.4 XML (`.opt`) |
+
+The facade takes its templates from the CDR and needs `directory` alone. The
+two FHIRconnect operations compile against the local files and need both keys;
+with `directory` alone they stay off and the server says so at start-up.
 
 ### `[facade]`
 
@@ -148,6 +155,26 @@ to the composition it came from, and the source identity of every resource the
 facade consumed. No clinical content is written into it. Back it up with the
 CDR, because a lost map means the next create writes a second composition for a
 resource the CDR already holds.
+
+### `[operations]`
+
+The `$tofhir` and `$toopenehr` lane. Both operations are pure transformations
+and reach no CDR, so they are served whenever `[mappings]` names both
+directories. Without them the two routes answer `503`.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | `true` | Whether the two operations and their direct forms are served |
+| `device_reference` | `Device/ferrobridge-<version>` | The `Provenance` `agent.who` a call that supplies no `context.who` gets |
+| `composer` | `FHIRconnect` | The composition composer an inbound run fills in when no mapping does |
+| `composition_language` | none | The composition language, an ISO 639-1 code |
+| `composition_territory` | none | The composition territory, an ISO 3166-1 alpha-2 code |
+
+The FHIRconnect engine chapter puts the composer and the context start time on
+the engine and the composition language and territory on the project performing
+the mapping, so set the last two: a template whose reference model requires
+them refuses to build a composition without them, and `$toopenehr` then answers
+an `OperationOutcome` naming the missing field.
 
 ## The secrets, in one place
 

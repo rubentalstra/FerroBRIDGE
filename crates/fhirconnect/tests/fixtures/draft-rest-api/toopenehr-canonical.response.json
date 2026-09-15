@@ -1,0 +1,9 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "composition",
+      "valueString": "{\"_type\": \"COMPOSITION\", \"name\": {\"_type\": \"DV_TEXT\", \"value\": \"International Patient Summary\"}, ...}"
+    }
+  ]
+}

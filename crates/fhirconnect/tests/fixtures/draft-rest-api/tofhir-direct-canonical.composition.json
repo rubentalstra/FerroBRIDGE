@@ -1,0 +1,19 @@
+{
+  "_type": "COMPOSITION",
+  "name": { "_type": "DV_TEXT", "value": "KDS_Fall_einfach" },
+  "archetype_details": {
+    "archetype_id": { "value": "openEHR-EHR-COMPOSITION.fall.v1" },
+    "template_id": { "value": "KDS_Fall_einfach" },
+    "rm_version": "1.0.4"
+  },
+  "category": {
+    "_type": "DV_CODED_TEXT",
+    "value": "event",
+    "defining_code": {
+      "_type": "CODE_PHRASE",
+      "terminology_id": { "_type": "TERMINOLOGY_ID", "value": "openehr" },
+      "code_string": "433"
+    }
+  },
+  "composer": { "_type": "PARTY_SELF" }
+}

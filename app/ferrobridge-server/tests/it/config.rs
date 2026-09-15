@@ -39,6 +39,17 @@ wire_version = "r4b"
 
 [cdm]
 url = "postgres://bridge@db.invalid/cdm"
+
+[mappings]
+directory = "/srv/ferrobridge/mappings"
+templates = "/srv/ferrobridge/templates"
+
+[operations]
+enabled = false
+device_reference = "Device/bridge-one"
+composer = "A synthetic composer"
+composition_language = "de"
+composition_territory = "DE"
 "#;
 
 /// Returns the environment map a single override makes.
@@ -72,6 +83,56 @@ fn a_file_states_every_section_and_the_resolver_reads_it() -> Result<(), Box<dyn
     assert_eq!(
         Some("postgres://bridge@db.invalid/cdm"),
         settings.cdm_url.as_ref().map(ExposeSecret::expose_secret)
+    );
+    let mappings = settings.mappings.as_ref().ok_or("the mapping set is on")?;
+    assert_eq!(
+        std::path::Path::new("/srv/ferrobridge/mappings"),
+        mappings.directory
+    );
+    assert_eq!(
+        std::path::Path::new("/srv/ferrobridge/templates"),
+        mappings.templates
+    );
+    assert!(!settings.operations.enabled);
+    assert_eq!("Device/bridge-one", settings.operations.device_reference);
+    assert_eq!("A synthetic composer", settings.operations.composer);
+    assert_eq!(
+        Some("de"),
+        settings.operations.composition_language.as_deref()
+    );
+    assert_eq!(
+        Some("DE"),
+        settings.operations.composition_territory.as_deref()
+    );
+    Ok(())
+}
+
+#[test]
+fn the_operations_lane_is_on_by_default_and_names_its_own_device() -> Result<(), Box<dyn StdError>>
+{
+    let settings = Config::from_sources(None, &BTreeMap::new())?.resolve()?;
+    assert!(settings.operations.enabled);
+    assert!(
+        settings.mappings.is_none(),
+        "no [mappings] section leaves the lane with nothing to serve"
+    );
+    assert_eq!(
+        format!("Device/ferrobridge-{}", env!("CARGO_PKG_VERSION")),
+        settings.operations.device_reference
+    );
+    Ok(())
+}
+
+#[test]
+fn a_mappings_section_with_no_directory_is_refused() -> Result<(), Box<dyn StdError>> {
+    let file = "[mappings]\ntemplates = \"/srv/templates\"\n";
+    let error = Config::from_sources(Some(file), &BTreeMap::new())?
+        .resolve()
+        .err()
+        .ok_or("a section present with no directory is refused")?;
+    assert!(
+        matches!(error, Error::Missing { ref key } if key == "mappings.directory"),
+        "the refusal names the key: {error}"
     );
     Ok(())
 }

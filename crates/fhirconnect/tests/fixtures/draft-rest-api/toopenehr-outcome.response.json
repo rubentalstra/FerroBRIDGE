@@ -1,0 +1,24 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "composition",
+      "valueString": "{\"_type\": \"COMPOSITION\", \"name\": {\"_type\": \"DV_TEXT\", \"value\": \"International Patient Summary\"}, ...}"
+    },
+    {
+      "name": "outcome",
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "issue": [
+          {
+            "severity": "warning",
+            "code": "incomplete",
+            "details": {
+              "text": "Element Observation.effectivePeriod could not be mapped; no corresponding openEHR archetype path found."
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

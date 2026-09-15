@@ -9,6 +9,8 @@
 
 mod corpus;
 mod engine;
+mod operations;
 mod pins;
 mod resolve;
+mod support;
 mod tree;

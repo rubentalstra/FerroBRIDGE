@@ -45,14 +45,23 @@ pub struct Config {
     pub mappings: Mappings,
     /// The FHIR facade, off until its section turns it on.
     pub facade: Facade,
+    /// The FHIRconnect operations.
+    pub operations: Operations,
 }
 
-/// Where the mapping files this deployment runs are read from.
+/// The mapping set this deployment runs.
+///
+/// One tree of FHIRconnect mapping files and, for the two operations, one
+/// directory of the operational templates they compile against. Both are read
+/// once at boot, so a mapping that does not compile is a refusal to start
+/// rather than a failure on the request that first touches it.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Mappings {
     /// The directory the FHIRconnect files are read from, recursively.
     pub directory: Option<PathBuf>,
+    /// The directory holding the operational templates, as OPT 1.4 XML.
+    pub templates: Option<PathBuf>,
 }
 
 /// The FHIR R4 facade lane.
@@ -97,6 +106,42 @@ impl Default for Facade {
             system_id: String::from("FerroBRIDGE"),
             composition_language: String::new(),
             composition_territory: String::new(),
+        }
+    }
+}
+
+/// The FHIRconnect operations lane.
+///
+/// The two operations are pure transformations that reach no CDR, so they are
+/// served whenever a mapping set names both of its directories.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Operations {
+    /// Whether the two operations are served.
+    pub enabled: bool,
+    /// The `Device` reference the `Provenance` `agent.who` carries when a call
+    /// supplies no `context.who`.
+    pub device_reference: String,
+    /// The composer an inbound run fills in when no mapping does.
+    pub composer: String,
+    /// The composition language, as an ISO 639-1 code.
+    pub composition_language: Option<String>,
+    /// The composition territory, as an ISO 3166-1 alpha-2 code.
+    pub composition_territory: Option<String>,
+}
+
+impl Default for Operations {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            device_reference: format!(
+                "Device/{}-{}",
+                crate::state::PRODUCT.to_ascii_lowercase(),
+                crate::state::VERSION
+            ),
+            composer: String::from("FHIRconnect"),
+            composition_language: None,
+            composition_territory: None,
         }
     }
 }
@@ -475,12 +520,42 @@ impl Config {
                 .transpose()?,
             cdm_url: self.cdm.as_ref().map(resolve_cdm).transpose()?,
             mapping_directory: self.mappings.directory.clone(),
+            mappings: resolve_mappings(&self.mappings)?,
             facade: if self.facade.enabled {
                 Some(resolve_facade(&self.facade)?)
             } else {
                 None
             },
+            operations: OperationsSettings {
+                enabled: self.operations.enabled,
+                device_reference: self.operations.device_reference.clone(),
+                composer: self.operations.composer.clone(),
+                composition_language: self.operations.composition_language.clone(),
+                composition_territory: self.operations.composition_territory.clone(),
+            },
         })
+    }
+}
+
+/// Returns the mapping-set paths `mappings` names, when it names both.
+///
+/// The facade reads `directory` alone and takes its templates from the CDR,
+/// so a set with no `templates` is a facade-only set and leaves the two
+/// operations off. A `templates` with no `directory` names nothing to compile.
+///
+/// # Errors
+///
+/// Returns [`Error::Missing`] when `templates` is set and `directory` is not.
+fn resolve_mappings(mappings: &Mappings) -> Result<Option<MappingSettings>, Error> {
+    match (mappings.directory.as_ref(), mappings.templates.as_ref()) {
+        (Some(directory), Some(templates)) => Ok(Some(MappingSettings {
+            directory: directory.clone(),
+            templates: templates.clone(),
+        })),
+        (None, Some(_)) => Err(Error::Missing {
+            key: String::from("mappings.directory"),
+        }),
+        _ => Ok(None),
     }
 }
 
@@ -547,8 +622,36 @@ pub struct Settings {
     pub cdm_url: Option<SecretString>,
     /// The directory the mapping files are read from, when one is configured.
     pub mapping_directory: Option<PathBuf>,
+    /// The mapping set the operations compile, when both directories are set.
+    pub mappings: Option<MappingSettings>,
     /// The facade lane, when it is on.
     pub facade: Option<FacadeSettings>,
+    /// The FHIRconnect operations lane.
+    pub operations: OperationsSettings,
+}
+
+/// The mapping set, resolved.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MappingSettings {
+    /// The directory holding the FHIRconnect mapping files.
+    pub directory: PathBuf,
+    /// The directory holding the operational templates.
+    pub templates: PathBuf,
+}
+
+/// The FHIRconnect operations lane, resolved.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct OperationsSettings {
+    /// Whether the two operations are served.
+    pub enabled: bool,
+    /// The `Device` reference the `Provenance` `agent.who` defaults to.
+    pub device_reference: String,
+    /// The composer an inbound run fills in when no mapping does.
+    pub composer: String,
+    /// The composition language, as an ISO 639-1 code.
+    pub composition_language: Option<String>,
+    /// The composition territory, as an ISO 3166-1 alpha-2 code.
+    pub composition_territory: Option<String>,
 }
 
 /// The HTTP surface, resolved.
@@ -603,6 +706,15 @@ impl Settings {
             tracing::info!("[facade] is enabled and carries identifiable data");
         } else {
             tracing::info!("[facade] is not enabled: the FHIR facade mounts no route");
+        }
+        match self.mappings {
+            Some(_) if self.operations.enabled => {
+                tracing::info!("[mappings] is configured: the FHIRconnect operations are served");
+            }
+            Some(_) => tracing::info!("[operations] enabled is false: the operations are off"),
+            None => tracing::info!(
+                "[mappings] names no directory and templates pair: the operations are off"
+            ),
         }
     }
 }

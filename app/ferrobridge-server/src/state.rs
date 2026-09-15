@@ -5,6 +5,9 @@
 
 use std::sync::Arc;
 
+use fhirconnect::engine::traverse::Defaults;
+use fhirconnect::operations::programs::ProgramSet;
+
 use crate::config::Settings;
 use crate::health::Registry;
 use crate::indicators;
@@ -14,6 +17,80 @@ pub const PRODUCT: &str = "FerroBRIDGE";
 
 /// The product version the root document reports.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// The compiled mapping set and what every operation run needs beside it.
+///
+/// The run timestamp is read per request, because it is the
+/// `Provenance.recorded` instant of that run and the composition context start
+/// time the engine defaults to; `fhirconnect` reads no clock, so this is where
+/// the clock lives.
+#[derive(Debug)]
+pub struct OperationsLane {
+    programs: ProgramSet,
+    device: String,
+    composer: String,
+    language: Option<String>,
+    territory: Option<String>,
+}
+
+impl OperationsLane {
+    /// Pairs a compiled set with the `Device` reference of this deployment.
+    #[must_use]
+    pub fn new(programs: ProgramSet, device: impl Into<String>) -> Self {
+        Self {
+            programs,
+            device: device.into(),
+            composer: String::from(DEFAULT_COMPOSER),
+            language: None,
+            territory: None,
+        }
+    }
+
+    /// Returns this lane with the composition defaults an inbound run applies.
+    ///
+    /// `engine/defaults-for-fields.adoc` puts the composer on the engine and
+    /// the composition language and territory on "the project performing the
+    /// mapping", so they are configured rather than invented.
+    #[must_use]
+    pub fn with_composition_defaults(
+        mut self,
+        composer: impl Into<String>,
+        language: Option<String>,
+        territory: Option<String>,
+    ) -> Self {
+        self.composer = composer.into();
+        self.language = language;
+        self.territory = territory;
+        self
+    }
+
+    /// Returns the compiled programs one call selects from.
+    #[must_use]
+    pub const fn programs(&self) -> &ProgramSet {
+        &self.programs
+    }
+
+    /// Returns the settings of one run, stamped with the current time.
+    #[must_use]
+    pub fn settings(&self) -> fhirconnect::operations::run::Settings {
+        let now = jiff::Timestamp::now().to_string();
+        let mut defaults = Defaults::at(now.clone()).with_composer(self.composer.as_str());
+        if let Some(ref language) = self.language {
+            defaults = defaults.with_language(language.as_str());
+        }
+        if let Some(ref territory) = self.territory {
+            defaults = defaults.with_territory(territory.as_str());
+        }
+        fhirconnect::operations::run::Settings::new(self.device.as_str(), now)
+            .with_defaults(defaults)
+    }
+}
+
+/// The composer the engine fills in when no mapping does.
+///
+/// "the `composer` can be defaulted with a value such as `FHIRconnect` party"
+/// (`engine/defaults-for-fields.adoc`).
+const DEFAULT_COMPOSER: &str = "FHIRconnect";
 
 /// The state the router is built over.
 #[derive(Debug)]
@@ -27,6 +104,8 @@ pub struct AppState {
     /// A disabled facade is `None` and mounts no route, so a request answers
     /// `404` rather than `403` (`docs/architecture.md` §4.6).
     facade: Option<Arc<crate::facade::Facade>>,
+    /// The FHIRconnect operations lane, when a mapping set is configured.
+    operations: Option<OperationsLane>,
 }
 
 impl AppState {
@@ -58,10 +137,34 @@ impl AppState {
                 })?;
             indicators.push(Arc::new(indicators::Terminology::new(client)));
         }
+        let operations = match settings.mappings {
+            Some(ref mappings) if settings.operations.enabled => {
+                let programs = crate::mappings::load(mappings).map_err(|source| {
+                    crate::config::Error::Client {
+                        upstream: "mappings",
+                        source: Box::new(source),
+                    }
+                })?;
+                tracing::info!(
+                    programs = programs.len(),
+                    "the FHIRconnect mapping set is compiled"
+                );
+                Some(
+                    OperationsLane::new(programs, settings.operations.device_reference.as_str())
+                        .with_composition_defaults(
+                            settings.operations.composer.as_str(),
+                            settings.operations.composition_language.clone(),
+                            settings.operations.composition_territory.clone(),
+                        ),
+                )
+            }
+            _ => None,
+        };
         Ok(Self {
             health: Registry::new(indicators),
             logged_query_parameters: settings.telemetry.logged_query_parameters.clone(),
             facade: None,
+            operations,
         })
     }
 
@@ -73,6 +176,7 @@ impl AppState {
             health,
             logged_query_parameters: Vec::new(),
             facade: None,
+            operations: None,
         }
     }
 
@@ -101,6 +205,19 @@ impl AppState {
     pub fn logging_query_parameters(mut self, names: Vec<String>) -> Self {
         self.logged_query_parameters = names;
         self
+    }
+
+    /// Returns this state with `lane` serving the FHIRconnect operations.
+    #[must_use]
+    pub fn serving_operations(mut self, lane: OperationsLane) -> Self {
+        self.operations = Some(lane);
+        self
+    }
+
+    /// Returns the FHIRconnect operations lane, when one is configured.
+    #[must_use]
+    pub const fn operations(&self) -> Option<&OperationsLane> {
+        self.operations.as_ref()
     }
 
     /// Returns the indicators readiness runs.

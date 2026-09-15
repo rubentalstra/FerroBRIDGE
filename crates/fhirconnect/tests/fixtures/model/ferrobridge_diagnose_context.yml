@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-License-Identifier: BUSL-1.1
+# The subject-resolving diagnosis chain plus one manual value taken from the
+# REST call, the shape basics/Variables.adoc writes for `$context`. It exists
+# so a run can be driven with and without the member the caller supplies.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_diagnose_context
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemDiagnose"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "subject"
+    unidirectional: "openehr->fhir"
+    with:
+      fhir: "$resource.subject"
+    manual:
+      - name: "subjectReference"
+        fhir:
+          - path: "reference"
+            value: "Patient/synthetic-subject-0001"
+
+  - name: "asserter"
+    unidirectional: "openehr->fhir"
+    with:
+      fhir: "$resource.asserter"
+    manual:
+      - name: "asserterReference"
+        fhir:
+          - path: "reference"
+            value: "$context.who"
