@@ -29,6 +29,8 @@ pub mod cell;
 
 pub mod condition;
 
+pub mod context;
+
 pub mod fhir;
 
 pub mod lens;
