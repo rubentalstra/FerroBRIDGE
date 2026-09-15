@@ -19,9 +19,12 @@ use ferrobridge_openehr::ids::TemplateId;
 use openehr_base::v1_3::base_types::identification::terminology_id::TerminologyId;
 use openehr_its::rest::generated::common::UpdateAudit;
 use openehr_its::rest::generated::common::UpdateAuditData;
+use openehr_rm::v1_2::common::archetyped::feeder_audit::FeederAudit;
+use openehr_rm::v1_2::common::archetyped::feeder_audit_details::FeederAuditDetails;
 use openehr_rm::v1_2::common::generic::party_identified::PartyIdentified;
 use openehr_rm::v1_2::common::generic::party_identified::PartyIdentifiedData;
 use openehr_rm::v1_2::common::generic::party_proxy::PartyProxy;
+use openehr_rm::v1_2::data_types::basic::dv_identifier::DvIdentifier;
 use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
 use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
 
@@ -40,6 +43,12 @@ const MODIFICATION_CODE: &str = "251";
 
 /// The `lifecycle_state` code of a committed version, "complete".
 const COMPLETE_CODE: &str = "532";
+
+/// What a source resource that carries no `id` is recorded as.
+///
+/// An absent identifier is recorded as unknown and never invented
+/// (`docs/architecture.md` §9).
+const UNKNOWN_SOURCE: &str = "unknown";
 
 /// Whether a write adds a version container or a version to one.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -143,6 +152,44 @@ pub fn audit(change: Change, system_id: &str) -> UpdateAudit {
     })
 }
 
+/// Returns the `FEEDER_AUDIT` one inbound resource commits with.
+///
+/// `FEEDER_AUDIT` "describes the origin of data that have been transformed
+/// into openEHR form and committed to the system"
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html>),
+/// which is what every write this facade makes is. The source resource's `id`
+/// and type travel as an `originating_system_item_ids` entry, its
+/// `meta.versionId` as `originating_system_audit.version_id`, and `system_id`
+/// names this bridge.
+#[must_use]
+pub fn feeder_audit(
+    resource_type: &str,
+    source_id: Option<&str>,
+    source_version: Option<&str>,
+    system_id: &str,
+) -> FeederAudit {
+    FeederAudit {
+        originating_system_item_ids: Some(vec![DvIdentifier {
+            issuer: None,
+            assigner: None,
+            id: String::from(source_id.unwrap_or(UNKNOWN_SOURCE)),
+            r#type: Some(String::from(resource_type)),
+        }]),
+        feeder_system_item_ids: None,
+        original_content: None,
+        originating_system_audit: Box::new(FeederAuditDetails {
+            system_id: String::from(system_id),
+            location: None,
+            subject: None,
+            provider: None,
+            time: None,
+            version_id: source_version.map(String::from),
+            other_details: None,
+        }),
+        feeder_system_audit: None,
+    }
+}
+
 /// Returns the `lifecycle_state` a contribution entry carries.
 #[must_use]
 pub fn lifecycle() -> DvCodedText {
@@ -177,7 +224,7 @@ fn coded(code: &str, rubric: &str) -> DvCodedText {
 
 #[cfg(test)]
 mod tests {
-    use super::{Change, audit, context, lifecycle};
+    use super::{Change, audit, context, feeder_audit, lifecycle};
     use openehr_its::rest::generated::common::UpdateAudit;
 
     #[test]
@@ -185,6 +232,37 @@ mod tests {
         assert_eq!("249", Change::Creation.code());
         assert_eq!("251", Change::Modification.code());
         assert_eq!("creation", Change::Creation.rubric());
+    }
+
+    #[test]
+    fn a_feeder_audit_carries_the_source_resource_and_its_version() {
+        let built = feeder_audit("Condition", Some("sender-1"), Some("3"), "ferrobridge.test");
+        let ids = built
+            .originating_system_item_ids
+            .expect("the source resource is recorded");
+        assert_eq!(1, ids.len());
+        let first = ids.first().expect("one identifier");
+        assert_eq!("sender-1", first.id);
+        assert_eq!(Some("Condition"), first.r#type.as_deref());
+        assert_eq!("ferrobridge.test", built.originating_system_audit.system_id);
+        assert_eq!(
+            Some("3"),
+            built.originating_system_audit.version_id.as_deref()
+        );
+    }
+
+    #[test]
+    fn a_source_resource_with_no_id_is_recorded_as_unknown() {
+        let built = feeder_audit("Condition", None, None, "ferrobridge.test");
+        let ids = built
+            .originating_system_item_ids
+            .expect("the source resource is recorded");
+        assert_eq!(
+            Some("unknown"),
+            ids.first().map(|first| first.id.as_str()),
+            "an absent id is recorded, never invented"
+        );
+        assert_eq!(None, built.originating_system_audit.version_id);
     }
 
     #[test]

@@ -236,13 +236,21 @@ fn map_one(
             ))
             .at(String::from(full_url))
     })?;
-    let rm = openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
+    let mut rm = openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
         Issue::error(IssueType::Processing)
             .diagnosing(format!(
                 "the built composition is no valid openEHR COMPOSITION: {error}"
             ))
             .at(String::from(full_url))
     })?;
+    rm.feeder_audit = Some(commit::feeder_audit(
+        inbound.resource_type(),
+        inbound
+            .id()
+            .map(crate::facade::identity::ExternalResourceId::as_str),
+        inbound.version_id(),
+        &facade.settings().system_id,
+    ));
     Ok((
         Mapped {
             full_url: String::from(full_url),

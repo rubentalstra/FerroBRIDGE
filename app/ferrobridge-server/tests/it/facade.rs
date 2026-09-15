@@ -95,6 +95,20 @@ impl Harness {
         built.into_value().into_value()
     }
 
+    /// Returns the body of the last request the CDR received on `path`.
+    async fn sent(&self, method: &str, path_prefix: &str) -> Option<serde_json::Value> {
+        self.cdr
+            .received_requests()
+            .await
+            .unwrap_or_default()
+            .iter()
+            .filter(|request| {
+                request.method.as_str() == method && request.url.path().starts_with(path_prefix)
+            })
+            .next_back()
+            .and_then(|request| serde_json::from_slice(&request.body).ok())
+    }
+
     /// Returns how many requests the CDR received on `path`.
     async fn received(&self, method: &str, path_prefix: &str) -> usize {
         self.cdr
@@ -506,6 +520,31 @@ async fn a_create_records_the_identity_it_assigned() -> Result<(), Box<dyn StdEr
     assert_eq!(EHR_ID, binding.ehr_id);
     assert_eq!(CONTAINER, binding.versioned_object_uid);
     assert_eq!("ferrobridge_facade.context", binding.context);
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_create_records_the_source_resource_in_the_feeder_audit() -> Result<(), Box<dyn StdError>>
+{
+    let harness = harness().await;
+    create_one(&harness).await?;
+    let sent = harness
+        .sent("POST", &format!("/ehr/{EHR_ID}/composition"))
+        .await
+        .ok_or("the create sent a composition")?;
+    let audit = &sent["feeder_audit"];
+    let item = &audit["originating_system_item_ids"][0];
+    assert_eq!(
+        Some("ferrobridge-synthetic-condition-1"),
+        item["id"].as_str(),
+        "the source resource id travels in the feeder audit: {audit}"
+    );
+    assert_eq!(Some("Condition"), item["type"].as_str());
+    assert_eq!(
+        Some("ferrobridge.test"),
+        audit["originating_system_audit"]["system_id"].as_str(),
+        "the feeder audit names this bridge: {audit}"
+    );
     Ok(())
 }
 

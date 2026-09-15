@@ -36,6 +36,7 @@ use crate::facade::handlers::Refusal;
 use crate::facade::handlers::conditional;
 use crate::facade::handlers::read;
 use crate::facade::handlers::render;
+use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::derive;
 use crate::facade::identity::derive::EntryKey;
@@ -132,7 +133,7 @@ async fn resend(
         .map_err(|error| store_identifier(&error))?;
     let preceding = precondition(client, headers, &ehr_id, &container).await?;
     let composition = build(facade, program, inbound)?;
-    let rm = strict_read(&composition)?;
+    let rm = strict_read(facade, &composition, inbound)?;
     let context = commit::context(
         commit::Change::Modification,
         &facade.settings().system_id,
@@ -221,7 +222,7 @@ async fn commit_first(
     .await
     .map_err(|error| ehr_refusal(&error))?;
     let composition = build(facade, program, inbound)?;
-    let rm = strict_read(&composition)?;
+    let rm = strict_read(facade, &composition, inbound)?;
     let context = commit::context(
         commit::Change::Creation,
         &facade.settings().system_id,
@@ -494,8 +495,14 @@ fn build(
 ///
 /// "The built composition is re-read through the strict RM reader before it is
 /// sent, so a bad document never reaches the CDR"
-/// (`docs/architecture.md` §12).
-fn strict_read(composition: &CanonicalComposition) -> Result<Composition, Refusal> {
+/// (`docs/architecture.md` §12). The composition that comes back carries the
+/// `FEEDER_AUDIT` of the resource it was mapped from, so the CDR stores where
+/// the content came from.
+fn strict_read(
+    facade: &Facade,
+    composition: &CanonicalComposition,
+    inbound: &Inbound,
+) -> Result<Composition, Refusal> {
     let text = serde_json::to_string(composition.value()).map_err(|error| {
         reply::refusal(
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -504,14 +511,21 @@ fn strict_read(composition: &CanonicalComposition) -> Result<Composition, Refusa
             )),
         )
     })?;
-    openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
+    let mut rm = openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
         reply::refusal(
             StatusCode::UNPROCESSABLE_ENTITY,
             Issue::error(IssueType::Processing).diagnosing(format!(
                 "the built composition is no valid openEHR COMPOSITION: {error}"
             )),
         )
-    })
+    })?;
+    rm.feeder_audit = Some(commit::feeder_audit(
+        inbound.resource_type(),
+        inbound.id().map(ExternalResourceId::as_str),
+        inbound.version_id(),
+        &facade.settings().system_id,
+    ));
+    Ok(rm)
 }
 
 /// Returns the composition the CDR stored, or the built one.
