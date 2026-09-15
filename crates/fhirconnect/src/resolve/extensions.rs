@@ -195,18 +195,7 @@ fn append<'a>(
     diagnostics: &mut Vec<Diagnostic>,
 ) {
     let owner = extension.header().name().value();
-    let carried = [
-        method.with.as_ref().map(|with| ("with", with.position)),
-        method
-            .fhir_condition
-            .as_ref()
-            .map(|condition| ("fhirCondition", condition.position)),
-        method
-            .openehr_condition
-            .as_ref()
-            .map(|condition| ("openehrCondition", condition.position)),
-    ];
-    for (key, position) in carried.into_iter().flatten() {
+    for (key, position) in carried_keys(method) {
         diagnostics.push(refusal(
             extension,
             owner,
@@ -253,6 +242,57 @@ fn append<'a>(
         .map(|followed| Node::all(&followed.mappings, extension))
         .unwrap_or_default();
     node.followed_by.extend(appended);
+}
+
+/// Returns every key of an `append` beyond the four an append is made of.
+///
+/// An `append` carries `name`, `extension`, `appendTo` and `followedBy`, and
+/// "if more logic needs to be altered, the overwrite method must be used
+/// instead"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
+/// §Append), so every other key is refused rather than dropped.
+fn carried_keys(method: &Mapping) -> Vec<(&'static str, Position)> {
+    let carried = [
+        method.with.as_ref().map(|with| ("with", with.position)),
+        method
+            .fhir_condition
+            .as_ref()
+            .map(|condition| ("fhirCondition", condition.position)),
+        method
+            .openehr_condition
+            .as_ref()
+            .map(|condition| ("openehrCondition", condition.position)),
+        method
+            .manual
+            .first()
+            .map(|entry| ("manual", entry.position)),
+        method
+            .reference
+            .as_ref()
+            .map(|reference| ("reference", reference.position)),
+        method
+            .slot_archetype
+            .as_ref()
+            .map(|slot| ("slotArchetype", slot.position())),
+        method
+            .mapping_code
+            .as_ref()
+            .map(|code| ("mappingCode", code.position())),
+        method.link.as_ref().map(|link| ("link", link.position)),
+        method
+            .participations_function
+            .as_ref()
+            .map(|function| ("participationsFunction", function.position())),
+        method
+            .conceptmap
+            .as_ref()
+            .map(|conceptmap| ("conceptmap", conceptmap.position())),
+        method
+            .unidirectional
+            .as_ref()
+            .map(|direction| ("unidirectional", direction.position())),
+    ];
+    carried.into_iter().flatten().collect()
 }
 
 /// Replaces the method of the same name.

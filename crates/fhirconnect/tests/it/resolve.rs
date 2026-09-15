@@ -490,6 +490,56 @@ fn an_append_that_carries_mapping_logic_is_refused() -> Result<(), Box<dyn Error
     Ok(())
 }
 
+/// "If more logic needs to be altered, the overwrite method must be used
+/// instead"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`,
+/// §Append), so a concept key on an `append` is refused rather than dropped.
+#[test]
+fn an_append_carrying_a_concept_key_is_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"extra\"\n    extension: \"append\"\n    appendTo: \"problem\"\n    slotArchetype: \"CLUSTER.absent.v1\"\n    mappingCode: \"someFunction\"\n    conceptmap: \"http://example.org/fhir/ConceptMap/x\"\n    unidirectional: \"openehr->fhir\"\n    followedBy:\n      mappings:\n        - name: \"child\"\n          with:\n            fhir: \"$resource.note.text\"\n            openehr: \"$archetype/data[at0001]/items[at0069]\"\n";
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        (
+            "extension.yml",
+            extension("synthetic_extension", "EVALUATION.synthetic.v1", body),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(
+        codes(&diagnostics),
+        vec![
+            "fc-append-carries-mapping",
+            "fc-append-carries-mapping",
+            "fc-append-carries-mapping",
+            "fc-append-carries-mapping"
+        ]
+    );
+    let named: Vec<&str> = diagnostics
+        .iter()
+        .filter_map(|diagnostic| diagnostic.model_path())
+        .map(|path| path.as_str())
+        .collect();
+    for key in [
+        "slotArchetype",
+        "mappingCode",
+        "conceptmap",
+        "unidirectional",
+    ] {
+        assert!(
+            named.iter().any(|path| path.ends_with(key)),
+            "{key} in {named:?}"
+        );
+    }
+    Ok(())
+}
+
 #[test]
 fn an_append_without_a_target_is_refused() -> Result<(), Box<dyn Error>> {
     let files = [
