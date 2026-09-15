@@ -119,6 +119,9 @@ struct Scope {
     openehr: RmPath,
     /// The direction the enclosing file or method pinned.
     direction: Option<Direction>,
+    /// The resources a `^` climbs into once it leaves this one, innermost
+    /// first.
+    enclosing: Vec<Enclosing>,
     /// The file whose `spec` keys the enclosing methods inherit.
     file: PathBuf,
     /// The `spec.conceptmap` of that file, when it writes one.
@@ -138,6 +141,21 @@ impl Scope {
             format!("{}.{name}", self.prefix)
         }
     }
+}
+
+/// One resource a `reference` mapping was written inside.
+///
+/// A `^` that leaves the resource a `reference` initializes carries on in the
+/// expression that named the reference, which is what the worked `^^` example
+/// does
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/path_operators.adoc`,
+/// §Recurrence and parent elements).
+#[derive(Debug, Clone)]
+struct Enclosing {
+    /// The resource type `$resource` named there.
+    resource: ResourceType,
+    /// The expression that named the reference, rooted at that `$resource`.
+    fhir: FhirPath,
 }
 
 /// What a compiled FHIR expression is used for.
@@ -232,6 +250,7 @@ impl<'a> Compiler<'a> {
             archetype: archetype.clone(),
             openehr: archetype,
             direction: start.spec().unidirectional.as_ref().map(|d| *d.value()),
+            enclosing: Vec::new(),
             file: start.file().to_path_buf(),
             conceptmap: start
                 .spec()
@@ -865,9 +884,15 @@ impl<'a> Compiler<'a> {
                 ));
                 return Method::Value;
             }
+            let mut enclosing = vec![Enclosing {
+                resource: scope.resource.clone(),
+                fhir: scope.fhir.clone(),
+            }];
+            enclosing.extend(scope.enclosing.iter().cloned());
             let inner = Scope {
                 resource: resource.clone(),
                 fhir: root_expression(),
+                enclosing,
                 ..scope.clone()
             };
             return Method::Reference {
@@ -1234,7 +1259,9 @@ impl<'a> Compiler<'a> {
                 return None;
             }
         };
-        let anchored = match expression.anchored(&scope.fhir) {
+        let mut anchors: Vec<&FhirPath> = vec![&scope.fhir];
+        anchors.extend(scope.enclosing.iter().map(|outer| &outer.fhir));
+        let (anchored, bound_in) = match expression.anchored_in(&anchors) {
             Ok(anchored) => anchored,
             Err(error) => {
                 self.diagnostics.push(diagnostic(
@@ -1248,6 +1275,10 @@ impl<'a> Compiler<'a> {
                 return None;
             }
         };
+        let resource = bound_in
+            .checked_sub(1)
+            .and_then(|outer| scope.enclosing.get(outer))
+            .map_or(&scope.resource, |outer| &outer.resource);
         if let Writability::ReadOnly { ref step, reason } = *anchored.writability()
             && let Site::Write(direction) = site
             && direction != Some(Direction::FhirToOpenehr)
@@ -1265,7 +1296,7 @@ impl<'a> Compiler<'a> {
             ));
             return None;
         }
-        match resolve_element(self.table, scope.resource.as_str(), &anchored) {
+        match resolve_element(self.table, resource.as_str(), &anchored) {
             Ok(resolved) => Some(FhirTarget::new(anchored, resolved)),
             Err(error) => {
                 self.diagnostics.push(diagnostic(

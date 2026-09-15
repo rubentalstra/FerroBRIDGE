@@ -1521,6 +1521,41 @@ fn a_mapping_writing_two_mapping_methods_is_refused() -> Result<(), Box<dyn Erro
     Ok(())
 }
 
+/// The worked `^^` example maps an Encounter diagnosis, whose type "is
+/// contained in the Encounter, while the rest of the diagnosis is contained in
+/// a referenced `Condition`", and reaches `diagnosis.use` from inside that
+/// reference
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/path_operators.adoc`,
+/// §Recurrence and parent elements).
+#[test]
+fn a_caret_run_climbs_out_of_a_referenced_resource() -> Result<(), Box<dyn Error>> {
+    let encounter = String::from(
+        "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: EVALUATION.synthetic.v1\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1\n  fhirConfig:\n    structureDefinition: http://hl7.org/fhir/StructureDefinition/Encounter\nmappings:\n  - name: \"problemDiagnosis\"\n    with:\n      fhir: \"$resource.diagnosis\"\n      openehr: \"$archetype\"\n      type: \"NONE\"\n    followedBy:\n      mappings:\n        - name: \"referencedDiagnose\"\n          with:\n            fhir: \"condition.reference\"\n            openehr: \"$reference\"\n          reference:\n            resourceType: \"Condition\"\n            mappings:\n              - name: \"diagnosisTyp\"\n                with:\n                  fhir: \"^^.use.coding\"\n                  openehr: \"data[at0001]/items[at0002]\"\n",
+    );
+    let files = [
+        ("model.yml", encounter),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let diagnosis = program.mappings().first().ok_or("the root mapping")?;
+    let referenced = diagnosis.followed_by().first().ok_or("the reference")?;
+    let Method::Reference { ref mappings, .. } = *referenced.method() else {
+        return Err(format!("the mapping compiled to {:?}", referenced.method()).into());
+    };
+    let inside = mappings.first().ok_or("the mapping inside the reference")?;
+    let target = inside.fhir().ok_or("the FHIR side")?;
+    assert_eq!(
+        target.expression().as_str(),
+        "$resource.diagnosis.use.coding"
+    );
+    Ok(())
+}
+
 #[test]
 fn a_mapping_code_the_engine_does_not_register_is_refused() -> Result<(), Box<dyn Error>> {
     let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      openehr: \"$archetype/data[at0001]/items[at0002]\"\n    mappingCode: \"absentFunction\"\n";
