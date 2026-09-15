@@ -1,0 +1,30 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "composition",
+      "valueString": "{\"_type\": \"COMPOSITION\", \"name\": {\"_type\": \"DV_TEXT\", \"value\": \"KDS_Fall_einfach\"}, \"archetype_details\": {\"archetype_id\": {\"value\": \"openEHR-EHR-COMPOSITION.fall.v1\"}, \"template_id\": {\"value\": \"KDS_Fall_einfach\"}, \"rm_version\": \"1.0.4\"}, \"language\": {\"_type\": \"CODE_PHRASE\", \"terminology_id\": {\"_type\": \"TERMINOLOGY_ID\", \"value\": \"ISO_639-1\"}, \"code_string\": \"de\"}, \"category\": {\"_type\": \"DV_CODED_TEXT\", \"value\": \"event\", \"defining_code\": {\"_type\": \"CODE_PHRASE\", \"terminology_id\": {\"_type\": \"TERMINOLOGY_ID\", \"value\": \"openehr\"}, \"code_string\": \"433\"}}, \"composer\": {\"_type\": \"PARTY_SELF\"}}"
+    },
+    {
+      "name": "context",
+      "part": [
+        {
+          "name": "ehr_id",
+          "valueString": "53d89df2-5501-4455-9a65-565a5d1ddb7c"
+        },
+        {
+          "name": "patient",
+          "valueReference": { "reference": "Patient/123" }
+        },
+        {
+          "name": "who",
+          "valueReference": { "reference": "Practitioner/456" }
+        },
+        {
+          "name": "onBehalfOf",
+          "valueReference": { "reference": "Organization/charite" }
+        }
+      ]
+    }
+  ]
+}

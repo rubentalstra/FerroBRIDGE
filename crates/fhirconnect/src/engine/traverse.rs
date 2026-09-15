@@ -45,6 +45,7 @@ use crate::engine::cell;
 use crate::engine::condition;
 use crate::engine::condition::ConditionError;
 use crate::engine::condition::Verdict;
+use crate::engine::context::CallContext;
 use crate::engine::fhir::FhirError;
 use crate::engine::fhir::FhirKind;
 use crate::engine::fhir::FhirValue;
@@ -407,6 +408,9 @@ struct Written {
 
 /// Runs `program` over a FHIR document, producing a composition.
 ///
+/// `context` carries the per-call values a `manual` path reads through
+/// `$context`; pass [`CallContext::new`] when the caller supplied none.
+///
 /// # Errors
 ///
 /// Returns [`EngineError`] for any element the program cannot map, and for a
@@ -418,6 +422,7 @@ pub fn to_openehr<T: Table + ?Sized>(
     document: &Value,
     functions: &dyn MappingFunctions,
     defaults: &Defaults,
+    context: &CallContext,
 ) -> Result<Outcome<CanonicalComposition>, EngineError> {
     let mut run = Run {
         program,
@@ -425,6 +430,7 @@ pub fn to_openehr<T: Table + ?Sized>(
         index,
         direction: Direction::FhirToOpenehr,
         functions,
+        context,
         warnings: Vec::new(),
         fhir: document.clone(),
         composition: None,
@@ -447,6 +453,9 @@ pub fn to_openehr<T: Table + ?Sized>(
 
 /// Runs `program` over a composition, producing a FHIR resource.
 ///
+/// `context` carries the per-call values a `manual` path reads through
+/// `$context`; pass [`CallContext::new`] when the caller supplied none.
+///
 /// # Errors
 ///
 /// Returns [`EngineError`] for any element the program cannot map.
@@ -456,6 +465,7 @@ pub fn to_fhir<T: Table + ?Sized>(
     index: &WebTemplateIndex,
     composition: &CanonicalComposition,
     functions: &dyn MappingFunctions,
+    context: &CallContext,
 ) -> Result<Outcome<Value>, EngineError> {
     let mut resource = Object::new();
     resource.insert(
@@ -468,6 +478,7 @@ pub fn to_fhir<T: Table + ?Sized>(
         index,
         direction: Direction::OpenehrToFhir,
         functions,
+        context,
         warnings: Vec::new(),
         fhir: Value::Object(resource),
         composition: Some(composition),
@@ -487,6 +498,7 @@ struct Run<'a, T: Table + ?Sized> {
     index: &'a WebTemplateIndex,
     direction: Direction,
     functions: &'a dyn MappingFunctions,
+    context: &'a CallContext,
     warnings: Vec<Warning>,
     fhir: Value,
     composition: Option<&'a CanonicalComposition>,
@@ -955,21 +967,25 @@ impl<T: Table + ?Sized> Run<'_, T> {
 
     /// Returns the text a `manual` path writes.
     ///
-    /// A `$context` member is a per-call value the operations surface hands
-    /// in; this run carries none, so naming one is a refusal rather than an
-    /// invented value.
-    // TODO(#114): the operations module hands the call context to the run.
-    fn manual_text<'v>(
+    /// A `$context` member is a per-call value the caller supplies, so a
+    /// member this run does not carry is a refusal rather than an invented
+    /// value (`basics/Variables.adoc`, §`$context`).
+    fn manual_text<'run>(
+        &'run self,
         mapping: &Mapping,
         entry: &Manual,
-        value: &'v ManualValue,
-    ) -> Result<&'v str, EngineError> {
+        value: &'run ManualValue,
+    ) -> Result<&'run str, EngineError> {
         match *value {
             ManualValue::Literal(ref text) => Ok(text.as_str()),
-            ManualValue::Context(ref member) => Err(EngineError::ContextMember {
-                mapping: format!("{}.{}", mapping.name(), entry.name()),
-                member: member.clone(),
-            }),
+            ManualValue::Context(ref member) => {
+                self.context
+                    .member(member)
+                    .ok_or_else(|| EngineError::ContextMember {
+                        mapping: format!("{}.{}", mapping.name(), entry.name()),
+                        member: member.clone(),
+                    })
+            }
         }
     }
 
@@ -1308,11 +1324,8 @@ impl<T: Table + ?Sized> Run<'_, T> {
                 .iter()
                 .map(|segment| segment.attribute.as_str())
                 .collect();
-            merge(
-                &mut merged,
-                &segments,
-                Self::manual_text(mapping, entry, path.value())?,
-            );
+            let text = self.manual_text(mapping, entry, path.value())?;
+            merge(&mut merged, &segments, text);
         }
         let Some(target) = node else {
             return Ok(());
@@ -1363,16 +1376,17 @@ impl<T: Table + ?Sized> Run<'_, T> {
             };
             let occurrence = self.entry_occurrence(target, binding, &mut shared);
             let element = String::from(target.resolved().leaf());
+            let text = Value::String(String::from(self.manual_text(
+                mapping,
+                entry,
+                path.value(),
+            )?));
             write(
                 self.table,
                 &mut self.fhir,
                 target.expression(),
                 &occurrence,
-                Value::String(String::from(Self::manual_text(
-                    mapping,
-                    entry,
-                    path.value(),
-                )?)),
+                text,
             )
             .map_err(|source| EngineError::Write {
                 mapping: format!("{}.{}", mapping.name(), entry.name()),

@@ -13,6 +13,8 @@ pub mod engine;
 
 pub mod model;
 
+pub mod operations;
+
 /// The FHIRconnect grammar this crate implements.
 ///
 /// A mapping file writes it in its `grammar` header (<https://sevkohler.github.io/FHIRconnect-spec/build/site/FHIRconnect/v1.0.0/basics/main.html>).

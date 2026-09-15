@@ -1,0 +1,9 @@
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "composition",
+      "valueString": "{\"international_patient_summary/category|code\": \"433\", \"international_patient_summary/category|value\": \"event\", \"international_patient_summary/context/start_time\": \"2022-02-03T04:05:06\", \"international_patient_summary/context/setting|code\": \"225\"}"
+    }
+  ]
+}

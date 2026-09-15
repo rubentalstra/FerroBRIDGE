@@ -399,6 +399,15 @@ pub enum PathError {
         /// One rendered message per violation.
         messages: Vec<String>,
     },
+    /// The flattener refused a canonical composition.
+    #[error("the composition built against `{template_id}` does not flatten")]
+    CompositionFlatten {
+        /// The template the composition was built against.
+        template_id: String,
+        /// Why the flattener refused it.
+        #[source]
+        source: Box<FlatError>,
+    },
     /// The composition was built against another template.
     #[error("the composition names the template `{found}`, not `{expected}`")]
     TemplateMismatch {
@@ -426,6 +435,7 @@ impl PathError {
             | Self::NotADescendant { .. }
             | Self::OccurrenceCount { .. } => DiagnosticCode::UnknownTemplatePath,
             Self::CompositionBuild { .. }
+            | Self::CompositionFlatten { .. }
             | Self::InvalidComposition { .. }
             | Self::TemplateMismatch { .. } => DiagnosticCode::InvalidComposition,
         }

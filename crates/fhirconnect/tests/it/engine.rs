@@ -17,20 +17,14 @@ use fhir_types::r4::schema::SCHEMAS;
 use fhirconnect::engine::condition::Verdict;
 use fhirconnect::engine::condition::evaluate;
 use fhirconnect::engine::condition::runs;
+use fhirconnect::engine::context::CallContext;
 use fhirconnect::engine::outcome::SkipReason;
 use fhirconnect::engine::outcome::Warning;
 use fhirconnect::engine::traverse::Defaults;
 use fhirconnect::engine::traverse::NoMappingFunctions;
 use fhirconnect::engine::traverse::to_fhir;
 use fhirconnect::engine::traverse::to_openehr;
-use fhirconnect::model::ast::ContextMappingFile;
 use fhirconnect::model::ast::Direction;
-use fhirconnect::model::ast::ModelMappingFile;
-use fhirconnect::model::load::MappingSet;
-use fhirconnect::model::parse::lower_context;
-use fhirconnect::model::parse::lower_model;
-use fhirconnect::model::semantic::StaticMappingCodes;
-use fhirconnect::resolve::compile::compile;
 use fhirconnect::resolve::program::Attachment;
 use fhirconnect::resolve::program::Condition;
 use fhirconnect::resolve::program::Mapping;
@@ -47,82 +41,17 @@ use fhirconnect::resolve::program::TemplateBinding;
 use fhirconnect::resolve::program::TemplateId;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::composition::NodeValue;
-use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::header::MappingName;
 use openehr_mapping_core::index::AqlPath;
 use openehr_mapping_core::index::WebTemplateIndex;
-use openehr_mapping_core::loader::load_str;
 use openehr_mapping_core::template::Generation;
-use openehr_mapping_core::template::TemplateSource;
 
-/// The fixtures this crate's tests ship.
-const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures");
-
-/// Builds the index over the testkit's diagnosis template.
-fn template() -> Result<WebTemplateIndex, Box<dyn Error>> {
-    let opt = openehr_its::opt14::from_xml(ferrobridge_testkit::fixtures::DIAGNOSE_OPT)?;
-    Ok(WebTemplateIndex::build(&TemplateSource::Opt14(Box::new(
-        opt,
-    )))?)
-}
+use crate::support::compiled;
+use crate::support::template;
 
 /// Compiles the condition fixture into its program.
 fn program() -> Result<Arc<Program>, Box<dyn Error>> {
     compiled("ferrobridge_conditions")
-}
-
-/// Compiles the context and model fixture pair named `fixture`.
-fn compiled(fixture: &str) -> Result<Arc<Program>, Box<dyn Error>> {
-    let mut set = MappingSet::new();
-    for (name, text) in [
-        (
-            format!("contexts/{fixture}.context.yml"),
-            std::fs::read_to_string(format!("{FIXTURES}/contexts/{fixture}.context.yml"))?,
-        ),
-        (
-            format!("model/{fixture}.yml"),
-            std::fs::read_to_string(format!("{FIXTURES}/model/{fixture}.yml"))?,
-        ),
-    ] {
-        let name = name.as_str();
-        let document = load_str(name, &text)?;
-        if text.contains("\ntype: context\n") {
-            let file: ContextMappingFile =
-                lower_context(&document).map_err(|diagnostics| render(&diagnostics))?;
-            set.insert_context(file)
-                .map_err(|error| error.to_string())?;
-        } else {
-            let file: ModelMappingFile =
-                lower_model(&document).map_err(|diagnostics| render(&diagnostics))?;
-            set.insert_model(file).map_err(|error| error.to_string())?;
-        }
-    }
-    let index = template()?;
-    let context = MappingName::new(format!("{fixture}.context"))?;
-    compile(
-        &set,
-        &context,
-        &index,
-        &SCHEMAS,
-        &StaticMappingCodes::default(),
-    )
-    .map_err(|diagnostics| Box::<dyn Error>::from(render(&diagnostics)))
-}
-
-/// Renders a diagnostic list as one error message.
-fn render(diagnostics: &[Diagnostic]) -> String {
-    diagnostics
-        .iter()
-        .map(|diagnostic| {
-            format!(
-                "{} {}: {}",
-                diagnostic.file().display(),
-                diagnostic.code(),
-                diagnostic.message()
-            )
-        })
-        .collect::<Vec<String>>()
-        .join("; ")
 }
 
 /// Returns the compiled mapping of `name`, at any depth.
@@ -355,6 +284,7 @@ fn the_minimal_diagnosis_chain_maps_both_ways() -> Result<(), Box<dyn Error>> {
         &document,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )?;
     insta::assert_json_snapshot!("diagnosis_composition", inbound.value().value());
     let outbound = to_fhir(
@@ -363,6 +293,7 @@ fn the_minimal_diagnosis_chain_maps_both_ways() -> Result<(), Box<dyn Error>> {
         &index,
         inbound.value(),
         &NoMappingFunctions,
+        &CallContext::new(),
     )?;
     insta::assert_json_snapshot!(
         "diagnosis_condition",
@@ -387,6 +318,7 @@ fn a_unidirectional_mapping_is_skipped_and_recorded() -> Result<(), Box<dyn Erro
         &document,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )?;
     assert!(
         inbound.warnings().contains(&Warning::Skipped {
@@ -402,6 +334,7 @@ fn a_unidirectional_mapping_is_skipped_and_recorded() -> Result<(), Box<dyn Erro
         &index,
         inbound.value(),
         &NoMappingFunctions,
+        &CallContext::new(),
     )?;
     assert!(
         !outbound.warnings().iter().any(|warning| matches!(
@@ -438,6 +371,7 @@ fn a_date_and_time_keeps_its_text_in_both_directions() -> Result<(), Box<dyn Err
             &document,
             &NoMappingFunctions,
             &defaults(),
+            &CallContext::new(),
         )?;
         let outbound = to_fhir(
             &program,
@@ -445,6 +379,7 @@ fn a_date_and_time_keeps_its_text_in_both_directions() -> Result<(), Box<dyn Err
             &index,
             inbound.value(),
             &NoMappingFunctions,
+            &CallContext::new(),
         )?;
         assert_eq!(
             outbound
@@ -480,6 +415,7 @@ fn a_value_the_element_does_not_admit_names_the_element() -> Result<(), Box<dyn 
         &document,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )
     .expect_err("a string is no CodeableConcept");
     assert!(
@@ -509,6 +445,7 @@ fn a_required_child_the_input_does_not_carry_refuses_the_unit() -> Result<(), Bo
         &document,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )
     .expect_err("the required child is not provided");
     assert!(
@@ -529,6 +466,7 @@ fn the_same_chain_maps_when_the_required_child_is_carried() -> Result<(), Box<dy
         &condition_document()?,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )?;
     assert!(
         inbound
@@ -558,6 +496,7 @@ fn a_slot_chain_that_reaches_a_model_twice_refuses() -> Result<(), Box<dyn Error
         &condition_document()?,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )
     .expect_err("the chain reaches the same model twice");
     assert!(
@@ -612,6 +551,7 @@ fn a_slotted_files_preprocessor_gate_skips_the_slot_when_it_closes() -> Result<(
         &condition_with_onset(written)?,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )?;
     assert!(
         open.value().value().to_string().contains(written),
@@ -630,6 +570,7 @@ fn a_slotted_files_preprocessor_gate_skips_the_slot_when_it_closes() -> Result<(
         &condition_with_onset_and_body_site(written)?,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )?;
     assert!(
         !closed.value().value().to_string().contains(written),
@@ -685,6 +626,7 @@ fn two_mappings_into_one_list_append_and_into_one_value_overwrite() -> Result<()
         &index,
         &composition,
         &NoMappingFunctions,
+        &CallContext::new(),
     )?;
     let sites = outbound
         .value()
@@ -726,6 +668,7 @@ fn a_manual_block_merges_its_paths_into_one_element() -> Result<(), Box<dyn Erro
         &condition_document()?,
         &NoMappingFunctions,
         &defaults(),
+        &CallContext::new(),
     )?;
     let node = index.node(&AqlPath::new(
         "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]/items[at0073]/value",
@@ -773,6 +716,7 @@ fn an_openehr_condition_filters_when_openehr_is_the_input() -> Result<(), Box<dy
         &index,
         &onset_composition(&index, None)?,
         &NoMappingFunctions,
+        &CallContext::new(),
     )?;
     assert_eq!(
         without.value().get("onsetDateTime"),
@@ -785,6 +729,7 @@ fn an_openehr_condition_filters_when_openehr_is_the_input() -> Result<(), Box<dy
         &index,
         &onset_composition(&index, Some("the comment"))?,
         &NoMappingFunctions,
+        &CallContext::new(),
     )?;
     assert_eq!(
         with.value().get("onsetDateTime").and_then(Value::as_str),
