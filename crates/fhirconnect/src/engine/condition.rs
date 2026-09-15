@@ -200,7 +200,21 @@ fn holds<T: Table + ?Sized>(
     attributes: &[&FhirPath],
     root: &Occurrence,
 ) -> bool {
-    let found = attribute_values(table, document, attributes, root);
+    let mut found = attribute_values(table, document, attributes, root);
+    if condition.operator() == ConditionOperator::Type {
+        found.types = type_names(table, document, condition, attributes, root);
+    }
+    decide(condition, &found)
+}
+
+/// Returns whether `condition` holds over what its attributes found.
+///
+/// The connectives are the ones the page's operator table fixes: `one of` is
+/// an OR over the criteria, `not of` an AND, `empty` and `not empty` ask
+/// whether the path holds anything, and `type` is an OR over the named
+/// classes.
+#[must_use]
+pub fn decide(condition: &Condition, found: &Attributes) -> bool {
     match condition.operator() {
         ConditionOperator::OneOf => found
             .values
@@ -215,21 +229,22 @@ fn holds<T: Table + ?Sized>(
         // answers rather than the scalar text a criteria list compares.
         ConditionOperator::Empty => found.present == 0,
         ConditionOperator::NotEmpty => found.present > 0,
-        ConditionOperator::Type => {
-            let named = type_names(table, document, condition, attributes, root);
-            named
-                .iter()
-                .any(|found| condition.criteria().iter().any(|wanted| wanted == found))
-        }
+        ConditionOperator::Type => found
+            .types
+            .iter()
+            .any(|named| condition.criteria().iter().any(|wanted| wanted == named)),
     }
 }
 
-/// What the attribute paths hold under one root occurrence.
-struct Attributes {
+/// What the attribute paths of a condition hold under one root occurrence.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Attributes {
     /// How many values the paths matched, of any shape.
-    present: usize,
+    pub present: usize,
     /// The scalar text of those values, for the criteria comparison.
-    values: Vec<String>,
+    pub values: Vec<String>,
+    /// The class names the `type` operator tests against.
+    pub types: Vec<String>,
 }
 
 /// Returns what the attribute paths hold under one root occurrence.
@@ -239,10 +254,7 @@ fn attribute_values<T: Table + ?Sized>(
     attributes: &[&FhirPath],
     root: &Occurrence,
 ) -> Attributes {
-    let mut found = Attributes {
-        present: 0,
-        values: Vec::new(),
-    };
+    let mut found = Attributes::default();
     for path in attributes {
         let Ok(matches) = read(table, document, path) else {
             continue;

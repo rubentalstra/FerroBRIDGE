@@ -28,6 +28,7 @@ use fhir_types::codec::Object;
 use fhir_types::codec::Value;
 use openehr_base::v1_3::base_types::identification::terminology_id::TerminologyId;
 use openehr_mapping_core::composition::CanonicalComposition;
+use openehr_mapping_core::composition::FlatIndex;
 use openehr_mapping_core::composition::NodeValue;
 use openehr_mapping_core::composition::PositionError;
 use openehr_mapping_core::composition::RmPosition;
@@ -566,11 +567,84 @@ impl<T: Table + ?Sized> Run<'_, T> {
                     )),
                 }
             }
-            // NOTE: Conditions.adoc, an openehrCondition is evaluated over the
-            // openEHR input, which this milestone reads only through the node
-            // the mapping names, so it gates rather than filters.
-            Direction::OpenehrToFhir => Ok(Some(inputs)),
+            Direction::OpenehrToFhir => {
+                let mut admitted = Vec::with_capacity(inputs.len());
+                for input in inputs {
+                    let positions = Self::positions_at(mapping, &input)?;
+                    if self.openehr_holds(mapping, gate, &positions)? {
+                        admitted.push(input);
+                    }
+                }
+                Ok(Some(admitted))
+            }
         }
+    }
+
+    /// Returns whether an `openehrCondition` holds at one instance.
+    ///
+    /// The condition is evaluated once per instance of the input, so a
+    /// `targetRoot` that is the `with` path filters the instances and one
+    /// pointing elsewhere answers the same for all of them, which is the plain
+    /// true or false `Conditions.adoc` §targetRoot asks for.
+    fn openehr_holds(
+        &self,
+        mapping: &Mapping,
+        gate: &crate::resolve::program::Condition,
+        instance: &[RmPosition],
+    ) -> Result<bool, EngineError> {
+        let Some(composition) = self.composition else {
+            return Ok(true);
+        };
+        let mut found = condition::Attributes::default();
+        for attribute in gate.attributes() {
+            let Target::Openehr(ref target) = *attribute else {
+                return Err(EngineError::Condition {
+                    mapping: String::from(mapping.name()),
+                    source: Box::new(ConditionError::WrongSide),
+                });
+            };
+            let depth = target.occurrences().len();
+            let mut positions: Vec<RmPosition> = instance.iter().take(depth).copied().collect();
+            positions.resize(depth, RmPosition::first());
+            let read = self
+                .index
+                .read(composition, target.node(), &positions)
+                .map_err(|source| EngineError::Template {
+                    mapping: String::from(mapping.name()),
+                    node: String::from(target.node().aql_path().as_str()),
+                    source: Box::new(source),
+                })?;
+            let Some(value) = read else {
+                continue;
+            };
+            let Some(at_tail) = attribute_at(&value, target) else {
+                continue;
+            };
+            found.present = found.present.saturating_add(1);
+            found.types.push(String::from(target.node().rm_type()));
+            if let Some(text) = scalar(at_tail) {
+                found.values.push(text);
+            }
+        }
+        Ok(condition::decide(gate, &found))
+    }
+
+    /// Returns the positions one input occurrence names, as it was read.
+    fn positions_at(mapping: &Mapping, input: &Occurrence) -> Result<Vec<RmPosition>, EngineError> {
+        let mut positions = Vec::with_capacity(input.depth());
+        for index in input.indices() {
+            let index = u32::try_from(*index).map_err(|_refused| EngineError::Position {
+                mapping: String::from(mapping.name()),
+                source: PositionError::Overflow,
+            })?;
+            positions.push(
+                RmPosition::new(index).map_err(|source| EngineError::Position {
+                    mapping: String::from(mapping.name()),
+                    source,
+                })?,
+            );
+        }
+        Ok(positions)
     }
 
     /// Returns the condition the direction evaluates, if the mapping carries
@@ -1238,7 +1312,22 @@ impl<T: Table + ?Sized> Run<'_, T> {
     ) -> Result<Binding, EngineError> {
         let bound = parent_depth(parent, self.direction);
         let mut indices: Vec<usize> = match self.direction {
-            Direction::FhirToOpenehr => parent.openehr.iter().map(|_axis| 0).collect(),
+            // NOTE: an openEHR position is 1-based and an instance index is
+            // 0-based (Simplified Formats §Instance Indexing), so the parent's
+            // positions come back through the index the counters speak.
+            Direction::FhirToOpenehr => {
+                let mut held = Vec::with_capacity(parent.openehr.len());
+                for position in &parent.openehr {
+                    let index = FlatIndex::from(*position).get();
+                    held.push(usize::try_from(index).map_err(|_refused| {
+                        EngineError::Position {
+                            mapping: String::from(mapping.name()),
+                            source: PositionError::Overflow,
+                        }
+                    })?);
+                }
+                held
+            }
             Direction::OpenehrToFhir => parent.fhir.indices().to_vec(),
         };
         indices.truncate(bound);
@@ -1265,15 +1354,12 @@ impl<T: Table + ?Sized> Run<'_, T> {
                             mapping: String::from(mapping.name()),
                             source: PositionError::Overflow,
                         })?;
-                    positions.push(
-                        RmPosition::try_from(openehr_mapping_core::composition::FlatIndex::new(
-                            index,
-                        ))
-                        .map_err(|source| EngineError::Position {
+                    positions.push(RmPosition::try_from(FlatIndex::new(index)).map_err(
+                        |source| EngineError::Position {
                             mapping: String::from(mapping.name()),
                             source,
-                        })?,
-                    );
+                        },
+                    )?);
                 }
                 Ok(Binding {
                     fhir: input.clone(),
@@ -1463,6 +1549,34 @@ fn fhir_axes(target: &FhirTarget) -> Vec<String> {
             | Move::Resolve { .. } => None,
         })
         .collect()
+}
+
+/// Returns the value a condition's attribute names below its node.
+///
+/// A Web Template node is as deep as the template constrains, and a condition
+/// may name an attribute below it, so the tail walks the canonical JSON of the
+/// node by attribute name.
+fn attribute_at<'value>(
+    value: &'value serde_json::Value,
+    target: &OpenehrTarget,
+) -> Option<&'value serde_json::Value> {
+    let mut found = value;
+    for segment in &target.tail().segments {
+        found = found.get(segment.attribute.as_str())?;
+    }
+    Some(found)
+}
+
+/// Returns the text a scalar carries, `None` for a structure.
+fn scalar(value: &serde_json::Value) -> Option<String> {
+    match *value {
+        serde_json::Value::String(ref text) => Some(text.clone()),
+        serde_json::Value::Bool(flag) => Some(String::from(if flag { "true" } else { "false" })),
+        serde_json::Value::Number(ref number) => Some(number.to_string()),
+        serde_json::Value::Null | serde_json::Value::Array(_) | serde_json::Value::Object(_) => {
+            None
+        }
+    }
 }
 
 /// Returns one `CODE_PHRASE`, for a defaulted composition field.

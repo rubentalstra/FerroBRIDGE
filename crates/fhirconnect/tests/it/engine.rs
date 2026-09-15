@@ -610,6 +610,75 @@ fn two_mappings_into_one_list_append_and_into_one_value_overwrite() -> Result<()
     Ok(())
 }
 
+#[test]
+fn an_openehr_condition_filters_when_openehr_is_the_input() -> Result<(), Box<dyn Error>> {
+    // Conditions.adoc: "in case of openEHR to FHIR it's the other way around",
+    // so the openehrCondition decides whether the mapping runs at all.
+    let program = compiled("ferrobridge_openehr_condition")?;
+    let index = template()?;
+    let without = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        &onset_composition(&index, None)?,
+        &NoMappingFunctions,
+    )?;
+    assert_eq!(
+        without.value().get("onsetDateTime"),
+        None,
+        "the condition holds nothing, so the mapping does not run"
+    );
+    let with = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        &onset_composition(&index, Some("the comment"))?,
+        &NoMappingFunctions,
+    )?;
+    assert_eq!(
+        with.value().get("onsetDateTime").and_then(Value::as_str),
+        Some("2026-09-12T09:00:00+02:00"),
+        "the condition holds, so the mapping runs"
+    );
+    Ok(())
+}
+
+/// Builds a composition with the date of onset and an optional comment.
+fn onset_composition(
+    index: &WebTemplateIndex,
+    comment: Option<&str>,
+) -> Result<CanonicalComposition, Box<dyn Error>> {
+    let root = "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]";
+    let mut values = vec![
+        NodeValue::new(
+            index.node(&AqlPath::new("/composer"))?,
+            "FerroBRIDGE".into(),
+        )
+        .with_datum("name"),
+        NodeValue::new(index.node(&AqlPath::new("/language"))?, "en".into()).with_datum("code"),
+        NodeValue::new(index.node(&AqlPath::new("/territory"))?, "NL".into()).with_datum("code"),
+        NodeValue::new(
+            index.node(&AqlPath::new(format!("{root}/items[at0002]/value")))?,
+            "the problem name".into(),
+        )
+        .with_datum("value"),
+        NodeValue::new(
+            index.node(&AqlPath::new(format!("{root}/items[at0077]/value")))?,
+            "2026-09-12T09:00:00+02:00".into(),
+        ),
+    ];
+    if let Some(comment) = comment {
+        values.push(
+            NodeValue::new(
+                index.node(&AqlPath::new(format!("{root}/items[at0069]/value")))?,
+                comment.into(),
+            )
+            .with_datum("value"),
+        );
+    }
+    Ok(index.build_composition(&values, NOW)?)
+}
+
 /// Builds a composition carrying three `DV_TEXT` values of the chain.
 fn three_texts(index: &WebTemplateIndex) -> Result<CanonicalComposition, Box<dyn Error>> {
     let root = "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]";
