@@ -118,10 +118,13 @@ than by silence. A new maintainer receives write access, a row in
 Recorded here so the questions do not have to be re-litigated in each pull
 request:
 
-- **No contributor licence agreement, and no copyright assignment.** You keep
-  your copyright; the licence is the Business Source License 1.1 for everyone,
-  the maintainer included, and every version becomes Apache 2.0 on its Change
-  Date. This is a deliberate position, not an oversight.
+- **No copyright assignment, and one Licensor.** You keep your copyright; the
+  licence is the Business Source License 1.1 for everyone, the maintainer
+  included, and every version becomes Apache 2.0 on its Change Date. A
+  contribution grants the Licensor the relicensing right in
+  [CONTRIBUTING.md § Licensing of contributions](CONTRIBUTING.md#licensing-of-contributions),
+  recorded by the pull request checkbox, so the work stays one work under one
+  licensor. This is a deliberate position, not an oversight.
 - **No hand-coded mapping per FHIR resource or per OMOP table.** Mappings are
   specification-conformant YAML validated against the published schemas, which
   is the reason this project exists.

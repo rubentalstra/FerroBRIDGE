@@ -99,8 +99,10 @@ four years after that version is published. The commercial licence starts with
 a short conversation with the maintainer named in
 [MAINTAINERS.md](MAINTAINERS.md).
 
-Contributions are licensed inbound equals outbound under the same licence, and
-there is no contributor licence agreement and no copyright assignment. Vendored
+Contributions carry the terms in
+[CONTRIBUTING.md](CONTRIBUTING.md#licensing-of-contributions): you keep your
+copyright, and you grant the Licensor the relicensing right that keeps the work
+one work under one licensor. There is no separate agreement to sign. Vendored
 specifications and third-party material keep their upstream terms, recorded
 beside them.
 

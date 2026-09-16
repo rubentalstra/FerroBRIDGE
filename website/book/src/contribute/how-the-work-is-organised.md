@@ -50,9 +50,11 @@ more than a speculative implementation.
 
 ## Licence of contributions
 
-Inbound equals outbound: your contribution is licensed under the same Business
-Source License 1.1 that covers the project. There is no contributor licence
-agreement and no copyright assignment.
+Your contribution is licensed under the same Business Source License 1.1 that
+covers the project, and it grants the Licensor the relicensing right in
+CONTRIBUTING.md § Licensing of contributions. You keep your copyright; the
+pull request checkbox records your acceptance, and there is no separate
+agreement to sign.
 
 The rules in full are in
 [`CONTRIBUTING.md`](https://github.com/rubentalstra/FerroBRIDGE/blob/main/CONTRIBUTING.md)
