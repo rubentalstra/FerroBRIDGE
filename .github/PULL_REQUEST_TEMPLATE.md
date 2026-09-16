@@ -7,6 +7,10 @@
 
 Closes #NNN
 
+## Licensing of contributions
+
+- [ ] I accept the terms in [CONTRIBUTING.md § Licensing of contributions](../CONTRIBUTING.md#licensing-of-contributions): I have the right to submit this work, I license it under the project licence of the version it lands in, and I grant the Licensor the relicensing right stated there.
+
 ## Checklist
 
 - [ ] Spec-facing decisions cite the governing specification (HL7 FHIR, FHIRconnect, the OMOP Common Data Model, OMOCL, or openEHR ITS-REST), not memory and not another implementation.
@@ -17,6 +21,8 @@ Closes #NNN
 - [ ] Every commit is signed.
 - [ ] No AI or assistant attribution anywhere in the commits or this PR.
 
-Contributions are inbound equals outbound under the Business Source License
-1.1, including its Change License; there is no contributor licence agreement. See
-[CONTRIBUTING.md](../CONTRIBUTING.md) for the full contribution guide.
+Contributions carry the licensing terms in
+[CONTRIBUTING.md](../CONTRIBUTING.md#licensing-of-contributions); the
+`contribution-licence-guard` check reads the box above, and there is no separate
+agreement to sign. See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full
+contribution guide.

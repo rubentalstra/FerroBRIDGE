@@ -288,9 +288,10 @@ managed, or embedded service and for for-fee distribution), and Apache License
 `SPDX-FileCopyrightText: Vernum Projecten B.V.` and `SPDX-License-Identifier: BUSL-1.1`
 in its header. A generated file keeps its `// @generated … DO NOT EDIT.` banner
 on the first line and carries the two SPDX lines under it, written by its
-emitter, which names Apache-2.0 for `crates/fhir-types`. Contribution is
-inbound equals outbound under the same licence,
-and there is no contributor licence agreement and no copyright assignment.
+emitter, which names Apache-2.0 for `crates/fhir-types`. A contribution
+is licensed under the same licence and grants the Licensor the relicensing
+right in CONTRIBUTING.md § Licensing of contributions; the pull request
+checkbox records it and `contribution-licence-guard` enforces it.
 Vendored specifications and third-party material keep their upstream terms,
 recorded in a `PROVENANCE.md` beside each vendored tree
 (`.claude/rules/vendored-inputs.md`).
