@@ -6,7 +6,7 @@ metadata:
   type: feedback
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 After opening a pull request, enable auto-merge at once:

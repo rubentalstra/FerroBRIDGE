@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # A FerroBRIDGE-authored model mapping whose one child maps the problem name,
 # which the synthetic ferrobridge.diagnose.v1 template constrains to 1..1. It

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # The minimal problem-diagnosis chain plus the subject the mapping resolves on
 # its own, so a $tofhir run that supplies no context.patient still produces a

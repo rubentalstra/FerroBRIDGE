@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # Fetch the browser assets the mermaid preprocessor needs into
 # website/book/vendor/mermaid/, verbatim and checksum-verified.

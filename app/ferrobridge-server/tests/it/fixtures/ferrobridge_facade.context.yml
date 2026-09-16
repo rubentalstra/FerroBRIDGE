@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # The context the facade suite runs: one profile onto the synthetic
 # ferrobridge.diagnose.v1 template of the testkit. The profile URL is

@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # <img src="assets/brand/ferrobridge-lockup-auto.svg" alt="FerroBRIDGE" width="284" height="64">

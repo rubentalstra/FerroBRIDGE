@@ -6,7 +6,7 @@ metadata:
   type: project
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 The owner decided on 2026-09-04 (#12, merged in #13) that FerroBRIDGE's own
@@ -27,7 +27,7 @@ The terms, as `LICENSE` and `NOTICE` state them:
 
 **How to apply:**
 
-- Every first-party file carries `SPDX-FileCopyrightText: Ruben Talstra` and
+- Every first-party file carries `SPDX-FileCopyrightText: Vernum Projecten B.V.` and
   `SPDX-License-Identifier: BUSL-1.1` in its header. The pin-matrix guard
   (#15) fails on a stale licence claim anywhere in the tree.
 - `LICENSE` is the one file that names Apache 2.0 as a licence of its own,

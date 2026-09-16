@@ -14,7 +14,7 @@ model: opus
 color: blue
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 You are a specification researcher for FerroBRIDGE, a pure-Rust standalone

@@ -2,7 +2,7 @@
 paths: ["**/*.rs"]
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Comments and documentation (RFC 505 + RFC 1574)

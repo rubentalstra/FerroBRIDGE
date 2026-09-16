@@ -5,7 +5,7 @@ metadata:
   type: feedback
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 On 2026-09-12 the `clippy` job died four times with "The runner has received

@@ -4,7 +4,7 @@ description: Look up the authoritative FHIR, FHIRconnect, OMOP, OMOCL, or openEH
 allowed-tools: Read, Grep, Glob, WebFetch
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Spec lookup

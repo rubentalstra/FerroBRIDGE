@@ -4,7 +4,7 @@ description: Regenerate the generated layers, fhir-types from the vendored FHIR 
 allowed-tools: Bash, Read, Grep
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Regenerate the FHIR layer

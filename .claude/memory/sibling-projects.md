@@ -6,7 +6,7 @@ metadata:
   type: project
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 FerroBRIDGE is the third project in the Ferro family, and the other two are

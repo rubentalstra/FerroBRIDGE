@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # The subject-resolving diagnosis chain plus one manual value taken from the
 # REST call, the shape basics/Variables.adoc writes for `$context`. It exists

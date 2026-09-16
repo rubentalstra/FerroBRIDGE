@@ -6,7 +6,7 @@ metadata:
   type: feedback
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 Milestones start at `v0.0.1` and step `v0.0.2`, `v0.0.3`, never a `v0.1.0`
