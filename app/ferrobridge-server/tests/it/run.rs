@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Ruben Talstra
+// SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
 //! The binary is thin over the library, so a test drives the real run path.

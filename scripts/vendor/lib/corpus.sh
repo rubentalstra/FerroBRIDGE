@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # shellcheck shell=bash
 # Shared helpers for the corpus vendor scripts (.claude/rules/vendored-inputs.md).

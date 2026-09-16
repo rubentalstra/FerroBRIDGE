@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Ruben Talstra
+// SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
 use std::fs;
@@ -85,7 +85,7 @@ fn every_generated_file_carries_the_banner() {
         // The banner holds the first line and the SPDX tags follow it (#129).
         assert!(
             content.contains(
-                "\n// SPDX-FileCopyrightText: Ruben Talstra\n// SPDX-License-Identifier: Apache-2.0\n"
+                "\n// SPDX-FileCopyrightText: Vernum Projecten B.V.\n// SPDX-License-Identifier: Apache-2.0\n"
             ),
             "{path} carries the SPDX tags under the banner"
         );

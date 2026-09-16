@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Ruben Talstra
+// SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
 //! The emitter: what it writes, that it writes the same bytes twice, and that
@@ -90,7 +90,7 @@ fn every_generated_file_carries_the_banner() -> Result<(), Box<dyn Error>> {
         // The banner holds the first line and the SPDX tags follow it (#129).
         assert!(
             text.contains(
-                "\n// SPDX-FileCopyrightText: Ruben Talstra\n// SPDX-License-Identifier: BUSL-1.1\n"
+                "\n// SPDX-FileCopyrightText: Vernum Projecten B.V.\n// SPDX-License-Identifier: BUSL-1.1\n"
             ),
             "{relative} does not carry the SPDX tags under the banner"
         );

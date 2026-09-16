@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Ruben Talstra
+// SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
 //! The three CDM datatypes Rust has no type for: a bounded string, a date and

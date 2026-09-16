@@ -12,7 +12,7 @@ model: opus
 color: green
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 You implement one bounded task in FerroBRIDGE, a pure-Rust standalone bridge

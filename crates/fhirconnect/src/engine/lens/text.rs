@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Ruben Talstra
+// SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
 //! `DV_TEXT` against FHIR `string`, `Coding` and `CodeableConcept`.

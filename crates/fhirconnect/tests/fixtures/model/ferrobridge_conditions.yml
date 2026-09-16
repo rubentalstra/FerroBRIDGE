@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # A FerroBRIDGE-authored model mapping whose only purpose is to carry one
 # condition per operator of the Conditions chapter, so the engine can evaluate

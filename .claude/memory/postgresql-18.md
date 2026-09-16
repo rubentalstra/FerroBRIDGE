@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 Owner ruling 2026-09-12: the CDM database in tests, the container harness, the

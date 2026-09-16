@@ -2,7 +2,7 @@
 paths: ["crates/**", "scripts/release/**", ".github/workflows/publish-crates.yml"]
 ---
 
-<!-- SPDX-FileCopyrightText: Ruben Talstra -->
+<!-- SPDX-FileCopyrightText: Vernum Projecten B.V. -->
 <!-- SPDX-License-Identifier: BUSL-1.1 -->
 
 # Published crates discipline (crates.io)

@@ -181,6 +181,11 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Changed
 
+- The Licensor and copyright holder of the project's own work is Vernum
+  Projecten B.V. (#197). Every `Licensor:`, copyright and
+  `SPDX-FileCopyrightText` line names the company. The licence terms are
+  unchanged, and maintainer credit stays a person.
+
 - Keyword values compare case-insensitively inside their documented set, and a
   value outside the set is refused. The FHIRconnect text is case-inconsistent
   about its own keyword values, so `openEHR->fhir` and `$openEHRRoot` are

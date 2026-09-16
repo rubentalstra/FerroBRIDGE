@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Ruben Talstra
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
 # A FerroBRIDGE-authored context over the diagnosis chain of the vendored
 # FHIRconnect mapping library: it starts at the published

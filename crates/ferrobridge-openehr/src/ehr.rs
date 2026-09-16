@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Ruben Talstra
+// SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
 //! The EHR resource: `POST /ehr`, `GET /ehr` by subject, `GET /ehr/{ehr_id}`.

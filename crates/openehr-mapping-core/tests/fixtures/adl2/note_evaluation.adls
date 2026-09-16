@@ -1,4 +1,4 @@
--- SPDX-FileCopyrightText: Ruben Talstra
+-- SPDX-FileCopyrightText: Vernum Projecten B.V.
 -- SPDX-License-Identifier: BUSL-1.1
 -- Synthetic: the ADL 2 twin of the ADL 1.4 EVALUATION in
 -- tests/fixtures/adl14/note_evaluation.opt. At-coded node identifiers.
