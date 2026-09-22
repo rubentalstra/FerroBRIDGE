@@ -143,7 +143,10 @@ impl super::super::codec::Json for Parameters {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_id(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -732,7 +735,10 @@ impl super::super::codec::Json for ParametersParameter {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;

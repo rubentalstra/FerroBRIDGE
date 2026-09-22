@@ -73,6 +73,14 @@ pub enum LowerError {
         /// The reference, as the element spells it.
         reference: String,
     },
+    /// A primitive's lexical form is no regular expression the crate compiles.
+    #[error("the lexical form of {path} does not compile: {reason}")]
+    InvalidLexicalForm {
+        /// The value element's path.
+        path: String,
+        /// The compiler's reason.
+        reason: String,
+    },
     /// A `contentReference` names an element behind a narrower feature.
     #[error(
         "{path} is emitted behind the {feature} feature and references {reference}, which is emitted behind {target_feature}"
@@ -235,6 +243,38 @@ pub struct TypeDef {
     /// The narrowest root set that reaches the type, so the feature it is
     /// gated behind.
     pub scope: RootScope,
+    /// The lexical form a primitive's value keeps, as the `regex` extension of
+    /// its `value` element states it
+    /// (<https://hl7.org/fhir/R5/datatypes.html#primitive>).
+    pub value_regex: Option<String>,
+}
+
+/// The lexical form anchored to the whole value.
+///
+/// The specification writes each form unanchored and asks the reader to add
+/// the anchors its regex engine spells
+/// (<https://hl7.org/fhir/R5/datatypes.html#primitive>); the group keeps an
+/// alternation inside the form from swallowing them.
+#[must_use]
+pub fn anchored_lexical_form(pattern: &str) -> String {
+    format!("^(?:{pattern})$")
+}
+
+/// Compiles `pattern` the way the generated crate compiles it.
+///
+/// The forms are XML Schema patterns, where `\s` is the space, the tab, the
+/// carriage return and the line feed alone
+/// (<https://www.w3.org/TR/xmlschema-2/#regexs>), so Unicode mode stays off and
+/// the match runs over the value's bytes. With it on, `\S` would exclude every
+/// Unicode space and refuse values the packages themselves publish.
+///
+/// # Errors
+///
+/// Returns the compiler's error for a pattern it cannot build.
+pub fn compile_lexical_form(pattern: &str) -> Result<regex::bytes::Regex, regex::Error> {
+    regex::bytes::RegexBuilder::new(pattern)
+        .unicode(false)
+        .build()
 }
 
 /// Where a lowered structure lands in the generated module.
@@ -369,6 +409,7 @@ impl VersionModule {
             table_only: false,
             base: None,
             scope: RootScope::Terminology,
+            value_regex: None,
         }, "the Resource enum")?;
         model.insert(TypeDef {
             name: UNKNOWN_RESOURCE.to_owned(),
@@ -386,6 +427,7 @@ impl VersionModule {
             table_only: false,
             scope: RootScope::Terminology,
             base: None,
+            value_regex: None,
         }, "the UnknownResource struct")?;
         model.box_cycles();
         model.box_wide_variants();
@@ -597,6 +639,11 @@ fn lower_struct(
         table_only,
     } = placement;
     let root_docs = structure.element(path).map(docs_of).unwrap_or_default();
+    let value_regex = if is_primitive {
+        value_lexical_form(structure, path)?
+    } else {
+        None
+    };
     let mut fields = Vec::new();
     for element in structure.children_of(path).cloned().collect::<Vec<_>>() {
         // NOTE: a max of 0 prohibits the element (https://hl7.org/fhir/R4B/conformance-rules.html#cardinality),
@@ -635,6 +682,7 @@ fn lower_struct(
                         is_resource: false,
                         table_only: placement.table_only,
                         scope,
+                        value_regex: None,
                     },
                     &element.path,
                 )?;
@@ -676,9 +724,40 @@ fn lower_struct(
                 .and_then(|url| url.rsplit('/').next())
                 .map(type_name),
             scope,
+            value_regex,
         },
         path,
     )
+}
+
+/// The lexical form of a primitive's `value` element, checked to compile.
+///
+/// The form is the `regex` extension the package puts on the value element's
+/// type (<https://hl7.org/fhir/R5/datatypes.html#primitive>), so it is read
+/// per version and never copied between them.
+fn value_lexical_form(
+    structure: &ResolvedStructure,
+    path: &str,
+) -> Result<Option<String>, LowerError> {
+    let Some(pattern) = structure
+        .children_of(path)
+        .find(|element| element.name() == "value")
+        .and_then(|element| match &element.shape {
+            ElementShape::Typed(types) => types.first().and_then(|first| first.regex.clone()),
+            ElementShape::Root
+            | ElementShape::ContentReference { .. }
+            | ElementShape::Choice(_) => None,
+        })
+    else {
+        return Ok(None);
+    };
+    compile_lexical_form(&anchored_lexical_form(&pattern)).map_err(|error| {
+        LowerError::InvalidLexicalForm {
+            path: format!("{path}.value"),
+            reason: error.to_string(),
+        }
+    })?;
+    Ok(Some(pattern))
 }
 
 /// The type codes an element lists, in the definition's order.

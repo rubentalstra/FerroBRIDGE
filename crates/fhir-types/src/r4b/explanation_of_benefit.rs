@@ -955,7 +955,10 @@ impl super::super::codec::Json for ExplanationOfBenefit {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_id(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -1970,7 +1973,10 @@ impl super::super::codec::Json for ExplanationOfBenefitAccident {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2660,7 +2666,10 @@ impl super::super::codec::Json for ExplanationOfBenefitAddItem {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3345,7 +3354,10 @@ impl super::super::codec::Json for ExplanationOfBenefitAddItemDetail {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3816,7 +3828,10 @@ impl super::super::codec::Json for ExplanationOfBenefitAddItemDetailSubDetail {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -4469,7 +4484,10 @@ impl super::super::codec::Json for ExplanationOfBenefitBenefitBalance {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -4835,7 +4853,10 @@ impl super::super::codec::Json for ExplanationOfBenefitBenefitBalanceFinancial {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5340,7 +5361,10 @@ impl super::super::codec::Json for ExplanationOfBenefitCareTeam {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5678,7 +5702,10 @@ impl super::super::codec::Json for ExplanationOfBenefitDiagnosis {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6097,7 +6124,10 @@ impl super::super::codec::Json for ExplanationOfBenefitInsurance {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6752,7 +6782,10 @@ impl super::super::codec::Json for ExplanationOfBenefitItem {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -7442,7 +7475,10 @@ impl super::super::codec::Json for ExplanationOfBenefitItemAdjudication {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -7929,7 +7965,10 @@ impl super::super::codec::Json for ExplanationOfBenefitItemDetail {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -8568,7 +8607,10 @@ impl super::super::codec::Json for ExplanationOfBenefitItemDetailSubDetail {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -9194,7 +9236,10 @@ impl super::super::codec::Json for ExplanationOfBenefitPayee {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -9495,7 +9540,10 @@ impl super::super::codec::Json for ExplanationOfBenefitPayment {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -9872,7 +9920,10 @@ impl super::super::codec::Json for ExplanationOfBenefitProcedure {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -10308,7 +10359,10 @@ impl super::super::codec::Json for ExplanationOfBenefitProcessNote {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -10583,7 +10637,10 @@ impl super::super::codec::Json for ExplanationOfBenefitRelated {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -10943,7 +11000,10 @@ impl super::super::codec::Json for ExplanationOfBenefitSupportingInfo {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -11509,7 +11569,10 @@ impl super::super::codec::Json for ExplanationOfBenefitTotal {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;

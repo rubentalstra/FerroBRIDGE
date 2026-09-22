@@ -1102,7 +1102,10 @@ impl super::super::codec::Json for DeviceDefinition {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2126,7 +2129,10 @@ impl super::super::codec::Json for DeviceDefinitionAdditive {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2381,7 +2387,10 @@ impl super::super::codec::Json for DeviceDefinitionChargeItem {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2647,7 +2656,10 @@ impl super::super::codec::Json for DeviceDefinitionClassification {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2933,7 +2945,10 @@ impl super::super::codec::Json for DeviceDefinitionConformsTo {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3217,7 +3232,10 @@ impl super::super::codec::Json for DeviceDefinitionCorrectiveAction {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3454,7 +3472,10 @@ impl super::super::codec::Json for DeviceDefinitionDeviceName {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3686,7 +3707,10 @@ impl super::super::codec::Json for DeviceDefinitionDeviceVersion {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -4030,7 +4054,10 @@ impl super::super::codec::Json for DeviceDefinitionGuideline {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -4377,7 +4404,10 @@ impl super::super::codec::Json for DeviceDefinitionHasPart {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -4705,7 +4735,10 @@ impl super::super::codec::Json for DeviceDefinitionLink {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5052,7 +5085,10 @@ impl super::super::codec::Json for DeviceDefinitionMaterial {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5370,7 +5406,10 @@ impl super::super::codec::Json for DeviceDefinitionPackaging {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5689,7 +5728,10 @@ impl super::super::codec::Json for DeviceDefinitionPackagingDistributor {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5973,7 +6015,10 @@ impl super::super::codec::Json for DeviceDefinitionProperty {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6491,7 +6536,10 @@ impl super::super::codec::Json for DeviceDefinitionRegulatoryIdentifier {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6812,7 +6860,10 @@ impl super::super::codec::Json for DeviceDefinitionUdiDeviceIdentifier {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -7086,7 +7137,10 @@ impl super::super::codec::Json for DeviceDefinitionUdiDeviceIdentifierMarketDist
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;

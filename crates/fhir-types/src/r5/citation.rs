@@ -855,7 +855,10 @@ impl super::super::codec::Json for Citation {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_id(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -1882,7 +1885,10 @@ impl super::super::codec::Json for CitationCitedArtifact {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2402,7 +2408,10 @@ impl super::super::codec::Json for CitationCitedArtifactAbstract {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2676,7 +2685,10 @@ impl super::super::codec::Json for CitationCitedArtifactClassification {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2971,7 +2983,10 @@ impl super::super::codec::Json for CitationCitedArtifactContributorship {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3337,7 +3352,10 @@ impl super::super::codec::Json for CitationCitedArtifactContributorshipEntry {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3678,7 +3696,10 @@ impl super::super::codec::Json for CitationCitedArtifactContributorshipEntryCont
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -3941,7 +3962,10 @@ impl super::super::codec::Json for CitationCitedArtifactContributorshipSummary {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -4214,7 +4238,10 @@ impl super::super::codec::Json for CitationCitedArtifactPart {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -4715,7 +4742,10 @@ impl super::super::codec::Json for CitationCitedArtifactPublicationForm {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5180,7 +5210,10 @@ impl super::super::codec::Json for CitationCitedArtifactPublicationFormPublished
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5592,7 +5625,10 @@ impl super::super::codec::Json for CitationCitedArtifactRelatesTo {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -5918,7 +5954,10 @@ impl super::super::codec::Json for CitationCitedArtifactStatusDate {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6180,7 +6219,10 @@ impl super::super::codec::Json for CitationCitedArtifactTitle {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6422,7 +6464,10 @@ impl super::super::codec::Json for CitationCitedArtifactVersion {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6656,7 +6701,10 @@ impl super::super::codec::Json for CitationCitedArtifactWebLocation {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -6890,7 +6938,10 @@ impl super::super::codec::Json for CitationClassification {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -7145,7 +7196,10 @@ impl super::super::codec::Json for CitationStatusDate {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -7385,7 +7439,10 @@ impl super::super::codec::Json for CitationSummary {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;

@@ -480,7 +480,10 @@ impl super::super::codec::Json for AuditEvent {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_id(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -1129,7 +1132,10 @@ impl super::super::codec::Json for AuditEventAgent {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -1661,7 +1667,10 @@ impl super::super::codec::Json for AuditEventEntity {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2031,7 +2040,10 @@ impl super::super::codec::Json for AuditEventEntityDetail {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2649,7 +2661,10 @@ impl super::super::codec::Json for AuditEventOutcome {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -2903,7 +2918,10 @@ impl super::super::codec::Json for AuditEventSource {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_string(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;

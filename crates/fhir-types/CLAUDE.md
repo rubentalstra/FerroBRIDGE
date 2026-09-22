@@ -24,6 +24,17 @@ to hand edits; the only hand-maintained files are `Cargo.toml` and this
 - `schema::SCHEMAS` is the one element table per version: the XML codec and the
   path model read the same statics, so cardinality, the element path, the type
   codes and `contentReference` are never copied into a second table.
+- A string-valued primitive is held to its lexical form on decode: the emitter
+  reads the `regex` extension of that version's `<primitive>.value` element,
+  writes it anchored behind a `LazyLock` in the version's `primitives` module,
+  and a value outside it is `DecodeErrorKind::BadValue` with the element path.
+  The forms are XML Schema patterns, so they compile with Unicode mode off and
+  match over the value's bytes; with it on, `\S` would exclude every Unicode
+  space and refuse the non-breaking spaces the packages publish themselves.
+  An element typed with a `FHIRPath` system type (`Resource.id`,
+  `Extension.url`) keeps the form of the FHIR type its own
+  `structuredefinition-fhir-type` extension names, which differs per package.
+  A primitive carried as a JSON number or a boolean keeps its scalar parse.
 - `codec::Value` converts to `serde_json::Value` only when every number comes
   back in the text the document carried, and otherwise reports a
   `ValueConversionError` with the element path; `Value::from_serde_json` is the

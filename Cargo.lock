@@ -1037,6 +1037,7 @@ dependencies = [
  "fhir-types",
  "insta",
  "proptest",
+ "regex",
  "serde",
  "serde_json",
  "tempfile",
@@ -1045,9 +1046,10 @@ dependencies = [
 
 [[package]]
 name = "fhir-types"
-version = "0.1.104"
+version = "0.1.105"
 dependencies = [
  "quick-xml",
+ "regex",
  "serde",
  "serde_json",
 ]

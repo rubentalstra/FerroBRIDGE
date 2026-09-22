@@ -41,6 +41,41 @@ impl From<&str> for Base64Binary {
     }
 }
 
+/// The lexical form of the FHIR primitive `base64Binary`, anchored to the whole value.
+///
+/// The `regex` extension of `base64Binary.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static BASE64_BINARY_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(
+            r"^(?:(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$",
+        )
+        .unicode(false)
+        .build()
+        .expect("the lexical form of `base64Binary` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `base64Binary`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_base64_binary(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if BASE64_BINARY_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
+    }
+}
+
 impl super::super::codec::Primitive for Base64Binary {
     fn value_json(
         &self,
@@ -119,7 +154,10 @@ impl super::super::codec::Primitive for Base64Binary {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_base64_binary(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -130,10 +168,12 @@ impl super::super::codec::Primitive for Base64Binary {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -285,10 +325,12 @@ impl super::super::codec::Primitive for Boolean {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -351,6 +393,39 @@ impl From<std::string::String> for Canonical {
 impl From<&str> for Canonical {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `canonical`, anchored to the whole value.
+///
+/// The `regex` extension of `canonical.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static CANONICAL_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(r"^(?:\S*)$")
+            .unicode(false)
+            .build()
+            .expect("the lexical form of `canonical` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `canonical`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_canonical(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if CANONICAL_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -432,7 +507,10 @@ impl super::super::codec::Primitive for Canonical {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_canonical(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -443,10 +521,12 @@ impl super::super::codec::Primitive for Canonical {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -511,6 +591,39 @@ impl From<std::string::String> for Code {
 impl From<&str> for Code {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `code`, anchored to the whole value.
+///
+/// The `regex` extension of `code.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static CODE_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(r"^(?:[^\s]+( [^\s]+)*)$")
+            .unicode(false)
+            .build()
+            .expect("the lexical form of `code` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `code`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_code(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if CODE_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -592,7 +705,10 @@ impl super::super::codec::Primitive for Code {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_code(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -603,10 +719,12 @@ impl super::super::codec::Primitive for Code {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -673,6 +791,40 @@ impl From<std::string::String> for Date {
 impl From<&str> for Date {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `date`, anchored to the whole value.
+///
+/// The `regex` extension of `date.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static DATE_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> = std::sync::LazyLock::new(
+    || {
+        regex::bytes::RegexBuilder::new(r"^(?:([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?)$")
+        .unicode(false)
+        .build()
+        .expect("the lexical form of `date` should compile")
+    },
+);
+
+/// Hands back `text` when it keeps the lexical form of `date`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_date(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if DATE_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -754,7 +906,10 @@ impl super::super::codec::Primitive for Date {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_date(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -765,10 +920,12 @@ impl super::super::codec::Primitive for Date {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -837,6 +994,40 @@ impl From<std::string::String> for DateTime {
 impl From<&str> for DateTime {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `dateTime`, anchored to the whole value.
+///
+/// The `regex` extension of `dateTime.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static DATE_TIME_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> = std::sync::LazyLock::new(
+    || {
+        regex::bytes::RegexBuilder::new(r"^(?:([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?)?)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)?)?)?)$")
+        .unicode(false)
+        .build()
+        .expect("the lexical form of `dateTime` should compile")
+    },
+);
+
+/// Hands back `text` when it keeps the lexical form of `dateTime`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_date_time(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if DATE_TIME_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -918,7 +1109,10 @@ impl super::super::codec::Primitive for DateTime {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_date_time(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -929,10 +1123,12 @@ impl super::super::codec::Primitive for DateTime {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -1102,10 +1298,12 @@ impl super::super::codec::Primitive for Decimal {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -1170,6 +1368,38 @@ impl From<std::string::String> for Id {
 impl From<&str> for Id {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `id`, anchored to the whole value.
+///
+/// The `regex` extension of `id.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static ID_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> = std::sync::LazyLock::new(|| {
+    regex::bytes::RegexBuilder::new(r"^(?:[A-Za-z0-9\-\.]{1,64})$")
+        .unicode(false)
+        .build()
+        .expect("the lexical form of `id` should compile")
+});
+
+/// Hands back `text` when it keeps the lexical form of `id`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_id(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if ID_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -1251,7 +1481,10 @@ impl super::super::codec::Primitive for Id {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_id(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -1262,10 +1495,12 @@ impl super::super::codec::Primitive for Id {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -1330,6 +1565,40 @@ impl From<std::string::String> for Instant {
 impl From<&str> for Instant {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `instant`, anchored to the whole value.
+///
+/// The `regex` extension of `instant.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static INSTANT_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> = std::sync::LazyLock::new(
+    || {
+        regex::bytes::RegexBuilder::new(r"^(?:([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))$")
+        .unicode(false)
+        .build()
+        .expect("the lexical form of `instant` should compile")
+    },
+);
+
+/// Hands back `text` when it keeps the lexical form of `instant`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_instant(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if INSTANT_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -1411,7 +1680,10 @@ impl super::super::codec::Primitive for Instant {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_instant(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -1422,10 +1694,12 @@ impl super::super::codec::Primitive for Instant {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -1577,10 +1851,12 @@ impl super::super::codec::Primitive for Integer {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -1732,10 +2008,12 @@ impl super::super::codec::Primitive for Integer64 {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -1799,6 +2077,39 @@ impl From<std::string::String> for Markdown {
 impl From<&str> for Markdown {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `markdown`, anchored to the whole value.
+///
+/// The `regex` extension of `markdown.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static MARKDOWN_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(r"^(?:^[\s\S]+$)$")
+            .unicode(false)
+            .build()
+            .expect("the lexical form of `markdown` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `markdown`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_markdown(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if MARKDOWN_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -1880,7 +2191,10 @@ impl super::super::codec::Primitive for Markdown {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_markdown(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -1891,10 +2205,12 @@ impl super::super::codec::Primitive for Markdown {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -1957,6 +2273,39 @@ impl From<std::string::String> for Oid {
 impl From<&str> for Oid {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `oid`, anchored to the whole value.
+///
+/// The `regex` extension of `oid.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static OID_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(r"^(?:urn:oid:[0-2](\.(0|[1-9][0-9]*))+)$")
+            .unicode(false)
+            .build()
+            .expect("the lexical form of `oid` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `oid`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_oid(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if OID_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -2038,7 +2387,10 @@ impl super::super::codec::Primitive for Oid {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_oid(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -2049,10 +2401,12 @@ impl super::super::codec::Primitive for Oid {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -2202,10 +2556,12 @@ impl super::super::codec::Primitive for PositiveInt {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -2270,6 +2626,39 @@ impl From<std::string::String> for String {
 impl From<&str> for String {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `string`, anchored to the whole value.
+///
+/// The `regex` extension of `string.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static STRING_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(r"^(?:^[\s\S]+$)$")
+            .unicode(false)
+            .build()
+            .expect("the lexical form of `string` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `string`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_string(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if STRING_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -2351,7 +2740,10 @@ impl super::super::codec::Primitive for String {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_string(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -2362,10 +2754,12 @@ impl super::super::codec::Primitive for String {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -2430,6 +2824,41 @@ impl From<std::string::String> for Time {
 impl From<&str> for Time {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `time`, anchored to the whole value.
+///
+/// The `regex` extension of `time.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static TIME_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(
+            r"^(?:([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\.[0-9]{1,9})?)$",
+        )
+        .unicode(false)
+        .build()
+        .expect("the lexical form of `time` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `time`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_time(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if TIME_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -2511,7 +2940,10 @@ impl super::super::codec::Primitive for Time {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_time(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -2522,10 +2954,12 @@ impl super::super::codec::Primitive for Time {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -2675,10 +3109,12 @@ impl super::super::codec::Primitive for UnsignedInt {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -2743,6 +3179,39 @@ impl From<std::string::String> for Uri {
 impl From<&str> for Uri {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `uri`, anchored to the whole value.
+///
+/// The `regex` extension of `uri.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static URI_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(r"^(?:\S*)$")
+            .unicode(false)
+            .build()
+            .expect("the lexical form of `uri` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `uri`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_uri(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if URI_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -2824,7 +3293,10 @@ impl super::super::codec::Primitive for Uri {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_uri(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -2835,10 +3307,12 @@ impl super::super::codec::Primitive for Uri {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -2901,6 +3375,39 @@ impl From<std::string::String> for Url {
 impl From<&str> for Url {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `url`, anchored to the whole value.
+///
+/// The `regex` extension of `url.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static URL_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(r"^(?:\S*)$")
+            .unicode(false)
+            .build()
+            .expect("the lexical form of `url` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `url`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_url(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if URL_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -2982,7 +3489,10 @@ impl super::super::codec::Primitive for Url {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_url(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -2993,10 +3503,12 @@ impl super::super::codec::Primitive for Url {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -3059,6 +3571,41 @@ impl From<std::string::String> for Uuid {
 impl From<&str> for Uuid {
     fn from(value: &str) -> Self {
         Self::from(std::string::String::from(value))
+    }
+}
+
+/// The lexical form of the FHIR primitive `uuid`, anchored to the whole value.
+///
+/// The `regex` extension of `uuid.value` states it (<https://hl7.org/fhir/R5/datatypes.html#primitive>),
+/// and the form is an XML Schema pattern, where `\s` is the space, the tab,
+/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>).
+#[expect(
+    clippy::expect_used,
+    reason = "the emitter compiles every lexical form it writes, so the pattern holds"
+)]
+static UUID_LEXICAL_FORM: std::sync::LazyLock<regex::bytes::Regex> =
+    std::sync::LazyLock::new(|| {
+        regex::bytes::RegexBuilder::new(
+            r"^(?:urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$",
+        )
+        .unicode(false)
+        .build()
+        .expect("the lexical form of `uuid` should compile")
+    });
+
+/// Hands back `text` when it keeps the lexical form of `uuid`.
+///
+/// # Errors
+///
+/// Returns [`super::super::codec::DecodeErrorKind::BadValue`] at `path` for a value outside the form.
+pub(crate) fn checked_uuid(
+    text: std::string::String,
+    path: &super::super::codec::Path,
+) -> Result<std::string::String, super::super::codec::DecodeError> {
+    if UUID_LEXICAL_FORM.is_match(text.as_bytes()) {
+        Ok(text)
+    } else {
+        Err(path.error(super::super::codec::DecodeErrorKind::BadValue))
     }
 }
 
@@ -3140,7 +3687,10 @@ impl super::super::codec::Primitive for Uuid {
         let value = match value {
             Some(value) => {
                 let value = super::super::codec::expect_single(value, path)?;
-                Some(super::super::codec::expect_string(value, path)?)
+                Some(checked_uuid(
+                    super::super::codec::expect_string(value, path)?,
+                    path,
+                )?)
             }
             None => None,
         };
@@ -3151,10 +3701,12 @@ impl super::super::codec::Primitive for Uuid {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     "extension" => {
                         for (index, entry) in super::super::codec::expect_array(item, path)?
@@ -3280,10 +3832,12 @@ impl super::super::codec::Primitive for Xhtml {
             for (key, item) in object {
                 match key.as_str() {
                     "id" => {
-                        id =
-                            Some(path.with("id", |path| {
-                                super::super::codec::expect_string(item, path)
-                            })?);
+                        id = Some(path.with("id", |path| {
+                            super::primitives::checked_string(
+                                super::super::codec::expect_string(item, path)?,
+                                path,
+                            )
+                        })?);
                     }
                     _ => {
                         return path.with(key, |path| {

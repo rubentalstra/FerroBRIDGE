@@ -16,6 +16,15 @@ resources are the authority for what it emits (`.claude/rules/codegen.md`).
   types each references, per version, and marks every item with the `cfg` of
   the narrowest feature that selects it. A shape the consumer lacks is fixed
   here, never shadowed downstream.
+- A primitive whose JSON form is a string carries its lexical form into the
+  output: `lower` reads the `regex` extension of `<primitive>.value` from the
+  version's own package and compiles it there, so an uncompilable form fails
+  the emit rather than the crate, and `render_codec` writes it anchored behind
+  a `LazyLock` with the function that refuses a value outside it
+  (<https://hl7.org/fhir/R5/datatypes.html#primitive>). The forms are XML
+  Schema patterns, so both sides compile them with Unicode mode off
+  (`lower::compile_lexical_form`), and they differ between versions, so each is
+  read from its own package and never copied.
 - Output is byte-deterministic: iterate `BTreeMap` and sorted vectors, never
   a hash map (`.claude/rules/reliability.md`); `rustfmt` from the pinned
   toolchain formats the output so `cargo fmt --check` and the emitter agree.

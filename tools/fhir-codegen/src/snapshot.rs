@@ -19,6 +19,9 @@ const FHIRPATH_SYSTEM_PREFIX: &str = "http://hl7.org/fhirpath/System.";
 const FHIR_TYPE_EXTENSION: &str =
     "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
 
+/// The extension carrying the lexical form of a primitive's value.
+const REGEX_EXTENSION: &str = "http://hl7.org/fhir/StructureDefinition/regex";
+
 /// A failure while resolving a snapshot.
 #[derive(Debug, thiserror::Error)]
 pub enum ResolveError {
@@ -97,6 +100,9 @@ pub struct TypeRef {
     pub profiles: Vec<String>,
     /// Profiles a `Reference` or `canonical` target must conform to.
     pub target_profiles: Vec<String>,
+    /// The lexical form the value keeps, as the `regex` extension spells it
+    /// (<https://hl7.org/fhir/R5/datatypes.html#primitive>).
+    pub regex: Option<String>,
 }
 
 impl TypeRef {
@@ -110,12 +116,18 @@ impl TypeRef {
             .iter()
             .find(|extension| extension.url == FHIR_TYPE_EXTENSION)
             .and_then(|extension| extension.value_url.clone());
+        let regex = raw
+            .extension
+            .iter()
+            .find(|extension| extension.url == REGEX_EXTENSION)
+            .and_then(|extension| extension.value_string.clone());
         Some(match (system, fhir_type) {
             (Some(system), Some(fhir_type)) => Self {
                 code: fhir_type,
                 fhirpath_type: Some(system.to_owned()),
                 profiles: raw.profile.clone(),
                 target_profiles: raw.target_profile.clone(),
+                regex,
             },
             // NOTE: no spec names a FHIR type for a bare System.* value type; keep the
             // `FHIRPath` name as the code so the emitter sees exactly what the package says.
@@ -124,12 +136,14 @@ impl TypeRef {
                 fhirpath_type: Some(system.to_owned()),
                 profiles: raw.profile.clone(),
                 target_profiles: raw.target_profile.clone(),
+                regex,
             },
             (None, _) => Self {
                 code: code.to_owned(),
                 fhirpath_type: None,
                 profiles: raw.profile.clone(),
                 target_profiles: raw.target_profile.clone(),
+                regex,
             },
         })
     }

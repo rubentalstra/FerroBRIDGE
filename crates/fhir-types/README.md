@@ -77,6 +77,44 @@ consumer walking a path resolves that member's contents against this entry. It
 is a table-only entry: the crate emits no `Element` Rust type, because an
 element whose type is `Element` becomes its own nested struct.
 
+## Primitive lexical forms
+
+A primitive value the FHIR JSON representation carries as a string is held to
+the lexical form of its type. The form is the `regex` extension the version's
+own package puts on the primitive's `value` element, anchored to the whole
+value and compiled once per primitive
+(<https://hl7.org/fhir/R5/datatypes.html#primitive>). A value outside it is a
+`DecodeError` carrying `DecodeErrorKind::BadValue` and the element path, so
+`"date": "yesterday"` is refused at `CodeSystem.date` rather than stored and
+read defensively later.
+
+```rust
+use fhir_types::codec::{DecodeErrorKind, Json, Path, expect_object};
+
+let document = serde_json::from_str::<fhir_types::codec::Value>(
+    r#"{"resourceType":"CodeSystem","status":"active","content":"complete","date":"yesterday"}"#,
+)?;
+let mut path = Path::root("CodeSystem");
+let object = expect_object(&document, &path)?;
+let error = fhir_types::r4::code_system::CodeSystem::from_json(object, &mut path)
+    .expect_err("yesterday is no dateTime");
+assert_eq!(error.kind, DecodeErrorKind::BadValue);
+assert_eq!(error.path, "CodeSystem.date");
+# Ok::<(), Box<dyn std::error::Error>>(())
+```
+
+Each form is an XML Schema pattern, so `\s` is the space, the tab, the carriage
+return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>) and
+a value carrying a non-breaking space, which the HL7 packages themselves
+publish inside a `display` and a `code`, is not refused for it.
+
+The forms differ between versions and are read per version, never copied: 4.0.1,
+4.3.0 and 6.0.0-ballot5 require a timezone offset once a `dateTime` carries a
+time, and 5.0.0 makes it optional. A primitive carried as a JSON number or a
+boolean (`integer`, `decimal`, `positiveInt`, `unsignedInt`, `boolean`) is
+checked by the parser of that scalar instead, which is what keeps a decimal's
+lexical form intact.
+
 ## JSON and decimal precision
 
 The codec reads and writes FHIR JSON through its own document model,

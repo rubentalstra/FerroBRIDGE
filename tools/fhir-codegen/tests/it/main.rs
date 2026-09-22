@@ -22,6 +22,7 @@ mod codec;
 mod element_table;
 mod emit;
 mod layout;
+mod lexical_forms;
 mod operations;
 mod package;
 mod precision;
