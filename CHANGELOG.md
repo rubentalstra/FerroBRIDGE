@@ -24,6 +24,19 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- `fhir-types` 0.1.105 refuses a primitive value outside its lexical form on
+  decode (#204). Every primitive whose JSON form is a string carries the
+  `regex` extension its own package puts on the `value` element
+  (<https://hl7.org/fhir/R5/datatypes.html#primitive>), compiled once behind a
+  `LazyLock` in the generated module and matched against the whole value as the
+  XML Schema pattern it is (<https://www.w3.org/TR/xmlschema-2/#regexs>), so
+  `"date": "yesterday"`, a `code` with a leading space, a `uri` holding a space
+  and an id outside `[A-Za-z0-9\-\.]{1,64}` are a `DecodeError` with
+  `BadValue` and the element path. The form is read per version and never
+  copied between them: 4.0.1, 4.3.0 and 6.0.0-ballot5 require the offset with a
+  time and 5.0.0 does not, and 4.0.1 types `CodeSystem.id` as `string` where
+  4.3.0 and 5.0.0 type it as `id`. A primitive carried as a JSON number or a
+  boolean keeps the number checks it already had.
 - `fhirconnect::operations` and the `$tofhir` and `$toopenehr` HTTP surface
   (#114). The two operations the draft FHIRconnect REST API chapter defines
   (specification pull request #93, pinned by commit) are served by

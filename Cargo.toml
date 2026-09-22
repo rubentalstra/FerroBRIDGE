@@ -36,6 +36,11 @@ serde-saphyr = { version = "1.2.0", default-features = false, features = ["deser
 # schemas are self-contained, so no remote or file reference resolver is built.
 jsonschema = { version = "0.56.0", default-features = false }
 thiserror = "2.0.20"
+# The lexical form of each FHIR primitive: the generated codec compiles the
+# `regex` extension of the primitive's value element and checks a decoded value
+# against it, and the generator compiles every form it writes. Verified against
+# crates.io on 2026-09-22.
+regex = "1.13.1"
 # The openEHR RM 1.1.0 model and the BASE path parser.
 openehr-rm = "0.0.64"
 # The BASE identification types the RM leaves to it: TERMINOLOGY_ID is a
@@ -53,7 +58,7 @@ proptest = "1.11.0"
 sha2 = "0.11.0"
 # Published from this workspace, so the requirement carries both a path and a
 # version: cargo resolves the path locally and the version on crates.io.
-fhir-types = { path = "crates/fhir-types", version = "0.1.104", default-features = false }
+fhir-types = { path = "crates/fhir-types", version = "0.1.105", default-features = false }
 openehr-mapping-core = { path = "crates/openehr-mapping-core", version = "0.0.0" }
 # Path-only, with no version: cargo strips the dev-dependency from a packaged
 # crates/* manifest instead of looking it up on crates.io.

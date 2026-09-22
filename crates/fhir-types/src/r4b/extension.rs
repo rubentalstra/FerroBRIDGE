@@ -407,7 +407,10 @@ impl super::super::codec::Json for Extension {
             .map(|value| {
                 path.with("id", |path| {
                     let value = super::super::codec::expect_single(value, path)?;
-                    super::super::codec::expect_string(value, path)
+                    super::primitives::checked_id(
+                        super::super::codec::expect_string(value, path)?,
+                        path,
+                    )
                 })
             })
             .transpose()?;
@@ -429,7 +432,7 @@ impl super::super::codec::Json for Extension {
             let value = raw_url
                 .ok_or_else(|| path.error(super::super::codec::DecodeErrorKind::MissingProperty))?;
             let value = super::super::codec::expect_single(value, path)?;
-            super::super::codec::expect_string(value, path)
+            super::primitives::checked_uri(super::super::codec::expect_string(value, path)?, path)
         })?;
         let field_value = match raw_value.suffix {
             None => None,

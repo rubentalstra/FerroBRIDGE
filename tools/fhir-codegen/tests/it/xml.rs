@@ -237,7 +237,10 @@ proptest! {
     /// coding, and a decimal's lexical form round-trips through XML.
     #[test]
     fn generated_parameters_round_trip_through_xml(
-        text in "[a-zA-Z0-9 <>&\"'\u{e9}]{0,24}",
+        // A FHIR string holds at least one character: its lexical form is
+        // `[ \r\n\t\S]+` in 4.0.1 and `^[\s\S]+$` in 5.0.0
+        // (<https://hl7.org/fhir/R5/datatypes.html#primitive>).
+        text in "[a-zA-Z0-9 <>&\"'\u{e9}]{1,24}",
         flag in any::<bool>(),
         number in any::<i32>(),
         decimal in prop_oneof![Just("1.50"), Just("0.001"), Just("-3"), Just("100"), Just("2.0"), Just("0.1234567890123456789012345678")],

@@ -10,8 +10,11 @@
 
 use std::fmt::{self, Write};
 
-use crate::lower::{Cardinality, Field, Scalar, Target, TypeDef, TypeKind, Variant, VersionModule};
-use crate::naming::type_name;
+use crate::lower::{
+    Cardinality, Field, PRIMITIVES_MODULE, Scalar, Target, TypeDef, TypeKind, Variant,
+    VersionModule, anchored_lexical_form,
+};
+use crate::naming::{module_name, type_name};
 use crate::render::{render_target, resource_scope};
 
 /// The codec module path from a type file (`<version>/<module>.rs`).
@@ -73,6 +76,125 @@ fn scalar_from_value(scalar: Scalar, primitive: Option<&str>) -> String {
     }
 }
 
+/// The lexical form `ty` states for its value, for a primitive the FHIR JSON
+/// representation carries as a string.
+///
+/// A primitive carried as a JSON number or a boolean
+/// (<https://hl7.org/fhir/R4B/json.html#primitive>) is decoded by the parser of
+/// that scalar, which admits exactly the values the form describes, so the form
+/// is read for the string-valued primitives alone.
+fn lexical_form(ty: &TypeDef, scalar: Scalar) -> Option<&str> {
+    if !matches!(scalar, Scalar::Str) || ty.name == "Decimal" {
+        return None;
+    }
+    ty.value_regex.as_deref()
+}
+
+/// The `LazyLock` holding the compiled lexical form of the primitive `name`.
+fn lexical_form_static(name: &str) -> String {
+    format!("{}_LEXICAL_FORM", module_name(name).to_uppercase())
+}
+
+/// The function checking a value against the lexical form of the primitive `name`.
+fn lexical_form_check(name: &str) -> String {
+    format!("checked_{}", module_name(name))
+}
+
+/// That function, spelled from another module of the same version.
+fn lexical_form_path(name: &str) -> String {
+    format!("super::{PRIMITIVES_MODULE}::{}", lexical_form_check(name))
+}
+
+/// The pattern as a Rust string literal, raw wherever the text admits one so
+/// the backslashes read as the package writes them.
+fn pattern_literal(pattern: &str) -> String {
+    if pattern.contains('"') {
+        format!("{pattern:?}")
+    } else {
+        format!("r\"{pattern}\"")
+    }
+}
+
+/// The compiled lexical form and the function that checks a value against it.
+fn render_lexical_form(
+    model: &VersionModule,
+    out: &mut String,
+    ty: &TypeDef,
+    pattern: &str,
+) -> fmt::Result {
+    let form = lexical_form_static(&ty.name);
+    let check = lexical_form_check(&ty.name);
+    let version = model.name.to_uppercase();
+    writeln!(
+        out,
+        "\n/// The lexical form of the FHIR primitive `{}`, anchored to the whole value.",
+        ty.path
+    )?;
+    writeln!(out, "///")?;
+    writeln!(
+        out,
+        "/// The `regex` extension of `{}.value` states it (<https://hl7.org/fhir/{version}/datatypes.html#primitive>),",
+        ty.path
+    )?;
+    writeln!(
+        out,
+        "/// and the form is an XML Schema pattern, where `\\s` is the space, the tab,"
+    )?;
+    writeln!(
+        out,
+        "/// the carriage return and the line feed alone (<https://www.w3.org/TR/xmlschema-2/#regexs>)."
+    )?;
+    writeln!(out, "#[expect(")?;
+    writeln!(out, "    clippy::expect_used,")?;
+    writeln!(
+        out,
+        "    reason = \"the emitter compiles every lexical form it writes, so the pattern holds\""
+    )?;
+    writeln!(out, ")]")?;
+    writeln!(
+        out,
+        "static {form}: std::sync::LazyLock<regex::bytes::Regex> = std::sync::LazyLock::new(|| {{"
+    )?;
+    writeln!(
+        out,
+        "    regex::bytes::RegexBuilder::new({})",
+        pattern_literal(&anchored_lexical_form(pattern))
+    )?;
+    writeln!(out, "        .unicode(false)")?;
+    writeln!(out, "        .build()")?;
+    writeln!(
+        out,
+        "        .expect(\"the lexical form of `{}` should compile\")",
+        ty.path
+    )?;
+    writeln!(out, "}});")?;
+    writeln!(
+        out,
+        "\n/// Hands back `text` when it keeps the lexical form of `{}`.",
+        ty.path
+    )?;
+    writeln!(out, "///")?;
+    writeln!(out, "/// # Errors")?;
+    writeln!(out, "///")?;
+    writeln!(
+        out,
+        "/// Returns [`{C}::DecodeErrorKind::BadValue`] at `path` for a value outside the form."
+    )?;
+    writeln!(out, "pub(crate) fn {check}(")?;
+    writeln!(out, "    text: std::string::String,")?;
+    writeln!(out, "    path: &{C}::Path,")?;
+    writeln!(out, ") -> Result<std::string::String, {C}::DecodeError> {{")?;
+    writeln!(out, "    if {form}.is_match(text.as_bytes()) {{")?;
+    writeln!(out, "        Ok(text)")?;
+    writeln!(out, "    }} else {{")?;
+    writeln!(
+        out,
+        "        Err(path.error({C}::DecodeErrorKind::BadValue))"
+    )?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "}}")
+}
+
 /// Renders the codec impls for `ty`.
 ///
 /// # Errors
@@ -80,7 +202,7 @@ fn scalar_from_value(scalar: Scalar, primitive: Option<&str>) -> String {
 /// Returns [`fmt::Error`] only if writing to the string fails, which `String` never does.
 pub fn render_codec(model: &VersionModule, out: &mut String, ty: &TypeDef) -> fmt::Result {
     match &ty.kind {
-        TypeKind::Struct { fields } if ty.is_primitive => render_primitive(out, ty, fields),
+        TypeKind::Struct { fields } if ty.is_primitive => render_primitive(model, out, ty, fields),
         TypeKind::Struct { fields } => {
             render_struct(model, out, ty, fields)?;
             render_serialize(model, out, ty, fields)?;
@@ -118,7 +240,30 @@ fn render_deserialize(out: &mut String, name: &str) -> fmt::Result {
     writeln!(out, "    }}\n}}")
 }
 
-fn render_primitive(out: &mut String, ty: &TypeDef, fields: &[Field]) -> fmt::Result {
+/// What a primitive's codec needs to know of its own shape.
+struct PrimitiveShape {
+    /// The Rust scalar the value holds.
+    scalar: Scalar,
+    /// The function holding the value to its lexical form, where the package
+    /// states one for the primitive.
+    value_check: Option<String>,
+    /// The same for the element's `id`, where the package states a form for
+    /// the type that element names.
+    id_check: Option<String>,
+    /// Whether the value element is required.
+    value_required: bool,
+    /// Whether the primitive carries an `id`.
+    has_id: bool,
+    /// Whether the primitive carries extensions.
+    has_extension: bool,
+}
+
+fn render_primitive(
+    model: &VersionModule,
+    out: &mut String,
+    ty: &TypeDef,
+    fields: &[Field],
+) -> fmt::Result {
     let value_field = fields.iter().find(|f| f.name == "value");
     let scalar = value_field
         .and_then(|f| match f.ty.target {
@@ -126,16 +271,28 @@ fn render_primitive(out: &mut String, ty: &TypeDef, fields: &[Field]) -> fmt::Re
             Target::Named(_) => None,
         })
         .unwrap_or(Scalar::Str);
-    let value_required = value_field.is_some_and(|f| f.ty.card == Cardinality::One);
-    let has_extension = fields.iter().any(|f| f.name == "extension");
-    // R6 prohibits `xhtml.id` (max 0), so a primitive may carry no id at all.
-    let has_id = fields.iter().any(|f| f.name == "id");
+    let form = lexical_form(ty, scalar);
+    let shape = PrimitiveShape {
+        scalar,
+        value_check: form.map(|_| lexical_form_check(&ty.name)),
+        id_check: fields
+            .iter()
+            .find(|f| f.name == "id")
+            .and_then(|f| inline_lexical_form(model, f, Scalar::Str)),
+        value_required: value_field.is_some_and(|f| f.ty.card == Cardinality::One),
+        // R6 prohibits `xhtml.id` (max 0), so a primitive may carry no id at all.
+        has_id: fields.iter().any(|f| f.name == "id"),
+        has_extension: fields.iter().any(|f| f.name == "extension"),
+    };
+    if let Some(pattern) = form {
+        render_lexical_form(model, out, ty, pattern)?;
+    }
     writeln!(out, "\nimpl {C}::Primitive for {} {{", ty.name)?;
     writeln!(
         out,
         "    fn value_json(&self) -> Result<Option<{C}::Value>, {C}::EncodeError> {{"
     )?;
-    let held = if value_required {
+    let held = if shape.value_required {
         "Some(&self.value)"
     } else {
         "self.value.as_ref()"
@@ -158,6 +315,20 @@ fn render_primitive(out: &mut String, ty: &TypeDef, fields: &[Field]) -> fmt::Re
         )?,
     }
     writeln!(out, "    }}\n")?;
+    render_primitive_element_json(out, &shape)?;
+    render_primitive_serialize(out, ty, &shape)?;
+    render_primitive_decode(out, ty, &shape)?;
+    writeln!(out, "}}")
+}
+
+/// The `element_json` writer: the `id` and `extension` of the `_name` sibling
+/// (<https://hl7.org/fhir/R4B/json.html#primitive>).
+fn render_primitive_element_json(out: &mut String, shape: &PrimitiveShape) -> fmt::Result {
+    let PrimitiveShape {
+        has_id,
+        has_extension,
+        ..
+    } = *shape;
     writeln!(
         out,
         "    fn element_json(&self) -> Result<Option<{C}::Value>, {C}::EncodeError> {{"
@@ -208,10 +379,7 @@ fn render_primitive(out: &mut String, ty: &TypeDef, fields: &[Field]) -> fmt::Re
     if has_id || has_extension {
         writeln!(out, "        Ok(Some({C}::Value::Object(object)))")?;
     }
-    writeln!(out, "    }}\n")?;
-    render_primitive_serialize(out, ty, scalar, value_required, has_id, has_extension)?;
-    render_primitive_decode(out, ty, scalar, value_required, has_id, has_extension)?;
-    writeln!(out, "}}")
+    writeln!(out, "    }}\n")
 }
 
 /// The scalar's serializer call over `serializer` and `place`, a reference to
@@ -232,11 +400,15 @@ fn scalar_serialize_call(scalar: Scalar, place: &str) -> String {
 fn render_primitive_serialize(
     out: &mut String,
     ty: &TypeDef,
-    scalar: Scalar,
-    value_required: bool,
-    has_id: bool,
-    has_extension: bool,
+    shape: &PrimitiveShape,
 ) -> fmt::Result {
+    let PrimitiveShape {
+        scalar,
+        value_required,
+        has_id,
+        has_extension,
+        ..
+    } = *shape;
     writeln!(out, "    fn has_value(&self) -> bool {{")?;
     if value_required {
         writeln!(out, "        true")?;
@@ -368,9 +540,13 @@ fn render_decimal_value(out: &mut String, indent: &str, text: &str) -> fmt::Resu
 fn render_primitive_decode_value(
     out: &mut String,
     ty: &TypeDef,
-    scalar: Scalar,
-    value_required: bool,
+    shape: &PrimitiveShape,
 ) -> fmt::Result {
+    let PrimitiveShape {
+        scalar,
+        value_required,
+        ..
+    } = *shape;
     writeln!(out, "    fn from_json_parts(")?;
     writeln!(out, "        value: Option<&{C}::Value>,")?;
     writeln!(out, "        element: Option<&{C}::Value>,")?;
@@ -391,11 +567,11 @@ fn render_primitive_decode_value(
         out,
         "                let value = {C}::expect_single(value, path)?;"
     )?;
-    writeln!(
-        out,
-        "                Some({}?)",
-        scalar_from_value(scalar, Some(ty.name.as_str()))
-    )?;
+    let decoded = scalar_from_value(scalar, Some(ty.name.as_str()));
+    match shape.value_check.as_deref() {
+        Some(check) => writeln!(out, "                Some({check}({decoded}?, path)?)")?,
+        None => writeln!(out, "                Some({decoded}?)")?,
+    }
     writeln!(out, "            }}")?;
     writeln!(out, "            None => None,")?;
     writeln!(out, "        }};")?;
@@ -408,15 +584,14 @@ fn render_primitive_decode_value(
     Ok(())
 }
 
-fn render_primitive_decode(
-    out: &mut String,
-    ty: &TypeDef,
-    scalar: Scalar,
-    value_required: bool,
-    has_id: bool,
-    has_extension: bool,
-) -> fmt::Result {
-    render_primitive_decode_value(out, ty, scalar, value_required)?;
+fn render_primitive_decode(out: &mut String, ty: &TypeDef, shape: &PrimitiveShape) -> fmt::Result {
+    let PrimitiveShape {
+        has_id,
+        has_extension,
+        ..
+    } = *shape;
+    let id_check = shape.id_check.as_deref();
+    render_primitive_decode_value(out, ty, shape)?;
     if has_id {
         writeln!(out, "        let mut id = None;")?;
     }
@@ -447,9 +622,13 @@ fn render_primitive_decode(
     writeln!(out, "            for (key, item) in object {{")?;
     writeln!(out, "                match key.as_str() {{")?;
     if has_id {
+        let read = match id_check {
+            Some(check) => format!("{check}({C}::expect_string(item, path)?, path)"),
+            None => format!("{C}::expect_string(item, path)"),
+        };
         writeln!(
             out,
-            "                    \"id\" => {{ id = Some(path.with(\"id\", |path| {C}::expect_string(item, path))?); }}"
+            "                    \"id\" => {{ id = Some(path.with(\"id\", |path| {read})?); }}"
         )?;
     }
     if has_extension {
@@ -990,7 +1169,7 @@ fn render_field_builders(model: &VersionModule, out: &mut String, fields: &[Fiel
     // named `path` or `object` cannot shadow the decoder's own bindings.
     for field in fields {
         match shape(model, field) {
-            Shape::Scalar(scalar) => render_scalar_builder(out, field, scalar)?,
+            Shape::Scalar(scalar) => render_scalar_builder(model, out, field, scalar)?,
             Shape::Primitive => render_primitive_builder(out, field)?,
             Shape::Complex => render_complex_builder(out, field)?,
             Shape::Choice(choice) => render_choice_builder(out, field, choice)?,
@@ -999,12 +1178,35 @@ fn render_field_builders(model: &VersionModule, out: &mut String, fields: &[Fiel
     Ok(())
 }
 
+/// The lexical-form check of the primitive an inline scalar field spells out.
+///
+/// An element typed with a `FHIRPath` system type holds the primitive's value
+/// directly (<https://hl7.org/fhir/R4B/json.html#primitive>), so it keeps the
+/// lexical form of the FHIR type the element's own type extension names.
+fn inline_lexical_form(model: &VersionModule, field: &Field, scalar: Scalar) -> Option<String> {
+    let code = field.types.first()?;
+    let ty = model.types.get(&type_name(code))?;
+    if !ty.is_primitive {
+        return None;
+    }
+    lexical_form(ty, scalar)?;
+    Some(lexical_form_path(&ty.name))
+}
+
 /// The decoder lines for a `FHIRPath` system scalar field.
-fn render_scalar_builder(out: &mut String, field: &Field, scalar: Scalar) -> fmt::Result {
+fn render_scalar_builder(
+    model: &VersionModule,
+    out: &mut String,
+    field: &Field,
+    scalar: Scalar,
+) -> fmt::Result {
     let slot = field.name.trim_start_matches("r#");
     let key = &field.fhir_name;
     let name = format!("field_{slot}");
-    let decode = scalar_from_value(scalar, None);
+    let decode = match inline_lexical_form(model, field, scalar) {
+        Some(check) => format!("{check}({}?, path)", scalar_from_value(scalar, None)),
+        None => scalar_from_value(scalar, None),
+    };
     match field.ty.card {
         Cardinality::Optional => writeln!(
             out,
