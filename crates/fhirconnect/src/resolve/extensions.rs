@@ -105,6 +105,15 @@ pub(crate) fn apply<'a>(
     extensions: &[&'a ModelMappingFile],
     diagnostics: &mut Vec<Diagnostic>,
 ) -> Merged<'a> {
+    refuse_duplicate_names(model, model.mappings(), &ModelPath::root(), diagnostics);
+    for extension in extensions {
+        refuse_duplicate_names(
+            extension,
+            extension.mappings(),
+            &ModelPath::root(),
+            diagnostics,
+        );
+    }
     let mut mappings = Node::all(model.mappings(), model, &ModelPath::root());
     let mut applied = Vec::new();
     let mut overwritten: Vec<(String, &MappingName)> = Vec::new();
@@ -378,6 +387,68 @@ fn refuse_nested_methods(
                     located.value()
                 ),
             ));
+        }
+    }
+}
+
+/// Refuses two sibling mapping methods of one file that carry one name.
+///
+/// `overwrite` "overwrites the mapping method with the same name" and
+/// `appendTo` names a method, or a child by its dotted path
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`),
+/// so a name two siblings share addresses neither of them, and an edit aimed
+/// at one could land on the other. The refusal names both positions. Every
+/// list is checked, the `followedBy` and `reference` lists included.
+fn refuse_duplicate_names(
+    file: &ModelMappingFile,
+    mappings: &[Mapping],
+    parent: &ModelPath,
+    diagnostics: &mut Vec<Diagnostic>,
+) {
+    let at = parent.field("mappings");
+    for (index, method) in mappings.iter().enumerate() {
+        let path = at.index(index);
+        if let Some(first) = mappings
+            .iter()
+            .take(index)
+            .find(|earlier| earlier.name.value() == method.name.value())
+        {
+            let first_at = first.name.position();
+            let again = method.name.position();
+            diagnostics.push(refusal(
+                file,
+                file.header().name().value(),
+                ResolveCode::DuplicateMethodName,
+                again,
+                &path.field("name"),
+                format!(
+                    "`{}` names two mapping methods of one list in {}, at line {} column {} and \
+                     at line {} column {}, so an `overwrite` or an `appendTo` of it has no \
+                     single target",
+                    method.name.value(),
+                    file.file().display(),
+                    first_at.line(),
+                    first_at.column(),
+                    again.line(),
+                    again.column()
+                ),
+            ));
+        }
+        if let Some(ref followed) = method.followed_by {
+            refuse_duplicate_names(
+                file,
+                &followed.mappings,
+                &path.field("followedBy"),
+                diagnostics,
+            );
+        }
+        if let Some(ref reference) = method.reference {
+            refuse_duplicate_names(
+                file,
+                &reference.mappings,
+                &path.field("reference"),
+                diagnostics,
+            );
         }
     }
 }

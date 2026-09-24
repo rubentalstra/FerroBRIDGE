@@ -83,6 +83,12 @@ corpus_pin_tag() {
   printf '%s\n' "$tag"
 }
 
+# Downloads the one file at URL $1 to $2, for a pin that names a single file
+# rather than a tree.
+corpus_download() {
+  curl --proto '=https' --tlsv1.2 -fsSL -A "$corpus_ua" -o "$2" "$1"
+}
+
 corpus_api() {
   curl --proto '=https' --tlsv1.2 -fsSL -A "$corpus_ua" \
     -H 'Accept: application/vnd.github+json' "$1"

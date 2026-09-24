@@ -6,7 +6,7 @@
 //! Every case drives the shipped router over a `wiremock` CDR, so the stack
 //! under test is the stack the binary serves: the middleware, the media-type
 //! guard, the program selection, the engine, the identity map and the status
-//! table (`docs/architecture.md` §4.6).
+//! table.
 
 use crate::support;
 use axum::Router;
@@ -172,6 +172,11 @@ fn settings() -> Settings {
 
 /// Returns a harness whose CDR serves the fixture template.
 async fn harness() -> Harness {
+    harness_with(settings()).await
+}
+
+/// Returns a harness whose facade runs with `facade_settings`.
+async fn harness_with(facade_settings: Settings) -> Harness {
     let cdr = MockServer::start().await;
     Mock::given(matchers::method("GET"))
         .and(matchers::path(
@@ -194,7 +199,7 @@ async fn harness() -> Harness {
         compiled,
         handle(&store),
         client(&cdr),
-        settings(),
+        facade_settings,
     ));
     Harness { cdr, store, facade }
 }
@@ -845,7 +850,7 @@ async fn if_none_exist_answers_four_hundred_and_twelve_when_several_match()
     )?;
     // A resource the map already consumed resolves to an update before any
     // conditional create runs, so this case sends a source id the map does
-    // not know (`docs/architecture.md` §4.6).
+    // not know.
     let mut fresh = condition();
     fresh["id"] = serde_json::json!("a-sender-id-the-map-has-not-seen");
     let request = Request::post("/fhir/Condition")
@@ -1188,6 +1193,534 @@ async fn a_batch_bundle_is_not_supported_in_this_milestone() -> Result<(), Box<d
     let (status, body) = call(harness.app(), request).await?;
     assert_eq!(StatusCode::UNPROCESSABLE_ENTITY, status);
     assert_eq!(Some("not-supported"), first_issue(&body)["code"].as_str());
+    Ok(())
+}
+
+/// Returns `error` and every cause behind it as one line, the way the facade
+/// renders a refusal into `issue.diagnostics`.
+fn chain_of(error: &dyn StdError) -> String {
+    let mut line = error.to_string();
+    let mut cause = error.source();
+    while let Some(source) = cause {
+        line.push_str(": ");
+        line.push_str(&source.to_string());
+        cause = source.source();
+    }
+    line
+}
+
+/// Returns the synthetic Condition with no diagnosis name, which the
+/// synthetic template requires.
+fn condition_without_code() -> serde_json::Value {
+    let mut resource = condition();
+    if let Some(object) = resource.as_object_mut() {
+        object.remove("code");
+    }
+    resource
+}
+
+/// Returns the `diagnostics` of every issue of an `OperationOutcome`.
+fn diagnostics_of(body: &serde_json::Value) -> Vec<&str> {
+    body["issue"]
+        .as_array()
+        .map(|issues| {
+            issues
+                .iter()
+                .filter_map(|issue| issue["diagnostics"].as_str())
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// Asserts that the stub CDR received no write of any kind.
+async fn assert_nothing_written(harness: &Harness) {
+    for method in ["POST", "PUT", "DELETE"] {
+        assert_eq!(
+            0,
+            harness.received(method, "/ehr").await,
+            "the dry run sent a {method} to the CDR"
+        );
+    }
+}
+
+#[tokio::test]
+async fn validate_names_the_template_and_the_ehr_disposition() -> Result<(), Box<dyn StdError>> {
+    // The carry-over case of #115: `information` issues naming what would be
+    // committed and where.
+    let harness = harness().await;
+    let request = Request::post(VALIDATE)
+        .header(header::CONTENT_TYPE, "application/fhir+json")
+        .body(Body::from(condition().to_string()))?;
+    let (status, body) = call(harness.app(), request).await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let information: Vec<&serde_json::Value> = body["issue"]
+        .as_array()
+        .ok_or("the outcome carries issues")?
+        .iter()
+        .filter(|issue| issue["severity"].as_str() == Some("information"))
+        .collect();
+    assert!(
+        information.iter().any(|issue| issue["diagnostics"]
+            .as_str()
+            .is_some_and(|text| text.contains("ferrobridge.diagnose.v1"))),
+        "an information issue names the template: {body}"
+    );
+    assert!(
+        information.iter().any(|issue| issue["diagnostics"]
+            .as_str()
+            .is_some_and(|text| text.contains("synthetic-subject-0001")
+                && text.contains("writes into an existing EHR only"))),
+        "an information issue names the subject and the EHR policy: {body}"
+    );
+    assert_nothing_written(&harness).await;
+    assert_eq!(
+        0,
+        harness.received("GET", "/ehr").await,
+        "the dry run asked the CDR for an EHR"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn validate_names_the_ehr_the_identity_map_already_holds() -> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    create_one(&harness).await?;
+    let before = harness.received("POST", "/ehr").await;
+    let request = Request::post(VALIDATE)
+        .header(header::CONTENT_TYPE, "application/fhir+json")
+        .body(Body::from(condition().to_string()))?;
+    let (status, body) = call(harness.app(), request).await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert!(
+        diagnostics_of(&body)
+            .iter()
+            .any(|text| text.contains(EHR_ID)),
+        "the disposition names the EHR the map holds: {body}"
+    );
+    assert_eq!(
+        before,
+        harness.received("POST", "/ehr").await,
+        "the dry run wrote into the CDR"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn validate_carries_the_validators_message_verbatim_and_writes_nothing()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let resource = condition_without_code();
+    let loaded = harness
+        .facade
+        .programs()
+        .by_context("ferrobridge_facade.context")
+        .ok_or("the fixture context compiled")?;
+    let document: fhir_types::codec::Value = serde_json::from_value(resource.clone())?;
+    let refusal = ferrobridge_server::facade::engine::inbound(
+        loaded.program(),
+        loaded.index(),
+        &document,
+        "2026-09-15T09:00:00Z",
+        &settings(),
+    )
+    .err()
+    .ok_or("the synthetic template requires the diagnosis name")?;
+    let request = Request::post(VALIDATE)
+        .header(header::CONTENT_TYPE, "application/fhir+json")
+        .body(Body::from(resource.to_string()))?;
+    let (status, body) = call(harness.app(), request).await?;
+    assert_eq!(StatusCode::OK, status, "both verdicts answer 200: {body}");
+    let issue = first_issue(&body);
+    assert_eq!(Some("error"), issue["severity"].as_str(), "{body}");
+    assert_eq!(
+        Some(chain_of(&refusal).as_str()),
+        issue["diagnostics"].as_str(),
+        "the validator's message travels verbatim: {body}"
+    );
+    assert_nothing_written(&harness).await;
+    assert_eq!(0, harness.received("GET", "/ehr").await);
+    Ok(())
+}
+
+#[tokio::test]
+async fn validate_refuses_at_the_operation_level_as_create_does() -> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let mut unknown_member = condition();
+    unknown_member["notAnElement"] = serde_json::json!("x");
+    let mut other_profile = condition();
+    other_profile["meta"] = serde_json::json!({ "profile": ["http://example.org/other"] });
+    for (media, body) in [
+        ("application/fhir+xml", String::from("<Condition/>")),
+        ("application/fhir+json", unknown_member.to_string()),
+        ("application/fhir+json", other_profile.to_string()),
+        ("application/fhir+json", String::from("{")),
+    ] {
+        let created = call(
+            harness.app(),
+            Request::post("/fhir/Condition")
+                .header(header::CONTENT_TYPE, media)
+                .body(Body::from(body.clone()))?,
+        )
+        .await?;
+        let validated = call(
+            harness.app(),
+            Request::post(VALIDATE)
+                .header(header::CONTENT_TYPE, media)
+                .body(Body::from(body.clone()))?,
+        )
+        .await?;
+        assert_eq!(
+            created.0, validated.0,
+            "create and $validate answer the same status for {body}"
+        );
+        assert_eq!(
+            first_issue(&created.1)["code"],
+            first_issue(&validated.1)["code"],
+            "create and $validate refuse with the same issue code for {body}"
+        );
+    }
+    assert_nothing_written(&harness).await;
+    Ok(())
+}
+
+#[tokio::test]
+async fn invalid_mapped_content_stores_nothing() -> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("POST"))
+        .and(matchers::path(format!("/ehr/{EHR_ID}/composition")))
+        .respond_with(ferrobridge_testkit::stubs::its_rest::unprocessable(
+            "the composition is invalid",
+            &["/content[0] is required"],
+        ))
+        .mount(&harness.cdr)
+        .await;
+    let (status, body) = call(harness.app(), post_condition(&condition())).await?;
+    assert_eq!(StatusCode::UNPROCESSABLE_ENTITY, status, "{body}");
+    let source = ferrobridge_server::facade::identity::ExternalResourceId::new(
+        "ferrobridge-synthetic-condition-1",
+    )?;
+    assert!(
+        harness
+            .store
+            .consumed(
+                &ferrobridge_server::facade::identity::record::SourceVersion::new(
+                    "Condition",
+                    source.clone(),
+                    None,
+                )
+            )?
+            .is_none(),
+        "a refused commit recorded the source as consumed"
+    );
+    if let Some(internal) = harness.store.internal_of("Condition", &source)? {
+        assert!(
+            harness.store.binding_of("Condition", &internal)?.is_none(),
+            "a refused commit bound the resource to a composition"
+        );
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn the_three_absences_differ_on_the_wire() -> Result<(), Box<dyn StdError>> {
+    // The carry-over case of #115: a disabled surface, a type outside the
+    // loaded programs and an id of a loaded type that nothing maps are three
+    // answers.
+    let harness = harness().await;
+    let disabled = call(
+        ferrobridge_server::router(support::state(), &support::settings()),
+        Request::get("/fhir/Condition/abcdef").body(Body::empty())?,
+    )
+    .await?;
+    let outside = call(
+        harness.app(),
+        Request::get("/fhir/Observation/abcdef").body(Body::empty())?,
+    )
+    .await?;
+    let unmapped = call(
+        harness.app(),
+        Request::get("/fhir/Condition/abcdef").body(Body::empty())?,
+    )
+    .await?;
+    for (status, _) in [&disabled, &outside, &unmapped] {
+        assert_eq!(StatusCode::NOT_FOUND, *status);
+    }
+    assert_eq!(
+        Some("not-supported"),
+        first_issue(&outside.1)["code"].as_str()
+    );
+    assert_eq!(Some("not-found"), first_issue(&unmapped.1)["code"].as_str());
+    let codes = [
+        disabled.1["issue"][0]["code"].clone(),
+        outside.1["issue"][0]["code"].clone(),
+        unmapped.1["issue"][0]["code"].clone(),
+    ];
+    let diagnostics = [
+        disabled.1["issue"][0]["diagnostics"].clone(),
+        outside.1["issue"][0]["diagnostics"].clone(),
+        unmapped.1["issue"][0]["diagnostics"].clone(),
+    ];
+    for (left, right) in [(0, 1), (0, 2), (1, 2)] {
+        assert_ne!(codes[left], codes[right], "{codes:?}");
+        assert_ne!(diagnostics[left], diagnostics[right], "{diagnostics:?}");
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn both_json_media_types_are_read_on_every_write() -> Result<(), Box<dyn StdError>> {
+    // "The MIME-type for JSON content is `application/fhir+json`" and
+    // `application/json` is its alias (<https://hl7.org/fhir/R4/http.html#mime-type>).
+    for media in ["application/fhir+json", "application/json"] {
+        let harness = harness().await;
+        let id = create_one_as(&harness, media).await?;
+        mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+        mount_update(
+            &harness.cdr,
+            ResponseTemplate::new(200)
+                .insert_header("ETag", format!("W/\"{VERSION_TWO}\""))
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(harness.composition().to_string()),
+        )
+        .await;
+        let updated = call(
+            harness.app(),
+            Request::put(format!("/fhir/Condition/{id}"))
+                .header(header::CONTENT_TYPE, media)
+                .body(Body::from(condition().to_string()))?,
+        )
+        .await?;
+        assert_eq!(
+            StatusCode::OK,
+            updated.0,
+            "update as {media}: {}",
+            updated.1
+        );
+        let validated = call(
+            harness.app(),
+            Request::post(VALIDATE)
+                .header(header::CONTENT_TYPE, media)
+                .body(Body::from(condition().to_string()))?,
+        )
+        .await?;
+        assert_eq!(
+            StatusCode::OK,
+            validated.0,
+            "$validate as {media}: {}",
+            validated.1
+        );
+        Mock::given(matchers::method("POST"))
+            .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
+            .respond_with(
+                ResponseTemplate::new(201)
+                    .insert_header("ETag", "W/\"7b0a4c2e-0000-4000-8000-00000000000c\""),
+            )
+            .mount(&harness.cdr)
+            .await;
+        let mut fresh = condition();
+        fresh["id"] = serde_json::json!("a-transaction-entry");
+        let bundle = serde_json::json!({
+            "resourceType": "Bundle",
+            "type": "transaction",
+            "entry": [
+                { "fullUrl": "urn:uuid:0000-good", "resource": fresh,
+                  "request": { "method": "POST", "url": "Condition" } }
+            ]
+        });
+        let transaction = call(
+            harness.app(),
+            Request::post("/fhir")
+                .header(header::CONTENT_TYPE, media)
+                .body(Body::from(bundle.to_string()))?,
+        )
+        .await?;
+        assert_eq!(
+            StatusCode::OK,
+            transaction.0,
+            "transaction as {media}: {}",
+            transaction.1
+        );
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn any_other_media_type_is_four_hundred_and_fifteen_on_every_write()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    for media in ["application/fhir+xml", "text/plain", "application/xml"] {
+        for request in [
+            Request::post("/fhir/Condition"),
+            Request::put("/fhir/Condition/abcdef"),
+            Request::post(VALIDATE),
+            Request::post("/fhir"),
+        ] {
+            let (status, body) = call(
+                harness.app(),
+                request
+                    .header(header::CONTENT_TYPE, media)
+                    .body(Body::from(condition().to_string()))?,
+            )
+            .await?;
+            assert_eq!(
+                StatusCode::UNSUPPORTED_MEDIA_TYPE,
+                status,
+                "{media}: {body}"
+            );
+            assert_eq!(Some("not-supported"), first_issue(&body)["code"].as_str());
+        }
+    }
+    assert_nothing_written(&harness).await;
+    Ok(())
+}
+
+/// Creates the fixture Condition sent as `media` and returns its logical id.
+async fn create_one_as(harness: &Harness, media: &str) -> Result<String, Box<dyn StdError>> {
+    mount_ehr(&harness.cdr).await;
+    mount_create(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, body) = call(
+        harness.app(),
+        Request::post("/fhir/Condition")
+            .header(header::CONTENT_TYPE, media)
+            .body(Body::from(condition().to_string()))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::CREATED, status, "create as {media}: {body}");
+    Ok(body["id"]
+        .as_str()
+        .ok_or("the created resource carries an id")?
+        .to_owned())
+}
+
+#[tokio::test]
+async fn the_feeder_audit_carries_the_source_version() -> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_create(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let mut resource = condition();
+    resource["meta"]["versionId"] = serde_json::json!("7");
+    let (status, body) = call(harness.app(), post_condition(&resource)).await?;
+    assert_eq!(StatusCode::CREATED, status, "{body}");
+    let sent = harness
+        .sent("POST", &format!("/ehr/{EHR_ID}/composition"))
+        .await
+        .ok_or("the create sent a composition")?;
+    let audit = &sent["feeder_audit"]["originating_system_audit"];
+    assert_eq!(
+        Some("7"),
+        audit["version_id"].as_str(),
+        "meta.versionId travels as the source version: {audit}"
+    );
+    assert_eq!(Some("ferrobridge.test"), audit["system_id"].as_str());
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_source_resource_with_no_id_is_audited_as_unknown() -> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_create(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let mut resource = condition();
+    if let Some(object) = resource.as_object_mut() {
+        object.remove("id");
+    }
+    let (status, body) = call(harness.app(), post_condition(&resource)).await?;
+    assert_eq!(StatusCode::CREATED, status, "{body}");
+    let sent = harness
+        .sent("POST", &format!("/ehr/{EHR_ID}/composition"))
+        .await
+        .ok_or("the create sent a composition")?;
+    let item = &sent["feeder_audit"]["originating_system_item_ids"][0];
+    assert_eq!(
+        Some("unknown"),
+        item["id"].as_str(),
+        "an absent id is recorded as unknown, never invented: {item}"
+    );
+    assert_eq!(Some("Condition"), item["type"].as_str());
+    Ok(())
+}
+
+/// Returns the facade settings with `policy` in place of the default one.
+fn settings_with(policy: Policy) -> Settings {
+    Settings {
+        ehr_policy: policy,
+        ..settings()
+    }
+}
+
+/// Mounts the EHR lookup that finds no EHR for any subject.
+async fn mount_no_ehr(cdr: &MockServer) {
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path("/ehr"))
+        .respond_with(ferrobridge_testkit::stubs::its_rest::not_found(
+            "no EHR for the subject",
+        ))
+        .mount(cdr)
+        .await;
+}
+
+#[tokio::test]
+async fn an_ehr_created_on_first_sight_names_the_subject_in_the_namespace()
+-> Result<(), Box<dyn StdError>> {
+    // The subject shape is a PARTY_SELF over a PARTY_REF whose GENERIC_ID
+    // scheme is the namespace, which is what `ehr_get_by_subject` matches on
+    // (`ehr-codegen.openapi.yaml`).
+    let harness = harness_with(settings_with(Policy::CreateOnFirstWrite)).await;
+    mount_no_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("POST"))
+        .and(matchers::path("/ehr"))
+        .respond_with(ResponseTemplate::new(201).insert_header("ETag", format!("\"{EHR_ID}\"")))
+        .mount(&harness.cdr)
+        .await;
+    mount_create(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, body) = call(harness.app(), post_condition(&condition())).await?;
+    assert_eq!(StatusCode::CREATED, status, "{body}");
+    let request = harness
+        .cdr
+        .received_requests()
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .find(|request| request.method.as_str() == "POST" && request.url.path() == "/ehr")
+        .ok_or("the facade created an EHR")?;
+    let created: serde_json::Value = serde_json::from_slice(&request.body)?;
+    assert_eq!(Some("EHR_STATUS"), created["_type"].as_str(), "{created}");
+    let subject = &created["subject"];
+    assert_eq!(Some("PARTY_SELF"), subject["_type"].as_str(), "{subject}");
+    let reference = &subject["external_ref"];
+    assert_eq!(Some("PARTY_REF"), reference["_type"].as_str(), "{subject}");
+    assert_eq!(
+        Some("http://example.org/fhir/sid/ferrobridge-subject"),
+        reference["namespace"].as_str()
+    );
+    assert_eq!(Some("GENERIC_ID"), reference["id"]["_type"].as_str());
+    assert_eq!(
+        Some("synthetic-subject-0001"),
+        reference["id"]["value"].as_str()
+    );
+    assert_eq!(
+        reference["namespace"], reference["id"]["scheme"],
+        "the GENERIC_ID scheme is the namespace: {subject}"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn an_unknown_subject_creates_no_ehr_under_the_default_policy()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_no_ehr(&harness.cdr).await;
+    let (status, body) = call(harness.app(), post_condition(&condition())).await?;
+    assert!(
+        status.is_client_error(),
+        "an unknown subject under Policy::Existing is refused: {status} {body}"
+    );
+    assert_eq!(
+        0,
+        harness.received("POST", "/ehr").await,
+        "the facade created an EHR the policy does not allow"
+    );
     Ok(())
 }
 

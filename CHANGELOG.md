@@ -24,6 +24,33 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- The KDS diagnosis round trip (#86). `scripts/vendor/kds-diagnose-opt.sh`
+  vendors the published `KDS_Diagnose` operational template verbatim, pinned
+  by commit, path and sha256 in `docs/VERSIONS.md`, with its provenance and
+  the repository licence beside it. A FerroBRIDGE project context compiles
+  the published `EVALUATION.problem_diagnosis.v1` chain of the FHIRconnect
+  mapping library against it; every published file the chain reaches loads
+  verbatim or has its refusal asserted by file and line, and the project
+  directory carries a stand-in for each one that does not. The two lens laws
+  are asserted as reviewed snapshots of the declared set, with a corrupted
+  intermediate that breaks each, over the synthetic chain today and over the
+  KDS chain once the engine carries it. The end-to-end lane commits a
+  synthetic KDS composition to the reference CDR and reads it back.
+- Context resolution refuses two sibling mapping methods of one file that
+  share a name (`fc-duplicate-method-name`, naming both positions), because an
+  `overwrite` or an `appendTo` of that name has no single target, and warns
+  when a listed extension extends a model the program never reaches
+  (`fc-unreached-extension`). A compiled program carries its warnings.
+- The carry-over wire cases on the facade (#115): `$validate` names the EHR
+  the composition would be written into as well as its template, carries the
+  validator's message verbatim, writes nothing either way, and refuses at the
+  operation level as create does; a refused commit stores nothing; the three
+  absences differ in `issue.code` and `diagnostics`; both JSON media types are
+  read on every write and anything else is `415`; the feeder audit carries
+  the source version and records an absent id as unknown; and an EHR created
+  on first sight names its subject as a `PARTY_SELF` over a `PARTY_REF` whose
+  `GENERIC_ID` scheme is the namespace, while the default policy creates none.
+
 - The FHIRconnect engine records where a composition came from in its
   `FEEDER_AUDIT` (#187)
   (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html#_feeder_audit_class>).
@@ -294,6 +321,12 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Fixed
 
+- A mapping path now resolves to an element the operational template renames:
+  the compiler matched a compacted node by the exact text of its `aqlPath`,
+  so a template that constrains a name (`items[at0002,'Kodierte Diagnose']`)
+  refused every mapping written by node id alone. It now applies the rule the
+  index applies to an indexed node: a name the mapping does not write selects
+  nothing, and one it does write must match.
 - The FHIRconnect engine evaluates a program's own `openehrCondition` going out
   of openEHR and refuses a composition it does not admit with
   `EngineError::NotApplicable`, the rule it already applied to

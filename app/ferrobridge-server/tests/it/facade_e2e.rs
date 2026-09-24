@@ -147,6 +147,198 @@ fn post_condition() -> Result<Request<Body>, Box<dyn StdError>> {
         .body(Body::from(resource.to_string()))?)
 }
 
+/// Uploads the published `KDS_Diagnose` template through the CDR's own route.
+async fn upload_kds_template(base_url: &str) -> Result<(), Box<dyn StdError>> {
+    let response = reqwest::Client::new()
+        .post(format!("{base_url}/definition/template/adl1.4"))
+        .header(header::CONTENT_TYPE, "application/xml")
+        .body(fixtures::KDS_DIAGNOSE_OPT)
+        .send()
+        .await?;
+    assert_eq!(
+        StatusCode::CREATED,
+        response.status(),
+        "the CDR refused the KDS template: {}",
+        response.text().await?
+    );
+    Ok(())
+}
+
+/// Returns the entity tag of a `201` without its quotes.
+fn entity_tag(response: &reqwest::Response) -> Result<String, Box<dyn StdError>> {
+    let raw = response
+        .headers()
+        .get(header::ETAG)
+        .and_then(|value| value.to_str().ok())
+        .ok_or("the 201 carries an ETag")?;
+    Ok(raw.trim_start_matches("W/").trim_matches('"').to_owned())
+}
+
+#[tokio::test]
+async fn the_kds_template_admits_the_synthetic_composition_on_a_real_cdr()
+-> Result<(), Box<dyn StdError>> {
+    // The composition is committed over ITS-REST as canonical JSON and read
+    // back; what the CDR sets on commit is the declared set of this leg.
+    if !containers::e2e_enabled() {
+        return Ok(());
+    }
+    let cdr = containers::cdr().await?;
+    upload_kds_template(cdr.base_url()).await?;
+    let index = openehr_mapping_core::index::WebTemplateIndex::build(
+        &openehr_mapping_core::template::TemplateSource::opt14(fixtures::KDS_DIAGNOSE_OPT)?,
+    )?;
+    let built = index.build_from_flat(&crate::kds::flat_composition()?, "2026-09-13T08:00:00Z")?;
+    let http = reqwest::Client::new();
+    let ehr = http.post(format!("{}/ehr", cdr.base_url())).send().await?;
+    assert_eq!(StatusCode::CREATED, ehr.status());
+    let ehr_id = entity_tag(&ehr)?;
+    let committed = http
+        .post(format!("{}/ehr/{ehr_id}/composition", cdr.base_url()))
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(built.value().to_string())
+        .send()
+        .await?;
+    let status = committed.status();
+    let version = entity_tag(&committed).unwrap_or_default();
+    assert_eq!(
+        StatusCode::CREATED,
+        status,
+        "the CDR refused the synthetic composition: {}",
+        committed.text().await?
+    );
+    let read = http
+        .get(format!(
+            "{}/ehr/{ehr_id}/composition/{version}",
+            cdr.base_url()
+        ))
+        .header(header::ACCEPT, "application/json")
+        .send()
+        .await?;
+    assert_eq!(StatusCode::OK, read.status());
+    let back = index.accept(read.json::<serde_json::Value>().await?)?;
+    let set = ferrobridge_testkit::laws::declared(
+        &[],
+        &[],
+        &serde_json::Value::Object(index.flatten(&built)?),
+        &serde_json::Value::Object(index.flatten(&back)?),
+    );
+    assert_eq!(set["lost"], serde_json::json!([]), "{set}");
+    assert_eq!(set["changed"], serde_json::json!([]), "{set}");
+    let added: Vec<&str> = set["added"]
+        .as_array()
+        .ok_or("the declared set lists what the CDR added")?
+        .iter()
+        .filter_map(serde_json::Value::as_str)
+        .collect();
+    assert!(
+        matches!(*added.as_slice(), [only] if only.starts_with("diagnose/_uid = ")),
+        "the commit adds the version uid and nothing else: {set}"
+    );
+    Ok(())
+}
+
+// TODO(#86): run once the engine closes four gaps. G1: an untyped mapping onto
+// a primitive dateTime takes the string kind, so no DV_DATE_TIME cell reads it.
+// G2: an untyped mapping onto a structural node runs a data cell instead of
+// anchoring its children. G3: a choice element with no type filter takes no
+// kind from the instance. G4: the required-child check counts a structural
+// anchor as a missing value.
+#[tokio::test]
+#[ignore = "the engine refuses the published chain; see the TODO above"]
+async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
+-> Result<(), Box<dyn StdError>> {
+    if !containers::e2e_enabled() {
+        return Ok(());
+    }
+    let cdr = containers::cdr().await?;
+    upload_kds_template(cdr.base_url()).await?;
+    let client = Client::new(Config::new(cdr.base_url().parse()?))?;
+    let directory = tempfile::tempdir()?;
+    crate::kds::write_mappings(directory.path())?;
+    let set = programs::read_set(directory.path())?;
+    let templates = programs::fetch_templates(&set, &client).await?;
+    let programs = programs::compile_set(&set, &templates)?;
+    let store: Arc<dyn Store> = Arc::new(MemoryStore::new());
+    let facade = Arc::new(Facade::new(
+        programs,
+        store,
+        client,
+        Settings {
+            base_url: String::from("http://ferrobridge.invalid/fhir"),
+            ehr_policy: Policy::CreateOnFirstWrite,
+            subject_namespace: String::from(SUBJECT_NAMESPACE),
+            system_id: String::from("ferrobridge.e2e"),
+            language: String::from("de"),
+            territory: String::from("DE"),
+        },
+    ));
+    let input: serde_json::Value = serde_json::from_str(fixtures::KDS_DIAGNOSE_CONDITION)?;
+    assert_eq!(
+        Some(crate::kds::PROFILE),
+        input["meta"]["profile"][0].as_str()
+    );
+    let created = call(
+        app(&facade),
+        Request::post("/fhir/Condition")
+            .header(header::CONTENT_TYPE, "application/fhir+json")
+            .body(Body::from(input.to_string()))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::CREATED, created.0, "{}", created.1);
+    let id = created.1["id"]
+        .as_str()
+        .ok_or("the created resource carries an id")?
+        .to_owned();
+    let read = call(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, read.0, "{}", read.1);
+    let mut output = read.1;
+    // NOTE: no specification governs this: our own design, the identity the
+    // facade assigns and the version it reports are the facade's, not the
+    // mapping's, so they leave the comparison with the engine's declared set.
+    if let Some(object) = output.as_object_mut() {
+        object.remove("id");
+        object.remove("meta");
+    }
+    let mut compared = input.clone();
+    if let Some(object) = compared.as_object_mut() {
+        object.remove("id");
+        object.remove("meta");
+    }
+    let set = ferrobridge_testkit::laws::declared(&[], &[], &compared, &output);
+    let pinned = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../crates/fhirconnect/tests/it/snapshots/it__roundtrip__kds_putget.snap"
+    ))?;
+    let body = pinned
+        .splitn(3, "---")
+        .nth(2)
+        .ok_or("the snapshot carries a body")?;
+    let engine: serde_json::Value = serde_json::from_str(body)?;
+    for list in ["lost", "added", "changed"] {
+        let expected: Vec<&serde_json::Value> = engine[list]
+            .as_array()
+            .ok_or("the snapshot carries the list")?
+            .iter()
+            .filter(|row| {
+                row.as_str()
+                    .is_some_and(|row| !row.starts_with("id ") && !row.starts_with("meta."))
+            })
+            .collect();
+        assert_eq!(
+            set[list]
+                .as_array()
+                .map(|rows| rows.iter().collect::<Vec<_>>()),
+            Some(expected),
+            "the facade and the engine disagree on {list}"
+        );
+    }
+    Ok(())
+}
+
 /// Sends `request` through `app` and reads the status and the body.
 async fn call(
     app: Router,

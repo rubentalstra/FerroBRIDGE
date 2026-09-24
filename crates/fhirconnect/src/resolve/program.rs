@@ -16,6 +16,7 @@
 use core::fmt;
 use core::str::FromStr;
 
+use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::header::ArchetypeId;
 use openehr_mapping_core::header::MappingName;
 use openehr_mapping_core::header::MappingVersion;
@@ -1397,6 +1398,7 @@ pub struct Program {
     operational: Vec<MappingName>,
     preprocessors: Vec<Preprocessor>,
     mappings: Vec<Mapping>,
+    warnings: Vec<Diagnostic>,
 }
 
 /// Everything a program carries, as the compiler assembles it.
@@ -1437,7 +1439,22 @@ impl Program {
             operational: parts.operational,
             preprocessors: parts.preprocessors,
             mappings: parts.mappings,
+            warnings: Vec::new(),
         }
+    }
+
+    /// Returns this program with the warnings its compilation raised.
+    #[must_use]
+    pub(crate) fn with_warnings(mut self, warnings: Vec<Diagnostic>) -> Self {
+        self.warnings = warnings;
+        self
+    }
+
+    /// Returns the warnings the compilation raised: what it accepted and found
+    /// worth reporting, in the order it found them.
+    #[must_use]
+    pub fn warnings(&self) -> &[Diagnostic] {
+        &self.warnings
     }
 
     /// Returns the `metadata.name` of the context mapping.
@@ -1588,6 +1605,9 @@ impl fmt::Display for Program {
         }
         for mapping in &self.mappings {
             mapping.render(f, 1)?;
+        }
+        for warning in &self.warnings {
+            writeln!(f, "  warning {}: {}", warning.code(), warning.message())?;
         }
         Ok(())
     }

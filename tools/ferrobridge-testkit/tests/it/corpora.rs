@@ -27,6 +27,10 @@ const CORPORA: &[(&str, &str)] = &[
         "docs/specs/omop-cdm",
     ),
     ("openEHR ITS-REST OpenAPI", "docs/specs/its-rest"),
+    (
+        "KDS Diagnose operational template (fixture)",
+        "tools/ferrobridge-testkit/fixtures/opt/kds",
+    ),
 ];
 
 /// The repository root, reached from this crate's manifest directory.
@@ -168,6 +172,26 @@ fn every_corpus_provenance_names_the_pin_the_matrix_names() -> Result<(), Box<dy
             "{dir}/PROVENANCE.md records no upstream licence"
         );
     }
+    Ok(())
+}
+
+#[test]
+fn the_kds_template_hashes_to_the_pinned_sha256() -> Result<(), Box<dyn Error>> {
+    let cell = matrix_pin_cell("KDS Diagnose operational template (fixture)")?;
+    let tokens: Vec<&str> = cell.split_whitespace().collect();
+    let pinned = tokens
+        .windows(2)
+        .find_map(|pair| match pair {
+            ["sha256", digest] => Some(*digest),
+            _ => None,
+        })
+        .ok_or("the KDS template pin names no sha256")?;
+    let file = repo_root().join("tools/ferrobridge-testkit/fixtures/opt/kds/KDS_Diagnose.opt");
+    assert_eq!(
+        sha256_of(&file)?,
+        pinned,
+        "the vendored KDS_Diagnose.opt no longer hashes to the value docs/VERSIONS.md pins"
+    );
     Ok(())
 }
 

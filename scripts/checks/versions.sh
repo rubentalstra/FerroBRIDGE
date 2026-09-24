@@ -446,7 +446,7 @@ else
   note "no compose.yaml yet, skipped"
 fi
 
-echo "== vendored corpora (docs/specs/*/PROVENANCE.md <-> docs/VERSIONS.md)"
+echo "== vendored corpora (docs/specs/*/PROVENANCE.md and the vendored fixtures <-> docs/VERSIONS.md)"
 # A corpus row carries the repository and its commit or immutable tag in one
 # cell, so this reads the whole cell rather than its first token.
 pin_cell_of() {
@@ -475,7 +475,8 @@ docs/specs/fhirconnect/draft-rest-api|FHIRconnect REST API chapter (draft, unmer
 docs/specs/fhirconnect-mapping-lib|FHIRconnect mapping library (corpus, never an oracle)
 docs/specs/omocl|OMOCL corpus
 docs/specs/omop-cdm|OMOP CDM definitions and PostgreSQL DDL
-docs/specs/its-rest|openEHR ITS-REST OpenAPI"
+docs/specs/its-rest|openEHR ITS-REST OpenAPI
+tools/ferrobridge-testkit/fixtures/opt/kds|KDS Diagnose operational template (fixture)"
 
 if [ -f docs/VERSIONS.md ]; then
   agreed=0
@@ -517,14 +518,16 @@ if [ -f LICENSE ]; then
   # tag is anchored to the start of its line, after an optional comment marker,
   # so a header claim is caught while the same text quoted inside a string
   # literal (the emitter that writes that crate's header) is not.
+  # The KDS project fixtures are modified copies of Apache-2.0 mapping-library files, so they keep that licence.
   while IFS= read -r hit; do
     [ -n "$hit" ] || continue
     bad "stale licence claim at $hit"
     stale=1
   done < <(git grep -n -E '^[[:space:]]*([/#*]+|<!--)?[[:space:]]*SPDX-License-Identifier: (MIT|Apache-2\.0)|License-MIT|License-Apache|^license = "(MIT|Apache-2\.0)"|^license: (MIT|Apache-2\.0)|image\.licenses="?(MIT|Apache)' \
     -- ':!LICENSE' ':!CHANGELOG.md' ':!scripts/checks/versions.sh' ':(glob,exclude)**/vendor/**' \
-    ':(glob,exclude)docs/specs/**' ':(glob,exclude)crates/fhir-types/**' || true)
-  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types excepted, Apache-2.0)"
+    ':(glob,exclude)docs/specs/**' ':(glob,exclude)crates/fhir-types/**' \
+    ':(glob,exclude)crates/fhirconnect/tests/fixtures/projects/ferrobridge/kds_diagnose/**' || true)
+  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types and the KDS project fixtures excepted, Apache-2.0)"
 else
   note "no LICENSE yet, skipped"
 fi

@@ -9,8 +9,10 @@
 
 mod corpus;
 mod engine;
+mod laws;
 mod operations;
 mod pins;
 mod resolve;
+mod roundtrip;
 mod support;
 mod tree;

@@ -1,0 +1,224 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: Apache-2.0
+# A modified copy of projects/org.highmed/KDS/diagnose/KDS_problem_diagnose.yml,
+# a derivative of it under its licence.
+# Source: SevKohler/FHIRconnect-mapping-lib at commit 6bd4c19a (vendored
+# under docs/specs/fhirconnect-mapping-lib), Apache License 2.0; the source
+# file carries no copyright line to keep.
+# Changed: the metadata name and version are FerroBRIDGE's, and the mappings
+# are the published file's from its line 11 on except where a published line
+# does not load or compile strictly. Each departure, by published line:
+#   12-17    the compositionMapping slot reaches the published
+#            COMPOSITION.report.v1.Condition, whose lines 44 and 74 share the
+#            name contextStartTimeEmpty and write null_flavour below a
+#            DV_DATE_TIME (#101), so no overwrite can reach both; left out.
+#   100      `"extensionValue"#TODO` puts a `#` against a token, which YAML
+#            1.2.2 section 6.6 does not admit as a comment (#101); the
+#            comment is dropped, and the method is renamed extensionValueText
+#            because it repeats the name of its sibling at published line 95.
+#   32       `extension: "add"` on a nested method; extension-methods.adoc
+#            defines the methods for the mapping methods of the file (#101).
+#   115-139  the multipleCoding branch slots
+#            model/cluster/org.highmed/multiple_coding_icd10gm.v1.yml, whose
+#            lines 30, 56 and 95 read `value` on a Coding (#101); left out.
+#   140-163  the bodySiteClusterIcd10 branch slots
+#            model/cluster/org.openehr/anatomical_location.v1.yml, which does
+#            not compile under a slot (#173); left out, with the
+#            KDS_anatomical_location extension that only this branch reaches.
+#   209-246  the primärdiagnose method slots EVALUATION.problem_diagnosis.v1
+#            into itself through a reference, a slot cycle; left out.
+# The three overwrites at the end are FerroBRIDGE's, each for a method of the
+# published model mapping that does not compile against KDS_Diagnose.
+grammar: FHIRConnect/v1.0.0
+type: extension
+metadata:
+  name: ferrobridge_kds_problem_diagnose
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  extends: EVALUATION.problem_diagnosis.v1
+
+mappings:
+  - name: "date"
+    extension: "add"
+    with:
+      fhir: "$resource.extension"
+      openehr: "$archetype/data[at0001]/items[at0003]"
+    fhirCondition:
+      targetRoot: "$resource.extension"
+      targetAttribute: "url"
+      operator: "one of"
+      criteria: "http://hl7.org/fhir/StructureDefinition/condition-assertedDate"
+    followedBy:
+      mappings:
+        - name: "date"
+          with:
+            fhir: "value.as(DateTime)"
+            openehr: "$archetype/data[at0001]/items[at0003]"
+
+
+        - name: "staticURL"
+          with:
+            fhir: "$fhirRoot"
+          manual:
+            - name: "url"
+              fhir:
+                - path: "url"
+                  value: "http://hl7.org/fhir/StructureDefinition/condition-assertedDate"
+
+  - name: "metaURL"
+    extension: "add"
+    unidirectional: "openEHR->fhir"
+    with:
+      fhir: "$resource.meta"
+    manual:
+      - name: "profileUrl"
+        fhir:
+          - path: "profile"
+            value: "https://www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose"
+
+
+  - name: "icd10ProblemDiagnose"
+    extension: "append"
+    appendTo: "problemDiagnose"
+    followedBy:
+      mappings:
+        - name: "coding"
+          with:
+            fhir: "coding"
+            openehr: "$archetype"
+          fhirCondition:
+            targetRoot: "coding"
+            targetAttribute: "system"
+            operator: "one of"
+            criteria: "http://fhir.de/CodeSystem/bfarm/icd-10-gm"
+          followedBy:
+            mappings:
+              - name: "codingSystem"
+                with:
+                  fhir: "$fhirRoot"
+                manual:
+                  - name: "system"
+                    fhir:
+                      - path: "system"
+                        value: "http://fhir.de/CodeSystem/bfarm/icd-10-gm"
+
+              - name: "codeIcd10Diagnosesicherheit"
+                with:
+                  fhir: "extension"
+                  openehr: "$openehrRoot"
+                fhirCondition:
+                  targetRoot: "extension"
+                  targetAttribute: "url"
+                  operator: "one of"
+                  criteria: "http://fhir.de/StructureDefinition/icd-10-gm-diagnosesicherheit"
+                followedBy:
+                  mappings:
+                    - name: "extensionValue"
+                      with:
+                        fhir: "value"
+                        openehr: "data[at0001]/items[at0073]"
+                        type: "CODING"
+                    - name: "extensionValueText"
+                      unidirectional: "fhir->openEHR"
+                      with:
+                        fhir: "value"
+                        openehr: "data[at0001]/items[at0073]"
+
+                    - name: "extensionUrl"
+                      with:
+                        fhir: "$fhirRoot" #since we want to access extension here
+                      manual:
+                        - name: "extensionUrl"
+                          fhir:
+                            - path: "url"
+                              value: "http://fhir.de/StructureDefinition/icd-10-gm-diagnosesicherheit"
+
+  - name: "dateTime"
+    extension: "overwrite"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype"
+      type: "NONE"
+    followedBy:
+      mappings:
+        - name: "period"
+          with:
+            fhir: "onset.ofType(Period)"
+            openehr: "$archetype"
+          followedBy:
+            mappings:
+              - name: "lebensphaseCluster"
+                with:
+                  fhir: "$fhirRoot"
+                  openehr: "data[at0001]/items[openEHR-EHR-CLUSTER.lebensphase.v0]"
+                slotArchetype: "CLUSTER.lebensphase.v0"
+                followedBy:
+                  mappings:
+                    - name: "start"
+                      with:
+                        fhir: "start"
+                        openehr: "$archetype/data[at0001]/items[at0077]"
+
+        - name: "dateTime"
+          with:
+            fhir: "onset.as(DateTime)"
+            openehr: "data[at0001]/items[at0077]"
+          openehrCondition:
+            targetRoot: "$archetype/data[at0001]"
+            targetAttributes:
+              - "items[openEHR-EHR-CLUSTER.lebensphase.v0]/items[at0001]"
+              - "items[openEHR-EHR-CLUSTER.lebensphase.v0]/items[at0002]"
+            operator: "empty"
+
+  - name: "problemQualifier"
+    extension: "add"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.problem_qualifier.v2]"
+    slotArchetype: "CLUSTER.problem_qualifier.v2"
+
+  # The published model maps `$archetype/diagnose/other_participations`, and
+  # EVALUATION has no `diagnose` attribute; ENTRY.other_participations is the
+  # attribute it means (openEHR RM 1.1.0, ENTRY; #101).
+  - name: "other_participations"
+    extension: "overwrite"
+    with:
+      fhir: "$resource.asserter"
+      openehr: "$archetype/other_participations"
+      type: "NONE"
+    followedBy:
+      mappings:
+        - name: "participationFunction"
+          with:
+            fhir: "$fhirRoot"
+            openehr: "$openehrRoot"
+          manual:
+            - name: "function"
+              openehr:
+                - path: "function"
+                  value: "asserter"
+        - name: "performer"
+          with:
+            fhir: "$fhirRoot"
+            openehr: "$openehrRoot"
+
+  # The published model maps `$archetype/data[at0012]`; the only data
+  # structure of the archetype is data[at0001], and KDS_Diagnose carries no
+  # at0012 node, so against this template the method maps nothing.
+  - name: "bodySite"
+    extension: "overwrite"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype"
+      type: "NONE"
+
+  # The published model slots CLUSTER.anatomical_location.v1 here, which does
+  # not compile under a slot (#173); the body site name is the cluster's
+  # at0001, which this maps directly.
+  - name: "bodySiteCluster"
+    extension: "overwrite"
+    with:
+      fhir: "$resource.bodySite"
+      openehr: "$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.anatomical_location.v1]/items[at0001]"

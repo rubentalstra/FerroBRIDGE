@@ -7,7 +7,8 @@
 //! [`matrix_pin`] reads the pin matrix, so a crate's version constant can be
 //! asserted against the single source of truth; [`containers`] starts the
 //! PostgreSQL and the reference CDR the end-to-end lane runs against;
-//! [`fixtures`] holds the synthetic documents the suites commit and map; and
+//! [`fixtures`] holds the synthetic documents the suites commit and map;
+//! [`laws`] compares the two ends of a round trip; and
 //! [`stubs`] carries the upstream response shapes for `wiremock`.
 #![doc(test(attr(deny(warnings))))]
 
@@ -16,6 +17,7 @@
 
 pub mod containers;
 pub mod fixtures;
+pub mod laws;
 pub mod stubs;
 
 use std::fmt;
