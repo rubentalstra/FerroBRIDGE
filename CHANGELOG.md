@@ -24,6 +24,10 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- `scripts/vendor/its-rest.sh` also vendors the Simplified Formats and
+  Simplified Data Template sources (`docs/simplified_formats/`,
+  `docs/simplified_data_template/`) at the pinned ITS-REST commit, so the FLAT
+  families the engine writes cite a vendored `master05-rm_mapping.adoc`.
 - The KDS diagnosis round trip (#86). `scripts/vendor/kds-diagnose-opt.sh`
   vendors the published `KDS_Diagnose` operational template verbatim, pinned
   by commit, path and sha256 in `docs/VERSIONS.md`, with its provenance and
@@ -33,9 +37,13 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
   verbatim or has its refusal asserted by file and line, and the project
   directory carries a stand-in for each one that does not. The two lens laws
   are asserted as reviewed snapshots of the declared set, with a corrupted
-  intermediate that breaks each, over the synthetic chain today and over the
-  KDS chain once the engine carries it. The end-to-end lane commits a
-  synthetic KDS composition to the reference CDR and reads it back.
+  intermediate that breaks each, over the synthetic chain and over the KDS
+  chain. Both laws hold on the KDS Diagnose chain in the engine, over the two
+  FHIRconnect operations and through the facade against the reference CDR,
+  each modulo its declared set. The end-to-end lane commits a synthetic KDS
+  composition to the reference CDR and reads it back. The server logs every
+  warning a compiled program carries once at load, naming the context, the
+  file, the line and the code.
 - Context resolution refuses two sibling mapping methods of one file that
   share a name (`fc-duplicate-method-name`, naming both positions), because an
   `overwrite` or an `appendTo` of that name has no single target, and warns
@@ -321,6 +329,39 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Fixed
 
+- The FHIRconnect compiler derives the data-type pair of a mapping with no
+  `type` key from its two sides, since the type "is derivable from the
+  instances" (`data-mappings.adoc` §Deprecated), and the engine runs what it
+  derived: an untyped `dateTime` element pairs with a `DV_DATE_TIME` node
+  instead of converting as text; an untyped mapping onto a structural node
+  anchors its children as `type: NONE` does, and one with no child is a
+  `fc-anchor-without-children` warning; a choice element with no type filter,
+  and an `Extension` against a data value through its `value[x]`, reads the
+  alternative the document carries and writes the first pair of the node's
+  class, refusing at load with `fc-underived-alternative` when the choice
+  admits none; and a `type` key on a choice fixes the alternative both ways.
+  The required-child check of `engine/Fail.adoc` counts a structural node as
+  provided once a value below it is written, and skips a child its own
+  condition closed. The same pass fixes four engine defects the KDS chain
+  reached: one resource maps into one instance of a repeating start
+  archetype, a repeating FHIR element is counted by its document path so
+  `code.coding` and `verificationStatus.coding` no longer share instances, a
+  `manual` entry's `openehrCondition` is evaluated going out of openEHR, and a
+  node the composition does not hold is no input occurrence. `ENTRY.provider`
+  travels as its `_provider` FLAT family, and the engine defaults
+  `EVENT_CONTEXT.setting` to `238` "other care" as a declared default
+  (`Defaults::with_setting` names another), so the declared set of a round
+  trip closes.
+- A mapping whose openEHR tail or `manual` path no FLAT part of the node's
+  class carries is refused at load (`fc-uncarried-tail`, naming the mapping,
+  the class and the tail) instead of on the request that first reaches it;
+  the engine keeps its `UnsupportedTail` refusal as a backstop. The published
+  `problem_qualifier.v2`, `KDS_problem_qualifier`, `problem_diagnosis.v1`,
+  `multiple_coding_icd10gm.v1` and `report.v1.Condition` files name such
+  tails, and the test contexts carry stand-ins for them.
+- `participationsFunction` writes and reads `EVENT_CONTEXT.participations`
+  (`$composition/context/participations`) as the `_participation:i` family
+  under `context`, as it does `ENTRY.other_participations`.
 - A mapping path now resolves to an element the operational template renames:
   the compiler matched a compacted node by the exact text of its `aqlPath`,
   so a template that constrains a name (`items[at0002,'Kodierte Diagnose']`)

@@ -14,6 +14,7 @@
 //! nothing, and the engine finishes the resolution.
 
 use fhir_types::codec::Value;
+use fhir_types::schema::Kind;
 
 use crate::tree::Occurrence;
 use crate::tree::element::Location;
@@ -68,6 +69,7 @@ pub enum Selected<'tree> {
 pub struct Match<'tree> {
     occurrence: Occurrence,
     selected: Selected<'tree>,
+    alternative: Option<(&'static str, Kind)>,
 }
 
 impl<'tree> Match<'tree> {
@@ -81,6 +83,17 @@ impl<'tree> Match<'tree> {
     #[must_use]
     pub const fn selected(&self) -> &Selected<'tree> {
         &self.selected
+    }
+
+    /// Returns the suffix and kind of the alternative the document carries,
+    /// when the path ends on a choice element no type filter resolved.
+    ///
+    /// The JSON key of a choice names its type
+    /// (<https://hl7.org/fhir/R4/formats.html#choice>), so the instance says
+    /// which alternative it holds.
+    #[must_use]
+    pub const fn alternative(&self) -> Option<(&'static str, Kind)> {
+        self.alternative
     }
 
     /// Returns the value, `None` when the match is a deferred reference.
@@ -120,6 +133,7 @@ pub fn read<'tree, T: Table + ?Sized>(
     let mut cursors = vec![Cursor {
         value: document,
         occurrence: Occurrence::default(),
+        alternative: None,
     }];
     for step in resolved.moves() {
         cursors = advance(cursors, step)?;
@@ -136,6 +150,7 @@ pub fn read<'tree, T: Table + ?Sized>(
 struct Cursor<'tree> {
     value: &'tree Value,
     occurrence: Occurrence,
+    alternative: Option<(&'static str, Kind)>,
 }
 
 impl<'tree> Cursor<'tree> {
@@ -155,6 +170,7 @@ impl<'tree> Cursor<'tree> {
         Match {
             occurrence: self.occurrence,
             selected,
+            alternative: self.alternative,
         }
     }
 
@@ -162,7 +178,11 @@ impl<'tree> Cursor<'tree> {
     fn indexed(&self, value: &'tree Value, index: usize) -> Self {
         let mut occurrence = self.occurrence.clone();
         occurrence.push(index);
-        Self { value, occurrence }
+        Self {
+            value,
+            occurrence,
+            alternative: None,
+        }
     }
 }
 
@@ -188,11 +208,17 @@ fn advance<'tree>(
         Move::Choice { field, variants } => {
             let mut next = Vec::new();
             for cursor in &cursors {
-                let Some(suffix) = alternative(cursor, field.path(), field.key(), variants)? else {
+                let Some((suffix, kind)) =
+                    alternative(cursor, field.path(), field.key(), variants)?
+                else {
                     continue;
                 };
                 let key = format!("{}{suffix}", field.key());
+                let start = next.len();
                 member(cursor, field.path(), &key, field.repeats(), &mut next)?;
+                for taken in next.iter_mut().skip(start) {
+                    taken.alternative = Some((suffix, kind));
+                }
             }
             Ok(next)
         }
@@ -240,6 +266,7 @@ fn member<'tree>(
         next.push(Cursor {
             value,
             occurrence: cursor.occurrence.clone(),
+            alternative: None,
         });
         return Ok(());
     }
@@ -262,27 +289,27 @@ fn alternative(
     cursor: &Cursor<'_>,
     element: &str,
     stem: &str,
-    variants: &[(&'static str, fhir_types::schema::Kind)],
-) -> Result<Option<&'static str>, ReadError> {
+    variants: &[(&'static str, Kind)],
+) -> Result<Option<(&'static str, Kind)>, ReadError> {
     let object = cursor.value.as_object().ok_or_else(|| ReadError::Shape {
         element: String::from(element),
         expected: "an object",
         found: json_kind(cursor.value),
     })?;
-    let mut found: Option<&'static str> = None;
-    for (suffix, _) in variants {
+    let mut found: Option<(&'static str, Kind)> = None;
+    for &(suffix, kind) in variants {
         let key = format!("{stem}{suffix}");
         if !object.contains_key(&key) {
             continue;
         }
-        if let Some(first) = found {
+        if let Some((first, _)) = found {
             return Err(ReadError::AmbiguousChoice {
                 element: String::from(element),
                 first: format!("{stem}{first}"),
                 second: key,
             });
         }
-        found = Some(suffix);
+        found = Some((suffix, kind));
     }
     Ok(found)
 }

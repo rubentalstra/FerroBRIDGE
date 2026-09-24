@@ -67,6 +67,11 @@ const PUBLISHED: &[&str] = &[
     "projects/org.highmed/KDS/diagnose/KDS_problem_qualifier.yml",
 ];
 
+/// The stand-ins every load of the chain carries beside the published files,
+/// relative to the fixtures.
+const STAND_INS: &[&str] =
+    &["projects/ferrobridge/kds_diagnose/ferrobridge_kds_problem_qualifier.yml"];
+
 /// The context this crate authored over that chain.
 const CONTEXT: &str = "contexts/ferrobridge_diagnose.context.yml";
 
@@ -86,13 +91,18 @@ fn chain(fixtures: &[&str]) -> Result<MappingSet, Vec<Diagnostic>> {
     let files: Vec<String> = PUBLISHED
         .iter()
         .map(|file| format!("{CORPUS}/{file}"))
-        .chain(fixtures.iter().map(|file| format!("{FIXTURES}/{file}")))
+        .chain(
+            STAND_INS
+                .iter()
+                .chain(fixtures)
+                .map(|file| format!("{FIXTURES}/{file}")),
+        )
         .collect();
     load_set(files, &StaticMappingCodes::default())
 }
 
 /// Builds a set from in-memory files, for the rules that need small inputs.
-fn set_of(files: &[(&str, &str)]) -> Result<MappingSet, Box<dyn Error>> {
+pub(crate) fn set_of(files: &[(&str, &str)]) -> Result<MappingSet, Box<dyn Error>> {
     let mut set = MappingSet::new();
     for (name, text) in files {
         let document = load_str(*name, text)?;
@@ -147,7 +157,7 @@ fn render(diagnostics: &[Diagnostic]) -> String {
 }
 
 /// Returns the code and message of every diagnostic, sorted.
-fn codes(diagnostics: &[Diagnostic]) -> Vec<String> {
+pub(crate) fn codes(diagnostics: &[Diagnostic]) -> Vec<String> {
     let mut found: Vec<String> = diagnostics
         .iter()
         .map(|diagnostic| diagnostic.code().to_string())
@@ -157,7 +167,7 @@ fn codes(diagnostics: &[Diagnostic]) -> Vec<String> {
 }
 
 /// Compiles one context out of a set against the diagnosis template.
-fn program_of(set: &MappingSet, context: &str) -> Result<Arc<Program>, Vec<Diagnostic>> {
+pub(crate) fn program_of(set: &MappingSet, context: &str) -> Result<Arc<Program>, Vec<Diagnostic>> {
     let index = template().map_err(|error| {
         vec![Diagnostic::error(
             "tests",
@@ -176,7 +186,7 @@ fn program_of(set: &MappingSet, context: &str) -> Result<Arc<Program>, Vec<Diagn
 }
 
 /// The header every small synthetic model file in this test opens with.
-fn model(name: &str, archetype: &str, body: &str) -> String {
+pub(crate) fn model(name: &str, archetype: &str, body: &str) -> String {
     format!(
         "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: {name}\n  version: \
          1.0.0\nspec:\n  system: FHIR\n  version: R4\n  openEhrConfig:\n    archetype: \
@@ -194,7 +204,7 @@ fn extension(name: &str, extends: &str, body: &str) -> String {
 }
 
 /// The header every small synthetic context file in this test opens with.
-fn context(name: &str, body: &str) -> String {
+pub(crate) fn context(name: &str, body: &str) -> String {
     format!(
         "grammar: FHIRConnect/v1.0.0\ntype: context\nmetadata:\n  name: {name}\n  version: \
          1.0.0\nspec:\n  system: FHIR\n  version: R4\ncontext:\n{body}"
@@ -202,7 +212,7 @@ fn context(name: &str, body: &str) -> String {
 }
 
 /// The start model every small synthetic case in this test compiles.
-fn start_model(body: &str) -> String {
+pub(crate) fn start_model(body: &str) -> String {
     model(
         "EVALUATION.synthetic.v1",
         "openEHR-EHR-EVALUATION.problem_diagnosis.v1",
@@ -222,7 +232,7 @@ fn revised_model(revision: &str, body: &str) -> String {
 }
 
 /// The context body every small synthetic case in this test compiles.
-fn start_context(extensions: &[&str]) -> String {
+pub(crate) fn start_context(extensions: &[&str]) -> String {
     let listed = if extensions.is_empty() {
         String::new()
     } else {
@@ -317,8 +327,9 @@ fn chain_paths() -> Vec<String> {
         .iter()
         .map(|file| format!("{CORPUS}/{file}"))
         .chain(
-            [CONTEXT, EXTENSION]
+            STAND_INS
                 .iter()
+                .chain([CONTEXT, EXTENSION].iter())
                 .map(|file| format!("{FIXTURES}/{file}")),
         )
         .collect()
@@ -1990,10 +2001,11 @@ fn an_rm_tail_the_reference_model_does_not_define_is_refused() -> Result<(), Box
     Ok(())
 }
 
-/// The reference-model attribute an `ENTRY` carries resolves below the node.
+/// A reference-model attribute path below the node compiles when a FLAT part
+/// of the node's class carries it.
 #[test]
 fn an_rm_tail_the_reference_model_defines_compiles() -> Result<(), Box<dyn Error>> {
-    let body = "mappings:\n  - name: \"provider\"\n    with:\n      fhir: \"$resource.recorder\"\n      openehr: \"$archetype/other_participations/function\"\n";
+    let body = "mappings:\n  - name: \"certaintyCode\"\n    with:\n      fhir: \"$resource.verificationStatus.coding.code\"\n      openehr: \"$archetype/data[at0001]/items[at0073]/defining_code/code_string\"\n";
     let files = [
         ("model.yml", start_model(body)),
         (
@@ -2010,7 +2022,54 @@ fn an_rm_tail_the_reference_model_defines_compiles() -> Result<(), Box<dyn Error
         .ok_or("the compiled mapping")?
         .openehr()
         .ok_or("its openEHR side")?;
-    assert_eq!(openehr.tail().to_string(), "other_participations/function");
+    assert_eq!(openehr.tail().to_string(), "defining_code/code_string");
+    Ok(())
+}
+
+/// A tail the reference model defines and no FLAT part of the node's class
+/// carries is refused at load: its value would be merged into the node and
+/// then dropped on the way to the wire.
+#[test]
+fn an_rm_tail_no_flat_part_carries_is_refused_at_load() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"provider\"\n    with:\n      fhir: \"$resource.recorder\"\n      openehr: \"$archetype/other_participations/function\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-uncarried-tail"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(
+        message.contains("`provider`")
+            && message.contains("`other_participations/function`")
+            && message.contains("EVALUATION"),
+        "the refusal names the mapping, the tail and the class: {message}"
+    );
+    Ok(())
+}
+
+/// A `manual` path no FLAT part of the node's class carries is refused at
+/// load, as a `with.openehr` tail is.
+#[test]
+fn a_manual_path_no_flat_part_carries_is_refused_at_load() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"certainty\"\n    with:\n      fhir: \"$resource.verificationStatus\"\n      openehr: \"$archetype/data[at0001]/items[at0073]\"\n    manual:\n      - name: \"linked\"\n        openehr:\n          - path: \"hyperlink/value\"\n            value: \"http://example.org/synthetic\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-uncarried-tail"]);
+    let message = diagnostics.first().ok_or("one refusal")?.message();
+    assert!(
+        message.contains("`certainty.linked`") && message.contains("`hyperlink/value`"),
+        "{message}"
+    );
     Ok(())
 }
 
@@ -2080,7 +2139,11 @@ fn a_profile_version_the_program_does_not_pin_is_refused() -> Result<(), Box<dyn
 /// The published cluster anchors on `$resource`, which is "Path of the root
 /// resource" (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`),
 /// so its condition reads `Condition.coding`, an element FHIR R4 does not
-/// define (<https://hl7.org/fhir/R4/condition.html>). Reported as #173.
+/// define (<https://hl7.org/fhir/R4/condition.html>). Reported as #173. The
+/// two warnings beside the refusals are `problem_diagnosis.v1.yml` lines 73
+/// and 100, mappings with no `type` onto a structural node and no child, and
+/// the three `fc-uncarried-tail` rows are its lines 45, 47 and 100, tails no
+/// FLAT part of `EVENT_CONTEXT` or `EVALUATION` carries.
 #[test]
 fn the_published_anatomical_location_slot_is_refused_naming_the_element()
 -> Result<(), Box<dyn Error>> {
@@ -2096,6 +2159,11 @@ fn the_published_anatomical_location_slot_is_refused_naming_the_element()
     assert_eq!(
         codes(&diagnostics),
         vec![
+            "fc-anchor-without-children",
+            "fc-anchor-without-children",
+            "fc-uncarried-tail",
+            "fc-uncarried-tail",
+            "fc-uncarried-tail",
             "fc-unknown-fhir-element",
             "fc-unknown-template-node",
             "fc-unknown-template-node"
@@ -2308,5 +2376,24 @@ fn a_listed_extension_whose_model_is_never_reached_is_a_warning() -> Result<(), 
         warnings.first().map(Diagnostic::severity),
         Some(openehr_mapping_core::diagnostic::Severity::Warning)
     );
+    Ok(())
+}
+
+/// The two fixtures that name a tail no FLAT part carries, one through
+/// `with.openehr` and one through a `manual` path, are refused at load.
+#[test]
+fn the_uncarried_tail_fixtures_are_refused_at_load() -> Result<(), Box<dyn Error>> {
+    for fixture in [
+        "ferrobridge_tail_unsupported",
+        "ferrobridge_manual_unsupported",
+    ] {
+        let error = crate::support::compiled(fixture)
+            .err()
+            .ok_or_else(|| format!("{fixture} compiled"))?;
+        assert!(
+            error.to_string().contains("fc-uncarried-tail"),
+            "{fixture}: {error}"
+        );
+    }
     Ok(())
 }

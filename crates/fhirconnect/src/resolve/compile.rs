@@ -23,6 +23,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::LazyLock;
 
+use fhir_types::schema::ValueKind;
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::diagnostic::ModelPath;
 use openehr_mapping_core::diagnostic::Severity;
@@ -35,6 +36,7 @@ use openehr_mapping_core::index::archetype_release_version;
 use openehr_mapping_core::index::node_id_matches;
 use openehr_mapping_core::path::MappingPath;
 use openehr_mapping_core::position::Located;
+use openehr_mapping_core::position::Position;
 use openehr_mapping_core::template::PathError;
 use openehr_rm::v1_2::model as rm_model;
 use openehr_rm::v1_2::paths::PathSegment;
@@ -42,6 +44,7 @@ use openehr_rm::v1_2::paths::RmPath;
 
 use crate::model::ast::Condition;
 use crate::model::ast::ContextMappingFile;
+use crate::model::ast::DataType;
 use crate::model::ast::Direction;
 use crate::model::ast::ManualEntry;
 use crate::model::ast::ModelMappingFile;
@@ -50,15 +53,18 @@ use crate::model::ast::Variable;
 use crate::model::ast::With;
 use crate::model::load::MappingSet;
 use crate::model::semantic::MappingCodeRegistry;
+use crate::resolve::derive;
 use crate::resolve::error::ResolveCode;
 use crate::resolve::extensions::Merged;
 use crate::resolve::extensions::Node;
 use crate::resolve::extensions::apply;
 use crate::resolve::extensions::diagnostic;
+use crate::resolve::program::Alternative;
 use crate::resolve::program::Attachment;
 use crate::resolve::program::Condition as CompiledCondition;
 use crate::resolve::program::ConditionParts;
 use crate::resolve::program::Create;
+use crate::resolve::program::Derived;
 use crate::resolve::program::FhirTarget;
 use crate::resolve::program::Hierarchy;
 use crate::resolve::program::Manual;
@@ -80,6 +86,8 @@ use crate::resolve::program::Split;
 use crate::resolve::program::Target;
 use crate::resolve::program::TemplateBinding;
 use crate::resolve::program::TemplateId;
+use crate::tree::element::Location;
+use crate::tree::element::Move;
 use crate::tree::element::Table;
 use crate::tree::element::resolve as resolve_element;
 use crate::tree::path::FhirPath;
@@ -188,6 +196,35 @@ enum Site {
     ReadOnly,
 }
 
+/// What the compiler reads of one mapping to derive its conversion.
+#[derive(Debug, Clone, Copy)]
+struct Derivation<'target> {
+    fhir: Option<&'target FhirTarget>,
+    openehr: Option<&'target OpenehrTarget>,
+    data_type: Option<DataType>,
+    direction: Option<Direction>,
+    /// The mapping maps its two paths and nothing else: no `manual` entry and
+    /// no other mapping method.
+    plain: bool,
+    children: bool,
+}
+
+/// The two resolved sides of a mapping with no `type` key, as its conversion
+/// is derived from them.
+#[derive(Debug, Clone, Copy)]
+struct Sides<'target> {
+    fhir: &'target FhirTarget,
+    openehr: &'target OpenehrTarget,
+    direction: Option<Direction>,
+    children: bool,
+}
+
+/// The FHIR type every extension is (<https://hl7.org/fhir/R4/extensibility.html>).
+const EXTENSION_TYPE: &str = "Extension";
+
+/// The element of an extension that carries its value, `Extension.value[x]`.
+const EXTENSION_VALUE: &str = "value";
+
 /// The compiler's state for one run.
 struct Compiler<'a> {
     set: &'a MappingSet,
@@ -253,6 +290,25 @@ impl<'a> Compiler<'a> {
         self.extensions = self.extensions_of(file);
         let resource = self.resource_of(start)?;
         let archetype = self.archetype_root(start)?;
+        let root = self
+            .template
+            .nodes()
+            .find(|node| *node.rm_path() == archetype);
+        let root_axes = match root.map(|node| occurrences(self.template, node)) {
+            Some(Ok(axes)) => axes,
+            None => Vec::new(),
+            Some(Err(error)) => {
+                self.diagnostics.push(diagnostic(
+                    start.file(),
+                    start_name,
+                    ResolveCode::UnresolvedArchetypeRoot,
+                    start.spec().position,
+                    &ModelPath::root().field("spec").field("openEhrConfig"),
+                    format!("the repeating nodes above `{archetype}` do not resolve: {error}"),
+                ));
+                return None;
+            }
+        };
         let scope = Scope {
             resource: resource.clone(),
             fhir: root_expression(),
@@ -273,21 +329,24 @@ impl<'a> Compiler<'a> {
         let mappings = self.mappings(&merged.mappings, &scope);
         let preprocessors = self.preprocessors(start, &scope);
         self.unreached_extensions(file);
-        Some(Program::new(ProgramParts {
-            context: context.clone(),
-            profile,
-            template,
-            resource,
-            start: start_name.clone(),
-            models: core::mem::take(&mut self.models),
-            operational: declaration
-                .operational
-                .iter()
-                .map(|name| name.value().clone())
-                .collect(),
-            preprocessors,
-            mappings,
-        }))
+        Some(
+            Program::new(ProgramParts {
+                context: context.clone(),
+                profile,
+                template,
+                resource,
+                start: start_name.clone(),
+                models: core::mem::take(&mut self.models),
+                operational: declaration
+                    .operational
+                    .iter()
+                    .map(|name| name.value().clone())
+                    .collect(),
+                preprocessors,
+                mappings,
+            })
+            .with_root_axes(root_axes),
+        )
     }
 
     /// Reports every listed extension whose target model the program never
@@ -848,34 +907,9 @@ impl<'a> Compiler<'a> {
             prefix: name.clone(),
             ..scope.clone()
         };
-        let fhir_condition = method.fhir_condition.as_ref().and_then(|condition| {
-            let guard = fhir
-                .as_ref()
-                .map_or(scope.fhir.as_str(), |target| target.expression().as_str());
-            self.condition(
-                file,
-                condition,
-                scope,
-                Direction::FhirToOpenehr,
-                &path.field("fhirCondition"),
-                guard,
-            )
-        });
-        let openehr_condition = method.openehr_condition.as_ref().and_then(|condition| {
-            let guard = openehr.as_ref().map_or_else(
-                || scope.openehr.to_string(),
-                |target| target.path().to_string(),
-            );
-            self.condition(
-                file,
-                condition,
-                scope,
-                Direction::OpenehrToFhir,
-                &path.field("openehrCondition"),
-                &guard,
-            )
-        });
-        let manual = method
+        let (fhir_condition, openehr_condition) =
+            self.conditions(node, scope, fhir.as_ref(), openehr.as_ref(), path);
+        let manual: Vec<Manual> = method
             .manual
             .iter()
             .enumerate()
@@ -885,12 +919,43 @@ impl<'a> Compiler<'a> {
             .collect();
         let method_kind = self.method(node, &inner, path);
         let followed_by = self.mappings(&node.followed_by, &inner);
+        let data_type = with.and_then(|with| with.data_type.as_ref().map(|kind| *kind.value()));
+        let plain =
+            manual.is_empty() && matches!(method_kind, Method::Value) && !declares_method(method);
+        let derived = self.derived_of(
+            file,
+            &Derivation {
+                fhir: fhir.as_ref(),
+                openehr: openehr.as_ref(),
+                data_type,
+                direction,
+                plain,
+                children: !followed_by.is_empty(),
+            },
+            method.position,
+            &path.field("with"),
+        );
+        if let (Some(_), Some(target)) = (&fhir, &openehr)
+            && plain
+            && data_type != Some(DataType::None)
+            && derived != Some(Derived::Anchor)
+        {
+            self.carried_tail(
+                file,
+                &name,
+                target,
+                false,
+                method.position,
+                &path.field("with").field("openehr"),
+            );
+        }
         Mapping::new(MappingParts {
             name,
             model: owner.clone(),
             fhir,
             openehr,
-            data_type: with.and_then(|with| with.data_type.as_ref().map(|kind| *kind.value())),
+            data_type,
+            derived,
             value: with.and_then(|with| with.value.as_ref().map(|value| value.value().clone())),
             direction,
             fhir_condition,
@@ -904,6 +969,301 @@ impl<'a> Compiler<'a> {
             method: method_kind,
             followed_by,
         })
+    }
+
+    /// Refuses an openEHR tail no FLAT part of the node's class carries.
+    ///
+    /// The engine writes a tail through the FLAT parts of the node's class
+    /// (`engine::rm::carried`), so a tail outside them would be merged and
+    /// then dropped on the way to the wire; the crate refuses such a mapping
+    /// at load, never on the request that first reaches it. A `manual` path
+    /// writes a scalar, so an empty one writes the node's `value` and a
+    /// family attribute is refused. No specification governs the walk below a
+    /// node beyond the RM attribute model: our own design.
+    fn carried_tail(
+        &mut self,
+        file: &'a ModelMappingFile,
+        mapping: &str,
+        target: &OpenehrTarget,
+        manual: bool,
+        position: Position,
+        path: &ModelPath,
+    ) {
+        let segments: Vec<&str> = target
+            .tail()
+            .segments
+            .iter()
+            .map(|segment| segment.attribute.as_str())
+            .collect();
+        let written: &[&str] = match (segments.is_empty(), manual) {
+            (true, false) => return,
+            (true, true) => &["value"],
+            (false, _) => &segments,
+        };
+        let class = target.node().rm_type();
+        let carried = crate::engine::rm::carried(class, written)
+            .is_some_and(|(_, held)| !manual || held != crate::engine::rm::Carried::Family);
+        if carried {
+            return;
+        }
+        self.diagnostics.push(diagnostic(
+            file.file(),
+            file.header().name().value(),
+            ResolveCode::UncarriedTail,
+            position,
+            path,
+            format!(
+                "`{mapping}` names `{}` below the {class} node `{}`, which no FLAT part of \
+                 {class} carries, so the value would never reach the wire",
+                written.join("/"),
+                target.node().aql_path().as_str()
+            ),
+        ));
+    }
+
+    /// Compiles the `fhirCondition` and the `openehrCondition` of one mapping
+    /// method, each guarded by the side it reads.
+    fn conditions(
+        &mut self,
+        node: &Node<'a>,
+        scope: &Scope,
+        fhir: Option<&FhirTarget>,
+        openehr: Option<&OpenehrTarget>,
+        path: &ModelPath,
+    ) -> (Option<CompiledCondition>, Option<CompiledCondition>) {
+        let file = node.origin;
+        let method = node.mapping;
+        let fhir_condition = method.fhir_condition.as_ref().and_then(|condition| {
+            let guard = fhir.map_or(scope.fhir.as_str(), |target| target.expression().as_str());
+            self.condition(
+                file,
+                condition,
+                scope,
+                Direction::FhirToOpenehr,
+                &path.field("fhirCondition"),
+                guard,
+            )
+        });
+        let openehr_condition = method.openehr_condition.as_ref().and_then(|condition| {
+            let guard = openehr.map_or_else(
+                || scope.openehr.to_string(),
+                |target| target.path().to_string(),
+            );
+            self.condition(
+                file,
+                condition,
+                scope,
+                Direction::OpenehrToFhir,
+                &path.field("openehrCondition"),
+                &guard,
+            )
+        });
+        (fhir_condition, openehr_condition)
+    }
+
+    /// Derives what the data-type cell of a mapping converts, when the
+    /// mapping leaves it to the compiler.
+    ///
+    /// A plain value mapping with no `type` key derives its pair from its two
+    /// sides, and a mapping whose `type` key names the type of a choice element
+    /// no filter resolved takes that alternative. Every other mapping carries
+    /// what it wrote.
+    fn derived_of(
+        &mut self,
+        file: &'a ModelMappingFile,
+        derivation: &Derivation<'_>,
+        position: Position,
+        path: &ModelPath,
+    ) -> Option<Derived> {
+        let fhir = derivation.fhir?;
+        match (derivation.openehr, derivation.data_type) {
+            (Some(openehr), None) if derivation.plain => self.derive(
+                file,
+                Sides {
+                    fhir,
+                    openehr,
+                    direction: derivation.direction,
+                    children: derivation.children,
+                },
+                position,
+                path,
+            ),
+            (_, Some(data_type))
+                if derivation.plain
+                    && matches!(*fhir.resolved().location(), Location::Choice(_)) =>
+            {
+                let code = derive::declared(data_type)?;
+                self.declared_alternative(file, fhir, code, position, path)
+            }
+            _ => None,
+        }
+    }
+
+    /// Derives the conversion of a mapping with no `type` key from its two
+    /// resolved sides.
+    ///
+    /// A structural node anchors the children and converts nothing, as the
+    /// `type: NONE` of `types-of-mappings/concept-type/FollowedBy.adoc` does,
+    /// and one with no child writes nothing, which is refused. A choice
+    /// element, and an `Extension` against a data value, read the alternative
+    /// the document carries and write the first pair of the node's class the
+    /// choice admits (`crate::resolve::derive`).
+    fn derive(
+        &mut self,
+        file: &'a ModelMappingFile,
+        sides: Sides<'_>,
+        position: Position,
+        path: &ModelPath,
+    ) -> Option<Derived> {
+        let owner = file.header().name().value();
+        let Sides {
+            fhir,
+            openehr,
+            direction,
+            children,
+        } = sides;
+        let class = openehr.leaf_class().unwrap_or(openehr.node().rm_type());
+        if derive::is_structural(class) {
+            if children {
+                return Some(Derived::Anchor);
+            }
+            // NOTE: no specification governs this: our own design, the mapping is kept
+            // with no derived pair so a run that carries its element refuses with no cell.
+            self.diagnostics.push(
+                Diagnostic::warning(
+                    file.file().to_path_buf(),
+                    ResolveCode::AnchorWithoutChildren.into(),
+                    format!(
+                        "`{}` names the {class} node `{}`, which holds other nodes, and no \
+                         `type` or child says what to write into it, so a run that carries \
+                         the element refuses",
+                        fhir.expression(),
+                        openehr.path()
+                    ),
+                )
+                .with_position(position)
+                .with_mapping_name(owner.clone())
+                .with_model_path(path.clone()),
+            );
+            return None;
+        }
+        let read = match *fhir.resolved().location() {
+            Location::Choice(_) => fhir.clone(),
+            Location::Complex(schema)
+                if schema.name == EXTENSION_TYPE && !derive::pairs(class).is_empty() =>
+            {
+                self.derived_target(file, fhir, EXTENSION_VALUE, position, path)?
+            }
+            Location::Complex(_) | Location::Primitive(_) | Location::Attribute => {
+                let code = fhir.resolved().type_code()?;
+                let text = matches!(
+                    *fhir.resolved().location(),
+                    Location::Primitive(ValueKind::Text) | Location::Attribute
+                );
+                return Some(Derived::Element(derive::element(class, code, text)));
+            }
+            Location::PrimitiveElement | Location::Resource | Location::Deferred => return None,
+        };
+        if direction == Some(Direction::FhirToOpenehr) {
+            return Some(Derived::Choice { read, write: None });
+        }
+        let variants = match read.resolved().moves().last() {
+            Some(Move::Choice { variants, .. }) => *variants,
+            _ => &[],
+        };
+        let Some(suffix) = derive::alternative(class, variants) else {
+            self.diagnostics.push(diagnostic(
+                file.file(),
+                owner,
+                ResolveCode::UnderivedAlternative,
+                position,
+                path,
+                format!(
+                    "`{}` is written from the {class} node `{}`, and the choice admits none of \
+                     the types {class} pairs with ({}); a `type` or an `as()` says which to write",
+                    read.resolved().leaf(),
+                    openehr.path(),
+                    derive::pairs(class).join(", ")
+                ),
+            ));
+            return None;
+        };
+        let written = self.derived_target(file, &read, &format!("as({suffix})"), position, path)?;
+        let code = written.resolved().type_code().unwrap_or(suffix);
+        Some(Derived::Choice {
+            read,
+            write: Some(Alternative::new(code, written)),
+        })
+    }
+
+    /// Resolves the alternative of a choice element the `type` key names.
+    ///
+    /// The key names the FHIR type of the element, the Type ID column of the
+    /// table in `types-of-mappings/data-type/data-mappings.adoc` §Deprecated, so
+    /// on a choice it fixes the alternative both directions read and write.
+    fn declared_alternative(
+        &mut self,
+        file: &'a ModelMappingFile,
+        fhir: &FhirTarget,
+        code: &'static str,
+        position: Position,
+        path: &ModelPath,
+    ) -> Option<Derived> {
+        let variants = match fhir.resolved().moves().last() {
+            Some(Move::Choice { variants, .. }) => *variants,
+            _ => &[],
+        };
+        let Some(suffix) = derive::suffix_of(code, variants) else {
+            self.diagnostics.push(diagnostic(
+                file.file(),
+                file.header().name().value(),
+                ResolveCode::UnderivedAlternative,
+                position,
+                path,
+                format!(
+                    "the `type` of `{}` names {code}, which the choice `{}` does not admit",
+                    fhir.expression(),
+                    fhir.resolved().leaf()
+                ),
+            ));
+            return None;
+        };
+        let written = self.derived_target(file, fhir, &format!("as({suffix})"), position, path)?;
+        Some(Derived::Declared(Alternative::new(code, written)))
+    }
+
+    /// Resolves `target` extended by one step the compiler derived.
+    ///
+    /// The step is one the grammar admits below any element of the kind the
+    /// target ends on, so a refusal is an element-table disagreement and is
+    /// reported as one for a written path would be.
+    fn derived_target(
+        &mut self,
+        file: &'a ModelMappingFile,
+        target: &FhirTarget,
+        step: &str,
+        position: Position,
+        path: &ModelPath,
+    ) -> Option<FhirTarget> {
+        let written = format!("{}.{step}", target.expression());
+        let (code, reason) = match FhirPath::from_str(&written) {
+            Ok(expression) => {
+                match resolve_element(self.table, target.resolved().resource(), &expression) {
+                    Ok(resolved) => return Some(FhirTarget::new(expression, resolved)),
+                    Err(error) => (ResolveCode::UnknownFhirElement, error.to_string()),
+                }
+            }
+            Err(error) => (ResolveCode::MalformedFhirPath, error.to_string()),
+        };
+        self.diagnostics.push(diagnostic(
+            file.file(),
+            file.header().name().value(),
+            code,
+            position,
+            path,
+            format!("the derived `{written}` does not resolve: {reason}"),
+        ));
+        None
     }
 
     /// Decides what a mapping method does beyond mapping its two paths.
@@ -1131,8 +1491,16 @@ impl<'a> Compiler<'a> {
             .filter_map(|(index, manual)| {
                 let at = path.field("openehr").index(index);
                 let value = self.manual_value(file, &manual.value, &at)?;
-                self.openehr_target(file.file(), owner, &manual.path, scope, &at)
-                    .map(|target| ManualPath::new(Target::Openehr(Box::new(target)), value))
+                let target = self.openehr_target(file.file(), owner, &manual.path, scope, &at)?;
+                self.carried_tail(
+                    file,
+                    &format!("{}.{}", scope.prefix, entry.name.value()),
+                    &target,
+                    true,
+                    manual.path.position(),
+                    &at,
+                );
+                Some(ManualPath::new(Target::Openehr(Box::new(target)), value))
             })
             .collect();
         Manual::new(
@@ -1652,6 +2020,16 @@ enum LocateError {
     Unknown(String),
     /// More than one node carries it, so nothing says which one is meant.
     Ambiguous(String),
+}
+
+/// Returns whether a method writes one of the mapping methods that do more
+/// than map its two paths, whether or not the method compiled.
+fn declares_method(method: &crate::model::ast::Mapping) -> bool {
+    method.reference.is_some()
+        || method.slot_archetype.is_some()
+        || method.link.is_some()
+        || method.mapping_code.is_some()
+        || method.participations_function.is_some()
 }
 
 /// Returns the `spec` keys a method inherits from the file that wrote it.

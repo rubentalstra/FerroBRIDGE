@@ -40,6 +40,7 @@ use openehr_mapping_core::template::PathError;
 use openehr_rm::v1_2::common::generic::party_identified::PartyIdentifiedData;
 use openehr_rm::v1_2::data_types::quantity::date_time::dv_date_time::DvDateTime;
 use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
+use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
 use openehr_rm::v1_2::model;
 
 use crate::engine::cell;
@@ -67,8 +68,10 @@ use crate::engine::seam::IdentityRequest;
 use crate::engine::seam::ReferenceError;
 use crate::engine::seam::Seams;
 use crate::model::ast::Direction;
+use crate::resolve::derive;
 use crate::resolve::program::Attachment;
 use crate::resolve::program::Create;
+use crate::resolve::program::Derived;
 use crate::resolve::program::FhirTarget;
 use crate::resolve::program::Hierarchy;
 use crate::resolve::program::Manual;
@@ -105,6 +108,11 @@ const INSTANCE_CEILING: u32 = 1024;
 /// and the `link` key leaves it optional. No specification governs the
 /// value: our own design.
 const LINK_TYPE: &str = "reference";
+
+/// The terminology id of the openEHR terminology, which the `setting` group
+/// belongs to, as `engine/defaults-for-fields.adoc` links it
+/// (<https://github.com/openEHR/specifications-TERM/blob/master/computable/XML/en/openehr_terminology.xml#L274>).
+const OPENEHR_TERMINOLOGY: &str = "openehr";
 
 /// The `external_ref.id.scheme` of a participant a FHIR reference names.
 ///
@@ -191,6 +199,7 @@ pub enum MappingCodeError {
 pub struct Defaults {
     composer: String,
     start_time: String,
+    setting: Setting,
     language: Option<String>,
     territory: Option<String>,
     origin: Option<Origin>,
@@ -208,6 +217,10 @@ impl Defaults {
         Self {
             composer: String::from("FHIRconnect"),
             start_time: now.into(),
+            setting: Setting {
+                code: String::from("238"),
+                value: String::from("other care"),
+            },
             language: None,
             territory: None,
             origin: None,
@@ -218,6 +231,23 @@ impl Defaults {
     #[must_use]
     pub fn with_composer(mut self, name: impl Into<String>) -> Self {
         self.composer = name.into();
+        self
+    }
+
+    /// Returns these defaults with the `EVENT_CONTEXT.setting` the project
+    /// performing the mapping defines.
+    ///
+    /// `code` and `value` are one concept of the openEHR terminology's
+    /// `setting` group, which "should be defined by the project performing the
+    /// mapping" and "can be defaulted to one of the valid values"
+    /// (`engine/defaults-for-fields.adoc`, which links the group in
+    /// `openehr_terminology.xml`). The default is `238` "other care".
+    #[must_use]
+    pub fn with_setting(mut self, code: impl Into<String>, value: impl Into<String>) -> Self {
+        self.setting = Setting {
+            code: code.into(),
+            value: value.into(),
+        };
         self
     }
 
@@ -263,6 +293,13 @@ impl Defaults {
     pub const fn origin(&self) -> Option<&Origin> {
         self.origin.as_ref()
     }
+}
+
+/// One concept of the openEHR terminology's `setting` group.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct Setting {
+    code: String,
+    value: String,
 }
 
 /// Why a run refused.
@@ -604,6 +641,13 @@ pub fn to_openehr<T: Table + ?Sized>(
         document.clone(),
         None,
     );
+    // NOTE: basics/Variables.adoc, `$archetype` is the root as `$resource` is, so one
+    // resource maps into one instance of the start archetype and its axes are bound.
+    run.pins = program
+        .root_axes()
+        .iter()
+        .map(|axis| (axis.clone(), RmPosition::first()))
+        .collect();
     run.admits_context()?;
     run.split_or_run(
         program.mappings(),
@@ -789,7 +833,10 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     }
 
     /// Runs one mapping under one binding.
-    fn mapping(&mut self, mapping: &Mapping, parent: &Binding) -> Result<(), EngineError> {
+    ///
+    /// Answers [`Ran::Gated`] when the unidirectional marker or the input
+    /// side's condition kept the mapping from running.
+    fn mapping(&mut self, mapping: &Mapping, parent: &Binding) -> Result<Ran, EngineError> {
         if let Some(only) = mapping.direction()
             && only != self.direction
         {
@@ -797,20 +844,24 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 mapping: String::from(mapping.name()),
                 reason: SkipReason::Unidirectional,
             });
-            return Ok(());
+            return Ok(Ran::Gated);
         }
         let Some(admitted) = self.admits(mapping, parent)? else {
-            return Ok(());
+            return Ok(Ran::Gated);
         };
         let bindings = self.apply(mapping, parent, &admitted)?;
         for binding in &bindings {
             self.children(mapping, binding)?;
         }
-        Ok(())
+        Ok(Ran::Ran)
     }
 
     /// Returns the input occurrences the conditions admit, `None` for a
     /// mapping a gate closed.
+    ///
+    /// A condition that filters out every occurrence the input carries closes
+    /// the gate as a false one does: the mapping's input is there, and the
+    /// condition says it is none this mapping maps.
     fn admits(
         &self,
         mapping: &Mapping,
@@ -835,15 +886,18 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 match verdict {
                     Verdict::Gate(false) => Ok(None),
                     Verdict::Gate(true) => Ok(Some(inputs)),
-                    Verdict::Filter(admitted) => Ok(Some(
-                        inputs
+                    Verdict::Filter(admitted) => {
+                        let present = !inputs.is_empty();
+                        let kept: Vec<Occurrence> = inputs
                             .into_iter()
                             .filter(|occurrence| admitted.contains(occurrence))
-                            .collect(),
-                    )),
+                            .collect();
+                        Ok((!kept.is_empty() || !present).then_some(kept))
+                    }
                 }
             }
             Direction::OpenehrToFhir => {
+                let present = !inputs.is_empty();
                 let mut admitted = Vec::with_capacity(inputs.len());
                 for input in inputs {
                     let positions = Self::positions_at(mapping, &input)?;
@@ -851,7 +905,7 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                         admitted.push(input);
                     }
                 }
-                Ok(Some(admitted))
+                Ok((!admitted.is_empty() || !present).then_some(admitted))
             }
         }
     }
@@ -1004,6 +1058,11 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
         }
         if prefix.len() >= depth {
             prefix.truncate(depth);
+            // NOTE: no specification governs this: our own design, a node the
+            // composition does not hold is no input occurrence, so nothing below it runs.
+            if self.node_value(name, input, &prefix)?.is_none() {
+                return Ok(Vec::new());
+            }
             return Ok(vec![prefix]);
         }
         let mut found = Vec::new();
@@ -1072,7 +1131,7 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             let Some(found) = attribute_at(&value, input) else {
                 return Ok(None);
             };
-            if carried != Carried::Value {
+            if !matches!(carried, Carried::Value | Carried::Family) {
                 return Ok(scalar(found).map(Leaf::Scalar));
             }
             let leaf = input
@@ -1909,8 +1968,9 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     /// auto-transformable. Therefore, it is added to the `with:` statement"
     /// (`concept-mappings.adoc`, §Participation mappings): the FHIR side is
     /// the `Reference` of the participant, the openEHR side the
-    /// `other_participations` of an `ENTRY`, and the function is the
-    /// method's. The performer carries the reference as its
+    /// `other_participations` of an `ENTRY` or the `participations` of the
+    /// `EVENT_CONTEXT` (`family::participation_list`), and the function is
+    /// the method's. The performer carries the reference as its
     /// `external_ref` and the reference's `display` as its name; the
     /// allocation is our own design.
     fn participation(
@@ -1920,7 +1980,14 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
         inputs: &[Occurrence],
         function: &str,
     ) -> Result<Vec<Binding>, EngineError> {
-        let (_target, openehr) = Self::family_sides(mapping, "other_participations")?;
+        let list = mapping
+            .openehr()
+            .and_then(|openehr| {
+                let tail = tail_segments(openehr);
+                family::participation_list(openehr.node().rm_type(), &tail)
+            })
+            .unwrap_or(family::ENTRY_PARTICIPATIONS);
+        let (_target, openehr) = Self::family_sides(mapping, list.attribute)?;
         match self.direction {
             Direction::FhirToOpenehr => {
                 let mut bindings = Vec::with_capacity(inputs.len());
@@ -1948,9 +2015,10 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                     };
                     let namespace = self.reference_type(literal);
                     let positions = self.family_positions(openehr, &binding.openehr);
-                    let index = self.next_family(openehr, &positions, "_other_participation");
+                    let index = self.next_family(openehr, &positions, list.family);
                     self.families.extend(family::participation(
                         openehr.node(),
+                        list,
                         &positions,
                         index,
                         &family::ParticipationParts {
@@ -1970,7 +2038,7 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 let Some(node) = self.node_value(mapping.name(), openehr, &positions)? else {
                     return Ok(Vec::new());
                 };
-                let found = family::participations(&node, function);
+                let found = family::participations(&node, list, function);
                 let occurrences =
                     vec![openehr_occurrence(mapping.name(), &positions)?; found.len()];
                 let bindings = self.bindings(mapping, parent, &occurrences)?;
@@ -2146,7 +2214,9 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
         // NOTE: PopulatingAnEntry.adoc writes `type: NONE` on the parent whose
         // `followedBy` children carry every value, so the parent anchors them
         // and transforms nothing of its own (recorded as a silence in #185).
-        if mapping.data_type() == Some(crate::model::ast::DataType::None) {
+        if mapping.data_type() == Some(crate::model::ast::DataType::None)
+            || matches!(mapping.derived(), Some(Derived::Anchor))
+        {
             return Ok(bindings);
         }
         let (Some(_fhir), Some(_openehr)) = (mapping.fhir(), mapping.openehr()) else {
@@ -2206,9 +2276,7 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 let Some(openehr) = mapping.openehr() else {
                     return Ok(());
                 };
-                let kind = Self::kind(mapping, target)?;
-                let value = self.element_at(mapping, target, input, kind)?;
-                let Some(view) = value else {
+                let Some(view) = self.input_value(mapping, target, openehr, input)? else {
                     return Ok(());
                 };
                 let node = openehr.node();
@@ -2244,7 +2312,7 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 let Some(source) = self.value_at(mapping, openehr, &positions)? else {
                     return Ok(());
                 };
-                let kind = Self::kind(mapping, target)?;
+                let (target, kind) = Self::output_target(mapping, target)?;
                 let refuse = |source: LensError| EngineError::Cell {
                     mapping: String::from(mapping.name()),
                     element: String::from(target.expression().as_str()),
@@ -2283,7 +2351,61 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                         }
                     },
                 };
-                self.put_fhir(mapping, binding, &view)
+                self.put_fhir_at(mapping, target, binding, &view)
+            }
+        }
+    }
+
+    /// Reads the FHIR element one input occurrence names, as the conversion
+    /// the compiler derived or the `type` key names.
+    fn input_value(
+        &self,
+        mapping: &Mapping,
+        target: &FhirTarget,
+        openehr: &OpenehrTarget,
+        input: &Occurrence,
+    ) -> Result<Option<FhirValue>, EngineError> {
+        match mapping.derived() {
+            Some(Derived::Choice { read, .. }) => self.choice_at(mapping, read, openehr, input),
+            Some(Derived::Declared(declared)) => {
+                let kind = Self::kind(mapping, declared.target())?;
+                self.element_at(mapping, declared.target(), input, kind)
+            }
+            Some(Derived::Element(_) | Derived::Anchor) | None => {
+                let kind = Self::kind(mapping, target)?;
+                self.element_at(mapping, target, input, kind)
+            }
+        }
+    }
+
+    /// Returns the target a mapping writes FHIR through, with the element
+    /// kind it writes.
+    fn output_target<'mapping>(
+        mapping: &'mapping Mapping,
+        target: &'mapping FhirTarget,
+    ) -> Result<(&'mapping FhirTarget, FhirKind), EngineError> {
+        match mapping.derived() {
+            Some(Derived::Choice {
+                write: Some(written),
+                ..
+            }) => {
+                let kind = FhirKind::of_code(written.code()).ok_or_else(|| {
+                    EngineError::UnknownElement {
+                        mapping: String::from(mapping.name()),
+                        element: String::from(written.target().resolved().leaf()),
+                    }
+                })?;
+                Ok((written.target(), kind))
+            }
+            Some(Derived::Declared(declared)) => {
+                Ok((declared.target(), Self::kind(mapping, declared.target())?))
+            }
+            Some(Derived::Choice { write: None, .. }) => Err(EngineError::UnknownElement {
+                mapping: String::from(mapping.name()),
+                element: String::from(target.resolved().leaf()),
+            }),
+            Some(Derived::Element(_) | Derived::Anchor) | None => {
+                Ok((target, Self::kind(mapping, target)?))
             }
         }
     }
@@ -2312,6 +2434,34 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             node: String::from(node.aql_path().as_str()),
             source: Box::new(source),
         };
+        if carried == Carried::Family {
+            let leaf = openehr
+                .leaf_class()
+                .ok_or_else(|| unsupported_tail(mapping, openehr))?;
+            let produced = cell::put(view, leaf, None, self.binding_of(node).as_deref()).map_err(
+                |source| EngineError::Cell {
+                    mapping: String::from(mapping.name()),
+                    element: String::from(target.expression().as_str()),
+                    source: Box::new(source),
+                },
+            )?;
+            for taken in &produced.fallbacks {
+                self.warnings.push(Warning::fallback(taken));
+            }
+            let family = rm::family_of(&segments);
+            for part in produced.value.parts().map_err(refuse_rm)? {
+                let mut sub_path = family.clone();
+                sub_path.extend(part.sub_path().iter().cloned());
+                let mut value = NodeValue::new(node, part.value().clone())
+                    .with_occurrences(binding.openehr.clone())
+                    .under(sub_path);
+                if let Some(datum) = part.datum() {
+                    value = value.with_datum(datum);
+                }
+                self.families.push(value);
+            }
+            return Ok(());
+        }
         let mut object = self
             .held_object(&binding.openehr, node.flat_id())
             .map_err(refuse_rm)?;
@@ -2417,14 +2567,65 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     }
 
     /// Returns which FHIR element a mapping writes.
+    ///
+    /// The `type` key names it where the mapping carries one, and the pair
+    /// the compiler derived otherwise.
     fn kind(mapping: &Mapping, target: &FhirTarget) -> Result<FhirKind, EngineError> {
-        mapping
-            .data_type()
-            .and_then(FhirKind::of)
-            .or_else(|| FhirKind::at(target.resolved().location()))
+        let kind = match (mapping.data_type(), mapping.derived()) {
+            (Some(data_type), _) => FhirKind::of(data_type),
+            (None, Some(Derived::Element(code))) => FhirKind::of_code(code),
+            (None, _) => FhirKind::at(target.resolved().location()),
+        };
+        kind.ok_or_else(|| EngineError::UnknownElement {
+            mapping: String::from(mapping.name()),
+            element: String::from(target.resolved().leaf()),
+        })
+    }
+
+    /// Reads the choice element one input occurrence names, as the
+    /// alternative the document carries.
+    ///
+    /// The JSON key of a choice names its type
+    /// (<https://hl7.org/fhir/R4/formats.html#choice>), so the instance fixes
+    /// the kind, and the node's class decides how a text alternative reads
+    /// (`crate::resolve::derive::carried`).
+    fn choice_at(
+        &self,
+        mapping: &Mapping,
+        read_at: &FhirTarget,
+        openehr: &OpenehrTarget,
+        occurrence: &Occurrence,
+    ) -> Result<Option<FhirValue>, EngineError> {
+        let matches = read(self.table, &self.fhir, read_at.expression()).map_err(|source| {
+            EngineError::Read {
+                mapping: String::from(mapping.name()),
+                expression: String::from(read_at.expression().as_str()),
+                source: Box::new(source),
+            }
+        })?;
+        let Some(found) = matches
+            .iter()
+            .find(|matched| matched.occurrence() == occurrence)
+        else {
+            return Ok(None);
+        };
+        let (Some(value), Some((suffix, variant))) = (found.value(), found.alternative()) else {
+            return Ok(None);
+        };
+        let element = read_at.resolved().leaf();
+        let class = openehr.leaf_class().unwrap_or(openehr.node().rm_type());
+        let kind = derive::carried(class, suffix, variant)
+            .and_then(FhirKind::of_code)
             .ok_or_else(|| EngineError::UnknownElement {
                 mapping: String::from(mapping.name()),
-                element: String::from(target.resolved().leaf()),
+                element: format!("{element} as {suffix}"),
+            })?;
+        FhirValue::read(kind, element, value)
+            .map(Some)
+            .map_err(|source| EngineError::Fhir {
+                mapping: String::from(mapping.name()),
+                element: String::from(element),
+                source: Box::new(source),
             })
     }
 
@@ -2504,6 +2705,18 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
         let Some(target) = mapping.fhir() else {
             return Ok(());
         };
+        self.put_fhir_at(mapping, target, binding, view)
+    }
+
+    /// Writes one FHIR element through `target` at the occurrence its
+    /// binding names.
+    fn put_fhir_at(
+        &mut self,
+        mapping: &Mapping,
+        target: &FhirTarget,
+        binding: &Binding,
+        view: &FhirValue,
+    ) -> Result<(), EngineError> {
         let element = String::from(target.resolved().leaf());
         let value = view.write(&element).map_err(|source| EngineError::Fhir {
             mapping: String::from(mapping.name()),
@@ -2540,7 +2753,7 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             });
             return Ok(());
         }
-        if !self.manual_admits(mapping, entry)? {
+        if !self.manual_admits(mapping, entry, binding)? {
             return Ok(());
         }
         match self.direction {
@@ -2550,7 +2763,17 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     }
 
     /// Returns whether the input-side conditions admit a manual entry.
-    fn manual_admits(&self, mapping: &Mapping, entry: &Manual) -> Result<bool, EngineError> {
+    ///
+    /// Going out of openEHR the entry's `openehrCondition` is evaluated at the
+    /// instance the mapping bound, the rule a mapping's own condition follows
+    /// (`basics/Conditions.adoc`, "conditions are always applied on the input
+    /// data").
+    fn manual_admits(
+        &self,
+        mapping: &Mapping,
+        entry: &Manual,
+        binding: &Binding,
+    ) -> Result<bool, EngineError> {
         let gate = match self.direction {
             Direction::FhirToOpenehr => entry.fhir_condition(),
             Direction::OpenehrToFhir => entry.openehr_condition(),
@@ -2565,10 +2788,7 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                     mapping: String::from(mapping.name()),
                     source: Box::new(source),
                 }),
-            // NOTE: Conditions.adoc, an openehrCondition reads the openEHR
-            // input, which this milestone reaches only through the mapping's
-            // own node, so a manual entry's gate answers true.
-            Direction::OpenehrToFhir => Ok(true),
+            Direction::OpenehrToFhir => self.openehr_holds(mapping.name(), gate, &binding.openehr),
         }
     }
 
@@ -2600,7 +2820,9 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             } else {
                 &segments
             };
-            if rm::carried(target.node().rm_type(), written).is_none() {
+            if rm::carried(target.node().rm_type(), written)
+                .is_none_or(|(_, held)| held == Carried::Family)
+            {
                 return Err(EngineError::UnsupportedTail {
                     mapping: format!("{}.{}", mapping.name(), entry.name()),
                     node: String::from(target.node().aql_path().as_str()),
@@ -2852,26 +3074,23 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     /// "If we have a parent node with a `1..1` cardinality and a child node
     /// with a `1..1` cardinality, the mapping should fail if the child is not
     /// provided" (`engine/Fail.adoc`), so a child the template requires and
-    /// the input does not carry refuses the unit.
+    /// the input does not carry refuses the unit. A child its own condition
+    /// closed was provided and is none the mapping maps, so it is skipped,
+    /// and a structural node counts as provided once any value below it is
+    /// written.
     fn children(&mut self, mapping: &Mapping, binding: &Binding) -> Result<(), EngineError> {
         for child in mapping.followed_by() {
-            self.mapping(child, binding)?;
-            if self.direction != Direction::FhirToOpenehr {
+            let ran = self.mapping(child, binding)?;
+            if self.direction != Direction::FhirToOpenehr || ran == Ran::Gated {
                 continue;
             }
             let Some(target) = child.openehr() else {
                 continue;
             };
-            if target.node().min().is_none_or(|min| min < 1)
-                || child.direction().is_some_and(|only| only != self.direction)
-            {
+            if target.node().min().is_none_or(|min| min < 1) {
                 continue;
             }
-            if !self
-                .written
-                .iter()
-                .any(|written| written.flat_id == *target.node().flat_id())
-            {
+            if !self.provided(target) {
                 return Err(EngineError::MissingRequired {
                     mapping: String::from(child.name()),
                     node: String::from(target.node().aql_path().as_str()),
@@ -2879,6 +3098,25 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             }
         }
         Ok(())
+    }
+
+    /// Returns whether the run wrote the node a required child names.
+    ///
+    /// A structural node holds no value of its own, so it is provided once
+    /// the run wrote any value at or below it.
+    fn provided(&self, target: &OpenehrTarget) -> bool {
+        let node = target.node().flat_id();
+        if !derive::is_structural(target.node().rm_type()) {
+            return self.written.iter().any(|written| written.flat_id == *node);
+        }
+        let below = format!("{}/", node.as_str());
+        self.written
+            .iter()
+            .any(|written| written.flat_id == *node || written.flat_id.as_str().starts_with(&below))
+            || self.families.iter().any(|family| {
+                let flat_id = family.flat_id();
+                flat_id == node || flat_id.as_str().starts_with(&below)
+            })
     }
 
     /// Fills the composition fields no mapping wrote.
@@ -2910,6 +3148,24 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 magnitude_status: None,
                 accuracy: None,
                 value: start_time,
+            }))
+        })?;
+        let setting = defaults.setting.clone();
+        self.default_at(&mut filled, "/context/setting", || {
+            RmValue::CodedText(Box::new(DvCodedText {
+                value: setting.value,
+                hyperlink: None,
+                formatting: None,
+                mappings: None,
+                language: None,
+                encoding: None,
+                defining_code: CodePhrase {
+                    terminology_id: TerminologyId {
+                        value: String::from(OPENEHR_TERMINOLOGY),
+                    },
+                    code_string: setting.code,
+                    preferred_term: None,
+                },
             }))
         })?;
         if let Some(code) = defaults.language.clone() {
@@ -3012,6 +3268,16 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     }
 }
 
+/// Whether a mapping ran, or its input side kept it from running.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Ran {
+    /// The mapping ran over the occurrences its input admitted.
+    Ran,
+    /// The unidirectional marker or the input side's condition kept it from
+    /// running.
+    Gated,
+}
+
 /// Returns how many axes of the output side the parent bound.
 fn parent_depth(parent: &Binding, direction: Direction) -> usize {
     match direction {
@@ -3022,24 +3288,40 @@ fn parent_depth(parent: &Binding, direction: Direction) -> usize {
 
 /// Returns the repeating elements a FHIR path steps through, outermost first.
 ///
-/// An `extension(url)` step takes an index of its own, because the url names
-/// one entry of a repeating element
+/// Each axis is named by the JSON keys the walk took from the resource root,
+/// so two elements that share a definition (`Condition.code.coding` and
+/// `Condition.verificationStatus.coding` are both `CodeableConcept.coding`)
+/// count their instances apart. An `extension(url)` step takes an index of
+/// its own, because the url names one entry of a repeating element
 /// (<https://hl7.org/fhir/R4/fhirpath.html>, §Additional functions).
 fn fhir_axes(target: &FhirTarget) -> Vec<String> {
-    target
-        .resolved()
-        .moves()
-        .iter()
-        .filter_map(|step| match *step {
-            Move::Member(ref field) => field.repeats().then(|| String::from(field.path())),
-            Move::Extension { ref field, ref url } => Some(format!("{}({url})", field.path())),
-            Move::Choice { .. }
-            | Move::Ordinal(_)
-            | Move::Index(_)
-            | Move::Predicate(_)
-            | Move::Resolve { .. } => None,
-        })
-        .collect()
+    let mut walked = String::from(target.resolved().resource());
+    let mut axes = Vec::new();
+    for step in target.resolved().moves() {
+        match *step {
+            Move::Member(ref field) => {
+                walked.push('.');
+                walked.push_str(field.key());
+                if field.repeats() {
+                    axes.push(walked.clone());
+                }
+            }
+            Move::Choice { ref field, .. } => {
+                walked.push('.');
+                walked.push_str(field.key());
+            }
+            Move::Extension { ref field, ref url } => {
+                walked.push('.');
+                walked.push_str(field.key());
+                walked.push('(');
+                walked.push_str(url);
+                walked.push(')');
+                axes.push(walked.clone());
+            }
+            Move::Ordinal(_) | Move::Index(_) | Move::Predicate(_) | Move::Resolve { .. } => {}
+        }
+    }
+    axes
 }
 
 /// Returns the value a condition's attribute names below its node.
@@ -3225,7 +3507,7 @@ fn scalar_json(
     };
     match carried {
         Carried::Text if written.as_str().is_some() => Ok(serde_json::Value::String(text)),
-        Carried::Text | Carried::Value => Err(refuse("is no text")),
+        Carried::Text | Carried::Value | Carried::Family => Err(refuse("is no text")),
         Carried::Real => serde_json::from_str::<serde_json::Number>(&text)
             .map(serde_json::Value::Number)
             .map_err(|_refused| refuse("is no real number")),
@@ -3299,16 +3581,43 @@ fn merge(object: &mut serde_json::Map<String, serde_json::Value>, segments: &[&s
 
 #[cfg(test)]
 mod tests {
+    use core::str::FromStr;
+
     use super::EngineError;
     use super::MappingFunctions;
     use super::NoMappingFunctions;
+    use super::fhir_axes;
     use super::merge;
     use super::render;
     use super::rm_positions;
     use super::settle;
     use crate::engine::outcome::SkipReason;
     use crate::engine::outcome::Warning;
+    use crate::resolve::program::FhirTarget;
+    use crate::tree::element::resolve;
+    use crate::tree::path::FhirPath;
     use openehr_mapping_core::composition::PositionError;
+
+    /// Resolves `expression` against the R4 `Condition`.
+    fn target(expression: &str) -> FhirTarget {
+        let path = FhirPath::from_str(expression).expect("the expression parses");
+        let resolved = resolve(&fhir_types::r4::schema::SCHEMAS, "Condition", &path)
+            .expect("the expression resolves");
+        FhirTarget::new(path, resolved)
+    }
+
+    #[test]
+    fn two_elements_that_share_a_definition_count_their_instances_apart() {
+        // Condition.code and Condition.verificationStatus are both
+        // CodeableConcept, so both codings are `CodeableConcept.coding`.
+        let code = fhir_axes(&target("$resource.code.coding.code"));
+        let status = fhir_axes(&target("$resource.verificationStatus.coding.code"));
+        assert_eq!(code, vec![String::from("Condition.code.coding")]);
+        assert_eq!(
+            status,
+            vec![String::from("Condition.verificationStatus.coding")]
+        );
+    }
 
     #[test]
     fn the_registry_this_milestone_ships_holds_nothing() {

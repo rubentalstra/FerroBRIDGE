@@ -125,14 +125,22 @@ openEHR.
   names into one element, a `slotArchetype` recurses with the whole chain
   checked for a cycle, and `type: NONE` writes nothing and only anchors what
   follows.
+- **A mapping with no `type` key converts through a derived pair.** The
+  compiler derives it from the element's FHIR type and the node's openEHR
+  class, the pairs of the data-type chapter the engine's cells carry. An
+  untyped mapping onto a structural node anchors its children as `type: NONE`
+  does, and a choice element is read as the alternative the document carries
+  and written as the first pair of the node's class.
 - **A missing required child refuses.** A `followedBy` child whose openEHR node
   the template constrains to `1..1` and whose input carries nothing is
-  `EngineError::MissingRequired`, naming the node.
-- **The composition defaults apply going into openEHR only.** The composer and
-  the context start time carry the values the specification's own defaults
-  chapter suggests, and the language and territory are the caller's, because
-  the chapter assigns them to the project. Each one the engine fills is a
-  recorded loss.
+  `EngineError::MissingRequired`, naming the node. A structural node counts as
+  provided once a value below it is written, and a child its own condition
+  closed is skipped.
+- **The composition defaults apply going into openEHR only.** The composer,
+  the context start time and the context setting carry the values the
+  specification's own defaults chapter suggests, and the language and
+  territory are the caller's, because the chapter assigns them to the project.
+  Each one the engine fills is a recorded loss.
 
 ## The operations module
 

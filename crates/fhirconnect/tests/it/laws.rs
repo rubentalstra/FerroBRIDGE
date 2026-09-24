@@ -127,6 +127,8 @@ pub(crate) fn getput(
     )?;
     let input = serde_json::Value::Object(index.flatten(composition)?);
     let output = serde_json::Value::Object(index.flatten(inbound.value())?);
+    // NOTE: no specification governs this: our own design, an addition from a mapping's
+    // own constant write is no loss, so the reviewed snapshot declares it, no warning does.
     Ok(declared(
         &messages(outbound.warnings()),
         &messages(inbound.warnings()),

@@ -1,0 +1,25 @@
+---
+source: crates/fhirconnect/tests/it/roundtrip.rs
+expression: declared
+---
+{
+  "first_leg": [
+    "the mapping problemDiagnose.coding.codeIcd10Diagnosesicherheit.extensionValueText did not run: its unidirectional marker names the other direction"
+  ],
+  "second_leg": [
+    "the mapping metaURL did not run: its unidirectional marker names the other direction",
+    "the engine filled /context/setting",
+    "the engine filled /language",
+    "the engine filled /territory"
+  ],
+  "lost": [],
+  "added": [
+    "diagnose/diagnose:0/_provider|name = \"FerroBRIDGE synthetic composer\"",
+    "diagnose/diagnose:0/klinischer_status/diagnoserolle|code = \"at0064\"",
+    "diagnose/diagnose:0/klinischer_status/diagnoserolle|terminology = \"local\"",
+    "diagnose/diagnose:0/klinischer_status/diagnoserolle|value = \"Hauptdiagnose\""
+  ],
+  "changed": [
+    "diagnose/diagnose:0/kodierte_diagnose|terminology: \"http://example.org/fhir/CodeSystem/ferrobridge-diagnosis\" became \"http://fhir.de/CodeSystem/bfarm/icd-10-gm\""
+  ]
+}

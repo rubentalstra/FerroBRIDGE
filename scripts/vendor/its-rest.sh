@@ -5,7 +5,10 @@
 #
 # Vendors the openEHR ITS-REST OpenAPI documents into docs/specs/its-rest/
 # (.claude/rules/vendored-inputs.md): the three STABLE code-generation documents
-# for the EHR, Query and Definition modules, plus the repository's licence file.
+# for the EHR, Query and Definition modules, the AsciiDoc sources of the
+# Simplified Formats and Simplified Data Template sub-specifications (the FLAT
+# format the composition seam reads and writes), plus the repository's licence
+# file.
 # Admin and Demographic are `x-status: DEVELOPMENT` in the same release and the
 # bridge does not depend on them (docs/architecture.md section 2).
 #
@@ -37,6 +40,8 @@ paths=(
   "$oas/ehr-codegen.openapi.yaml"
   "$oas/query-codegen.openapi.yaml"
   "$oas/definition-codegen.openapi.yaml"
+  "docs/simplified_formats"
+  "docs/simplified_data_template"
   "LICENSE"
 )
 
@@ -57,7 +62,6 @@ corpus_take "$tree_root" "$dest" "${paths[@]}"
 
 # Each document must be the STABLE one, and each says `info.version: latest`,
 # which is why this provenance records a blob id per file rather than a version.
-rows=""
 for path in "${paths[@]}"; do
   case "$path" in
     *.openapi.yaml)
@@ -66,9 +70,13 @@ for path in "${paths[@]}"; do
       ;;
     *) ;;
   esac
-  rows="$rows
-| \`$path\` | \`$(corpus_sha256 "$dest/$path")\` | \`$(corpus_blob_id "$dest/$path")\` |"
 done
+rows=""
+while IFS= read -r file; do
+  path="${file#"$dest"/}"
+  rows="$rows
+| \`$path\` | \`$(corpus_sha256 "$file")\` | \`$(corpus_blob_id "$file")\` |"
+done < <(find "$dest" -type f ! -name PROVENANCE.md | LC_ALL=C sort)
 
 licence="$(sed -nE 's/^[[:space:]]+name:[[:space:]]*(Creative Commons.*)$/\1/p' \
   "$dest/$oas/ehr-codegen.openapi.yaml" | head -n1)"
@@ -82,7 +90,7 @@ cat > "$dest/PROVENANCE.md" << PROV
 <!-- This file describes vendored third-party material; the bytes beside it
      keep their upstream licence, not the licence of this repository. -->
 
-# Provenance: the openEHR ITS-REST OpenAPI documents
+# Provenance: the openEHR ITS-REST OpenAPI documents and Simplified Formats
 
 Vendored verbatim by \`scripts/vendor/its-rest.sh\`
 (.claude/rules/vendored-inputs.md). Never edit a file here: change the pin in
@@ -110,6 +118,12 @@ the git blob id of each file are what identify these bytes
 Each of the three is \`x-status: STABLE\`, which the script checks. The Admin and
 Demographic documents of the same release are \`x-status: DEVELOPMENT\` and are
 not vendored.
+
+\`docs/simplified_formats/\` and \`docs/simplified_data_template/\` are the
+AsciiDoc sources of the Simplified Formats and Simplified Data Template
+sub-specifications at the same commit, taken whole. The FLAT format of the
+composition seam, its \`ctx/\` shortcuts and its \`_\`-prefixed attribute
+families (\`master05-rm_mapping.adoc\`) are specified there.
 
 | File | sha256 | git blob id |
 |---|---|---|$rows

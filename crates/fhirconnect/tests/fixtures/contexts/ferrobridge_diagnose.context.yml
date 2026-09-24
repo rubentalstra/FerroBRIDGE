@@ -3,10 +3,11 @@
 # A FerroBRIDGE-authored context over the diagnosis chain of the vendored
 # FHIRconnect mapping library: it starts at the published
 # EVALUATION.problem_diagnosis.v1, loads the published CLUSTER model mappings
-# it slots, applies the published KDS_problem_qualifier extension and the
-# extension beside this file, and maps them onto the synthetic
-# ferrobridge.diagnose.v1 template of the testkit. The profile URL is
-# example.org, which RFC 6761 section 6.5 reserves for examples.
+# it slots, applies the FerroBRIDGE stand-in for the published
+# KDS_problem_qualifier extension (its manual paths write a string onto
+# TERMINOLOGY_ID) and the extension beside this file, and maps them onto the
+# synthetic ferrobridge.diagnose.v1 template of the testkit. The profile URL
+# is example.org, which RFC 6761 section 6.5 reserves for examples.
 grammar: FHIRConnect/v1.0.0
 type: context
 metadata:
@@ -26,5 +27,5 @@ context:
     - "CLUSTER.problem_qualifier.v2"
   extensions:
     - "ferrobridge_problem_diagnose"
-    - "KDS_problem_qualifier"
+    - "ferrobridge_kds_problem_qualifier"
   start: "EVALUATION.problem_diagnosis.v1"

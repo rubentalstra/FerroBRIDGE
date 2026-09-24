@@ -826,6 +826,90 @@ pub enum Method {
     },
 }
 
+/// The alternative of a choice element a mapping writes.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Alternative {
+    code: &'static str,
+    target: FhirTarget,
+}
+
+impl Alternative {
+    /// Pairs the FHIR type code of the alternative with the target that
+    /// writes it.
+    #[must_use]
+    pub const fn new(code: &'static str, target: FhirTarget) -> Self {
+        Self { code, target }
+    }
+
+    /// Returns the FHIR type code of the alternative.
+    #[must_use]
+    pub const fn code(&self) -> &'static str {
+        self.code
+    }
+
+    /// Returns the target that writes the alternative, the choice resolved to
+    /// it.
+    #[must_use]
+    pub const fn target(&self) -> &FhirTarget {
+        &self.target
+    }
+}
+
+/// What the data-type cell of a mapping with no `type` key converts, as the
+/// compiler derived it from the two sides.
+///
+/// The `type` key is deprecated because the type "is derivable from the
+/// instances of FHIR and openEHR"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mappings/data-type/data-mappings.adoc`,
+/// §Deprecated); [`crate::resolve::derive`] holds the rule.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Derived {
+    /// The FHIR type code the cell converts through.
+    Element(&'static str),
+    /// A choice element no type filter resolved, read as the alternative the
+    /// document carries and written as the one the node's class selects.
+    ///
+    /// An `Extension` against a data value converts through its `value[x]`,
+    /// the one element of an extension that carries data
+    /// (<https://hl7.org/fhir/R4/extensibility.html>), so `read` is that
+    /// choice below the mapping's own element.
+    Choice {
+        /// The choice element the value is read at.
+        read: FhirTarget,
+        /// The alternative written, `None` for a mapping that never writes
+        /// FHIR.
+        write: Option<Alternative>,
+    },
+    /// The node holds other nodes, so the mapping anchors its children and
+    /// converts nothing, as `type: NONE` does.
+    Anchor,
+    /// A choice element the `type` key resolves, read and written as the
+    /// alternative of that type.
+    Declared(Alternative),
+}
+
+impl fmt::Display for Derived {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Self::Element(code) => write!(f, "{code}"),
+            Self::Choice {
+                ref read,
+                ref write,
+            } => {
+                write!(f, "choice read {read}")?;
+                if let Some(written) = write.as_ref() {
+                    write!(f, " write {} as {}", written.code, written.target)?;
+                }
+                Ok(())
+            }
+            Self::Anchor => f.write_str("anchor"),
+            Self::Declared(ref written) => {
+                write!(f, "{} as {}", written.code, written.target)
+            }
+        }
+    }
+}
+
 /// One compiled mapping method, with everything the interpreter needs.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Mapping {
@@ -834,6 +918,7 @@ pub struct Mapping {
     fhir: Option<FhirTarget>,
     openehr: Option<OpenehrTarget>,
     data_type: Option<DataType>,
+    derived: Option<Derived>,
     value: Option<String>,
     direction: Option<Direction>,
     fhir_condition: Option<Condition>,
@@ -860,6 +945,8 @@ pub struct MappingParts {
     pub openehr: Option<OpenehrTarget>,
     /// The data type the mapping pins.
     pub data_type: Option<DataType>,
+    /// The conversion the compiler derived for a mapping with no `type` key.
+    pub derived: Option<Derived>,
     /// The literal value the mapping writes.
     pub value: Option<String>,
     /// The one direction the mapping runs in, when it is pinned to one.
@@ -889,6 +976,7 @@ impl Mapping {
             fhir: parts.fhir,
             openehr: parts.openehr,
             data_type: parts.data_type,
+            derived: parts.derived,
             value: parts.value,
             direction: parts.direction,
             fhir_condition: parts.fhir_condition,
@@ -928,6 +1016,13 @@ impl Mapping {
     #[must_use]
     pub const fn data_type(&self) -> Option<DataType> {
         self.data_type
+    }
+
+    /// Returns the conversion the compiler derived, for a mapping with no
+    /// `type` key.
+    #[must_use]
+    pub const fn derived(&self) -> Option<&Derived> {
+        self.derived.as_ref()
     }
 
     /// Returns the literal value the mapping writes.
@@ -998,6 +1093,9 @@ impl Mapping {
         }
         if let Some(data_type) = self.data_type {
             writeln!(f, "{inner}type {data_type}")?;
+        }
+        if let Some(ref derived) = self.derived {
+            writeln!(f, "{inner}derived {derived}")?;
         }
         if let Some(ref value) = self.value {
             writeln!(f, "{inner}value {value}")?;
@@ -1399,6 +1497,7 @@ pub struct Program {
     preprocessors: Vec<Preprocessor>,
     mappings: Vec<Mapping>,
     warnings: Vec<Diagnostic>,
+    root_axes: Vec<FlatId>,
 }
 
 /// Everything a program carries, as the compiler assembles it.
@@ -1440,7 +1539,30 @@ impl Program {
             preprocessors: parts.preprocessors,
             mappings: parts.mappings,
             warnings: Vec::new(),
+            root_axes: Vec::new(),
         }
+    }
+
+    /// Returns this program with the repeating nodes on the way to the start
+    /// model's archetype root.
+    #[must_use]
+    pub(crate) fn with_root_axes(mut self, axes: Vec<FlatId>) -> Self {
+        self.root_axes = axes;
+        self
+    }
+
+    /// Returns the repeating nodes on the way to the start model's archetype
+    /// root, the root itself included, outermost first.
+    ///
+    /// `$archetype` is "the root of the archetype" as `$resource` is the root
+    /// of the resource
+    /// (`docs/specs/fhirconnect/modules/ROOT/pages/basics/Variables.adoc`,
+    /// §`$archetype` and `$resource`), so a run into openEHR writes one
+    /// resource into one instance of the root and binds these axes to it
+    /// before the first mapping runs.
+    #[must_use]
+    pub fn root_axes(&self) -> &[FlatId] {
+        &self.root_axes
     }
 
     /// Returns this program with the warnings its compilation raised.
@@ -1582,6 +1704,10 @@ impl fmt::Display for Program {
         writeln!(f, "  template {}", self.template)?;
         writeln!(f, "  resource {}", self.resource)?;
         writeln!(f, "  start {}", self.start)?;
+        if !self.root_axes.is_empty() {
+            let axes: Vec<&str> = self.root_axes.iter().map(FlatId::as_str).collect();
+            writeln!(f, "  root axes [{}]", axes.join(", "))?;
+        }
         for model in &self.models {
             writeln!(
                 f,

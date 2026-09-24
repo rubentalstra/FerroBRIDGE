@@ -27,8 +27,9 @@
 #            KDS_anatomical_location extension that only this branch reaches.
 #   209-246  the primärdiagnose method slots EVALUATION.problem_diagnosis.v1
 #            into itself through a reference, a slot cycle; left out.
-# The three overwrites at the end are FerroBRIDGE's, each for a method of the
-# published model mapping that does not compile against KDS_Diagnose.
+# The overwrites at the end are FerroBRIDGE's, each for a method of the
+# published model mapping that does not compile against KDS_Diagnose or that
+# pairs types no page of the data-type chapter pairs.
 grammar: FHIRConnect/v1.0.0
 type: extension
 metadata:
@@ -181,28 +182,29 @@ mappings:
 
   # The published model maps `$archetype/diagnose/other_participations`, and
   # EVALUATION has no `diagnose` attribute; ENTRY.other_participations is the
-  # attribute it means (openEHR RM 1.1.0, ENTRY; #101).
+  # attribute it means (openEHR RM 1.1.0, ENTRY; #101). Its performer child
+  # pairs a Reference with a PARTICIPATION, which no page of the data-type
+  # chapter pairs (the published line 76 comment says so itself), so the
+  # participation is written in the form concept-mappings.adoc, Participation
+  # mappings, gives for this very mapping.
   - name: "other_participations"
     extension: "overwrite"
     with:
       fhir: "$resource.asserter"
       openehr: "$archetype/other_participations"
-      type: "NONE"
-    followedBy:
-      mappings:
-        - name: "participationFunction"
-          with:
-            fhir: "$fhirRoot"
-            openehr: "$openehrRoot"
-          manual:
-            - name: "function"
-              openehr:
-                - path: "function"
-                  value: "asserter"
-        - name: "performer"
-          with:
-            fhir: "$fhirRoot"
-            openehr: "$openehrRoot"
+    participationsFunction: "asserter"
+
+  # The published model maps the asserter a second time, into
+  # EVENT_CONTEXT.participations (its lines 31 to 50), with the same
+  # Reference-to-PARTICIPATION performer child no data-type page pairs, so the
+  # context participation is written in the participationsFunction form too.
+  - name: "participations"
+    extension: "overwrite"
+    with:
+      fhir: "$resource.asserter"
+      openehr: "$composition/context/participations"
+    participationsFunction: "asserter"
+
 
   # The published model maps `$archetype/data[at0012]`; the only data
   # structure of the archetype is data[at0001], and KDS_Diagnose carries no

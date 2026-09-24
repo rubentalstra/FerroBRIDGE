@@ -41,6 +41,7 @@ const PUBLISHED: &[&str] = &[
 const PROJECT_FILES: &[&str] = &[
     "ferrobridge_kds_diagnose.context.yml",
     "ferrobridge_kds_problem_diagnose.yml",
+    "ferrobridge_kds_problem_qualifier.yml",
     "ferrobridge_lebensphase.v0.yml",
     "ferrobridge_kds_composition.Condition.yml",
 ];

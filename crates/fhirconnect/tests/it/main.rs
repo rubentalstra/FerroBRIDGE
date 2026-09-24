@@ -8,6 +8,7 @@
 #![allow(clippy::panic_in_result_fn, reason = "test assertions")]
 
 mod corpus;
+mod derive;
 mod engine;
 mod laws;
 mod operations;
