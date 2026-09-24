@@ -17,7 +17,7 @@ cargo-fuzz = true
 libfuzzer-sys = "0.4.13"
 openehr-mapping-core = { path = "../crates/openehr-mapping-core" }
 # The same pin as the workspace (docs/VERSIONS.md); the anchor path is an RmPath.
-openehr-rm = "0.0.64"
+openehr-rm = "0.0.67"
 
 [[bin]]
 name = "mapping_loader"

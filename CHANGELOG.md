@@ -203,6 +203,13 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Changed
 
+- The `openehr-*` crates move from 0.0.64 to 0.0.67 in the workspace, the
+  fuzz manifest and every pin row, one hand-made bump for the five Dependabot
+  ones (#207 to #211) that cannot build alone because the family is one
+  lockstep line; 0.0.65 to 0.0.67 changed only the copyright holder in the
+  source headers. `serde-saphyr` moves to 1.3.0 and `clap` to 4.6.7 with
+  their pin rows (#206). Dependabot's cargo ecosystem gains an `openehr` group
+  so the next family bump arrives as one pull request.
 - The container base image `gcr.io/distroless/static-debian13:nonroot` moves
   to index digest `e2e927e`, in the `FROM` of `docker/Dockerfile` and its pin
   row (#199, landed by hand because the pin row lives outside the Dockerfile).

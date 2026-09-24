@@ -61,6 +61,11 @@ updates:
       cargo-minor-patch:
         patterns: ["*"]
         update-types: ["minor", "patch"]
+      # The openehr-* crates are one lockstep line on 0.0.x, where every bump
+      # counts as a major and would otherwise open one PR per crate, none of
+      # which builds alone. One PR moves the family.
+      openehr:
+        patterns: ["openehr-*"]
     commit-message:
       prefix: "deps"
 

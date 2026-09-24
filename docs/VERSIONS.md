@@ -53,12 +53,12 @@ carries the exact patch.
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| `openehr-base` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-rm` | 0.0.64 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-its` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-query` | 0.0.64 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-am` | 0.0.64 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` (the AOM2 OPT2 types an ADL 2 template decodes into) |
-| `openehr-adl` | 0.0.64 | the root `Cargo.toml` `[workspace.dependencies]`, test-only: the ADL 2 test fixtures of `openehr-mapping-core` are compiled from their `.adls` sources |
+| `openehr-base` | 0.0.67 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-rm` | 0.0.67 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-its` | 0.0.67 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-query` | 0.0.67 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-am` | 0.0.67 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` (the AOM2 OPT2 types an ADL 2 template decodes into) |
+| `openehr-adl` | 0.0.67 | the root `Cargo.toml` `[workspace.dependencies]`, test-only: the ADL 2 test fixtures of `openehr-mapping-core` are compiled from their `.adls` sources |
 
 ## Third-party crates
 
@@ -69,7 +69,7 @@ dependency pins below.
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| `serde-saphyr` | 1.2.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
+| `serde-saphyr` | 1.3.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
 | `jsonschema` | 0.56.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the FHIRconnect mapping schemas) |
 | `reqwest` | 0.13.5 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |
 | `backon` | 1.6.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` |

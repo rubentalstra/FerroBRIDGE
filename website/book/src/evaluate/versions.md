@@ -38,7 +38,7 @@ HL7 FHIR packages (R4 4.0.1, R4B 4.3.0, R5 5.0.0, R6 6.0.0-ballot5, THO 7.3.0)
 and published to crates.io; its version line continues the one the sibling
 project published up to 0.1.97 before the crate moved here, and the current
 pin is the `fhir-types` row of `docs/VERSIONS.md`. The openEHR model comes
-from six published crates, pinned together on their 0.0 minor line (0.0.64
+from six published crates, pinned together on their 0.0 minor line (0.0.67
 today; the pin matrix is the authority):
 
 | Crate | Used for |
