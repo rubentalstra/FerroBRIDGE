@@ -1,0 +1,30 @@
+---
+source: crates/fhirconnect/tests/it/roundtrip.rs
+expression: declared
+---
+{
+  "first_leg": [
+    "the mapping recordedDateOutboundOnly did not run: its unidirectional marker names the other direction",
+    "the engine filled /composer",
+    "the engine filled /context/start_time",
+    "the engine filled /language",
+    "the engine filled /territory"
+  ],
+  "second_leg": [],
+  "lost": [
+    "clinicalStatus.coding[0].code = \"active\"",
+    "clinicalStatus.coding[0].display = \"Active\"",
+    "clinicalStatus.coding[0].system = \"http://terminology.hl7.org/CodeSystem/condition-clinical\"",
+    "id = \"ferrobridge-synthetic-condition-1\"",
+    "identifier[0].system = \"http://example.org/fhir/sid/ferrobridge-condition\"",
+    "identifier[0].value = \"synthetic-condition-0001\"",
+    "recordedDate = \"2026-09-12T10:00:00+02:00\"",
+    "subject.identifier.system = \"http://example.org/fhir/sid/ferrobridge-subject\"",
+    "subject.identifier.value = \"synthetic-subject-0001\"",
+    "verificationStatus.coding[0].code = \"confirmed\"",
+    "verificationStatus.coding[0].display = \"Confirmed\"",
+    "verificationStatus.coding[0].system = \"http://terminology.hl7.org/CodeSystem/condition-ver-status\""
+  ],
+  "added": [],
+  "changed": []
+}

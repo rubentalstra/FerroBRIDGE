@@ -39,6 +39,10 @@ pub enum ResolveCode {
     UnknownExtensionTarget,
     /// Two extensions of one context overwrite one mapping name.
     RepeatedOverwrite,
+    /// Two sibling mapping methods of one file carry one name.
+    DuplicateMethodName,
+    /// A listed extension extends a model mapping the program never reaches.
+    UnreachedExtension,
     /// The model mapping writes no `spec.fhirConfig.structureDefinition`, so
     /// no resource type is named.
     ResourceTypeUnnamed,
@@ -101,6 +105,8 @@ impl ResolveCode {
             Self::AppendWithoutTarget => "fc-append-without-target",
             Self::UnknownExtensionTarget => "fc-unknown-extension-target",
             Self::RepeatedOverwrite => "fc-repeated-overwrite",
+            Self::DuplicateMethodName => "fc-duplicate-method-name",
+            Self::UnreachedExtension => "fc-unreached-extension",
             Self::ResourceTypeUnnamed => "fc-resource-type-unnamed",
             Self::UnknownResourceType => "fc-unknown-resource-type",
             Self::MalformedFhirPath => "fc-malformed-fhir-path",
@@ -138,6 +144,8 @@ impl ResolveCode {
             Self::AppendWithoutTarget,
             Self::UnknownExtensionTarget,
             Self::RepeatedOverwrite,
+            Self::DuplicateMethodName,
+            Self::UnreachedExtension,
             Self::ResourceTypeUnnamed,
             Self::UnknownResourceType,
             Self::MalformedFhirPath,

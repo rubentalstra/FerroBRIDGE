@@ -18,7 +18,6 @@
 
 use core::str::FromStr;
 use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -26,6 +25,7 @@ use std::sync::LazyLock;
 
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::diagnostic::ModelPath;
+use openehr_mapping_core::diagnostic::Severity;
 use openehr_mapping_core::header::ArchetypeId;
 use openehr_mapping_core::header::MappingName;
 use openehr_mapping_core::header::MappingType;
@@ -105,8 +105,12 @@ pub fn compile(
 ) -> Result<Arc<Program>, Vec<Diagnostic>> {
     let mut compiler = Compiler::new(set, template, table, codes);
     let program = compiler.run(context);
+    let refused = compiler
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.severity() == Severity::Error);
     match program {
-        Some(program) if compiler.diagnostics.is_empty() => Ok(Arc::new(program)),
+        Some(program) if !refused => Ok(Arc::new(program.with_warnings(compiler.diagnostics))),
         _ => Err(compiler.diagnostics),
     }
 }
@@ -190,8 +194,8 @@ struct Compiler<'a> {
     template: &'a WebTemplateIndex,
     table: &'a dyn Table,
     codes: &'a dyn MappingCodeRegistry,
-    compacted: BTreeMap<String, Vec<&'a ResolvedNode>>,
-    interior: BTreeSet<String>,
+    compacted: Vec<(RmPath, &'a ResolvedNode)>,
+    interior: Vec<RmPath>,
     extensions: Vec<&'a ModelMappingFile>,
     diagnostics: Vec<Diagnostic>,
     models: Vec<ModelBinding>,
@@ -268,6 +272,7 @@ impl<'a> Compiler<'a> {
         let merged = self.merge(start);
         let mappings = self.mappings(&merged.mappings, &scope);
         let preprocessors = self.preprocessors(start, &scope);
+        self.unreached_extensions(file);
         Some(Program::new(ProgramParts {
             context: context.clone(),
             profile,
@@ -283,6 +288,51 @@ impl<'a> Compiler<'a> {
             preprocessors,
             mappings,
         }))
+    }
+
+    /// Reports every listed extension whose target model the program never
+    /// reached.
+    ///
+    /// An extension applies when the model mapping it extends is merged, so
+    /// one whose model no slot of the chain reaches changes nothing. The
+    /// context still compiles, and the listing is reported as a warning
+    /// because an author who lists an extension expects it to act. No
+    /// specification governs this: our own design.
+    fn unreached_extensions(&mut self, file: &ContextMappingFile) {
+        let owner = file.header().name().value();
+        let path = ModelPath::root().field("context").field("extensions");
+        for (index, declared) in file.context().extensions.iter().enumerate() {
+            let Some(extension) = self.set.model(declared.value()) else {
+                continue;
+            };
+            let Some(extends) = extension.spec().extends.as_ref() else {
+                continue;
+            };
+            let applied = self.models.iter().any(|model| {
+                model
+                    .extensions()
+                    .iter()
+                    .any(|name| name == declared.value())
+            });
+            if applied {
+                continue;
+            }
+            self.diagnostics.push(
+                Diagnostic::warning(
+                    file.file().to_path_buf(),
+                    ResolveCode::UnreachedExtension.into(),
+                    format!(
+                        "`{}` extends `{}`, which no mapping of this context reaches, so the \
+                         extension changes nothing",
+                        declared.value(),
+                        extends.value()
+                    ),
+                )
+                .with_position(declared.position())
+                .with_mapping_name(owner.clone())
+                .with_model_path(path.index(index)),
+            );
+        }
     }
 
     /// Reads the profile the context pins.
@@ -1535,17 +1585,26 @@ impl<'a> Compiler<'a> {
                 Err(PathError::AmbiguousPath { .. }) => {
                     return Err(self.ambiguity(&prefix, &self.template.all_at_rm_path(&prefix)));
                 }
-                Err(_) => match self.compacted.get(&prefix.to_string()).map(Vec::as_slice) {
-                    Some([only]) => *only,
-                    Some(several) if several.len() > 1 => {
-                        return Err(self.ambiguity(&prefix, several));
+                Err(_) => {
+                    let found: Vec<&ResolvedNode> = self
+                        .compacted
+                        .iter()
+                        .filter(|entry| names_same_place(&prefix, &entry.0))
+                        .map(|&(_, node)| node)
+                        .collect();
+                    match *found.as_slice() {
+                        [only] => only,
+                        [] => continue,
+                        _ => return Err(self.ambiguity(&prefix, &found)),
                     }
-                    _ => continue,
-                },
+                }
             };
             let constrained = rest.segments.iter().find(|segment| constrains(segment));
             if let Some(segment) = constrained
-                && !self.interior.contains(&path.to_string())
+                && !self
+                    .interior
+                    .iter()
+                    .any(|interior| names_same_place(path, interior))
             {
                 return Err(LocateError::Unknown(format!(
                     "the template `{}` has no node at `{path}`; the deepest node it reaches is \
@@ -1806,8 +1865,8 @@ fn archetype_of(model: &ModelMappingFile) -> Option<&ArchetypeId> {
 /// The builder compacts the structure between an archetype root and a leaf, so
 /// a path that names one of those structures is a path the template knows
 /// without carrying a node for it.
-fn interior_paths(template: &WebTemplateIndex) -> BTreeSet<String> {
-    let mut found = BTreeSet::new();
+fn interior_paths(template: &WebTemplateIndex) -> Vec<RmPath> {
+    let mut found: BTreeMap<String, RmPath> = BTreeMap::new();
     for node in template.nodes() {
         let path = node.rm_path();
         for taken in 1..path.segments.len() {
@@ -1815,10 +1874,10 @@ fn interior_paths(template: &WebTemplateIndex) -> BTreeSet<String> {
                 absolute: path.absolute,
                 segments: path.segments.get(..taken).unwrap_or_default().to_vec(),
             };
-            found.insert(prefix.to_string());
+            found.entry(prefix.to_string()).or_insert(prefix);
         }
     }
-    found
+    found.into_values().collect()
 }
 
 /// Maps the path a mapping writes for a compacted node onto the nodes it
@@ -1826,8 +1885,8 @@ fn interior_paths(template: &WebTemplateIndex) -> BTreeSet<String> {
 ///
 /// A shortened path that reaches more than one node keeps all of them, because
 /// binding the mapping to one of them would bind it to a node nothing named.
-fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, Vec<&ResolvedNode>> {
-    let mut found: BTreeMap<String, Vec<&ResolvedNode>> = BTreeMap::new();
+fn compaction_map(template: &WebTemplateIndex) -> Vec<(RmPath, &ResolvedNode)> {
+    let mut found: Vec<(RmPath, &ResolvedNode)> = Vec::new();
     for node in template.nodes() {
         let path = node.rm_path();
         let kept = path
@@ -1842,7 +1901,47 @@ fn compaction_map(template: &WebTemplateIndex) -> BTreeMap<String, Vec<&Resolved
             absolute: path.absolute,
             segments: path.segments.get(..kept).unwrap_or_default().to_vec(),
         };
-        found.entry(shortened.to_string()).or_default().push(node);
+        found.push((shortened, node));
     }
     found
+}
+
+/// Whether a path a mapping writes names the place `carried` holds in the
+/// template.
+///
+/// A mapping names an archetype node by its node id, and the template may
+/// constrain the same node further with a name, which the `aqlPath` carries.
+/// A name the mapping does not write selects nothing, the rule the index
+/// applies to an indexed node; a node id the mapping writes must be the one
+/// the template carries, and one it does not write matches only a segment
+/// that carries none. No specification governs this: our own design.
+fn names_same_place(written: &RmPath, carried: &RmPath) -> bool {
+    written.absolute == carried.absolute
+        && written.segments.len() == carried.segments.len()
+        && written
+            .segments
+            .iter()
+            .zip(&carried.segments)
+            .all(|(wanted, held)| {
+                let node_id = match (
+                    wanted.predicate.archetype_node_id.as_deref(),
+                    held.predicate.archetype_node_id.as_deref(),
+                ) {
+                    (Some(wanted), Some(held)) => node_id_matches(wanted, held),
+                    (None, None) => true,
+                    (Some(_), None) | (None, Some(_)) => false,
+                };
+                let name = match (
+                    wanted.predicate.name_value.as_deref(),
+                    held.predicate.name_value.as_deref(),
+                ) {
+                    (Some(wanted), Some(held)) => wanted == held,
+                    (Some(_) | None, None) | (None, Some(_)) => true,
+                };
+                !wanted.descendant
+                    && wanted.attribute == held.attribute
+                    && wanted.predicate.position == held.predicate.position
+                    && node_id
+                    && name
+            })
 }

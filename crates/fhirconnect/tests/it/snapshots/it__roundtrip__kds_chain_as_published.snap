@@ -1,0 +1,22 @@
+---
+source: crates/fhirconnect/tests/it/roundtrip.rs
+expression: rows(&diagnostics)
+---
+[
+  "KDS_anatomical_location.yml:15 fc-unknown-fhir-element",
+  "KDS_problem_diagnose.yml:100 fc-duplicate-method-name",
+  "KDS_problem_diagnose.yml:241 fc-slot-cycle",
+  "KDS_problem_diagnose.yml:32 fc-nested-extension-method",
+  "anatomical_location.v1.yml:33 fc-unknown-fhir-element",
+  "anatomical_location.v1.yml:33 fc-unknown-fhir-element",
+  "multiple_coding_icd10gm.v1.yml:30 fc-unknown-fhir-element",
+  "multiple_coding_icd10gm.v1.yml:56 fc-unknown-fhir-element",
+  "multiple_coding_icd10gm.v1.yml:95 fc-unknown-fhir-element",
+  "problem_diagnosis.v1.yml:103 fc-unknown-template-node",
+  "problem_diagnosis.v1.yml:60 fc-unknown-template-node",
+  "problem_diagnosis.v1.yml:71 fc-unknown-template-node",
+  "report.v1.Condition.yml:74 fc-duplicate-method-name",
+  "report.v1.Condition.yml:92 fc-unknown-template-node",
+  "report.v1.Condition.yml:94 fc-unknown-template-node",
+  "report.v1.Condition.yml:96 fc-unknown-template-node"
+]

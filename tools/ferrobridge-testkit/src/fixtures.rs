@@ -7,6 +7,13 @@
 //! identifier, no extract from any system. Identifier and code systems sit
 //! under `http://example.org`, which RFC 6761 §6.5 reserves for documentation
 //! and examples, except where a FHIR required binding fixes the system.
+//!
+//! Two fixtures name systems outside that domain. [`KDS_DIAGNOSE_OPT`] is a
+//! published operational template vendored verbatim with its provenance beside
+//! it: a template carries constraints, never patient content.
+//! [`KDS_DIAGNOSE_CONDITION`] is synthetic, and names the profile and the
+//! systems and extension URLs the published KDS mappings match on, because a
+//! mapping condition only admits the value it names.
 
 /// A synthetic operational template: one `EVALUATION` with one `DV_TEXT`
 /// element under an `ITEM_TREE`.
@@ -26,6 +33,18 @@ pub const DIAGNOSE_OPT: &str = include_str!("../fixtures/opt/diagnose.opt");
 
 /// The template identifier [`DIAGNOSE_OPT`] declares.
 pub const DIAGNOSE_TEMPLATE_ID: &str = "ferrobridge.diagnose.v1";
+
+/// The published `KDS_Diagnose` operational template, vendored verbatim.
+///
+/// One `COMPOSITION.report.v1` holding `EVALUATION.problem_diagnosis.v1` with
+/// its slotted clusters, the template the FHIR round trip runs against.
+/// `scripts/vendor/kds-diagnose-opt.sh` fetches it at the commit
+/// `docs/VERSIONS.md` pins, and `PROVENANCE.md` beside it records its source
+/// and licence.
+pub const KDS_DIAGNOSE_OPT: &str = include_str!("../fixtures/opt/kds/KDS_Diagnose.opt");
+
+/// The template identifier [`KDS_DIAGNOSE_OPT`] declares.
+pub const KDS_DIAGNOSE_TEMPLATE_ID: &str = "KDS_Diagnose";
 
 /// A synthetic canonical COMPOSITION built against
 /// [`MINIMAL_EVALUATION_OPT`].
@@ -83,6 +102,17 @@ pub const TERM_UNKNOWN_CODE: &str = "gamma";
 /// A synthetic FHIR R4 `Condition`.
 pub const R4_CONDITION: &str = include_str!("../fixtures/fhir/r4/condition.json");
 
+/// A synthetic FHIR R4 `Condition` shaped like the MII Diagnose profile.
+///
+/// It claims the profile the `KDS_Diagnose` mappings compile against, codes
+/// its diagnosis in the ICD-10-GM system with the Diagnosesicherheit
+/// extension, dates its onset with a period whose start carries the
+/// lebensphase extension, and carries the asserted-date extension, the two
+/// status elements, a body site and a note. Every code and every other system
+/// is invented under `http://example.org`.
+pub const KDS_DIAGNOSE_CONDITION: &str =
+    include_str!("../fixtures/fhir/r4/kds_diagnose_condition.json");
+
 /// A synthetic FHIR R4 `Observation`.
 pub const R4_OBSERVATION: &str = include_str!("../fixtures/fhir/r4/observation.json");
 
@@ -104,6 +134,42 @@ mod tests {
         "http://terminology.hl7.org/CodeSystem/condition-clinical",
         "http://terminology.hl7.org/CodeSystem/condition-ver-status",
     ];
+
+    #[test]
+    fn the_kds_condition_names_only_invented_codes_outside_the_matched_systems() {
+        use super::KDS_DIAGNOSE_CONDITION;
+        let matched = [
+            "www.medizininformatik-initiative.de/fhir/core/modul-diagnose/StructureDefinition/Diagnose",
+            "hl7.org/fhir/StructureDefinition/condition-assertedDate",
+            "fhir.de/StructureDefinition/icd-10-gm-diagnosesicherheit",
+            "fhir.de/CodeSystem/bfarm/icd-10-gm",
+            "fhir.de/StructureDefinition/lebensphase",
+        ];
+        let bound: Vec<&str> = REQUIRED_BINDING_SYSTEMS
+            .iter()
+            .map(|system| system.trim_start_matches("http://"))
+            .collect();
+        for scheme in ["http://", "https://"] {
+            for url in KDS_DIAGNOSE_CONDITION.split(scheme).skip(1) {
+                assert!(
+                    url.starts_with("example.org/")
+                        || matched.iter().any(|system| url.starts_with(system))
+                        || bound.iter().any(|system| url.starts_with(system)),
+                    "the KDS Condition names a URL outside the matched systems: {url}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn the_kds_template_declares_its_identifier() {
+        use super::{KDS_DIAGNOSE_OPT, KDS_DIAGNOSE_TEMPLATE_ID};
+        let declared = format!("<template_id>\n    <value>{KDS_DIAGNOSE_TEMPLATE_ID}</value>");
+        assert!(
+            KDS_DIAGNOSE_OPT.contains(&declared),
+            "the vendored KDS template does not declare {KDS_DIAGNOSE_TEMPLATE_ID}"
+        );
+    }
 
     #[test]
     fn the_composition_names_the_template_and_carries_the_note() {

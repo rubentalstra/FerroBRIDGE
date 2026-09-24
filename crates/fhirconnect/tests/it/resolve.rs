@@ -2137,3 +2137,176 @@ fn the_published_evaluation_tail_outside_the_reference_model_is_refused()
     );
     Ok(())
 }
+
+/// The context body of the renaming cases, over the published `KDS_Diagnose`
+/// template, which names the elements it constrains.
+fn renamed_context() -> String {
+    context(
+        "synthetic.context",
+        "  profile:\n    url: \"http://example.org/fhir/StructureDefinition/synthetic\"\n  \
+         template:\n    id: \"KDS_Diagnose\"\n  archetypes:\n    - \
+         \"EVALUATION.synthetic.v1\"\n  start: \"EVALUATION.synthetic.v1\"\n",
+    )
+}
+
+/// Compiles one synthetic start model against the published `KDS_Diagnose`.
+fn against_kds(body: &str) -> Result<Result<Arc<Program>, Vec<Diagnostic>>, Box<dyn Error>> {
+    let set = set_of(&[
+        ("model.yml", start_model(body).as_str()),
+        ("context.yml", renamed_context().as_str()),
+    ])?;
+    let opt = openehr_its::opt14::from_xml(ferrobridge_testkit::fixtures::KDS_DIAGNOSE_OPT)?;
+    let index = WebTemplateIndex::build(&TemplateSource::Opt14(Box::new(opt)))?;
+    Ok(compile(
+        &set,
+        &MappingName::new("synthetic.context")?,
+        &index,
+        &SCHEMAS,
+        &StaticMappingCodes::default(),
+    ))
+}
+
+/// A template may constrain an element's name, and its `aqlPath` then carries
+/// the name as a predicate (`[at0002,'Kodierte Diagnose']`); a mapping names
+/// the node by its node id, and a name it does not write selects nothing, the
+/// rule the index applies to an indexed node. The second element sits below an
+/// archetype root the template renames too. No specification governs this:
+/// our own design.
+#[test]
+fn a_path_that_writes_no_name_resolves_to_the_element_the_template_names()
+-> Result<(), Box<dyn Error>> {
+    let program = against_kds(
+        "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      \
+         openehr: \"$archetype/data[at0001]/items[at0002]\"\n  - name: \"clinicalStatus\"\n    \
+         with:\n      fhir: \"$resource.clinicalStatus\"\n      openehr: \
+         \"$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.problem_qualifier.v2]/items[at0003]\"\n",
+    )?
+    .map_err(|diagnostics| render(&diagnostics))?;
+    let text = program.to_string();
+    assert!(
+        text.contains("items[at0002,'Kodierte Diagnose']/value DV_CODED_TEXT"),
+        "{text}"
+    );
+    assert!(
+        text.contains(
+            "items[openEHR-EHR-CLUSTER.problem_qualifier.v2,'Klinischer Status']/items[at0003,'Klinischer Status']/value DV_CODED_TEXT"
+        ),
+        "{text}"
+    );
+    Ok(())
+}
+
+/// A name the mapping does write must be the name the template carries.
+#[test]
+fn a_path_whose_name_the_template_does_not_carry_is_refused() -> Result<(), Box<dyn Error>> {
+    let diagnostics = against_kds(
+        "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      \
+         openehr: \"$archetype/data[at0001]/items[at0002,'Another name']\"\n",
+    )?
+    .err()
+    .ok_or("a name the template does not carry compiled")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-unknown-template-node"]);
+    Ok(())
+}
+
+/// `overwrite` "overwrites the mapping method with the same name"
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/extension-methods.adoc`),
+/// so two top-level methods sharing a name leave an overwrite no single
+/// target, and the refusal names where both are.
+#[test]
+fn two_methods_of_one_file_sharing_a_name_are_refused_naming_both() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource.code\"\n      \
+                openehr: \"$archetype/data[at0001]/items[at0002]\"\n  - name: \"problem\"\n    \
+                with:\n      fhir: \"$resource.note.text\"\n      openehr: \
+                \"$archetype/data[at0001]/items[at0069]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-duplicate-method-name"]);
+    let message = diagnostics
+        .first()
+        .map(Diagnostic::message)
+        .ok_or("a refusal")?;
+    assert!(
+        message.contains("line 14 column 11") && message.contains("line 18 column 11"),
+        "the refusal names both positions: {message}"
+    );
+    Ok(())
+}
+
+/// `appendTo` reaches a child by its dotted name, so two siblings of one
+/// `followedBy` sharing a name are refused the same way.
+#[test]
+fn two_sibling_children_sharing_a_name_are_refused() -> Result<(), Box<dyn Error>> {
+    let body = "mappings:\n  - name: \"problem\"\n    with:\n      fhir: \"$resource\"\n      \
+                openehr: \"$archetype\"\n      type: \"NONE\"\n    followedBy:\n      mappings:\n        \
+                - name: \"code\"\n          with:\n            fhir: \"code\"\n            openehr: \
+                \"data[at0001]/items[at0002]\"\n        - name: \"code\"\n          with:\n            \
+                fhir: \"note.text\"\n            openehr: \"data[at0001]/items[at0069]\"\n";
+    let files = [
+        ("model.yml", start_model(body)),
+        (
+            "context.yml",
+            context("synthetic.context", &start_context(&[])),
+        ),
+    ];
+    let diagnostics = refusals(&borrow(&files), "synthetic.context")?;
+    assert_eq!(codes(&diagnostics), vec!["fc-duplicate-method-name"]);
+    Ok(())
+}
+
+/// An extension applies when the model it extends is merged, so one whose
+/// model no slot reaches changes nothing; the context compiles and the
+/// program carries a warning naming the extension and the model.
+#[test]
+fn a_listed_extension_whose_model_is_never_reached_is_a_warning() -> Result<(), Box<dyn Error>> {
+    let unreached = model(
+        "CLUSTER.synthetic.v1",
+        "openEHR-EHR-CLUSTER.problem_qualifier.v2",
+        "mappings:\n  - name: \"status\"\n    with:\n      fhir: \"$resource.clinicalStatus\"\n      \
+         openehr: \"$archetype/items[at0003]\"\n",
+    );
+    let files = [
+        ("model.yml", start_model(PROBLEM)),
+        ("cluster.yml", unreached),
+        (
+            "extension.yml",
+            extension(
+                "synthetic_extension",
+                "CLUSTER.synthetic.v1",
+                "mappings:\n  - name: \"status\"\n    extension: \"overwrite\"\n    with:\n      \
+                 fhir: \"$resource.clinicalStatus\"\n      openehr: \"$archetype/items[at0003]\"\n",
+            ),
+        ),
+        (
+            "context.yml",
+            context(
+                "synthetic.context",
+                &start_context(&["synthetic_extension"]),
+            ),
+        ),
+    ];
+    let set = set_of(&borrow(&files))?;
+    let program =
+        program_of(&set, "synthetic.context").map_err(|diagnostics| render(&diagnostics))?;
+    let warnings = program.warnings();
+    assert_eq!(codes(warnings), vec!["fc-unreached-extension"]);
+    let message = warnings
+        .first()
+        .map(Diagnostic::message)
+        .ok_or("a warning")?;
+    assert!(
+        message.contains("`synthetic_extension`") && message.contains("`CLUSTER.synthetic.v1`"),
+        "the warning names the extension and the model: {message}"
+    );
+    assert_eq!(
+        warnings.first().map(Diagnostic::severity),
+        Some(openehr_mapping_core::diagnostic::Severity::Warning)
+    );
+    Ok(())
+}

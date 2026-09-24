@@ -1,0 +1,22 @@
+---
+source: crates/fhirconnect/tests/it/roundtrip.rs
+expression: declared
+---
+{
+  "first_leg": [],
+  "second_leg": [
+    "the mapping recordedDateOutboundOnly did not run: its unidirectional marker names the other direction",
+    "the engine filled /composer",
+    "the engine filled /context/start_time",
+    "the engine filled /language",
+    "the engine filled /territory"
+  ],
+  "lost": [],
+  "added": [
+    "ctx/setting = \"238\"",
+    "ctx/time = \"2026-09-13T08:00:00Z\""
+  ],
+  "changed": [
+    "ctx/composer_name: \"FerroBRIDGE\" became \"FHIRconnect\""
+  ]
+}

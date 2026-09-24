@@ -496,7 +496,7 @@ async fn a_body_that_is_not_a_parameters_answers_an_operation_outcome()
 async fn a_mapping_that_cannot_run_answers_an_outcome_and_nothing_else()
 -> Result<(), Box<dyn StdError>> {
     // Strictness is the default: a failed mapping answers an OperationOutcome
-    // and no Bundle (architecture section 4.7).
+    // and no Bundle.
     let root = mapping_tree()?;
     let mut built = composition(app(&root)?).await?;
     if let Some(object) = built.as_object_mut() {
@@ -608,5 +608,150 @@ async fn the_enveloped_toopenehr_reads_a_parameters_body() -> Result<(), Box<dyn
         text.contains('/'),
         "the format parameter selected the flat serialization: {text}"
     );
+    Ok(())
+}
+
+/// Returns the one `Condition` a `$tofhir` Bundle carries.
+fn mapped_condition(answer: &serde_json::Value) -> Result<&serde_json::Value, Box<dyn StdError>> {
+    answer["entry"]
+        .as_array()
+        .ok_or("the Bundle carries entries")?
+        .iter()
+        .map(|entry| &entry["resource"])
+        .find(|resource| resource["resourceType"].as_str() == Some("Condition"))
+        .ok_or_else(|| Box::<dyn StdError>::from("the Bundle carries the mapped Condition"))
+}
+
+/// Runs `$toopenehr` then `$tofhir` over `condition` and returns what the
+/// second leg mapped back.
+async fn both_legs(
+    root: &tempfile::TempDir,
+    condition: &serde_json::Value,
+) -> Result<serde_json::Value, Box<dyn StdError>> {
+    let carried = serde_json::json!({
+        "resourceType": "Bundle",
+        "type": "collection",
+        "entry": [{ "resource": condition }],
+    });
+    let (status, _, body) = call(
+        app(root)?,
+        Request::post("/fhir/$toopenehr")
+            .header(header::CONTENT_TYPE, FHIR_JSON)
+            .body(Body::from(carried.to_string()))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let answer: serde_json::Value = serde_json::from_str(&body)?;
+    let mut built: serde_json::Value = serde_json::from_str(composition_text(&answer)?)?;
+    // NOTE: no specification governs this: our own design, a composition
+    // takes its `uid` when a CDR commits it, so the round trip without one
+    // gives it the version a commit would, as `composition` above does.
+    if let Some(object) = built.as_object_mut() {
+        object.insert(
+            String::from("uid"),
+            serde_json::json!({
+                "_type": "OBJECT_VERSION_ID",
+                "value": "d2b3c1a0-0000-4000-8000-000000000001::ferrobridge.example::1",
+            }),
+        );
+    }
+    let request = serde_json::json!({
+        "resourceType": "Parameters",
+        "parameter": [{ "name": "composition", "valueString": built.to_string() }],
+    });
+    let (status, _, body) = call(
+        app(root)?,
+        Request::post("/fhir/$tofhir")
+            .header(header::CONTENT_TYPE, FHIR_JSON)
+            .body(Body::from(request.to_string()))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let answer: serde_json::Value = serde_json::from_str(&body)?;
+    Ok(mapped_condition(&answer)?.clone())
+}
+
+#[tokio::test]
+async fn the_two_operations_round_trip_a_condition_modulo_what_the_program_maps()
+-> Result<(), Box<dyn StdError>> {
+    // The synthetic program maps the diagnosis name both ways and writes the
+    // subject going to FHIR only, so every other element of the input is the
+    // declared loss of this round trip, the subject comes back as the literal
+    // reference the program writes, and the id is the one `$tofhir` derives
+    // from the composition's version.
+    let root = mapping_tree()?;
+    let input =
+        serde_json::from_str::<serde_json::Value>(&bundle()?)?["entry"][0]["resource"].clone();
+    let output = both_legs(&root, &input).await?;
+    let set = ferrobridge_testkit::laws::declared(&[], &[], &input, &output);
+    assert_eq!(
+        set["lost"],
+        serde_json::json!([
+            "clinicalStatus.coding[0].code = \"active\"",
+            "clinicalStatus.coding[0].display = \"Active\"",
+            "clinicalStatus.coding[0].system = \"http://terminology.hl7.org/CodeSystem/condition-clinical\"",
+            "identifier[0].system = \"http://example.org/fhir/sid/ferrobridge-condition\"",
+            "identifier[0].value = \"synthetic-condition-0001\"",
+            format!("meta.profile[0] = \"{PROFILE}\""),
+            "recordedDate = \"2026-09-12T10:00:00+02:00\"",
+            "subject.identifier.system = \"http://example.org/fhir/sid/ferrobridge-subject\"",
+            "subject.identifier.value = \"synthetic-subject-0001\"",
+            "verificationStatus.coding[0].code = \"confirmed\"",
+            "verificationStatus.coding[0].display = \"Confirmed\"",
+            "verificationStatus.coding[0].system = \"http://terminology.hl7.org/CodeSystem/condition-ver-status\"",
+        ]),
+        "{set}"
+    );
+    assert_eq!(
+        set["added"],
+        serde_json::json!(["subject.reference = \"Patient/synthetic-subject-0001\""]),
+        "{set}"
+    );
+    assert_eq!(
+        set["changed"],
+        serde_json::json!([
+            "id: \"ferrobridge-synthetic-condition-1\" became \"d2b3c1a0-0000-4000-8000-000000000001\""
+        ]),
+        "{set}"
+    );
+    Ok(())
+}
+
+// TODO(#86): run once the engine closes four gaps. G1: an untyped mapping onto
+// a primitive dateTime takes the string kind, so no DV_DATE_TIME cell reads it.
+// G2: an untyped mapping onto a structural node runs a data cell instead of
+// anchoring its children. G3: a choice element with no type filter takes no
+// kind from the instance. G4: the required-child check counts a structural
+// anchor as a missing value.
+#[tokio::test]
+#[ignore = "the engine refuses the published chain; see the TODO above"]
+async fn the_two_operations_round_trip_the_kds_condition_as_the_engine_does()
+-> Result<(), Box<dyn StdError>> {
+    let root = tempfile::tempdir()?;
+    crate::kds::write_mappings(&root.path().join("mappings"))?;
+    std::fs::create_dir_all(root.path().join("templates"))?;
+    std::fs::write(
+        root.path().join("templates").join("KDS_Diagnose.opt"),
+        ferrobridge_testkit::fixtures::KDS_DIAGNOSE_OPT,
+    )?;
+    let input: serde_json::Value =
+        serde_json::from_str(ferrobridge_testkit::fixtures::KDS_DIAGNOSE_CONDITION)?;
+    let output = both_legs(&root, &input).await?;
+    let set = ferrobridge_testkit::laws::declared(&[], &[], &input, &output);
+    let pinned = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../crates/fhirconnect/tests/it/snapshots/it__roundtrip__kds_putget.snap"
+    ))?;
+    let body = pinned
+        .splitn(3, "---")
+        .nth(2)
+        .ok_or("the snapshot carries a body")?;
+    let engine: serde_json::Value = serde_json::from_str(body)?;
+    for list in ["lost", "added", "changed"] {
+        assert_eq!(
+            set[list], engine[list],
+            "the wire and the engine disagree on {list}"
+        );
+    }
     Ok(())
 }

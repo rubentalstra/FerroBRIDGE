@@ -12,3 +12,4 @@ crates/omop-cdm/src/generated/** linguist-generated
 crates/omop-cdm/ddl/** linguist-vendored -text
 tools/fhir-codegen/vendor/** linguist-vendored -text
 docs/specs/** linguist-vendored -text
+tools/ferrobridge-testkit/fixtures/opt/kds/** linguist-vendored -text
