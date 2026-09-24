@@ -213,6 +213,7 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Changed
 
+- The `zizmor` pin moves from 1.29.0 to 1.30.1 in the CI lane and the pin matrix (#180). Its new `self-repository` audit is disabled in `.github/zizmor.yml` with the reason: actionlint 1.7.12 refuses the `$/` form it asks for, and the switch waits on actionlint (#223).
 - The vendored draft REST API chapter of FHIRconnect gains
   `rest/sushi-config.yaml`, `rest/ig.ini` and `rest/input/pagecontent/index.md`
   at the pinned commit, fetched by `scripts/vendor/fhirconnect.sh`, so the

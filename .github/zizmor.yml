@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+#
+# zizmor configuration (https://docs.zizmor.sh/configuration/), discovered at
+# .github/zizmor.yml when the CI lane audits .github/.
+rules:
+  # The audit asks for GitHub's self-repository `uses: $/...` form in place of
+  # the workspace-relative `uses: ./...`. actionlint 1.7.12, the newest release,
+  # refuses the `$/` form ("invalid format because ref is missing"), and this
+  # repository runs both linters as gates, so the workspace-relative form stays
+  # until actionlint accepts the new one. The switch is tracked on issue #223.
+  self-repository:
+    disable: true
