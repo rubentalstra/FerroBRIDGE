@@ -7,7 +7,7 @@
 //! three facts the engine has no way to know: the logical id the identity map
 //! holds, the `meta.versionId` the CDR's version tree names, and the
 //! `meta.source` that points at the composition version the content came from
-//! (`docs/architecture.md` §9).
+//! (no specification governs the identity: our own design).
 
 use ferrobridge_openehr::ids::EhrId;
 use ferrobridge_openehr::ids::ObjectVersionId;
@@ -48,7 +48,8 @@ pub(crate) fn render(
     let produced =
         engine::outbound(program, index, composition).map_err(|error| engine_refusal(&error))?;
     let warnings = produced.warnings().to_vec();
-    let mut body = match produced.into_value() {
+    let (value, created) = produced.into_parts();
+    let mut body = match value {
         Value::Object(object) => object,
         other => {
             return Err(reply::refusal(
@@ -59,6 +60,7 @@ pub(crate) fn render(
             ));
         }
     };
+    contain(&mut body, created);
     body.insert(String::from("id"), Value::String(String::from(id.as_str())));
     let mut meta = body
         .get("meta")
@@ -81,6 +83,70 @@ pub(crate) fn render(
     );
     body.insert(String::from("meta"), Value::Object(meta));
     Ok(Rendered { body, warnings })
+}
+
+/// Carries the resources an outbound run created inside the one it mapped.
+///
+/// The facade serves one resource per composition entry, and a resource the
+/// run created beside it has no location of its own on this server, so it
+/// travels as a contained resource and every reference to it becomes the
+/// local `#<id>` form (<https://hl7.org/fhir/R4/references.html#contained>).
+/// No specification governs the choice: our own design.
+fn contain(body: &mut Object, created: Vec<Value>) {
+    if created.is_empty() {
+        return;
+    }
+    let mut local: Vec<(String, String)> = Vec::with_capacity(created.len());
+    for resource in &created {
+        if let (Some(kind), Some(id)) = (
+            resource.get("resourceType").and_then(Value::as_str),
+            resource.get("id").and_then(Value::as_str),
+        ) {
+            local.push((format!("{kind}/{id}"), format!("#{id}")));
+        }
+    }
+    let mut contained: Vec<Value> = body
+        .get("contained")
+        .and_then(Value::as_array)
+        .map(<[Value]>::to_vec)
+        .unwrap_or_default();
+    contained.extend(created);
+    for resource in &mut contained {
+        relocate(resource, &local);
+    }
+    let mut document = Value::Object(core::mem::take(body));
+    relocate(&mut document, &local);
+    if let Value::Object(mut object) = document {
+        object.insert(String::from("contained"), Value::Array(contained));
+        *body = object;
+    }
+}
+
+/// Rewrites every `reference` that names a contained resource to its local
+/// form.
+fn relocate(value: &mut Value, local: &[(String, String)]) {
+    match *value {
+        Value::Object(ref mut object) => {
+            for (key, member) in object.iter_mut() {
+                if key == "reference"
+                    && let Value::String(ref mut text) = *member
+                    && let Some((_, rewritten)) = local.iter().find(|(from, _)| from == text)
+                {
+                    *text = rewritten.clone();
+                    continue;
+                }
+                if key != "contained" {
+                    relocate(member, local);
+                }
+            }
+        }
+        Value::Array(ref mut items) => {
+            for item in items {
+                relocate(item, local);
+            }
+        }
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+    }
 }
 
 /// Records the declared set of losses one outbound run took.
@@ -123,8 +189,8 @@ pub(crate) fn composition_url(
 
 /// Returns the refusal one engine error renders as.
 ///
-/// "An element the program cannot map refuses the unit"
-/// (`docs/architecture.md` §9), so the answer is a `422` whose diagnostics
+/// An element the program cannot map refuses the unit (no specification
+/// governs this: our own design), so the answer is a `422` whose diagnostics
 /// name the mapping and the element the engine refused at.
 pub(crate) fn engine_refusal(error: &fhirconnect::engine::traverse::EngineError) -> Refusal {
     reply::refusal(
@@ -149,8 +215,44 @@ pub(crate) fn chain(error: &dyn core::error::Error) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{chain, composition_url};
+    use super::{chain, composition_url, contain};
     use ferrobridge_openehr::ids::{EhrId, ObjectVersionId};
+    use fhir_types::codec::Value;
+
+    #[test]
+    fn a_created_resource_is_contained_and_referenced_locally() {
+        // R4 references.html#contained: a contained resource is referenced
+        // as `#<id>` from the resource that contains it.
+        let Value::Object(mut body) = Value::from_serde_json(serde_json::json!({
+            "resourceType": "Condition",
+            "evidence": [{"detail": [{"reference": "Observation/created-1"}]}]
+        })) else {
+            panic!("the literal is an object");
+        };
+        let created = Value::from_serde_json(serde_json::json!({
+            "resourceType": "Observation",
+            "id": "created-1"
+        }));
+        contain(&mut body, vec![created.clone()]);
+        let document = Value::Object(body);
+        assert_eq!(
+            document
+                .get("contained")
+                .and_then(Value::as_array)
+                .map(<[Value]>::to_vec),
+            Some(vec![created])
+        );
+        assert_eq!(
+            document
+                .get("evidence")
+                .and_then(|evidence| evidence.as_array()?.first())
+                .and_then(|evidence| evidence.get("detail"))
+                .and_then(|detail| detail.as_array()?.first())
+                .and_then(|detail| detail.get("reference"))
+                .and_then(Value::as_str),
+            Some("#created-1")
+        );
+    }
 
     #[test]
     fn the_source_url_names_the_ehr_and_the_exact_version() {

@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose asserter becomes an openEHR
+# PARTICIPATION of the problem-diagnosis entry, the participation shape of
+# types-of-mappings/concept-type/concept-mappings.adoc.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_participation
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "other_participations"
+    with:
+      fhir: "$resource.asserter"
+      openehr: "$archetype/other_participations"
+    participationsFunction: "asserter"

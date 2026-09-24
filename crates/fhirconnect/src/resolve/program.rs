@@ -407,6 +407,7 @@ pub struct OpenehrTarget {
     node: ResolvedNode,
     tail: RmPath,
     occurrences: Vec<FlatId>,
+    leaf_class: Option<String>,
 }
 
 impl OpenehrTarget {
@@ -423,7 +424,28 @@ impl OpenehrTarget {
             node,
             tail,
             occurrences,
+            leaf_class: None,
         }
+    }
+
+    /// Returns this target with `class` as the reference-model class of the
+    /// last attribute its tail names.
+    #[must_use]
+    pub fn with_leaf_class(mut self, class: impl Into<String>) -> Self {
+        self.leaf_class = Some(class.into());
+        self
+    }
+
+    /// Returns the reference-model class of the last attribute the tail names,
+    /// `None` for a path that names the node itself.
+    ///
+    /// The resolver reads it from the RM attribute model
+    /// (<https://docs.rs/openehr-rm/0.0.69/openehr_rm/v1_2/model/fn.attribute.html>),
+    /// and it is the class, in place of the node's, whose value the engine
+    /// reads and writes at the end of the tail.
+    #[must_use]
+    pub fn leaf_class(&self) -> Option<&str> {
+        self.leaf_class.as_deref()
     }
 
     /// Returns the absolute openEHR path the mapping names.

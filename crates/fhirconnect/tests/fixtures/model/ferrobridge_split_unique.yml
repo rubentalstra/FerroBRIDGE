@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose split creates one element per
+# distinct body-site name rather than per occurrence, the unique shape of
+# types-of-mappings/concept-type/HierarchyMappings.adoc.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_split_unique
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+preprocessor:
+  hierarchy:
+    with:
+      fhir: "$resource.bodySite"
+      openehr: "$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.anatomical_location.v1]"
+    split:
+      fhir:
+        create: "resource"
+        unique:
+          - "items[at0001]"
+      openehr:
+        create: "archetype"
+        unique:
+          - "text"
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "bodySite"
+    with:
+      fhir: "$resource.bodySite"
+      openehr: "$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.anatomical_location.v1]/items[at0001]"
+      type: "CODEABLECONCEPT"

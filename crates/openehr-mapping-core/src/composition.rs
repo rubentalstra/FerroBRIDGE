@@ -442,13 +442,28 @@ impl WebTemplateIndex {
             });
         }
         let path = self.instance_path(node, occurrences)?;
-        if path.segments.is_empty() {
-            return Ok(Some(composition.value.clone()));
-        }
         // NOTE: no specification governs this: our own design, an absent
         // optional node is a legitimate absence and never a defect, so it
         // reads as `None` rather than as an error.
-        Ok(openehr_rm::v1_2::paths::item_at_path(&composition.value, &path).cloned())
+        let mut current = &composition.value;
+        for segment in &path.segments {
+            // An RM positional predicate counts every element of the container
+            // (BASE Release 1.2.0 §Paths and Locators, positional parameters),
+            // and an instance counts the node's own occurrences only, so the
+            // position picks among the elements the node's identity selects.
+            let mut identity = segment.clone();
+            identity.predicate.position = None;
+            let candidates = openehr_rm::v1_2::paths::select_children(current, &identity);
+            let index = segment
+                .predicate
+                .position
+                .map_or(0, |position| position.saturating_sub(1));
+            let Some(&found) = candidates.get(index) else {
+                return Ok(None);
+            };
+            current = found;
+        }
+        Ok(Some(current.clone()))
     }
 
     /// Returns the FLAT key one value is written under.

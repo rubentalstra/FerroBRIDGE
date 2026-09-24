@@ -219,6 +219,127 @@ impl RmValue {
             Self::Proportion(ref proportion) => proportion_parts(proportion),
         }
     }
+
+    /// Returns the canonical JSON of the value, with its `_type`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`RmError::Encode`] when the value has no JSON form.
+    pub fn to_canonical(&self) -> Result<Value, RmError> {
+        let rm_type = self.rm_type();
+        let encoded = match *self {
+            Self::Text(ref text) => serde_json::to_value(text),
+            Self::CodedText(ref coded) => serde_json::to_value(coded.as_ref()),
+            Self::CodePhrase(ref code) => serde_json::to_value(code),
+            Self::DateTime(ref date) => serde_json::to_value(date.as_ref()),
+            Self::DateTimeInterval(ref interval) => serde_json::to_value(interval.as_ref()),
+            Self::Party(ref party) => serde_json::to_value(party),
+            Self::Identifier(ref identifier) => serde_json::to_value(identifier),
+            Self::Proportion(ref proportion) => serde_json::to_value(proportion.as_ref()),
+        }
+        .map_err(|source| RmError::Encode {
+            rm_type,
+            reason: source.to_string(),
+        })?;
+        let Value::Object(mut object) = encoded else {
+            return Err(RmError::Encode {
+                rm_type,
+                reason: String::from("the value does not encode as a JSON object"),
+            });
+        };
+        object.insert(String::from("_type"), Value::String(String::from(rm_type)));
+        Ok(Value::Object(object))
+    }
+}
+
+/// What the attribute a tail ends on holds.
+///
+/// A tail below a template node names either one scalar attribute of the
+/// node's data value or one data value nested in it, and the FLAT parts of the
+/// node's class are what carry it onto the wire (openEHR ITS-REST 1.1.0,
+/// Simplified Formats, the per-class attribute tables).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Carried {
+    /// A string attribute.
+    Text,
+    /// A real-valued attribute.
+    Real,
+    /// An integer attribute.
+    Integer,
+    /// A boolean attribute.
+    Boolean,
+    /// A data value of the tail's leaf class, read and written by its cell.
+    Value,
+}
+
+/// The attribute tails each class's FLAT parts carry, with what they hold.
+///
+/// [`RmValue::parts`] writes exactly these, so a tail outside the table would
+/// be merged into the value and then dropped on the way to the wire. No
+/// specification governs the walk below a node beyond the RM attribute model:
+/// our own design.
+const CARRIED: &[(&str, &str, Carried)] = &[
+    ("DV_TEXT", "value", Carried::Text),
+    ("DV_TEXT", "formatting", Carried::Text),
+    ("DV_CODED_TEXT", "value", Carried::Text),
+    ("DV_CODED_TEXT", "formatting", Carried::Text),
+    ("DV_CODED_TEXT", "defining_code", Carried::Value),
+    ("DV_CODED_TEXT", "defining_code/code_string", Carried::Text),
+    (
+        "DV_CODED_TEXT",
+        "defining_code/terminology_id/value",
+        Carried::Text,
+    ),
+    (
+        "DV_CODED_TEXT",
+        "defining_code/preferred_term",
+        Carried::Text,
+    ),
+    ("CODE_PHRASE", "code_string", Carried::Text),
+    ("CODE_PHRASE", "terminology_id/value", Carried::Text),
+    ("CODE_PHRASE", "preferred_term", Carried::Text),
+    ("DV_DATE_TIME", "value", Carried::Text),
+    ("DV_DATE_TIME", "magnitude_status", Carried::Text),
+    ("DV_INTERVAL", "lower/value", Carried::Text),
+    ("DV_INTERVAL", "upper/value", Carried::Text),
+    ("DV_INTERVAL", "lower_unbounded", Carried::Boolean),
+    ("DV_INTERVAL", "upper_unbounded", Carried::Boolean),
+    ("DV_INTERVAL", "lower_included", Carried::Boolean),
+    ("DV_INTERVAL", "upper_included", Carried::Boolean),
+    ("PARTY_IDENTIFIED", "name", Carried::Text),
+    ("DV_IDENTIFIER", "id", Carried::Text),
+    ("DV_IDENTIFIER", "issuer", Carried::Text),
+    ("DV_IDENTIFIER", "assigner", Carried::Text),
+    ("DV_IDENTIFIER", "type", Carried::Text),
+    ("DV_PROPORTION", "numerator", Carried::Real),
+    ("DV_PROPORTION", "denominator", Carried::Real),
+    ("DV_PROPORTION", "type", Carried::Integer),
+    ("DV_PROPORTION", "precision", Carried::Integer),
+];
+
+/// Returns the class a tail below a node of `rm_type` is written as, and what
+/// the tail's attribute holds, `None` when no FLAT part carries it.
+///
+/// A node's own class is tried first. A `DV_TEXT` node may hold a
+/// `DV_CODED_TEXT` and a `PARTY_PROXY` node a `PARTY_IDENTIFIED`, the
+/// subtypes the reference model admits, so a tail only the subtype carries
+/// writes the subtype
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/data_types.html#_dv_coded_text_class>).
+#[must_use]
+pub fn carried(rm_type: &str, tail: &[&str]) -> Option<(&'static str, Carried)> {
+    let wanted = tail.join("/");
+    let subtype = match rm_type {
+        "DV_TEXT" => Some("DV_CODED_TEXT"),
+        "PARTY_PROXY" => Some("PARTY_IDENTIFIED"),
+        _ => None,
+    };
+    let lookup = |class: &str| {
+        CARRIED
+            .iter()
+            .find(|&&(owner, path, _)| owner == class && path == wanted)
+            .map(|&(owner, _, held)| (owner, held))
+    };
+    lookup(rm_type).or_else(|| subtype.and_then(lookup))
 }
 
 /// The parts of a `DV_TEXT` (Simplified Formats, §`DV_TEXT`).

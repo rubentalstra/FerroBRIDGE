@@ -5,8 +5,8 @@
 //!
 //! [`crate::resolve`] compiles a context into an immutable program with every
 //! path already resolved; this module runs it. There is one traversal, and
-//! the direction enters it in three places only
-//! (`docs/architecture.md` §4.4):
+//! the direction enters it in three places only (our own design, over the
+//! rules the specification gives):
 //!
 //! - conditions are evaluated on the input side, so `fhirCondition` runs when
 //!   FHIR is the input and `openehrCondition` when openEHR is
@@ -24,6 +24,10 @@
 //! The direction is [`crate::model::ast::Direction`], the type the
 //! `unidirectional` key already parses into: it names the same two
 //! directions, and a second enum beside it would only need converting.
+//!
+//! The engine makes no call of its own. What a run asks of its caller, the
+//! `mappingCode` functions, the resource a reference points at and the id of
+//! a resource the run creates, is the [`seam`] it is handed.
 
 pub mod cell;
 
@@ -31,14 +35,20 @@ pub mod condition;
 
 pub mod context;
 
+pub mod family;
+
 pub mod fhir;
 
 pub mod lens;
+
+pub mod origin;
 
 pub mod outcome;
 
 pub mod recurrence;
 
 pub mod rm;
+
+pub mod seam;
 
 pub mod traverse;

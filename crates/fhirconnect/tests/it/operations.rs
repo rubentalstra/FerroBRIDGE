@@ -402,6 +402,61 @@ fn a_missing_composition_is_required() -> Result<(), Box<dyn Error>> {
 }
 
 #[test]
+fn a_split_answers_every_created_resource_as_an_entry() -> Result<(), Box<dyn Error>> {
+    // HierarchyMappings.adoc §split: each anatomical-location cluster creates
+    // its own Condition, and the one Provenance covers every one of them.
+    let set = program_set(&["ferrobridge_split"])?;
+    let mut resource = condition("http://example.org/fhir/StructureDefinition/ferrobridge-split")?;
+    if let Some(object) = resource.as_object_mut() {
+        object.insert(
+            String::from("bodySite"),
+            serde_json::json!([{"text": "Left knee"}, {"text": "Right knee"}]),
+        );
+    }
+    let inbound = run::to_openehr(
+        &set,
+        &SCHEMAS,
+        &NoMappingFunctions,
+        &settings(),
+        &ToOpenehrRequest::new(bundle(vec![resource])?),
+    )?;
+    let mut built: serde_json::Value = serde_json::from_str(inbound.composition())?;
+    if let Some(object) = built.as_object_mut() {
+        object.insert(
+            String::from("uid"),
+            serde_json::json!({ "_type": "OBJECT_VERSION_ID", "value": COMPOSITION_UID }),
+        );
+    }
+    let request = ToFhirRequest::new(CompositionPayload::parse(&built.to_string())?);
+    let answer = run::to_fhir(&set, &SCHEMAS, &NoMappingFunctions, &settings(), &request)?;
+    let conditions: Vec<String> = answer
+        .bundle()
+        .entry
+        .iter()
+        .filter_map(|entry| match entry.resource {
+            Some(Resource::Condition(ref condition)) => condition.id.clone(),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(
+        conditions.len(),
+        2,
+        "one Condition per cluster: {conditions:?}"
+    );
+    let targets = answer
+        .bundle()
+        .entry
+        .iter()
+        .find_map(|entry| match entry.resource {
+            Some(Resource::Provenance(ref provenance)) => Some(provenance.target.len()),
+            _ => None,
+        })
+        .ok_or("the Bundle carries the Provenance")?;
+    assert_eq!(targets, 2, "the Provenance covers both Conditions");
+    Ok(())
+}
+
+#[test]
 fn the_diagnosis_chain_maps_both_ways_through_the_operations() -> Result<(), Box<dyn Error>> {
     // A canonical composition in, a Condition Bundle with a Provenance out;
     // that Bundle back in, the same composition out.
@@ -434,11 +489,27 @@ fn the_diagnosis_chain_maps_both_ways_through_the_operations() -> Result<(), Box
     ])?)
     .with_template_id(TemplateId::new(TEMPLATE));
     let second = run::to_openehr(&set, &SCHEMAS, &NoMappingFunctions, &settings(), &back)?;
-    let reread: serde_json::Value = serde_json::from_str(second.composition())?;
+    let mut reread: serde_json::Value = serde_json::from_str(second.composition())?;
+    // The FEEDER_AUDIT names the resource each pass read (RM 1.1.0
+    // common.html §FEEDER_AUDIT), and the second pass reads the Condition
+    // `$tofhir` identified, so the audit is asserted on its own and the
+    // content is compared without it.
+    let audit = reread
+        .as_object_mut()
+        .and_then(|object| object.remove("feeder_audit"))
+        .ok_or("the second pass records its origin")?;
+    assert_eq!(
+        audit
+            .pointer("/originating_system_item_ids/0/id")
+            .and_then(serde_json::Value::as_str),
+        condition.id.as_deref(),
+        "the second pass records the Condition it read: {audit}"
+    );
     let first_pass: serde_json::Value = {
         let mut without = committed.clone();
         if let Some(object) = without.as_object_mut() {
             object.remove("uid");
+            object.remove("feeder_audit");
         }
         without
     };

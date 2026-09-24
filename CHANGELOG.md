@@ -24,6 +24,33 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- The FHIRconnect engine records where a composition came from in its
+  `FEEDER_AUDIT` (#187)
+  (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html#_feeder_audit_class>).
+  `Defaults::with_origin` names the system and the source resource, which
+  travel as `originating_system_audit` and `originating_system_item_ids`, and
+  every composition field the engine defaulted travels as one
+  `feeder_system_item_ids` entry, in the order of the `Warning::Defaulted`
+  entries. The facade and `$toopenehr` both set the origin, so the facade no
+  longer patches the audit onto the built composition.
+- The FHIRconnect engine reads and writes a mapping's reference-model tail
+  below the deepest template node, in both directions (#189). The resolver
+  records the class of the tail's last attribute, the tail's class selects the
+  data-type cell, and a tail no FLAT part of the node's class carries is
+  refused with `EngineError::UnsupportedTail` instead of being dropped on the
+  way to the wire.
+- The FHIRconnect engine runs `reference`, `link`, `participationsFunction`
+  and `hierarchy.split` (#186). What a run calls out to is `Seams`: the
+  `mappingCode` registry, a `ReferenceSource` for referenced resources and an
+  `IdentitySink` for the resources a run creates, whose default derives a
+  stable id by digest. A reference that resolves to nothing is a declared
+  skip and a reference cycle refuses. A `link` writes an openEHR `LINK` whose
+  target must be an `ehr:` URI, a participation writes one
+  `other_participations` entry, and a split creates one resource or one
+  archetype instance per occurrence and per distinct `unique` tuple. Created
+  resources travel on `Outcome::created`: `$tofhir` answers them as Bundle
+  entries covered by the one `Provenance`, and the facade carries them as
+  contained resources.
 - The FHIRconnect operations compile against the templates the CDR serves when
   `[cdr]` is configured and `[mappings] templates` is not (#195): boot reads the
   context files, fetches each template they name at
@@ -267,6 +294,20 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Fixed
 
+- The FHIRconnect engine evaluates a program's own `openehrCondition` going out
+  of openEHR and refuses a composition it does not admit with
+  `EngineError::NotApplicable`, the rule it already applied to
+  `fhirCondition` going in (`basics/Conditions.adoc`). A `manual` path no FLAT
+  part carries refuses with `EngineError::UnsupportedTail` instead of being
+  dropped, an openEHR position that does not fit is refused with its own
+  `PositionError` instead of being dropped or reported as a zero, and a
+  default whose template lookup fails for a reason other than a missing node
+  refuses (#189, #187).
+- `WebTemplateIndex::read` finds the n-th instance of a repeating node among
+  that node's own occurrences (#186). It read the position as an RM
+  positional predicate, which counts every element of the container (BASE
+  Release 1.2.0 §Paths and Locators), so the first anatomical-location cluster
+  behind a sibling element read as absent.
 - `GET /fhir/metadata` declares `$tofhir` and `$toopenehr` in
   `CapabilityStatement.rest.operation` whenever the FHIRconnect operations lane
   is served beside the facade, with the canonical `OperationDefinition` URL of

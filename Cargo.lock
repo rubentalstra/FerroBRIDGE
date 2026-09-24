@@ -1069,6 +1069,7 @@ dependencies = [
  "openehr-sdt",
  "proptest",
  "serde_json",
+ "sha2",
  "tempfile",
  "thiserror",
 ]

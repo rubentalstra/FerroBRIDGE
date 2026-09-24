@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose preprocessor openehrCondition
+# admits only a composition carrying the problem-diagnosis comment, so the
+# context gate of basics/Conditions.adoc can be driven out of openEHR.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_context_gate
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+preprocessor:
+  openehrCondition:
+    targetRoot: "$archetype/data[at0001]"
+    targetAttributes:
+      - "items[at0069]"
+    operator: "not empty"
+
+mappings:
+  - name: "onset"
+    with:
+      fhir: "$resource.onset.ofType(dateTime)"
+      openehr: "$archetype/data[at0001]/items[at0077]"
+      type: "DATETIME"

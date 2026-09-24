@@ -9,7 +9,9 @@
 //! compiled against the synthetic diagnosis template of the testkit and
 //! evaluated over the synthetic FHIR `Condition` of the testkit.
 
+use core::cell::RefCell;
 use core::error::Error;
+use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use fhir_types::codec::Value;
@@ -18,10 +20,18 @@ use fhirconnect::engine::condition::Verdict;
 use fhirconnect::engine::condition::evaluate;
 use fhirconnect::engine::condition::runs;
 use fhirconnect::engine::context::CallContext;
+use fhirconnect::engine::origin::Origin;
+use fhirconnect::engine::origin::SourceItem;
 use fhirconnect::engine::outcome::SkipReason;
 use fhirconnect::engine::outcome::Warning;
+use fhirconnect::engine::seam::IdentityRequest;
+use fhirconnect::engine::seam::IdentitySink;
+use fhirconnect::engine::seam::ReferenceError;
+use fhirconnect::engine::seam::ReferenceSource;
+use fhirconnect::engine::seam::Seams;
 use fhirconnect::engine::traverse::Defaults;
-use fhirconnect::engine::traverse::NoMappingFunctions;
+use fhirconnect::engine::traverse::EngineError;
+use fhirconnect::engine::traverse::SplitRefusal;
 use fhirconnect::engine::traverse::to_fhir;
 use fhirconnect::engine::traverse::to_openehr;
 use fhirconnect::model::ast::Direction;
@@ -282,7 +292,7 @@ fn the_minimal_diagnosis_chain_maps_both_ways() -> Result<(), Box<dyn Error>> {
         &SCHEMAS,
         &index,
         &document,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )?;
@@ -292,7 +302,7 @@ fn the_minimal_diagnosis_chain_maps_both_ways() -> Result<(), Box<dyn Error>> {
         &SCHEMAS,
         &index,
         inbound.value(),
-        &NoMappingFunctions,
+        &Seams::default(),
         &CallContext::new(),
     )?;
     insta::assert_json_snapshot!(
@@ -316,7 +326,7 @@ fn a_unidirectional_mapping_is_skipped_and_recorded() -> Result<(), Box<dyn Erro
         &SCHEMAS,
         &index,
         &document,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )?;
@@ -333,7 +343,7 @@ fn a_unidirectional_mapping_is_skipped_and_recorded() -> Result<(), Box<dyn Erro
         &SCHEMAS,
         &index,
         inbound.value(),
-        &NoMappingFunctions,
+        &Seams::default(),
         &CallContext::new(),
     )?;
     assert!(
@@ -369,7 +379,7 @@ fn a_date_and_time_keeps_its_text_in_both_directions() -> Result<(), Box<dyn Err
             &SCHEMAS,
             &index,
             &document,
-            &NoMappingFunctions,
+            &Seams::default(),
             &defaults(),
             &CallContext::new(),
         )?;
@@ -378,7 +388,7 @@ fn a_date_and_time_keeps_its_text_in_both_directions() -> Result<(), Box<dyn Err
             &SCHEMAS,
             &index,
             inbound.value(),
-            &NoMappingFunctions,
+            &Seams::default(),
             &CallContext::new(),
         )?;
         assert_eq!(
@@ -413,7 +423,7 @@ fn a_value_the_element_does_not_admit_names_the_element() -> Result<(), Box<dyn 
         &SCHEMAS,
         &index,
         &document,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )
@@ -443,7 +453,7 @@ fn a_required_child_the_input_does_not_carry_refuses_the_unit() -> Result<(), Bo
         &SCHEMAS,
         &index,
         &document,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )
@@ -464,7 +474,7 @@ fn the_same_chain_maps_when_the_required_child_is_carried() -> Result<(), Box<dy
         &SCHEMAS,
         &index,
         &condition_document()?,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )?;
@@ -494,7 +504,7 @@ fn a_slot_chain_that_reaches_a_model_twice_refuses() -> Result<(), Box<dyn Error
         &SCHEMAS,
         &index,
         &condition_document()?,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )
@@ -549,7 +559,7 @@ fn a_slotted_files_preprocessor_gate_skips_the_slot_when_it_closes() -> Result<(
         &SCHEMAS,
         &index,
         &condition_with_onset(written)?,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )?;
@@ -568,7 +578,7 @@ fn a_slotted_files_preprocessor_gate_skips_the_slot_when_it_closes() -> Result<(
         &SCHEMAS,
         &index,
         &condition_with_onset_and_body_site(written)?,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )?;
@@ -625,7 +635,7 @@ fn two_mappings_into_one_list_append_and_into_one_value_overwrite() -> Result<()
         &SCHEMAS,
         &index,
         &composition,
-        &NoMappingFunctions,
+        &Seams::default(),
         &CallContext::new(),
     )?;
     let sites = outbound
@@ -666,7 +676,7 @@ fn a_manual_block_merges_its_paths_into_one_element() -> Result<(), Box<dyn Erro
         &SCHEMAS,
         &index,
         &condition_document()?,
-        &NoMappingFunctions,
+        &Seams::default(),
         &defaults(),
         &CallContext::new(),
     )?;
@@ -715,7 +725,7 @@ fn an_openehr_condition_filters_when_openehr_is_the_input() -> Result<(), Box<dy
         &SCHEMAS,
         &index,
         &onset_composition(&index, None)?,
-        &NoMappingFunctions,
+        &Seams::default(),
         &CallContext::new(),
     )?;
     assert_eq!(
@@ -728,7 +738,7 @@ fn an_openehr_condition_filters_when_openehr_is_the_input() -> Result<(), Box<dy
         &SCHEMAS,
         &index,
         &onset_composition(&index, Some("the comment"))?,
-        &NoMappingFunctions,
+        &Seams::default(),
         &CallContext::new(),
     )?;
     assert_eq!(
@@ -844,4 +854,1242 @@ fn cyclic_program(
         preprocessors: Vec::new(),
         mappings,
     })))
+}
+
+/// Returns the defaults of a run whose origin is the synthetic sender.
+fn audited(source: SourceItem) -> Defaults {
+    defaults().with_origin(Origin::new("ferrobridge.test").with_source(source))
+}
+
+/// Returns the `id` of every entry of one `FEEDER_AUDIT` identifier list.
+fn audit_ids<'value>(audit: &'value serde_json::Value, list: &str) -> Vec<&'value str> {
+    audit
+        .get(list)
+        .and_then(serde_json::Value::as_array)
+        .map(|entries| {
+            entries
+                .iter()
+                .filter_map(|entry| entry.get("id").and_then(serde_json::Value::as_str))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[test]
+fn a_run_with_an_origin_records_it_in_the_feeder_audit() -> Result<(), Box<dyn Error>> {
+    // RM 1.1.0 common.html §FEEDER_AUDIT: the audit "describes the origin of
+    // data that have been transformed into openEHR form", and
+    // FEEDER_AUDIT_DETAILS.system_id names the system that handled it.
+    let program = compiled("ferrobridge_diagnose_minimal")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_document()?,
+        &Seams::default(),
+        &audited(
+            SourceItem::new("Condition")
+                .with_id("sender-1")
+                .with_version_id("3"),
+        ),
+        &CallContext::new(),
+    )?;
+    let audit = inbound
+        .value()
+        .value()
+        .get("feeder_audit")
+        .ok_or("the composition carries a FEEDER_AUDIT")?;
+    assert_eq!(
+        audit
+            .pointer("/originating_system_audit/system_id")
+            .and_then(serde_json::Value::as_str),
+        Some("ferrobridge.test")
+    );
+    assert_eq!(
+        audit
+            .pointer("/originating_system_audit/version_id")
+            .and_then(serde_json::Value::as_str),
+        Some("3"),
+        "the source meta.versionId travels as the originating version"
+    );
+    assert_eq!(
+        audit_ids(audit, "originating_system_item_ids"),
+        ["sender-1"],
+        "the source resource id travels as the one originating item: {audit}"
+    );
+    assert_eq!(
+        audit
+            .pointer("/originating_system_item_ids/0/type")
+            .and_then(serde_json::Value::as_str),
+        Some("Condition")
+    );
+    assert_eq!(
+        audit
+            .pointer("/feeder_system_audit/system_id")
+            .and_then(serde_json::Value::as_str),
+        Some("ferrobridge.test")
+    );
+    Ok(())
+}
+
+#[test]
+fn the_defaulted_warnings_and_the_feeder_audit_agree() -> Result<(), Box<dyn Error>> {
+    // defaults-for-fields.adoc names the fields the engine fills; each one is
+    // a declared Warning::Defaulted and one feeder_system_item_ids entry, in
+    // the same order.
+    let program = compiled("ferrobridge_diagnose_minimal")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_document()?,
+        &Seams::default(),
+        &audited(SourceItem::new("Condition").with_id("sender-1")),
+        &CallContext::new(),
+    )?;
+    let warned: Vec<&str> = inbound
+        .warnings()
+        .iter()
+        .filter_map(|warning| match *warning {
+            Warning::Defaulted { ref field } => Some(field.as_str()),
+            _ => None,
+        })
+        .collect();
+    assert!(
+        !warned.is_empty(),
+        "the minimal chain leaves fields to default"
+    );
+    let audit = inbound
+        .value()
+        .value()
+        .get("feeder_audit")
+        .ok_or("the composition carries a FEEDER_AUDIT")?;
+    assert_eq!(
+        audit_ids(audit, "feeder_system_item_ids"),
+        warned,
+        "the audit lists exactly the defaulted fields, in order: {audit}"
+    );
+    let types: Vec<Option<&str>> = audit
+        .get("feeder_system_item_ids")
+        .and_then(serde_json::Value::as_array)
+        .map(|entries| {
+            entries
+                .iter()
+                .map(|entry| entry.get("type").and_then(serde_json::Value::as_str))
+                .collect()
+        })
+        .unwrap_or_default();
+    assert!(
+        types.iter().all(|kind| *kind == Some("defaulted")),
+        "every feeder item is typed as a default: {types:?}"
+    );
+    // The builder validated the composition against its template before it
+    // answered; reading it back through the same validation shows the audit
+    // is admitted content.
+    index.accept(inbound.value().value().clone())?;
+    Ok(())
+}
+
+#[test]
+fn a_source_with_no_id_is_recorded_as_unknown() -> Result<(), Box<dyn Error>> {
+    // An absent identifier is recorded, never invented.
+    let program = compiled("ferrobridge_diagnose_minimal")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_document()?,
+        &Seams::default(),
+        &audited(SourceItem::new("Condition")),
+        &CallContext::new(),
+    )?;
+    let audit = inbound
+        .value()
+        .value()
+        .get("feeder_audit")
+        .ok_or("the composition carries a FEEDER_AUDIT")?;
+    assert_eq!(audit_ids(audit, "originating_system_item_ids"), ["unknown"]);
+    assert_eq!(
+        audit.pointer("/originating_system_audit/version_id"),
+        None,
+        "a source with no version records none"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_run_without_an_origin_writes_no_feeder_audit() -> Result<(), Box<dyn Error>> {
+    let program = compiled("ferrobridge_diagnose_minimal")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_document()?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(inbound.value().value().get("feeder_audit"), None);
+    Ok(())
+}
+
+/// The path of the diagnostic certainty value in the synthetic template.
+const CERTAINTY: &str =
+    "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]/items[at0073]/value";
+
+/// Returns the synthetic `Condition` with a certainty coding the template's
+/// local code list admits.
+fn condition_with_local_certainty() -> Result<Value, Box<dyn Error>> {
+    let mut parsed: serde_json::Value =
+        serde_json::from_str(ferrobridge_testkit::fixtures::R4_CONDITION)?;
+    if let Some(object) = parsed.as_object_mut() {
+        object.insert(
+            String::from("verificationStatus"),
+            serde_json::json!({
+                "coding": [{"system": "local", "code": "at0074", "display": "Confirmed"}],
+                "text": "http://example.org/ferrobridge/certainty"
+            }),
+        );
+    }
+    Ok(Value::from_serde_json(parsed))
+}
+
+/// Returns the certainty value a composition holds.
+fn certainty_of(
+    index: &WebTemplateIndex,
+    composition: &CanonicalComposition,
+) -> Result<serde_json::Value, Box<dyn Error>> {
+    let node = index.node(&AqlPath::new(CERTAINTY))?;
+    Ok(index
+        .read(composition, node, &[])?
+        .ok_or("the run wrote the certainty")?)
+}
+
+#[test]
+fn a_tail_below_a_node_is_written_and_read_in_both_directions() -> Result<(), Box<dyn Error>> {
+    // RM 1.1.0 data_types.html §DV_CODED_TEXT: defining_code is a CODE_PHRASE
+    // whose code_string and terminology_id.value are attributes below the
+    // node the template constrains; each mapping names one of them.
+    let program = compiled("ferrobridge_tail")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_local_certainty()?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let written = certainty_of(&index, inbound.value())?;
+    assert_eq!(
+        written
+            .pointer("/defining_code/code_string")
+            .and_then(serde_json::Value::as_str),
+        Some("at0074"),
+        "the code landed in the coded text's code_string: {written}"
+    );
+    assert_eq!(
+        written
+            .pointer("/defining_code/terminology_id/value")
+            .and_then(serde_json::Value::as_str),
+        Some("local")
+    );
+    assert_eq!(
+        written.get("value").and_then(serde_json::Value::as_str),
+        Some("Confirmed")
+    );
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default(),
+        &CallContext::new(),
+    )?;
+    let coding = outbound
+        .value()
+        .get("verificationStatus")
+        .and_then(|status| status.get("coding"))
+        .ok_or("the Condition carries the certainty coding")?
+        .to_serde_json(&mut fhir_types::codec::Path::root("Coding"))?;
+    assert_eq!(
+        coding,
+        serde_json::json!([{"system": "local", "code": "at0074", "display": "Confirmed"}]),
+        "the three attributes read back into one coding"
+    );
+    Ok(())
+}
+
+#[test]
+fn the_tails_leaf_class_selects_the_cell() -> Result<(), Box<dyn Error>> {
+    // The Coding lands on DV_CODED_TEXT.defining_code, a CODE_PHRASE, so the
+    // CODE_PHRASE row of the data-type chapter runs, not the DV_CODED_TEXT
+    // row of the node.
+    let program = compiled("ferrobridge_tail_phrase")?;
+    let phrase =
+        mapping(&program, "certainty.certaintyPhrase").ok_or("the phrase mapping compiled")?;
+    assert_eq!(
+        phrase
+            .openehr()
+            .and_then(fhirconnect::resolve::program::OpenehrTarget::leaf_class),
+        Some("CODE_PHRASE"),
+        "the resolver records the tail's class"
+    );
+    assert_eq!(
+        phrase.openehr().map(|target| target.node().rm_type()),
+        Some("DV_CODED_TEXT")
+    );
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_local_certainty()?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let written = certainty_of(&index, inbound.value())?;
+    assert_eq!(
+        written
+            .pointer("/defining_code/code_string")
+            .and_then(serde_json::Value::as_str),
+        Some("at0074")
+    );
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default(),
+        &CallContext::new(),
+    )?;
+    let coding = outbound
+        .value()
+        .get("verificationStatus")
+        .and_then(|status| status.get("coding"))
+        .and_then(|codings| codings.as_array()?.first())
+        .ok_or("the Condition carries the certainty coding")?;
+    assert_eq!(coding.get("code").and_then(Value::as_str), Some("at0074"));
+    assert_eq!(
+        coding.get("display").and_then(Value::as_str),
+        Some("Confirmed")
+    );
+    Ok(())
+}
+
+#[test]
+fn a_tail_no_flat_part_carries_is_refused_in_both_directions() -> Result<(), Box<dyn Error>> {
+    // DV_TEXT.hyperlink is an attribute of the reference model, and the
+    // Simplified Formats DV_TEXT table writes no part for it, so a write
+    // through it would be lost on the way to the wire.
+    let program = compiled("ferrobridge_tail_unsupported")?;
+    let index = template()?;
+    let error = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_local_certainty()?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )
+    .expect_err("no FLAT part carries the hyperlink");
+    assert!(
+        matches!(error, EngineError::UnsupportedTail { ref tail, .. } if tail.contains("hyperlink")),
+        "the refusal names the tail: {error}"
+    );
+    let composition = compiled("ferrobridge_tail").and_then(|carrier| {
+        Ok(to_openehr(
+            &carrier,
+            &SCHEMAS,
+            &index,
+            &condition_with_local_certainty()?,
+            &Seams::default(),
+            &defaults(),
+            &CallContext::new(),
+        )?)
+    })?;
+    let error = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        composition.value(),
+        &Seams::default(),
+        &CallContext::new(),
+    )
+    .expect_err("the read side mirrors the table");
+    assert!(
+        matches!(error, EngineError::UnsupportedTail { .. }),
+        "the read refuses the same tail: {error}"
+    );
+    Ok(())
+}
+
+/// A reference source over a map, keyed by the literal reference.
+#[derive(Debug, Default)]
+struct MapReferences(BTreeMap<String, Value>);
+
+impl ReferenceSource for MapReferences {
+    fn fetch(
+        &self,
+        reference: &str,
+        _expected: &ResourceType,
+    ) -> Result<Option<Value>, ReferenceError> {
+        Ok(self.0.get(reference).cloned())
+    }
+}
+
+/// An identity sink over a map from resource type to id, recording every
+/// request it answers.
+#[derive(Debug, Default)]
+struct MapIdentities {
+    ids: BTreeMap<String, String>,
+    seen: RefCell<Vec<IdentityRequest>>,
+}
+
+impl IdentitySink for MapIdentities {
+    fn identify(&self, request: &IdentityRequest) -> Result<String, ReferenceError> {
+        self.seen.borrow_mut().push(request.clone());
+        self.ids
+            .get(request.resource_type())
+            .cloned()
+            .ok_or_else(|| ReferenceError::Identity {
+                resource_type: String::from(request.resource_type()),
+                source: Box::from("the map holds no id for the type"),
+            })
+    }
+}
+
+/// Returns the synthetic `Condition` with the given members set.
+fn condition_with(members: serde_json::Value) -> Result<Value, Box<dyn Error>> {
+    let mut parsed: serde_json::Value =
+        serde_json::from_str(ferrobridge_testkit::fixtures::R4_CONDITION)?;
+    if let (Some(object), serde_json::Value::Object(added)) = (parsed.as_object_mut(), members) {
+        object.extend(added);
+    }
+    Ok(Value::from_serde_json(parsed))
+}
+
+/// Returns the synthetic `Observation` the evidence reference points at.
+fn evidence_observation() -> Value {
+    Value::from_serde_json(evidence_json())
+}
+
+/// Returns the synthetic `Observation` the evidence reference points at, as
+/// JSON.
+fn evidence_json() -> serde_json::Value {
+    serde_json::json!({
+        "resourceType": "Observation",
+        "id": "synthetic-observation-1",
+        "status": "final",
+        "code": {"text": "Synthetic evidence one"}
+    })
+}
+
+/// Returns the text of the problem-diagnosis comment a composition holds.
+fn comment_of(
+    index: &WebTemplateIndex,
+    composition: &CanonicalComposition,
+) -> Result<Option<String>, Box<dyn Error>> {
+    let node = index.node(&AqlPath::new(
+        "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]/items[at0069]/value",
+    ))?;
+    Ok(index
+        .read(composition, node, &[])?
+        .and_then(|value| value.get("value")?.as_str().map(String::from)))
+}
+
+#[test]
+fn a_reference_maps_the_referenced_resource_into_openehr() -> Result<(), Box<dyn Error>> {
+    // Reference.adoc: the `reference` mapping initializes the referenced
+    // resource and its mappings run over it, with `$fhirRoot` its root.
+    let program = compiled("ferrobridge_reference")?;
+    let index = template()?;
+    let mut held = BTreeMap::new();
+    held.insert(
+        String::from("Observation/synthetic-observation-1"),
+        evidence_observation(),
+    );
+    let references = MapReferences(held);
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({
+            "evidence": [{"detail": [{"reference": "Observation/synthetic-observation-1"}]}]
+        }))?,
+        &Seams::default().with_references(&references),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(
+        comment_of(&index, inbound.value())?.as_deref(),
+        Some("Synthetic evidence one"),
+        "the referenced Observation's code reached the composition"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_contained_reference_resolves_in_the_document_itself() -> Result<(), Box<dyn Error>> {
+    // R4 references.html#contained: `#id` names a contained resource.
+    let program = compiled("ferrobridge_reference")?;
+    let index = template()?;
+    let mut contained = evidence_json();
+    if let Some(object) = contained.as_object_mut() {
+        object.insert(String::from("id"), serde_json::json!("evidence"));
+    }
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({
+            "contained": [contained],
+            "evidence": [{"detail": [{"reference": "#evidence"}]}]
+        }))?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(
+        comment_of(&index, inbound.value())?.as_deref(),
+        Some("Synthetic evidence one")
+    );
+    Ok(())
+}
+
+#[test]
+fn a_reference_that_resolves_to_nothing_is_a_declared_skip() -> Result<(), Box<dyn Error>> {
+    // references.adoc: "If not possible, the engine proceeds with the mapping".
+    let program = compiled("ferrobridge_reference")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({
+            "evidence": [{"detail": [{"reference": "Observation/absent"}]}]
+        }))?,
+        &Seams::default().with_references(&MapReferences::default()),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    assert!(
+        inbound.warnings().contains(&Warning::Skipped {
+            mapping: String::from("evidence"),
+            reason: SkipReason::UnresolvedReference {
+                reference: String::from("Observation/absent"),
+            },
+        }),
+        "the unresolved reference is declared: {:?}",
+        inbound.warnings()
+    );
+    assert_eq!(comment_of(&index, inbound.value())?, None);
+    Ok(())
+}
+
+#[test]
+fn a_reference_of_the_wrong_type_refuses() -> Result<(), Box<dyn Error>> {
+    let program = compiled("ferrobridge_reference")?;
+    let index = template()?;
+    let mut held = BTreeMap::new();
+    held.insert(
+        String::from("Observation/synthetic-observation-1"),
+        Value::from_serde_json(serde_json::json!({"resourceType": "Specimen", "id": "x"})),
+    );
+    let references = MapReferences(held);
+    let error = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({
+            "evidence": [{"detail": [{"reference": "Observation/synthetic-observation-1"}]}]
+        }))?,
+        &Seams::default().with_references(&references),
+        &defaults(),
+        &CallContext::new(),
+    )
+    .expect_err("a Specimen is no Observation");
+    assert!(
+        matches!(error, EngineError::Reference { .. }),
+        "the refusal is the reference's: {error}"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_reference_out_of_openehr_creates_the_resource_the_sink_names() -> Result<(), Box<dyn Error>> {
+    // Reference.adoc: "initialize a new resource in FHIR ... and reference it
+    // inside the resource we are currently mapping".
+    let program = compiled("ferrobridge_reference")?;
+    let index = template()?;
+    let mut held = BTreeMap::new();
+    held.insert(
+        String::from("Observation/synthetic-observation-1"),
+        evidence_observation(),
+    );
+    let references = MapReferences(held);
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({
+            "evidence": [{"detail": [{"reference": "Observation/synthetic-observation-1"}]}]
+        }))?,
+        &Seams::default().with_references(&references),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let mut ids = BTreeMap::new();
+    ids.insert(
+        String::from("Observation"),
+        String::from("created-observation-1"),
+    );
+    let identities = MapIdentities {
+        ids,
+        seen: RefCell::default(),
+    };
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default().with_identities(&identities),
+        &CallContext::new(),
+    )?;
+    let detail = outbound
+        .value()
+        .get("evidence")
+        .and_then(|evidence| evidence.as_array()?.first())
+        .and_then(|evidence| evidence.get("detail"))
+        .and_then(|detail| detail.as_array()?.first())
+        .and_then(|detail| detail.get("reference"))
+        .and_then(Value::as_str);
+    assert_eq!(detail, Some("Observation/created-observation-1"));
+    let created = outbound
+        .created()
+        .first()
+        .ok_or("the run created the Observation")?;
+    assert_eq!(
+        created.get("id").and_then(Value::as_str),
+        Some("created-observation-1")
+    );
+    assert_eq!(
+        created
+            .get("code")
+            .and_then(|code| code.get("text"))
+            .and_then(Value::as_str),
+        Some("Synthetic evidence one"),
+        "the created Observation carries what its mappings read"
+    );
+    let seen = identities.seen.borrow();
+    assert_eq!(
+        seen.iter()
+            .map(IdentityRequest::resource_type)
+            .collect::<Vec<&str>>(),
+        ["Observation"],
+        "one identity was asked for"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_reference_chain_that_reaches_itself_refuses() -> Result<(), Box<dyn Error>> {
+    // references.adoc: the engine should "keep track of which ones are
+    // already resolved" to prevent circular dependencies.
+    let program = compiled("ferrobridge_reference_cycle")?;
+    let index = template()?;
+    let mut observation = evidence_json();
+    if let Some(object) = observation.as_object_mut() {
+        object.insert(
+            String::from("hasMember"),
+            serde_json::json!([{"reference": "Observation/synthetic-observation-1"}]),
+        );
+    }
+    let mut held = BTreeMap::new();
+    held.insert(
+        String::from("Observation/synthetic-observation-1"),
+        Value::from_serde_json(observation),
+    );
+    let references = MapReferences(held);
+    let error = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({
+            "evidence": [{"detail": [{"reference": "Observation/synthetic-observation-1"}]}]
+        }))?,
+        &Seams::default().with_references(&references),
+        &defaults(),
+        &CallContext::new(),
+    )
+    .expect_err("the chain reaches the Observation twice");
+    assert!(
+        matches!(error, EngineError::ReferenceCycle { ref reference, .. } if reference == "Observation/synthetic-observation-1"),
+        "the refusal names the reference: {error}"
+    );
+    Ok(())
+}
+
+/// A synthetic `ehr:` URI of a composition version the link targets.
+const LINKED: &str = "ehr://ferrobridge.example/3a2f1c4e-0000-4000-8000-0000000000ab/compositions/d2b3c1a0-0000-4000-8000-000000000001::ferrobridge.example::1";
+
+#[test]
+fn a_link_is_written_and_read_back() -> Result<(), Box<dyn Error>> {
+    // concept-mappings.adoc §Linked mappings: the fields of the LINK are the
+    // ones the `link` block sets; RM 1.1.0 common.html §LINK.
+    let program = compiled("ferrobridge_link")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({"encounter": {"reference": LINKED}}))?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let entry = index.node(&AqlPath::new(
+        "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]",
+    ))?;
+    let written = index
+        .read(inbound.value(), entry, &[])?
+        .ok_or("the entry was written")?;
+    let link = written
+        .pointer("/links/0")
+        .ok_or("the entry carries a LINK")?;
+    assert_eq!(
+        link.pointer("/target/value")
+            .and_then(serde_json::Value::as_str),
+        Some(LINKED)
+    );
+    assert_eq!(
+        link.pointer("/meaning/value")
+            .and_then(serde_json::Value::as_str),
+        Some("the encounter the diagnosis was made in")
+    );
+    assert_eq!(
+        link.pointer("/type/value")
+            .and_then(serde_json::Value::as_str),
+        Some("encounter")
+    );
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(
+        outbound
+            .value()
+            .get("encounter")
+            .and_then(|encounter| encounter.get("reference"))
+            .and_then(Value::as_str),
+        Some(LINKED),
+        "the link's target reads back into the reference"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_link_to_what_no_ehr_uri_names_refuses() -> Result<(), Box<dyn Error>> {
+    // RM 1.1.0 data_types.html §DV_EHR_URI: the target "has the scheme name
+    // 'ehr'", and a relative FHIR reference has none.
+    let program = compiled("ferrobridge_link")?;
+    let index = template()?;
+    let error = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({
+            "encounter": {"reference": "Encounter/synthetic-encounter-1"}
+        }))?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )
+    .expect_err("a relative reference is no ehr: URI");
+    assert!(
+        matches!(error, EngineError::LinkTarget { ref target, .. } if target == "Encounter/synthetic-encounter-1"),
+        "the refusal names the target: {error}"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_participation_is_written_and_read_back() -> Result<(), Box<dyn Error>> {
+    // concept-mappings.adoc §Participation mappings: the function is the
+    // method's, the participant the Reference; RM 1.1.0 common.html
+    // §PARTICIPATION.
+    let program = compiled("ferrobridge_participation")?;
+    let index = template()?;
+    let asserter = serde_json::json!({
+        "reference": "Practitioner/synthetic-practitioner-1",
+        "display": "Synthetic Practitioner One"
+    });
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({"asserter": asserter}))?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let entry = index.node(&AqlPath::new(
+        "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]",
+    ))?;
+    let written = index
+        .read(inbound.value(), entry, &[])?
+        .ok_or("the entry was written")?;
+    let participation = written
+        .pointer("/other_participations/0")
+        .ok_or("the entry carries a PARTICIPATION")?;
+    assert_eq!(
+        participation
+            .pointer("/function/value")
+            .and_then(serde_json::Value::as_str),
+        Some("asserter")
+    );
+    assert_eq!(
+        participation
+            .pointer("/performer/name")
+            .and_then(serde_json::Value::as_str),
+        Some("Synthetic Practitioner One")
+    );
+    assert_eq!(
+        participation
+            .pointer("/performer/external_ref/namespace")
+            .and_then(serde_json::Value::as_str),
+        Some("Practitioner")
+    );
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(
+        outbound
+            .value()
+            .get("asserter")
+            .map(|found| found.to_serde_json(&mut fhir_types::codec::Path::root("Reference")))
+            .transpose()?,
+        Some(asserter),
+        "the participant reads back as the Reference it came from"
+    );
+    Ok(())
+}
+
+/// Returns the `bodySite.text` values of one Condition, in order.
+fn body_sites(condition: &Value) -> Vec<&str> {
+    condition
+        .get("bodySite")
+        .and_then(Value::as_array)
+        .map(|sites| {
+            sites
+                .iter()
+                .filter_map(|site| site.get("text").and_then(Value::as_str))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// Returns the body-site names the anatomical-location clusters of a
+/// composition carry, in order.
+fn cluster_sites(composition: &CanonicalComposition) -> Vec<String> {
+    composition
+        .value()
+        .pointer("/content/0/data/items")
+        .and_then(serde_json::Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .filter(|item| {
+                    item.get("archetype_node_id")
+                        .and_then(serde_json::Value::as_str)
+                        == Some("openEHR-EHR-CLUSTER.anatomical_location.v1")
+                })
+                .filter_map(|cluster| {
+                    cluster
+                        .pointer("/items/0/value/value")
+                        .and_then(serde_json::Value::as_str)
+                        .map(String::from)
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// Returns a Condition with one `bodySite` per text.
+fn condition_with_sites(texts: &[&str]) -> Result<Value, Box<dyn Error>> {
+    let sites: Vec<serde_json::Value> = texts
+        .iter()
+        .map(|text| serde_json::json!({"text": text}))
+        .collect();
+    condition_with(serde_json::json!({"bodySite": sites}))
+}
+
+#[test]
+fn a_split_into_openehr_creates_one_cluster_per_body_site() -> Result<(), Box<dyn Error>> {
+    // HierarchyMappings.adoc §Hierarchy and unique values: from FHIR to
+    // openEHR, each occurrence of the `with` path creates a new element.
+    let program = compiled("ferrobridge_split")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_sites(&["Left knee", "Right knee"])?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(cluster_sites(inbound.value()), ["Left knee", "Right knee"]);
+    let subject_skips = inbound
+        .warnings()
+        .iter()
+        .filter(|warning| {
+            **warning
+                == Warning::Skipped {
+                    mapping: String::from("subject"),
+                    reason: SkipReason::Unidirectional,
+                }
+        })
+        .count();
+    assert_eq!(
+        subject_skips,
+        1,
+        "a skip that holds for every group is declared once: {:?}",
+        inbound.warnings()
+    );
+    Ok(())
+}
+
+#[test]
+fn a_split_out_of_openehr_creates_one_resource_per_cluster() -> Result<(), Box<dyn Error>> {
+    // HierarchyMappings.adoc §split: "for each event in openEHR, one
+    // resource must be created", and the composition's other fields reach
+    // every one of them.
+    let program = compiled("ferrobridge_split")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_sites(&["Left knee", "Right knee"])?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let identities = MapIdentities {
+        ids: BTreeMap::from([(String::from("Condition"), String::from("split-condition-2"))]),
+        seen: RefCell::default(),
+    };
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default().with_identities(&identities),
+        &CallContext::new(),
+    )?;
+    assert_eq!(body_sites(outbound.value()), ["Left knee"]);
+    let [ref second] = *outbound.created() else {
+        return Err(Box::from("the second cluster created one more Condition"));
+    };
+    assert_eq!(body_sites(second), ["Right knee"]);
+    assert_eq!(
+        second.get("id").and_then(Value::as_str),
+        Some("split-condition-2")
+    );
+    for condition in [outbound.value(), second] {
+        assert_eq!(
+            condition
+                .get("code")
+                .and_then(|code| code.get("text"))
+                .and_then(Value::as_str),
+            Some("Synthetic problem one"),
+            "the content outside the split reaches every resource"
+        );
+    }
+    let seen = identities.seen.borrow();
+    let [ref request] = *seen.as_slice() else {
+        return Err(Box::from("one identity was asked for"));
+    };
+    assert_eq!(
+        request.occurrence(),
+        [2],
+        "the split occurrence travels in the identity request"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_split_derives_the_same_ids_on_every_run() -> Result<(), Box<dyn Error>> {
+    // The default identity sink derives the id from the request, so the same
+    // composition yields the same ids across runs.
+    let program = compiled("ferrobridge_split")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_sites(&["Left knee", "Right knee", "Left hip"])?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let ids = || -> Result<Vec<String>, Box<dyn Error>> {
+        let outbound = to_fhir(
+            &program,
+            &SCHEMAS,
+            &index,
+            inbound.value(),
+            &Seams::default(),
+            &CallContext::new(),
+        )?;
+        Ok(outbound
+            .created()
+            .iter()
+            .filter_map(|created| created.get("id").and_then(Value::as_str).map(String::from))
+            .collect())
+    };
+    let first = ids()?;
+    assert_eq!(
+        first.len(),
+        2,
+        "two further clusters created two Conditions"
+    );
+    assert_ne!(
+        first.first(),
+        first.get(1),
+        "each occurrence takes its own id"
+    );
+    assert_eq!(first, ids()?, "a second run derives the same ids");
+    Ok(())
+}
+
+#[test]
+fn a_split_groups_occurrences_by_their_unique_tuple() -> Result<(), Box<dyn Error>> {
+    // HierarchyMappings.adoc: "the `unique:` key defines the condition that
+    // triggers the creation of the new element", so occurrences that share
+    // the tuple share the element.
+    let program = compiled("ferrobridge_split_unique")?;
+    let index = template()?;
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with_sites(&["Left knee", "Right knee", "Left knee"])?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(
+        cluster_sites(inbound.value()),
+        ["Left knee", "Right knee"],
+        "two distinct body-site texts create two clusters"
+    );
+    let identities = MapIdentities {
+        ids: BTreeMap::from([(String::from("Condition"), String::from("unique-condition"))]),
+        seen: RefCell::default(),
+    };
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default().with_identities(&identities),
+        &CallContext::new(),
+    )?;
+    assert_eq!(outbound.created().len(), 1);
+    let seen = identities.seen.borrow();
+    assert_eq!(
+        seen.first().map(IdentityRequest::unique),
+        Some([String::from("Right knee")].as_slice()),
+        "the unique tuple travels in the identity request"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_slotted_files_split_runs_under_the_slot() -> Result<(), Box<dyn Error>> {
+    // HierarchyMappings.adoc: the hierarchy lives in the preprocessor of the
+    // file it belongs to, so a slotted file's split runs over the slotted
+    // mappings.
+    let split = compiled("ferrobridge_split")?;
+    let index = template()?;
+    let model = MappingName::new("ferrobridge_split")?;
+    let slot = Mapping::new(MappingParts {
+        method: Method::Slot {
+            model: model.clone(),
+            preprocessors: vec![Preprocessor::new(
+                model.clone(),
+                None,
+                None,
+                split.hierarchy().cloned(),
+            )],
+            mappings: split.mappings().to_vec(),
+        },
+        ..slot_parts(&model, Vec::new())
+    });
+    let host = cyclic_program(&MappingName::new("ferrobridge_slot_host")?, vec![slot])?;
+    let inbound = to_openehr(
+        &host,
+        &SCHEMAS,
+        &index,
+        &condition_with_sites(&["Left knee", "Right knee"])?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(cluster_sites(inbound.value()), ["Left knee", "Right knee"]);
+    let outbound = to_fhir(
+        &host,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(body_sites(outbound.value()), ["Left knee"]);
+    let [ref second] = *outbound.created() else {
+        return Err(Box::from("the slotted split created one more Condition"));
+    };
+    assert_eq!(body_sites(second), ["Right knee"]);
+    Ok(())
+}
+
+#[test]
+fn a_split_on_a_node_that_does_not_repeat_refuses() -> Result<(), Box<dyn Error>> {
+    // HierarchyMappings.adoc §split: an element is created per occurrence, so
+    // a node the template holds once takes no second one.
+    let split = compiled("ferrobridge_split")?;
+    let minimal = compiled("ferrobridge_diagnose_minimal")?;
+    let index = template()?;
+    let problem = mapping(&minimal, "problemDiagnose").ok_or("the problem mapping")?;
+    let fhir = problem.fhir().cloned();
+    let openehr = problem.openehr().cloned();
+    let hierarchy = fhirconnect::resolve::program::Hierarchy::new(
+        fhir,
+        openehr,
+        None,
+        split
+            .hierarchy()
+            .and_then(|found| found.split_openehr())
+            .cloned(),
+    );
+    let model = MappingName::new("ferrobridge_split")?;
+    let slot = Mapping::new(MappingParts {
+        method: Method::Slot {
+            model: model.clone(),
+            preprocessors: vec![Preprocessor::new(
+                model.clone(),
+                None,
+                None,
+                Some(hierarchy),
+            )],
+            mappings: split.mappings().to_vec(),
+        },
+        ..slot_parts(&model, Vec::new())
+    });
+    let host = cyclic_program(&MappingName::new("ferrobridge_slot_host")?, vec![slot])?;
+    let error = to_openehr(
+        &host,
+        &SCHEMAS,
+        &index,
+        &condition_document()?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )
+    .expect_err("the problem name occurs once");
+    assert!(
+        matches!(
+            error,
+            EngineError::Split {
+                reason: SplitRefusal::NotRepeating { .. },
+                ..
+            }
+        ),
+        "the refusal names the node: {error}"
+    );
+    Ok(())
+}
+
+#[test]
+fn the_contexts_openehr_condition_gates_a_run_out_of_openehr() -> Result<(), Box<dyn Error>> {
+    // Conditions.adoc §Conditions in the preprocessor: the condition "defines
+    // that the mapping file is only executed if the given condition is met",
+    // read on the input side, which is openEHR here.
+    let program = compiled("ferrobridge_context_gate")?;
+    let index = template()?;
+    let error = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        &onset_composition(&index, None)?,
+        &Seams::default(),
+        &CallContext::new(),
+    )
+    .expect_err("a composition with no comment is not admitted");
+    assert!(
+        matches!(error, EngineError::NotApplicable { .. }),
+        "the refusal is the context's: {error}"
+    );
+    let admitted = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        &onset_composition(&index, Some("the comment"))?,
+        &Seams::default(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(
+        admitted
+            .value()
+            .get("onsetDateTime")
+            .and_then(Value::as_str),
+        Some("2026-09-12T09:00:00+02:00"),
+        "a composition the condition admits maps"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_manual_path_no_flat_part_carries_is_refused() -> Result<(), Box<dyn Error>> {
+    // DV_TEXT.hyperlink is an RM attribute the Simplified Formats DV_TEXT table
+    // writes no part for, so a manual write through it would be lost.
+    let program = compiled("ferrobridge_manual_unsupported")?;
+    let index = template()?;
+    let error = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_document()?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )
+    .expect_err("no FLAT part carries the hyperlink");
+    assert!(
+        matches!(
+            error,
+            EngineError::UnsupportedTail { ref mapping, ref tail, .. }
+                if mapping == "certainty.linked" && tail.contains("hyperlink")
+        ),
+        "the refusal names the manual entry and the tail: {error}"
+    );
+    Ok(())
 }

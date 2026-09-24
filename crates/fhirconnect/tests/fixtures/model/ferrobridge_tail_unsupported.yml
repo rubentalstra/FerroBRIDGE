@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping that names DV_TEXT.hyperlink below the
+# DV_CODED_TEXT node of items[at0073]. The reference model carries the
+# attribute, and no FLAT part of the class does, so the engine refuses it.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_tail_unsupported
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "certaintyLink"
+    with:
+      fhir: "$resource.verificationStatus.text"
+      openehr: "$archetype/data[at0001]/items[at0073]/value/hyperlink/value"
