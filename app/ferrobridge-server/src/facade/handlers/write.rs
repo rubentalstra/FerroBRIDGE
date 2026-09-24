@@ -5,8 +5,8 @@
 //!
 //! Create is conditional and idempotent by source identity: a resource whose
 //! `id` and `meta.versionId` the identity map already knows resolves to an
-//! update of the composition it produced, never a second one
-//! (`docs/architecture.md` §4.6). Update needs the map to know the id, because
+//! update of the composition it produced, never a second one (no
+//! specification governs this: our own design). Update needs the map to know the id, because
 //! this milestone declares `updateCreate: false`, and it checks the CDR's
 //! current `ETag` when the client sends no `If-Match`.
 
@@ -36,7 +36,6 @@ use crate::facade::handlers::Refusal;
 use crate::facade::handlers::conditional;
 use crate::facade::handlers::read;
 use crate::facade::handlers::render;
-use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::derive;
 use crate::facade::identity::derive::EntryKey;
@@ -133,7 +132,7 @@ async fn resend(
         .map_err(|error| store_identifier(&error))?;
     let preceding = precondition(client, headers, &ehr_id, &container).await?;
     let composition = build(facade, program, inbound)?;
-    let rm = strict_read(facade, &composition, inbound)?;
+    let rm = strict_read(&composition)?;
     let context = commit::context(
         commit::Change::Modification,
         &facade.settings().system_id,
@@ -222,7 +221,7 @@ async fn commit_first(
     .await
     .map_err(|error| ehr_refusal(&error))?;
     let composition = build(facade, program, inbound)?;
-    let rm = strict_read(facade, &composition, inbound)?;
+    let rm = strict_read(&composition)?;
     let context = commit::context(
         commit::Change::Creation,
         &facade.settings().system_id,
@@ -296,8 +295,9 @@ fn record(
             ),
         )
     })?;
-    // TODO(#186): carry the split occurrence once `hierarchy.split` runs; one
-    // program maps one document today, so the occurrence is the first.
+    // NOTE: no specification governs this: our own design, the facade serves the
+    // first resource of a split and carries every further one as contained, so
+    // the entry's identity is its first occurrence.
     let key = EntryKey::new(version.versioned_object_uid(), entry.path(), 0);
     let map_key = derive::map_key(&key);
     let resource_type = inbound.resource_type();
@@ -407,8 +407,8 @@ fn answer(
 
 /// Returns the version a write must follow, from `If-Match` or from the CDR.
 ///
-/// "A missing `If-Match` checks the CDR's current `ETag`"
-/// (`docs/architecture.md` §4.6): the facade reads the latest version and uses
+/// A missing `If-Match` checks the CDR's current `ETag` (no specification
+/// governs this: our own design): the facade reads the latest version and uses
 /// it, so a concurrent writer still produces the `412` the CDR answers.
 async fn precondition(
     client: &Client,
@@ -476,8 +476,8 @@ fn build(
     program: &Loaded,
     inbound: &Inbound,
 ) -> Result<CanonicalComposition, Refusal> {
-    // NOTE: one instant serves every defaulted time of one ingest
-    // (`docs/architecture.md` §12), so the clock is read once here.
+    // NOTE: no specification governs this: our own design, one instant serves
+    // every defaulted time of one ingest, so the clock is read once here.
     let now = jiff::Timestamp::now().to_string();
 
     engine::inbound(
@@ -493,16 +493,11 @@ fn build(
 
 /// Re-reads a built composition through the strict RM reader.
 ///
-/// "The built composition is re-read through the strict RM reader before it is
-/// sent, so a bad document never reaches the CDR"
-/// (`docs/architecture.md` §12). The composition that comes back carries the
-/// `FEEDER_AUDIT` of the resource it was mapped from, so the CDR stores where
-/// the content came from.
-fn strict_read(
-    facade: &Facade,
-    composition: &CanonicalComposition,
-    inbound: &Inbound,
-) -> Result<Composition, Refusal> {
+/// The built composition is re-read through the strict RM reader before it is
+/// sent, so a bad document never reaches the CDR. It already carries the
+/// `FEEDER_AUDIT` the engine wrote for the resource it was mapped from
+/// ([`engine::inbound`]), so the CDR stores where the content came from.
+fn strict_read(composition: &CanonicalComposition) -> Result<Composition, Refusal> {
     let text = serde_json::to_string(composition.value()).map_err(|error| {
         reply::refusal(
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -511,21 +506,14 @@ fn strict_read(
             )),
         )
     })?;
-    let mut rm = openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
+    openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
         reply::refusal(
             StatusCode::UNPROCESSABLE_ENTITY,
             Issue::error(IssueType::Processing).diagnosing(format!(
                 "the built composition is no valid openEHR COMPOSITION: {error}"
             )),
         )
-    })?;
-    rm.feeder_audit = Some(commit::feeder_audit(
-        inbound.resource_type(),
-        inbound.id().map(ExternalResourceId::as_str),
-        inbound.version_id(),
-        &facade.settings().system_id,
-    ));
-    Ok(rm)
+    })
 }
 
 /// Returns the composition the CDR stored, or the built one.

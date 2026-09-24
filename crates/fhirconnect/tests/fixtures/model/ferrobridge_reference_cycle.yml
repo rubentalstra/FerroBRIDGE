@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose referenced Observation carries a
+# further reference through hasMember, so a document whose Observation names
+# itself closes a reference chain.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_reference_cycle
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "evidence"
+    with:
+      fhir: "$resource.evidence.detail"
+      openehr: "$reference"
+    reference:
+      resourceType: "Observation"
+      mappings:
+        - name: "member"
+          with:
+            fhir: "$fhirRoot.hasMember"
+            openehr: "$reference"
+          reference:
+            resourceType: "Observation"
+            mappings:
+              - name: "memberCode"
+                with:
+                  fhir: "$fhirRoot.code"
+                  openehr: "$archetype/data[at0001]/items[at0069]"
+                  type: "CODEABLECONCEPT"

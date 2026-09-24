@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose certainty Coding lands on the
+# CODE_PHRASE below the DV_CODED_TEXT node of items[at0073], so the tail's
+# class, and not the node's, selects the data-type cell.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_tail_phrase
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "certainty"
+    with:
+      fhir: "$resource.verificationStatus.coding"
+      openehr: "$archetype/data[at0001]/items[at0073]"
+      type: "NONE"
+    followedBy:
+      mappings:
+        - name: "certaintyPhrase"
+          with:
+            fhir: "$fhirRoot"
+            openehr: "value/defining_code"
+            type: "CODING"
+        - name: "certaintyText"
+          with:
+            fhir: "display"
+            openehr: "value/value"

@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose encounter reference becomes an
+# openEHR LINK on the problem-diagnosis entry, the linked-mapping shape of
+# types-of-mappings/concept-type/concept-mappings.adoc.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_link
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "encounterLink"
+    with:
+      fhir: "$resource.encounter"
+      openehr: "$archetype/links"
+    link:
+      meaning: "the encounter the diagnosis was made in"
+      type: "encounter"

@@ -78,6 +78,51 @@ A skipped element is a typed outcome carried to the caller, never a log line,
 and the declared set of losses is closed: the round-trip tests assert it
 exactly. An element the program cannot map refuses the unit.
 
+The concept-type methods that create or resolve a document are the one place
+each direction has a branch of its own, because the specification names a
+different act per side: `hierarchy.split` runs `split.fhir` going out of
+openEHR and `split.openehr` going in, and `reference` resolves a resource
+going in and creates one going out. `link` and `participationsFunction` keep
+the two branches beside each other over the same family, so they cannot
+drift.
+
+## What a run calls out to is a seam
+
+The engine makes no call of its own. `engine::seam::Seams` carries the
+`mappingCode` registry, the `ReferenceSource` a `reference` mapping fetches
+from, and the `IdentitySink` that names every resource a run creates;
+`Seams::default()` registers nothing, resolves nothing and derives ids by a
+digest over the `IdentityRequest`, so the same composition yields the same
+ids. A reference that resolves to nothing is a `Warning::Skipped`, never a
+silent nothing; a reference chain that reaches itself refuses. Created
+resources travel as `Outcome::created`: the operations lane answers them as
+Bundle entries and the facade carries them as contained resources with `#id`
+references. The operations lane resolves a reference against the request
+Bundle only.
+
+## Reference-model attributes beside the template nodes
+
+`FEEDER_AUDIT`, `LINK` and `PARTICIPATION` are no Web Template node, so the
+engine writes them as the `_feeder_audit`, `_link:i` and
+`_other_participation:i` FLAT families of the node they belong to
+(`engine::family`). A run whose `Defaults` carry an `engine::origin::Origin`
+records the originating system, the source resource and every defaulted field
+in the composition's `FEEDER_AUDIT`, in the same order as the
+`Warning::Defaulted` entries. A `link` target must be an `ehr:` URI, because
+`LINK.target` is a `DV_EHR_URI`; the linked composition of a `link` whose FHIR
+side is no reference is refused, since one run produces one composition.
+
+## A tail below a node is carried by the FLAT parts of its class
+
+The resolver records the RM class of the last attribute a tail names
+(`OpenehrTarget::leaf_class`). The engine reads the tail from the node's
+canonical JSON and writes it by merging into the value the place holds, and
+`engine::rm::carried` is the table of tails the FLAT parts of each class
+write. A tail outside it would be merged and then dropped on the way to the
+wire, so it refuses with `EngineError::UnsupportedTail` in both directions. A
+tail that ends on a data value runs the cell of the tail's class, not the
+node's.
+
 ## Where a mapping writes is one rule, applied to whichever side is the output
 
 The axes the parent mapping bound keep their instance; every repeating element
@@ -88,6 +133,13 @@ earlier one and a `0..n` input leaves only its last occurrence. That one rule
 is what makes the specification's three recurrence examples come out as the
 specification draws them, in both directions, and the counter-examples come out
 wrong in the documented way rather than in some other way.
+
+A `hierarchy.split` adds pins to that rule and nothing else: each group of
+occurrences (one per occurrence, or one per distinct `unique` tuple) runs the
+whole mapping set with the split node's openEHR axis pinned to the group's
+instance, and going into openEHR with the FHIR `with` element pinned too. A
+pinned axis counts as bound, so every mapping under the node writes into the
+group's element and every mapping outside it runs as it would unsplit.
 
 ## Tests
 

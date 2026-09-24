@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose evidence mapping initializes the
+# referenced Observation and maps its code onto the problem-diagnosis
+# comment, the reference shape of types-of-mappings/concept-type/Reference.adoc.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_reference
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "evidence"
+    with:
+      fhir: "$resource.evidence.detail"
+      openehr: "$reference"
+    reference:
+      resourceType: "Observation"
+      mappings:
+        - name: "evidenceCode"
+          with:
+            fhir: "$fhirRoot.code"
+            openehr: "$archetype/data[at0001]/items[at0069]"
+            type: "CODEABLECONCEPT"

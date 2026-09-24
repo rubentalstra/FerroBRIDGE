@@ -25,6 +25,11 @@ use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::index::WebTemplateIndex;
 
 use crate::engine::context::CallContext;
+use crate::engine::origin::Origin;
+use crate::engine::origin::SourceItem;
+use crate::engine::seam::BundleReferences;
+use crate::engine::seam::NoReferences;
+use crate::engine::seam::Seams;
 use crate::engine::traverse;
 use crate::engine::traverse::Defaults;
 use crate::engine::traverse::MappingFunctions;
@@ -66,7 +71,8 @@ impl Settings {
     /// Creates the settings of one run.
     ///
     /// `device` is the engine's own `Device` reference, the `Provenance`
-    /// `agent.who` a call that supplies no `context.who` gets. `now` is the
+    /// `agent.who` a call that supplies no `context.who` gets and the
+    /// `FEEDER_AUDIT` system a `$toopenehr` composition records. `now` is the
     /// caller's current timestamp: it is the `Provenance.recorded` instant and
     /// the composition context start time the engine defaults to. This crate
     /// reads no clock.
@@ -135,7 +141,8 @@ pub fn to_fhir<T: Table + ?Sized>(
     let program = select_by_template(programs.programs(), &template)
         .map_err(|source| OperationError::Select { source })?;
     let context = request.context().cloned().unwrap_or_default();
-    let outcome = traverse::to_fhir(program, table, index, &composition, functions, &context)
+    let seams = Seams::default().with_functions(functions);
+    let outcome = traverse::to_fhir(program, table, index, &composition, &seams, &context)
         .map_err(|source| OperationError::Mapping {
             source: Box::new(source),
         })?;
@@ -144,29 +151,40 @@ pub fn to_fhir<T: Table + ?Sized>(
     subject(table, &mut object, &resource_type, request.context())?;
     let id = identity(&object, &composition, &resource_type)?;
     object.insert(String::from("id"), Value::String(id.clone()));
-    let mapped =
-        Resource::from_json(&object, &mut Path::root(&resource_type)).map_err(|source| {
-            OperationError::Mapped {
-                version: "R4",
-                source: Box::new(source),
-            }
-        })?;
+    let mapped = typed(&object, &resource_type)?;
+    let mut targets = vec![format!("{resource_type}/{id}")];
+    let mut resources = vec![mapped];
+    // NOTE: a created resource carries the id the identity sink gave it and is
+    // referenced as `<type>/<id>`, so it travels as one more entry of the answer
+    // (<https://hl7.org/fhir/R4/bundle.html#references>).
+    for created in outcome.created() {
+        let mut object = object_of(created)?;
+        let kind = object
+            .get("resourceType")
+            .and_then(Value::as_str)
+            .map(String::from)
+            .ok_or(OperationError::NotAnObject {
+                what: "created resource",
+            })?;
+        subject(table, &mut object, &kind, request.context())?;
+        if let Some(created_id) = object.get("id").and_then(Value::as_str) {
+            targets.push(format!("{kind}/{created_id}"));
+        }
+        resources.push(typed(&object, &kind)?);
+    }
     let source = match composition_uid(&composition) {
         Some(uid) => CompositionSource::new(template.as_str()).with_uid(uid),
         None => CompositionSource::new(template.as_str()),
     };
-    let target = format!("{resource_type}/{id}");
     let provenance = provenance::of_run(
-        core::slice::from_ref(&target),
+        &targets,
         settings.now(),
         settings.device(),
         &source,
         request.context(),
     );
-    let mut entry = vec![
-        entry_of(mapped),
-        entry_of(Resource::Provenance(Box::new(provenance))),
-    ];
+    let mut entry: Vec<BundleEntry> = resources.into_iter().map(entry_of).collect();
+    entry.push(entry_of(Resource::Provenance(Box::new(provenance))));
     if let Some(reported) = issues::of_warnings(outcome.warnings()) {
         entry.push(entry_of(Resource::OperationOutcome(Box::new(reported))));
     }
@@ -201,13 +219,22 @@ pub fn to_openehr<T: Table + ?Sized>(
             template: String::from(template.as_str()),
         })?;
     let document = mapped_resource(&entries, program)?;
+    let mut origin = Origin::new(settings.device());
+    if let Some(source) = SourceItem::of(&document) {
+        origin = origin.with_source(source);
+    }
+    let defaults = settings.defaults().clone().with_origin(origin);
+    let references = BundleReferences::new(bundle_entries(request.bundle())?, &NoReferences);
+    let seams = Seams::default()
+        .with_functions(functions)
+        .with_references(&references);
     let outcome = traverse::to_openehr(
         program,
         table,
         index,
         &document,
-        functions,
-        settings.defaults(),
+        &seams,
+        &defaults,
         &CallContext::new(),
     )
     .map_err(|source| OperationError::Mapping {
@@ -366,6 +393,35 @@ fn entry_of(resource: Resource) -> BundleEntry {
         resource: Some(resource),
         ..BundleEntry::default()
     }
+}
+
+/// Returns a mapped resource object as the typed resource of `resource_type`.
+fn typed(object: &Object, resource_type: &str) -> Result<Resource, OperationError> {
+    Resource::from_json(object, &mut Path::root(resource_type)).map_err(|source| {
+        OperationError::Mapped {
+            version: "R4",
+            source: Box::new(source),
+        }
+    })
+}
+
+/// Returns every entry resource of `bundle` with its `fullUrl`, as a
+/// reference source reads them.
+///
+/// A reference that the Bundle does not resolve goes to no further source:
+/// the operations "change no server state" and reach no server, so an
+/// unresolved reference is a declared skip of the run.
+fn bundle_entries(bundle: &Bundle) -> Result<Vec<(Option<String>, Value)>, OperationError> {
+    let mut entries = Vec::new();
+    for entry in &bundle.entry {
+        let Some(ref resource) = entry.resource else {
+            continue;
+        };
+        let object = Json::to_json(resource).map_err(|source| OperationError::Encode { source })?;
+        let full_url = entry.full_url.as_ref().and_then(|url| url.value.clone());
+        entries.push((full_url, Value::Object(object)));
+    }
+    Ok(entries)
 }
 
 /// Returns every entry resource of `bundle` as a JSON object.

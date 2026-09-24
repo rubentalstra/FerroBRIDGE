@@ -3,9 +3,9 @@
 
 //! `POST [base]`: a `transaction` Bundle, all or nothing.
 //!
-//! "A transaction Bundle that cannot be mapped in full is refused with one
-//! `OperationOutcome` naming every failing entry and nothing is committed"
-//! (`docs/architecture.md` §4.6). So every entry is mapped first, and only a
+//! A transaction Bundle that cannot be mapped in full is refused with one
+//! `OperationOutcome` naming every failing entry and nothing is committed
+//! (the refusal shape is our own design). So every entry is mapped first, and only a
 //! Bundle that mapped in full reaches the CDR, as one CONTRIBUTION, which is
 //! what makes the commit itself atomic (`ehr-codegen.openapi.yaml`,
 //! `contribution_create`).
@@ -212,9 +212,8 @@ fn map_one(
                 .diagnosing(render::chain(&error))
                 .at(String::from(full_url))
         })?;
-    // NOTE: one instant serves every defaulted time of one ingest
-    // (`docs/architecture.md` §12), so each entry of a Bundle reads the clock
-    // once and the whole Bundle commits with those readings.
+    // NOTE: no specification governs this: our own design, one instant serves
+    // every defaulted time of one ingest, so each entry reads the clock once.
     let now = jiff::Timestamp::now().to_string();
     let built = crate::facade::engine::inbound(
         program.program(),
@@ -236,21 +235,13 @@ fn map_one(
             ))
             .at(String::from(full_url))
     })?;
-    let mut rm = openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
+    let rm = openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
         Issue::error(IssueType::Processing)
             .diagnosing(format!(
                 "the built composition is no valid openEHR COMPOSITION: {error}"
             ))
             .at(String::from(full_url))
     })?;
-    rm.feeder_audit = Some(commit::feeder_audit(
-        inbound.resource_type(),
-        inbound
-            .id()
-            .map(crate::facade::identity::ExternalResourceId::as_str),
-        inbound.version_id(),
-        &facade.settings().system_id,
-    ));
     Ok((
         Mapped {
             full_url: String::from(full_url),

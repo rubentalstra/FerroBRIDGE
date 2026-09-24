@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose preprocessor splits each
+# anatomical-location cluster into its own Condition going out of openEHR,
+# and each Condition.bodySite into its own cluster going in, the split shape
+# of types-of-mappings/concept-type/HierarchyMappings.adoc.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_split
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+preprocessor:
+  hierarchy:
+    with:
+      fhir: "$resource.bodySite"
+      openehr: "$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.anatomical_location.v1]"
+    split:
+      fhir:
+        create: "resource"
+      openehr:
+        create: "archetype"
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "bodySite"
+    with:
+      fhir: "$resource.bodySite"
+      openehr: "$archetype/data[at0001]/items[openEHR-EHR-CLUSTER.anatomical_location.v1]/items[at0001]"
+      type: "CODEABLECONCEPT"
+
+  - name: "subject"
+    unidirectional: "openehr->fhir"
+    with:
+      fhir: "$resource.subject"
+    manual:
+      - name: "subjectReference"
+        fhir:
+          - path: "reference"
+            value: "Patient/synthetic-subject-0001"

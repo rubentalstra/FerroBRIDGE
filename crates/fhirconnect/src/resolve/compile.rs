@@ -996,7 +996,7 @@ impl<'a> Compiler<'a> {
             return Method::Value;
         }
         let archetype = archetype_of(slotted).cloned();
-        if let (Some(archetype), Ok((node, _))) = (archetype, self.locate(&scope.openehr)) {
+        if let (Some(archetype), Ok((node, _, _))) = (archetype, self.locate(&scope.openehr)) {
             match node.node_id() {
                 Some(carried) if node_id_matches(archetype.as_str(), carried) => {
                     self.check_revision(slotted, Some(carried));
@@ -1411,7 +1411,7 @@ impl<'a> Compiler<'a> {
             return None;
         }
         match self.locate(&resolved) {
-            Ok((node, tail)) => {
+            Ok((node, tail, leaf)) => {
                 let occurrences = match occurrences(self.template, node) {
                     Ok(axes) => axes,
                     Err(error) => {
@@ -1429,12 +1429,11 @@ impl<'a> Compiler<'a> {
                         return None;
                     }
                 };
-                Some(OpenehrTarget::new(
-                    resolved,
-                    node.clone(),
-                    tail,
-                    occurrences,
-                ))
+                let target = OpenehrTarget::new(resolved, node.clone(), tail, occurrences);
+                Some(match leaf {
+                    Some(class) => target.with_leaf_class(class),
+                    None => target,
+                })
             }
             Err(error) => {
                 let (code, message) = match error {
@@ -1515,7 +1514,10 @@ impl<'a> Compiler<'a> {
     /// the reference model or through a structure the template compacted away.
     /// A segment the template carries nowhere and that constrains a node
     /// identity is refused. No specification governs this: our own design.
-    fn locate(&self, path: &RmPath) -> Result<(&'a ResolvedNode, RmPath), LocateError> {
+    fn locate(
+        &self,
+        path: &RmPath,
+    ) -> Result<(&'a ResolvedNode, RmPath, Option<String>), LocateError> {
         let total = path.segments.len();
         for taken in (0..=total).rev() {
             let head = path.segments.get(..taken).unwrap_or_default();
@@ -1553,15 +1555,15 @@ impl<'a> Compiler<'a> {
                     segment.attribute
                 )));
             }
-            if let Err(message) = rm_tail(node.rm_type(), &rest) {
-                return Err(LocateError::Unknown(format!(
+            let leaf = rm_tail(node.rm_type(), &rest).map_err(|message| {
+                LocateError::Unknown(format!(
                     "the template `{}` reaches `{}` and `{path}` walks `{rest}` below it: \
                      {message}",
                     self.template.template_id(),
                     node.aql_path().as_str()
-                )));
-            }
-            return Ok((node, rest));
+                ))
+            })?;
+            return Ok((node, rest, leaf));
         }
         Err(LocateError::Unknown(format!(
             "the template `{}` has no node at `{path}`",
@@ -1674,38 +1676,66 @@ static RESOURCE_ROOT: LazyLock<FhirPath> = LazyLock::new(|| {
 ///
 /// A type the model does not carry stops the walk rather than refusing it: the
 /// mapping is then checked as far as the model reaches and no further.
-fn rm_tail(rm_type: &str, tail: &RmPath) -> Result<(), String> {
+///
+/// Returns the class of the last attribute the tail names, `None` for an
+/// empty tail and for a walk the model stopped before its end. The class is
+/// the declared type, or its one concrete descendant when the declared type is
+/// abstract and has exactly one.
+fn rm_tail(rm_type: &str, tail: &RmPath) -> Result<Option<String>, String> {
     let mut candidates = concrete_forms(rm_type);
     if candidates.is_empty() {
-        return Ok(());
+        return Ok(None);
     }
-    for segment in &tail.segments {
+    let mut leaf: Option<&'static str> = None;
+    for (position, segment) in tail.segments.iter().enumerate() {
         let attribute = segment.attribute.as_str();
-        let mut carried = false;
+        let mut declared: Option<&'static str> = None;
         let mut next: Vec<&'static str> = Vec::new();
         for candidate in &candidates {
             let Some(found) = rm_model::attribute(candidate, attribute) else {
                 continue;
             };
-            carried = true;
+            declared.get_or_insert(found.declared_type);
             for form in concrete_forms(found.declared_type) {
                 if !next.contains(&form) {
                     next.push(form);
                 }
             }
         }
-        if !carried {
+        let Some(declared) = declared else {
             return Err(format!(
                 "`{attribute}` is no attribute of `{}` in the openEHR reference model",
                 candidates.join("`, `")
             ));
-        }
+        };
+        leaf = Some(declared);
         if next.is_empty() {
-            return Ok(());
+            let last = position.saturating_add(1) == tail.segments.len();
+            return Ok(last.then(|| String::from(declared)));
         }
         candidates = next;
     }
-    Ok(())
+    Ok(leaf.map(concrete_leaf))
+}
+
+/// Returns the one concrete form of an abstract class, or the class itself.
+fn concrete_leaf(declared: &'static str) -> String {
+    let Some(class) = rm_model::class(declared) else {
+        return String::from(declared);
+    };
+    if !class.is_abstract {
+        return String::from(declared);
+    }
+    let concrete: Vec<&str> = class
+        .descendants
+        .iter()
+        .copied()
+        .filter(|name| rm_model::class(name).is_some_and(|found| !found.is_abstract))
+        .collect();
+    match *concrete.as_slice() {
+        [only] => String::from(only),
+        _ => String::from(declared),
+    }
 }
 
 /// Returns the reference-model class plus every concrete class below it.

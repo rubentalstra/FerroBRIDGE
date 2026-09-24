@@ -30,6 +30,8 @@ openehr-base.workspace = true
 # crate names the same crate rather than re-exporting them.
 openehr-rm.workspace = true
 serde_json.workspace = true
+# The digest the default identity sink derives a created resource's id from.
+sha2.workspace = true
 # The generated FHIR model: the lexical `Value` tree the path model walks and
 # the element table that guides it (docs/architecture.md section 4.1).
 fhir-types = { workspace = true, features = ["r4", "resources"] }
