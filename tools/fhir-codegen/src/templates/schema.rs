@@ -47,9 +47,9 @@ pub enum Kind {
 
 /// One element of a type, in definition order.
 ///
-/// The cardinality, the path, the type codes and the content reference are the
-/// `ElementDefinition` fields of the definition this element comes from
-/// (<https://hl7.org/fhir/R4/elementdefinition.html>).
+/// The cardinality, the path, the type codes, the content reference and the
+/// two flags are the `ElementDefinition` fields of the definition this element
+/// comes from (<https://hl7.org/fhir/R4/elementdefinition.html>).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FieldSchema {
     /// The element name (the JSON key; a choice's stem).
@@ -69,6 +69,12 @@ pub struct FieldSchema {
     pub types: &'static [&'static str],
     /// The element path a `contentReference` names, without the leading `#`.
     pub content_reference: Option<&'static str>,
+    /// Whether the element is part of the summary view, the `isSummary` flag a
+    /// `_summary=true` answer keeps (<https://hl7.org/fhir/R4/search.html#summary>).
+    pub is_summary: bool,
+    /// Whether the element modifies the meaning of its parent, the `isModifier`
+    /// flag (<https://hl7.org/fhir/R4/conformance-rules.html#isModifier>).
+    pub is_modifier: bool,
 }
 
 /// One type's elements.

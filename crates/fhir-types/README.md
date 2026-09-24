@@ -44,7 +44,8 @@ Each version module carries `schema::SCHEMAS`, the elements of every type it
 emits in definition order, over the table types in the crate-level
 `fhir_types::schema` module. Per element it holds the `ElementDefinition` path,
 `min`, `max`, the type codes the definition lists, the `contentReference`
-target, and the kind the XML codec reads. `Schemas::element` resolves a dotted
+target, the `isSummary` and `isModifier` flags, and the kind the XML codec
+reads. `Schemas::element` resolves a dotted
 element path through complex types, backbone elements and content references,
 and answers on a choice element's base path and on each expanded form the JSON
 representation gives it; `Schemas::type_of` gives the type a path resolves to.
