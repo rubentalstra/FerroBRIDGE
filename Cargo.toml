@@ -42,7 +42,7 @@ thiserror = "2.0.20"
 # crates.io on 2026-09-22.
 regex = "1.13.1"
 # The openEHR RM 1.1.0 model and the BASE path parser.
-openehr-rm = "0.0.64"
+openehr-rm = "0.0.67"
 # The BASE identification types the RM leaves to it: TERMINOLOGY_ID is a
 # CODE_PHRASE field, so a lens that builds one names this crate.
 openehr-base = "0.0.64"
