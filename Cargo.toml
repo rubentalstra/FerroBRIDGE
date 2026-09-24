@@ -76,7 +76,7 @@ fhirconnect = { path = "crates/fhirconnect" }
 # 0.0.64; the alternative is a hand-written copy of a generated model, which
 # .claude/rules/codegen.md forbids.
 openehr-its = { version = "0.0.64", default-features = false, features = ["flat", "rest-server"] }
-openehr-am = "0.0.64"
+openehr-am = "0.0.67"
 # Test-only: the ADL 2 test fixtures are compiled from their .adls sources, so
 # the parser is a dev-dependency of openehr-mapping-core and never ships.
 openehr-adl = "0.0.64"

@@ -935,7 +935,7 @@ dependencies = [
  "futures-core",
  "futures-util",
  "http",
- "openehr-am",
+ "openehr-am 0.0.67",
  "openehr-its",
  "openehr-rm",
  "reqwest",
@@ -963,7 +963,7 @@ dependencies = [
  "fhirconnect",
  "http",
  "jiff",
- "openehr-base",
+ "openehr-base 0.0.64",
  "openehr-its",
  "openehr-mapping-core",
  "openehr-rm",
@@ -1062,7 +1062,7 @@ dependencies = [
  "fhir-types",
  "insta",
  "jsonschema",
- "openehr-base",
+ "openehr-base 0.0.64",
  "openehr-its",
  "openehr-mapping-core",
  "openehr-rm",
@@ -2241,9 +2241,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cc992e1353119ef869753c8f0fb78dda1e8613d4ced5ff1e5f69639315e7812b"
 dependencies = [
  "indexmap 2.14.2",
- "openehr-am",
- "openehr-base",
- "openehr-lang",
+ "openehr-am 0.0.64",
+ "openehr-base 0.0.64",
+ "openehr-lang 0.0.64",
  "openehr-rm",
  "openehr-term",
  "regex",
@@ -2258,8 +2258,20 @@ version = "0.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0e128f482dca8e541117fa0a14dfdf1400bd752495bbd5e56ed414c59cfc16a"
 dependencies = [
- "openehr-base",
- "openehr-lang",
+ "openehr-base 0.0.64",
+ "openehr-lang 0.0.64",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "openehr-am"
+version = "0.0.67"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2c7f1ed8e704cedf71d9d861695020bcd3189d131e15d2df3a9bd5af81190c3"
+dependencies = [
+ "openehr-base 0.0.67",
+ "openehr-lang 0.0.67",
  "serde",
  "serde_json",
 ]
@@ -2269,6 +2281,18 @@ name = "openehr-base"
 version = "0.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9795d227cfb05ea31d37360199c5b30869fb773298ed76b17cc2a78d4b8f383c"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror",
+ "uuid",
+]
+
+[[package]]
+name = "openehr-base"
+version = "0.0.67"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3a7649d4d831bb057717dbf58d19c4e30a9df2111062674b7a507134a305386"
 dependencies = [
  "serde",
  "serde_json",
@@ -2287,9 +2311,9 @@ dependencies = [
  "fancy-regex",
  "http",
  "indexmap 2.14.2",
- "openehr-am",
- "openehr-base",
- "openehr-lang",
+ "openehr-am 0.0.64",
+ "openehr-base 0.0.64",
+ "openehr-lang 0.0.64",
  "openehr-rm",
  "openehr-term",
  "quick-xml",
@@ -2310,7 +2334,22 @@ dependencies = [
  "chumsky",
  "indexmap 2.14.2",
  "logos",
- "openehr-base",
+ "openehr-base 0.0.64",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "openehr-lang"
+version = "0.0.67"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4e3f5bb4f4111d35c1a4de8d4dc7082e3b6cf015fca4c7e54d703f4d5ea77a4"
+dependencies = [
+ "chumsky",
+ "indexmap 2.14.2",
+ "logos",
+ "openehr-base 0.0.67",
  "serde",
  "serde_json",
  "thiserror",
@@ -2323,7 +2362,7 @@ dependencies = [
  "ferrobridge-testkit",
  "insta",
  "openehr-adl",
- "openehr-am",
+ "openehr-am 0.0.67",
  "openehr-its",
  "openehr-rm",
  "proptest",
@@ -2339,7 +2378,7 @@ version = "0.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d84db4e6bb4f3f4095058dfabc1eb7e407fc4e23777d16b560223ea609ffe3b4"
 dependencies = [
- "openehr-base",
+ "openehr-base 0.0.64",
  "openehr-term",
  "rust_decimal",
  "serde",
@@ -2356,7 +2395,7 @@ version = "0.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ce7e9832ead11cb4fa1fb2dd0a2fb662fd57f1676caa95528d01c897786bcd5"
 dependencies = [
- "openehr-base",
+ "openehr-base 0.0.64",
  "roxmltree",
  "serde",
  "thiserror",
