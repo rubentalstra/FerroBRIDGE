@@ -79,7 +79,7 @@ openehr-its = { version = "0.0.64", default-features = false, features = ["flat"
 openehr-am = "0.0.64"
 # Test-only: the ADL 2 test fixtures are compiled from their .adls sources, so
 # the parser is a dev-dependency of openehr-mapping-core and never ships.
-openehr-adl = "0.0.64"
+openehr-adl = "0.0.67"
 # The HTTP client for the CDR wire. reqwest 0.13 spells the rustls selection
 # "rustls"; it carries its own platform verifier and aws-lc-rs provider.
 reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "json", "http2"] }
