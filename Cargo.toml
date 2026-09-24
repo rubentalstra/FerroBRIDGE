@@ -45,7 +45,7 @@ regex = "1.13.1"
 openehr-rm = "0.0.64"
 # The BASE identification types the RM leaves to it: TERMINOLOGY_ID is a
 # CODE_PHRASE field, so a lens that builds one names this crate.
-openehr-base = "0.0.64"
+openehr-base = "0.0.67"
 # anyhow is a binary-only error type (.claude/rules/rust-style.md).
 anyhow = "1.0.104"
 clap = { version = "4.6.6", features = ["derive"] }
