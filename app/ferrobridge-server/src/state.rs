@@ -112,11 +112,18 @@ impl AppState {
     /// Returns the state `settings` describes, with one indicator per
     /// configured upstream.
     ///
+    /// The operations lane compiles its mapping set here, against the
+    /// templates [`crate::mappings::load_configured`] takes from the template
+    /// directory or the CDR, so a template the CDR does not serve refuses the
+    /// start.
+    ///
     /// # Errors
     /// Returns [`crate::config::Error::Client`] when an upstream client
-    /// refuses the configuration it was handed.
-    pub fn build(settings: &Settings) -> Result<Self, crate::config::Error> {
+    /// refuses the configuration it was handed, and
+    /// [`crate::config::Error::Mappings`] when the mapping set does not load.
+    pub async fn build(settings: &Settings) -> Result<Self, crate::config::Error> {
         let mut indicators: Vec<Arc<dyn crate::health::HealthIndicator>> = Vec::new();
+        let mut cdr = None;
         if let Some(config) = settings.cdr.as_ref() {
             let client =
                 ferrobridge_openehr::client::Client::new(config.clone()).map_err(|source| {
@@ -125,7 +132,8 @@ impl AppState {
                         source: Box::new(source),
                     }
                 })?;
-            indicators.push(Arc::new(indicators::Cdr::new(client)));
+            indicators.push(Arc::new(indicators::Cdr::new(client.clone())));
+            cdr = Some(client);
         }
         if let Some(config) = settings.terminology.as_ref() {
             let client =
@@ -137,29 +145,23 @@ impl AppState {
                 })?;
             indicators.push(Arc::new(indicators::Terminology::new(client)));
         }
-        let operations = match settings.mappings {
-            Some(ref mappings) if settings.operations.enabled => {
-                let programs = crate::mappings::load(mappings).map_err(|source| {
-                    crate::config::Error::Client {
-                        upstream: "mappings",
-                        source: Box::new(source),
-                    }
-                })?;
-                tracing::info!(
-                    programs = programs.len(),
-                    "the FHIRconnect mapping set is compiled"
-                );
-                Some(
-                    OperationsLane::new(programs, settings.operations.device_reference.as_str())
-                        .with_composition_defaults(
-                            settings.operations.composer.as_str(),
-                            settings.operations.composition_language.clone(),
-                            settings.operations.composition_territory.clone(),
-                        ),
+        let programs = crate::mappings::load_configured(settings, cdr.as_ref())
+            .await
+            .map_err(|source| crate::config::Error::Mappings {
+                source: Box::new(source),
+            })?;
+        let operations = programs.map(|programs| {
+            tracing::info!(
+                programs = programs.len(),
+                "the FHIRconnect mapping set is compiled"
+            );
+            OperationsLane::new(programs, settings.operations.device_reference.as_str())
+                .with_composition_defaults(
+                    settings.operations.composer.as_str(),
+                    settings.operations.composition_language.clone(),
+                    settings.operations.composition_territory.clone(),
                 )
-            }
-            _ => None,
-        };
+        });
         Ok(Self {
             health: Registry::new(indicators),
             logged_query_parameters: settings.telemetry.logged_query_parameters.clone(),

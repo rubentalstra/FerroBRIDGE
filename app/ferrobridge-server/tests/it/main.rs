@@ -18,6 +18,7 @@ mod config;
 mod facade;
 mod facade_e2e;
 mod http;
+mod lane_templates;
 mod operations;
 mod readiness;
 mod run;

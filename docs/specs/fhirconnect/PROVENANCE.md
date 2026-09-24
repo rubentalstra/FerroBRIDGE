@@ -9,13 +9,13 @@ docs/VERSIONS.md and re-run the script.
 
 - Source: <https://github.com/SevKohler/FHIRconnect-spec>
 - Pin: commit `195b07fdb4c78da0432fdd1e9dbd127b81be6165`
-- Fetched: 2026-09-12
+- Fetched: 2026-09-24
 - Upstream licence: Apache License 2.0, the repository's `LICENSE` file,
   vendored beside this file
 - Layout: the upstream paths, unchanged
-- Files: 71, of which 61 are `modules/ROOT/pages/**/*.adoc`
+- Files: 74, of which 61 are `modules/ROOT/pages/**/*.adoc`
 - Tree digest (sha256 over the sorted per-file `sha256  path` listing, both
-  `PROVENANCE.md` files excluded): `217f75e08201daa2ff8671e38b99c6cd96d16776e90ef9a72b682c0273d95315`
+  `PROVENANCE.md` files excluded): `f3e9a165a79d2d3cbaf1f9d1516356f21501709fcd2b3bb4eb20d17039da69d1`
 
 ## What is here
 

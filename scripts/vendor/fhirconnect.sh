@@ -7,9 +7,11 @@
 # (.claude/rules/vendored-inputs.md): the two published draft-07 mapping
 # schemas, the prose pages the design cites, the navigation, and the upstream
 # licence, from the commit the "FHIRconnect specification source" row of
-# docs/VERSIONS.md pins. It then vendors the unmerged REST API chapter and its
-# FSH operation definitions into docs/specs/fhirconnect/draft-rest-api/ from the
-# commit the "FHIRconnect REST API chapter (draft, unmerged)" row pins.
+# docs/VERSIONS.md pins. It then vendors the unmerged REST API chapter, its FSH
+# operation definitions and the implementation guide configuration that sets
+# their canonical base (rest/sushi-config.yaml, rest/ig.ini) into
+# docs/specs/fhirconnect/draft-rest-api/ from the commit the "FHIRconnect REST
+# API chapter (draft, unmerged)" row pins.
 #
 # The schemas ship twice upstream, and the two copies differ at the pinned
 # commit: build/site/FHIRconnect/v1.0.0/_attachments/ is the rendered v1.0.0
@@ -99,7 +101,10 @@ corpus_take "$draft_root" "$draft_dest" \
   "modules/ROOT/pages/engine/rest-api.adoc" \
   "rest/input/fsh/operations/ToFhir.fsh" \
   "rest/input/fsh/operations/ToOpenEhr.fsh" \
-  "rest/input/pagecontent/operations.md"
+  "rest/input/pagecontent/index.md" \
+  "rest/input/pagecontent/operations.md" \
+  "rest/ig.ini" \
+  "rest/sushi-config.yaml"
 
 fetched="$(corpus_fetched)"
 

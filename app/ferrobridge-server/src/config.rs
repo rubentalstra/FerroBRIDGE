@@ -51,9 +51,11 @@ pub struct Config {
 
 /// The mapping set this deployment runs.
 ///
-/// One tree of FHIRconnect mapping files and, for the two operations, one
-/// directory of the operational templates they compile against. Both are read
-/// once at boot, so a mapping that does not compile is a refusal to start
+/// One tree of FHIRconnect mapping files and, optionally, one directory of the
+/// operational templates the two operations compile against. With no
+/// `templates`, the operations take each template a context names from the
+/// `[cdr]`, and a `directory` with neither is refused at boot. Everything is
+/// read once at boot, so a mapping that does not compile is a refusal to start
 /// rather than a failure on the request that first touches it.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
 #[serde(default, deny_unknown_fields)]
@@ -61,6 +63,9 @@ pub struct Mappings {
     /// The directory the FHIRconnect files are read from, recursively.
     pub directory: Option<PathBuf>,
     /// The directory holding the operational templates, as OPT 1.4 XML.
+    ///
+    /// When set, it wins over the `[cdr]` for the two operations; the facade
+    /// always takes its templates from the CDR.
     pub templates: Option<PathBuf>,
 }
 
@@ -112,8 +117,9 @@ impl Default for Facade {
 
 /// The FHIRconnect operations lane.
 ///
-/// The two operations are pure transformations that reach no CDR, so they are
-/// served whenever a mapping set names both of its directories.
+/// The two operations are pure transformations that reach no CDR on a
+/// request, so they are served whenever `[mappings] directory` is set and its
+/// templates load, from `[mappings] templates` or, at boot, from the `[cdr]`.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Operations {
@@ -422,6 +428,13 @@ pub enum Error {
         #[source]
         source: Box<dyn std::error::Error + Send + Sync>,
     },
+    /// The mapping set the operations lane runs did not load.
+    #[error("the mapping set could not be loaded")]
+    Mappings {
+        /// Why it did not load, the template and upstream status included.
+        #[source]
+        source: Box<crate::mappings::Error>,
+    },
 }
 
 impl Config {
@@ -490,8 +503,23 @@ impl Config {
     /// both set, [`Error::Secret`] when a `_file` cannot be read, and the
     /// value errors ([`Error::Listen`], [`Error::Url`],
     /// [`Error::WireVersion`], [`Error::Missing`], [`Error::Scheme`],
-    /// [`Error::Client`]) each naming the key that carries the fault.
+    /// [`Error::Client`]) each naming the key that carries the fault. Returns
+    /// [`Error::Mappings`] over [`crate::mappings::Error::NoTemplateSource`]
+    /// when the operations are enabled and `[mappings] directory` is set with
+    /// neither `[mappings] templates` nor `[cdr]`, so the refusal comes
+    /// before any network call.
     pub fn resolve(&self) -> Result<Settings, Error> {
+        if let Some(directory) = self.mappings.directory.as_ref()
+            && self.operations.enabled
+            && self.mappings.templates.is_none()
+            && self.cdr.is_none()
+        {
+            return Err(Error::Mappings {
+                source: Box::new(crate::mappings::Error::NoTemplateSource {
+                    directory: directory.clone(),
+                }),
+            });
+        }
         let listen = self
             .server
             .listen
@@ -539,9 +567,10 @@ impl Config {
 
 /// Returns the mapping-set paths `mappings` names, when it names both.
 ///
-/// The facade reads `directory` alone and takes its templates from the CDR,
-/// so a set with no `templates` is a facade-only set and leaves the two
-/// operations off. A `templates` with no `directory` names nothing to compile.
+/// A set with no `templates` resolves to `None` here and is carried by
+/// [`Settings::mapping_directory`] alone: the facade and the two operations
+/// then take their templates from the CDR at boot. A `templates` with no
+/// `directory` names nothing to compile.
 ///
 /// # Errors
 ///
@@ -622,7 +651,11 @@ pub struct Settings {
     pub cdm_url: Option<SecretString>,
     /// The directory the mapping files are read from, when one is configured.
     pub mapping_directory: Option<PathBuf>,
-    /// The mapping set the operations compile, when both directories are set.
+    /// The mapping set the operations compile from disk, when both
+    /// directories are set.
+    ///
+    /// With `None` and a [`Settings::mapping_directory`], the operations take
+    /// their templates from the CDR instead.
     pub mappings: Option<MappingSettings>,
     /// The facade lane, when it is on.
     pub facade: Option<FacadeSettings>,
@@ -707,14 +740,19 @@ impl Settings {
         } else {
             tracing::info!("[facade] is not enabled: the FHIR facade mounts no route");
         }
-        match self.mappings {
-            Some(_) if self.operations.enabled => {
-                tracing::info!("[mappings] is configured: the FHIRconnect operations are served");
+        match (self.mappings.as_ref(), self.mapping_directory.as_ref()) {
+            _ if !self.operations.enabled => {
+                tracing::info!("[operations] enabled is false: the operations are off");
             }
-            Some(_) => tracing::info!("[operations] enabled is false: the operations are off"),
-            None => tracing::info!(
-                "[mappings] names no directory and templates pair: the operations are off"
+            (Some(_), _) => tracing::info!(
+                "[mappings] names a template directory: the FHIRconnect operations compile against it"
             ),
+            (None, Some(_)) => tracing::info!(
+                "[mappings] names no template directory: the FHIRconnect operations compile against the CDR's templates"
+            ),
+            (None, None) => {
+                tracing::info!("[mappings] names no directory: the operations are off");
+            }
         }
     }
 }

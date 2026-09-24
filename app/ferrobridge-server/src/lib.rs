@@ -117,7 +117,9 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
         use anyhow::Context;
 
         settings.log_lanes();
-        let mut state = AppState::build(&settings).context("building the upstream clients")?;
+        let mut state = AppState::build(&settings)
+            .await
+            .context("building the upstream clients")?;
         if let Some(lane) = settings.facade.as_ref() {
             let mounted = build_facade(&settings, lane)
                 .await
@@ -245,7 +247,12 @@ pub fn router(state: Arc<AppState>, server: &ServerSettings) -> Router {
         .with_state(Arc::clone(&state))
         .merge(operations::router(Arc::clone(&state)));
     if let Some(mounted) = state.facade() {
-        routes = routes.merge(facade::routes(Arc::clone(mounted)));
+        let operations = if state.operations().is_some() {
+            facade::capability::Operations::Served
+        } else {
+            facade::capability::Operations::Absent
+        };
+        routes = routes.merge(facade::routes(Arc::clone(mounted), operations));
     }
     with_middleware(routes, state, server)
 }

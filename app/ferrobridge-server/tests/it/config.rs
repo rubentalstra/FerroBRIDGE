@@ -138,6 +138,34 @@ fn a_mappings_section_with_no_directory_is_refused() -> Result<(), Box<dyn StdEr
 }
 
 #[test]
+fn a_mapping_directory_with_neither_templates_nor_a_cdr_is_refused_at_resolve()
+-> Result<(), Box<dyn StdError>> {
+    let file = "[mappings]\ndirectory = \"/srv/mappings\"\n";
+    let error = Config::from_sources(Some(file), &BTreeMap::new())?
+        .resolve()
+        .err()
+        .ok_or("the operations lane has no template source")?;
+    let Error::Mappings { ref source } = error else {
+        panic!("the refusal is a mapping-set refusal: {error}");
+    };
+    assert!(
+        matches!(
+            **source,
+            ferrobridge_server::mappings::Error::NoTemplateSource { ref directory }
+                if directory == std::path::Path::new("/srv/mappings")
+        ),
+        "{source}"
+    );
+    assert_eq!("the mapping set could not be loaded", error.to_string());
+    let rendered = source.to_string();
+    assert!(
+        rendered.contains("[mappings] templates") && rendered.contains("[cdr]"),
+        "the refusal names both sources: {rendered}"
+    );
+    Ok(())
+}
+
+#[test]
 fn an_environment_override_wins_over_the_file() -> Result<(), Box<dyn StdError>> {
     let settings = Config::from_sources(
         Some(FULL),
@@ -198,7 +226,7 @@ fn the_facade_is_off_until_its_section_turns_it_on() -> Result<(), Box<dyn StdEr
 #[test]
 fn an_enabled_facade_resolves_its_policy_and_its_store() -> Result<(), Box<dyn StdError>> {
     let text = concat!(
-        "[mappings]\ndirectory = \"/srv/mappings\"\n\n",
+        "[mappings]\ndirectory = \"/srv/mappings\"\ntemplates = \"/srv/templates\"\n\n",
         "[facade]\nenabled = true\n",
         "base_url = \"https://bridge.invalid/fhir\"\n",
         "ehr_policy = \"create_on_first_write\"\n",

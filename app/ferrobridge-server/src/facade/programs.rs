@@ -30,7 +30,6 @@ use fhirconnect::resolve::select::SelectError;
 use fhirconnect::resolve::select::select_by_profile_pinned;
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::index::WebTemplateIndex;
-use openehr_mapping_core::template::TemplateSource;
 
 /// The file extensions a mapping directory is read for.
 ///
@@ -65,49 +64,36 @@ pub enum LoadError {
         /// The context that names none.
         context: String,
     },
-    /// The CDR does not hold the template a context names.
-    #[error("the CDR holds no template {template}, which the context {context} maps")]
-    UnknownTemplate {
+    /// No fetched template provides the one a context names.
+    #[error("no fetched template provides {template}, which the context {context} maps")]
+    MissingTemplate {
         /// The template that was asked for.
         template: String,
         /// The context that names it.
         context: String,
     },
-    /// The template could not be fetched.
-    #[error("the template {template} could not be fetched from the CDR")]
+    /// The CDR does not hold the template a context names.
+    #[error(
+        "the CDR holds no template {template}, which the context {context} maps: it answered {status}"
+    )]
+    UnknownTemplate {
+        /// The template that was asked for.
+        template: String,
+        /// The first context, in name order, that names it.
+        context: String,
+        /// The status the CDR answered.
+        status: http::StatusCode,
+    },
+    /// The CDR did not serve a template a context names as a Web Template.
+    #[error("the template {template}, which the context {context} maps, did not load from the CDR")]
     Fetch {
         /// The template that was asked for.
         template: String,
-        /// What the client reported.
+        /// The first context, in name order, that names it.
+        context: String,
+        /// What the fetch reported, the upstream status included.
         #[source]
-        source: Box<ferrobridge_openehr::error::Error>,
-    },
-    /// The template does not build a Web Template.
-    #[error("the template {template} does not build a Web Template")]
-    Template {
-        /// The template that refused.
-        template: String,
-        /// What the index builder reported.
-        #[source]
-        source: Box<openehr_mapping_core::template::PathError>,
-    },
-    /// The CDR refused the template fetch, or served a generation this
-    /// version does not read.
-    #[error("the CDR did not serve the template {template}: {detail}")]
-    TemplateRefused {
-        /// The template that was asked for.
-        template: String,
-        /// What the CDR answered, as the client reported it.
-        detail: String,
-    },
-    /// A template identifier the CDR route cannot carry.
-    #[error("{template} is no template identifier the CDR route can carry")]
-    TemplateName {
-        /// The identifier a context wrote.
-        template: String,
-        /// What the identifier's constructor reported.
-        #[source]
-        source: Box<ferrobridge_openehr::ids::IdError>,
+        source: Box<crate::mappings::Error>,
     },
 }
 
@@ -314,7 +300,7 @@ pub fn read_set(directory: &Path) -> Result<MappingSet, LoadError> {
 /// # Errors
 ///
 /// Returns [`LoadError::NoTemplateId`] for a context naming no template,
-/// [`LoadError::UnknownTemplate`] for one whose template is absent, and
+/// [`LoadError::MissingTemplate`] for one whose template is absent, and
 /// [`LoadError::Mappings`] for a context that does not compile.
 pub fn compile_set(
     set: &MappingSet,
@@ -325,7 +311,7 @@ pub fn compile_set(
         let name = context.header().name().value().clone();
         let template = template_of(context)?;
         let Some(index) = indexes.get(&template) else {
-            return Err(LoadError::UnknownTemplate {
+            return Err(LoadError::MissingTemplate {
                 template,
                 context: name.to_string(),
             });
@@ -361,92 +347,47 @@ fn template_of(context: &fhirconnect::model::ast::ContextMappingFile) -> Result<
 
 /// Returns the templates every context of `set` names, fetched from the CDR.
 ///
+/// Each template is fetched once, through [`crate::mappings::template_index`],
+/// and a refusal names the first context, in name order, that maps it.
+///
 /// # Errors
 ///
-/// Returns [`LoadError::TemplateName`] for an identifier the CDR route cannot
-/// carry, [`LoadError::Fetch`] when the call does not reach a documented
-/// answer, [`LoadError::UnknownTemplate`] when the CDR holds no such template,
-/// and [`LoadError::Template`] when the template does not build a Web
-/// Template.
+/// Returns [`LoadError::NoTemplateId`] for a context naming no template,
+/// [`LoadError::UnknownTemplate`] with the upstream status when the CDR holds
+/// no such template, and [`LoadError::Fetch`] for every other fetch that does
+/// not yield a Web Template.
 pub async fn fetch_templates(
     set: &MappingSet,
     client: &ferrobridge_openehr::client::Client,
 ) -> Result<BTreeMap<String, Arc<WebTemplateIndex>>, LoadError> {
-    let mut wanted: BTreeSet<String> = BTreeSet::new();
+    let mut wanted: BTreeMap<String, String> = BTreeMap::new();
     for context in set.contexts() {
-        wanted.insert(template_of(context)?);
+        let name = context.header().name().value().as_str().to_owned();
+        wanted.entry(template_of(context)?).or_insert(name);
     }
     let mut indexes = BTreeMap::new();
-    for template in wanted {
-        let id = ferrobridge_openehr::ids::TemplateId::new(&template).map_err(|source| {
-            LoadError::TemplateName {
-                template: template.clone(),
-                source: Box::new(source),
+    for (template, context) in wanted {
+        match crate::mappings::template_index(client, &template).await {
+            Ok(index) => {
+                indexes.insert(template, Arc::new(index));
             }
-        })?;
-        let outcome = client
-            .template(&id)
-            .await
-            .map_err(|source| LoadError::Fetch {
-                template: template.clone(),
-                source: Box::new(source),
-            })?;
-        let source = match outcome {
-            ferrobridge_openehr::template::TemplateOutcome::Found(source) => source,
-            ferrobridge_openehr::template::TemplateOutcome::UnknownTemplate => {
+            Err(crate::mappings::Error::TemplateNotHeld { status, .. }) => {
                 return Err(LoadError::UnknownTemplate {
                     template,
-                    context: String::from("a loaded context"),
+                    context,
+                    status,
                 });
             }
-            ferrobridge_openehr::template::TemplateOutcome::BadRequest(upstream) => {
-                return Err(LoadError::TemplateRefused {
+            Err(source) => {
+                return Err(LoadError::Fetch {
                     template,
-                    detail: upstream.to_string(),
+                    context,
+                    source: Box::new(source),
                 });
             }
-            other => {
-                return Err(LoadError::TemplateRefused {
-                    template,
-                    detail: format!(
-                        "the client answered an outcome this version does not read ({other:?})"
-                    ),
-                });
-            }
-        };
-        let index = build_index(&template, source)?;
-        indexes.insert(template, Arc::new(index));
+        }
     }
     Ok(indexes)
-}
-
-/// Returns the Web Template index of one fetched template.
-fn build_index(
-    template: &str,
-    source: ferrobridge_openehr::template::TemplateSource,
-) -> Result<WebTemplateIndex, LoadError> {
-    let source = match source {
-        ferrobridge_openehr::template::TemplateSource::Opt14(opt) => TemplateSource::Opt14(opt),
-        ferrobridge_openehr::template::TemplateSource::Opt2 {
-            template: opt,
-            resolved_id,
-        } => TemplateSource::Opt2 {
-            template: opt,
-            resolved_id: resolved_id.as_str().to_owned(),
-        },
-        other => {
-            return Err(LoadError::TemplateRefused {
-                template: template.to_owned(),
-                detail: format!(
-                    "the CDR served a generation this version does not read ({other:?})"
-                ),
-            });
-        }
-    };
-    WebTemplateIndex::build(&source).map_err(|source| LoadError::Template {
-        template: template.to_owned(),
-        source: Box::new(source),
-    })
 }
 
 /// Returns the refusal a diagnostic list describes.

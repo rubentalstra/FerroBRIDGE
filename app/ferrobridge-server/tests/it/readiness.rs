@@ -17,10 +17,10 @@ use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 /// Returns the router of a deployment whose CDR is `base`.
-fn router(base: &str) -> Result<Router, Box<dyn StdError>> {
+async fn router(base: &str) -> Result<Router, Box<dyn StdError>> {
     let text = format!("[cdr]\nbase_url = \"{base}/v1\"\ntimeout_ms = 2000\n");
     let settings = Config::from_sources(Some(&text), &BTreeMap::new())?.resolve()?;
-    let state = Arc::new(AppState::build(&settings)?);
+    let state = Arc::new(AppState::build(&settings).await?);
     Ok(ferrobridge_server::router(state, &support::settings()))
 }
 
@@ -43,7 +43,7 @@ async fn a_cdr_that_answers_makes_readiness_two_hundred() -> Result<(), Box<dyn 
         .mount(&server)
         .await;
 
-    let (status, document) = readiness(router(&server.uri())?).await?;
+    let (status, document) = readiness(router(&server.uri()).await?).await?;
     assert_eq!(StatusCode::OK, status);
     assert_eq!(Some("up"), document["state"].as_str());
     assert_eq!(Some("up"), document["indicators"]["cdr"]["state"].as_str());
@@ -60,7 +60,7 @@ async fn a_cdr_that_answers_five_hundred_and_three_makes_readiness_five_hundred_
         .mount(&server)
         .await;
 
-    let (status, document) = readiness(router(&server.uri())?).await?;
+    let (status, document) = readiness(router(&server.uri()).await?).await?;
     assert_eq!(StatusCode::SERVICE_UNAVAILABLE, status);
     assert_eq!(Some("down"), document["state"].as_str());
     assert_eq!(
@@ -86,7 +86,7 @@ async fn a_cdr_that_refuses_the_credentials_still_counts_as_reachable()
         .mount(&server)
         .await;
 
-    let (status, document) = readiness(router(&server.uri())?).await?;
+    let (status, document) = readiness(router(&server.uri()).await?).await?;
     assert_eq!(StatusCode::OK, status, "a 401 means the service is there");
     assert_eq!(Some("up"), document["indicators"]["cdr"]["state"].as_str());
     Ok(())
@@ -96,7 +96,7 @@ async fn a_cdr_that_refuses_the_credentials_still_counts_as_reachable()
 async fn a_cdr_that_never_answers_makes_readiness_five_hundred_and_three()
 -> Result<(), Box<dyn StdError>> {
     // Port 1 is reserved and unbindable, so the connection is refused at once.
-    let (status, document) = readiness(router("http://127.0.0.1:1")?).await?;
+    let (status, document) = readiness(router("http://127.0.0.1:1").await?).await?;
     assert_eq!(StatusCode::SERVICE_UNAVAILABLE, status);
     assert_eq!(
         Some("down"),
@@ -111,7 +111,7 @@ async fn a_cdr_that_never_answers_makes_readiness_five_hundred_and_three()
 
 #[tokio::test]
 async fn liveness_stays_two_hundred_while_an_upstream_is_down() -> Result<(), Box<dyn StdError>> {
-    let app = router("http://127.0.0.1:1")?;
+    let app = router("http://127.0.0.1:1").await?;
     let response = app
         .oneshot(Request::get("/health/liveness").body(Body::empty())?)
         .await?;
