@@ -173,7 +173,7 @@ async fn read_template(client: &Client, template_id: &TemplateId) -> Result<(), 
         template.template_id.value,
         "the CDR served a different template"
     );
-    let web_template = openehr_its::flat::webtemplate::builder::build_web_template(&template)?;
+    let web_template = openehr_sdt::flat::webtemplate::builder::build_web_template(&template)?;
     assert_eq!(
         fixtures::MINIMAL_EVALUATION_TEMPLATE_ID,
         web_template.template_id,

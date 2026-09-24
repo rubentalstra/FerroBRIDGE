@@ -203,6 +203,15 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Changed
 
+- The `openehr-*` crates move to 0.0.69, and `openehr-sdt` joins the workspace:
+  the sibling split the Simplified Data Template engines (the Web Template
+  builder, the FLAT and STRUCTURED codecs, the composition builder and the
+  RM-instance validation) out of `openehr-its` at 0.0.68, so the mapping
+  foundation and the tests reach them through `openehr_sdt` and `openehr-its`
+  is taken with `opt14`, `json` and `rest-server` alone. `openehr-its` is
+  Apache-2.0 again and `openehr-sdt` is BUSL-1.1, which the licence table
+  records. `jsonschema` moves to 0.57.0, `thiserror` to 2.0.21, and both locks
+  take every compatible update.
 - The `openehr-*` crates move from 0.0.64 to 0.0.67 in the workspace, the
   fuzz manifest and every pin row, one hand-made bump for the five Dependabot
   ones (#207 to #211) that cannot build alone because the family is one

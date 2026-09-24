@@ -36,7 +36,7 @@ Four rules the specification text pins:
   requested time, which is a `Deleted` outcome and never an absent value.
 
 The model types come from the published `openehr-rm`, `openehr-its` and
-`openehr-am` crates; this crate models nothing the specification already
+`openehr-am` crates (`openehr-sdt` in the tests, for the FLAT codec); this crate models nothing the specification already
 publishes.
 
 ## Status

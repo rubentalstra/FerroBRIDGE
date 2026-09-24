@@ -47,7 +47,9 @@ allow = [
 ]
 confidence-threshold = 0.9
 # The project's own crates are BUSL-1.1 (LICENSE). The openEHR model crates
-# join this list as they are added (openehr-its, openehr-query are BUSL-1.1).
+# join this list as they are added (openehr-sdt, openehr-query and openehr-adl
+# are BUSL-1.1; openehr-its is Apache-2.0 again from 0.0.68, when the engines
+# moved to openehr-sdt).
 #
 # openehr-term arrives transitively under openehr-rm. Its Rust code is
 # Apache-2.0; the CC-BY-SA-3.0 half covers only the official openEHR
@@ -56,7 +58,7 @@ confidence-threshold = 0.9
 # data unchanged with attribution, which is what the share-alike term asks, and
 # no first-party file derives from it.
 exceptions = [
-  { allow = ["BUSL-1.1", "Apache-2.0"], crate = "openehr-its" },
+  { allow = ["BUSL-1.1"], crate = "openehr-sdt" },
   # openehr-adl is a dev-dependency of openehr-mapping-core alone: the ADL 2
   # test fixtures are compiled from their .adls sources, so it never ships.
   { allow = ["BUSL-1.1"], crate = "openehr-adl" },

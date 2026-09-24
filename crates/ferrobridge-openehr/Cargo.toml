@@ -39,6 +39,7 @@ url.workspace = true
 ferrobridge-testkit.workspace = true
 http.workspace = true
 openehr-its.workspace = true
+openehr-sdt.workspace = true
 openehr-rm.workspace = true
 secrecy.workspace = true
 serde_json.workspace = true

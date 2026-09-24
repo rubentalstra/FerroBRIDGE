@@ -22,6 +22,7 @@ include = ["src/**", "README.md", "LICENSE"]
 [dependencies]
 openehr-am.workspace = true
 openehr-its.workspace = true
+openehr-sdt.workspace = true
 openehr-rm.workspace = true
 serde.workspace = true
 serde-saphyr.workspace = true

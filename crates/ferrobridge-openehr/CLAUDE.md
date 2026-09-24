@@ -18,7 +18,8 @@ does not carry.
   OpenAPI documents; the client sends the 1.1.0 value-carrying form and never
   the deprecated 1.0.3 spelling, whose attribute path sat in the header name.
 - **The model comes from the published crates**: `openehr-rm` for the RM,
-  `openehr-its` for the ITS-REST transport DTOs and the codecs, `openehr-am`
+  `openehr-its` for the ITS-REST transport DTOs and the codecs, `openehr-sdt`
+  for the Simplified Data Template formats, `openehr-am`
   for the AOM2 operational template. Never hand-write a type one of them
   already defines.
 - **Retry is bounded and idempotent-only.** `GET`, `PUT` under `If-Match` and

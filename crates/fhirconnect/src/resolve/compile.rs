@@ -1667,7 +1667,7 @@ static RESOURCE_ROOT: LazyLock<FhirPath> = LazyLock::new(|| {
 /// A Web Template carries the nodes an archetype constrains and stops there, so
 /// everything below the deepest one is plain reference model. The attribute
 /// model `openehr-rm` generates from the RM BMM is the oracle for it
-/// (<https://docs.rs/openehr-rm/0.0.67/openehr_rm/v1_2/model/fn.attribute.html>):
+/// (<https://docs.rs/openehr-rm/0.0.69/openehr_rm/v1_2/model/fn.attribute.html>):
 /// an attribute is looked up on the node's type and on the concrete subtypes of
 /// it, because a declared type may be abstract (`ELEMENT.value` is
 /// `DATA_VALUE`) and the attribute then belongs to one of its descendants.

@@ -41,6 +41,7 @@ insta.workspace = true
 # The operational-template parser the resolve tests build their Web Template
 # with; the crate itself takes the built template from its caller.
 openehr-its.workspace = true
+openehr-sdt.workspace = true
 proptest.workspace = true
 tempfile.workspace = true
 
