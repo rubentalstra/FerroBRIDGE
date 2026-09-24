@@ -112,18 +112,49 @@ server says so once at start-up.
 ### `[mappings]`
 
 The FHIRconnect mapping set this deployment runs. The facade, the two
-FHIRconnect operations and the mapping subcommands read the same set. Both
-directories are read once at boot, and a mapping that does not compile refuses
-the start rather than the first request that touches it.
+FHIRconnect operations and the mapping subcommands read the same set. The set
+and its templates are read once at boot, and a mapping that does not compile
+refuses the start rather than the first request that touches it.
 
 | Key | Default | Meaning |
 |---|---|---|
 | `directory` | none | The directory the mapping files are read from, recursively (`.yml`, `.yaml`) |
-| `templates` | none | The directory holding the operational templates the mappings compile against, as OPT 1.4 XML (`.opt`) |
+| `templates` | none | The directory holding the operational templates the two operations compile against, as OPT 1.4 XML (`.opt`) |
 
-The facade takes its templates from the CDR and needs `directory` alone. The
-two FHIRconnect operations compile against the local files and need both keys;
-with `directory` alone they stay off and the server says so at start-up.
+The facade always takes its templates from the CDR and needs `directory`
+alone. The two FHIRconnect operations take theirs from one of two sources:
+
+- With `templates` set, every `.opt` file in that directory is read. This
+  source wins when `[cdr]` is configured too, because the directory is the
+  explicit choice, and the operations then run with no CDR at all.
+- With `templates` unset and `[cdr]` configured, the server reads the context
+  files first and fetches each template they name from the CDR
+  (`GET /definition/template/adl1.4/{template_id}`, openEHR ITS-REST 1.1.0
+  §Definition). A template the CDR does not hold, or any other refused fetch,
+  stops the start with an error naming the template and the status the CDR
+  answered, so the lane never comes up with part of its mappings.
+
+A `directory` with neither `templates` nor `[cdr]` is refused while the
+operations are enabled. The server checks this when it reads the
+configuration, before it calls any upstream, and the refusal names both
+sources. With `[operations] enabled = false`, `directory` alone
+is enough for the facade.
+
+```toml
+# The operations compile against local templates and reach no CDR.
+[mappings]
+directory = "/etc/ferrobridge/mappings"
+templates = "/etc/ferrobridge/templates"
+```
+
+```toml
+# The operations compile against the templates the CDR serves.
+[cdr]
+base_url = "https://cdr.example.org/openehr/v1"
+
+[mappings]
+directory = "/etc/ferrobridge/mappings"
+```
 
 ### `[facade]`
 
@@ -159,8 +190,9 @@ resource the CDR already holds.
 ### `[operations]`
 
 The `$tofhir` and `$toopenehr` lane. Both operations are pure transformations
-and reach no CDR, so they are served whenever `[mappings]` names both
-directories. Without them the two routes answer `503`.
+and reach no CDR on a request, so they are served whenever `[mappings]
+directory` is set and its templates load, from `[mappings] templates` or from
+the CDR at boot. Without a mapping directory the two routes answer `503`.
 
 | Key | Default | Meaning |
 |---|---|---|

@@ -152,12 +152,20 @@ impl Facade {
 /// Only what this milestone implements is mounted: the conformance statement,
 /// a type-level create, `$validate`, an instance read and update, and a
 /// system-level transaction. Search and batch have no route, so a request for
-/// either answers `404` (<https://hl7.org/fhir/R4/http.html>).
-pub fn routes(facade: Arc<Facade>) -> Router {
+/// either answers `404` (<https://hl7.org/fhir/R4/http.html>). `operations`
+/// is whether the same router serves the FHIRconnect operations, which the
+/// conformance statement declares only then.
+pub fn routes(facade: Arc<Facade>, operations: capability::Operations) -> Router {
     Router::new()
         .route(
             &format!("{BASE_PATH}/metadata"),
-            get(handlers::metadata_route),
+            get(
+                move |axum::extract::State(facade): axum::extract::State<Arc<Facade>>,
+                      headers: http::HeaderMap,
+                      uri: http::Uri| async move {
+                    handlers::metadata_route(&facade, &headers, &uri, operations)
+                },
+            ),
         )
         .route(BASE_PATH, post(handlers::transaction_route))
         .route(

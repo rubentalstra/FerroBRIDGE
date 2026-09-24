@@ -22,10 +22,11 @@ moves and every difference is re-adjudicated.
 ## Turning the lane on
 
 Configure a mapping set. `[mappings] directory` names the tree of FHIRconnect
-mapping files and `[mappings] templates` the directory of operational
-templates they compile against. Both are read once at boot, so a mapping that
-does not compile stops the server rather than the first request that touches
-it. `[operations]` carries the lane switch and the values a run needs beside
+mapping files. The operational templates they compile against come from
+`[mappings] templates` when it names a directory, and otherwise from the
+`[cdr]`, which serves each template a context names. Everything is read once
+at boot, so a mapping or a template that does not load stops the server rather
+than the first request that touches it. `[operations]` carries the lane switch and the values a run needs beside
 the payload. See [Configuring the server](../operate/configuration.md).
 
 Without `[mappings]`, both operations answer `503` with an `OperationOutcome`.
@@ -112,6 +113,16 @@ Content-Type: application/fhir+json
 answers the composition itself, with `Content-Type:
 application/openehr+json`. The media type is the one the chapter defines for
 openEHR canonical JSON, with the suffix ordering of RFC 6839 §4.
+
+## Discovering the operations
+
+With the facade enabled beside this lane, `GET /fhir/metadata` declares both
+operations in `CapabilityStatement.rest.operation`, as `tofhir` and
+`toopenehr` with the canonical `OperationDefinition` URL of each. When the lane
+is off, the statement leaves them out. The direct forms are never declared:
+the request body is no FHIR resource and the response is no `Parameters`, so
+they fall outside the FHIR operations framework the statement describes, and
+the chapter keeps them out of the FHIRconnect implementation guide.
 
 ## What a failure looks like
 

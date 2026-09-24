@@ -39,12 +39,17 @@ use crate::facade::reply;
 pub(crate) use crate::facade::reply::Refusal;
 
 /// `GET [base]/metadata`: the `CapabilityStatement` of the loaded programs.
-pub async fn metadata_route(
-    State(facade): State<Arc<Facade>>,
-    headers: HeaderMap,
-    uri: Uri,
+///
+/// `operations` says whether the router serves the FHIRconnect operations
+/// beside the facade, so the statement declares them only then.
+#[must_use]
+pub fn metadata_route(
+    facade: &Facade,
+    headers: &HeaderMap,
+    uri: &Uri,
+    operations: capability::Operations,
 ) -> Response {
-    metadata(&facade, &headers, &uri).unwrap_or_else(Refusal::into_response)
+    metadata(facade, headers, uri, operations).unwrap_or_else(Refusal::into_response)
 }
 
 /// `POST [base]/{type}`: create, conditional and idempotent by source
@@ -118,9 +123,15 @@ pub async fn transaction_route(
 }
 
 /// Answers the `CapabilityStatement`.
-fn metadata(facade: &Facade, headers: &HeaderMap, uri: &Uri) -> Result<Response, Refusal> {
+fn metadata(
+    facade: &Facade,
+    headers: &HeaderMap,
+    uri: &Uri,
+    operations: capability::Operations,
+) -> Result<Response, Refusal> {
     guard(headers, uri, Body::Absent)?;
-    let statement = capability::statement(facade.programs(), &facade.settings().base_url);
+    let statement =
+        capability::statement(facade.programs(), &facade.settings().base_url, operations);
     let encoded = statement.to_json().map_err(|error| {
         reply::refusal(
             StatusCode::INTERNAL_SERVER_ERROR,

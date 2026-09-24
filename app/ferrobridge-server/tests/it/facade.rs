@@ -21,6 +21,8 @@ use ferrobridge_server::facade::identity::store::Store;
 use ferrobridge_server::facade::programs;
 use ferrobridge_server::health::Registry;
 use ferrobridge_server::state::AppState;
+use ferrobridge_server::state::OperationsLane;
+use fhirconnect::operations::programs::ProgramSet;
 use http::Request;
 use http::Response;
 use http::StatusCode;
@@ -72,6 +74,16 @@ impl Harness {
     fn app(&self) -> Router {
         let state =
             AppState::with_health(Registry::default()).with_facade(Arc::clone(&self.facade));
+        ferrobridge_server::router(Arc::new(state), &server_settings())
+    }
+
+    /// Returns the application under test with the FHIRconnect operations
+    /// lane served beside the facade.
+    fn app_with_operations(&self) -> Router {
+        let lane = OperationsLane::new(ProgramSet::new(), "Device/ferrobridge-test");
+        let state = AppState::with_health(Registry::default())
+            .with_facade(Arc::clone(&self.facade))
+            .serving_operations(lane);
         ferrobridge_server::router(Arc::new(state), &server_settings())
     }
 
@@ -385,6 +397,120 @@ async fn the_capability_statement_names_exactly_the_loaded_programs()
         .filter_map(|entry| entry["code"].as_str())
         .collect();
     assert_eq!(vec!["transaction"], system);
+    Ok(())
+}
+
+/// Returns the `(name, definition)` pairs of the system-level operations
+/// `body` declares.
+fn system_operations(body: &serde_json::Value) -> Vec<(String, String)> {
+    body["rest"][0]["operation"]
+        .as_array()
+        .map(|entries| {
+            entries
+                .iter()
+                .map(|entry| {
+                    (
+                        entry["name"].as_str().unwrap_or_default().to_owned(),
+                        entry["definition"].as_str().unwrap_or_default().to_owned(),
+                    )
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[tokio::test]
+async fn a_template_the_cdr_does_not_hold_names_the_context_and_the_status()
+-> Result<(), Box<dyn StdError>> {
+    // An unmatched route answers 404 on both definition routes of ITS-REST.
+    let cdr = MockServer::start().await;
+    let set = programs::read_set(std::path::Path::new(FIXTURES))?;
+    let error = programs::fetch_templates(&set, &client(&cdr))
+        .await
+        .err()
+        .ok_or("a template the CDR does not hold refuses the load")?;
+    match error {
+        programs::LoadError::UnknownTemplate {
+            ref template,
+            ref context,
+            status,
+        } => {
+            assert_eq!("ferrobridge.diagnose.v1", template);
+            assert_eq!("ferrobridge_facade.context", context);
+            assert_eq!(StatusCode::NOT_FOUND, status);
+        }
+        ref other => panic!("the refusal names the context and the status: {other}"),
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_served_operations_lane_is_declared_at_the_system_level() -> Result<(), Box<dyn StdError>>
+{
+    // R4 CapabilityStatement.rest.operation carries the system-level
+    // operations; both FSH definitions of the draft chapter set `system = true`.
+    let harness = harness().await;
+    let (status, body) = call(
+        harness.app_with_operations(),
+        Request::get("/fhir/metadata").body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert_eq!(
+        vec![
+            (
+                String::from("tofhir"),
+                String::from("http://fhirconnect.org/fhir/OperationDefinition/ToFhir"),
+            ),
+            (
+                String::from("toopenehr"),
+                String::from("http://fhirconnect.org/fhir/OperationDefinition/ToOpenEhr"),
+            ),
+        ],
+        system_operations(&body)
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn an_absent_operations_lane_is_not_declared() -> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let (status, body) = call(
+        harness.app(),
+        Request::get("/fhir/metadata").body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert!(
+        body["rest"][0]["operation"].is_null(),
+        "an operations lane that is not served is not declared: {body}"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn the_direct_forms_of_the_operations_are_never_declared() -> Result<(), Box<dyn StdError>> {
+    // rest-api.adoc (draft), Direct payload invocation: "intentionally not
+    // part of the FHIRconnect FHIR Implementation Guide".
+    let harness = harness().await;
+    let (_, body) = call(
+        harness.app_with_operations(),
+        Request::get("/fhir/metadata").body(Body::empty())?,
+    )
+    .await?;
+    let rendered = body.to_string();
+    assert!(
+        !rendered.contains("/tofhir") && !rendered.contains("/toopenehr"),
+        "a direct form is declared: {rendered}"
+    );
+    let names: Vec<String> = system_operations(&body)
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+    assert_eq!(
+        vec![String::from("tofhir"), String::from("toopenehr")],
+        names
+    );
     Ok(())
 }
 

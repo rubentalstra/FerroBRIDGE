@@ -10,7 +10,7 @@ Vendored verbatim by `scripts/vendor/fhirconnect.sh`; never edit a file here.
 
 - Source: <https://github.com/SevKohler/FHIRconnect-spec/pull/93>
 - Pin: pull request #93 at head commit `2bf2a2fe91bae2ae659cda1665826567ea81b4af`
-- Fetched: 2026-09-12
+- Fetched: 2026-09-24
 - Upstream licence: Apache License 2.0, the `LICENSE` file of the same
   repository, vendored at `../LICENSE`
 - Layout: the upstream paths, unchanged
@@ -18,6 +18,9 @@ Vendored verbatim by `scripts/vendor/fhirconnect.sh`; never edit a file here.
 | File | sha256 |
 |---|---|
 | `modules/ROOT/pages/engine/rest-api.adoc` | `089925c50637759956d0e4386079338781c8753e7ea7697176f12c27b8b7900b` |
+| `rest/ig.ini` | `bbc1db9a8628da42d223870f2923a6cb2cf92592d35cad9cf13df9b503897017` |
 | `rest/input/fsh/operations/ToFhir.fsh` | `e8784c01d530c7c627af3cad912417fe9cd304f82c21f5a35e1ef57627dd64e0` |
 | `rest/input/fsh/operations/ToOpenEhr.fsh` | `fb7890c3a1aa4cf7f70dbd0d27f18235f29357d96c5f40348687885df214766c` |
+| `rest/input/pagecontent/index.md` | `fdd330578b73cb9244d1ade6858e242f1da407e5fbf927629b6cac2b448e55f0` |
 | `rest/input/pagecontent/operations.md` | `202801f257a7ca6376c9a3fafa360a38403a8713b0536572445204f9110201df` |
+| `rest/sushi-config.yaml` | `d63608ed1d80d5adf4d7057f9d2b50d34bceb7f438b100af5bbd2720b75514bb` |

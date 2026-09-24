@@ -51,6 +51,9 @@ The `CapabilityStatement` names exactly the resource types the loaded programs
 map, with `create`, `read` and `update` per type, `transaction` at system
 level, the `$validate` operation, `updateCreate: false`, `conditionalCreate`
 and `conditionalUpdate` true, `fhirVersion: 4.0.1`, and no search parameter.
+When the FHIRconnect operations lane is served under the same base,
+`rest.operation` also names `$tofhir` and `$toopenehr`; their direct forms are
+never declared ([The FHIRconnect operations](operations.md) says why).
 
 ## Media types and bodies
 

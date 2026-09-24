@@ -24,6 +24,16 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- The FHIRconnect operations compile against the templates the CDR serves when
+  `[cdr]` is configured and `[mappings] templates` is not (#195): boot reads the
+  context files, fetches each template they name at
+  `GET /definition/template/adl1.4/{template_id}` (openEHR ITS-REST 1.1.0
+  §Definition), and refuses the start with the template id and the upstream
+  status when the CDR does not serve one. A `[mappings] templates` directory
+  still wins when both are present. A `[mappings] directory` with neither
+  source is refused when the configuration is read, before any upstream call,
+  while `[operations] enabled` is true. A mapping set that does not load stops
+  the start with "the mapping set could not be loaded" followed by the cause.
 - `fhir-types` 0.1.106 carries the `isSummary` and `isModifier` flags of every
   element on `schema::FieldSchema` as `is_summary` and `is_modifier` (#213),
   read from the pinned `StructureDefinition` of each version
@@ -203,6 +213,11 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Changed
 
+- The vendored draft REST API chapter of FHIRconnect gains
+  `rest/sushi-config.yaml`, `rest/ig.ini` and `rest/input/pagecontent/index.md`
+  at the pinned commit, fetched by `scripts/vendor/fhirconnect.sh`, so the
+  implementation guide canonical behind the `$tofhir` and `$toopenehr`
+  definitions is citable from the tree.
 - The `openehr-*` crates move to 0.0.69, and `openehr-sdt` joins the workspace:
   the sibling split the Simplified Data Template engines (the Web Template
   builder, the FLAT and STRUCTURED codecs, the composition builder and the
@@ -251,6 +266,13 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Fixed
 
+- `GET /fhir/metadata` declares `$tofhir` and `$toopenehr` in
+  `CapabilityStatement.rest.operation` whenever the FHIRconnect operations lane
+  is served beside the facade, with the canonical `OperationDefinition` URL of
+  each (`http://fhirconnect.org/fhir/OperationDefinition/ToFhir` and
+  `.../ToOpenEhr`), and leaves them out when the lane is off (#194). The two
+  direct forms stay undeclared, because the draft REST API chapter keeps them
+  outside the FHIRconnect implementation guide.
 - The element table `fhir-types` emits now carries `Element` with its `id` and
   `extension`, so a table-driven consumer resolves the members of a primitive's
   underscore sibling (`_birthDate`) against the definition rather than against
