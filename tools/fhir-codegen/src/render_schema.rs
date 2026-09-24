@@ -69,9 +69,11 @@ pub fn render_schema(model: &VersionModule) -> Result<String, fmt::Error> {
             );
             let path = &field.path;
             let min = field.min;
+            let is_summary = field.is_summary;
+            let is_modifier = field.is_modifier;
             writeln!(
                 out,
-                "                FieldSchema {{ name: {name:?}, path: {path:?}, kind: {kind}, min: {min}, max: {max}, many: {many}, types: &[{}], content_reference: {content_reference} }},",
+                "                FieldSchema {{ name: {name:?}, path: {path:?}, kind: {kind}, min: {min}, max: {max}, many: {many}, types: &[{}], content_reference: {content_reference}, is_summary: {is_summary}, is_modifier: {is_modifier} }},",
                 types.join(", ")
             )?;
         }

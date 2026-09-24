@@ -24,6 +24,15 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Added
 
+- `fhir-types` 0.1.106 carries the `isSummary` and `isModifier` flags of every
+  element on `schema::FieldSchema` as `is_summary` and `is_modifier` (#213),
+  read from the pinned `StructureDefinition` of each version
+  (<https://hl7.org/fhir/R4/elementdefinition.html>). A server answering
+  `_summary=true` (<https://hl7.org/fhir/R4/search.html#summary>) reads the
+  summary set from the element table instead of keeping its own copy. The
+  element-table test compares both flags with the package JSON for every
+  emitted element and pins `Patient.active`, `Patient.name` and
+  `Patient.photo` per version.
 - `fhir-types` 0.1.105 refuses a primitive value outside its lexical form on
   decode (#204). Every primitive whose JSON form is a string carries the
   `regex` extension its own package puts on the `value` element

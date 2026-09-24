@@ -175,6 +175,10 @@ pub struct Field {
     pub types: Vec<String>,
     /// The element path a `contentReference` names, without the leading `#`.
     pub content_reference: Option<String>,
+    /// The `isSummary` flag of the definition.
+    pub is_summary: bool,
+    /// The `isModifier` flag of the definition.
+    pub is_modifier: bool,
 }
 
 /// A choice enum variant.
@@ -706,6 +710,8 @@ fn lower_struct(
             max: element.max,
             types: type_codes(&element.shape),
             content_reference: content_reference_of(&element.shape),
+            is_summary: element.is_summary,
+            is_modifier: element.is_modifier,
         });
     }
     model.insert(

@@ -33,6 +33,8 @@ struct Expected {
     max: Option<u32>,
     types: Vec<String>,
     content_reference: Option<String>,
+    is_summary: bool,
+    is_modifier: bool,
 }
 
 /// The emitted table of each version, in the order [`packages`] lists them.
@@ -140,6 +142,14 @@ fn children_of(elements: &[Value], parent: &str) -> Vec<Expected> {
                             .to_owned()
                     },
                 ),
+                is_summary: element
+                    .get("isSummary")
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false),
+                is_modifier: element
+                    .get("isModifier")
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false),
             })
         })
         .collect()
@@ -191,6 +201,14 @@ fn assert_type(module: &str, schema: &TypeSchema, expected: &[Expected]) {
             expected.content_reference.as_deref(),
             "{at}: the content reference"
         );
+        assert_eq!(
+            field.is_summary, expected.is_summary,
+            "{at}: the isSummary flag"
+        );
+        assert_eq!(
+            field.is_modifier, expected.is_modifier,
+            "{at}: the isModifier flag"
+        );
         if expected.path.ends_with("[x]") && expected.content_reference.is_none() {
             let variants = match field.kind {
                 Kind::Choice(variants) => variants,
@@ -219,6 +237,37 @@ fn every_emitted_element_agrees_with_its_definition() {
                 .or_insert_with(|| snapshot_elements(package, root));
             assert_type(module, schema, &children_of(elements, schema.path));
         }
+    }
+}
+
+/// The flags of one `Patient` element in every version, as its package states
+/// them: `Patient.active` is in the summary and a modifier, `Patient.name` is in
+/// the summary only, and `Patient.photo` is neither
+/// (<https://hl7.org/fhir/R4/patient.html>).
+#[test]
+fn the_summary_and_modifier_flags_are_the_packages_own_in_every_version() {
+    for (module, schemas) in tables() {
+        let flags = |path: &str| {
+            let (_, field) = schemas
+                .element(path)
+                .unwrap_or_else(|| panic!("{module}: {path} resolves"));
+            (field.is_summary, field.is_modifier)
+        };
+        assert_eq!(
+            flags("Patient.active"),
+            (true, true),
+            "{module}: Patient.active"
+        );
+        assert_eq!(
+            flags("Patient.name"),
+            (true, false),
+            "{module}: Patient.name"
+        );
+        assert_eq!(
+            flags("Patient.photo"),
+            (false, false),
+            "{module}: Patient.photo"
+        );
     }
 }
 
