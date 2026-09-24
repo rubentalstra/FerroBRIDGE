@@ -122,7 +122,7 @@ Dependabot (`docker`, over `/docker`) proposes the bumps.
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| Container base image | `gcr.io/distroless/static-debian13:nonroot@sha256:1c2c046bc09ed40fad370b599a0b1ae7987f55b01e247cf27a7c27cd97e5bbc7` | the `FROM` of `docker/Dockerfile`, and its `org.opencontainers.image.base.name` label without the digest |
+| Container base image | `gcr.io/distroless/static-debian13:nonroot@sha256:e2e927ec666bae08560abb3c55d0659eceabb657f56b6782ab500a9fc7f555e3` | the `FROM` of `docker/Dockerfile`, and its `org.opencontainers.image.base.name` label without the digest |
 
 The quickstart `compose.yaml` pulls `ghcr.io/rubentalstra/ferrobridge` at the
 release it shipped with, so its tag is the product version below rather than a

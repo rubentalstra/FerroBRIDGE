@@ -203,6 +203,9 @@ image, each with provenance and an SBOM you can verify (`SECURITY.md`).
 
 ### Changed
 
+- The container base image `gcr.io/distroless/static-debian13:nonroot` moves
+  to index digest `e2e927e`, in the `FROM` of `docker/Dockerfile` and its pin
+  row (#199, landed by hand because the pin row lives outside the Dockerfile).
 - The Licensor and copyright holder of the project's own work is Vernum
   Projecten B.V. (#197). Every `Licensor:`, copyright and
   `SPDX-FileCopyrightText` line names the company. The licence terms are
