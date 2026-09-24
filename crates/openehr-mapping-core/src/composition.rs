@@ -281,19 +281,19 @@ impl WebTemplateIndex {
         for value in values {
             flat.insert(self.flat_key(value)?, value.value.clone());
         }
-        let document = openehr_its::flat::sim::flat::parse_flat(&flat).map_err(|source| {
+        let document = openehr_sdt::flat::sim::flat::parse_flat(&flat).map_err(|source| {
             PathError::CompositionBuild {
                 template_id: self.template_id().to_owned(),
                 source: Box::new(source),
             }
         })?;
         let built =
-            openehr_its::flat::build::build_composition(&document, self.web_template(), now)
+            openehr_sdt::flat::build::build_composition(&document, self.web_template(), now)
                 .map_err(|source| PathError::CompositionBuild {
                     template_id: self.template_id().to_owned(),
                     source: Box::new(source),
                 })?;
-        let messages = openehr_its::rm_instance::validate_composition(&built, self.web_template());
+        let messages = openehr_sdt::rm_instance::validate_composition(&built, self.web_template());
         if !messages.is_empty() {
             return Err(PathError::InvalidComposition {
                 template_id: self.template_id().to_owned(),
@@ -327,19 +327,19 @@ impl WebTemplateIndex {
         flat: &serde_json::Map<String, Value>,
         now: &str,
     ) -> Result<CanonicalComposition, PathError> {
-        let document = openehr_its::flat::sim::flat::parse_flat(flat).map_err(|source| {
+        let document = openehr_sdt::flat::sim::flat::parse_flat(flat).map_err(|source| {
             PathError::CompositionBuild {
                 template_id: self.template_id().to_owned(),
                 source: Box::new(source),
             }
         })?;
         let built =
-            openehr_its::flat::build::build_composition(&document, self.web_template(), now)
+            openehr_sdt::flat::build::build_composition(&document, self.web_template(), now)
                 .map_err(|source| PathError::CompositionBuild {
                     template_id: self.template_id().to_owned(),
                     source: Box::new(source),
                 })?;
-        let messages = openehr_its::rm_instance::validate_composition(&built, self.web_template());
+        let messages = openehr_sdt::rm_instance::validate_composition(&built, self.web_template());
         if !messages.is_empty() {
             return Err(PathError::InvalidComposition {
                 template_id: self.template_id().to_owned(),
@@ -368,7 +368,7 @@ impl WebTemplateIndex {
     /// Returns [`PathError::InvalidComposition`] when the document does not
     /// validate against the template.
     pub fn accept(&self, value: Value) -> Result<CanonicalComposition, PathError> {
-        let messages = openehr_its::rm_instance::validate_composition(&value, self.web_template());
+        let messages = openehr_sdt::rm_instance::validate_composition(&value, self.web_template());
         if !messages.is_empty() {
             return Err(PathError::InvalidComposition {
                 template_id: self.template_id().to_owned(),
@@ -406,7 +406,7 @@ impl WebTemplateIndex {
                 found: composition.template_id.clone(),
             });
         }
-        let document = openehr_its::flat::flatten::flatten_composition(
+        let document = openehr_sdt::flat::flatten::flatten_composition(
             &composition.value,
             self.web_template(),
         )
@@ -414,7 +414,7 @@ impl WebTemplateIndex {
             template_id: self.template_id().to_owned(),
             source: Box::new(source),
         })?;
-        Ok(openehr_its::flat::sim::flat::emit_flat(&document))
+        Ok(openehr_sdt::flat::sim::flat::emit_flat(&document))
     }
 
     /// Reads the value of one node out of a composition.

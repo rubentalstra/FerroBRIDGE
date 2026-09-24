@@ -18,8 +18,8 @@
 //! differently.
 
 use openehr_am::v2_4::aom2::archetype::operational_template::OperationalTemplate;
-use openehr_its::flat::error::FlatError;
-use openehr_its::flat::webtemplate::model::WebTemplate;
+use openehr_sdt::flat::error::FlatError;
+use openehr_sdt::flat::webtemplate::model::WebTemplate;
 
 use crate::diagnostic::Diagnostic;
 use crate::diagnostic::DiagnosticCode;
@@ -134,10 +134,10 @@ impl TemplateSource {
 pub fn web_template(source: &TemplateSource) -> Result<WebTemplate, PathError> {
     let built = match *source {
         TemplateSource::Opt14(ref opt) => {
-            openehr_its::flat::webtemplate::builder::build_web_template(opt)
+            openehr_sdt::flat::webtemplate::builder::build_web_template(opt)
         }
         TemplateSource::Opt2 { ref template, .. } => {
-            openehr_its::flat::webtemplate::builder_v2_4::build_web_template_v2_4(template)
+            openehr_sdt::flat::webtemplate::builder_v2_4::build_web_template_v2_4(template)
         }
     };
     built.map_err(|source_error| PathError::TemplateBuild {

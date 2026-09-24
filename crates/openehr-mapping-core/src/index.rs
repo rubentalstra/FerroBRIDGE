@@ -18,10 +18,10 @@
 
 use std::collections::BTreeMap;
 
-use openehr_its::flat::webtemplate::model::WebTemplate;
-use openehr_its::flat::webtemplate::model::WebTemplateNode;
 use openehr_rm::v1_2::paths::PathSegment;
 use openehr_rm::v1_2::paths::RmPath;
+use openehr_sdt::flat::webtemplate::model::WebTemplate;
+use openehr_sdt::flat::webtemplate::model::WebTemplateNode;
 
 use crate::path::MappingPath;
 use crate::template::Binding;
