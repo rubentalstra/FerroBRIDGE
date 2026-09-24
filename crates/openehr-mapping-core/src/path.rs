@@ -15,7 +15,7 @@
 //! and no parent step.
 //!
 //! The tail of a path is parsed by the BASE path parser of `openehr-rm`
-//! (<https://docs.rs/openehr-rm/0.0.64/openehr_rm/v1_2/paths/struct.RmPath.html>),
+//! (<https://docs.rs/openehr-rm/0.0.67/openehr_rm/v1_2/paths/struct.RmPath.html>),
 //! so this module never re-implements the openEHR grammar. It resolves the
 //! parent steps against an anchor before the path is used, and the resolved
 //! path carries no `..` segment.
