@@ -62,7 +62,82 @@ impl Origin {
     }
 }
 
-/// The FHIR resource one run into openEHR read.
+/// Why a value cannot be one of the message identifiers.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+#[non_exhaustive]
+pub enum MessageIdError {
+    /// The text carries no characters.
+    #[error("a {kind} cannot be empty")]
+    Empty {
+        /// Which identifier was being built.
+        kind: &'static str,
+    },
+}
+
+/// The id a sending system gave one message.
+///
+/// An example is the MSH-10 control id of an HL7 v2 message. The type is
+/// distinct from [`MessageType`], so the two cannot be swapped at a call site.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MessageControlId(String);
+
+impl MessageControlId {
+    /// Returns the control id `text` names.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`MessageIdError::Empty`] when `text` is empty.
+    pub fn new(text: impl Into<String>) -> Result<Self, MessageIdError> {
+        let text = text.into();
+        // NOTE: no specification governs this: our own design; no vendored
+        // source states the MSH-10 length, so only an empty id is refused.
+        if text.is_empty() {
+            return Err(MessageIdError::Empty {
+                kind: "message control id",
+            });
+        }
+        Ok(Self(text))
+    }
+
+    /// Returns the control id as the message carried it.
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// The type of one message, such as `ORU^R01`.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MessageType(String);
+
+impl MessageType {
+    /// Returns the message type `text` names.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`MessageIdError::Empty`] when `text` is empty.
+    pub fn new(text: impl Into<String>) -> Result<Self, MessageIdError> {
+        let text = text.into();
+        if text.is_empty() {
+            return Err(MessageIdError::Empty {
+                kind: "message type",
+            });
+        }
+        Ok(Self(text))
+    }
+
+    /// Returns the message type as the message carried it.
+    #[must_use]
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// The item one run into openEHR read.
+///
+/// The item is a FHIR resource ([`SourceItem::of`]) or a message a face
+/// received ([`SourceItem::message`]). Either way the engine records its type
+/// and its id as the one `originating_system_item_ids` entry.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SourceItem {
     resource_type: String,
@@ -79,6 +154,16 @@ impl SourceItem {
             id: None,
             version_id: None,
         }
+    }
+
+    /// Creates the source of a message, named by its control id.
+    ///
+    /// The control id becomes the item's id and the message type its type. A
+    /// message carries no version, so none is recorded (no specification
+    /// governs this allocation: our own design).
+    #[must_use]
+    pub fn message(control_id: MessageControlId, message_type: MessageType) -> Self {
+        Self::new(message_type.0).with_id(control_id.0)
     }
 
     /// Reads the source item a FHIR resource describes.
@@ -117,13 +202,14 @@ impl SourceItem {
         self
     }
 
-    /// Returns the resource type.
+    /// Returns the item's type: a resource's `resourceType`, or a message's
+    /// type.
     #[must_use]
     pub fn resource_type(&self) -> &str {
         &self.resource_type
     }
 
-    /// Returns the resource id, when the resource carries one.
+    /// Returns the item's id, when the item carries one.
     #[must_use]
     pub fn id(&self) -> Option<&str> {
         self.id.as_deref()
@@ -138,7 +224,7 @@ impl SourceItem {
 
 #[cfg(test)]
 mod tests {
-    use super::SourceItem;
+    use super::{MessageControlId, MessageIdError, MessageType, SourceItem};
     use fhir_types::codec::Value;
 
     #[test]
@@ -152,6 +238,33 @@ mod tests {
         assert_eq!(source.resource_type(), "Condition");
         assert_eq!(source.id(), Some("sender-1"));
         assert_eq!(source.version_id(), Some("3"));
+    }
+
+    #[test]
+    fn a_message_source_names_its_control_id_and_its_type() {
+        let source = SourceItem::message(
+            MessageControlId::new("MSG-0001").expect("a non-empty control id"),
+            MessageType::new("ORU^R01").expect("a non-empty message type"),
+        );
+        assert_eq!(source.id(), Some("MSG-0001"));
+        assert_eq!(source.resource_type(), "ORU^R01");
+        assert_eq!(source.version_id(), None);
+    }
+
+    #[test]
+    fn an_empty_control_id_or_message_type_is_refused() {
+        assert_eq!(
+            Err(MessageIdError::Empty {
+                kind: "message control id"
+            }),
+            MessageControlId::new("")
+        );
+        assert_eq!(
+            Err(MessageIdError::Empty {
+                kind: "message type"
+            }),
+            MessageType::new("")
+        );
     }
 
     #[test]

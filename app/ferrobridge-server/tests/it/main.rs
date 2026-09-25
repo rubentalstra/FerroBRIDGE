@@ -21,6 +21,7 @@ mod etl_config;
 mod facade;
 mod facade_e2e;
 mod http;
+mod ingest;
 mod kds;
 mod lane_templates;
 mod omop_round_trip;

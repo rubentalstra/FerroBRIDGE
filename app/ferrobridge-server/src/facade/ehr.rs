@@ -134,12 +134,10 @@ pub async fn resolve(
             }
             Policy::CreateOnFirstWrite => create(client, person).await?,
         },
-        other => {
+        _ => {
             return Err(EhrError::Refused {
                 subject: person.to_string(),
-                detail: format!(
-                    "the client answered an outcome this version does not read ({other:?})"
-                ),
+                detail: crate::facade::status::unread_diagnostics("ehr_get_by_subject"),
             });
         }
     };
@@ -161,11 +159,9 @@ async fn create(client: &Client, person: &PersonId) -> Result<EhrId, EhrError> {
                 detail: crate::facade::status::diagnostics(&upstream),
             })
         }
-        other => Err(EhrError::Refused {
+        _ => Err(EhrError::Refused {
             subject: person.to_string(),
-            detail: format!(
-                "the client answered an outcome this version does not read ({other:?})"
-            ),
+            detail: crate::facade::status::unread_diagnostics("ehr_create"),
         }),
     }
 }

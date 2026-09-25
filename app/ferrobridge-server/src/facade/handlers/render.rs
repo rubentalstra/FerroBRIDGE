@@ -23,9 +23,11 @@ use url::Url;
 use crate::facade::engine;
 use crate::facade::handlers::Refusal;
 use crate::facade::identity::FhirResourceId;
+use crate::facade::ingest::Refused;
 use crate::facade::outcome::Issue;
 use crate::facade::outcome::IssueType;
 use crate::facade::reply;
+use crate::facade::status;
 
 /// What one rendered resource carries beside its body.
 #[derive(Debug, Clone)]
@@ -45,21 +47,11 @@ pub(crate) fn render(
     version: &ObjectVersionId,
     source: &Url,
 ) -> Result<Rendered, Refusal> {
-    let produced =
-        engine::outbound(program, index, composition).map_err(|error| engine_refusal(&error))?;
+    let produced = engine::outbound(program, index, composition)
+        .map_err(|error| Refusal::from(crate::facade::ingest::engine_refusal(&error)))?;
     let warnings = produced.warnings().to_vec();
     let (value, created) = produced.into_parts();
-    let mut body = match value {
-        Value::Object(object) => object,
-        other => {
-            return Err(reply::refusal(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Issue::error(IssueType::Exception).diagnosing(format!(
-                    "the engine produced {other:?} where a FHIR resource object belongs"
-                )),
-            ));
-        }
-    };
+    let mut body = resource_object(value, program.resource().as_str())?;
     contain(&mut body, created);
     body.insert(String::from("id"), Value::String(String::from(id.as_str())));
     let mut meta = body
@@ -83,6 +75,27 @@ pub(crate) fn render(
     );
     body.insert(String::from("meta"), Value::Object(meta));
     Ok(Rendered { body, warnings })
+}
+
+/// Returns the resource object an outbound run produced.
+///
+/// The value is mapped clinical content, so a refusal names only its shape:
+/// the resource type the program maps and the JSON kind the engine produced.
+/// The status is the table's [`status::INTERNAL`] row, because the engine is
+/// the bridge's own.
+fn resource_object(value: Value, resource_type: &str) -> Result<Object, Refusal> {
+    let kind = match value {
+        Value::Object(object) => return Ok(object),
+        Value::Null => "null",
+        Value::Bool(_) => "a boolean",
+        Value::Number(_) => "a number",
+        Value::String(_) => "a string",
+        Value::Array(_) => "an array",
+    };
+    Err(Refusal::from(Refused::of_answer(&status::Answer::new(
+        status::INTERNAL,
+        format!("the engine produced {kind} where a {resource_type} resource object belongs"),
+    ))))
 }
 
 /// Carries the resources an outbound run created inside the one it mapped.
@@ -187,37 +200,48 @@ pub(crate) fn composition_url(
         })
 }
 
-/// Returns the refusal one engine error renders as.
-///
-/// An element the program cannot map refuses the unit (no specification
-/// governs this: our own design), so the answer is a `422` whose diagnostics
-/// name the mapping and the element the engine refused at.
-pub(crate) fn engine_refusal(error: &fhirconnect::engine::traverse::EngineError) -> Refusal {
-    reply::refusal(
-        StatusCode::UNPROCESSABLE_ENTITY,
-        Issue::error(IssueType::Processing)
-            .diagnosing(chain(error))
-            .detailing("the mapping refused this resource"),
-    )
-}
-
-/// Returns `error` and every cause behind it as one line.
-pub(crate) fn chain(error: &dyn core::error::Error) -> String {
-    let mut line = error.to_string();
-    let mut cause = error.source();
-    while let Some(source) = cause {
-        line.push_str(": ");
-        line.push_str(&source.to_string());
-        cause = source.source();
-    }
-    line
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{chain, composition_url, contain};
+    use super::{composition_url, contain, resource_object};
     use ferrobridge_openehr::ids::{EhrId, ObjectVersionId};
     use fhir_types::codec::Value;
+    use http::StatusCode;
+
+    /// A synthetic value no refusal may carry onto the wire.
+    const MARKER: &str = "ferrobridge-synthetic-clinical-marker";
+
+    #[tokio::test]
+    async fn an_output_that_is_no_object_is_refused_by_its_shape_alone() {
+        let produced = Value::Array(vec![Value::String(String::from(MARKER))]);
+        let refusal =
+            resource_object(produced, "Condition").expect_err("an array is no resource object");
+        let response = refusal.into_response();
+        assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, response.status());
+        let bytes = axum::body::to_bytes(response.into_body(), 64 * 1024)
+            .await
+            .expect("the refusal body reads");
+        let text = String::from_utf8(bytes.to_vec()).expect("the body is UTF-8");
+        assert!(
+            text.contains("the engine produced an array where a Condition resource object belongs"),
+            "{text}"
+        );
+        assert!(
+            !text.contains(MARKER),
+            "the produced value reached the wire: {text}"
+        );
+    }
+
+    #[test]
+    fn an_object_output_passes_through() {
+        let Value::Object(object) = Value::from_serde_json(serde_json::json!({
+            "resourceType": "Condition"
+        })) else {
+            panic!("the literal is an object");
+        };
+        let passed = resource_object(Value::Object(object.clone()), "Condition")
+            .expect("an object is the resource");
+        assert_eq!(object, passed);
+    }
 
     #[test]
     fn a_created_resource_is_contained_and_referenced_locally() {
@@ -267,11 +291,5 @@ mod tests {
             "http://cdr.invalid/openehr/v1/ehr/bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11/composition/8849182c-82ad-4088-a07f-48ead4180515::ferroehr::2",
             built.as_str()
         );
-    }
-
-    #[test]
-    fn a_cause_chain_renders_as_one_line() {
-        let error = crate::facade::identity::IdError::Empty { kind: "FHIR id" };
-        assert_eq!("a FHIR id cannot be empty", chain(&error));
     }
 }

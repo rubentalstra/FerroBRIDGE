@@ -8,7 +8,8 @@
 //! CDR, and answers either a FHIR resource or an `OperationOutcome`
 //! (`docs/architecture.md` §4.6). Every CDR answer reaches the wire through
 //! the one table of [`crate::facade::status`], so a status is never invented
-//! at a call site.
+//! at a call site. Create, update and transaction write through
+//! [`crate::facade::ingest`], so the handlers keep only the HTTP half.
 
 mod conditional;
 mod read;
