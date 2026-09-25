@@ -84,6 +84,39 @@ invocation flag to run at all, which puts the lane one forgotten flag away from
 never running. The gate variable is the single switch instead, and this job is
 where it is on.
 
+## The conformance gate
+
+`conformance` runs `scripts/checks/conformance.sh --check` (#24). There is no
+external conformance suite for FHIRconnect or OMOCL, so the corpus tests are
+the instrument (`docs/architecture.md` §11). Four tests, one per corpus, give
+each case a verdict and write it to `target/conformance/<corpus>.json` through
+`ferrobridge_testkit::conformance`:
+
+| Corpus | Case | Test |
+|---|---|---|
+| `fhirconnect-mapping-lib` | a file of `docs/specs/fhirconnect-mapping-lib/` | `crates/fhirconnect/tests/it/corpus.rs` |
+| `omocl` | a file of `docs/specs/omocl/` | `crates/omocl/tests/it/corpus.rs` |
+| `roundtrip` | a round-trip chain | `crates/fhirconnect/tests/it/roundtrip.rs` |
+| `draft-rest-api` | an FSH operation definition of the draft chapter | `crates/fhirconnect/tests/it/operations.rs` |
+
+Each test compares its verdicts with the committed
+`conformance/<corpus>/pass-list.txt` and fails when a listed case no longer
+passes, so a regression fails the ordinary `test` job too. The script adds the
+rest under `--check`: a passing case the list does not record, a corpus whose
+size moved from the list's `total` line, a badge under `conformance/badges/`
+that disagrees with its list, and a README conformance badge that names no
+committed badge file. `scripts/checks/conformance.sh --update` rewrites the
+lists and the badges from one run. The script runs one package per `cargo
+nextest` invocation, for the same memory reason the `test` job uses
+`cargo hack`, and it needs `jq`, which the hosted runner carries.
+
+The README shows each badge through
+`https://img.shields.io/endpoint?url=<raw URL of the badge JSON on main>`, the
+shields.io endpoint schema (<https://shields.io/badges/endpoint-badge>):
+`schemaVersion` 1, a label, the message `k / n`, and a colour by share. No
+specification governs the gate: our own design, following the sibling
+terminology server's pass lists.
+
 ## The sqlx query metadata
 
 `omop-cdm` checks its SQL at compile time with `sqlx`, from the query metadata

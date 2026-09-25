@@ -345,6 +345,31 @@ jobs:
       # nextest does not run doctests, so they get their own compile.
       - run: cargo hack test --doc --workspace --locked
 
+  # The conformance gate (#24): the four corpus tests measure the vendored
+  # FHIRconnect and OMOCL libraries, the round-trip chains and the draft REST
+  # API's operation definitions against the committed pass lists under
+  # conformance/. A case a list records that no longer passes fails the job,
+  # and so does an unrecorded new pass or a badge that disagrees with its list.
+  # The script runs one package per nextest invocation, as the test lane does
+  # through cargo hack, so the generated giants never compile side by side.
+  conformance:
+    name: conformance
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+      - uses: taiki-e/install-action@76c2e6406e52637deed7160d77bded76bd83e06e # v2.87.14
+        with:
+          tool: cargo-nextest
+      - run: scripts/checks/conformance.sh --check
+
   # The container-backed lane. Every test behind the harness returns early
   # unless FERROBRIDGE_E2E is 1, so this job is the only run where the
   # PostgreSQL and the reference CDR actually start. testcontainers talks to
@@ -651,6 +676,7 @@ jobs:
       - clippy
       - clippy-fhir-types
       - test
+      - conformance
       - e2e
       - sqlx-offline
       - doc

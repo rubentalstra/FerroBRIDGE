@@ -117,7 +117,8 @@ the testkit tool crate. Beside it:
   behind the `FERROBRIDGE_E2E` gate, with every image pinned by digest in
   `docs/VERSIONS.md`; `stubs` carries the documented ITS-REST and FHIR R4
   terminology response shapes for `wiremock`; `fixtures/` holds the synthetic
-  template, composition and FHIR resources; `matrix_pin` reads the pin matrix.
+  template, composition and FHIR resources; `matrix_pin` reads the pin matrix;
+  `conformance` is the helper the corpus tests report their verdicts through.
   `vocabulary` holds the synthetic OHDSI vocabulary for the ten vocabulary
   tables and its `COPY` loader (the observed Athena shape is #88).
 - `docs/specs/`: the vendored specification corpora (#71), one directory per
@@ -138,8 +139,10 @@ the testkit tool crate. Beside it:
   which fails when a file disagrees with the `docs/VERSIONS.md` pin matrix or
   claims a licence other than `BUSL-1.1`; `crate-version-guard.sh`, the crate
   bump rule; `favicon-sync.sh`, the book theme favicon against the brand mark;
-  and `pin-freshness.sh`, every pin no ecosystem watches against its newest
-  upstream release.
+  `pin-freshness.sh`, every pin no ecosystem watches against its newest
+  upstream release; and `conformance.sh`, the pass-list gate over the four
+  corpora under `conformance/` (a regression fails, a new pass asks for the
+  list, `--update` rewrites the lists and the shields.io badge JSON).
 - `.github/`: issue and pull-request templates, CODEOWNERS, Dependabot, and
   ten workflows (CI, Docs, Scorecard, CodeQL, SonarQube Cloud, Release,
   Release build, Release image, Publish crates, Pin freshness). `ci.yml` runs

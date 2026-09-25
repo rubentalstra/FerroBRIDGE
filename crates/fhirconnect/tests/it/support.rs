@@ -85,3 +85,7 @@ pub(crate) fn render(diagnostics: &[Diagnostic]) -> String {
         .collect::<Vec<String>>()
         .join("; ")
 }
+
+/// A compiled program with the published files of the library it loads,
+/// relative to the vendored library.
+pub(crate) type Chain = (&'static [&'static str], Arc<Program>);

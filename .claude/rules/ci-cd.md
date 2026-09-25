@@ -117,8 +117,10 @@ sources, which subsumes cargo-audit); MSRV via `cargo hack check
 --rust-version`; the codegen drift gate (`cargo run --locked -p fhir-codegen --
 emit --check`); `cargo publish --workspace --dry-run --locked`; the
 crate-version guard on pull requests (`scripts/checks/crate-version-guard.sh`);
-`dependency-review-action` on pull requests; and the `comment-style.sh` guard
-at `--all`. **Always `--locked`**, so CI fails on
+`dependency-review-action` on pull requests; the `comment-style.sh` guard
+at `--all`; and the `conformance` job (`scripts/checks/conformance.sh --check`,
+the committed pass lists under `conformance/` against the corpus tests' own
+verdicts, a regression or an unrecorded pass failing the lane). **Always `--locked`**, so CI fails on
 lockfile drift rather than on registry drift. Commit `Cargo.lock`.
 
 ## Supply chain (the release lane, `docs/release.md`)
