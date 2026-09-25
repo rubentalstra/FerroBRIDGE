@@ -13,6 +13,7 @@
 
 pub mod cli;
 pub mod config;
+pub mod etl;
 pub mod facade;
 pub mod health;
 pub mod indicators;
@@ -76,13 +77,25 @@ where
         Ok(cli) => cli,
         Err(error) => return ExitCode::from(clap_exit(&error)),
     };
-    if let Some(issue) = cli.command.pending_issue() {
-        eprintln!(
-            "ferrobridge: `{}` is not implemented yet; it lands with issue #{issue}",
-            cli.command.spelling()
-        );
-        return ExitCode::from(EXIT_UNAVAILABLE_JOB);
-    }
+    let job = match (&cli.command, cli.command.pending_issue()) {
+        (cli::Command::Serve, None) => Job::Serve,
+        (
+            cli::Command::Cdm {
+                command: cli::Cdm::Init,
+            },
+            None,
+        ) => Job::CdmInit,
+        (command, issue) => {
+            let issue = issue.map_or_else(String::new, |issue| {
+                format!("; it lands with issue #{issue}")
+            });
+            eprintln!(
+                "ferrobridge: `{}` is not implemented yet{issue}",
+                command.spelling()
+            );
+            return ExitCode::from(EXIT_UNAVAILABLE_JOB);
+        }
+    };
     let settings = match Config::load(cli.config.as_deref()).and_then(|config| config.resolve()) {
         Ok(settings) => settings,
         Err(error) => {
@@ -99,13 +112,86 @@ where
         eprintln!("ferrobridge: cannot start: {}", chain(&error));
         return ExitCode::from(EXIT_CONFIG);
     }
-    match serve_command(settings) {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(error) => {
-            tracing::error!(error = format!("{error:#}"), "cannot serve");
-            ExitCode::FAILURE
+    match job {
+        Job::Serve => match serve_command(settings) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(error) => {
+                tracing::error!(error = format!("{error:#}"), "cannot serve");
+                ExitCode::FAILURE
+            }
+        },
+        Job::CdmInit => {
+            let Some(cdm) = settings.cdm else {
+                eprintln!("ferrobridge: cannot start: `cdm init` needs a [cdm] section");
+                return ExitCode::from(EXIT_CONFIG);
+            };
+            match cdm_init_command(&cdm) {
+                Ok(()) => ExitCode::SUCCESS,
+                Err(error) => {
+                    tracing::error!(error = format!("{error:#}"), "cdm init failed");
+                    ExitCode::FAILURE
+                }
+            }
         }
     }
+}
+
+/// The jobs the binary runs today.
+enum Job {
+    /// `serve`.
+    Serve,
+    /// `cdm init`.
+    CdmInit,
+}
+
+/// Applies the CDM DDL and the bridge schema to the configured database.
+///
+/// The CDM schema is built in one transaction through `sqlx`, and the bridge
+/// schema through the writer's own `tokio-postgres` connection; the two
+/// clients never share a pool.
+fn cdm_init_command(cdm: &config::CdmSettings) -> anyhow::Result<()> {
+    use anyhow::Context;
+    use secrecy::ExposeSecret;
+
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?;
+    runtime.block_on(async {
+        let options: sqlx::postgres::PgConnectOptions = cdm
+            .url
+            .expose_secret()
+            .parse()
+            .context("reading [cdm] url")?;
+        let pool = omop_cdm::database::CdmPool::connect(
+            sqlx::postgres::PgPoolOptions::new().max_connections(1),
+            options,
+            cdm.schema.clone(),
+        )
+        .await
+        .context("connecting to the CDM database")?;
+        omop_cdm::database::init(&pool)
+            .await
+            .with_context(|| format!("applying the CDM DDL to schema {}", cdm.schema))?;
+        pool.pool().close().await;
+        let mut writer = omop_cdm::writer::CdmWriter::connect(
+            cdm.url.expose_secret(),
+            cdm.schema.clone(),
+            cdm.bridge_schema.clone(),
+            cdm.person_policy,
+        )
+        .await
+        .context("connecting the CDM writer")?;
+        writer
+            .init()
+            .await
+            .with_context(|| format!("creating the bridge schema {}", cdm.bridge_schema))?;
+        tracing::info!(
+            schema = %cdm.schema,
+            bridge_schema = %cdm.bridge_schema,
+            "the CDM schema and the bridge schema are in place"
+        );
+        Ok(())
+    })
 }
 
 /// Builds the runtime and serves until the process is asked to stop.

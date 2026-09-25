@@ -41,6 +41,8 @@ pub struct Config {
     pub terminology: Option<Terminology>,
     /// The OMOP CDM database, when one is configured.
     pub cdm: Option<Cdm>,
+    /// The OMOP ETL job, when one is configured.
+    pub etl: Option<Etl>,
     /// Where the mapping files are read from.
     pub mappings: Mappings,
     /// The FHIR facade, off until its section turns it on.
@@ -256,13 +258,78 @@ impl Default for Terminology {
 }
 
 /// The OMOP CDM database lane.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Cdm {
     /// The PostgreSQL connection URL.
     pub url: Option<String>,
     /// A file holding the connection URL, read at boot.
     pub url_file: Option<PathBuf>,
+    /// The schema the CDM tables live in.
+    pub schema: String,
+    /// The schema the bridge keeps its natural-key side table in.
+    pub bridge_schema: String,
+    /// What the writer does for an EHR with no `PERSON`:
+    /// `create_on_first_sight` or `existing`.
+    pub person_policy: String,
+}
+
+impl Default for Cdm {
+    fn default() -> Self {
+        Self {
+            url: None,
+            url_file: None,
+            schema: String::from("cdm"),
+            bridge_schema: String::from("ferrobridge"),
+            person_policy: String::from("create_on_first_sight"),
+        }
+    }
+}
+
+/// The OMOP ETL job.
+///
+/// The queries are parsed and checked when the configuration loads, so a
+/// query the runner cannot read refuses the start of any job.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Etl {
+    /// The AQL that selects each composition whole, aliased `ehr_id`,
+    /// `versioned_object_uid`, `version_uid` and `composition`.
+    pub aql: String,
+    /// How many rows one page of a query asks for.
+    pub page_size: u32,
+    /// The `*_type_concept_id` the mappings write; no default, because it
+    /// records a provenance only the deployment knows.
+    pub type_concept_id: Option<i32>,
+    /// The `period_type_concept_id` of every observation period.
+    pub observation_period_type_concept_id: Option<i32>,
+    /// The visit derivation, off until its section is present.
+    pub visits: Option<EtlVisits>,
+}
+
+impl Default for Etl {
+    fn default() -> Self {
+        Self {
+            aql: String::new(),
+            page_size: 100,
+            type_concept_id: None,
+            observation_period_type_concept_id: None,
+            visits: None,
+        }
+    }
+}
+
+/// The visit derivation of the OMOP ETL job.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct EtlVisits {
+    /// The AQL aliased `ehr_id`, `visit_source`, `visit_start` and
+    /// `visit_end`.
+    pub aql: String,
+    /// The `visit_concept_id` every visit carries.
+    pub visit_concept_id: Option<i32>,
+    /// The `visit_type_concept_id` every visit carries.
+    pub visit_type_concept_id: Option<i32>,
 }
 
 /// How often, and how far apart, a call is retried.
@@ -428,6 +495,41 @@ pub enum Error {
         #[source]
         source: Box<dyn std::error::Error + Send + Sync>,
     },
+    /// A schema name is not an unquoted PostgreSQL identifier.
+    #[error("{key} is not a schema name")]
+    Schema {
+        /// The key that holds it.
+        key: String,
+        /// Why the name is refused.
+        #[source]
+        source: omop_cdm::ddl::SchemaNameError,
+    },
+    /// The person policy names neither of the two values.
+    #[error("{key} is `{value}`; the policies are create_on_first_sight and existing")]
+    PersonPolicy {
+        /// The key that holds it.
+        key: String,
+        /// The value it holds.
+        value: String,
+    },
+    /// A page size that would never advance.
+    #[error("{key} is 0; a page holds at least one row")]
+    PageSize {
+        /// The key that holds it.
+        key: String,
+        /// What the page size reported.
+        #[source]
+        source: ferrobridge_openehr::query::PageSizeError,
+    },
+    /// A configured AQL the runner cannot read.
+    #[error("{key} is refused")]
+    Aql {
+        /// The key that holds it.
+        key: String,
+        /// Why the query is refused.
+        #[source]
+        source: Box<crate::etl::aql::AqlError>,
+    },
     /// The mapping set the operations lane runs did not load.
     #[error("the mapping set could not be loaded")]
     Mappings {
@@ -546,7 +648,8 @@ impl Config {
                 .as_ref()
                 .map(resolve_terminology)
                 .transpose()?,
-            cdm_url: self.cdm.as_ref().map(resolve_cdm).transpose()?,
+            cdm: self.cdm.as_ref().map(resolve_cdm).transpose()?,
+            etl: self.etl.as_ref().map(resolve_etl).transpose()?,
             mapping_directory: self.mappings.directory.clone(),
             mappings: resolve_mappings(&self.mappings)?,
             facade: if self.facade.enabled {
@@ -647,8 +750,10 @@ pub struct Settings {
     pub cdr: Option<ferrobridge_openehr::config::Config>,
     /// The terminology client configuration, when the lane is on.
     pub terminology: Option<ferrobridge_term::config::Config>,
-    /// The OMOP CDM connection URL, when the lane is on.
-    pub cdm_url: Option<SecretString>,
+    /// The OMOP CDM database, when the lane is on.
+    pub cdm: Option<CdmSettings>,
+    /// The OMOP ETL job, when it is configured.
+    pub etl: Option<crate::etl::EtlSettings>,
     /// The directory the mapping files are read from, when one is configured.
     pub mapping_directory: Option<PathBuf>,
     /// The mapping set the operations compile from disk, when both
@@ -661,6 +766,19 @@ pub struct Settings {
     pub facade: Option<FacadeSettings>,
     /// The FHIRconnect operations lane.
     pub operations: OperationsSettings,
+}
+
+/// The OMOP CDM database, resolved.
+#[derive(Debug, Clone)]
+pub struct CdmSettings {
+    /// The PostgreSQL connection URL, which may carry a password.
+    pub url: SecretString,
+    /// The schema the CDM tables live in.
+    pub schema: omop_cdm::ddl::SchemaName,
+    /// The schema the natural-key side table lives in.
+    pub bridge_schema: omop_cdm::ddl::SchemaName,
+    /// What the writer does for an EHR with no `PERSON`.
+    pub person_policy: omop_cdm::writer::PersonPolicy,
 }
 
 /// The mapping set, resolved.
@@ -730,7 +848,7 @@ impl Settings {
         } else {
             tracing::info!("no [terminology] section: the terminology lane is off");
         }
-        if self.cdm_url.is_some() {
+        if self.cdm.is_some() {
             tracing::info!("[cdm] is configured and carries identifiable data");
         } else {
             tracing::info!("no [cdm] section: the OMOP lane is off");
@@ -858,11 +976,105 @@ fn resolve_terminology(
     Ok(config)
 }
 
-/// Returns the CDM connection URL `cdm` describes.
-fn resolve_cdm(cdm: &Cdm) -> Result<SecretString, Error> {
-    // TODO(#91): hand this URL to the CDM writer, which owns the connection.
-    secret("cdm.url", cdm.url.as_deref(), cdm.url_file.as_deref())?.ok_or(Error::Missing {
-        key: String::from("cdm.url"),
+/// Returns the CDM database `cdm` describes.
+fn resolve_cdm(cdm: &Cdm) -> Result<CdmSettings, Error> {
+    let url =
+        secret("cdm.url", cdm.url.as_deref(), cdm.url_file.as_deref())?.ok_or(Error::Missing {
+            key: String::from("cdm.url"),
+        })?;
+    let schema_of = |key: &str, name: &str| {
+        omop_cdm::ddl::SchemaName::new(name).map_err(|source| Error::Schema {
+            key: key.to_owned(),
+            source,
+        })
+    };
+    let person_policy = match cdm.person_policy.as_str() {
+        "create_on_first_sight" => omop_cdm::writer::PersonPolicy::CreateOnFirstSight,
+        "existing" => omop_cdm::writer::PersonPolicy::Existing,
+        _ => {
+            return Err(Error::PersonPolicy {
+                key: String::from("cdm.person_policy"),
+                value: cdm.person_policy.clone(),
+            });
+        }
+    };
+    Ok(CdmSettings {
+        url,
+        schema: schema_of("cdm.schema", &cdm.schema)?,
+        bridge_schema: schema_of("cdm.bridge_schema", &cdm.bridge_schema)?,
+        person_policy,
+    })
+}
+
+/// Returns the value of the required integer `key`.
+fn required(key: &str, value: Option<i32>) -> Result<i32, Error> {
+    value.ok_or_else(|| Error::Missing {
+        key: key.to_owned(),
+    })
+}
+
+/// Returns the checked query `text` holds, refusing it under `key`.
+fn query_of(
+    key: &str,
+    text: &str,
+    check: fn(&str) -> Result<crate::etl::aql::CheckedQuery, crate::etl::aql::AqlError>,
+) -> Result<crate::etl::aql::CheckedQuery, Error> {
+    if text.is_empty() {
+        return Err(Error::Missing {
+            key: key.to_owned(),
+        });
+    }
+    check(text).map_err(|source| Error::Aql {
+        key: key.to_owned(),
+        source: Box::new(source),
+    })
+}
+
+/// Returns the ETL job `etl` describes, with both queries checked.
+fn resolve_etl(etl: &Etl) -> Result<crate::etl::EtlSettings, Error> {
+    let compositions = query_of(
+        "etl.aql",
+        &etl.aql,
+        crate::etl::aql::CheckedQuery::compositions,
+    )?;
+    let page_size = ferrobridge_openehr::query::PageSize::new(etl.page_size).map_err(|source| {
+        Error::PageSize {
+            key: String::from("etl.page_size"),
+            source,
+        }
+    })?;
+    let visits = etl
+        .visits
+        .as_ref()
+        .map(|visits| {
+            Ok::<_, Error>(crate::etl::VisitSettings {
+                query: query_of(
+                    "etl.visits.aql",
+                    &visits.aql,
+                    crate::etl::aql::CheckedQuery::visits,
+                )?,
+                concepts: omop_cdm::writer::VisitConcepts {
+                    visit_concept_id: required(
+                        "etl.visits.visit_concept_id",
+                        visits.visit_concept_id,
+                    )?,
+                    visit_type_concept_id: required(
+                        "etl.visits.visit_type_concept_id",
+                        visits.visit_type_concept_id,
+                    )?,
+                },
+            })
+        })
+        .transpose()?;
+    Ok(crate::etl::EtlSettings {
+        compositions,
+        page_size,
+        type_concept_id: required("etl.type_concept_id", etl.type_concept_id)?,
+        observation_period_type_concept_id: required(
+            "etl.observation_period_type_concept_id",
+            etl.observation_period_type_concept_id,
+        )?,
+        visits,
     })
 }
 

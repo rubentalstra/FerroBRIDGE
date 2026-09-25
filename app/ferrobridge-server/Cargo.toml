@@ -38,12 +38,20 @@ jiff.workspace = true
 openehr-base.workspace = true
 openehr-its.workspace = true
 openehr-mapping-core.workspace = true
+# The ETL checks its configured AQL at load (docs/architecture.md section 5.4).
+openehr-query.workspace = true
 openehr-rm.workspace = true
+# The OMOP sink: the record graph, the CDM writer and the derived tables.
+omop-cdm = { workspace = true, features = ["database"] }
+# The AQL result set arrives as a stream of pages.
+futures-util.workspace = true
 # The embedded identity store (docs/architecture.md section 9).
 redb.workspace = true
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+# The connection options `cdm init` opens the CDM pool with.
+sqlx.workspace = true
 # The digest behind a derived FHIR resource id.
 sha2.workspace = true
 thiserror.workspace = true
@@ -61,6 +69,8 @@ ferrobridge-testkit.workspace = true
 reqwest.workspace = true
 tempfile.workspace = true
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "time", "net"] }
+# The ETL cases read back what the writer wrote.
+tokio-postgres.workspace = true
 tower.workspace = true
 wiremock.workspace = true
 

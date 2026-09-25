@@ -60,7 +60,9 @@ sha2 = "0.11.0"
 # version: cargo resolves the path locally and the version on crates.io.
 fhir-types = { path = "crates/fhir-types", version = "0.1.106", default-features = false }
 openehr-mapping-core = { path = "crates/openehr-mapping-core", version = "0.0.0" }
-omop-cdm = { path = "crates/omop-cdm", version = "0.0.0" }
+# The OMOP CDM layer, taken metadata-only by default: a consumer that writes
+# to a CDM database turns on its `database` feature.
+omop-cdm = { path = "crates/omop-cdm", version = "0.0.0", default-features = false }
 # Path-only, with no version: cargo strips the dev-dependency from a packaged
 # crates/* manifest instead of looking it up on crates.io.
 ferrobridge-testkit = { path = "tools/ferrobridge-testkit" }
@@ -82,6 +84,9 @@ fhirconnect = { path = "crates/fhirconnect" }
 openehr-its = { version = "0.0.69", default-features = false, features = ["opt14", "json", "rest-server"] }
 openehr-sdt = { version = "0.0.69", default-features = false, features = ["flat"] }
 openehr-am = "0.0.69"
+# The AQL 1.1.0 parser: the ETL checks its configured queries at load
+# (docs/architecture.md section 5.4). Verified against crates.io on 2026-09-25.
+openehr-query = "0.0.69"
 # Test-only: the ADL 2 test fixtures are compiled from their .adls sources, so
 # the parser is a dev-dependency of openehr-mapping-core and never ships.
 openehr-adl = "0.0.69"

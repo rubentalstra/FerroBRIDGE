@@ -63,6 +63,41 @@ crates on crates.io.
 - `omop_cdm::meta::ColumnMeta::fk_domain`, the vocabulary domain the CDM v5.4
   field definitions name for a concept column, emitted by
   `tools/omop-cdm-codegen` from the `fkDomain` cell.
+- The OMOP sink (#91). `omop_cdm::graph` is the record graph one composition
+  becomes: rows checked against the column metadata as they are built, keyed
+  by EHR, versioned composition, archetype root and occurrence, with
+  references to a person, a visit or another row for the writer to resolve,
+  `FACT_RELATIONSHIP` links, and the per-composition report. A row missing a
+  required column, a date among them, is refused naming the column.
+  `omop_cdm::writer::CdmWriter` commits one graph per transaction over its own
+  `tokio-postgres` connection: ids come from one `integer` sequence per table
+  in a bridge schema (`ferrobridge` by default) beside the CDM, a natural-key
+  side table keeps each key on its id across runs, a later version deletes
+  the rows the earlier one wrote, the rows cross through binary `COPY`, links
+  are written in both directions with `relationship_concept_id` 0, and a
+  watermark names the version committed. An exhausted sequence is a typed
+  error and rolls the composition back. `omop_cdm::derived` rebuilds
+  `OBSERVATION_PERIOD` from the first to the last clinical event per person,
+  and `CONDITION_ERA` and `DRUG_ERA` with the PostgreSQL form of the scripts
+  the CDM publishes (`crates/omop-cdm/sql/`, checked against the digest of
+  the vendored page). The PostgreSQL side of `omop-cdm` sits behind a
+  `database` feature, on by default; `omocl` takes the crate without it.
+- The ETL runner and the `[etl]` configuration (#91): the composition query
+  and the visit query are parsed with `openehr-query` 0.0.69 at load and
+  refused without their four aliased projections, an `ORDER BY`, or with a
+  `LIMIT`; the run pages them through `POST /query/aql`, reads each template
+  once, validates each composition, commits it whole, reports a refused one
+  and goes on, skips on `--resume` every composition whose watermark names the
+  same version, binds `--since` to `$since`, derives visits grouped by EHR and
+  source, and prints a run report with rows per table, concept 0
+  assignments, zero-relationship links, unmapped fields and refusals.
+  `[cdm]` gains `schema`, `bridge_schema` and `person_policy`.
+- `ferrobridge cdm init` runs: it applies the CDM DDL and the bridge schema to
+  the configured database. `ferrobridge etl run [--resume] [--since TIME]`
+  parses and names #90, the OMOCL engine it waits on, and
+  `ferrobridge vocab load DIR --schema NAME` parses and names #233.
+- `docs/specs/omop-cdm/site/sqlScripts.qmd`, the source of the CDM's SQL
+  scripts page, joins the vendored OMOP CDM corpus at the same tag.
 
 ### Changed
 

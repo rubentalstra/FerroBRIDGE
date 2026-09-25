@@ -563,6 +563,7 @@ if [ -f LICENSE ]; then
   # so a header claim is caught while the same text quoted inside a string
   # literal (the emitter that writes that crate's header) is not.
   # The KDS project fixtures are modified copies of Apache-2.0 mapping-library files, so they keep that licence.
+  # The omop-cdm era scripts are the PostgreSQL form of OHDSI's Apache-2.0 SQL, so they keep it too.
   while IFS= read -r hit; do
     [ -n "$hit" ] || continue
     bad "stale licence claim at $hit"
@@ -570,8 +571,9 @@ if [ -f LICENSE ]; then
   done < <(git grep -n -E '^[[:space:]]*([/#*]+|<!--)?[[:space:]]*SPDX-License-Identifier: (MIT|Apache-2\.0)|License-MIT|License-Apache|^license = "(MIT|Apache-2\.0)"|^license: (MIT|Apache-2\.0)|image\.licenses="?(MIT|Apache)' \
     -- ':!LICENSE' ':!CHANGELOG.md' ':!scripts/checks/versions.sh' ':(glob,exclude)**/vendor/**' \
     ':(glob,exclude)docs/specs/**' ':(glob,exclude)crates/fhir-types/**' \
-    ':(glob,exclude)crates/fhirconnect/tests/fixtures/projects/ferrobridge/kds_diagnose/**' || true)
-  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types and the KDS project fixtures excepted, Apache-2.0)"
+    ':(glob,exclude)crates/fhirconnect/tests/fixtures/projects/ferrobridge/kds_diagnose/**' \
+    ':(glob,exclude)crates/omop-cdm/sql/*.sql' || true)
+  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types, the KDS project fixtures and the omop-cdm era scripts excepted, Apache-2.0)"
 else
   note "no LICENSE yet, skipped"
 fi

@@ -82,7 +82,7 @@ fn a_file_states_every_section_and_the_resolver_reads_it() -> Result<(), Box<dyn
     );
     assert_eq!(
         Some("postgres://bridge@db.invalid/cdm"),
-        settings.cdm_url.as_ref().map(ExposeSecret::expose_secret)
+        settings.cdm.as_ref().map(|cdm| cdm.url.expose_secret())
     );
     let mappings = settings.mappings.as_ref().ok_or("the mapping set is on")?;
     assert_eq!(
@@ -208,7 +208,7 @@ fn an_environment_override_turns_a_lane_on_with_no_file_at_all() -> Result<(), B
         settings.terminology.is_none(),
         "a lane with no section stays off"
     );
-    assert!(settings.cdm_url.is_none());
+    assert!(settings.cdm.is_none());
     Ok(())
 }
 
@@ -322,7 +322,7 @@ fn a_cdm_url_file_sibling_is_read_at_boot() -> Result<(), Box<dyn StdError>> {
     let settings = Config::from_sources(Some(&text), &BTreeMap::new())?.resolve()?;
     assert_eq!(
         Some("postgres://bridge@db.invalid/cdm"),
-        settings.cdm_url.as_ref().map(ExposeSecret::expose_secret)
+        settings.cdm.as_ref().map(|cdm| cdm.url.expose_secret())
     );
     Ok(())
 }

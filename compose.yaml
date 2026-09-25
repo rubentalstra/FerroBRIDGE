@@ -131,12 +131,10 @@ services:
     security_opt:
       - no-new-privileges:true
 
-  # One shot: apply the OMOP CDM v5.4 DDL to the database above.
+  # One shot: apply the OMOP CDM v5.4 DDL and the bridge schema to the
+  # database above.
   #
   #   docker compose --profile cdm run --rm cdm-init
-  #
-  # TODO(#91): `cdm init` exits 2 today naming that issue, so this service is
-  # the shape the job runs in rather than a working load.
   cdm-init:
     image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.3}
     profiles: [cdm]
@@ -162,12 +160,12 @@ services:
   #   FERROBRIDGE_VOCAB_DIR=/srv/athena/2026-09 \
   #     docker compose --profile vocab run --rm vocab-load
   #
-  # TODO(#91): `vocab load` exits 2 today naming that issue, so this service is
+  # TODO(#233): `vocab load` exits 2 today naming that issue, so this service is
   # the shape the job runs in rather than a working load.
   vocab-load:
     image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.3}
     profiles: [vocab]
-    command: ["vocab", "load"]
+    command: ["vocab", "load", "/vocabulary", "--schema", "cdm"]
     restart: "no"
     depends_on:
       cdm:

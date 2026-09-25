@@ -1,7 +1,7 @@
 <!-- This file describes vendored third-party material; the bytes beside it
      keep their upstream licence, not the licence of this repository. -->
 
-# Provenance: the OMOP Common Data Model v5.4 definitions and PostgreSQL DDL
+# Provenance: the OMOP Common Data Model v5.4 definitions, PostgreSQL DDL and SQL scripts
 
 Vendored verbatim by `scripts/vendor/omop-cdm.sh`
 (.claude/rules/vendored-inputs.md). Never edit a file here: change the pin in
@@ -9,14 +9,14 @@ docs/VERSIONS.md and re-run the script.
 
 - Source: <https://github.com/OHDSI/CommonDataModel>
 - Pin: tag `v5.4.3`, which resolves to commit `746a15e0fb36a95ba6cc0993737f1273bbad92f2`
-- Fetched: 2026-09-12
+- Fetched: 2026-09-25
 - Upstream licence: `Apache License 2.0`. **The repository has no `LICENSE` file.**
   `DESCRIPTION` is the only place the licence is declared, which is why that
   file is vendored here and the script fails if a `LICENSE` file ever appears.
 - Layout: the upstream paths, unchanged
-- Files: 7
+- Files: 8
 - Tree digest (sha256 over the sorted per-file `sha256  path` listing,
-  `PROVENANCE.md` excluded): `c9bcab5c4f9ede06508fa5bf3c56c92ce4ab142e69835c05f1d21e993611550e`
+  `PROVENANCE.md` excluded): `67a4bdcb2886db921ea2c38865c0b8356845dfe86750c588722a9da9deece9ba`
 
 ## What is here
 
@@ -26,6 +26,12 @@ OHDSI renders them from the same CSVs through a dialect layer that sits outside
 them, so they are vendored rather than generated, and a test asserts the
 generated column set equals the DDL's (docs/architecture.md section 10).
 
+`site/sqlScripts.qmd` is the source of the CDM's SQL scripts page
+(<https://ohdsi.github.io/CommonDataModel/sqlScripts.html>). Its condition era
+and drug era scripts are OHDSI SQL for SqlRender, so the `omop-cdm` crate
+carries their PostgreSQL form under `sql/`, and a test pins the digest of
+this file so an upstream change to the scripts is noticed.
+
 | File | sha256 | git blob id |
 |---|---|---|
 | `inst/csv/OMOP_CDMv5.4_Field_Level.csv` | `2b763c7a2aeb309372c1564350939551531318e2078fd4443e03b2741e79b77c` | `fdec16107fba2a45c3ec360ef84c0d837a43998b` |
@@ -34,4 +40,5 @@ generated column set equals the DDL's (docs/architecture.md section 10).
 | `inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_primary_keys.sql` | `d8f50617f9a698bd9fbfe8d4106d76dcd543949a6976032786f64a91c1941f81` | `9304d020bcb007bca8ad8e57873b76a2b626e8d9` |
 | `inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_indices.sql` | `ea23abbb327ee94e974728196cce2b2db466c7ad4bb4313f36fa3ce2388e8776` | `18b739493af0c3bcc90bff728e987a5b06a7bb0b` |
 | `inst/ddl/5.4/postgresql/OMOPCDM_postgresql_5.4_constraints.sql` | `b09f54e6f1550c8594941a96798246944c10d42d9d4be8291a5058033be0f91d` | `19818c3cd59fa47d153160197a8be9399040a6b6` |
+| `site/sqlScripts.qmd` | `5bbc254456e131a7e1c56bff013d4d79ab0b1ecbec40228746b58e7f7039147a` | `085dee247cc4ddb6be0b2daf93521adfa603daac` |
 | `DESCRIPTION` | `88a1f1f5ba02ecc694b327d3a989b3cb97ed1cb6c12092c84094ce49f95f7aed` | `1a5c4f5215981853019f5a3cecf5f7e795d6b225` |

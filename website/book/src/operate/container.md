@@ -163,7 +163,11 @@ docker compose --profile cdm run --rm cdm-init
 ```
 
 `cdm-init` runs the bridge image with `cdm init`, which applies the OMOP CDM
-v5.4 DDL once the database reports healthy.
+v5.4 tables, primary keys and indices to `[cdm] schema` in one transaction,
+then creates the bridge schema (`[cdm] bridge_schema`) with its side table,
+watermarks and one id sequence per CDM table. The OHDSI constraints file is
+not applied yet (#232). A second `cdm init` on the same schema is refused
+whole, because the tables already exist.
 
 The `vocab` profile loads an OHDSI Athena vocabulary export. The export is a
 licensed download you obtain yourself; it is bind-mounted read only and no
@@ -174,9 +178,10 @@ FERROBRIDGE_VOCAB_DIR=/srv/athena/2026-09 \
   docker compose --profile vocab run --rm vocab-load
 ```
 
-Both subcommands exit 2 today with a line naming the issue that lands them, so
-the two services are the shape the jobs run in rather than a working load. The
-compose file says so beside each one.
+`vocab load DIR --schema NAME` exits 2 today with a line naming #233, the
+loader that waits on the observed export format, so that service is the shape
+the job runs in rather than a working load. `etl run` exits 2 the same way,
+naming #90, the OMOCL engine the run maps compositions with.
 
 ## Sources
 

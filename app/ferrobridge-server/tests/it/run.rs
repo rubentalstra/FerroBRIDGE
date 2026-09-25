@@ -16,14 +16,19 @@ fn rendered(code: ExitCode) -> String {
     format!("{code:?}")
 }
 
+/// The jobs that parse and do not run yet, with the issue each names.
+const PENDING: [(&[&str], &str); 3] = [
+    (&["etl", "run"], "#90"),
+    (&["vocab", "load", "/srv/athena", "--schema", "cdm"], "#233"),
+    (&["mapping", "check"], "#82"),
+];
+
 #[test]
-fn every_job_but_serve_exits_two_and_names_the_issue_that_lands_it() {
-    for argv in [
-        ["ferrobridge", "etl", "run"],
-        ["ferrobridge", "cdm", "init"],
-        ["ferrobridge", "vocab", "load"],
-        ["ferrobridge", "mapping", "check"],
-    ] {
+fn every_pending_job_exits_two() {
+    for (argv, _) in PENDING {
+        let argv: Vec<&str> = std::iter::once("ferrobridge")
+            .chain(argv.iter().copied())
+            .collect();
         assert_eq!(
             rendered(ExitCode::from(EXIT_UNAVAILABLE_JOB)),
             rendered(run(&argv)),
@@ -33,13 +38,8 @@ fn every_job_but_serve_exits_two_and_names_the_issue_that_lands_it() {
 }
 
 #[test]
-fn the_binary_prints_the_issue_that_lands_each_refused_job() {
-    for (argv, issue) in [
-        (["etl", "run"], "#91"),
-        (["cdm", "init"], "#91"),
-        (["vocab", "load"], "#91"),
-        (["mapping", "check"], "#82"),
-    ] {
+fn the_binary_prints_the_issue_that_lands_each_pending_job() {
+    for (argv, issue) in PENDING {
         let output = std::process::Command::new(env!("CARGO_BIN_EXE_ferrobridge"))
             .args(argv)
             .output()
@@ -53,6 +53,21 @@ fn the_binary_prints_the_issue_that_lands_each_refused_job() {
         assert!(stderr.contains(issue), "{argv:?} names {issue}: {stderr}");
         assert_eq!(1, stderr.lines().count(), "one line, not a backtrace");
     }
+}
+
+#[test]
+fn cdm_init_without_a_cdm_section_exits_seventy_eight() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_ferrobridge"))
+        .args(["cdm", "init"])
+        .env_remove("FERROBRIDGE_CONFIG")
+        .output()
+        .expect("the binary runs");
+    assert_eq!(Some(i32::from(EXIT_CONFIG)), output.status.code());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("[cdm]"),
+        "the refusal names the section: {stderr}"
+    );
 }
 
 #[test]
