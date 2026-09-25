@@ -162,6 +162,14 @@ pub trait Store: fmt::Debug + Send + Sync {
     /// Returns [`StoreError`] when the store cannot be read.
     fn consumed(&self, source: &SourceVersion) -> Result<Option<ConsumedSource>, StoreError>;
 
+    /// Returns what consumed every version of the `id` `source` names, with
+    /// a `meta.versionId` or without one, in storage-key order.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StoreError`] when the store cannot be read.
+    fn consumed_versions(&self, source: &SourceVersion) -> Result<Vec<ConsumedSource>, StoreError>;
+
     /// Records what consumed `source`, and returns the record that stands.
     ///
     /// # Errors
@@ -324,6 +332,17 @@ impl Store for MemoryStore {
         self.with(|tables| tables.sources.get(&key).cloned())
     }
 
+    fn consumed_versions(&self, source: &SourceVersion) -> Result<Vec<ConsumedSource>, StoreError> {
+        let range = source.every_version();
+        self.with(|tables| {
+            tables
+                .sources
+                .range(range)
+                .map(|(_, held)| held.clone())
+                .collect()
+        })
+    }
+
     fn record_consumed(
         &self,
         source: &SourceVersion,
@@ -446,6 +465,39 @@ mod tests {
         assert_eq!(
             Some(consumed),
             store.consumed(&source).expect("the read back")
+        );
+    }
+
+    #[test]
+    fn every_consumed_version_of_one_id_reads_back_and_no_other_id() {
+        let store = MemoryStore::new();
+        let source = |id: &str, version: Option<&str>| {
+            SourceVersion::new(
+                "Condition",
+                ExternalResourceId::new(id).expect("a legal external id"),
+                version.map(String::from),
+            )
+        };
+        let consumed = |uid: &str| ConsumedSource {
+            ehr_id: String::from("bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11"),
+            versioned_object_uid: String::from(uid),
+            internal_id: String::from("abc"),
+            context: String::from("ferrobridge_diagnosis.context"),
+        };
+        for (id, version, uid) in [
+            ("c-1", Some("1"), "uid-1"),
+            ("c-1", None, "uid-2"),
+            ("c-10", Some("1"), "uid-3"),
+        ] {
+            store
+                .record_consumed(&source(id, version), &consumed(uid))
+                .expect("the write");
+        }
+        assert_eq!(
+            vec![consumed("uid-2"), consumed("uid-1")],
+            store
+                .consumed_versions(&source("c-1", Some("9")))
+                .expect("the read")
         );
     }
 }

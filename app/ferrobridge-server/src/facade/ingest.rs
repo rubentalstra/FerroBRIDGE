@@ -204,6 +204,25 @@ pub enum Delivery {
     /// binding it, so this write bound it from the contribution read back
     /// and committed nothing.
     Reconciled,
+    /// An earlier delivery of the same source produced the composition, so
+    /// this write committed nothing and answers where that composition
+    /// stands.
+    Replayed,
+}
+
+/// What the identity map knows of the source one single create carries.
+#[derive(Debug)]
+pub enum Recognised {
+    /// The map consumed no version of the source's `id`: the create runs
+    /// [`Ingest::ingest_resource`], which also finishes the binding a
+    /// transaction left undone.
+    Unknown,
+    /// The source repeats one the map consumed, so nothing is committed and
+    /// the answer names the composition the first delivery produced.
+    Replayed(Written),
+    /// The map consumed another version of the source's `id`, so the create
+    /// commits a later version of the composition that version produced.
+    Revised(ConsumedSource),
 }
 
 /// Why an entry of a Bundle was skipped.
@@ -416,6 +435,36 @@ struct Placed {
     version: ObjectVersionId,
 }
 
+/// Where the composition a consumed source produced stands now.
+#[derive(Debug)]
+struct Standing {
+    /// The EHR the composition lives in.
+    ehr_id: EhrId,
+    /// The logical id the resource has.
+    id: FhirResourceId,
+    /// The version the composition stands at.
+    version: ObjectVersionId,
+    /// The composition the CDR holds at that version.
+    composition: Composition,
+}
+
+impl Standing {
+    /// Returns the answer of a write that found this composition and
+    /// committed nothing, with `built` as the mapping the answer renders
+    /// through.
+    fn written(self, built: &CanonicalComposition) -> Result<Written, Refused> {
+        let composition =
+            representation(Returned::Representation(Box::new(self.composition)), built)?;
+        Ok(Written {
+            id: self.id,
+            ehr_id: self.ehr_id,
+            version: self.version,
+            composition,
+            delivery: Delivery::Replayed,
+        })
+    }
+}
+
 impl<'a> Ingest<'a> {
     /// Returns an ingest over `programs`, `store`, `client` and `settings`.
     ///
@@ -444,24 +493,30 @@ impl<'a> Ingest<'a> {
         &self.client
     }
 
-    /// Claims the source key of `inbound` for one delivery.
+    /// Claims the source keys of `inbound` for one delivery.
     ///
     /// The caller takes the claim before it reads the identity map and holds
-    /// it until the delivery settles, so a second delivery of the same
-    /// `resourceType`, `id` and `meta.versionId` that arrives meanwhile
-    /// commits nothing. A resource with no `id` has no key, and its claim
-    /// holds nothing. No specification governs the redelivery rule: our own
-    /// design.
+    /// it until the delivery settles. The claim holds the source's
+    /// `resourceType`, `id` and `meta.versionId` ([`SourceVersion::storage_key`])
+    /// and its `resourceType` and `id` alone ([`SourceVersion::resource_key`]),
+    /// so a second single delivery of the same `id` that arrives meanwhile,
+    /// whatever its `meta.versionId`, commits nothing. A resource with no `id`
+    /// has no key, and its claim holds nothing. No specification governs the
+    /// redelivery rule: our own design.
     ///
     /// # Errors
     ///
     /// Returns a `409` [`Refused`] with a `duplicate` issue when another
-    /// in-flight delivery holds the key; the caller retries once that
-    /// delivery settles.
+    /// in-flight delivery holds a key; the caller retries once that delivery
+    /// settles.
     pub fn claim_resource(&self, inbound: &Inbound) -> Result<Claim<'a>, Refused> {
         let source = resource_source(inbound);
         self.claims
-            .claim(source.iter().map(SourceVersion::storage_key))
+            .claim(
+                source
+                    .iter()
+                    .flat_map(|source| [source.storage_key(), source.resource_key()]),
+            )
             .map_err(|_contended| {
                 let at = source.map_or_else(
                     || String::from(inbound.resource_type()),
@@ -471,19 +526,94 @@ impl<'a> Ingest<'a> {
             })
     }
 
-    /// Returns what the identity map recorded for this source resource
-    /// version.
+    /// Returns what the identity map knows of the source a single create of
+    /// `inbound` carries.
+    ///
+    /// The source key is the `resourceType`, the `id` and the
+    /// `meta.versionId` ([`SourceVersion`]). No specification governs the
+    /// rule that follows: our own design, since R4 `create` says nothing of a
+    /// repeated create with a client-assigned `id`
+    /// (<https://hl7.org/fhir/R4/http.html#create>) and a `meta.versionId`
+    /// changes each time the sender's resource changes
+    /// (<https://hl7.org/fhir/R4/resource.html#Meta>).
+    ///
+    /// - A source whose `id` and `meta.versionId` the map consumed is
+    ///   [`Recognised::Replayed`]: nothing is committed.
+    /// - A source whose `id` the map consumed at another `meta.versionId` is
+    ///   [`Recognised::Revised`].
+    /// - A source with no `meta.versionId` whose `id` the map consumed at any
+    ///   version is compared with the composition as it stands, masking what
+    ///   two mappings of one resource differ in (the `uid` the CDR assigns and
+    ///   every time the run filled from its clock, as [`pair`] masks them).
+    ///   The same content is [`Recognised::Replayed`], other content
+    ///   [`Recognised::Revised`].
+    /// - A source whose key a transaction committed and left unbound, or whose
+    ///   `id` the map never consumed, is [`Recognised::Unknown`].
+    ///
+    /// `claim` is the one [`Ingest::claim_resource`] took for `inbound`.
     ///
     /// # Errors
     ///
-    /// Returns a `500` [`Refused`] when the identity store cannot be read.
-    pub fn consumed(&self, inbound: &Inbound) -> Result<Option<ConsumedSource>, Refused> {
+    /// Returns a `409` [`Refused`] when the map binds the `id` to more than
+    /// one composition, a `422` for a resource the program cannot map or a
+    /// composition the strict reader refuses, every CDR refusal of the
+    /// composition read through the status table, a `500` when `claim` does
+    /// not hold the resource's source key, and a `500` when the identity
+    /// store cannot be read or holds an identifier this version cannot read.
+    pub async fn recognise(
+        &self,
+        claim: &Claim<'_>,
+        inbound: &Inbound,
+        program: &Loaded,
+        provenance: &Provenance,
+    ) -> Result<Recognised, Refused> {
         let Some(source) = resource_source(inbound) else {
-            return Ok(None);
+            return Ok(Recognised::Unknown);
         };
-        self.store
+        if !claim.holds(&source.storage_key()) {
+            return Err(unclaimed());
+        }
+        let exact = self
+            .store
             .consumed(&source)
-            .map_err(|error| store_refusal(&error))
+            .map_err(|error| store_refusal(&error))?;
+        let known = if let Some(known) = exact {
+            if source.version_id().is_some() {
+                let built = self.build(program, inbound, provenance)?;
+                let standing = self.standing(&known).await?;
+                return Ok(Recognised::Replayed(standing.written(&built)?));
+            }
+            known
+        } else {
+            if self
+                .store
+                .committed(&source)
+                .map_err(|error| store_refusal(&error))?
+                .is_some()
+            {
+                return Ok(Recognised::Unknown);
+            }
+            let versions = self
+                .store
+                .consumed_versions(&source)
+                .map_err(|error| store_refusal(&error))?;
+            let Some(known) = one_composition(&source, versions)? else {
+                return Ok(Recognised::Unknown);
+            };
+            if source.version_id().is_some() {
+                return Ok(Recognised::Revised(known));
+            }
+            known
+        };
+        let (built, instant) = self
+            .run(program, inbound, provenance)
+            .map_err(|error| engine_refusal(&error))?;
+        let sent = strict_read(&built)?;
+        let standing = self.standing(&known).await?;
+        if same_content(&sent, &instant, &standing.composition) {
+            return Ok(Recognised::Replayed(standing.written(&built)?));
+        }
+        Ok(Recognised::Revised(known))
     }
 
     /// Commits the first version of a composition for `inbound`.
@@ -524,11 +654,7 @@ impl<'a> Ingest<'a> {
         if let Some(source) = resource_source(inbound)
             && !claim.holds(&source.storage_key())
         {
-            return Err(Refused::new(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Issue::error(IssueType::Exception)
-                    .diagnosing("the delivery holds no claim on the source it commits"),
-            ));
+            return Err(unclaimed());
         }
         let subject = inbound
             .subject(&self.settings.subject_namespace)
@@ -1438,6 +1564,19 @@ impl<'a> Ingest<'a> {
     /// The identity map holds the version container and the resource id, and
     /// the CDR holds the version, so the latest one is read from the CDR.
     async fn stands(&self, known: &ConsumedSource) -> Result<(EhrId, Placed), Refused> {
+        let standing = self.standing(known).await?;
+        Ok((
+            standing.ehr_id,
+            Placed {
+                id: standing.id,
+                version: standing.version,
+            },
+        ))
+    }
+
+    /// Returns the composition a consumed source produced, at the version it
+    /// stands at now.
+    async fn standing(&self, known: &ConsumedSource) -> Result<Standing, Refused> {
         let ehr_id = EhrId::new(&known.ehr_id).map_err(|error| stored_identifier(&error))?;
         let container = HierObjectId::new(&known.versioned_object_uid)
             .map_err(|error| stored_identifier(&error))?;
@@ -1449,7 +1588,7 @@ impl<'a> Ingest<'a> {
                 )),
             )
         })?;
-        let (version, _composition) = self
+        let (version, composition) = self
             .read(&ehr_id, &UidBasedId::HierObjectId(container))
             .await?;
         let version = version.ok_or_else(|| {
@@ -1459,7 +1598,12 @@ impl<'a> Ingest<'a> {
                     .diagnosing("the CDR answered a composition with no ETag"),
             )
         })?;
-        Ok((ehr_id, Placed { id, version }))
+        Ok(Standing {
+            ehr_id,
+            id,
+            version,
+            composition,
+        })
     }
 
     /// Returns the composition the CDR holds as `version`.
@@ -1604,6 +1748,46 @@ fn distinct(mapped: &[Mapped<'_>], sources: &[Option<SourceVersion>]) -> Result<
     } else {
         Err(Refused::of(StatusCode::UNPROCESSABLE_ENTITY, issues))
     }
+}
+
+/// Returns the refusal of a delivery that commits a source its claim does
+/// not hold.
+fn unclaimed() -> Refused {
+    Refused::new(
+        StatusCode::INTERNAL_SERVER_ERROR,
+        Issue::error(IssueType::Exception)
+            .diagnosing("the delivery holds no claim on the source it commits"),
+    )
+}
+
+/// Returns the one composition every consumed version of `source`'s `id`
+/// names, or nothing when the map consumed none.
+///
+/// Two versions of one `id` that name two compositions leave no one
+/// composition a later version revises, so the create is refused with the
+/// record intact (no specification governs this: our own design).
+fn one_composition(
+    source: &SourceVersion,
+    versions: Vec<ConsumedSource>,
+) -> Result<Option<ConsumedSource>, Refused> {
+    let mut versions = versions.into_iter();
+    let Some(first) = versions.next() else {
+        return Ok(None);
+    };
+    let split = versions.any(|other| {
+        other.ehr_id != first.ehr_id || other.versioned_object_uid != first.versioned_object_uid
+    });
+    if split {
+        return Err(Refused::new(
+            StatusCode::CONFLICT,
+            Issue::error(IssueType::Conflict)
+                .diagnosing(
+                    "the identity map binds versions of this resource to more than one composition, so none is the one this version revises",
+                )
+                .at(format!("{}/{}", source.resource_type(), source.id())),
+        ));
+    }
+    Ok(Some(first))
 }
 
 /// Returns the refusal of a delivery whose source another in-flight delivery
@@ -1787,25 +1971,25 @@ fn clock_filled(composition: &serde_json::Value, instant: &str) -> Vec<String> {
     found
 }
 
-/// Whether the composition sent for `entry` and a stored one carry the same
-/// content.
+/// Whether the composition `sent`, mapped at `instant`, and a stored one
+/// carry the same content.
 ///
-/// The comparison masks what differs between two mappings of one entry and
+/// The comparison masks what differs between two mappings of one resource and
 /// is no content of the source: the `uid` the CDR assigns, and every time the
-/// run of the entry filled from its clock ([`clock_filled`]), whatever the
-/// stored composition holds at that place.
-fn same_content(entry: &Mapped<'_>, stored: &Composition) -> bool {
+/// run filled from its clock ([`clock_filled`]), whatever the stored
+/// composition holds at that place.
+fn same_content(sent: &Composition, instant: &str, stored: &Composition) -> bool {
     let canonical = |composition: &Composition| {
         let mut composition = composition.clone();
         composition.uid = None;
         openehr_its::json::to_canonical_json(&composition).parse::<serde_json::Value>()
     };
     // NOTE: no specification governs this: our own design; a composition that
-    // does not read back as JSON cannot be compared, so it matches no entry.
-    let (Ok(mut sent), Ok(mut held)) = (canonical(&entry.composition), canonical(stored)) else {
+    // does not read back as JSON cannot be compared, so it matches nothing.
+    let (Ok(mut sent), Ok(mut held)) = (canonical(sent), canonical(stored)) else {
         return false;
     };
-    for pointer in clock_filled(&sent, &entry.instant) {
+    for pointer in clock_filled(&sent, instant) {
         for tree in [&mut sent, &mut held] {
             if let Some(slot) = tree.pointer_mut(&pointer) {
                 *slot = serde_json::Value::Null;
@@ -1847,7 +2031,9 @@ fn pair(
             .zip(&keys)
             .enumerate()
             .filter(|(_, (entry, candidate))| {
-                **candidate == key && (sharing == 1 || same_content(entry, &composition))
+                **candidate == key
+                    && (sharing == 1
+                        || same_content(&entry.composition, &entry.instant, &composition))
             })
             .map(|(index, _)| index)
             .collect();

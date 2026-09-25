@@ -104,13 +104,44 @@ facade reads the recorded contribution back, finds the version whose
 of that contribution belong to the transaction's other entries and are passed
 over.
 
+## A re-sent single create commits once
+
+A single create (`POST [base]/{type}`) of a resource whose `id` the identity
+map already consumed follows the same rule as a re-sent transaction, keyed by
+the same `resourceType`, `id` and `meta.versionId`. FHIR R4 says nothing about
+a repeated create with a client-assigned id, so these rules are FerroBRIDGE's
+own design.
+
+- **The same `id` and the same `meta.versionId`:** the create is a replay. The
+  facade commits nothing and answers `200 OK` with the `Location`, the `ETag`
+  and the body of the composition the first delivery produced, at the version
+  it stands at now. A re-sent Bundle gets the same answer per entry.
+- **The same `id` and another `meta.versionId`:** a changed `meta.versionId`
+  means the sender changed the resource, so the create commits a later version
+  of the composition the first delivery produced and answers `200 OK`. That is
+  the update a `PUT` performs, following the version the CDR holds now.
+- **The same `id` and no `meta.versionId`:** the key has no version to compare,
+  so the facade maps the resource and compares the result with the composition
+  as the CDR holds it now. The comparison masks the same fields as the
+  transaction path: the composition `uid` and every time the engine filled from
+  its clock. The same content is a replay, answered as above. Other content is
+  the later version.
+- **An `id` the map binds to more than one composition:** the facade cannot
+  tell which one the create revises, so it answers `409 Conflict` with a
+  `conflict` issue and commits nothing.
+
+A transaction entry keeps its own rule: it is recognised only by its exact key.
+`PUT` is unchanged.
+
 Two deliveries of one source that overlap commit once. Before a delivery reads
 the identity map, it claims the key of every entry it carries, and it holds
 those claims until it answers, whether it commits, is refused, or fails. A
 second delivery that finds any of its keys claimed commits nothing and answers
 `409 Conflict` with an `OperationOutcome` whose `duplicate` issues name each
 entry another delivery holds. The rule is the same for a transaction and for a
-single create of a resource with an `id`. Retry after the first delivery has
+single create of a resource with an `id`, and a single create also claims the
+`resourceType` and `id` alone, so two creates of one `id` at different
+versions do not run at once. Retry after the first delivery has
 answered: the retry is then recognised as a re-sent Bundle or resource, as
 described above. The claims live in the server process, one set per identity
 store, so they order deliveries that reach the same FerroBRIDGE instance.

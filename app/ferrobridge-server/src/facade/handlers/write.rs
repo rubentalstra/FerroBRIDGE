@@ -3,13 +3,18 @@
 
 //! Create and update: the two inbound interactions.
 //!
-//! Create is conditional and idempotent by source identity: a resource whose
-//! `id` and `meta.versionId` the identity map already knows resolves to an
-//! update of the composition it produced, never a second one (no
-//! specification governs this: our own design). A create claims its source
-//! before it reads the map and holds the claim until it answers, so a second
-//! create of the same source that arrives meanwhile is a `409` and commits
-//! nothing. Update needs the map to know the id, because
+//! Create is conditional and idempotent by source identity (no specification
+//! governs this: our own design, [`Ingest::recognise`] states the rule). A
+//! resource whose `id` and `meta.versionId` the identity map already consumed
+//! is a replay: the answer is `200 OK` naming the composition the first
+//! delivery produced, and nothing is committed, as a re-sent transaction is
+//! answered. A resource whose `id` the map consumed at another
+//! `meta.versionId` commits a later version of that composition. A resource
+//! with no `meta.versionId` and a known `id` is a replay when its mapping
+//! matches the composition as it stands, and a later version otherwise. A
+//! create claims its source before it reads the map and holds the claim until
+//! it answers, so a second create of the same `id` that arrives meanwhile is a
+//! `409` and commits nothing. Update needs the map to know the id, because
 //! this milestone declares `updateCreate: false`, and it checks the CDR's
 //! current `ETag` when the client sends no `If-Match`.
 //!
@@ -37,6 +42,7 @@ use crate::facade::identity::record::ConsumedSource;
 use crate::facade::ingest;
 use crate::facade::ingest::Ingest;
 use crate::facade::ingest::Provenance;
+use crate::facade::ingest::Recognised;
 use crate::facade::ingest::Refused;
 use crate::facade::ingest::Written;
 use crate::facade::media;
@@ -62,8 +68,17 @@ pub(crate) async fn create(
     let ingest = facade.ingest(facade.client_for(headers));
     let claim = ingest.claim_resource(&inbound)?;
 
-    if let Some(known) = ingest.consumed(&inbound)? {
-        return resend(facade, &ingest, program, &inbound, &known, headers).await;
+    match ingest
+        .recognise(&claim, &inbound, program, &Provenance::EachResource)
+        .await?
+    {
+        Recognised::Replayed(written) => {
+            return answer(facade, program, &written, headers, StatusCode::OK);
+        }
+        Recognised::Revised(known) => {
+            return resend(facade, &ingest, program, &inbound, &known, headers).await;
+        }
+        Recognised::Unknown => {}
     }
     if let Some(answer) =
         conditional::if_none_exist(facade, ingest.client(), resource_type, headers).await?
@@ -75,7 +90,7 @@ pub(crate) async fn create(
         .await?;
     let status = match written.delivery {
         ingest::Delivery::Committed => StatusCode::CREATED,
-        ingest::Delivery::Reconciled => StatusCode::OK,
+        ingest::Delivery::Reconciled | ingest::Delivery::Replayed => StatusCode::OK,
     };
     answer(facade, program, &written, headers, status)
 }
