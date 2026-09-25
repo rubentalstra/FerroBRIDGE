@@ -9,7 +9,8 @@ expression: pretty(mapped.bundle())
       "resource": {
         "destination": [
           {
-            "endpoint": "EHR",
+            "endpoint": "urn:ferrobridge:hl7v2-hd:EHR",
+            "name": "EHR",
             "receiver": {
               "reference": "urn:uuid:7e1712a4-82b1-84bd-bcd4-a1f05cda7b42"
             },
@@ -34,7 +35,8 @@ expression: pretty(mapped.bundle())
           "reference": "urn:uuid:8e19195b-7cf5-8b2e-8c5e-21b195f1b97a"
         },
         "source": {
-          "endpoint": "LAB"
+          "endpoint": "urn:ferrobridge:hl7v2-hd:LAB",
+          "name": "LAB"
         }
       }
     },

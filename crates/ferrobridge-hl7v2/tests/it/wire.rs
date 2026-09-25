@@ -252,6 +252,28 @@ async fn a_message_type_the_definitions_do_not_carry_is_answered_ar() {
     listener.stop().await;
 }
 
+// NOTE: HL7 R4 MessageHeader.source is 1..1, and the guide's MSH map writes it from
+// MSH-3 or MSH-24, so a message valuing neither is refused naming MSH-3.
+#[tokio::test]
+async fn a_message_naming_no_sender_is_answered_ar_at_msh_3() {
+    let listener = Listener::start(Codec::default()).await;
+    let mut stream = TcpStream::connect(listener.address)
+        .await
+        .expect("a connection");
+    stream
+        .write_all(&frame(&fixtures::oru_r01_without_sender()))
+        .await
+        .expect("the frame is sent");
+    let ack = read_ack(&mut stream).await;
+    assert_eq!(msa(&ack), "MSA|AR|MSG00007");
+    assert!(
+        ack.contains("|MSH^1^3|101^Required field missing^HL70357|E|"),
+        "{ack}"
+    );
+    drop(stream);
+    listener.stop().await;
+}
+
 #[tokio::test]
 async fn a_frame_without_its_start_block_is_answered_ar_and_closed() {
     let listener = Listener::start(Codec::default()).await;

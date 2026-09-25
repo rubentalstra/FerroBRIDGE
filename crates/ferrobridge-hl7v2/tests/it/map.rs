@@ -447,55 +447,107 @@ fn lines_of(mapped: &Mapped, kind: &str) -> Vec<String> {
         .collect()
 }
 
-// NOTE: HL7 R4 datatypes §url admits no whitespace, and MessageHeader.source and
-// MessageHeader.destination.endpoint are 1..1, so the MessageHeader is left out.
-#[tokio::test]
-async fn an_application_name_with_spaces_is_no_url_and_its_element_is_dropped() {
-    let (mapped, _) = mapped(&fixtures::oru_r01_named_applications()).await;
-    let invalid: Vec<(String, String)> = mapped
-        .outcomes()
-        .iter()
-        .filter_map(|outcome| match outcome {
-            Outcome::InvalidValue {
-                element,
-                fhir_type,
-                error: fhir_types::codec::DecodeErrorKind::BadValue,
-                ..
-            } => Some((element.clone(), fhir_type.clone())),
-            _ => None,
-        })
-        .collect();
+/// The `source` and first `destination` of the Bundle's `MessageHeader`.
+fn header_parts(mapped: &Mapped) -> (Value, Value) {
+    let header = entries(mapped.bundle())
+        .first()
+        .and_then(|entry| entry.get("resource"))
+        .expect("the Bundle has a first entry");
     assert_eq!(
-        invalid,
-        vec![
-            (
-                String::from("MessageHeader.source.endpoint"),
-                String::from("url")
-            ),
-            (
-                String::from("MessageHeader.destination.endpoint"),
-                String::from("url")
-            ),
-        ],
+        header.get("resourceType").and_then(Value::as_str),
+        Some("MessageHeader"),
+        "HL7 R4 Bundle bdl-12: a message Bundle opens with its MessageHeader"
+    );
+    let source = header.get("source").cloned().expect("a source");
+    let destination = header
+        .get("destination")
+        .and_then(Value::as_array)
+        .and_then(<[Value]>::first)
+        .cloned()
+        .expect("a destination");
+    (source, destination)
+}
+
+fn text_at<'v>(value: &'v Value, key: &str) -> Option<&'v str> {
+    value.get(key).and_then(Value::as_str)
+}
+
+// NOTE: HL7 R4 datatypes §url admits no whitespace, so an application named only by
+// its namespace ID gets the derived endpoint and keeps the name in `name`.
+#[tokio::test]
+async fn an_application_named_with_spaces_gets_a_derived_endpoint_and_keeps_its_name() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_named_applications()).await;
+    let (source, destination) = header_parts(&mapped);
+    assert_eq!(
+        text_at(&source, "endpoint"),
+        Some("urn:ferrobridge:hl7v2-hd:North%20Lab%20App")
+    );
+    assert_eq!(text_at(&source, "name"), Some("North Lab App"));
+    assert_eq!(
+        text_at(&destination, "endpoint"),
+        Some("urn:ferrobridge:hl7v2-hd:South%20EHR")
+    );
+    assert_eq!(text_at(&destination, "name"), Some("South EHR"));
+    assert!(
+        lines_of(&mapped, "invalid-value").is_empty(),
         "{:#?}",
         summary(&mapped)
     );
-    let header: Vec<String> = lines_of(&mapped, "missing-required")
-        .into_iter()
-        .filter(|line| line.contains("MessageHeader"))
-        .collect();
-    assert_eq!(
-        header,
-        vec![
-            String::from(
-                "missing-required: MessageHeader.destination[0] lacks MessageHeader.destination.endpoint"
-            ),
-            String::from("missing-required: MessageHeader lacks MessageHeader.source"),
-        ]
+    assert!(
+        lines_of(&mapped, "missing-required")
+            .iter()
+            .all(|line| !line.contains("MessageHeader")),
+        "{:#?}",
+        summary(&mapped)
     );
-    assert!(lines_of(&mapped, "undecodable").is_empty());
-    assert!(resources(mapped.bundle(), "MessageHeader").is_empty());
     let object = mapped.bundle().as_object().expect("a Bundle object");
     fhir_types::r4::bundle::Bundle::from_json(object, &mut Path::root("Bundle"))
         .expect("the Bundle decodes as R4");
+}
+
+// NOTE: the guide's `datatype-hd-endpoint-to-messageheader-source` map writes an ISO
+// universal ID as `urn:oid:` and a UUID as `urn:uuid:` before HD.2.
+#[tokio::test]
+async fn a_universal_id_of_type_iso_or_uuid_is_the_endpoint() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_universal_applications()).await;
+    let (source, destination) = header_parts(&mapped);
+    assert_eq!(text_at(&source, "endpoint"), Some("urn:oid:1.2.3.4.5"));
+    assert_eq!(text_at(&source, "name"), Some("LAB"));
+    assert_eq!(
+        text_at(&destination, "endpoint"),
+        Some("urn:uuid:2b3c4d5e-0000-4000-8000-000000000001")
+    );
+    assert_eq!(text_at(&destination, "name"), Some("EHR"));
+    assert!(
+        lines_of(&mapped, "components-dropped")
+            .iter()
+            .all(|line| !line.contains("MSH[1]-3") && !line.contains("MSH[1]-5"))
+    );
+    let object = mapped.bundle().as_object().expect("a Bundle object");
+    fhir_types::r4::bundle::Bundle::from_json(object, &mut Path::root("Bundle"))
+        .expect("the Bundle decodes as R4");
+}
+
+// NOTE: HL7 R4 Bundle bdl-12: a message Bundle opens with a MessageHeader, and
+// MessageHeader.source is 1..1, so a message naming no sender maps to no Bundle.
+#[tokio::test]
+async fn a_message_naming_no_sender_maps_to_no_bundle() {
+    let parsed = support::parsed(&fixtures::oru_r01_without_sender());
+    let corpus = support::corpus();
+    let tables = tables();
+    let (_server, client) = tables.serve().await;
+    let refused = map(&parsed, &corpus, Some(&client)).await;
+    match refused {
+        Err(ferrobridge_hl7v2::map::MapError::NoMessageHeader { dropped }) => {
+            assert!(
+                matches!(
+                    dropped.as_deref(),
+                    Some(Outcome::MissingRequired { required, .. })
+                        if required == "MessageHeader.source"
+                ),
+                "{dropped:?}"
+            );
+        }
+        other => panic!("the map should refuse the message: {other:?}"),
+    }
 }

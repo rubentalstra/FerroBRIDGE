@@ -168,6 +168,40 @@ The FHIR scheme has a failure mode worth knowing before you run it: a re-sent
 Bundle that omits one resource reads as a different mapping. It is documented
 rather than hidden.
 
+## An HL7 v2 sender and receiver become MessageHeader endpoints
+
+A FHIR R4 `message` Bundle opens with a `MessageHeader`
+(<https://hl7.org/fhir/R4/bundle.html#invs>, `bdl-12`), whose
+`source.endpoint` and `destination.endpoint` are required `url` values
+(<https://hl7.org/fhir/R4/messageheader.html>). The v2-to-FHIR guide writes
+MSH-3 (Sending Application) and MSH-5 (Receiving Application) there, and both
+are `HD` values. FerroBRIDGE builds the endpoint from the `HD` in this order:
+
+1. When HD.3 (the universal ID type) is `ISO`, `UUID`, `DNS` or `URI` and
+   HD.2 (the universal ID) is valued, the endpoint is the form the guide's
+   `HD` endpoint map assigns: `urn:oid:`, `urn:uuid:`, `urn:dns:` or
+   `urn:uri:` followed by HD.2.
+2. Otherwise, or when that form is no valid `url`, the endpoint is derived:
+   `urn:ferrobridge:hl7v2-hd:` followed by HD.1 (the namespace ID), and, when
+   HD.2 or HD.3 is valued, `:` HD.2 `:` HD.3. Every byte outside the RFC 3986
+   `pchar` set is percent-encoded, and so is `:` inside a component, so
+   `North Lab App` becomes `urn:ferrobridge:hl7v2-hd:North%20Lab%20App`.
+
+HD.1, when valued, is also written to `source.name` or `destination.name`, so
+the application name stays readable. No specification governs the derived
+form: it is FerroBRIDGE's own design. The guide leaves an `HD` without a
+typed universal ID to the implementer, a v2 application name often holds
+spaces a `url` cannot carry, and the `ferrobridge` prefix marks the value as
+derived so nobody reads it as an identifier the sender assigned. The same
+`HD` always yields the same endpoint.
+
+A message that names its sender in neither MSH-3 nor MSH-24 (Sending Network
+Address) is answered `AR` with an `ERR` at MSH-3 and is not mapped: no
+`MessageHeader.source` can be written for it. The guide's MSH-3 row leaves that
+case to the implementer, and refusing it is FerroBRIDGE's decision. A run that
+still completes no `MessageHeader` is refused with an error naming the element
+it lacks, so no header-less message Bundle is ever produced.
+
 ## Version mismatch is refused at load time
 
 The mapping version, the grammar version, the archetype revision, the template

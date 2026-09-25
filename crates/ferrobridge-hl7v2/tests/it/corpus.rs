@@ -61,6 +61,26 @@ const REPORTSTREAM_CONVERSIONS: &[&str] = &["HL7_to_FHIR", "mappinginventory"];
 /// The reason a case fails when the Bundle the map wrote does not decode.
 const UNDECODABLE: &str = "the Bundle does not decode as R4";
 
+/// The reason a case fails when a `message` Bundle does not open with a
+/// `MessageHeader` (<https://hl7.org/fhir/R4/bundle.html#invs>, `bdl-12`).
+const HEADERLESS: &str = "the message Bundle breaks bdl-12";
+
+/// Whether `bundle` keeps `bdl-12`: when `Bundle.type` is `message`, the
+/// first entry's resource is a `MessageHeader`.
+fn keeps_bdl_12(bundle: &Value) -> bool {
+    if bundle.get("type").and_then(Value::as_str) != Some("message") {
+        return true;
+    }
+    bundle
+        .get("entry")
+        .and_then(Value::as_array)
+        .and_then(<[Value]>::first)
+        .and_then(|entry| entry.get("resource"))
+        .and_then(|resource| resource.get("resourceType"))
+        .and_then(Value::as_str)
+        == Some("MessageHeader")
+}
+
 /// How many messages of each AIRA example file the smoke corpus reads.
 ///
 /// No specification governs this: our own design; the files hold 13,583
@@ -689,6 +709,9 @@ async fn run(
     ) {
         return Case::fail(&message.id, format!("{UNDECODABLE}: {error}")).with_outcomes(outcomes);
     }
+    if !keeps_bdl_12(mapped.bundle()) {
+        return Case::fail(&message.id, HEADERLESS).with_outcomes(outcomes);
+    }
     Case::pass(&message.id).with_outcomes(outcomes)
 }
 
@@ -717,6 +740,16 @@ async fn measure(corpus: Corpus, messages: &[Message]) -> Result<(), Box<dyn Err
         undecodable,
         Vec::<(&str, &str)>::new(),
         "every Bundle the {corpus} corpus maps decodes as R4"
+    );
+    let headerless: Vec<&str> = cases
+        .iter()
+        .filter(|case| case.failure() == Some(HEADERLESS))
+        .map(Case::id)
+        .collect();
+    assert_eq!(
+        headerless,
+        Vec::<&str>::new(),
+        "every message Bundle the {corpus} corpus maps opens with its MessageHeader (bdl-12)"
     );
     let left_out: usize = cases
         .iter()

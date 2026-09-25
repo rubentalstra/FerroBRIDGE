@@ -432,6 +432,23 @@ crates on crates.io.
   passes 115 of 511 messages (8 before) and the build-time smoke corpus 189
   of 379 (26 before), and the corpus test asserts that no Bundle fails to
   decode and no resource is left out as `undecodable`.
+- Every `message` Bundle the v2-to-FHIR interpreter emits opens with its
+  `MessageHeader`, as FHIR R4 invariant `bdl-12` requires
+  (<https://hl7.org/fhir/R4/bundle.html#invs>) (#311). A v2 `HD` written into
+  a `url` element (MSH-3 into `MessageHeader.source.endpoint`, MSH-5 into
+  `MessageHeader.destination.endpoint`) becomes the guide's `urn:oid:`,
+  `urn:uuid:`, `urn:dns:` or `urn:uri:` form of its universal ID when HD.3
+  names one of those types, and otherwise the derived
+  `urn:ferrobridge:hl7v2-hd:` endpoint with each component percent-encoded;
+  the namespace ID is kept in the `name` beside it. A message that names its
+  sender in neither MSH-3 nor MSH-24 is answered `AR` with an `ERR` at MSH-3,
+  and a run that still completes no `MessageHeader` is refused as
+  `MapError::NoMessageHeader` naming the element it lacks. The corpus test
+  asserts `bdl-12` over every Bundle it maps. The vendored corpus passes 107
+  of 511 messages (115 before) and the smoke corpus 162 of 379 (189 before):
+  the cases that left are header-less Bundles now refused, 8 that value
+  MSH-24 (whose row into `MessageHeader.source` has no single data type map)
+  and 27 that value neither MSH-3 nor MSH-24.
 - A v2 message whose header carries no MSH-9.3 (the v2.3 senders in the
   vendored ReportStream set) resolves its structure from MSH-9.1 and MSH-9.2
   through the generated message index instead of being refused as unnamed
