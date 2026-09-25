@@ -1234,7 +1234,7 @@ queries and `tokio-postgres` 0.7.18 for binary `COPY`; `redb` 4.3.0 for the
 identity store; `jiff` 0.2.37 for the bridge's own timestamps (openEHR partial
 dates stay in their lexical form in `openehr-base`; FHIR primitives keep theirs
 in `fhir-types`); `sha2` 0.11.0; `insta`, `proptest`, `wiremock`,
-`testcontainers` 0.27.3 for tests. Consuming `openehr-its` with
+`testcontainers` 0.28.0 for tests. Consuming `openehr-its` with
 `default-features = false` and the `opt14`, `json` and `rest-server` features,
 and `openehr-sdt` with `flat` alone (which carries both Web Template builders
 and implies `openehr-its/opt14`;

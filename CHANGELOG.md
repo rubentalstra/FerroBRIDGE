@@ -23,6 +23,28 @@ crates on crates.io.
 
 ## [Unreleased]
 
+### Added
+
+- The OMOP concept resolver (#89). `omop_cdm::vocabulary::ConceptResolver`
+  looks a source code up in `CONCEPT` by `(vocabulary_id, concept_code)` and
+  returns it when it is standard, or every standard concept its `Maps to`
+  relationships reach, ordered by `concept_id`. Every row it touches must have
+  no `invalid_reason` and validity dates that contain the record date. Two
+  valid concepts under one key are a typed error naming the key and the date,
+  and a code with no standard concept comes back unmapped with its key, for
+  the caller to write as concept 0 and count. Each concept carries its
+  `domain_id`. The queries go through `sqlx` 0.9.0 and are checked at compile
+  time against the vendored DDL from the committed `.sqlx/` metadata, which
+  `scripts/checks/sqlx-offline.sh` regenerates or checks.
+  `omop_cdm::database` binds a pool to one CDM schema and applies OHDSI's
+  tables, primary keys and indices to it in one transaction; the rendered
+  constraints file stays out, because PostgreSQL refuses it (#232). The
+  testkit carries a synthetic vocabulary for the ten vocabulary tables, in a
+  CSV shape of FerroBRIDGE's own that `COPY` reads. The loader for an Athena
+  export is #233, which waits on #88 recording that format from an observed
+  export. The `sqlx-offline` CI job fails when the committed query metadata
+  no longer matches the queries.
+
 ## [0.0.3] - 2026-09-25
 
 The FHIR round-trip release. The `fhirconnect` crate runs every FHIRconnect

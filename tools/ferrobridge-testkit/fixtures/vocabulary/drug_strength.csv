@@ -1,0 +1,2 @@
+drug_concept_id,ingredient_concept_id,amount_value,amount_unit_concept_id,numerator_value,numerator_unit_concept_id,denominator_value,denominator_unit_concept_id,box_size,valid_start_date,valid_end_date,invalid_reason
+1010,1011,5,3001,,,,,,1970-01-01,2099-12-31,

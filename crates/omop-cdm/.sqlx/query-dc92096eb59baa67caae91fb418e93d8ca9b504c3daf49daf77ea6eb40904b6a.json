@@ -1,0 +1,127 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id,\n                      c.concept_class_id, c.standard_concept, c.concept_code,\n                      to_char(c.valid_start_date, 'YYYY-MM-DD') AS \"valid_start_date!\",\n                      to_char(c.valid_end_date, 'YYYY-MM-DD') AS \"valid_end_date!\",\n                      c.invalid_reason\n               FROM concept_relationship AS r\n               JOIN concept AS c ON c.concept_id = r.concept_id_2\n               WHERE r.concept_id_1 = $1 AND r.relationship_id = 'Maps to'\n                 AND r.invalid_reason IS NULL\n                 AND r.valid_start_date <= $2::text::date AND $2::text::date <= r.valid_end_date\n                 AND c.standard_concept = 'S'\n                 AND c.invalid_reason IS NULL\n                 AND c.valid_start_date <= $2::text::date AND $2::text::date <= c.valid_end_date\n               ORDER BY c.concept_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "concept_id",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "concept_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "concept_name",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "concept_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "domain_id",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "domain_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "vocabulary_id",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "vocabulary_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "concept_class_id",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "concept_class_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "standard_concept",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "standard_concept"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "concept_code",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "concept_code"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "valid_start_date!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "valid_end_date!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "invalid_reason",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "invalid_reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "dc92096eb59baa67caae91fb418e93d8ca9b504c3daf49daf77ea6eb40904b6a"
+}

@@ -370,6 +370,48 @@ jobs:
           tool: cargo-nextest
       - run: cargo nextest run --locked -p omop-cdm -p ferrobridge-openehr -p ferrobridge-term -p ferrobridge-testkit --no-tests=pass
 
+  # The sqlx query metadata of omop-cdm (#89). The crate's queries compile
+  # offline from crates/omop-cdm/.sqlx/; this job builds the CDM schema from
+  # the vendored DDL in a service container and fails when that metadata no
+  # longer describes the queries. The image is the docs/VERSIONS.md PostgreSQL
+  # row, which scripts/checks/versions.sh compares with this file. The service
+  # trusts local connections, so no credential is written here. sqlx-cli is
+  # not in taiki-e/install-action's own tool list, so the action installs it
+  # through its cargo-binstall fallback.
+  sqlx-offline:
+    name: sqlx-offline
+    needs: detect
+    if: needs.detect.outputs.cargo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:18.6@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280
+        env:
+          POSTGRES_USER: ferrobridge
+          POSTGRES_DB: ferrobridge
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready --username=ferrobridge --dbname=ferrobridge"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-rust
+      - uses: taiki-e/install-action@76c2e6406e52637deed7160d77bded76bd83e06e # v2.87.14
+        with:
+          tool: sqlx-cli@0.9.0
+      - run: scripts/checks/sqlx-offline.sh --check
+        env:
+          DATABASE_URL: postgres://ferrobridge@127.0.0.1:5432/ferrobridge
+
   doc:
     name: rustdoc
     needs: detect
@@ -607,6 +649,7 @@ jobs:
       - clippy-fhir-types
       - test
       - e2e
+      - sqlx-offline
       - doc
       - cargo-deny
       - msrv

@@ -8,17 +8,19 @@
 //! asserted against the single source of truth; [`containers`] starts the
 //! PostgreSQL and the reference CDR the end-to-end lane runs against;
 //! [`fixtures`] holds the synthetic documents the suites commit and map;
-//! [`laws`] compares the two ends of a round trip; and
-//! [`stubs`] carries the upstream response shapes for `wiremock`.
+//! [`laws`] compares the two ends of a round trip;
+//! [`stubs`] carries the upstream response shapes for `wiremock`; and
+//! [`vocabulary`] holds the synthetic OHDSI vocabulary and its loader.
 #![doc(test(attr(deny(warnings))))]
 
-// TODO(#89): the synthetic OHDSI vocabulary fixture the concept resolver
-// loads, once #88 pins the Athena export format.
+// TODO(#88): the synthetic vocabulary takes the observed Athena export shape
+// once it is recorded, so the production loader is what the tests exercise.
 
 pub mod containers;
 pub mod fixtures;
 pub mod laws;
 pub mod stubs;
+pub mod vocabulary;
 
 use std::fmt;
 use std::path::PathBuf;

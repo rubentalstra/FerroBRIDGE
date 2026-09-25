@@ -8,16 +8,22 @@
 //! type and its column metadata, emitted from the OHDSI definitions by
 //! `tools/omop-cdm-codegen`; [`meta`] is the metadata vocabulary those modules
 //! are written in, [`value`] the three column types Rust has no type for, and
-//! [`ddl`] points the embedded DDL at a schema. The model is documented at
+//! [`ddl`] points the embedded DDL at a schema. [`database`] binds a
+//! PostgreSQL pool to a CDM schema and applies the DDL to it, and
+//! [`vocabulary`] resolves source codes to standard concepts over the loaded
+//! vocabulary tables. The model is documented at
 //! <https://ohdsi.github.io/CommonDataModel/cdm54.html>.
-//!
-//! The vocabulary loader and the concept resolver follow in a later increment.
 #![doc(test(attr(deny(warnings))))]
 
+// TODO(#233): the vocabulary loader for an Athena export, once #88 records the
+// observed file format.
+
+pub mod database;
 pub mod ddl;
 pub mod generated;
 pub mod meta;
 pub mod value;
+pub mod vocabulary;
 
 /// The OMOP Common Data Model version this crate targets.
 ///

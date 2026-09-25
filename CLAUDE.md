@@ -112,8 +112,8 @@ the testkit tool crate. Beside it:
   `docs/VERSIONS.md`; `stubs` carries the documented ITS-REST and FHIR R4
   terminology response shapes for `wiremock`; `fixtures/` holds the synthetic
   template, composition and FHIR resources; `matrix_pin` reads the pin matrix.
-  The synthetic OHDSI vocabulary fixture arrives with the vocabulary loader
-  (#89).
+  `vocabulary` holds the synthetic OHDSI vocabulary for the ten vocabulary
+  tables and its `COPY` loader (the observed Athena shape is #88).
 - `docs/specs/`: the vendored specification corpora (#71), one directory per
   corpus with a `PROVENANCE.md`, fetched by `scripts/vendor/*.sh` from the pins
   in `docs/VERSIONS.md`: FHIRconnect with its schemas and the draft REST API
