@@ -11,6 +11,8 @@
 //! stop. `main.rs` only hands in the arguments and returns the exit code.
 #![doc(test(attr(deny(warnings))))]
 
+pub mod banner;
+pub mod build_info;
 pub mod cli;
 pub mod config;
 pub mod etl;
@@ -22,6 +24,7 @@ pub mod operations;
 pub mod panic;
 pub mod request_id;
 pub mod request_log;
+pub mod startup;
 pub mod state;
 pub mod telemetry;
 
@@ -113,6 +116,15 @@ where
         }
     };
     let stdout_is_terminal = std::io::stdout().is_terminal();
+    let format = settings.telemetry.format;
+    if matches!(job, Job::Serve)
+        && format.resolve(stdout_is_terminal) == telemetry::Rendering::Pretty
+    {
+        banner::print(
+            &startup::lanes(&settings),
+            format.colour(stdout_is_terminal),
+        );
+    }
     if let Err(error) = telemetry::init(
         settings.telemetry.format,
         &settings.telemetry.filter,
@@ -321,16 +333,22 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
     runtime.block_on(async move {
         use anyhow::Context;
 
-        settings.log_lanes();
+        build_info::log();
         let mut state = AppState::build(&settings)
             .await
             .context("building the upstream clients")?;
+        let mut lanes = startup::lanes(&settings);
         if let Some(lane) = settings.facade.as_ref() {
-            let mounted = build_facade(&settings, lane)
+            let (mounted, counts) = build_facade(&settings, lane)
                 .await
                 .context("starting the FHIR facade")?;
             state = state.with_facade(Arc::new(mounted));
+            set_counts(&mut lanes, "facade", counts);
         }
+        if let Some(operations) = state.operations() {
+            set_counts(&mut lanes, "operations", operation_counts(operations));
+        }
+        startup::log(&lanes);
         let state = Arc::new(state);
         tracing::info!(
             version = state::VERSION,
@@ -353,7 +371,34 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
     })
 }
 
-/// Builds the FHIR facade this deployment mounts.
+/// Records `counts` on the lane called `name`.
+fn set_counts(lanes: &mut [startup::Lane], name: &str, counts: startup::MappingCounts) {
+    if let Some(lane) = lanes.iter_mut().find(|lane| lane.name == name) {
+        lane.mappings = Some(counts);
+    }
+}
+
+/// Returns what the operations lane compiled: one program per context, over
+/// the distinct templates the programs name.
+fn operation_counts(lane: &state::OperationsLane) -> startup::MappingCounts {
+    let programs = lane.programs().programs();
+    let contexts: std::collections::BTreeSet<&str> = programs
+        .iter()
+        .map(|program| program.context().as_str())
+        .collect();
+    let templates: std::collections::BTreeSet<&str> = programs
+        .iter()
+        .map(|program| program.template().id().as_str())
+        .collect();
+    startup::MappingCounts {
+        contexts: contexts.len(),
+        programs: programs.len(),
+        templates: templates.len(),
+    }
+}
+
+/// Builds the FHIR facade this deployment mounts and returns it with what its
+/// mapping set loaded.
 ///
 /// The mapping set is read and compiled once, at boot, against the templates
 /// the CDR holds, so a mapping that does not compile refuses the start rather
@@ -363,7 +408,7 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
 async fn build_facade(
     settings: &Settings,
     lane: &config::FacadeSettings,
-) -> anyhow::Result<facade::Facade> {
+) -> anyhow::Result<(facade::Facade, startup::MappingCounts)> {
     use anyhow::Context;
 
     let cdr = settings
@@ -383,22 +428,25 @@ async fn build_facade(
     let programs =
         facade::programs::compile_set(&set, &templates).context("compiling the mapping set")?;
     tracing::info!(
-        programs = programs.len(),
+        lane = "facade",
         types = programs
             .resource_types()
             .iter()
             .cloned()
             .collect::<Vec<String>>()
             .join(","),
-        "the FHIR facade loaded its mapping set"
+        "the FHIR facade serves these resource types"
     );
+    let counts = startup::MappingCounts {
+        contexts: set.contexts().count(),
+        programs: programs.len(),
+        templates: templates.len(),
+    };
     let store = facade::identity::redb_store::RedbStore::open(&lane.identity_store)
         .with_context(|| format!("opening {}", lane.identity_store.display()))?;
-    Ok(facade::Facade::new(
-        programs,
-        Arc::new(store),
-        client,
-        lane.settings.clone(),
+    Ok((
+        facade::Facade::new(programs, Arc::new(store), client, lane.settings.clone()),
+        counts,
     ))
 }
 
@@ -442,13 +490,15 @@ fn chain(error: &dyn std::error::Error) -> String {
 /// `GET /` answers a small JSON document naming the product and its version,
 /// `GET /health/liveness` answers `200` while the process is up, and
 /// `GET /health/readiness` answers `200` when every registered indicator is up
-/// and `503` with each indicator's state otherwise. The two FHIRconnect
+/// and `503` with each indicator's state otherwise, and `GET /health/info`
+/// answers the build facts and the pins as JSON. The two FHIRconnect
 /// operations and their direct forms are mounted under `/fhir`.
 pub fn router(state: Arc<AppState>, server: &ServerSettings) -> Router {
     let mut routes = Router::new()
         .route("/", get(root))
         .route("/health/liveness", get(liveness))
         .route("/health/readiness", get(readiness))
+        .route("/health/info", get(info))
         .with_state(Arc::clone(&state))
         .merge(operations::router(Arc::clone(&state)));
     if let Some(mounted) = state.facade() {
@@ -501,6 +551,11 @@ async fn root() -> Response {
 /// `GET /health/liveness`: `200` while the process is up.
 async fn liveness() -> StatusCode {
     StatusCode::OK
+}
+
+/// `GET /health/info`: the build facts and the pins, as JSON.
+async fn info() -> Response {
+    axum::Json(build_info::Info::current()).into_response()
 }
 
 /// `GET /health/readiness`: the state of every registered indicator.

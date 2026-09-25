@@ -40,6 +40,62 @@ fn app() -> Router {
 }
 
 #[tokio::test]
+async fn the_info_route_serves_the_build_facts_and_the_pins() -> Result<(), Box<dyn StdError>> {
+    let (status, body) = call(app(), Request::get("/health/info").body(Body::empty())?).await?;
+    assert_eq!(StatusCode::OK, status);
+    let document: serde_json::Value = serde_json::from_str(&body)?;
+    assert_eq!(
+        Some(env!("CARGO_PKG_VERSION")),
+        document["version"].as_str()
+    );
+    assert_eq!(
+        Some(ferrobridge_server::build_info::COMMIT),
+        document["build"]["commit"].as_str()
+    );
+    assert_eq!(
+        Some(ferrobridge_server::build_info::BUILT_AT),
+        document["build"]["built_at"].as_str()
+    );
+    assert_eq!(
+        Some(ferrobridge_server::build_info::RUSTC),
+        document["build"]["rustc"].as_str()
+    );
+    let pins = document["pins"].as_array().expect("the pins are a list");
+    let names: Vec<&str> = pins.iter().filter_map(|pin| pin["name"].as_str()).collect();
+    assert_eq!(
+        vec![
+            "FHIRconnect",
+            "FHIR",
+            "OMOCL",
+            "OMOP CDM",
+            "openEHR ITS-REST",
+            "openehr-* crates",
+            "fhir-types"
+        ],
+        names
+    );
+    let keys = |value: &serde_json::Value| -> Vec<String> {
+        let mut keys: Vec<String> = value
+            .as_object()
+            .map(|object| object.keys().cloned().collect())
+            .unwrap_or_default();
+        keys.sort();
+        keys
+    };
+    assert_eq!(
+        vec!["build", "pins", "product", "version"],
+        keys(&document),
+        "the document carries the facts and nothing else"
+    );
+    assert_eq!(
+        vec!["built_at", "commit", "commit_short", "rustc"],
+        keys(&document["build"]),
+        "the build facts carry no path and no secret"
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn the_root_document_names_the_product_and_the_version() -> Result<(), Box<dyn StdError>> {
     let (status, body) = call(app(), Request::get("/").body(Body::empty())?).await?;
     assert_eq!(StatusCode::OK, status);

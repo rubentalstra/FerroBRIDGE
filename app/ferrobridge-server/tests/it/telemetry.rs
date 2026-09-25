@@ -63,3 +63,40 @@ fn a_filter_that_parses_is_honoured() {
     let text = emitted(Rendering::Json, "error");
     assert!(text.is_empty(), "an info line is below error: {text}");
 }
+
+/// A value carrying a line break and a forged record of its own.
+const FORGED: &str = "ok\r\n2026-09-25T00:00:00Z ERROR forged: a second record";
+
+/// Writes one `warn` line carrying [`FORGED`] as a field and inside the
+/// message, and returns what the subscriber for `rendering` wrote.
+fn emitted_forged(rendering: Rendering) -> String {
+    let logs = Logs::default();
+    let capture = subscriber(rendering, DEFAULT_FILTER, false, logs.clone());
+    tracing::subscriber::with_default(capture, || {
+        tracing::warn!(value = %FORGED, "a value reached a field: {FORGED}");
+    });
+    logs.text()
+}
+
+#[test]
+fn a_line_feed_in_a_field_cannot_forge_a_second_pretty_line() {
+    let text = emitted_forged(Rendering::Pretty);
+    assert_eq!(1, text.lines().count(), "one record, one line: {text:?}");
+    assert!(
+        text.ends_with('\n'),
+        "the record keeps its terminator: {text:?}"
+    );
+    assert!(
+        text.contains(r"ok\r\n2026-09-25T00:00:00Z ERROR forged"),
+        "the break is spelled out, every character kept: {text:?}"
+    );
+}
+
+#[test]
+fn a_line_feed_in_a_field_stays_escaped_in_the_json_line() {
+    let text = emitted_forged(Rendering::Json);
+    assert_eq!(1, text.lines().count(), "one object, one line: {text:?}");
+    let document: serde_json::Value =
+        serde_json::from_str(text.trim_end()).expect("the line is a JSON object");
+    assert_eq!(Some(FORGED), document["value"].as_str());
+}

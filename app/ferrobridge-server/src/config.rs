@@ -16,7 +16,7 @@ use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use crate::telemetry::{DEFAULT_FILTER, Format};
+use crate::telemetry::{DEFAULT_FILTER, FILTER_ENV, FORMAT_ENV, Format};
 
 /// The prefix of every environment override.
 ///
@@ -566,7 +566,9 @@ impl Config {
             }
         };
         let environment: BTreeMap<String, String> = std::env::vars()
-            .filter(|(name, _)| name.starts_with(ENV_PREFIX))
+            .filter(|(name, _)| {
+                name.starts_with(ENV_PREFIX) || name == FORMAT_ENV || name == FILTER_ENV
+            })
             .collect();
         Self::from_sources(text.as_deref(), &environment)
     }
@@ -592,6 +594,7 @@ impl Config {
         for (name, raw) in environment {
             apply_override(&mut table, name, raw)?;
         }
+        apply_console_overrides(&mut table, environment)?;
         // The merged tree is written back and re-read so every refusal carries
         // the key and its position, which a `Table` alone cannot report.
         let merged = toml::to_string(&table).map_err(|source| Error::Assemble { source })?;
@@ -836,52 +839,6 @@ pub struct TelemetrySettings {
     pub logged_query_parameters: Vec<String>,
 }
 
-impl Settings {
-    /// Logs which lanes are on, and which of them carry identifiable data.
-    ///
-    /// The line names the section and never a value, so a start-up log states
-    /// what this process can reach without stating any of it.
-    pub fn log_lanes(&self) {
-        if let Some(cdr) = self.cdr.as_ref() {
-            tracing::info!(
-                credentials = cdr.credentials.is_some(),
-                "[cdr] is configured and carries identifiable data"
-            );
-        } else {
-            tracing::info!("no [cdr] section: the CDR lane is off");
-        }
-        if self.terminology.is_some() {
-            tracing::info!("[terminology] is configured");
-        } else {
-            tracing::info!("no [terminology] section: the terminology lane is off");
-        }
-        if self.cdm.is_some() {
-            tracing::info!("[cdm] is configured and carries identifiable data");
-        } else {
-            tracing::info!("no [cdm] section: the OMOP lane is off");
-        }
-        if self.facade.is_some() {
-            tracing::info!("[facade] is enabled and carries identifiable data");
-        } else {
-            tracing::info!("[facade] is not enabled: the FHIR facade mounts no route");
-        }
-        match (self.mappings.as_ref(), self.mapping_directory.as_ref()) {
-            _ if !self.operations.enabled => {
-                tracing::info!("[operations] enabled is false: the operations are off");
-            }
-            (Some(_), _) => tracing::info!(
-                "[mappings] names a template directory: the FHIRconnect operations compile against it"
-            ),
-            (None, Some(_)) => tracing::info!(
-                "[mappings] names no template directory: the FHIRconnect operations compile against the CDR's templates"
-            ),
-            (None, None) => {
-                tracing::info!("[mappings] names no directory: the operations are off");
-            }
-        }
-    }
-}
-
 /// Applies one environment override onto `table`.
 fn apply_override(table: &mut toml::Table, name: &str, raw: &str) -> Result<(), Error> {
     let Some(path) = name.strip_prefix(ENV_PREFIX) else {
@@ -911,6 +868,34 @@ fn apply_override(table: &mut toml::Table, name: &str, raw: &str) -> Result<(), 
         cursor = next;
     }
     cursor.insert(key.clone(), env_value(raw));
+    Ok(())
+}
+
+/// Applies [`FORMAT_ENV`] and [`FILTER_ENV`] onto `[telemetry]`.
+///
+/// They run after every `FERROBRIDGE__` override, so they win over the file
+/// and over `FERROBRIDGE__TELEMETRY__FORMAT` and `FERROBRIDGE__TELEMETRY__FILTER`:
+/// they are the names an operator sets for one run. Each value is text, so a
+/// format outside `auto`, `json` and `pretty` is refused by the parse that
+/// follows, naming `telemetry.format`.
+fn apply_console_overrides(
+    table: &mut toml::Table,
+    environment: &BTreeMap<String, String>,
+) -> Result<(), Error> {
+    for (variable, key) in [(FORMAT_ENV, "format"), (FILTER_ENV, "filter")] {
+        let Some(raw) = environment.get(variable) else {
+            continue;
+        };
+        let entry = table
+            .entry("telemetry")
+            .or_insert_with(|| toml::Value::Table(toml::Table::new()));
+        let toml::Value::Table(telemetry) = entry else {
+            return Err(Error::EnvShape {
+                name: variable.to_owned(),
+            });
+        };
+        telemetry.insert(key.to_owned(), toml::Value::String(raw.clone()));
+    }
     Ok(())
 }
 
