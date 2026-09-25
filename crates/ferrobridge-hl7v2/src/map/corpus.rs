@@ -105,7 +105,9 @@ pub enum Assignment {
 /// A row's `mappedVia`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MappedVia {
-    /// The id of a table map, read from `ConceptMap/<id>`.
+    /// The id of a map, read from `ConceptMap/<id>`: a table map, or the
+    /// data type map the row runs (`StructureDefinition-TypeInfo.json`,
+    /// `mappedVia`: "Url of the mapping artifact for the item").
     Table(String),
     /// Any other value, such as `unspecified_mapping`.
     Unresolved(String),
@@ -154,6 +156,51 @@ pub struct Map {
     pub rows: Vec<Row>,
     /// The groups of a table map.
     pub groups: Vec<TableGroup>,
+}
+
+impl Map {
+    /// Returns whether `other` is an alternative to this map for one value:
+    /// both map one source component, with no condition, into the same child
+    /// of the target, or one of them into the target itself (`$value`).
+    ///
+    /// The four `datatype-ei-<qualifier>-to-identifier` maps each write
+    /// `EI.1` into `value` and are alternatives; maps that write distinct
+    /// children, or one child only under a condition, fill parts of one
+    /// target. No specification governs this: our own design, since no row
+    /// of the guide names its data type map.
+    #[must_use]
+    pub fn alternative_to(&self, other: &Self) -> bool {
+        self.rows.iter().any(|mine| {
+            other.rows.iter().any(|theirs| {
+                mine.source == theirs.source
+                    && mine.condition == Condition::Always
+                    && theirs.condition == Condition::Always
+                    && match (reach(mine), reach(theirs)) {
+                        (Some(Reach::Whole), Some(_)) | (Some(_), Some(Reach::Whole)) => true,
+                        (Some(Reach::Child(a)), Some(Reach::Child(b))) => a == b,
+                        _ => false,
+                    }
+            })
+        })
+    }
+}
+
+/// The part of its target a row writes.
+enum Reach<'r> {
+    /// `$value`: the target itself.
+    Whole,
+    /// The child with this name.
+    Child(&'r str),
+}
+
+/// Returns the part of its target `row` writes, `None` for a target that
+/// does not parse.
+fn reach(row: &Row) -> Option<Reach<'_>> {
+    match &row.target {
+        Ok(Target::Value { .. }) => Some(Reach::Whole),
+        Ok(Target::Path { steps, .. }) => steps.first().map(|step| Reach::Child(&step.name)),
+        Err(_) => None,
+    }
 }
 
 /// A refusal to load the corpus.

@@ -469,6 +469,23 @@ crates on crates.io.
   of a structure v2.9.1 still carries keeps the row's type. The corpus pass
   counts are unchanged: 112 of 511 vendored messages and 189 of 379 fetched
   ones.
+- A v2-to-FHIR row whose data type maps are alternatives for one value runs
+  one of them (#327). Two maps are alternatives when both map one component,
+  with no condition, into the same child or into the target itself, as the
+  four `datatype-ei-<qualifier>-to-identifier` maps do with EI.1. The map
+  whose rows write from the most components of the value is chosen, and
+  among equally specific maps that write the same, the one with the fewest
+  rows. ORC-2, ORC-3 and TXA-12 each give one `Identifier`: a bare value
+  from `datatype-ei-defaultassigner-to-identifier`, a value with an
+  assigning authority from `datatype-ei-organization-to-identifier`, with
+  its assigner. The `[System]` variant, whose EI.1 row writes `$value` and
+  whose system rows are narrative, is no longer run, so the
+  `no-datatype-map` it counted through `datatype-st-to-identifier` is gone.
+  Equally specific maps that write differently count `datatype-ambiguous`
+  naming them, and none writes. A row whose `mappedVia` names a data type
+  map runs that map alone (`StructureDefinition-TypeInfo`: "Url of the
+  mapping artifact for the item"). The pass counts do not move (134 of 511
+  vendored, 189 of 379 smoke): no EI outcome decides a verdict there.
 - A v2-to-FHIR row into a complex element runs every data type map the
   guide names for it (#324). The maps are found by the element's type, else
   by its element path, the form the guide's map titles use for a backbone

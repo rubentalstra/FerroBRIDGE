@@ -199,6 +199,16 @@ pub enum Outcome {
         /// The ids of the maps that wrote it.
         maps: Vec<String>,
     },
+    /// Alternative data type maps for one value, of which no single one is
+    /// the most specific, so the row writes none of them.
+    DatatypeAmbiguous {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The ids of the equally specific maps.
+        candidates: Vec<String>,
+    },
     /// A `mappedVia` that names no loaded table map.
     UnresolvedTable {
         /// Where.
@@ -377,6 +387,7 @@ impl Outcome {
             Self::NoSegmentMap { .. } => "no-segment-map",
             Self::NoDatatypeMap { .. } => "no-datatype-map",
             Self::DatatypeConflict { .. } => "datatype-conflict",
+            Self::DatatypeAmbiguous { .. } => "datatype-ambiguous",
             Self::UnresolvedTable { .. } => "unresolved-table",
             Self::NoTerminology { .. } => "no-terminology",
             Self::Untranslated { .. } => "untranslated",
