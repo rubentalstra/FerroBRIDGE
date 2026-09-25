@@ -8,9 +8,10 @@
 //! end (`docs/architecture.md` §5.1, §5.4).
 //!
 //! The composition query selects each composition whole beside its
-//! `ehr_id`, `versioned_object_uid` and `version_uid`; the runner reads the
-//! template the composition names from the CDR once per run, validates the
-//! composition against it, and hands it to a [`Mapper`]. A composition the
+//! `ehr_id` and `version_uid`, and optionally its `versioned_object_uid`;
+//! the runner reads the template the composition names from the CDR once
+//! per run, validates the composition against it, ties it to its derived
+//! visit ([`tie`]), and hands it to a [`Mapper`]. A composition the
 //! mapper or the writer refuses is rolled back and reported, and the run goes
 //! on; a CDR or database that stops answering ends the run with a typed
 //! error. A resumed run skips every composition whose watermark names the
@@ -19,18 +20,23 @@
 //! `fetch` paging.
 
 pub mod aql;
+pub mod job;
 pub mod mapper;
 pub mod report;
+pub mod tie;
 pub mod visits;
 
 use crate::etl::aql::{CheckedQuery, SINCE_PARAMETER};
 use crate::etl::report::RunReport;
+use crate::etl::tie::{Tie, Windows};
 use ferrobridge_openehr::client::Client;
 use ferrobridge_openehr::ids::ObjectVersionId;
 use ferrobridge_openehr::query::{PageSize, QueryPageError};
 use futures_util::StreamExt;
 use omop_cdm::derived;
-use omop_cdm::graph::{EhrId, RecordGraph, Refusal, Source, VersionUid, VersionedObjectUid};
+use omop_cdm::graph::{
+    EhrId, RecordGraph, Refusal, Source, VersionUid, VersionedObjectUid, VisitKey,
+};
 use omop_cdm::writer::{CdmWriter, RunId, VisitConcepts, WriteError};
 use openehr_its::rest::generated::query::AdhocQueryExecute;
 use openehr_mapping_core::composition::CanonicalComposition;
@@ -82,6 +88,9 @@ pub struct SourceComposition<'a> {
     pub composition: &'a CanonicalComposition,
     /// The index of the template it was validated against.
     pub template: &'a WebTemplateIndex,
+    /// The derived visit the composition belongs to, when the run ties it
+    /// to one ([`tie`]).
+    pub visit: Option<&'a VisitKey>,
     /// The configured context.
     pub context: MappingContext,
 }
@@ -170,24 +179,31 @@ fn text<'r>(
         .ok_or_else(|| Refusal::new(format!("the composition row's `{projection}` is no text")))
 }
 
-/// Reads the composition version a row names, checking that its
-/// `version_uid` belongs to its `versioned_object_uid` (RM Common,
-/// `OBJECT_VERSION_ID`).
+/// Reads the composition version a row names.
+///
+/// The versioned object is the `object_id` part of the `version_uid` (openEHR RM
+/// Common 1.1.0, `OBJECT_VERSION_ID`); a `versioned_object_uid` the query selects
+/// must name the same one.
 fn source(query: &CheckedQuery, row: &[serde_json::Value]) -> Result<Source, Refusal> {
     let ehr = text(query, row, "ehr_id")?;
-    let versioned = text(query, row, "versioned_object_uid")?;
     let version = text(query, row, "version_uid")?;
     let parsed = ObjectVersionId::new(version)
         .map_err(|error| Refusal::new(format!("the version_uid `{version}`: {error}")))?;
-    if parsed.versioned_object_uid().as_str() != versioned {
-        return Err(Refusal::new(format!(
-            "the version_uid `{version}` is no version of `{versioned}`"
-        )));
+    // NOTE: openEHR RM Common 1.1.0 §OBJECT_VERSION_ID; the versioned object
+    // is the `object_id` part of the version's identifier.
+    let versioned = parsed.versioned_object_uid();
+    if query.column("versioned_object_uid").is_some() {
+        let selected = text(query, row, "versioned_object_uid")?;
+        if versioned.as_str() != selected {
+            return Err(Refusal::new(format!(
+                "the version_uid `{version}` is no version of `{selected}`"
+            )));
+        }
     }
     let refused = |error: omop_cdm::graph::EmptyIdentifier| Refusal::new(error.to_string());
     Ok(Source::new(
         EhrId::new(ehr).map_err(refused)?,
-        VersionedObjectUid::new(versioned).map_err(refused)?,
+        VersionedObjectUid::new(versioned.as_str()).map_err(refused)?,
         VersionUid::new(version).map_err(refused)?,
     ))
 }
@@ -288,6 +304,7 @@ pub async fn run<M: Mapper>(
         _ => {}
     }
     let mut report = RunReport::new(run_id.as_str());
+    let mut windows = None;
     if let Some(visits) = settings.visits.as_ref() {
         let rows = rows(cdr, &visits.query, settings.page_size)
             .await
@@ -300,6 +317,7 @@ pub async fn run<M: Mapper>(
             .write_visits(&grouped.visits, visits.concepts)
             .await
             .map_err(RunError::Database)?;
+        windows = Some(Windows::new(&grouped.visits));
     }
 
     let context = MappingContext {
@@ -328,17 +346,25 @@ pub async fn run<M: Mapper>(
             report.compositions.skipped = report.compositions.skipped.saturating_add(1);
             continue;
         }
-        let outcome =
-            composition(cdr, &mut templates, query, &row, &source, context, mapper).await?;
-        let graph = match outcome {
-            Ok(graph) => graph,
+        let read = Read {
+            query,
+            row: &row,
+            source: &source,
+            context,
+            windows: windows.as_ref(),
+        };
+        let (graph, tie) = match composition(cdr, &mut templates, &read, mapper).await? {
+            Ok(outcome) => outcome,
             Err(refusal) => {
                 report.composition_refused(Some(&source), &refusal);
                 continue;
             }
         };
         match writer.commit(&graph, run_id).await {
-            Ok(written) => report.committed(&source, &written),
+            Ok(written) => {
+                report.committed(&source, &written);
+                report.tied(tie.as_ref());
+            }
             Err(error) if writer.is_closed() => return Err(RunError::Database(error)),
             Err(error) => {
                 report.engine_outcomes(Some(&source), graph.report());
@@ -360,17 +386,29 @@ pub async fn run<M: Mapper>(
     Ok(report)
 }
 
-/// Reads, validates and maps the composition of one row.
+/// One composition row and what the run knows when it maps it.
+struct Read<'r> {
+    /// The checked composition query.
+    query: &'r CheckedQuery,
+    /// The row.
+    row: &'r [serde_json::Value],
+    /// The composition version the row names.
+    source: &'r Source,
+    /// The configured context.
+    context: MappingContext,
+    /// The derived visits, when the run derives them.
+    windows: Option<&'r Windows>,
+}
+
+/// Reads, validates and maps the composition of one row, tied to its visit
+/// when the run derives visits.
 async fn composition<M: Mapper>(
     cdr: &Client,
     templates: &mut Templates,
-    query: &CheckedQuery,
-    row: &[serde_json::Value],
-    source: &Source,
-    context: MappingContext,
+    read: &Read<'_>,
     mapper: &M,
-) -> Result<Result<RecordGraph, Refusal>, RunError> {
-    let value = match cell(query, row, "composition") {
+) -> Result<Result<(RecordGraph, Option<Tie>), Refusal>, RunError> {
+    let value = match cell(read.query, read.row, "composition") {
         Ok(value) if value.is_object() => value.clone(),
         Ok(_) => {
             return Ok(Err(Refusal::new(
@@ -387,19 +425,106 @@ async fn composition<M: Mapper>(
         Ok(canonical) => canonical,
         Err(error) => return Ok(Err(Refusal::new(crate::chain(&error)))),
     };
+    let Some(windows) = read.windows else {
+        return Ok(map(mapper, read, &canonical, &index, None)
+            .await
+            .map(|graph| (graph, None)));
+    };
+    Ok(tied(mapper, read, &canonical, &index, windows).await)
+}
+
+/// Maps `canonical` tied to the visit its moment falls in.
+async fn tied<M: Mapper>(
+    mapper: &M,
+    read: &Read<'_>,
+    canonical: &CanonicalComposition,
+    index: &WebTemplateIndex,
+    windows: &Windows,
+) -> Result<(RecordGraph, Option<Tie>), Refusal> {
+    let anchor = tie::anchor(canonical)?;
+    let ehr = read.source.ehr_id();
+    let facility = anchor.facility.as_deref();
+    if let Some(moment) = anchor.moment {
+        let tie = windows.tie(ehr, moment, facility);
+        let graph = map(mapper, read, canonical, index, tie.visit()).await?;
+        return Ok((graph, Some(tie)));
+    }
+    // NOTE: no specification governs this: our own design; a composition with no
+    // context start time is tied by the first date its mapping resolved.
+    let graph = map(mapper, read, canonical, index, None).await?;
+    let tie = tie::resolved_moment(&graph)
+        .map_or(Tie::Outside, |moment| windows.tie(ehr, moment, facility));
+    let graph = match tie.visit() {
+        Some(visit) => map(mapper, read, canonical, index, Some(visit)).await?,
+        None => graph,
+    };
+    Ok((graph, Some(tie)))
+}
+
+/// Maps `canonical` with `visit`, checking that the graph names the
+/// composition.
+async fn map<M: Mapper>(
+    mapper: &M,
+    read: &Read<'_>,
+    canonical: &CanonicalComposition,
+    index: &WebTemplateIndex,
+    visit: Option<&VisitKey>,
+) -> Result<RecordGraph, Refusal> {
     let graph = mapper
         .map(&SourceComposition {
-            source: source.clone(),
-            composition: &canonical,
-            template: &index,
-            context,
+            source: read.source.clone(),
+            composition: canonical,
+            template: index,
+            visit,
+            context: read.context,
         })
-        .await;
-    Ok(match graph {
-        Ok(graph) if graph.source() == source => Ok(graph),
-        Ok(_) => Err(Refusal::new(
+        .await?;
+    if graph.source() == read.source {
+        Ok(graph)
+    } else {
+        Err(Refusal::new(
             "the mapper answered with the graph of another composition",
-        )),
-        Err(refusal) => Err(refusal),
-    })
+        ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::source;
+    use crate::etl::aql::CheckedQuery;
+    use serde_json::json;
+
+    /// The version every case reads.
+    const VERSION: &str = "8849182c-82ad-4088-a07f-48ead4180515::ferrobridge.test::2";
+
+    #[test]
+    fn the_versioned_object_is_read_from_the_version_when_the_query_selects_none() {
+        let query = CheckedQuery::compositions(
+            "SELECT e/ehr_id/value AS ehr_id, v/uid/value AS version_uid, c AS composition \
+             FROM EHR e CONTAINS VERSION v CONTAINS COMPOSITION c ORDER BY v/uid/value",
+        )
+        .expect("the query checks");
+        let read =
+            source(&query, &[json!("ehr-1"), json!(VERSION), json!({})]).expect("the row reads");
+        assert_eq!(
+            "8849182c-82ad-4088-a07f-48ead4180515",
+            read.versioned_object_uid().as_str()
+        );
+    }
+
+    #[test]
+    fn a_selected_versioned_object_of_another_version_is_refused() {
+        let query = CheckedQuery::compositions(
+            "SELECT e/ehr_id/value AS ehr_id, vo/uid/value AS versioned_object_uid, \
+             v/uid/value AS version_uid, c AS composition \
+             FROM EHR e CONTAINS VERSIONED_OBJECT vo CONTAINS VERSION v CONTAINS COMPOSITION c \
+             ORDER BY v/uid/value",
+        )
+        .expect("the query checks");
+        let row = [json!("ehr-1"), json!("another"), json!(VERSION), json!({})];
+        assert!(
+            source(&query, &row).is_err(),
+            "the version is no version of it"
+        );
+    }
 }

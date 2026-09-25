@@ -74,6 +74,8 @@ toml.workspace = true
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
+# The OMOP round trip pins its rows as a reviewed snapshot.
+insta.workspace = true
 # The shutdown cases drive a real socket, so they need a real HTTP client.
 reqwest.workspace = true
 tempfile.workspace = true

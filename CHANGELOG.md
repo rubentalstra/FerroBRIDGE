@@ -50,6 +50,33 @@ crates on crates.io.
   JSON. A carriage return or line feed inside a `pretty` record is written as
   `\r` or `\n`, so a value cannot forge a second line. `FERROBRIDGE_LOG_FORMAT`
   and `RUST_LOG` override `[telemetry] format` and `filter`.
+- `etl run` ties each composition to a derived visit (#244): the visit of its
+  EHR whose window contains the composition's `context/start_time` (for a
+  composition without a context, the first date its mapping resolved), with
+  the `context/health_care_facility` name deciding between several windows
+  against each visit's source. Every clinical row of a tied composition
+  carries `visit_occurrence_id`; a composition inside no window, or inside
+  several the facility does not decide, carries none, and the run report
+  counts both. The composition query may leave out `versioned_object_uid`,
+  which the runner then reads from the `version_uid`, so a CDR that answers
+  no `VERSIONED_OBJECT` in `FROM` can be read. The rule is FerroBRIDGE's own
+  and is on the OMOP ETL page.
+- The OMOP round trip, the v0.0.4 acceptance test (#92): three synthetic
+  laboratory compositions in two EHRs, committed to the reference CDR over
+  ITS-REST as canonical JSON, read by `etl run` with the published
+  `Laboratory_test_result_v1`, `Laboratory_test_analyte_v1` and `Specimen_v1`
+  files copied verbatim, and written into a CDM v5.4 PostgreSQL with the
+  synthetic vocabulary. The `MEASUREMENT`, `SPECIMEN`, `FACT_RELATIONSHIP`,
+  `VISIT_OCCURRENCE` and `OBSERVATION_PERIOD` rows are a reviewed snapshot; an
+  unmapped analyte lands as concept 0 and is counted; a second run leaves the
+  database identical, and a composition changed in the CDR replaces exactly
+  its own row on the next run. The synthetic vocabulary gains the `LOINC`,
+  `UCUM` and `SNOMED` stand-in codes the compositions use, the
+  `Meas Value Operator` concepts, and synthetic visit and type concepts. The
+  OMOP ETL page gives the Data Quality Dashboard steps for a populated
+  database. `etl::job::run` is the job the binary calls, so a test drives the
+  same path.
+
 - The OMOCL engine (#90). `omocl::resolve::compile` binds a loaded mapping
   set to one template once: every file at every archetype root of the
   template it maps, an `Include` below its including root at its `base_path`

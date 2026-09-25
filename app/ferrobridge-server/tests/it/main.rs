@@ -23,6 +23,7 @@ mod facade_e2e;
 mod http;
 mod kds;
 mod lane_templates;
+mod omop_round_trip;
 mod operations;
 mod readiness;
 mod run;

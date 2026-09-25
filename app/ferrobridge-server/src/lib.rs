@@ -155,7 +155,7 @@ where
             }
         }
         Job::EtlRun(options) => {
-            if let Some(missing) = etl_missing_section(&settings) {
+            if let Some(missing) = etl::job::missing_section(&settings) {
                 eprintln!("ferrobridge: cannot start: `etl run` needs {missing}");
                 return ExitCode::from(EXIT_CONFIG);
             }
@@ -230,99 +230,22 @@ fn cdm_init_command(cdm: &config::CdmSettings) -> anyhow::Result<()> {
     })
 }
 
-/// Returns the configuration `etl run` needs and `settings` lacks, first
-/// missing first.
-fn etl_missing_section(settings: &Settings) -> Option<&'static str> {
-    if settings.etl.is_none() {
-        Some("an [etl] section")
-    } else if settings.cdm.is_none() {
-        Some("a [cdm] section")
-    } else if settings.cdr.is_none() {
-        Some("a [cdr] section")
-    } else if settings.omocl_directory.is_none() {
-        Some("[mappings] omocl")
-    } else {
-        None
-    }
-}
-
 /// Runs the OMOP ETL once and prints its report as text and as JSON.
 ///
-/// The OMOCL set is read from `[mappings] omocl` before any upstream is
-/// called, so a mapping that does not load refuses the start. The concept
-/// resolver and the writer open their own connections to the `[cdm]`
-/// database; the two clients never share a pool.
+/// The job itself is [`etl::job::run`], which a test drives with a
+/// configuration of its own.
 #[expect(
     clippy::print_stdout,
     reason = "the run report is the job's output, written to stdout for the operator"
 )]
 fn etl_run_command(settings: &Settings, options: &etl::RunOptions) -> anyhow::Result<()> {
-    use anyhow::Context;
-    use secrecy::ExposeSecret;
-
-    let etl_settings = settings
-        .etl
-        .as_ref()
-        .context("`etl run` needs an [etl] section: it runs the queries it names")?;
-    let cdm = settings
-        .cdm
-        .as_ref()
-        .context("`etl run` needs a [cdm] section: it writes the rows there")?;
-    let cdr = settings
-        .cdr
-        .as_ref()
-        .context("`etl run` needs a [cdr] section: it reads the compositions there")?;
-    let directory = settings
-        .omocl_directory
-        .as_ref()
-        .context("`etl run` needs [mappings] omocl: it maps with the files it finds there")?;
-    let set = etl::mapper::read_set(directory).context("reading the OMOCL mapping set")?;
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;
-    runtime.block_on(async {
-        let client = ferrobridge_openehr::client::Client::new(cdr.clone())
-            .context("building the CDR client the run reads through")?;
-        let options_url: sqlx::postgres::PgConnectOptions = cdm
-            .url
-            .expose_secret()
-            .parse()
-            .context("reading [cdm] url")?;
-        let pool = omop_cdm::database::CdmPool::connect(
-            sqlx::postgres::PgPoolOptions::new().max_connections(2),
-            options_url,
-            cdm.schema.clone(),
-        )
-        .await
-        .context("connecting the concept resolver to the CDM database")?;
-        let mapper = etl::mapper::OmoclMapper::new(
-            set,
-            etl::mapper::CdmVocabulary::new(omop_cdm::vocabulary::ConceptResolver::new(pool)),
-            omocl::engine::concept::VocabularyAliases::default(),
-        );
-        let mut writer = omop_cdm::writer::CdmWriter::connect(
-            cdm.url.expose_secret(),
-            cdm.schema.clone(),
-            cdm.bridge_schema.clone(),
-            cdm.person_policy,
-        )
-        .await
-        .context("connecting the CDM writer")?;
-        let run_id = omop_cdm::writer::RunId::new(uuid::Uuid::new_v4().to_string())?;
-        let report = etl::run(
-            etl_settings,
-            options,
-            &client,
-            &mut writer,
-            &mapper,
-            &run_id,
-        )
-        .await
-        .context("running the ETL")?;
-        println!("{report}");
-        println!("{}", serde_json::to_string_pretty(&report)?);
-        Ok(())
-    })
+    let report = runtime.block_on(etl::job::run(settings, options))?;
+    println!("{report}");
+    println!("{}", serde_json::to_string_pretty(&report)?);
+    Ok(())
 }
 
 /// Builds the runtime and serves until the process is asked to stop.
