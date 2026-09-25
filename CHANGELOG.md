@@ -416,6 +416,22 @@ crates on crates.io.
 
 ### Fixed
 
+- A v2-to-FHIR row into a complex element runs every data type map the
+  guide names for it (#324). The maps are found by the element's type, else
+  by its element path, the form the guide's map titles use for a backbone
+  element (`HD[endpoint]` and `HD[name]` into `MessageHeader.source`), so
+  MSH-3 and MSH-24 into `source` and MSH-25 into `destination` run both HD
+  maps where they counted `no-datatype-map`. A child that another row of the
+  same field targets directly stays that row's, so MSH-3's own
+  `source[1].endpoint` row keeps the endpoint. When two maps write the same
+  child for one value, as the four EI maps into `Identifier` do with EI.1,
+  the row writes nothing and counts `datatype-conflict` naming the child and
+  the maps. The pass counts do not move (111 of 511 vendored, 189 of 379
+  smoke): the guide's `datatype-hd-endpoint-to-messageheader-source` gates
+  every endpoint row on a condition outside the guide's grammar (`HD-3`, `=`,
+  a test with no operand) and assigns a concatenation, so its endpoint is
+  never written and the 23 messages valuing MSH-24 still lack
+  `MessageHeader.source.endpoint`.
 - A required FHIR primitive carried only by its `_name` sibling with an
   extension counts as present, as FHIR R4 JSON represents a primitive with
   extensions and no value (<https://hl7.org/fhir/R4/json.html#primitive>)

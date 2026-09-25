@@ -247,23 +247,29 @@ impl Corpus {
     /// Returns the ids of the qualified candidates when there is none or
     /// several.
     pub fn find(&self, kind: &str, source: &str, target: &str) -> Result<&Map, Vec<String>> {
+        match self.qualifying(kind, source, target).as_slice() {
+            [one] => Ok(one),
+            several => Err(several.iter().map(|map| map.id.clone()).collect()),
+        }
+    }
+
+    /// Returns every map of `kind` from `source` to `target`: the one whose
+    /// id is `<kind>-<source>-to-<target>` when there is one, else each
+    /// qualified map `<kind>-<source>-<qualifier>-to-<target>`, by id.
+    #[must_use]
+    pub fn qualifying(&self, kind: &str, source: &str, target: &str) -> Vec<&Map> {
         let source = source.to_ascii_lowercase();
         let target = target.to_ascii_lowercase();
         let exact = format!("{kind}-{source}-to-{target}");
         if let Some(map) = self.maps.get(&exact) {
-            return Ok(map);
+            return vec![map];
         }
         let prefix = format!("{kind}-{source}-");
         let suffix = format!("-to-{target}");
-        let candidates: Vec<&Map> = self
-            .maps
+        self.maps
             .values()
             .filter(|map| map.id.starts_with(&prefix) && map.id.ends_with(&suffix))
-            .collect();
-        match candidates.as_slice() {
-            [one] => Ok(one),
-            _ => Err(candidates.iter().map(|map| map.id.clone()).collect()),
-        }
+            .collect()
     }
 
     /// Reads one directory's `ConceptMaps` into the corpus.
