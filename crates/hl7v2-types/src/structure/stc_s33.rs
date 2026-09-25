@@ -10,7 +10,9 @@ use crate::segment;
 /// The `STC_S33` message structure definition, `http://hl7.org/v2/StructureDefinition/STC_S33`.
 pub static STC_S33: Structure = Structure {
     id: "STC_S33",
-    url: "http://hl7.org/v2/StructureDefinition/STC_S33",
+    url: Some("http://hl7.org/v2/StructureDefinition/STC_S33"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "STC_S33.1-MSH",

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `DSC` segment definition, `http://hl7.org/v2/StructureDefinition/DSC`.
 pub static DSC: Segment = Segment {
     id: "DSC",
-    url: "http://hl7.org/v2/StructureDefinition/DSC",
+    url: Some("http://hl7.org/v2/StructureDefinition/DSC"),
     name: "Continuation Pointer",
     fields: &[
         Field {

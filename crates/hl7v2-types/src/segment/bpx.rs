@@ -12,7 +12,7 @@ use crate::model::{
 /// The `BPX` segment definition, `http://hl7.org/v2/StructureDefinition/BPX`.
 pub static BPX: Segment = Segment {
     id: "BPX",
-    url: "http://hl7.org/v2/StructureDefinition/BPX",
+    url: Some("http://hl7.org/v2/StructureDefinition/BPX"),
     name: "Blood Product Dispense Status",
     fields: &[
         Field {

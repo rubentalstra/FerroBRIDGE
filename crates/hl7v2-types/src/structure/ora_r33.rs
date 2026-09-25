@@ -12,7 +12,9 @@ use crate::segment;
 /// The `ORA_R33` message structure definition, `http://hl7.org/v2/StructureDefinition/ORA_R33`.
 pub static ORA_R33: Structure = Structure {
     id: "ORA_R33",
-    url: "http://hl7.org/v2/StructureDefinition/ORA_R33",
+    url: Some("http://hl7.org/v2/StructureDefinition/ORA_R33"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "ORA_R33.1-MSH",

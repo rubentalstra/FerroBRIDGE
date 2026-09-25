@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `DPS` segment definition, `http://hl7.org/v2/StructureDefinition/DPS`.
 pub static DPS: Segment = Segment {
     id: "DPS",
-    url: "http://hl7.org/v2/StructureDefinition/DPS",
+    url: Some("http://hl7.org/v2/StructureDefinition/DPS"),
     name: "Diagnosis and Procedure Code",
     fields: &[
         Field {

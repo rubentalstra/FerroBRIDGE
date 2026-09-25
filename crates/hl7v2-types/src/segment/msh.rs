@@ -12,7 +12,7 @@ use crate::model::{
 /// The `MSH` segment definition, `http://hl7.org/v2/StructureDefinition/MSH`.
 pub static MSH: Segment = Segment {
     id: "MSH",
-    url: "http://hl7.org/v2/StructureDefinition/MSH",
+    url: Some("http://hl7.org/v2/StructureDefinition/MSH"),
     name: "Message Header",
     fields: &[
         Field {

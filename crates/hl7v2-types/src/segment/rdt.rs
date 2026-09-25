@@ -9,7 +9,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment};
 /// The `RDT` segment definition, `http://hl7.org/v2/StructureDefinition/RDT`.
 pub static RDT: Segment = Segment {
     id: "RDT",
-    url: "http://hl7.org/v2/StructureDefinition/RDT",
+    url: Some("http://hl7.org/v2/StructureDefinition/RDT"),
     name: "Table Row Data",
     fields: &[Field {
         id: "RDT.1-rdt1",

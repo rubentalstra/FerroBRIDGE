@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PSH` segment definition, `http://hl7.org/v2/StructureDefinition/PSH`.
 pub static PSH: Segment = Segment {
     id: "PSH",
-    url: "http://hl7.org/v2/StructureDefinition/PSH",
+    url: Some("http://hl7.org/v2/StructureDefinition/PSH"),
     name: "Product Summary Header",
     fields: &[
         Field {

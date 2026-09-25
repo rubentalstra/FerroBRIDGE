@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment};
 /// The `ADD` segment definition, `http://hl7.org/v2/StructureDefinition/ADD`.
 pub static ADD: Segment = Segment {
     id: "ADD",
-    url: "http://hl7.org/v2/StructureDefinition/ADD",
+    url: Some("http://hl7.org/v2/StructureDefinition/ADD"),
     name: "Addendum",
     fields: &[Field {
         id: "ADD.1-add1",

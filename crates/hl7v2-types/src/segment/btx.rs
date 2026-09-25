@@ -12,7 +12,7 @@ use crate::model::{
 /// The `BTX` segment definition, `http://hl7.org/v2/StructureDefinition/BTX`.
 pub static BTX: Segment = Segment {
     id: "BTX",
-    url: "http://hl7.org/v2/StructureDefinition/BTX",
+    url: Some("http://hl7.org/v2/StructureDefinition/BTX"),
     name: "Blood Product Transfusion/Disposition",
     fields: &[
         Field {

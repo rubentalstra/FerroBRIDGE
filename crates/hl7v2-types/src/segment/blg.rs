@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `BLG` segment definition, `http://hl7.org/v2/StructureDefinition/BLG`.
 pub static BLG: Segment = Segment {
     id: "BLG",
-    url: "http://hl7.org/v2/StructureDefinition/BLG",
+    url: Some("http://hl7.org/v2/StructureDefinition/BLG"),
     name: "Billing",
     fields: &[
         Field {

@@ -7,9 +7,12 @@
 //! tree), [`crate::roots::V2RootSet`] (select every message structure and segment),
 //! [`lower::Model`] (the group trees and the field table of every segment the
 //! set holds), [`render`] (source text), and [`emit`] (write or check).
+//! [`legacy`] adds the structures the v2.9.1 definitions no longer carry,
+//! from the tables of the earlier versions that did.
 
 pub mod corpus;
 pub mod definition;
 pub mod emit;
+pub mod legacy;
 pub mod lower;
 pub mod render;

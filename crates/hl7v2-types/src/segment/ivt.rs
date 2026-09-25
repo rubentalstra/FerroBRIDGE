@@ -12,7 +12,7 @@ use crate::model::{
 /// The `IVT` segment definition, `http://hl7.org/v2/StructureDefinition/IVT`.
 pub static IVT: Segment = Segment {
     id: "IVT",
-    url: "http://hl7.org/v2/StructureDefinition/IVT",
+    url: Some("http://hl7.org/v2/StructureDefinition/IVT"),
     name: "Material Location",
     fields: &[
         Field {

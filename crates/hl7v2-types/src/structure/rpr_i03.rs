@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RPR_I03` message structure definition, `http://hl7.org/v2/StructureDefinition/RPR_I03`.
 pub static RPR_I03: Structure = Structure {
     id: "RPR_I03",
-    url: "http://hl7.org/v2/StructureDefinition/RPR_I03",
+    url: Some("http://hl7.org/v2/StructureDefinition/RPR_I03"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RPR_I03.1-MSH",

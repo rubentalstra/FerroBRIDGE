@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `BLC` segment definition, `http://hl7.org/v2/StructureDefinition/BLC`.
 pub static BLC: Segment = Segment {
     id: "BLC",
-    url: "http://hl7.org/v2/StructureDefinition/BLC",
+    url: Some("http://hl7.org/v2/StructureDefinition/BLC"),
     name: "Blood Code",
     fields: &[
         Field {

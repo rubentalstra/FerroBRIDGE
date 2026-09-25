@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PEO` segment definition, `http://hl7.org/v2/StructureDefinition/PEO`.
 pub static PEO: Segment = Segment {
     id: "PEO",
-    url: "http://hl7.org/v2/StructureDefinition/PEO",
+    url: Some("http://hl7.org/v2/StructureDefinition/PEO"),
     name: "Product Experience Observation",
     fields: &[
         Field {

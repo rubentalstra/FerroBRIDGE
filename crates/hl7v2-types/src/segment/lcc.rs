@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `LCC` segment definition, `http://hl7.org/v2/StructureDefinition/LCC`.
 pub static LCC: Segment = Segment {
     id: "LCC",
-    url: "http://hl7.org/v2/StructureDefinition/LCC",
+    url: Some("http://hl7.org/v2/StructureDefinition/LCC"),
     name: "Location Charge Code",
     fields: &[
         Field {

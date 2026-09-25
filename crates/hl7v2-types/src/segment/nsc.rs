@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `NSC` segment definition, `http://hl7.org/v2/StructureDefinition/NSC`.
 pub static NSC: Segment = Segment {
     id: "NSC",
-    url: "http://hl7.org/v2/StructureDefinition/NSC",
+    url: Some("http://hl7.org/v2/StructureDefinition/NSC"),
     name: "Application Status Change",
     fields: &[
         Field {

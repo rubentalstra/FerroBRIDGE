@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `CSS` segment definition, `http://hl7.org/v2/StructureDefinition/CSS`.
 pub static CSS: Segment = Segment {
     id: "CSS",
-    url: "http://hl7.org/v2/StructureDefinition/CSS",
+    url: Some("http://hl7.org/v2/StructureDefinition/CSS"),
     name: "Clinical Study Data Schedule",
     fields: &[
         Field {

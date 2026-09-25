@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PRA` segment definition, `http://hl7.org/v2/StructureDefinition/PRA`.
 pub static PRA: Segment = Segment {
     id: "PRA",
-    url: "http://hl7.org/v2/StructureDefinition/PRA",
+    url: Some("http://hl7.org/v2/StructureDefinition/PRA"),
     name: "Practitioner Detail",
     fields: &[
         Field {

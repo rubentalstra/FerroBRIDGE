@@ -61,6 +61,11 @@ fuzz/coverage/
 /tools/fhir-codegen/vendor/hl7-v2ig/*
 !/tools/fhir-codegen/vendor/hl7-v2ig/PROVENANCE.md
 
+# The HL7 v2 legacy tables scripts/vendor/v2-legacy.sh fetches at build time,
+# under the same terms as the definitions above.
+/tools/fhir-codegen/vendor/hl7-v2-legacy/*
+!/tools/fhir-codegen/vendor/hl7-v2-legacy/PROVENANCE.md
+
 # The HL7 v2 message sets scripts/vendor/hl7v2-samples.sh --build-time fetches.
 # Neither repository grants redistribution, so only each PROVENANCE.md is
 # committed (.claude/rules/vendored-inputs.md).

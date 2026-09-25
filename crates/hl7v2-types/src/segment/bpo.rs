@@ -12,7 +12,7 @@ use crate::model::{
 /// The `BPO` segment definition, `http://hl7.org/v2/StructureDefinition/BPO`.
 pub static BPO: Segment = Segment {
     id: "BPO",
-    url: "http://hl7.org/v2/StructureDefinition/BPO",
+    url: Some("http://hl7.org/v2/StructureDefinition/BPO"),
     name: "Blood Product Order",
     fields: &[
         Field {

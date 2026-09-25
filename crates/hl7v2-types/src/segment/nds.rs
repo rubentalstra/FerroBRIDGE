@@ -12,7 +12,7 @@ use crate::model::{
 /// The `NDS` segment definition, `http://hl7.org/v2/StructureDefinition/NDS`.
 pub static NDS: Segment = Segment {
     id: "NDS",
-    url: "http://hl7.org/v2/StructureDefinition/NDS",
+    url: Some("http://hl7.org/v2/StructureDefinition/NDS"),
     name: "Notification Detail",
     fields: &[
         Field {

@@ -12,7 +12,9 @@ use crate::segment;
 /// The `REF_I12` message structure definition, `http://hl7.org/v2/StructureDefinition/REF_I12`.
 pub static REF_I12: Structure = Structure {
     id: "REF_I12",
-    url: "http://hl7.org/v2/StructureDefinition/REF_I12",
+    url: Some("http://hl7.org/v2/StructureDefinition/REF_I12"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "REF_I12.1-MSH",

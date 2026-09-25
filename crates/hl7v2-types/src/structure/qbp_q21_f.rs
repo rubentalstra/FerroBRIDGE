@@ -9,6 +9,8 @@ use crate::model::Structure;
 /// The `QBP_Q21-F` message structure definition, `http://hl7.org/v2/StructureDefinition/QBP_Q21-F`.
 pub static QBP_Q21_F: Structure = Structure {
     id: "QBP_Q21-F",
-    url: "http://hl7.org/v2/StructureDefinition/QBP_Q21-F",
+    url: Some("http://hl7.org/v2/StructureDefinition/QBP_Q21-F"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[],
 };

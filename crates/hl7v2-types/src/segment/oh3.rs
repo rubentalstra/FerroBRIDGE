@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `OH3` segment definition, `http://hl7.org/v2/StructureDefinition/OH3`.
 pub static OH3: Segment = Segment {
     id: "OH3",
-    url: "http://hl7.org/v2/StructureDefinition/OH3",
+    url: Some("http://hl7.org/v2/StructureDefinition/OH3"),
     name: "Usual Work",
     fields: &[
         Field {

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `LDP` segment definition, `http://hl7.org/v2/StructureDefinition/LDP`.
 pub static LDP: Segment = Segment {
     id: "LDP",
-    url: "http://hl7.org/v2/StructureDefinition/LDP",
+    url: Some("http://hl7.org/v2/StructureDefinition/LDP"),
     name: "Location Department",
     fields: &[
         Field {

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `TXA` segment definition, `http://hl7.org/v2/StructureDefinition/TXA`.
 pub static TXA: Segment = Segment {
     id: "TXA",
-    url: "http://hl7.org/v2/StructureDefinition/TXA",
+    url: Some("http://hl7.org/v2/StructureDefinition/TXA"),
     name: "Transcription Document Header",
     fields: &[
         Field {

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PMT` segment definition, `http://hl7.org/v2/StructureDefinition/PMT`.
 pub static PMT: Segment = Segment {
     id: "PMT",
-    url: "http://hl7.org/v2/StructureDefinition/PMT",
+    url: Some("http://hl7.org/v2/StructureDefinition/PMT"),
     name: "Payment Information",
     fields: &[
         Field {

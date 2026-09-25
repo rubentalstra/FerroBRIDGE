@@ -12,7 +12,9 @@ use crate::segment;
 /// The `MFN_M17` message structure definition, `http://hl7.org/v2/StructureDefinition/MFN_M17`.
 pub static MFN_M17: Structure = Structure {
     id: "MFN_M17",
-    url: "http://hl7.org/v2/StructureDefinition/MFN_M17",
+    url: Some("http://hl7.org/v2/StructureDefinition/MFN_M17"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "MFN_M17.1-MSH",

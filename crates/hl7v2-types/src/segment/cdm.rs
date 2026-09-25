@@ -12,7 +12,7 @@ use crate::model::{
 /// The `CDM` segment definition, `http://hl7.org/v2/StructureDefinition/CDM`.
 pub static CDM: Segment = Segment {
     id: "CDM",
-    url: "http://hl7.org/v2/StructureDefinition/CDM",
+    url: Some("http://hl7.org/v2/StructureDefinition/CDM"),
     name: "Charge Description Master",
     fields: &[
         Field {

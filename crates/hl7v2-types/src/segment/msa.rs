@@ -13,7 +13,7 @@ use crate::model::{
 /// The `MSA` segment definition, `http://hl7.org/v2/StructureDefinition/MSA`.
 pub static MSA: Segment = Segment {
     id: "MSA",
-    url: "http://hl7.org/v2/StructureDefinition/MSA",
+    url: Some("http://hl7.org/v2/StructureDefinition/MSA"),
     name: "Message Acknowledgment",
     fields: &[
         Field {

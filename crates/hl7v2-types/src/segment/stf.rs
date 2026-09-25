@@ -13,7 +13,7 @@ use crate::model::{
 /// The `STF` segment definition, `http://hl7.org/v2/StructureDefinition/STF`.
 pub static STF: Segment = Segment {
     id: "STF",
-    url: "http://hl7.org/v2/StructureDefinition/STF",
+    url: Some("http://hl7.org/v2/StructureDefinition/STF"),
     name: "Staff Identification",
     fields: &[
         Field {

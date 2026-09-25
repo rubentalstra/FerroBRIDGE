@@ -12,7 +12,9 @@ use crate::segment;
 /// The `ORU_R30-A` message structure definition, `http://hl7.org/v2/StructureDefinition/ORU_R30-A`.
 pub static ORU_R30_A: Structure = Structure {
     id: "ORU_R30-A",
-    url: "http://hl7.org/v2/StructureDefinition/ORU_R30-A",
+    url: Some("http://hl7.org/v2/StructureDefinition/ORU_R30-A"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "ORU_R30-A.1-MSH",

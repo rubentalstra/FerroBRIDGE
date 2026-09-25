@@ -13,7 +13,7 @@ use crate::model::{
 /// The `AL1` segment definition, `http://hl7.org/v2/StructureDefinition/AL1`.
 pub static AL1: Segment = Segment {
     id: "AL1",
-    url: "http://hl7.org/v2/StructureDefinition/AL1",
+    url: Some("http://hl7.org/v2/StructureDefinition/AL1"),
     name: "Patient Allergy Information",
     fields: &[
         Field {

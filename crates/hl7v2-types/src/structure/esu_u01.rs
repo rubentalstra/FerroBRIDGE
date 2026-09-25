@@ -10,7 +10,9 @@ use crate::segment;
 /// The `ESU_U01` message structure definition, `http://hl7.org/v2/StructureDefinition/ESU_U01`.
 pub static ESU_U01: Structure = Structure {
     id: "ESU_U01",
-    url: "http://hl7.org/v2/StructureDefinition/ESU_U01",
+    url: Some("http://hl7.org/v2/StructureDefinition/ESU_U01"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "ESU_U01.1-MSH",

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `BUI` segment definition, `http://hl7.org/v2/StructureDefinition/BUI`.
 pub static BUI: Segment = Segment {
     id: "BUI",
-    url: "http://hl7.org/v2/StructureDefinition/BUI",
+    url: Some("http://hl7.org/v2/StructureDefinition/BUI"),
     name: "Blood Unit information",
     fields: &[
         Field {

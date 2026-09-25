@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SCP` segment definition, `http://hl7.org/v2/StructureDefinition/SCP`.
 pub static SCP: Segment = Segment {
     id: "SCP",
-    url: "http://hl7.org/v2/StructureDefinition/SCP",
+    url: Some("http://hl7.org/v2/StructureDefinition/SCP"),
     name: "Sterilizer Configuration",
     fields: &[
         Field {

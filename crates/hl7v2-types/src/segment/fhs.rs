@@ -12,7 +12,7 @@ use crate::model::{
 /// The `FHS` segment definition, `http://hl7.org/v2/StructureDefinition/FHS`.
 pub static FHS: Segment = Segment {
     id: "FHS",
-    url: "http://hl7.org/v2/StructureDefinition/FHS",
+    url: Some("http://hl7.org/v2/StructureDefinition/FHS"),
     name: "File Header",
     fields: &[
         Field {

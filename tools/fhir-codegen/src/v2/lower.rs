@@ -55,6 +55,10 @@ pub const PLACEHOLDER_GROUP_NAME: &str = "FIXME";
 const BACKBONE: &str = "BackboneElement";
 /// The canonical URL prefix of a v2 definition.
 const V2_CANONICAL: &str = "http://hl7.org/v2/StructureDefinition/";
+/// The HL7 v2 version the definitions hold.
+// NOTE: HL7/v2ig V291_EXTRACTION_SUMMARY.md at the pinned commit describes the
+// source of truth as extracted from the HL7 V2.9.1 documents.
+pub const DEFINITIONS_VERSION: &str = "2.9.1";
 
 /// A defect of the v2 definitions that lowering tolerates where it was found.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -327,6 +331,8 @@ pub enum Optionality {
     B,
     /// `W`.
     W,
+    /// `NA`, which only the legacy tables write.
+    Na,
     /// `-`.
     Unstated,
 }
@@ -421,8 +427,8 @@ pub struct Field {
 pub struct Segment {
     /// The definition id.
     pub id: String,
-    /// The canonical URL.
-    pub url: String,
+    /// The canonical URL, `None` for a legacy segment.
+    pub url: Option<String>,
     /// The root element's `short`.
     pub name: String,
     /// The fields in position order.
@@ -485,8 +491,12 @@ pub enum Node {
 pub struct Structure {
     /// The definition id.
     pub id: String,
-    /// The canonical URL.
-    pub url: String,
+    /// The canonical URL, `None` for a legacy structure.
+    pub url: Option<String>,
+    /// The HL7 version of the tables it comes from.
+    pub version: String,
+    /// The first version the sources carry without it, for a legacy structure.
+    pub withdrawn_as_of: Option<String>,
     /// The top-level nodes.
     pub nodes: Vec<Node>,
 }
@@ -838,7 +848,7 @@ fn lower_segment(corpus: &Corpus, sourced: &Input<'_>) -> Result<Segment, LowerE
     }
     Ok(Segment {
         id: id.to_owned(),
-        url: sourced.definition.url.clone(),
+        url: Some(sourced.definition.url.clone()),
         name,
         fields: lowered,
     })
@@ -1377,7 +1387,9 @@ fn lower_structure<'a>(
     };
     Ok(Structure {
         id: id.to_owned(),
-        url: sourced.definition.url.clone(),
+        url: Some(sourced.definition.url.clone()),
+        version: String::from(DEFINITIONS_VERSION),
+        withdrawn_as_of: None,
         nodes,
     })
 }

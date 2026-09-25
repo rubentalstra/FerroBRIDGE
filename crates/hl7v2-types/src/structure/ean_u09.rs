@@ -12,7 +12,9 @@ use crate::segment;
 /// The `EAN_U09` message structure definition, `http://hl7.org/v2/StructureDefinition/EAN_U09`.
 pub static EAN_U09: Structure = Structure {
     id: "EAN_U09",
-    url: "http://hl7.org/v2/StructureDefinition/EAN_U09",
+    url: Some("http://hl7.org/v2/StructureDefinition/EAN_U09"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "EAN_U09.1-MSH",

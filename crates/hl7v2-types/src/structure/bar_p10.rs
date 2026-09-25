@@ -12,7 +12,9 @@ use crate::segment;
 /// The `BAR_P10` message structure definition, `http://hl7.org/v2/StructureDefinition/BAR_P10`.
 pub static BAR_P10: Structure = Structure {
     id: "BAR_P10",
-    url: "http://hl7.org/v2/StructureDefinition/BAR_P10",
+    url: Some("http://hl7.org/v2/StructureDefinition/BAR_P10"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "BAR_P10.1-MSH",

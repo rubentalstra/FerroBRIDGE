@@ -12,7 +12,9 @@ use crate::segment;
 /// The `MDM_T02-D` message structure definition, `http://hl7.org/v2/StructureDefinition/MDM_T02-D`.
 pub static MDM_T02_D: Structure = Structure {
     id: "MDM_T02-D",
-    url: "http://hl7.org/v2/StructureDefinition/MDM_T02-D",
+    url: Some("http://hl7.org/v2/StructureDefinition/MDM_T02-D"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "MDM_T02-D.1-MSH",

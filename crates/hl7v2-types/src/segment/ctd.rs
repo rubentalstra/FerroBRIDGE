@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `CTD` segment definition, `http://hl7.org/v2/StructureDefinition/CTD`.
 pub static CTD: Segment = Segment {
     id: "CTD",
-    url: "http://hl7.org/v2/StructureDefinition/CTD",
+    url: Some("http://hl7.org/v2/StructureDefinition/CTD"),
     name: "Contact Data",
     fields: &[
         Field {

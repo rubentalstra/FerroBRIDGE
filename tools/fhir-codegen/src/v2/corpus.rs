@@ -211,7 +211,7 @@ impl Corpus {
 }
 
 /// The commit a `PROVENANCE.md` pins, from its line that opens `- Pin: commit`.
-fn pinned_commit(provenance: &str) -> Option<String> {
+pub(crate) fn pinned_commit(provenance: &str) -> Option<String> {
     provenance.lines().find_map(|line| {
         let rest = line.strip_prefix("- Pin: commit `")?;
         let (sha, _) = rest.split_once('`')?;

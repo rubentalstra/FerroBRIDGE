@@ -12,7 +12,9 @@ use crate::segment;
 /// The `DBC_O41` message structure definition, `http://hl7.org/v2/StructureDefinition/DBC_O41`.
 pub static DBC_O41: Structure = Structure {
     id: "DBC_O41",
-    url: "http://hl7.org/v2/StructureDefinition/DBC_O41",
+    url: Some("http://hl7.org/v2/StructureDefinition/DBC_O41"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "DBC_O41.1-MSH",

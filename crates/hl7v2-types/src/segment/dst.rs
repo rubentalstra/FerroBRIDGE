@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `DST` segment definition, `http://hl7.org/v2/StructureDefinition/DST`.
 pub static DST: Segment = Segment {
     id: "DST",
-    url: "http://hl7.org/v2/StructureDefinition/DST",
+    url: Some("http://hl7.org/v2/StructureDefinition/DST"),
     name: "Transport Destination",
     fields: &[
         Field {

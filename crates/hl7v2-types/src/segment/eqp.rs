@@ -12,7 +12,7 @@ use crate::model::{
 /// The `EQP` segment definition, `http://hl7.org/v2/StructureDefinition/EQP`.
 pub static EQP: Segment = Segment {
     id: "EQP",
-    url: "http://hl7.org/v2/StructureDefinition/EQP",
+    url: Some("http://hl7.org/v2/StructureDefinition/EQP"),
     name: "Equipment Log/Service",
     fields: &[
         Field {

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Opti
 /// The `BTS` segment definition, `http://hl7.org/v2/StructureDefinition/BTS`.
 pub static BTS: Segment = Segment {
     id: "BTS",
-    url: "http://hl7.org/v2/StructureDefinition/BTS",
+    url: Some("http://hl7.org/v2/StructureDefinition/BTS"),
     name: "Batch Trailer",
     fields: &[
         Field {

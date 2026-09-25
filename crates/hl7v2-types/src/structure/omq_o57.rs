@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OMQ_O57` message structure definition, `http://hl7.org/v2/StructureDefinition/OMQ_O57`.
 pub static OMQ_O57: Structure = Structure {
     id: "OMQ_O57",
-    url: "http://hl7.org/v2/StructureDefinition/OMQ_O57",
+    url: Some("http://hl7.org/v2/StructureDefinition/OMQ_O57"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OMQ_O57.1-MSH",

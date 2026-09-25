@@ -12,7 +12,7 @@ use crate::model::{
 /// The `MFE` segment definition, `http://hl7.org/v2/StructureDefinition/MFE`.
 pub static MFE: Segment = Segment {
     id: "MFE",
-    url: "http://hl7.org/v2/StructureDefinition/MFE",
+    url: Some("http://hl7.org/v2/StructureDefinition/MFE"),
     name: "Master File Entry",
     fields: &[
         Field {

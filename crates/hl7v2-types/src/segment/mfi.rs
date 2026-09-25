@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `MFI` segment definition, `http://hl7.org/v2/StructureDefinition/MFI`.
 pub static MFI: Segment = Segment {
     id: "MFI",
-    url: "http://hl7.org/v2/StructureDefinition/MFI",
+    url: Some("http://hl7.org/v2/StructureDefinition/MFI"),
     name: "Master File Identification",
     fields: &[
         Field {

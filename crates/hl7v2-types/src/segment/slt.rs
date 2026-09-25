@@ -10,7 +10,7 @@ use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Opti
 /// The `SLT` segment definition, `http://hl7.org/v2/StructureDefinition/SLT`.
 pub static SLT: Segment = Segment {
     id: "SLT",
-    url: "http://hl7.org/v2/StructureDefinition/SLT",
+    url: Some("http://hl7.org/v2/StructureDefinition/SLT"),
     name: "Sterilization Lot",
     fields: &[
         Field {

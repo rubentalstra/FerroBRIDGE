@@ -12,7 +12,7 @@ use crate::model::{
 /// The `FAC` segment definition, `http://hl7.org/v2/StructureDefinition/FAC`.
 pub static FAC: Segment = Segment {
     id: "FAC",
-    url: "http://hl7.org/v2/StructureDefinition/FAC",
+    url: Some("http://hl7.org/v2/StructureDefinition/FAC"),
     name: "Facility",
     fields: &[
         Field {

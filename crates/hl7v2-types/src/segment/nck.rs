@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `NCK` segment definition, `http://hl7.org/v2/StructureDefinition/NCK`.
 pub static NCK: Segment = Segment {
     id: "NCK",
-    url: "http://hl7.org/v2/StructureDefinition/NCK",
+    url: Some("http://hl7.org/v2/StructureDefinition/NCK"),
     name: "System Clock",
     fields: &[Field {
         id: "NCK.1-systemDateTime",

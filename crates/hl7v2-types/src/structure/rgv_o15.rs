@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RGV_O15` message structure definition, `http://hl7.org/v2/StructureDefinition/RGV_O15`.
 pub static RGV_O15: Structure = Structure {
     id: "RGV_O15",
-    url: "http://hl7.org/v2/StructureDefinition/RGV_O15",
+    url: Some("http://hl7.org/v2/StructureDefinition/RGV_O15"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RGV_O15.1-MSH",

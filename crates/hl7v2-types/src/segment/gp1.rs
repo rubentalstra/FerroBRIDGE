@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `GP1` segment definition, `http://hl7.org/v2/StructureDefinition/GP1`.
 pub static GP1: Segment = Segment {
     id: "GP1",
-    url: "http://hl7.org/v2/StructureDefinition/GP1",
+    url: Some("http://hl7.org/v2/StructureDefinition/GP1"),
     name: "Grouping/Reimbursement - Visit",
     fields: &[
         Field {

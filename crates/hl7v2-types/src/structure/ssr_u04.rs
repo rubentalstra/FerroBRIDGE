@@ -12,7 +12,9 @@ use crate::segment;
 /// The `SSR_U04` message structure definition, `http://hl7.org/v2/StructureDefinition/SSR_U04`.
 pub static SSR_U04: Structure = Structure {
     id: "SSR_U04",
-    url: "http://hl7.org/v2/StructureDefinition/SSR_U04",
+    url: Some("http://hl7.org/v2/StructureDefinition/SSR_U04"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "SSR_U04.1-MSH",

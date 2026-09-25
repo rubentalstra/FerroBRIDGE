@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OSM_R26` message structure definition, `http://hl7.org/v2/StructureDefinition/OSM_R26`.
 pub static OSM_R26: Structure = Structure {
     id: "OSM_R26",
-    url: "http://hl7.org/v2/StructureDefinition/OSM_R26",
+    url: Some("http://hl7.org/v2/StructureDefinition/OSM_R26"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OSM_R26.1-MSH",

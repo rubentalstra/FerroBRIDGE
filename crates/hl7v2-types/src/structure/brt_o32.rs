@@ -12,7 +12,9 @@ use crate::segment;
 /// The `BRT_O32` message structure definition, `http://hl7.org/v2/StructureDefinition/BRT_O32`.
 pub static BRT_O32: Structure = Structure {
     id: "BRT_O32",
-    url: "http://hl7.org/v2/StructureDefinition/BRT_O32",
+    url: Some("http://hl7.org/v2/StructureDefinition/BRT_O32"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "BRT_O32.1-MSH",

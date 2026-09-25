@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SGH` segment definition, `http://hl7.org/v2/StructureDefinition/SGH`.
 pub static SGH: Segment = Segment {
     id: "SGH",
-    url: "http://hl7.org/v2/StructureDefinition/SGH",
+    url: Some("http://hl7.org/v2/StructureDefinition/SGH"),
     name: "Segment Group Header",
     fields: &[
         Field {

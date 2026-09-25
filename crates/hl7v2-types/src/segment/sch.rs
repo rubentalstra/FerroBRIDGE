@@ -13,7 +13,7 @@ use crate::model::{
 /// The `SCH` segment definition, `http://hl7.org/v2/StructureDefinition/SCH`.
 pub static SCH: Segment = Segment {
     id: "SCH",
-    url: "http://hl7.org/v2/StructureDefinition/SCH",
+    url: Some("http://hl7.org/v2/StructureDefinition/SCH"),
     name: "Schedule Activity Information",
     fields: &[
         Field {

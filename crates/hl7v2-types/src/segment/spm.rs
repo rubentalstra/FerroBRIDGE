@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SPM` segment definition, `http://hl7.org/v2/StructureDefinition/SPM`.
 pub static SPM: Segment = Segment {
     id: "SPM",
-    url: "http://hl7.org/v2/StructureDefinition/SPM",
+    url: Some("http://hl7.org/v2/StructureDefinition/SPM"),
     name: "Specimen",
     fields: &[
         Field {

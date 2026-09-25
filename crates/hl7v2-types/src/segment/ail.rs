@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `AIL` segment definition, `http://hl7.org/v2/StructureDefinition/AIL`.
 pub static AIL: Segment = Segment {
     id: "AIL",
-    url: "http://hl7.org/v2/StructureDefinition/AIL",
+    url: Some("http://hl7.org/v2/StructureDefinition/AIL"),
     name: "Appointment Information - Location Resource",
     fields: &[
         Field {

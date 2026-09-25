@@ -13,7 +13,7 @@ use crate::model::{
 /// The `IN1` segment definition, `http://hl7.org/v2/StructureDefinition/IN1`.
 pub static IN1: Segment = Segment {
     id: "IN1",
-    url: "http://hl7.org/v2/StructureDefinition/IN1",
+    url: Some("http://hl7.org/v2/StructureDefinition/IN1"),
     name: "Insurance",
     fields: &[
         Field {

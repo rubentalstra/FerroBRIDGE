@@ -12,7 +12,9 @@ use crate::segment;
 /// The `PGL_PC6` message structure definition, `http://hl7.org/v2/StructureDefinition/PGL_PC6`.
 pub static PGL_PC6: Structure = Structure {
     id: "PGL_PC6",
-    url: "http://hl7.org/v2/StructureDefinition/PGL_PC6",
+    url: Some("http://hl7.org/v2/StructureDefinition/PGL_PC6"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "PGL_PC6.1-MSH",

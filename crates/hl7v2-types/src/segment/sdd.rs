@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SDD` segment definition, `http://hl7.org/v2/StructureDefinition/SDD`.
 pub static SDD: Segment = Segment {
     id: "SDD",
-    url: "http://hl7.org/v2/StructureDefinition/SDD",
+    url: Some("http://hl7.org/v2/StructureDefinition/SDD"),
     name: "Sterilization Device Data",
     fields: &[
         Field {

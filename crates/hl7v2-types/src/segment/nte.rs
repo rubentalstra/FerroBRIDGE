@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `NTE` segment definition, `http://hl7.org/v2/StructureDefinition/NTE`.
 pub static NTE: Segment = Segment {
     id: "NTE",
-    url: "http://hl7.org/v2/StructureDefinition/NTE",
+    url: Some("http://hl7.org/v2/StructureDefinition/NTE"),
     name: "Notes and Comments",
     fields: &[
         Field {

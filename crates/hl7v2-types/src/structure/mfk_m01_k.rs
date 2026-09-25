@@ -10,7 +10,9 @@ use crate::segment;
 /// The `MFK_M01-K` message structure definition, `http://hl7.org/v2/StructureDefinition/MFK_M01-K`.
 pub static MFK_M01_K: Structure = Structure {
     id: "MFK_M01-K",
-    url: "http://hl7.org/v2/StructureDefinition/MFK_M01-K",
+    url: Some("http://hl7.org/v2/StructureDefinition/MFK_M01-K"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "MFK_M01-K.1-MSH",

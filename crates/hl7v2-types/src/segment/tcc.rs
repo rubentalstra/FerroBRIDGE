@@ -12,7 +12,7 @@ use crate::model::{
 /// The `TCC` segment definition, `http://hl7.org/v2/StructureDefinition/TCC`.
 pub static TCC: Segment = Segment {
     id: "TCC",
-    url: "http://hl7.org/v2/StructureDefinition/TCC",
+    url: Some("http://hl7.org/v2/StructureDefinition/TCC"),
     name: "Test Code Configuration",
     fields: &[
         Field {

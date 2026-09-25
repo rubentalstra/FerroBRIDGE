@@ -12,7 +12,7 @@ use crate::model::{
 /// The `RDF` segment definition, `http://hl7.org/v2/StructureDefinition/RDF`.
 pub static RDF: Segment = Segment {
     id: "RDF",
-    url: "http://hl7.org/v2/StructureDefinition/RDF",
+    url: Some("http://hl7.org/v2/StructureDefinition/RDF"),
     name: "Table Row Definition",
     fields: &[
         Field {

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `PYE` segment definition, `http://hl7.org/v2/StructureDefinition/PYE`.
 pub static PYE: Segment = Segment {
     id: "PYE",
-    url: "http://hl7.org/v2/StructureDefinition/PYE",
+    url: Some("http://hl7.org/v2/StructureDefinition/PYE"),
     name: "Payee Information",
     fields: &[
         Field {

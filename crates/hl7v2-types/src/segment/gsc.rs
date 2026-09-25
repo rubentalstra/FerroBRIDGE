@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `GSC` segment definition, `http://hl7.org/v2/StructureDefinition/GSC`.
 pub static GSC: Segment = Segment {
     id: "GSC",
-    url: "http://hl7.org/v2/StructureDefinition/GSC",
+    url: Some("http://hl7.org/v2/StructureDefinition/GSC"),
     name: "Sex Parameter for Clinical Use",
     fields: &[
         Field {

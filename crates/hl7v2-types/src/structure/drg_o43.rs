@@ -12,7 +12,9 @@ use crate::segment;
 /// The `DRG_O43` message structure definition, `http://hl7.org/v2/StructureDefinition/DRG_O43`.
 pub static DRG_O43: Structure = Structure {
     id: "DRG_O43",
-    url: "http://hl7.org/v2/StructureDefinition/DRG_O43",
+    url: Some("http://hl7.org/v2/StructureDefinition/DRG_O43"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "DRG_O43.1-MSH",

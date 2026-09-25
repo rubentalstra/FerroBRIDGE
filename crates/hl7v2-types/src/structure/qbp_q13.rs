@@ -10,7 +10,9 @@ use crate::segment;
 /// The `QBP_Q13` message structure definition, `http://hl7.org/v2/StructureDefinition/QBP_Q13`.
 pub static QBP_Q13: Structure = Structure {
     id: "QBP_Q13",
-    url: "http://hl7.org/v2/StructureDefinition/QBP_Q13",
+    url: Some("http://hl7.org/v2/StructureDefinition/QBP_Q13"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "QBP_Q13.1-MSH",

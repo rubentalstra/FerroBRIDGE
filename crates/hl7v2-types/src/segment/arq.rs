@@ -12,7 +12,7 @@ use crate::model::{
 /// The `ARQ` segment definition, `http://hl7.org/v2/StructureDefinition/ARQ`.
 pub static ARQ: Segment = Segment {
     id: "ARQ",
-    url: "http://hl7.org/v2/StructureDefinition/ARQ",
+    url: Some("http://hl7.org/v2/StructureDefinition/ARQ"),
     name: "Appointment Request",
     fields: &[
         Field {

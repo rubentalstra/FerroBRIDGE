@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OMB_O27` message structure definition, `http://hl7.org/v2/StructureDefinition/OMB_O27`.
 pub static OMB_O27: Structure = Structure {
     id: "OMB_O27",
-    url: "http://hl7.org/v2/StructureDefinition/OMB_O27",
+    url: Some("http://hl7.org/v2/StructureDefinition/OMB_O27"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OMB_O27.1-MSH",

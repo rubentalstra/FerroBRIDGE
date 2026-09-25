@@ -12,7 +12,7 @@ use crate::model::{
 /// The `CNS` segment definition, `http://hl7.org/v2/StructureDefinition/CNS`.
 pub static CNS: Segment = Segment {
     id: "CNS",
-    url: "http://hl7.org/v2/StructureDefinition/CNS",
+    url: Some("http://hl7.org/v2/StructureDefinition/CNS"),
     name: "Clear Notification",
     fields: &[
         Field {

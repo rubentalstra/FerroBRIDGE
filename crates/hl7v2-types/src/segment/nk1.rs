@@ -13,7 +13,7 @@ use crate::model::{
 /// The `NK1` segment definition, `http://hl7.org/v2/StructureDefinition/NK1`.
 pub static NK1: Segment = Segment {
     id: "NK1",
-    url: "http://hl7.org/v2/StructureDefinition/NK1",
+    url: Some("http://hl7.org/v2/StructureDefinition/NK1"),
     name: "Next of Kin / Associated Parties",
     fields: &[
         Field {

@@ -12,7 +12,9 @@ use crate::segment;
 /// The `CCR_I16` message structure definition, `http://hl7.org/v2/StructureDefinition/CCR_I16`.
 pub static CCR_I16: Structure = Structure {
     id: "CCR_I16",
-    url: "http://hl7.org/v2/StructureDefinition/CCR_I16",
+    url: Some("http://hl7.org/v2/StructureDefinition/CCR_I16"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "CCR_I16.1-MSH",

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `IPC` segment definition, `http://hl7.org/v2/StructureDefinition/IPC`.
 pub static IPC: Segment = Segment {
     id: "IPC",
-    url: "http://hl7.org/v2/StructureDefinition/IPC",
+    url: Some("http://hl7.org/v2/StructureDefinition/IPC"),
     name: "Imaging Procedure Control",
     fields: &[
         Field {

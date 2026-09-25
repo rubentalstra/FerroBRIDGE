@@ -91,8 +91,10 @@ the testkit tool crate. Beside it:
   v2 definitions: every message structure's segment-group tree, the field
   table of every segment definition (batch envelopes included), the component
   table of every data type, and every message definition indexed by code and
-  trigger event with the structure variant it names (#289). Never
-  hand-edited.
+  trigger event with the structure variant it names (#289), plus `legacy`,
+  the 218 per-version trees of the 57 structures v2.9.1 withdrew
+  (`ORM_O01`) from the build-time IGAMT export of HL7's v2 database (#303).
+  Never hand-edited.
 - `crates/openehr-mapping-core`: the half of the mapping foundation both
   languages share (#74): the header they standardize between them, the YAML
   loader with anchors and source positions, the registry by mapping name and
@@ -122,9 +124,10 @@ the testkit tool crate. Beside it:
   or value it cannot carry a counted outcome.
 - `tools/fhir-codegen`: the generator, with the six vendored HL7 FHIR packages
   under `vendor/` (380 MB, a `PROVENANCE.md` each; the sixth is the v2-to-FHIR
-  guide, #252) and the HL7 v2 definitions fetched at build time into the
-  ignored `vendor/hl7-v2ig/` (only its `PROVENANCE.md` is committed) as its
-  inputs.
+  guide, #252), the HL7 v2 definitions fetched at build time into the
+  ignored `vendor/hl7-v2ig/`, and the IGAMT export of HL7's v2 database
+  fetched the same way into `vendor/hl7-v2-legacy/` (#303; of each only the
+  `PROVENANCE.md` is committed) as its inputs.
 - `crates/omop-cdm`: the OMOP CDM v5.4 layer. `src/generated/` and `ddl/` are
   emitted by `tools/omop-cdm-codegen` from the vendored OHDSI definitions; the
   column metadata, the three column types and the DDL schema substitution are

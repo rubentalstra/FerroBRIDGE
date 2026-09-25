@@ -53,7 +53,7 @@ static CORPUS: LazyLock<Corpus> = LazyLock::new(|| {
 });
 
 /// The lowered model, once.
-static MODEL: LazyLock<Model> = LazyLock::new(|| {
+pub(crate) static MODEL: LazyLock<Model> = LazyLock::new(|| {
     let roots = V2RootSet::select(&CORPUS).expect("every structure file is a message structure");
     Model::lower(&CORPUS, &roots).expect("the definitions lower")
 });
@@ -142,6 +142,7 @@ fn optionality_code(optionality: Optionality) -> String {
         Optionality::X => String::from("X"),
         Optionality::B => String::from("B"),
         Optionality::W => String::from("W"),
+        Optionality::Na => String::from("NA"),
         Optionality::Unstated => String::from("-"),
     }
 }
@@ -155,9 +156,11 @@ fn every_structure_file_and_every_segment_file_is_emitted() {
         let id = raw(file)["id"].as_str().expect("id").to_owned();
         let emitted = hl7v2_types::structure::find(&id).expect("every structure is emitted");
         assert_eq!(
-            emitted.url,
-            format!("http://hl7.org/v2/StructureDefinition/{id}")
+            emitted.url.map(str::to_owned),
+            Some(format!("http://hl7.org/v2/StructureDefinition/{id}"))
         );
+        assert_eq!(emitted.version, "2.9.1");
+        assert_eq!(emitted.withdrawn_as_of, None);
     }
     assert_eq!(hl7v2_types::segment::SEGMENTS.len(), MODEL.segments.len());
     assert_eq!(MODEL.segments.len(), 190);
@@ -211,7 +214,7 @@ fn emitted_fields_agree_with_the_segment_definitions() {
     let mut fields = 0;
     for segment in &hl7v2_types::segment::SEGMENTS {
         let definition = raw(&format!("{V2_SEGMENT_DIR}/{}.json", segment.id));
-        assert_eq!(definition["url"], segment.url);
+        assert_eq!(definition["url"].as_str(), segment.url);
         let elements = elements(&definition);
         let (root, raw_fields) = elements.split_first().expect("a root element");
         assert_eq!(root["short"], segment.name);
@@ -240,6 +243,9 @@ fn emitted_fields_agree_with_the_segment_definitions() {
                 ),
                 Some(DataTypeRef::Undefined(code)) => {
                     assert!(hl7v2_types::data_type::find(code).is_none(), "{context}");
+                }
+                Some(DataTypeRef::Legacy(code)) => {
+                    panic!("{context}: a v2.9.1 field carries the legacy code {code}")
                 }
                 None => {}
             }
@@ -296,7 +302,11 @@ fn flatten(nodes: &[Node], out: &mut Vec<Entry>) {
             Node::Segment(segment) => out.push(Entry {
                 id: segment.id.to_owned(),
                 cardinality: segment.cardinality,
-                type_code: segment.segment.url.to_owned(),
+                type_code: segment
+                    .segment
+                    .url
+                    .expect("a v2.9.1 segment has a URL")
+                    .to_owned(),
                 status: segment.status.map(|status| match status {
                     SegmentStatus::A => "A",
                     SegmentStatus::B => "B",
@@ -1092,16 +1102,19 @@ fn an_unfetched_tree_names_the_fetch_script() {
 
 fn tree(root: &Path) -> Vec<(String, String)> {
     let mut files = Vec::new();
-    for entry in fs::read_dir(root).expect("dir listable") {
-        let path = entry.expect("entry readable").path();
-        if path.is_dir() {
-            files.extend(tree(&path));
-        } else {
+    let mut pending = vec![root.to_path_buf()];
+    while let Some(dir) = pending.pop() {
+        for entry in fs::read_dir(&dir).expect("dir listable") {
+            let path = entry.expect("entry readable").path();
+            if path.is_dir() {
+                pending.push(path);
+                continue;
+            }
             let relative = path
                 .strip_prefix(root)
                 .expect("under root")
                 .to_string_lossy()
-                .into_owned();
+                .replace('\\', "/");
             files.push((relative, fs::read_to_string(&path).expect("file readable")));
         }
     }
@@ -1112,6 +1125,8 @@ fn tree(root: &Path) -> Vec<(String, String)> {
 fn options(crate_dir: &Path, check: bool) -> EmitOptions {
     EmitOptions {
         definitions: definitions_dir(),
+        legacy: vendor_dir().join("hl7-v2-legacy"),
+        vendor: vendor_dir(),
         crate_dir: crate_dir.to_path_buf(),
         check,
     }
@@ -1124,18 +1139,24 @@ fn emitting_twice_is_byte_identical_and_check_passes() {
     let report = emit(&options(first.path(), false)).expect("first emit");
     emit(&options(second.path(), false)).expect("second emit");
     // lib.rs, model.rs, four index modules, one module per structure, segment,
-    // data type and message definition.
-    assert_eq!(report.files.len(), 6 + 305 + 190 + 83 + 696);
+    // data type and message definition; then the legacy index, three modules
+    // per legacy version, and one module per legacy structure and segment.
+    assert_eq!(
+        report.files.len(),
+        6 + 305 + 190 + 83 + 696 + 1 + 11 * 3 + 218 + 495
+    );
     assert_eq!(
         tree(&first.path().join("src")),
         tree(&second.path().join("src"))
     );
     emit(&options(first.path(), true)).expect("check passes on a fresh tree");
     for (path, content) in tree(&first.path().join("src")) {
-        assert!(
-            content.starts_with("// @generated by fhir-codegen from HL7/v2ig "),
-            "{path} starts with the banner"
-        );
+        let source = if path.starts_with("legacy/") {
+            "// @generated by fhir-codegen from usnistgov/igamt-hl7Tools-service "
+        } else {
+            "// @generated by fhir-codegen from HL7/v2ig "
+        };
+        assert!(content.starts_with(source), "{path} starts with the banner");
         assert!(content.contains(
             "DO NOT EDIT.\n// Change the emitter (tools/fhir-codegen) and regenerate.\n// SPDX-FileCopyrightText: Vernum Projecten B.V.\n// SPDX-License-Identifier: Apache-2.0\n"
         ), "{path} carries the SPDX tags under the banner");

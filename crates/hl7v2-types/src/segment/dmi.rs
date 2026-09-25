@@ -12,7 +12,7 @@ use crate::model::{
 /// The `DMI` segment definition, `http://hl7.org/v2/StructureDefinition/DMI`.
 pub static DMI: Segment = Segment {
     id: "DMI",
-    url: "http://hl7.org/v2/StructureDefinition/DMI",
+    url: Some("http://hl7.org/v2/StructureDefinition/DMI"),
     name: "DRG Master File Information",
     fields: &[
         Field {

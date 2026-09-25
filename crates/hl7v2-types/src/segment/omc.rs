@@ -13,7 +13,7 @@ use crate::model::{
 /// The `OMC` segment definition, `http://hl7.org/v2/StructureDefinition/OMC`.
 pub static OMC: Segment = Segment {
     id: "OMC",
-    url: "http://hl7.org/v2/StructureDefinition/OMC",
+    url: Some("http://hl7.org/v2/StructureDefinition/OMC"),
     name: "Supporting Clinical Information",
     fields: &[
         Field {

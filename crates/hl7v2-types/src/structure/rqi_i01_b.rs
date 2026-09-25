@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RQI_I01-B` message structure definition, `http://hl7.org/v2/StructureDefinition/RQI_I01-B`.
 pub static RQI_I01_B: Structure = Structure {
     id: "RQI_I01-B",
-    url: "http://hl7.org/v2/StructureDefinition/RQI_I01-B",
+    url: Some("http://hl7.org/v2/StructureDefinition/RQI_I01-B"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RQI_I01-B.1-MSH",

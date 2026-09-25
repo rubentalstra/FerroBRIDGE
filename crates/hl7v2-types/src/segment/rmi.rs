@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `RMI` segment definition, `http://hl7.org/v2/StructureDefinition/RMI`.
 pub static RMI: Segment = Segment {
     id: "RMI",
-    url: "http://hl7.org/v2/StructureDefinition/RMI",
+    url: Some("http://hl7.org/v2/StructureDefinition/RMI"),
     name: "Risk Management Incident",
     fields: &[
         Field {

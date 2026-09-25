@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `NPU` segment definition, `http://hl7.org/v2/StructureDefinition/NPU`.
 pub static NPU: Segment = Segment {
     id: "NPU",
-    url: "http://hl7.org/v2/StructureDefinition/NPU",
+    url: Some("http://hl7.org/v2/StructureDefinition/NPU"),
     name: "Bed Status Update",
     fields: &[
         Field {

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SID` segment definition, `http://hl7.org/v2/StructureDefinition/SID`.
 pub static SID: Segment = Segment {
     id: "SID",
-    url: "http://hl7.org/v2/StructureDefinition/SID",
+    url: Some("http://hl7.org/v2/StructureDefinition/SID"),
     name: "Substance Identifier",
     fields: &[
         Field {

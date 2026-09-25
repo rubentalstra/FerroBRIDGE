@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `ROL` segment definition, `http://hl7.org/v2/StructureDefinition/ROL`.
 pub static ROL: Segment = Segment {
     id: "ROL",
-    url: "http://hl7.org/v2/StructureDefinition/ROL",
+    url: Some("http://hl7.org/v2/StructureDefinition/ROL"),
     name: "Role",
     fields: &[
         Field {

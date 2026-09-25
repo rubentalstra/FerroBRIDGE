@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PSS` segment definition, `http://hl7.org/v2/StructureDefinition/PSS`.
 pub static PSS: Segment = Segment {
     id: "PSS",
-    url: "http://hl7.org/v2/StructureDefinition/PSS",
+    url: Some("http://hl7.org/v2/StructureDefinition/PSS"),
     name: "Product/Service Section",
     fields: &[
         Field {

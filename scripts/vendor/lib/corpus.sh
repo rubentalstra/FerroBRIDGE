@@ -166,3 +166,36 @@ corpus_tree_digest() {
 corpus_file_count() { find "$1" -type f ! -name PROVENANCE.md | wc -l | tr -d '[:space:]'; }
 
 corpus_fetched() { date -u +%Y-%m-%d; }
+
+# The token after the word $1 in the pin cell $2.
+corpus_pin_field() {
+  awk -v key="$1" '{ for (i = 1; i < NF; i++) if ($i == key) { print $(i + 1); exit } }' <<< "$2"
+}
+
+# Prints the passages on use of the licence page HL7 attaches to its v2+
+# publication, quoted verbatim as Markdown, one source line each: the page is
+# the file $4 of the repository $2 at commit $3, downloaded into the scratch
+# directory $1 and checked against the sha256 $5.
+corpus_hl7_licence_quotes() {
+  local scratch="$1" repo="$2" commit="$3" path="$4" sha="$5" got opening line quotes=""
+  corpus_download "https://raw.githubusercontent.com/$repo/$commit/$path" "$scratch/licence.html" ||
+    die "download of $path from $repo failed"
+  got="$(corpus_sha256 "$scratch/licence.html")"
+  [ "$got" = "$sha" ] || die "$path hashes to $got, the pin records $sha"
+  for opening in \
+    "The 2019 Health Level Seven v2+ Publication is copyrighted" \
+    "HL7 licenses its standards and select IP free of charge." \
+    "A. HL7 INDIVIDUAL, STUDENT AND HEALTH PROFESSIONAL MEMBERS, who register" \
+    "INDIVIDUAL, STUDENT AND HEALTH PROFESSIONAL MEMBERS wishing to incorporate" \
+    "B. HL7 ORGANIZATION MEMBERS, who register" \
+    "C. NON-MEMBERS, who register" \
+    "NON-MEMBERS wishing to incorporate"; do
+    line="$(grep -F "$opening" "$scratch/licence.html")" || die "$path has no line opening '$opening'"
+    [ "$(wc -l <<< "$line" | tr -d '[:space:]')" = "1" ] ||
+      die "$path has more than one line opening '$opening'"
+    quotes="$quotes
+> $line
+>"
+  done
+  printf '%s\n' "${quotes%>}"
+}

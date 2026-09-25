@@ -10,7 +10,7 @@ use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Opti
 /// The `VAR` segment definition, `http://hl7.org/v2/StructureDefinition/VAR`.
 pub static VAR: Segment = Segment {
     id: "VAR",
-    url: "http://hl7.org/v2/StructureDefinition/VAR",
+    url: Some("http://hl7.org/v2/StructureDefinition/VAR"),
     name: "Variance",
     fields: &[
         Field {

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `UB2` segment definition, `http://hl7.org/v2/StructureDefinition/UB2`.
 pub static UB2: Segment = Segment {
     id: "UB2",
-    url: "http://hl7.org/v2/StructureDefinition/UB2",
+    url: Some("http://hl7.org/v2/StructureDefinition/UB2"),
     name: "UB92 Data",
     fields: &[
         Field {

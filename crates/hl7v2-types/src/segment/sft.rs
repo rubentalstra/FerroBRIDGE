@@ -10,7 +10,7 @@ use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Opti
 /// The `SFT` segment definition, `http://hl7.org/v2/StructureDefinition/SFT`.
 pub static SFT: Segment = Segment {
     id: "SFT",
-    url: "http://hl7.org/v2/StructureDefinition/SFT",
+    url: Some("http://hl7.org/v2/StructureDefinition/SFT"),
     name: "Software",
     fields: &[
         Field {

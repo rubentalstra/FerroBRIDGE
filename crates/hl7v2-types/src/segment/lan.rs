@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `LAN` segment definition, `http://hl7.org/v2/StructureDefinition/LAN`.
 pub static LAN: Segment = Segment {
     id: "LAN",
-    url: "http://hl7.org/v2/StructureDefinition/LAN",
+    url: Some("http://hl7.org/v2/StructureDefinition/LAN"),
     name: "Language Detail",
     fields: &[
         Field {

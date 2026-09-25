@@ -12,7 +12,9 @@ use crate::segment;
 /// The `CSU_C09` message structure definition, `http://hl7.org/v2/StructureDefinition/CSU_C09`.
 pub static CSU_C09: Structure = Structure {
     id: "CSU_C09",
-    url: "http://hl7.org/v2/StructureDefinition/CSU_C09",
+    url: Some("http://hl7.org/v2/StructureDefinition/CSU_C09"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "CSU_C09.1-MSH",

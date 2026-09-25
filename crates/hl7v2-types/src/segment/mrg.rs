@@ -12,7 +12,7 @@ use crate::model::{
 /// The `MRG` segment definition, `http://hl7.org/v2/StructureDefinition/MRG`.
 pub static MRG: Segment = Segment {
     id: "MRG",
-    url: "http://hl7.org/v2/StructureDefinition/MRG",
+    url: Some("http://hl7.org/v2/StructureDefinition/MRG"),
     name: "Merge Patient Information",
     fields: &[
         Field {

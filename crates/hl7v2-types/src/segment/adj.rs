@@ -12,7 +12,7 @@ use crate::model::{
 /// The `ADJ` segment definition, `http://hl7.org/v2/StructureDefinition/ADJ`.
 pub static ADJ: Segment = Segment {
     id: "ADJ",
-    url: "http://hl7.org/v2/StructureDefinition/ADJ",
+    url: Some("http://hl7.org/v2/StructureDefinition/ADJ"),
     name: "Adjustment",
     fields: &[
         Field {

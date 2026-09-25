@@ -10,7 +10,9 @@ use crate::segment;
 /// The `CCF_I22` message structure definition, `http://hl7.org/v2/StructureDefinition/CCF_I22`.
 pub static CCF_I22: Structure = Structure {
     id: "CCF_I22",
-    url: "http://hl7.org/v2/StructureDefinition/CCF_I22",
+    url: Some("http://hl7.org/v2/StructureDefinition/CCF_I22"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "CCF_I22.1-MSH",

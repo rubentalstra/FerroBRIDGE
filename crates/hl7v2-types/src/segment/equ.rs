@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `EQU` segment definition, `http://hl7.org/v2/StructureDefinition/EQU`.
 pub static EQU: Segment = Segment {
     id: "EQU",
-    url: "http://hl7.org/v2/StructureDefinition/EQU",
+    url: Some("http://hl7.org/v2/StructureDefinition/EQU"),
     name: "Equipment Detail",
     fields: &[
         Field {

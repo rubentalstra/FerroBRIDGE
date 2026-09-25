@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SCD` segment definition, `http://hl7.org/v2/StructureDefinition/SCD`.
 pub static SCD: Segment = Segment {
     id: "SCD",
-    url: "http://hl7.org/v2/StructureDefinition/SCD",
+    url: Some("http://hl7.org/v2/StructureDefinition/SCD"),
     name: "Anti-Microbial Cycle Data",
     fields: &[
         Field {

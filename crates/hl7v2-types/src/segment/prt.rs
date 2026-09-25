@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `PRT` segment definition, `http://hl7.org/v2/StructureDefinition/PRT`.
 pub static PRT: Segment = Segment {
     id: "PRT",
-    url: "http://hl7.org/v2/StructureDefinition/PRT",
+    url: Some("http://hl7.org/v2/StructureDefinition/PRT"),
     name: "Participation Information",
     fields: &[
         Field {

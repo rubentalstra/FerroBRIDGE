@@ -12,7 +12,9 @@ use crate::segment;
 /// The `NMD_N02` message structure definition, `http://hl7.org/v2/StructureDefinition/NMD_N02`.
 pub static NMD_N02: Structure = Structure {
     id: "NMD_N02",
-    url: "http://hl7.org/v2/StructureDefinition/NMD_N02",
+    url: Some("http://hl7.org/v2/StructureDefinition/NMD_N02"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "NMD_N02.1-MSH",

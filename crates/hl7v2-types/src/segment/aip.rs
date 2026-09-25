@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `AIP` segment definition, `http://hl7.org/v2/StructureDefinition/AIP`.
 pub static AIP: Segment = Segment {
     id: "AIP",
-    url: "http://hl7.org/v2/StructureDefinition/AIP",
+    url: Some("http://hl7.org/v2/StructureDefinition/AIP"),
     name: "Appointment Information - Personnel Resource",
     fields: &[
         Field {

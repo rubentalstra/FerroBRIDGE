@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `PCE` segment definition, `http://hl7.org/v2/StructureDefinition/PCE`.
 pub static PCE: Segment = Segment {
     id: "PCE",
-    url: "http://hl7.org/v2/StructureDefinition/PCE",
+    url: Some("http://hl7.org/v2/StructureDefinition/PCE"),
     name: "Patient Charge Cost Center Exception",
     fields: &[
         Field {

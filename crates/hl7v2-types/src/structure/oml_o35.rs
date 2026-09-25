@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OML_O35` message structure definition, `http://hl7.org/v2/StructureDefinition/OML_O35`.
 pub static OML_O35: Structure = Structure {
     id: "OML_O35",
-    url: "http://hl7.org/v2/StructureDefinition/OML_O35",
+    url: Some("http://hl7.org/v2/StructureDefinition/OML_O35"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OML_O35.1-MSH",

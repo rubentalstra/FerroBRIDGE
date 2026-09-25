@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RRA_O18` message structure definition, `http://hl7.org/v2/StructureDefinition/RRA_O18`.
 pub static RRA_O18: Structure = Structure {
     id: "RRA_O18",
-    url: "http://hl7.org/v2/StructureDefinition/RRA_O18",
+    url: Some("http://hl7.org/v2/StructureDefinition/RRA_O18"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RRA_O18.1-MSH",

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `IPR` segment definition, `http://hl7.org/v2/StructureDefinition/IPR`.
 pub static IPR: Segment = Segment {
     id: "IPR",
-    url: "http://hl7.org/v2/StructureDefinition/IPR",
+    url: Some("http://hl7.org/v2/StructureDefinition/IPR"),
     name: "Invoice Processing Results",
     fields: &[
         Field {

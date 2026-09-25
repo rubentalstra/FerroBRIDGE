@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OUL_R22` message structure definition, `http://hl7.org/v2/StructureDefinition/OUL_R22`.
 pub static OUL_R22: Structure = Structure {
     id: "OUL_R22",
-    url: "http://hl7.org/v2/StructureDefinition/OUL_R22",
+    url: Some("http://hl7.org/v2/StructureDefinition/OUL_R22"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OUL_R22.1-MSH",
