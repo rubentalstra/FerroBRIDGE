@@ -46,3 +46,11 @@ the provenance is committed, and the generated group table stays in an
 unpublished tool (#253). The standing exception, recorded before, is the
 OHDSI DDL and era SQL `omop-cdm` embeds at run time under Apache-2.0.
 
+**Ruling 2026-09-25, generated code:** Rust generated from a vendored
+specification is the project's own code and carries the code licence
+(Apache-2.0 for a generated model crate, as `fhir-types`), so `hl7v2-types`
+is published; the specification bytes it was generated from are never
+packaged and, for v2ig, never committed. The owner, as licensor and HL7
+member, holds that the generated table does not incorporate the
+specification; the audit's contrary reading is recorded on #251.
+
