@@ -409,6 +409,26 @@ crates on crates.io.
   vendored ReportStream set) resolves its structure from MSH-9.1 and MSH-9.2
   through the generated message index instead of being refused as unnamed
   (HL7 v2.5.1 chapter 2 §2.15.9.9, table 0354).
+- A transaction entry with an `id` the identity map knows and a new
+  `meta.versionId` commits a later version of that resource's composition
+  inside the Bundle's contribution, as a single create of it does (#297).
+  Before this fix it created a second composition under a second container.
+  The entry goes in as an `UpdateVersion` whose `preceding_version_uid` is the
+  composition's latest version, with a `modification` audit, binds to the
+  resource id it already has, and answers `200 OK` in the
+  `transaction-response` with a `Location` naming the new version. The
+  commit-before-bind record, the `FEEDER_AUDIT` pairing and the retry after a
+  failed binding hold for such an entry, and a Bundle entry now also claims
+  its `resourceType` and `id` alone, as a single create does.
+- A conditional create's `If-None-Exist: identifier=…` finds a resource the
+  facade committed (#299). The search read the external-id table under the
+  identifier's value, a key the ingest never wrote, so a conditional create
+  of an existing resource committed a duplicate. Every committed resource now
+  records each `Resource.identifier` it carries against its logical id (a
+  sixth identity table, `identifier_internal`), and the search reads it in the
+  R4 token forms `[code]`, `|[code]` and `[system]|[code]`, percent-decoded;
+  the `[system]|` form answers `400 not-supported`. One match answers
+  `200 OK` and commits nothing, several answer `412`.
 - A single create re-sent with the `id` and `meta.versionId` the identity map
   already consumed commits nothing and answers `200 OK` with the `Location`,
   `ETag` and body of the composition the first delivery produced, as a

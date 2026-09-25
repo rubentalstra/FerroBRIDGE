@@ -63,6 +63,7 @@ use crate::facade::identity::derive::EntryKey;
 use crate::facade::identity::record::CommittedSource;
 use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
+use crate::facade::identity::record::Identifier;
 use crate::facade::identity::record::SourceVersion;
 use crate::facade::identity::store::Store;
 use crate::facade::identity::store::StoreError;
@@ -262,6 +263,11 @@ pub struct Committed {
     pub id: FhirResourceId,
     /// The composition version the entry stands at.
     pub version: ObjectVersionId,
+    /// The change this delivery committed for the entry: a first version of
+    /// a composition, or a later version of the one an earlier version of
+    /// the entry's `id` produced. Nothing when this delivery committed
+    /// nothing for it.
+    pub change: Option<commit::Change>,
 }
 
 /// How the committed entries of a Bundle reached the CDR.
@@ -433,6 +439,21 @@ struct Placed {
     id: FhirResourceId,
     /// The composition version the entry stands at.
     version: ObjectVersionId,
+    /// The change this delivery committed for the entry, when it committed
+    /// one.
+    change: Option<commit::Change>,
+}
+
+/// What the identity map records of one Bundle entry's source.
+#[derive(Debug, Default)]
+struct Recorded {
+    /// What consumed the exact source.
+    consumed: Option<ConsumedSource>,
+    /// The contribution that committed the exact source.
+    committed: Option<CommittedSource>,
+    /// What consumed another version of the source's `id`, whose composition
+    /// the entry revises.
+    revised: Option<ConsumedSource>,
 }
 
 /// Where the composition a consumed source produced stands now.
@@ -905,6 +926,15 @@ impl<'a> Ingest<'a> {
     /// only some of whose entries were consumed is refused, because a
     /// transaction is all or nothing (<https://hl7.org/fhir/R4/http.html#transaction>).
     ///
+    /// An entry mapped from a resource whose `id` the map consumed at another
+    /// `meta.versionId`, and whose exact key it holds no record of, revises
+    /// the composition that version produced, as a single create of it does
+    /// ([`Ingest::recognise`]): it goes into the CONTRIBUTION as a
+    /// modification following the composition's latest version, beside the
+    /// creations of the other entries, and binds to the resource id it
+    /// already has. No specification governs the redelivery rule: our own
+    /// design.
+    ///
     /// The commit is two steps. The contribution uid the CDR answers is
     /// recorded against every keyed entry ([`CommittedSource`]) before any
     /// entry is bound; the versions then come from the answer's CONTRIBUTION
@@ -926,7 +956,10 @@ impl<'a> Ingest<'a> {
     /// second subject, two entries with one source key, a Bundle with nothing
     /// to commit, and an EHR that cannot be resolved; a `409` naming every
     /// entry another in-flight delivery holds; a `409` naming every
-    /// entry already consumed or committed when not all were; the CDR's
+    /// entry already consumed or committed when not all were; a `409` for an
+    /// entry the map binds to more than one composition or to one in another
+    /// EHR, and a `422` for two entries that revise one composition; the
+    /// CDR's refusal of a revised composition's read; the CDR's
     /// refusal of the contribution through the status table, naming every
     /// mapped entry; a `500` naming the contribution when it cannot be read
     /// back or its versions cannot bind the entries; and a `500` when the
@@ -959,24 +992,19 @@ impl<'a> Ingest<'a> {
         distinct(&partition.mapped, &sources)?;
         let _claim = self
             .claims
-            .claim(sources.iter().flatten().map(SourceVersion::storage_key))
+            .claim(claim_keys(&sources, provenance))
             .map_err(|contended| contended_entries(&partition.mapped, &sources, &contended))?;
         let mut known = Vec::with_capacity(sources.len());
         let mut committed = Vec::with_capacity(sources.len());
+        let mut revised = Vec::with_capacity(sources.len());
         for source in &sources {
-            let (recorded, contribution) = match source {
-                Some(source) => (
-                    self.store
-                        .consumed(source)
-                        .map_err(|error| store_refusal(&error))?,
-                    self.store
-                        .committed(source)
-                        .map_err(|error| store_refusal(&error))?,
-                ),
-                None => (None, None),
+            let recorded = match source {
+                Some(source) => self.recorded(source, provenance)?,
+                None => Recorded::default(),
             };
-            known.push(recorded);
-            committed.push(contribution);
+            known.push(recorded.consumed);
+            committed.push(recorded.committed);
+            revised.push(recorded.revised);
         }
         let consumed = known.iter().flatten().count();
         if consumed > 0 && consumed == known.len() {
@@ -1001,7 +1029,10 @@ impl<'a> Ingest<'a> {
                     Issue::error(IssueType::Processing).diagnosing(chain(&error)),
                 )
             })?;
-        let (contribution, returned) = self.commit_all(&ehr_id, &partition.mapped).await?;
+        let preceding = self.preceding(&ehr_id, &partition.mapped, &revised).await?;
+        let (contribution, returned) = self
+            .commit_all(&ehr_id, &partition.mapped, &preceding)
+            .await?;
         self.record_commitment(&sources, &ehr_id, &contribution)?;
         let versions = self
             .committed_versions(
@@ -1012,7 +1043,10 @@ impl<'a> Ingest<'a> {
                 Scope::Whole,
             )
             .await?;
-        let placed = self.place(&partition.mapped, &sources, &ehr_id, versions_of(versions))?;
+        let mut placed = self.place(&partition.mapped, &sources, &ehr_id, versions_of(versions))?;
+        for (place, prior) in placed.iter_mut().zip(&preceding) {
+            place.change = Some(change_of(prior.as_ref()));
+        }
         Ok(Ingested {
             ehr_id,
             commit: Commit::Contribution(contribution),
@@ -1049,6 +1083,103 @@ impl<'a> Ingest<'a> {
             commit: Commit::AlreadyConsumed,
             entries: outcomes(partition, placed),
         })
+    }
+
+    /// Returns what the identity map records of one Bundle entry's `source`:
+    /// the exact source consumed, the contribution that committed it, and,
+    /// when neither, the composition another version of its `id` produced.
+    ///
+    /// Only an entry mapped from a resource has versions of one `id`; the
+    /// entries of one message share its control id and are no versions of
+    /// each other. The by-id lookup is the one a single create runs
+    /// ([`Ingest::recognise`]).
+    fn recorded(
+        &self,
+        source: &SourceVersion,
+        provenance: &Provenance,
+    ) -> Result<Recorded, Refused> {
+        let consumed = self
+            .store
+            .consumed(source)
+            .map_err(|error| store_refusal(&error))?;
+        let committed = self
+            .store
+            .committed(source)
+            .map_err(|error| store_refusal(&error))?;
+        if consumed.is_some() || committed.is_some() || *provenance != Provenance::EachResource {
+            return Ok(Recorded {
+                consumed,
+                committed,
+                revised: None,
+            });
+        }
+        let versions = self
+            .store
+            .consumed_versions(source)
+            .map_err(|error| store_refusal(&error))?;
+        Ok(Recorded {
+            consumed: None,
+            committed: None,
+            revised: one_composition(source, versions)?,
+        })
+    }
+
+    /// Returns the version each mapped entry's commit follows: the latest
+    /// version of the composition `revised` names for it, or nothing for an
+    /// entry that creates one.
+    ///
+    /// A revised composition must live in the Bundle's EHR, and one
+    /// composition takes one new version per contribution, since each
+    /// `UpdateVersion` names the one version it follows
+    /// (`ehr-codegen.openapi.yaml`, `UpdateVersion.preceding_version_uid`).
+    async fn preceding(
+        &self,
+        ehr_id: &EhrId,
+        mapped: &[Mapped<'_>],
+        revised: &[Option<ConsumedSource>],
+    ) -> Result<Vec<Option<ObjectVersionId>>, Refused> {
+        let mut containers = BTreeSet::new();
+        let mut preceding = Vec::with_capacity(revised.len());
+        for (entry, revision) in mapped.iter().zip(revised) {
+            let Some(known) = revision else {
+                preceding.push(None);
+                continue;
+            };
+            if known.ehr_id != ehr_id.as_str() {
+                return Err(Refused::new(
+                    StatusCode::CONFLICT,
+                    Issue::error(IssueType::Conflict)
+                        .diagnosing(
+                            "the identity map binds this resource to a composition in another EHR than the Bundle's subject",
+                        )
+                        .at(entry.full_url.clone()),
+                ));
+            }
+            if !containers.insert(known.versioned_object_uid.clone()) {
+                return Err(Refused::new(
+                    StatusCode::UNPROCESSABLE_ENTITY,
+                    Issue::error(IssueType::Duplicate)
+                        .diagnosing(
+                            "another entry of this transaction revises the same composition, and a contribution carries one version of it",
+                        )
+                        .at(entry.full_url.clone()),
+                ));
+            }
+            let container = HierObjectId::new(&known.versioned_object_uid)
+                .map_err(|error| stored_identifier(&error))?;
+            let (latest, _composition) = self
+                .read(ehr_id, &UidBasedId::HierObjectId(container))
+                .await?;
+            let latest = latest.ok_or_else(|| {
+                Refused::new(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Issue::error(IssueType::Exception)
+                        .diagnosing("the CDR answered a composition with no ETag"),
+                )
+            })?;
+            preceding.push(Some(latest));
+        }
+        Ok(preceding)
     }
 
     /// Records that every keyed entry of a Bundle was committed in
@@ -1094,10 +1225,15 @@ impl<'a> Ingest<'a> {
                 &version,
                 &entry.built,
             )?;
+            self.index(&entry.inbound, &id)?;
             if let Some(source) = source {
                 self.consume(source, &stood, &id)?;
             }
-            placed.push(Placed { id, version });
+            placed.push(Placed {
+                id,
+                version,
+                change: None,
+            });
         }
         Ok(placed)
     }
@@ -1335,6 +1471,11 @@ impl<'a> Ingest<'a> {
     /// Commits every mapped entry as one CONTRIBUTION, and returns its uid
     /// with what the answer carried.
     ///
+    /// Each entry goes in as one `UpdateVersion` (`ehr-codegen.openapi.yaml`,
+    /// `NewContribution.versions`): a creation when `preceding` names nothing
+    /// for it, and otherwise a modification whose `preceding_version_uid` is
+    /// the version `preceding` names, so the CDR refuses a stale one.
+    ///
     /// A `201` whose body is neither schema the operation admits still named
     /// the committed contribution, so it answers as one that returned nothing
     /// and the versions are read back.
@@ -1342,22 +1483,32 @@ impl<'a> Ingest<'a> {
         &self,
         ehr_id: &EhrId,
         mapped: &[Mapped<'_>],
+        preceding: &[Option<ObjectVersionId>],
     ) -> Result<(ContributionUid, Returned<Contribution>), Refused> {
         let system_id = &self.settings.system_id;
+        let versions: Vec<UpdateVersion<Versionable>> = mapped
+            .iter()
+            .zip(preceding)
+            .map(|(entry, prior)| UpdateVersion {
+                preceding_version_uid: prior.clone(),
+                signature: None,
+                lifecycle_state: commit::lifecycle(),
+                attestations: None,
+                data: Versionable::Composition(entry.composition.as_ref().clone()),
+                commit_audit: commit::audit(change_of(prior.as_ref()), system_id),
+            })
+            .collect();
+        // NOTE: no specification governs this: our own design; the contribution's
+        // own audit states a modification only when every version it carries is one.
+        let change = if preceding.iter().all(Option::is_some) {
+            commit::Change::Modification
+        } else {
+            commit::Change::Creation
+        };
         let contribution = NewContribution {
             uid: None,
-            versions: mapped
-                .iter()
-                .map(|entry| UpdateVersion {
-                    preceding_version_uid: None,
-                    signature: None,
-                    lifecycle_state: commit::lifecycle(),
-                    attestations: None,
-                    data: Versionable::Composition(entry.composition.as_ref().clone()),
-                    commit_audit: commit::audit(commit::Change::Creation, system_id),
-                })
-                .collect(),
-            audit: commit::audit(commit::Change::Creation, system_id),
+            versions,
+            audit: commit::audit(change, system_id),
         };
         let answered = match self
             .client
@@ -1475,6 +1626,7 @@ impl<'a> Ingest<'a> {
     ) -> Result<Written, Refused> {
         let resource_type = inbound.resource_type();
         let (id, stood) = self.bind(program, resource_type, ehr_id, version, composition)?;
+        self.index(inbound, &id)?;
         if let Some(source) = resource_source(inbound) {
             self.consume(&source, &stood, &id)?;
         }
@@ -1538,6 +1690,18 @@ impl<'a> Ingest<'a> {
         Ok((id, stood))
     }
 
+    /// Records every `Resource.identifier` of `inbound` against `id`, so a
+    /// conditional create's `identifier` search finds the resource
+    /// (<https://hl7.org/fhir/R4/http.html#ccreate>).
+    fn index(&self, inbound: &Inbound, id: &FhirResourceId) -> Result<(), Refused> {
+        for identifier in identifiers_of(inbound) {
+            self.store
+                .record_identifier(inbound.resource_type(), &identifier, id)
+                .map_err(|error| store_refusal(&error))?;
+        }
+        Ok(())
+    }
+
     /// Records that `source` was consumed by the composition `stood` binds.
     fn consume(
         &self,
@@ -1570,6 +1734,7 @@ impl<'a> Ingest<'a> {
             Placed {
                 id: standing.id,
                 version: standing.version,
+                change: None,
             },
         ))
     }
@@ -1659,6 +1824,56 @@ fn resource_source(inbound: &Inbound) -> Option<SourceVersion> {
             inbound.version_id().map(str::to_owned),
         )
     })
+}
+
+/// Returns every `Resource.identifier` of `inbound` that carries a `value`,
+/// in document order.
+///
+/// An `identifier` search matches on the value
+/// (<https://hl7.org/fhir/R4/search.html#token>), so an `Identifier` with no
+/// `value` can answer no search and has nothing to record.
+fn identifiers_of(inbound: &Inbound) -> Vec<Identifier> {
+    inbound
+        .document()
+        .get("identifier")
+        .and_then(Value::as_array)
+        .unwrap_or_default()
+        .iter()
+        .filter_map(|identifier| {
+            let value = identifier.get("value").and_then(Value::as_str)?;
+            let system = identifier.get("system").and_then(Value::as_str);
+            Some(Identifier::new(system, value))
+        })
+        .collect()
+}
+
+/// Returns the change a version that follows `preceding` makes: a creation
+/// when it follows nothing, a modification otherwise.
+const fn change_of(preceding: Option<&ObjectVersionId>) -> commit::Change {
+    match preceding {
+        None => commit::Change::Creation,
+        Some(_) => commit::Change::Modification,
+    }
+}
+
+/// Returns the keys one Bundle delivery claims.
+///
+/// Every keyed entry claims its source key ([`SourceVersion::storage_key`]).
+/// An entry mapped from a resource also claims its `resourceType` and `id`
+/// alone ([`SourceVersion::resource_key`]), as a single create does, since a
+/// new version of that `id` revises the composition any other version
+/// produced; the entries of one message share their message's key, so they
+/// claim theirs alone.
+fn claim_keys(sources: &[Option<SourceVersion>], provenance: &Provenance) -> Vec<String> {
+    let each = *provenance == Provenance::EachResource;
+    sources
+        .iter()
+        .flatten()
+        .flat_map(|source| {
+            let resource = each.then(|| source.resource_key());
+            std::iter::once(source.storage_key()).chain(resource)
+        })
+        .collect()
 }
 
 /// Returns the EHR and the contribution a commit record names.
@@ -1819,9 +2034,10 @@ fn contended_entries(
             .iter()
             .zip(sources)
             .filter(|(_, source)| {
-                source
-                    .as_ref()
-                    .is_some_and(|source| contended.holds(&source.storage_key()))
+                source.as_ref().is_some_and(|source| {
+                    contended.holds(&source.storage_key())
+                        || contended.holds(&source.resource_key())
+                })
             })
             .map(|(entry, _)| entry.full_url.clone()),
     )
@@ -1873,6 +2089,7 @@ fn outcomes(partition: Partition<'_>, placed: Vec<Placed>) -> Vec<EntryOutcome> 
                 template_id: entry.template_id.clone(),
                 id: place.id,
                 version: place.version,
+                change: place.change,
             })
         })
         .collect();

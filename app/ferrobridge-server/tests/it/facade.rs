@@ -290,6 +290,24 @@ pub(crate) enum Echo {
 struct Committed {
     /// Every committed composition, in commit order.
     versions: Vec<(String, serde_json::Value)>,
+    /// How many version containers the commits created.
+    created: usize,
+    /// The versions the latest contribution committed, in commit order.
+    latest: Vec<String>,
+}
+
+impl Committed {
+    /// Returns the distinct version containers committed, in commit order.
+    fn containers(&self) -> Vec<&str> {
+        let mut seen = Vec::new();
+        for (version, _) in &self.versions {
+            let container = version.split("::").next().unwrap_or_default();
+            if !seen.contains(&container) {
+                seen.push(container);
+            }
+        }
+        seen
+    }
 }
 
 /// The stub CDR half that takes a contribution and remembers its versions.
@@ -321,10 +339,24 @@ impl TakeContribution {
         };
         let mut named = Vec::new();
         for data in body["versions"].as_array().into_iter().flatten() {
-            let Some(container) = self.containers.get(committed.versions.len()) else {
-                return ResponseTemplate::new(500);
+            // A version that names its `preceding_version_uid` is the next
+            // version of that container (`ehr-codegen.openapi.yaml`,
+            // `UpdateVersion`); any other opens the next container.
+            let version = if let Some(prior) = data["preceding_version_uid"]["value"].as_str() {
+                let mut parts = prior.split("::");
+                let container = parts.next().unwrap_or_default();
+                let tree = parts.nth(1).and_then(|tree| tree.parse::<u32>().ok());
+                let Some(tree) = tree else {
+                    return ResponseTemplate::new(400);
+                };
+                format!("{container}::ferrobridge.test::{}", tree + 1)
+            } else {
+                let Some(container) = self.containers.get(committed.created) else {
+                    return ResponseTemplate::new(500);
+                };
+                committed.created += 1;
+                format!("{container}::ferrobridge.test::1")
             };
-            let version = format!("{container}::ferrobridge.test::1");
             let mut stored = data["data"].clone();
             if self.echo == Echo::Foreign {
                 stored["feeder_audit"]["originating_system_item_ids"][0]["id"] =
@@ -333,6 +365,7 @@ impl TakeContribution {
             committed.versions.push((version.clone(), stored));
             named.push(version);
         }
+        committed.latest.clone_from(&named);
         if self.echo == Echo::Reversed {
             named.reverse();
         }
@@ -346,8 +379,8 @@ impl TakeContribution {
     }
 }
 
-/// The stub CDR half that answers the CONTRIBUTION it committed on its read
-/// (`ehr-codegen.openapi.yaml`, `contribution_get`).
+/// The stub CDR half that answers the latest CONTRIBUTION it committed on its
+/// read (`ehr-codegen.openapi.yaml`, `contribution_get`).
 struct ReadContribution {
     /// What was committed.
     committed: Arc<std::sync::Mutex<Committed>>,
@@ -358,11 +391,7 @@ impl wiremock::Respond for ReadContribution {
         let Ok(committed) = self.committed.lock() else {
             return ResponseTemplate::new(500);
         };
-        let named: Vec<&str> = committed
-            .versions
-            .iter()
-            .map(|(version, _)| version.as_str())
-            .collect();
+        let named: Vec<&str> = committed.latest.iter().map(String::as_str).collect();
         if named.is_empty() {
             return ferrobridge_testkit::stubs::its_rest::not_found(
                 "no contribution was committed",
@@ -374,8 +403,8 @@ impl wiremock::Respond for ReadContribution {
     }
 }
 
-/// The stub CDR half that answers a committed composition by its version or
-/// by its container.
+/// The stub CDR half that answers a committed composition by its version, or
+/// by its container at the latest version.
 struct ReadCommitted {
     /// What was committed.
     committed: Arc<std::sync::Mutex<Committed>>,
@@ -392,7 +421,7 @@ impl wiremock::Respond for ReadCommitted {
             .and_then(Iterator::last)
             .map(|segment| segment.replace("%3A", ":").replace("%3a", ":"))
             .unwrap_or_default();
-        let found = committed.versions.iter().find(|(version, _)| {
+        let found = committed.versions.iter().rev().find(|(version, _)| {
             *version == wanted || version.split("::").next() == Some(wanted.as_str())
         });
         match found {
@@ -419,6 +448,17 @@ async fn mount_echo_after(
     echo: Echo,
     delay: Duration,
 ) {
+    mount_echo_tracked(cdr, containers, echo, delay).await;
+}
+
+/// Mounts the echo CDR of [`mount_echo_after`], and returns what it commits
+/// so a case can count the containers.
+async fn mount_echo_tracked(
+    cdr: &MockServer,
+    containers: &'static [&'static str],
+    echo: Echo,
+    delay: Duration,
+) -> Arc<std::sync::Mutex<Committed>> {
     let committed = Arc::new(std::sync::Mutex::new(Committed::default()));
     Mock::given(matchers::method("POST"))
         .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
@@ -443,9 +483,12 @@ async fn mount_echo_after(
         .and(matchers::path_regex(format!(
             "^/ehr/{EHR_ID}/composition/.+$"
         )))
-        .respond_with(ReadCommitted { committed })
+        .respond_with(ReadCommitted {
+            committed: Arc::clone(&committed),
+        })
         .mount(cdr)
         .await;
+    committed
 }
 
 /// The containers the echo CDR hands out for a transaction.
@@ -1290,6 +1333,149 @@ async fn if_none_exist_answers_four_hundred_and_twelve_when_several_match()
     let (status, body) = call(harness.app(), request).await?;
     assert_eq!(StatusCode::PRECONDITION_FAILED, status, "{body}");
     assert_eq!(Some("duplicate"), first_issue(&body)["code"].as_str());
+    Ok(())
+}
+
+/// The `Identifier.system` of the synthetic Condition's one identifier.
+const CONDITION_IDENTIFIER_SYSTEM: &str = "http://example.org/fhir/sid/ferrobridge-condition";
+
+/// The `Identifier.value` of the synthetic Condition's one identifier.
+const CONDITION_IDENTIFIER_VALUE: &str = "synthetic-condition-0001";
+
+/// Returns a conditional create of the synthetic Condition under another
+/// sender `id`, so the source lookup meets nothing and the search decides.
+fn conditional_create(if_none_exist: &str) -> Result<Request<Body>, Box<dyn StdError>> {
+    conditional_create_as("a-sender-id-the-map-has-not-seen", if_none_exist)
+}
+
+/// Returns the conditional create of [`conditional_create`] under the sender
+/// `id` `sender_id`.
+fn conditional_create_as(
+    sender_id: &str,
+    if_none_exist: &str,
+) -> Result<Request<Body>, Box<dyn StdError>> {
+    let mut fresh = condition();
+    fresh["id"] = serde_json::json!(sender_id);
+    Ok(Request::post("/fhir/Condition")
+        .header(header::CONTENT_TYPE, "application/fhir+json")
+        .header("If-None-Exist", if_none_exist)
+        .body(Body::from(fresh.to_string()))?)
+}
+
+#[tokio::test]
+async fn if_none_exist_on_an_identifier_a_committed_resource_carries_answers_two_hundred_and_commits_nothing()
+-> Result<(), Box<dyn StdError>> {
+    // "If the search finds one match, the server returns 200 OK"
+    // (<https://hl7.org/fhir/R4/http.html#ccreate>); the token forms are
+    // `[system]|[code]` and `[code]` (<https://hl7.org/fhir/R4/search.html#token>).
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    for search in [
+        format!("identifier={CONDITION_IDENTIFIER_SYSTEM}|{CONDITION_IDENTIFIER_VALUE}"),
+        format!("identifier={CONDITION_IDENTIFIER_VALUE}"),
+        format!(
+            "identifier=http%3A%2F%2Fexample.org%2Ffhir%2Fsid%2Fferrobridge-condition%7C{CONDITION_IDENTIFIER_VALUE}"
+        ),
+    ] {
+        let (status, body) = call(harness.app(), conditional_create(&search)?).await?;
+        assert_eq!(StatusCode::OK, status, "{search}: {body}");
+        assert_eq!(Some(id.as_str()), body["id"].as_str(), "{search}");
+    }
+    assert_eq!(
+        (1, 0, 0),
+        writes(&harness).await,
+        "the one create before the searches is the only commit"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn if_none_exist_on_an_identifier_no_resource_carries_still_creates()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    create_one(&harness).await?;
+    for (sender_id, search) in [
+        (
+            "sender-a",
+            format!("identifier={CONDITION_IDENTIFIER_SYSTEM}|another-value"),
+        ),
+        (
+            "sender-b",
+            format!("identifier=http://example.org/another-system|{CONDITION_IDENTIFIER_VALUE}"),
+        ),
+        (
+            "sender-c",
+            format!("identifier=|{CONDITION_IDENTIFIER_VALUE}"),
+        ),
+    ] {
+        let (status, body) =
+            call(harness.app(), conditional_create_as(sender_id, &search)?).await?;
+        assert_eq!(StatusCode::CREATED, status, "{search}: {body}");
+    }
+    assert_eq!(
+        (4, 0, 0),
+        writes(&harness).await,
+        "each unmatched conditional create commits its composition"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn if_none_exist_on_an_identifier_two_resources_carry_is_four_hundred_and_twelve()
+-> Result<(), Box<dyn StdError>> {
+    // "If it finds more than one match, the server returns 412 Precondition
+    // Failed" (<https://hl7.org/fhir/R4/http.html#ccreate>).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_echo(&harness.cdr, ECHOED, Echo::Sent).await;
+    let mut second = condition();
+    second["id"] = serde_json::json!("ferrobridge-synthetic-condition-2");
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[
+            ("urn:uuid:0000-first", condition()),
+            ("urn:uuid:0000-second", second),
+        ]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let (status, body) = call(
+        harness.app(),
+        conditional_create(&format!(
+            "identifier={CONDITION_IDENTIFIER_SYSTEM}|{CONDITION_IDENTIFIER_VALUE}"
+        ))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::PRECONDITION_FAILED, status, "{body}");
+    assert_eq!(Some("duplicate"), first_issue(&body)["code"].as_str());
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "the refused conditional create commits nothing"
+    );
+    assert_eq!(
+        0,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/composition"))
+            .await
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn if_none_exist_on_every_code_of_a_system_is_refused() -> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let (status, body) = call(
+        harness.app(),
+        conditional_create(&format!("identifier={CONDITION_IDENTIFIER_SYSTEM}|"))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::BAD_REQUEST, status, "{body}");
+    assert_eq!(Some("not-supported"), first_issue(&body)["code"].as_str());
+    assert_eq!((0, 0, 0), writes(&harness).await);
     Ok(())
 }
 
@@ -2170,6 +2356,176 @@ async fn a_single_create_of_a_committed_unbound_entry_binds_from_the_read_back_a
         "the single create commits nothing"
     );
     assert!(harness.store.consumed(&source)?.is_some());
+    Ok(())
+}
+
+/// Returns the consumed-source key of the synthetic Condition at `version`.
+fn condition_source_at(
+    version: &str,
+) -> Result<ferrobridge_server::facade::identity::record::SourceVersion, Box<dyn StdError>> {
+    Ok(
+        ferrobridge_server::facade::identity::record::SourceVersion::new(
+            "Condition",
+            ferrobridge_server::facade::identity::ExternalResourceId::new(
+                "ferrobridge-synthetic-condition-1",
+            )?,
+            Some(String::from(version)),
+        ),
+    )
+}
+
+/// Returns how many version containers the echo CDR committed into.
+fn containers_of(committed: &Arc<std::sync::Mutex<Committed>>) -> Result<usize, Box<dyn StdError>> {
+    let held = committed
+        .lock()
+        .map_err(|_poisoned| "the echo CDR's record is poisoned")?;
+    Ok(held.containers().len())
+}
+
+#[tokio::test]
+async fn a_transaction_entry_at_a_new_version_id_of_a_known_resource_commits_one_modification()
+-> Result<(), Box<dyn StdError>> {
+    // A CONTRIBUTION version that follows another names it as its
+    // `preceding_version_uid` (`ehr-codegen.openapi.yaml`, `UpdateVersion`),
+    // and its audit states a modification (openEHR terminology code 251).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    let committed = mount_echo_tracked(&harness.cdr, ECHOED, Echo::Sent, Duration::ZERO).await;
+    let (first_status, first) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition_at("1"))]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, first_status, "{first}");
+    let first_location = first["entry"][0]["response"]["location"]
+        .as_str()
+        .ok_or("the first delivery answers a location")?;
+    let id = first_location
+        .strip_prefix(&format!("{BASE_URL}/Condition/"))
+        .and_then(|rest| rest.strip_suffix("/_history/1"))
+        .ok_or(format!("{first_location} is no first version"))?
+        .to_owned();
+
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition_at("2"))]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let response = &body["entry"][0]["response"];
+    assert_eq!(Some("200 OK"), response["status"].as_str(), "{body}");
+    assert_eq!(
+        Some(format!("{BASE_URL}/Condition/{id}/_history/2").as_str()),
+        response["location"].as_str(),
+        "the same resource, one version on"
+    );
+    assert_eq!(Some("W/\"2\""), response["etag"].as_str());
+    assert_eq!(
+        2,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "one contribution per delivery"
+    );
+    let sent = harness
+        .sent("POST", &format!("/ehr/{EHR_ID}/contribution"))
+        .await
+        .ok_or("the second contribution was sent")?;
+    let versions = sent["versions"]
+        .as_array()
+        .ok_or("the contribution carries versions")?;
+    assert_eq!(1, versions.len(), "one modification: {sent}");
+    let version = versions.first().ok_or("one version")?;
+    assert_eq!(
+        Some(VERSION_ONE),
+        version["preceding_version_uid"]["value"].as_str(),
+        "the modification follows the version the CDR holds: {sent}"
+    );
+    assert_eq!(
+        Some("251"),
+        version["commit_audit"]["change_type"]["defining_code"]["code_string"].as_str(),
+        "{sent}"
+    );
+    assert_eq!(1, containers_of(&committed)?, "no second composition");
+    assert_eq!(
+        Some(CONTAINER),
+        harness
+            .store
+            .consumed(&condition_source_at("2")?)?
+            .as_ref()
+            .map(|known| known.versioned_object_uid.as_str()),
+        "the new version is recorded against the same composition"
+    );
+    let (status, read) = call(
+        harness.app(),
+        Request::get(format!("/fhir/Condition/{id}")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{read}");
+    assert_eq!(Some(id.as_str()), read["id"].as_str());
+    assert_eq!(Some("2"), read["meta"]["versionId"].as_str());
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_revising_transaction_entry_whose_binding_failed_binds_on_retry_and_commits_once()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    let committed = mount_echo_tracked(&harness.cdr, ECHOED, Echo::Minimal, Duration::ZERO).await;
+    let (first_status, first) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition_at("1"))]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, first_status, "{first}");
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/contribution/{CONTRIBUTION}"
+        )))
+        .respond_with(ferrobridge_testkit::stubs::its_rest::not_found(
+            "the contribution is not readable yet",
+        ))
+        .up_to_n_times(1)
+        .with_priority(1)
+        .mount(&harness.cdr)
+        .await;
+    let bundle = transaction_of(&[("urn:uuid:0000-good", condition_at("2"))]);
+
+    let (status, body) = post_transaction(&harness, &bundle).await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    let source = condition_source_at("2")?;
+    assert_eq!(None, harness.store.consumed(&source)?);
+    assert!(
+        harness.store.committed(&source)?.is_some(),
+        "the commit is recorded before the binding"
+    );
+
+    let (status, body) = post_transaction(&harness, &bundle).await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let response = &body["entry"][0]["response"];
+    assert_eq!(Some("200 OK"), response["status"].as_str(), "{body}");
+    assert_eq!(Some("W/\"2\""), response["etag"].as_str(), "{body}");
+    assert_eq!(
+        CONTAINER,
+        bound_container(&harness, response["location"].as_str())?
+    );
+    assert_eq!(
+        2,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "the retry commits nothing"
+    );
+    assert_eq!(1, containers_of(&committed)?, "no second composition");
+    assert_eq!(
+        Some(CONTAINER),
+        harness
+            .store
+            .consumed(&source)?
+            .as_ref()
+            .map(|known| known.versioned_object_uid.as_str())
+    );
     Ok(())
 }
 

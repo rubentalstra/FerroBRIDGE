@@ -10,7 +10,8 @@
 //!
 //! The search this milestone can answer runs against the identity map, so the
 //! parameters are `_id` (a logical id this server assigned) and `identifier`
-//! (an id a sending system wrote), each admitting the comma-separated OR form
+//! (a `Resource.identifier` a committed resource carried, which the ingest
+//! records against its logical id), each admitting the comma-separated OR form
 //! of FHIR search (<https://hl7.org/fhir/R4/search.html#combining>). Any other
 //! parameter is refused rather than ignored, because a silently narrowed
 //! search would turn a duplicate into a second composition.
@@ -23,8 +24,9 @@ use crate::facade::Facade;
 use crate::facade::handlers::Refusal;
 use crate::facade::handlers::read;
 use crate::facade::handlers::write;
-use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
+use crate::facade::identity::record::IdentifierQuery;
+use crate::facade::identity::record::SystemMatch;
 use crate::facade::outcome::Issue;
 use crate::facade::outcome::IssueType;
 use crate::facade::reply;
@@ -82,21 +84,15 @@ fn search(
 ) -> Result<BTreeSet<FhirResourceId>, Refusal> {
     let mut found = BTreeSet::new();
     let mut seen_parameter = false;
-    for pair in query.trim_start_matches('?').split('&') {
-        if pair.is_empty() {
-            continue;
-        }
-        let mut halves = pair.splitn(2, '=');
-        let name = halves.next().unwrap_or_default();
-        let raw = halves.next().unwrap_or_default();
-        if !ANSWERED.contains(&name) {
-            return Err(unanswerable(name));
+    // NOTE: `If-None-Exist` carries "the search URL" query part
+    // (<https://hl7.org/fhir/R4/http.html#ccreate>), so it is read percent-decoded.
+    for (name, raw) in url::form_urlencoded::parse(query.trim_start_matches('?').as_bytes()) {
+        if !ANSWERED.contains(&name.as_ref()) {
+            return Err(unanswerable(&name));
         }
         seen_parameter = true;
         for value in raw.split(',').filter(|value| !value.is_empty()) {
-            if let Some(id) = resolve(facade, resource_type, name, value)? {
-                found.insert(id);
-            }
+            found.extend(resolve(facade, resource_type, &name, value)?);
         }
     }
     if !seen_parameter {
@@ -109,33 +105,55 @@ fn search(
     Ok(found)
 }
 
-/// Returns the logical id one parameter value resolves to.
+/// Returns the logical ids one parameter value resolves to.
 fn resolve(
     facade: &Facade,
     resource_type: &str,
     name: &str,
     value: &str,
-) -> Result<Option<FhirResourceId>, Refusal> {
+) -> Result<Vec<FhirResourceId>, Refusal> {
     if name == "_id" {
         let Ok(id) = FhirResourceId::new(value) else {
             // NOTE: a value outside the R4 id grammar can name no resource
             // this server holds, so it legitimately matches nothing
             // (<https://hl7.org/fhir/R4/resource.html>).
-            return Ok(None);
+            return Ok(Vec::new());
         };
-        return Ok(read::binding(facade, resource_type, &id)?.map(|_held| id));
+        return Ok(read::binding(facade, resource_type, &id)?
+            .map(|_held| id)
+            .into_iter()
+            .collect());
     }
-    // An `identifier` search takes `system|value` or a bare value
-    // (<https://hl7.org/fhir/R4/search.html#token>); the identity map is keyed
-    // by what the sender wrote, so the value half is the key.
-    let token = value.rsplit('|').next().unwrap_or(value);
-    let Ok(external) = ExternalResourceId::new(token) else {
-        return Ok(None);
-    };
     facade
         .store()
-        .internal_of(resource_type, &external)
+        .identified(resource_type, &token(value)?)
         .map_err(|error| write::store_refusal(&error))
+}
+
+/// Reads one `identifier` value as an R4 token.
+///
+/// The forms are `[code]` (any system), `|[code]` (no system) and
+/// `[system]|[code]` (<https://hl7.org/fhir/R4/search.html#token>). The
+/// `[system]|` form matches every code of a system, which the identity map
+/// cannot enumerate by system, so it is refused.
+fn token(value: &str) -> Result<IdentifierQuery, Refusal> {
+    let Some((system, code)) = value.split_once('|') else {
+        return Ok(IdentifierQuery::new(SystemMatch::Any, value));
+    };
+    if code.is_empty() {
+        return Err(reply::refusal(
+            StatusCode::BAD_REQUEST,
+            Issue::error(IssueType::NotSupported).diagnosing(
+                "If-None-Exist names identifier=[system]|, and this server answers an identifier search by its value",
+            ),
+        ));
+    }
+    let system = if system.is_empty() {
+        SystemMatch::Absent
+    } else {
+        SystemMatch::Is(String::from(system))
+    };
+    Ok(IdentifierQuery::new(system, code))
 }
 
 /// Returns the refusal a parameter this milestone cannot answer renders as.
