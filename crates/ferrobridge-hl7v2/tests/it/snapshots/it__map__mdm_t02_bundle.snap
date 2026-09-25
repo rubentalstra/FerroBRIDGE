@@ -21,6 +21,7 @@ expression: pretty(mapped.bundle())
         ],
         "eventCoding": {
           "code": "T02",
+          "display": "MDM^T02^MDM_T02",
           "system": "http://terminology.hl7.org/CodeSystem/v2-0003"
         },
         "meta": {

@@ -231,6 +231,30 @@ impl<'p> Scope<'p> {
     }
 }
 
+/// The text of a concatenation read in `scope`: each literal as written and
+/// each operand's first value, joined.
+///
+/// No specification governs an operand with no value: our own design joins
+/// the empty text for it, since the row's own source is valued when a row
+/// applies and the guide's joins name the other components beside it.
+///
+/// # Errors
+///
+/// Returns the operand the scope cannot read.
+fn concatenate(scope: &Scope<'_>, parts: &[condition::Part]) -> Result<String, String> {
+    let mut text = String::new();
+    for part in parts {
+        match part {
+            condition::Part::Literal(literal) => text.push_str(literal),
+            condition::Part::Operand(operand) => {
+                let read = scope.probe(operand).ok_or_else(|| operand.to_string())?;
+                text.push_str(read.text.as_deref().unwrap_or_default());
+            }
+        }
+    }
+    Ok(text)
+}
+
 /// The first placed segment with `id` among `items`, searching group
 /// instances depth first.
 fn first_placed<'p>(items: &'p [Item], id: &str, segments: &'p [Segment]) -> Option<&'p Segment> {
@@ -271,6 +295,16 @@ enum Pending {
     Translation { request: usize, part: Part },
 }
 
+/// What one data type map wrote under one child of a complex target: the
+/// indices of its writes, and each write's steps below the target with its
+/// value, `None` for a translation still pending.
+#[derive(Debug)]
+struct Written {
+    map: String,
+    indices: Vec<usize>,
+    values: Vec<(Vec<Slot>, Option<Value>)>,
+}
+
 /// One recorded write.
 #[derive(Debug, Clone)]
 struct Write {
@@ -278,6 +312,10 @@ struct Write {
     value: Pending,
     at: Location,
     row: RowRef,
+    /// Whether the bridge derived the value where no row of the guide writes
+    /// one ([`Run::endpoint`]), so a row of the guide at the same element
+    /// replaces it.
+    fallback: bool,
 }
 
 /// How a resource came to exist.
@@ -498,6 +536,14 @@ impl<'a> Run<'a> {
             }
             Condition::Unsupported { text, .. } => {
                 self.outcomes.push(Outcome::UnsupportedCondition {
+                    at: scope.at.clone(),
+                    row: reference.clone(),
+                    text: text.clone(),
+                });
+                Ok(false)
+            }
+            Condition::Defective { text } => {
+                self.outcomes.push(Outcome::DefectiveCondition {
                     at: scope.at.clone(),
                     row: reference.clone(),
                     text: text.clone(),
@@ -762,36 +808,88 @@ impl<'a> Run<'a> {
         datum: Datum<'a>,
         leaf: &Base,
     ) -> Result<(), MapError> {
-        let claimed = self.claimed(row, reference);
+        let resource_type = self
+            .resources
+            .get(leaf.resource)
+            .map(|resource| resource.type_name.clone())
+            .unwrap_or_default();
+        let claimed = self.claimed(row, reference, &resource_type);
         let mark = self.mark();
         let mut named = BTreeSet::new();
-        let mut writers: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        let mut by_child: BTreeMap<String, Vec<Written>> = BTreeMap::new();
         for map in maps {
             let start = self
                 .resources
                 .get(leaf.resource)
                 .map_or(0, |resource| resource.writes.len());
             named.extend(self.datatype_rows(scope, map, datatype, datum, leaf, &claimed)?);
-            let children: BTreeSet<String> = self
+            let recorded = self
                 .resources
                 .get(leaf.resource)
                 .and_then(|resource| resource.writes.get(start..))
-                .into_iter()
-                .flatten()
-                .filter_map(|write| child_of(&leaf.slots, &write.slots))
-                .collect();
-            for child in children {
-                writers.entry(child).or_default().push(map.id.clone());
+                .unwrap_or_default();
+            let mut children: BTreeMap<String, Written> = BTreeMap::new();
+            for (offset, write) in recorded.iter().enumerate() {
+                let Some(child) = child_of(&leaf.slots, &write.slots) else {
+                    continue;
+                };
+                let entry = children.entry(child).or_insert_with(|| Written {
+                    map: map.id.clone(),
+                    indices: Vec::new(),
+                    values: Vec::new(),
+                });
+                entry.indices.push(start.saturating_add(offset));
+                entry.values.push((
+                    write
+                        .slots
+                        .get(leaf.slots.len()..)
+                        .unwrap_or_default()
+                        .to_vec(),
+                    match &write.value {
+                        Pending::Ready(value) => Some(value.clone()),
+                        Pending::Translation { .. } => None,
+                    },
+                ));
+            }
+            for (child, written) in children {
+                by_child.entry(child).or_default().push(written);
             }
         }
-        writers.retain(|_, ids| ids.len() > 1);
-        if writers.is_empty() {
+        by_child.retain(|_, written| written.len() > 1);
+        // NOTE: no specification governs this: our own design; maps that write one child with the
+        // same values agree, so the first map's writes stand and the others' are dropped.
+        let mut duplicates = Vec::new();
+        by_child.retain(|_, written| {
+            let agree = written.split_first().is_some_and(|(first, rest)| {
+                first.values.iter().all(|(_, value)| value.is_some())
+                    && rest.iter().all(|other| other.values == first.values)
+            });
+            if agree {
+                duplicates.extend(
+                    written
+                        .iter()
+                        .skip(1)
+                        .flat_map(|other| other.indices.clone()),
+                );
+            }
+            !agree
+        });
+        if by_child.is_empty() {
+            duplicates.sort_unstable();
+            if let Some(resource) = self.resources.get_mut(leaf.resource) {
+                for index in duplicates.into_iter().rev() {
+                    if index < resource.writes.len() {
+                        resource.writes.remove(index);
+                    }
+                }
+            }
             let ids: Vec<&str> = maps.iter().map(|map| map.id.as_str()).collect();
             self.unmapped_components(scope, &ids.join(" "), datum, &named);
             return Ok(());
         }
         self.rollback(&mark);
-        for (element, maps) in writers {
+        for (element, written) in by_child {
+            let maps = written.into_iter().map(|written| written.map).collect();
             self.outcomes.push(Outcome::DatatypeConflict {
                 at: scope.at.clone(),
                 row: reference.clone(),
@@ -831,8 +929,9 @@ impl<'a> Run<'a> {
     ///
     /// A row that maps only the absence of that source
     /// ([`condition::requires_absent`]) never meets a valued one, so it claims
-    /// nothing.
-    fn claimed(&self, row: &Row, reference: &RowRef) -> BTreeSet<String> {
+    /// nothing, and neither does a row the bridge's endpoint fallback fills
+    /// ([`Run::falls_back`]), since a row of the guide wins over it.
+    fn claimed(&self, row: &Row, reference: &RowRef, resource_type: &str) -> BTreeSet<String> {
         let Ok(Target::Path { steps: own, .. }) = &row.target else {
             return BTreeSet::new();
         };
@@ -847,6 +946,7 @@ impl<'a> Run<'a> {
                 !matches!(&other.condition, Condition::Computable(expr)
                     if condition::requires_absent(expr, &operand))
             })
+            .filter(|other| !self.falls_back(resource_type, other))
             .filter_map(|other| match &other.target {
                 Ok(Target::Path { steps, .. }) => {
                     let under = steps.len() > own.len()
@@ -861,6 +961,21 @@ impl<'a> Run<'a> {
                 _ => None,
             })
             .collect()
+    }
+
+    /// Whether `row` writes an `HD` into a `url` of `resource_type` through
+    /// [`Run::endpoint`]: no assignment, no table and no data type map.
+    fn falls_back(&self, resource_type: &str, row: &Row) -> bool {
+        let Ok(Target::Path { steps, .. }) = &row.target else {
+            return false;
+        };
+        let names: Vec<&str> = steps.iter().map(|step| step.name.as_str()).collect();
+        row.assignment.is_none()
+            && row.mapped_via.is_none()
+            && row.source_type.as_deref() == Some("HD")
+            && self.corpus.find("datatype", "HD", "url").is_err()
+            && resolve_path(resource_type, &names)
+                .is_ok_and(|resolved| resolved.type_code() == Some("url"))
     }
 
     /// Counts each valued component of `datum` that no row of the data type
@@ -1037,6 +1152,53 @@ impl<'a> Run<'a> {
         }
     }
 
+    /// Writes a row's `assignment` at `leaf`: a literal as given, a
+    /// concatenation as the texts it joins, and any other form counted.
+    fn assign(
+        &mut self,
+        scope: &Scope<'a>,
+        assignment: &Assignment,
+        resolved: &fhirconnect::tree::element::Resolved,
+        leaf: &Base,
+        reference: &RowRef,
+    ) {
+        let at = &scope.at;
+        let row = || reference.clone();
+        match assignment {
+            Assignment::Literal(text) => {
+                let value = match resolved.location() {
+                    fhirconnect::tree::element::Location::Primitive(
+                        fhir_types::schema::ValueKind::Boolean,
+                    ) => match text.as_str() {
+                        "true" => Value::Bool(true),
+                        "false" => Value::Bool(false),
+                        _ => Value::String(text.clone()),
+                    },
+                    _ => Value::String(text.clone()),
+                };
+                self.record(leaf, Pending::Ready(value), at, reference);
+            }
+            Assignment::Concat(parts) => match concatenate(scope, parts) {
+                Ok(text) => self.record(leaf, Pending::Ready(Value::String(text)), at, reference),
+                Err(operand) => self.outcomes.push(Outcome::UnevaluableAssignment {
+                    at: at.clone(),
+                    row: row(),
+                    operand,
+                }),
+            },
+            Assignment::Defective(text) => self.outcomes.push(Outcome::DefectiveAssignment {
+                at: at.clone(),
+                row: row(),
+                text: text.clone(),
+            }),
+            Assignment::Unsupported(text) => self.outcomes.push(Outcome::UnsupportedAssignment {
+                at: at.clone(),
+                row: row(),
+                text: text.clone(),
+            }),
+        }
+    }
+
     /// Writes the value of `datum` at `leaf`: an assignment, a translation,
     /// a data type map or a converted primitive.
     fn value(
@@ -1051,30 +1213,9 @@ impl<'a> Run<'a> {
         let Some(resolved) = self.resolve(leaf, at, reference) else {
             return Ok(());
         };
-        match &row.assignment {
-            Some(Assignment::Literal(text)) => {
-                let value = match resolved.location() {
-                    fhirconnect::tree::element::Location::Primitive(
-                        fhir_types::schema::ValueKind::Boolean,
-                    ) => match text.as_str() {
-                        "true" => Value::Bool(true),
-                        "false" => Value::Bool(false),
-                        _ => Value::String(text.clone()),
-                    },
-                    _ => Value::String(text.clone()),
-                };
-                self.record(leaf, Pending::Ready(value), at, reference);
-                return Ok(());
-            }
-            Some(Assignment::Unsupported(text)) => {
-                self.outcomes.push(Outcome::UnsupportedAssignment {
-                    at: at.clone(),
-                    row: reference.clone(),
-                    text: text.clone(),
-                });
-                return Ok(());
-            }
-            None => {}
+        if let Some(assignment) = &row.assignment {
+            self.assign(scope, assignment, &resolved, leaf, reference);
+            return Ok(());
         }
         if let Some(mapped_via) = &row.mapped_via {
             self.table(leaf, &resolved, mapped_via, datum, at, reference);
@@ -1199,13 +1340,14 @@ impl<'a> Run<'a> {
     /// Writes a v2 `HD` into a FHIR `url` element, with its namespace ID in
     /// the `name` element beside it when there is one.
     ///
-    /// The url is the guide's universal form when the `HD` carries one the
-    /// `url` type admits (<https://hl7.org/fhir/R4/datatypes.html#url>), else
-    /// the derived form of [`convert::endpoint`].
+    /// The url is the derived form of [`convert::endpoint`], written as a
+    /// fallback ([`Run::write`]): where a row of the guide writes the
+    /// endpoint, as `datatype-hd-endpoint-to-messageheader-source` does for a
+    /// typed universal ID, that row's value stands.
     fn endpoint(&mut self, datum: Datum<'a>, leaf: &Base, at: &Location, reference: &RowRef) {
         let component = |position| datum.child(position).text();
-        let found = match convert::endpoint(component(1), component(2), component(3)) {
-            Ok(found) => found,
+        let url = match convert::endpoint(component(1), component(2), component(3)) {
+            Ok(url) => url,
             Err(error) => {
                 self.outcomes.push(Outcome::Unconvertible {
                     at: at.clone(),
@@ -1215,11 +1357,13 @@ impl<'a> Run<'a> {
                 return;
             }
         };
-        let url = found
-            .universal
-            .filter(|url| constraint::lexical("url", &Value::String(url.clone())).is_ok())
-            .unwrap_or(found.derived);
-        self.record(leaf, Pending::Ready(Value::String(url)), at, reference);
+        self.write(
+            leaf,
+            Pending::Ready(Value::String(url)),
+            at,
+            reference,
+            true,
+        );
         let Some(namespace) = component(1) else {
             return;
         };
@@ -1242,7 +1386,7 @@ impl<'a> Run<'a> {
             .is_ok_and(|resolved| resolved.type_code() == Some("string"));
         if holds_name {
             let value = Value::String(String::from(namespace));
-            self.record(&name, Pending::Ready(value), at, reference);
+            self.write(&name, Pending::Ready(value), at, reference, true);
         }
     }
 
@@ -1318,12 +1462,56 @@ impl<'a> Run<'a> {
 
     /// Records one write against the leaf's resource.
     fn record(&mut self, leaf: &Base, value: Pending, at: &Location, reference: &RowRef) {
+        self.write(leaf, value, at, reference, false);
+    }
+
+    /// Records one write, a fallback when `fallback` holds.
+    ///
+    /// No specification governs this: our own design. A row of the guide
+    /// wins over the bridge's fallback for one element: a fallback at an
+    /// element a write already fills is dropped, and a row of the guide
+    /// drops every fallback at its element. Nothing the message carries is
+    /// lost, since the fallback derives from the same value.
+    fn write(
+        &mut self,
+        leaf: &Base,
+        value: Pending,
+        at: &Location,
+        reference: &RowRef,
+        fallback: bool,
+    ) {
+        let Some(resource) = self.resources.get(leaf.resource) else {
+            return;
+        };
+        let contested = fallback || resource.writes.iter().any(|write| write.fallback);
+        let names: Vec<&str> = leaf.slots.iter().map(|slot| slot.name.as_str()).collect();
+        // NOTE: no specification governs this: our own design; a path the element table does not
+        // resolve contests nothing, and `build` counts it as `unknown-element` when it applies.
+        let flags = if contested {
+            repeating(&resource.type_name, &names).ok()
+        } else {
+            None
+        };
+        if let Some(flags) = flags {
+            let same = |write: &Write| {
+                write.slots.len() == leaf.slots.len() && under(&leaf.slots, &flags, &write.slots)
+            };
+            if fallback && resource.writes.iter().any(same) {
+                return;
+            }
+            if let Some(resource) = self.resources.get_mut(leaf.resource) {
+                resource
+                    .writes
+                    .retain(|write| !(write.fallback && same(write)));
+            }
+        }
         if let Some(resource) = self.resources.get_mut(leaf.resource) {
             resource.writes.push(Write {
                 slots: leaf.slots.clone(),
                 value,
                 at: at.clone(),
                 row: reference.clone(),
+                fallback,
             });
         }
     }
@@ -2367,11 +2555,11 @@ mod tests {
             Some(&Value::String(String::from("1.2.3.9"))),
             "{writes:?}"
         );
-        let endpoint_map_ran = run.outcomes.iter().any(|outcome| {
-            matches!(outcome, Outcome::UnsupportedCondition { row, .. }
-                if row.map == "datatype-hd-endpoint-to-messageheader-source")
-        });
-        assert!(endpoint_map_ran, "{:?}", run.outcomes);
+        assert_eq!(
+            header_write(&writes, "source.endpoint"),
+            Some(&Value::String(String::from("urn:oid:1.2.3.9"))),
+            "the endpoint map's ISO row runs: {writes:?}"
+        );
         assert!(
             run.outcomes.iter().all(|outcome| !matches!(
                 outcome,
@@ -2430,13 +2618,13 @@ mod tests {
     }
 
     // NOTE: no specification governs this: our own design; two maps writing one child of the
-    // target refuse the row, counted once per child, and neither value reaches the element.
+    // target with different values refuse the row, counted once per child, and neither value lands.
     #[test]
     fn two_maps_into_one_child_refuse_the_row_as_a_counted_conflict() {
         let conflicting = hd_source_map(
             "datatype-hd-label-to-messageheader-source",
             "http://example.org/fhir/ConceptMap/datatype-hd-label-to-messageheader-source",
-            &[("HD.1", "name", "string")],
+            &[("HD.2", "name", "string")],
         );
         let corpus = supplemented(&[conflicting]);
         let parsed = parsed_with(NETWORK_ONLY.0, NETWORK_ONLY.1);
@@ -2466,6 +2654,71 @@ mod tests {
                     String::from("datatype-hd-name-to-messageheader-source"),
                 ][..]
             )]
+        );
+    }
+
+    // NOTE: no specification governs this: our own design; maps that write one child with the
+    // same value agree, so the value is written once and no conflict is counted.
+    #[test]
+    fn two_maps_writing_one_child_with_one_value_agree() {
+        let agreeing = hd_source_map(
+            "datatype-hd-label-to-messageheader-source",
+            "http://example.org/fhir/ConceptMap/datatype-hd-label-to-messageheader-source",
+            &[("HD.1", "name", "string")],
+        );
+        let corpus = supplemented(&[agreeing]);
+        let parsed = parsed_with(NETWORK_ONLY.0, NETWORK_ONLY.1);
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let writes = header_writes(&run);
+        let names: Vec<&Value> = writes
+            .iter()
+            .filter(|(path, _)| path == "source.name")
+            .map(|(_, value)| value)
+            .collect();
+        assert_eq!(
+            names,
+            vec![&Value::String(String::from("NORTHNET"))],
+            "{writes:?}"
+        );
+        assert!(
+            run.outcomes
+                .iter()
+                .all(|outcome| !matches!(outcome, Outcome::DatatypeConflict { .. })),
+            "{:?}",
+            run.outcomes
+        );
+    }
+
+    // NOTE: `datatype-hd-endpoint-to-messageheader-source` writes `name` as `HD.1+" - "+HD.3+":"+HD.2`
+    // for another HD.3 and `datatype-hd-name-to-messageheader-source` writes HD.1, so they conflict.
+    #[test]
+    fn a_namespace_id_beside_another_universal_id_type_is_a_conflict_of_the_guides_maps() {
+        let corpus = corpus();
+        let parsed = parsed_with(NETWORK_ONLY.0, "||||||||||||NORTHNET^LAB-7^L");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let conflicts: Vec<(&str, &[String])> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::DatatypeConflict { element, maps, .. } => {
+                    Some((element.as_str(), maps.as_slice()))
+                }
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            conflicts,
+            vec![(
+                "name",
+                &[
+                    String::from("datatype-hd-endpoint-to-messageheader-source"),
+                    String::from("datatype-hd-name-to-messageheader-source"),
+                ][..]
+            )],
+            "{:?}",
+            run.outcomes
         );
     }
 

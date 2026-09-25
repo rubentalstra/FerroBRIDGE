@@ -43,6 +43,31 @@ crates on crates.io.
   legacy tree is the counted outcome `withdrawn-structure`. A structure's and
   a segment's `url` is now `Option`, a field's data type can be
   `DataTypeRef::Legacy`, and `Optionality` gains `Na`.
+- The v2-to-FHIR interpreter reads the condition and assignment forms the
+  guide's own rows write (#326). A condition compares a component spelled
+  `HD-3` (a name before `-` that is a data type and no segment) as well as
+  `HD.3`, so the `hd-endpoint` maps' `IF HD-3 = "ISO"` and `NOT IN` rows
+  run. An `assignment` of quoted literals and operands joined by `+`
+  (`"urn:oid:"+HD.2`, `MSG.1+"^"+MSG.2+"^"+MSG.3`) is written as the joined
+  text. A valued MSH-24 or MSH-25 of type ISO, UUID, DNS or URI now gives the
+  guide's `urn:` endpoint. A check that names no operand (`IF NOT VALUED`)
+  is counted as `defective-condition`, two parts with no `+` between them
+  (`RP.3"/"RP.4`) as `defective-assignment`, and an operand the scope cannot
+  read as `unevaluable-assignment`. An `IN` or `NOT IN` with no operand reads
+  the row's own source, as `mapping_guidelines.md` §Conditions lists them,
+  and so do `VALUED` and `NOT VALUED` (the bridge's own reading), so the
+  `hd-endpoint` HD.3 rows write the guide's data-absent-reason endpoint.
+  Across the 263 ConceptMaps, 415 conditions parse and 44 are refused (2 for
+  a missing operand). Two qualifying data type maps that write one child with
+  the same value agree, and only differing values count as
+  `datatype-conflict`. The typed `urn:` endpoints come from the guide's rows
+  alone: `convert::endpoint` builds only the derived
+  `urn:ferrobridge:hl7v2-hd:` form, as a fallback a row of the guide at the
+  same element replaces, so an HD in MSH-5 or a facility field (no guide row
+  writes a url from it) now gets the derived form.
+  `crates/ferrobridge-hl7v2/scripts/guide-forms.sh` lists every form with its
+  count. The HL7 v2 corpus passes 134 of 511 messages, up from 111: the 23
+  that value MSH-24. The smoke corpora stay at 189 of 379.
 - `hl7v2-types` carries the data type and message definitions (#289).
   `data_type` holds the 83 data types of the HL7 v2 definitions (12
   primitive, 71 complex with 448 components), each component with its

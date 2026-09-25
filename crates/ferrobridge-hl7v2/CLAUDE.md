@@ -35,8 +35,10 @@ rule in one place. A row into a complex element is the one exception: it
 runs every qualified map (`Corpus::qualifying`), named for the element's type
 or else its element path (`messageheader-source`), each into its own
 children (`Run::datatypes`). A child another row of the same source targets
-directly is left to that row (`Run::claimed`), and two maps writing one child
-for a value roll the row back as `datatype-conflict`.
+directly is left to that row (`Run::claimed`), unless that row only reaches
+the bridge's endpoint fallback (`Run::falls_back`). Two maps writing one child
+with different values roll the row back as `datatype-conflict`; with the same
+values they agree and the first map's writes stand.
 
 ## Instances are identities, allocated when a value first reaches them
 
@@ -50,9 +52,10 @@ from a label.
 
 ## Strict at every seam
 
-A condition in a form outside the grammar in `map::condition`, a target
-outside `map::notation`, an assignment that is no quoted literal, a
-`Narrative-Condition`, a value a FHIR primitive cannot hold (a time with no
+A condition in a form outside the grammar in `map::condition`, a check that
+names no operand (`defective-condition`), a target outside `map::notation`,
+an assignment outside the concatenation grammar or joining two parts with no
+`+` (`defective-assignment`), a `Narrative-Condition`, a value a FHIR primitive cannot hold (a time with no
 offset is no `dateTime`), and a resource that does not decode as R4 are each
 a typed `Outcome`, counted and never dropped. Before a value is written,
 `map::constraint` checks it against its primitive's lexical form through the
@@ -70,14 +73,28 @@ from MSH-4, and the destination's from MSH-6, as a `facility-endpoint`
 outcome, replacing the data-absent-reason the guide's MSH-24 and MSH-25
 rows write there. A row runs on its empty source only when it assigns a
 literal and its condition requires that source `NOT VALUED`
-(`condition::requires_absent`). An `HD` written
-into a `url` goes through `convert::endpoint`, the one place the derived
-`urn:ferrobridge:hl7v2-hd:` form is built. A refused or failed translation
+(`condition::requires_absent`). The guide's own rows write the typed
+`urn:oid:`, `urn:uuid:`, `urn:dns:` and `urn:uri:` endpoints. An `HD` into a
+`url` that no row of the guide fills goes through `convert::endpoint`, the
+one place the derived `urn:ferrobridge:hl7v2-hd:` form is built, written as
+a fallback that a row of the guide at the same element replaces
+(`Run::write`). A refused or failed translation
 fails the run with the upstream status (`MapError::Terminology`); an absent
 terminology server is `no-terminology`, never a code passed through.
 
-The condition and target grammars are `logos` lexers under `chumsky`
-parsers, the pair `openehr-query` builds its AQL parser on. The v2 message
+The condition, assignment and target grammars are `logos` lexers under
+`chumsky` parsers, the pair `openehr-query` builds its AQL parser on. The
+condition grammar reads the guide's comparison forms (`=`, `EQUALS`, `IS`,
+`NOT EQUALS`, `IN`, `NOT IN`, the counts and lengths) over a field
+(`PID-3.1`), a component (`HD.3`, or `HD-3` when the name before `-` is a
+data type and no segment) or a segment, and an `IN`, `NOT IN`, `VALUED` or
+`NOT VALUED` with no operand reads the row's own source
+(`condition::parse_for`; `mapping_guidelines.md` §Conditions lists the two
+`IN` forms, and the `VALUED` forms are our own reading); the assignment
+grammar is literals
+and operands joined by `+` (`"urn:oid:"+HD.2`), where an operand with no
+value joins as the empty text. `scripts/guide-forms.sh` lists every
+condition and assignment form the package writes, with counts. The v2 message
 splitter is hand-written, because MSH-1 and MSH-2 declare the delimiters at
 run time.
 

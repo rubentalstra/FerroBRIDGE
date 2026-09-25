@@ -21,6 +21,7 @@ expression: pretty(mapped.bundle())
         ],
         "eventCoding": {
           "code": "A01",
+          "display": "ADT^A01^ADT_A01",
           "system": "http://terminology.hl7.org/CodeSystem/v2-0003"
         },
         "meta": {

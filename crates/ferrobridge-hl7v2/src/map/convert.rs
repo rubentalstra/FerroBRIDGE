@@ -16,8 +16,8 @@
 //! A value the target cannot hold is refused, never approximated: a time with
 //! no offset is no FHIR `dateTime`.
 //!
-//! A v2 `HD` written into a FHIR `url` is converted by [`endpoint`]: the
-//! guide's url form of a typed universal ID, else a derived `urn:` form.
+//! A v2 `HD` written into a FHIR `url` that no row of the guide fills is
+//! converted by [`endpoint`] into a derived `urn:` form.
 
 use fhir_types::codec::{Number, Value};
 
@@ -74,25 +74,15 @@ pub fn primitive(fhir_type: &str, text: &str) -> Result<Value, ConvertError> {
 /// the sender assigned.
 pub const DERIVED_ENDPOINT: &str = "urn:ferrobridge:hl7v2-hd:";
 
-/// The endpoints a v2 `HD` yields for a FHIR `url` element, in the order they
-/// are tried.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Endpoint {
-    /// The url the guide's `HD` map builds from a universal ID of type `ISO`,
-    /// `UUID`, `DNS` or `URI`, when the `HD` carries one.
-    pub universal: Option<String>,
-    /// The url derived from every component: [`DERIVED_ENDPOINT`], the
-    /// namespace ID and, when either is valued, the universal ID and its
-    /// type, each percent-encoded and joined by `:`.
-    pub derived: String,
-}
-
-/// Builds the endpoints of a v2 `HD` from its namespace ID (`HD.1`),
-/// universal ID (`HD.2`) and universal ID type (`HD.3`).
+/// Builds the endpoint the bridge derives from a v2 `HD`.
 ///
-/// The universal forms are the assignments of the guide's
-/// `datatype-hd-endpoint-to-messageheader-source` map: `urn:oid:`,
-/// `urn:uuid:`, `urn:dns:` or `urn:uri:` before the universal ID.
+/// The endpoint is [`DERIVED_ENDPOINT`], the namespace ID (`HD.1`) and, when
+/// either is valued, the universal ID (`HD.2`) and its type (`HD.3`), each
+/// percent-encoded and joined by `:`.
+///
+/// The typed forms (`urn:oid:`, `urn:uuid:`, `urn:dns:`, `urn:uri:`) are
+/// the guide's own rows (`datatype-hd-endpoint-to-messageheader-source`),
+/// which the interpreter runs, so they are never built here.
 ///
 /// # Errors
 ///
@@ -101,20 +91,10 @@ pub fn endpoint(
     namespace: Option<&str>,
     universal: Option<&str>,
     universal_type: Option<&str>,
-) -> Result<Endpoint, ConvertError> {
+) -> Result<String, ConvertError> {
     if namespace.is_none() && universal.is_none() && universal_type.is_none() {
         return Err(ConvertError::Form { expected: "HD" });
     }
-    let scheme = match universal_type {
-        Some("ISO") => Some("urn:oid:"),
-        Some("UUID") => Some("urn:uuid:"),
-        Some("DNS") => Some("urn:dns:"),
-        Some("URI") => Some("urn:uri:"),
-        _ => None,
-    };
-    let universal_url = scheme
-        .zip(universal)
-        .map(|(scheme, universal)| format!("{scheme}{universal}"));
     let mut derived = String::from(DERIVED_ENDPOINT);
     percent_encode(namespace.unwrap_or_default(), &mut derived);
     if universal.is_some() || universal_type.is_some() {
@@ -123,10 +103,7 @@ pub fn endpoint(
         derived.push(':');
         percent_encode(universal_type.unwrap_or_default(), &mut derived);
     }
-    Ok(Endpoint {
-        universal: universal_url,
-        derived,
-    })
+    Ok(derived)
 }
 
 /// Appends `text` to `out` with every byte outside the RFC 3986 §3.3 `pchar`
@@ -358,7 +335,7 @@ fn integer(fhir_type: &str, text: &str) -> Result<Number, ConvertError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{ConvertError, DERIVED_ENDPOINT, Endpoint, endpoint, primitive};
+    use super::{ConvertError, DERIVED_ENDPOINT, endpoint, primitive};
     use fhir_types::codec::Value;
 
     fn text(value: &str) -> Value {
@@ -423,27 +400,16 @@ mod tests {
     }
 
     #[test]
-    fn a_universal_id_of_a_url_yielding_type_is_the_endpoint() {
+    fn a_typed_universal_id_is_kept_in_the_derived_endpoint_the_guide_rows_replace() {
         assert_eq!(
             endpoint(Some("LAB"), Some("1.2.3.4"), Some("ISO")),
-            Ok(Endpoint {
-                universal: Some(String::from("urn:oid:1.2.3.4")),
-                derived: format!("{DERIVED_ENDPOINT}LAB:1.2.3.4:ISO"),
-            })
-        );
-        let uuid = "2b3c4d5e-0000-4000-8000-000000000001";
-        assert_eq!(
-            endpoint(None, Some(uuid), Some("UUID")).map(|found| found.universal),
-            Ok(Some(format!("urn:uuid:{uuid}")))
+            Ok(format!("{DERIVED_ENDPOINT}LAB:1.2.3.4:ISO"))
         );
         assert_eq!(
-            endpoint(None, Some("lab.example.org"), Some("DNS")).map(|found| found.universal),
-            Ok(Some(String::from("urn:dns:lab.example.org")))
-        );
-        assert_eq!(
-            endpoint(None, Some("http://lab.example.org/v2"), Some("URI"))
-                .map(|found| found.universal),
-            Ok(Some(String::from("urn:uri:http://lab.example.org/v2")))
+            endpoint(None, Some("http://lab.example.org/v2"), Some("URI")),
+            Ok(format!(
+                "{DERIVED_ENDPOINT}:http%3A%2F%2Flab.example.org%2Fv2:URI"
+            ))
         );
     }
 
@@ -451,13 +417,10 @@ mod tests {
     fn a_namespace_id_alone_is_derived_with_every_non_pchar_byte_encoded() {
         assert_eq!(
             endpoint(Some("North Lab App"), None, None),
-            Ok(Endpoint {
-                universal: None,
-                derived: format!("{DERIVED_ENDPOINT}North%20Lab%20App"),
-            })
+            Ok(format!("{DERIVED_ENDPOINT}North%20Lab%20App"))
         );
         assert_eq!(
-            endpoint(Some("Lab:M\u{FC}ller/1%"), None, None).map(|found| found.derived),
+            endpoint(Some("Lab:M\u{FC}ller/1%"), None, None),
             Ok(format!("{DERIVED_ENDPOINT}Lab%3AM%C3%BCller%2F1%25"))
         );
     }
@@ -466,13 +429,10 @@ mod tests {
     fn a_universal_id_of_another_type_is_kept_in_the_derived_endpoint() {
         assert_eq!(
             endpoint(None, Some("LAB-7"), Some("L")),
-            Ok(Endpoint {
-                universal: None,
-                derived: format!("{DERIVED_ENDPOINT}:LAB-7:L"),
-            })
+            Ok(format!("{DERIVED_ENDPOINT}:LAB-7:L"))
         );
         assert_eq!(
-            endpoint(Some("LAB"), Some("1.2.3"), None).map(|found| found.derived),
+            endpoint(Some("LAB"), Some("1.2.3"), None),
             Ok(format!("{DERIVED_ENDPOINT}LAB:1.2.3:"))
         );
     }

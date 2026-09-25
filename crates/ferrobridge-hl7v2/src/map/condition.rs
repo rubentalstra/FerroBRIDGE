@@ -24,14 +24,27 @@
 //!            | ( "LST.COUNT" | "LENGTH" ) compare number
 //! compare   := "EQUALS" | "=" | "NOT" "EQUALS"
 //!            | ( "GREATER" | "LESS" ) "THAN" ( "OR" "EQUALS" )?
-//! operand   := SEG "-" n ( "." n )* | TYPE "." n ( "." n )* | SEG
+//! operand   := SEG "-" n ( "." n )* | TYPE ( "." | "-" ) n ( "." n )* | SEG
 //! ```
 //!
 //! Keywords are matched without regard to case, because the corpus writes
 //! `LST.count` beside `LST.COUNT`. An operand list before one check
 //! (`IF PID-33 AND PID-34 VALUED`) applies the check to each operand, joined
-//! by the connective written. Anything else is refused at load, and the row
-//! is a counted outcome.
+//! by the connective written. A name before `-` is a field of a segment when
+//! the v2 definitions name that segment, else a component of the data type
+//! they name, as the `hd-endpoint` maps write `HD-3` beside `HD.2`. An `IN`,
+//! `NOT IN`, `VALUED` or `NOT VALUED` with no operand before it reads the
+//! row's own source ([`parse_for`]); those on a row with no source, and any
+//! other operand-less check, are [`ConditionError::NoOperand`].
+//! Anything else is refused at load, and the row is a counted outcome.
+//!
+//! The `assignment` of a row ([`assignment`]) shares the lexer: quoted
+//! literals and operands joined by `+`, as `"urn:oid:"+HD.2`.
+//!
+//! ```text
+//! assignment := part ( "+" part )*
+//! part       := literal | operand
+//! ```
 
 use core::fmt;
 
@@ -165,6 +178,48 @@ pub enum ConditionError {
         /// The index of the first token not admitted.
         token: usize,
     },
+    /// A check follows `IF`, `AND` or `OR` with no operand before it, as
+    /// `IF NOT VALUED` does.
+    #[error("the check at token {token} names no operand")]
+    NoOperand {
+        /// The index of the check's first token.
+        token: usize,
+    },
+}
+
+/// One part of an assignment.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Part {
+    /// A double-quoted literal, written as given.
+    Literal(Literal),
+    /// An operand, whose value is written.
+    Operand(Operand),
+}
+
+/// Why an assignment could not be parsed.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum AssignmentError {
+    /// A character sequence no token of the grammar matches.
+    #[error("no token of the assignment grammar matches {slice:?} at byte {offset}")]
+    Lex {
+        /// The byte offset.
+        offset: usize,
+        /// The text no token matches.
+        slice: String,
+    },
+    /// The tokens do not match the grammar.
+    #[error("the assignment leaves the grammar at token {token}")]
+    Syntax {
+        /// The index of the first token not admitted.
+        token: usize,
+    },
+    /// Two parts follow each other with no `+` between them, as
+    /// `RP.3"/"RP.4` does.
+    #[error("parts {token} and the next are joined by no +")]
+    MissingOperator {
+        /// The index of the first of the two parts.
+        token: usize,
+    },
 }
 
 /// One token of a condition.
@@ -213,11 +268,13 @@ enum Token {
     Close,
     #[token(",")]
     Comma,
+    #[token("+")]
+    Plus,
     #[regex(r#""[^"]*""#, |lexer| unquote(lexer.slice()))]
     Text(String),
     #[regex(r"[0-9]+", |lexer| lexer.slice().parse::<u64>().ok())]
     Number(u64),
-    #[regex(r"[A-Z][A-Z0-9]{2}-[0-9]+(\.[0-9]+)*", |lexer| field(lexer.slice()))]
+    #[regex(r"[A-Z][A-Z0-9]{1,3}-[0-9]+(\.[0-9]+)*", |lexer| dashed(lexer.slice()))]
     Field(Operand),
     #[regex(r"[A-Z][A-Z0-9]{1,3}\.[0-9]+(\.[0-9]+)*", |lexer| component(lexer.slice()))]
     Component(Operand),
@@ -242,13 +299,26 @@ fn positions(text: &str) -> Option<Vec<usize>> {
         .collect()
 }
 
-/// A `SEG-n.m` operand.
-fn field(slice: &str) -> Option<Operand> {
-    let (segment, path) = slice.split_once('-')?;
-    Some(Operand::Field {
-        segment: String::from(segment),
-        path: positions(path)?,
-    })
+/// A `NAME-n.m` operand: a field when the v2 definitions name the segment,
+/// else a component when they name the data type, else none.
+///
+/// No specification governs this: our own design; the guide's `hd-endpoint`
+/// maps spell one component `HD.3` and `HD-3`, and no segment id is a data
+/// type code in the v2 definitions.
+fn dashed(slice: &str) -> Option<Operand> {
+    let (name, path) = slice.split_once('-')?;
+    let path = positions(path)?;
+    if hl7v2_types::segment::find(name).is_some() {
+        Some(Operand::Field {
+            segment: String::from(name),
+            path,
+        })
+    } else {
+        hl7v2_types::data_type::find(name).map(|_| Operand::Component {
+            datatype: String::from(name),
+            path,
+        })
+    }
 }
 
 /// A `TYPE.n.m` operand.
@@ -274,31 +344,148 @@ type Extra<'a> = chumsky::extra::Err<Simple<'a, Token>>;
 /// Returns [`ConditionError::Lex`] for text no token matches and
 /// [`ConditionError::Syntax`] for tokens outside the grammar.
 pub fn parse(text: &str) -> Result<Expr, ConditionError> {
+    parse_for(text, None)
+}
+
+/// Parses a `Computable-ANTLR` condition of a row whose source is `source`,
+/// reading an `IN`, `NOT IN`, `VALUED` or `NOT VALUED` check with no operand
+/// before it as a check of `source`.
+///
+/// The mapping guidelines list `IN` and `NOT IN` without an operand
+/// (`mapping_guidelines.md` §Conditions: `IF IN ("A","B", "C")`, `IF NOT IN
+/// ("A","B", "C")`), and a condition decides whether the row's own v2
+/// element is mapped. They list only those two; reading `VALUED` and
+/// `NOT VALUED` the same way is our own reading. Every other check names its
+/// operand.
+///
+/// # Errors
+///
+/// Returns [`ConditionError::Lex`] for text no token matches,
+/// [`ConditionError::NoOperand`] for a check with no operand that `source`
+/// does not supply, and [`ConditionError::Syntax`] for tokens outside the
+/// grammar.
+pub fn parse_for(text: &str, source: Option<&Operand>) -> Result<Expr, ConditionError> {
+    let tokens = lex(text).map_err(|(offset, slice)| ConditionError::Lex { offset, slice })?;
+    condition(source.cloned())
+        .parse(tokens.as_slice())
+        .into_result()
+        .map_err(|errors| match no_operand(&tokens) {
+            Some(token) => ConditionError::NoOperand { token },
+            None => ConditionError::Syntax {
+                token: errors
+                    .first()
+                    .map_or(tokens.len(), |error| error.span().start),
+            },
+        })
+}
+
+/// Returns the operand a row's source code names.
+///
+/// That is a field for `MSH-24`, a component for `HD.3`, a segment for `PID`,
+/// and `None` for a message path such as `ORU_R01.MSH` or a whole data type
+/// such as `MSG`.
+#[must_use]
+pub fn source_operand(code: &str) -> Option<Operand> {
+    match lex(code).ok()?.as_slice() {
+        [Token::Field(operand) | Token::Component(operand)] => Some(operand.clone()),
+        [Token::Segment(id)] => {
+            hl7v2_types::segment::find(id).map(|_| Operand::Segment(id.clone()))
+        }
+        _ => None,
+    }
+}
+
+/// Parses a row's `assignment` as literals and operands joined by `+`.
+///
+/// # Errors
+///
+/// Returns [`AssignmentError::Lex`] for text no token matches,
+/// [`AssignmentError::MissingOperator`] for two parts with no `+` between
+/// them, and [`AssignmentError::Syntax`] for other tokens outside the
+/// grammar.
+pub fn assignment(text: &str) -> Result<Vec<Part>, AssignmentError> {
+    let tokens = lex(text).map_err(|(offset, slice)| AssignmentError::Lex { offset, slice })?;
+    concatenation()
+        .parse(tokens.as_slice())
+        .into_result()
+        .map_err(|errors| {
+            let adjacent = tokens
+                .windows(2)
+                .position(|pair| matches!(pair, [left, right] if is_part(left) && is_part(right)));
+            match adjacent {
+                Some(token) => AssignmentError::MissingOperator { token },
+                None => AssignmentError::Syntax {
+                    token: errors
+                        .first()
+                        .map_or(tokens.len(), |error| error.span().start),
+                },
+            }
+        })
+}
+
+/// The assignment grammar.
+fn concatenation<'a>() -> impl Parser<'a, &'a [Token], Vec<Part>, Extra<'a>> {
+    let part = select! {
+        Token::Text(text) => Part::Literal(text),
+        Token::Field(operand) => Part::Operand(operand),
+        Token::Component(operand) => Part::Operand(operand),
+    };
+    part.separated_by(just(Token::Plus))
+        .at_least(1)
+        .collect::<Vec<_>>()
+        .then_ignore(end())
+}
+
+/// Whether `token` is a part of an assignment.
+const fn is_part(token: &Token) -> bool {
+    matches!(
+        token,
+        Token::Text(_) | Token::Field(_) | Token::Component(_)
+    )
+}
+
+/// The tokens of `text`, or the offset and text of the first sequence no
+/// token matches.
+fn lex(text: &str) -> Result<Vec<Token>, (usize, String)> {
     let mut tokens = Vec::new();
     let mut lexer = Token::lexer(text);
     while let Some(token) = lexer.next() {
         match token {
             Ok(token) => tokens.push(token),
-            Err(()) => {
-                return Err(ConditionError::Lex {
-                    offset: lexer.span().start,
-                    slice: String::from(lexer.slice()),
-                });
-            }
+            Err(()) => return Err((lexer.span().start, String::from(lexer.slice()))),
         }
     }
-    condition()
-        .parse(tokens.as_slice())
-        .into_result()
-        .map_err(|errors| ConditionError::Syntax {
-            token: errors
-                .first()
-                .map_or(tokens.len(), |error| error.span().start),
+    Ok(tokens)
+}
+
+/// The index of the first check that directly follows `IF`, `AND` or `OR`,
+/// with no operand before it.
+fn no_operand(tokens: &[Token]) -> Option<usize> {
+    tokens
+        .windows(3)
+        .position(|window| match window {
+            [Token::If | Token::And | Token::Or, next, after] => match next {
+                Token::Valued | Token::In | Token::Equals | Token::EqualSign => true,
+                Token::Not => matches!(
+                    after,
+                    Token::Valued | Token::In | Token::Equals | Token::Text(_)
+                ),
+                _ => false,
+            },
+            _ => false,
+        })
+        .map(|position| position.saturating_add(1))
+        .or_else(|| match tokens {
+            [.., Token::If | Token::And | Token::Or, Token::Valued] => {
+                Some(tokens.len().saturating_sub(1))
+            }
+            _ => None,
         })
 }
 
-/// The condition grammar.
-fn condition<'a>() -> impl Parser<'a, &'a [Token], Expr, Extra<'a>> {
+/// The condition grammar, reading an operand-less `IN` or `NOT IN` as a
+/// check of `source` when there is one.
+fn condition<'a>(source: Option<Operand>) -> impl Parser<'a, &'a [Token], Expr, Extra<'a>> {
     let operand = select! {
         Token::Field(operand) => operand,
         Token::Component(operand) => operand,
@@ -326,6 +513,38 @@ fn condition<'a>() -> impl Parser<'a, &'a [Token], Expr, Extra<'a>> {
             }
             expr
         });
+    let quoted = select! { Token::Text(quoted) => quoted };
+    let list = quoted
+        .separated_by(just(Token::Comma))
+        .at_least(1)
+        .collect::<Vec<_>>()
+        .delimited_by(just(Token::Open), just(Token::Close));
+    let is = just(Token::Is).or_not();
+    // NOTE: `mapping_guidelines.md` §Conditions lists `IF IN (...)` and `IF NOT IN (...)` with no
+    // operand, reading the row's own source; the guide lists only those, and reading `VALUED` and
+    // `NOT VALUED` the same way is our own reading.
+    let implicit = choice((
+        is.clone()
+            .then(just(Token::Not))
+            .then(just(Token::In))
+            .ignore_then(list.clone())
+            .map(Check::NotIn),
+        is.clone()
+            .then(just(Token::In))
+            .ignore_then(list)
+            .map(Check::In),
+        is.clone()
+            .then(just(Token::Not))
+            .then(just(Token::Valued))
+            .to(Check::NotValued { error: false }),
+        is.then(just(Token::Valued)).to(Check::Valued),
+    ))
+    .try_map(move |check, span| {
+        source
+            .clone()
+            .map(|operand| Expr::Test(operand, check))
+            .ok_or_else(|| Simple::new(None, span))
+    });
     let expr = recursive(|expr| {
         let group = just(Token::Open)
             .ignore_then(just(Token::If).or_not())
@@ -337,6 +556,7 @@ fn condition<'a>() -> impl Parser<'a, &'a [Token], Expr, Extra<'a>> {
                 .map(|inner| Expr::Not(Box::new(inner))),
             group,
             test,
+            implicit,
         ));
         let and = unary.clone().foldl(
             just(Token::And)
@@ -517,8 +737,16 @@ pub fn requires_absent(expr: &Expr, operand: &Operand) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{
-        Check, Compare, Expr, Operand, Probe, Unevaluable, evaluate, parse, requires_absent,
+        AssignmentError, Check, Compare, ConditionError, Expr, Operand, Part, Probe, Unevaluable,
+        assignment, evaluate, parse, parse_for, requires_absent, source_operand,
     };
+
+    fn component(datatype: &str, path: &[usize]) -> Operand {
+        Operand::Component {
+            datatype: String::from(datatype),
+            path: path.to_vec(),
+        }
+    }
 
     fn field(segment: &str, path: &[usize]) -> Operand {
         Operand::Field {
@@ -542,6 +770,9 @@ mod tests {
             "IF OBX-2=\"NM\"",
             "IF ORC VALUED",
             "If CWE.2 IS NOT VALUED",
+            "IF HD-3 = \"ISO\"",
+            "IF HD.2 NOT VALUED AND (HD-3 NOT IN (\"ISO\", \"UUID\", \"DNS\", \"URI\"))",
+            "IF HD.1 NOT VALUED AND IF HD-3 NOT IN (\"ISO\", \"UUID\")",
         ] {
             assert!(parse(text).is_ok(), "{text}: {:?}", parse(text));
         }
@@ -557,7 +788,7 @@ mod tests {
             "IF (OBX-2 EQUALS \"SN\" AND OBX-5.1 EQUALS \"<>\"",
             "IF CX.4 IN http://hl7.org/implement/standards/fhir/identifier-registry.html",
             "IF IN1-17 IS 'patient'",
-            "IF HD-3 = \"ISO\"",
+            "IF XYZ-3 = \"ISO\"",
         ] {
             assert!(parse(text).is_err(), "{text}");
         }
@@ -626,5 +857,238 @@ mod tests {
         assert!(!holds("IF MSH-24.1 NOT VALUED"));
         assert!(!holds("IF MSH-24 NOT VALUED OR MSH-3 NOT VALUED"));
         assert!(!holds("IF MSH-24 NOT IN (\"A\")"));
+    }
+
+    #[test]
+    fn a_dashed_data_type_name_is_a_component_and_a_dashed_segment_a_field() {
+        assert_eq!(
+            parse("IF HD-3 = \"ISO\""),
+            Ok(Expr::Test(
+                component("HD", &[3]),
+                Check::Equals(String::from("ISO"))
+            ))
+        );
+        assert_eq!(
+            parse("IF XON-10 NOT VALUED"),
+            Ok(Expr::Test(
+                component("XON", &[10]),
+                Check::NotValued { error: false }
+            ))
+        );
+        assert_eq!(
+            parse("IF PID-3 VALUED"),
+            Ok(Expr::Test(field("PID", &[3]), Check::Valued))
+        );
+    }
+
+    #[test]
+    #[expect(clippy::panic_in_result_fn, reason = "test assertions")]
+    fn a_dashed_component_comparison_reads_the_component() -> Result<(), Unevaluable> {
+        let expr = parse("IF HD-3 NOT IN (\"ISO\", \"UUID\")").expect("a condition");
+        let probe = |text: &'static str| {
+            move |operand: &Operand| {
+                (operand == &component("HD", &[3])).then(|| Probe {
+                    valued: true,
+                    text: Some(String::from(text)),
+                    count: 1,
+                })
+            }
+        };
+        assert!(!evaluate(&expr, &mut probe("UUID"))?);
+        assert!(evaluate(&expr, &mut probe("DNS"))?);
+        Ok(())
+    }
+
+    #[test]
+    fn a_check_with_no_operand_is_refused_as_such() {
+        for (text, token) in [
+            ("IF NOT VALUED", 1),
+            (
+                "IF NOT VALUED OR NOT IN (\"ISO\", \"UUID\", \"DNS\", \"URI\")",
+                1,
+            ),
+            ("IF NOT VALUED AND RXA-21 NOT EQUALS \"D\"", 1),
+            ("IF PID-3 VALUED AND IN (\"A\")", 4),
+        ] {
+            assert_eq!(
+                parse(text),
+                Err(ConditionError::NoOperand { token }),
+                "{text}"
+            );
+        }
+        assert!(matches!(parse("IF NOT (PID-3 VALUED)"), Ok(Expr::Not(_))));
+    }
+
+    #[test]
+    fn an_operand_less_in_reads_the_row_source() {
+        let own = component("HD", &[3]);
+        let list = || vec![String::from("ISO"), String::from("UUID")];
+        assert_eq!(
+            parse_for("IF IN (\"ISO\", \"UUID\")", Some(&own)),
+            Ok(Expr::Test(own.clone(), Check::In(list())))
+        );
+        assert_eq!(
+            parse_for("IF NOT IN (\"ISO\", \"UUID\")", Some(&own)),
+            Ok(Expr::Test(own.clone(), Check::NotIn(list())))
+        );
+        assert_eq!(
+            parse_for("IF HD.2 VALUED AND NOT IN (\"ISO\", \"UUID\")", Some(&own)),
+            Ok(Expr::And(
+                Box::new(Expr::Test(component("HD", &[2]), Check::Valued)),
+                Box::new(Expr::Test(own.clone(), Check::NotIn(list())))
+            ))
+        );
+    }
+
+    #[test]
+    fn an_operand_less_check_with_no_row_source_or_a_bare_literal_stays_refused() {
+        for text in [
+            "IF IN (\"ISO\")",
+            "IF NOT IN (\"ISO\")",
+            "IF VALUED",
+            "IF NOT VALUED",
+        ] {
+            assert_eq!(
+                parse_for(text, None),
+                Err(ConditionError::NoOperand { token: 1 }),
+                "{text}"
+            );
+        }
+        assert_eq!(
+            parse_for(
+                "IF IAM-15 VALUED AND NOT \"SEL\"",
+                Some(&field("IAM", &[15]))
+            ),
+            Err(ConditionError::NoOperand { token: 4 })
+        );
+    }
+
+    #[test]
+    fn an_operand_less_valued_reads_the_row_source() {
+        let own = component("HD", &[3]);
+        assert_eq!(
+            parse_for("IF VALUED", Some(&own)),
+            Ok(Expr::Test(own.clone(), Check::Valued))
+        );
+        assert_eq!(
+            parse_for("IF IS VALUED", Some(&own)),
+            Ok(Expr::Test(own.clone(), Check::Valued))
+        );
+    }
+
+    #[test]
+    fn an_operand_less_not_valued_reads_the_row_source() {
+        let own = component("HD", &[3]);
+        let absent = || Expr::Test(own.clone(), Check::NotValued { error: false });
+        assert_eq!(parse_for("IF NOT VALUED", Some(&own)), Ok(absent()));
+        assert_eq!(
+            parse_for(
+                "IF NOT VALUED OR NOT IN (\"ISO\", \"UUID\", \"DNS\", \"URI\")",
+                Some(&own)
+            ),
+            Ok(Expr::Or(
+                Box::new(absent()),
+                Box::new(Expr::Test(
+                    own.clone(),
+                    Check::NotIn(["ISO", "UUID", "DNS", "URI"].map(String::from).to_vec())
+                ))
+            ))
+        );
+        assert_eq!(
+            parse_for("IF NOT VALUED AND RXA-21 NOT EQUALS \"D\"", Some(&own)),
+            Ok(Expr::And(
+                Box::new(absent()),
+                Box::new(Expr::Test(
+                    field("RXA", &[21]),
+                    Check::NotEquals(String::from("D"))
+                ))
+            ))
+        );
+    }
+
+    #[test]
+    fn a_source_code_names_its_operand() {
+        assert_eq!(source_operand("HD.3"), Some(component("HD", &[3])));
+        assert_eq!(source_operand("MSH-24"), Some(field("MSH", &[24])));
+        assert_eq!(
+            source_operand("PID"),
+            Some(Operand::Segment(String::from("PID")))
+        );
+        assert_eq!(source_operand("ORU_R01.MSH"), None);
+        assert_eq!(source_operand("MSG"), None);
+    }
+
+    #[test]
+    fn a_concatenation_parses_into_its_parts() {
+        let literal = |text: &str| Part::Literal(String::from(text));
+        assert_eq!(
+            assignment("\"urn:oid:\"+HD.2"),
+            Ok(vec![
+                literal("urn:oid:"),
+                Part::Operand(component("HD", &[2]))
+            ])
+        );
+        assert_eq!(
+            assignment("HD.1+\" - \"+HD.3+\":\"+HD.2"),
+            Ok(vec![
+                Part::Operand(component("HD", &[1])),
+                literal(" - "),
+                Part::Operand(component("HD", &[3])),
+                literal(":"),
+                Part::Operand(component("HD", &[2])),
+            ])
+        );
+        assert_eq!(
+            assignment("OBX-5.1+\"-\"+OBX-5.2"),
+            Ok(vec![
+                Part::Operand(field("OBX", &[5, 1])),
+                literal("-"),
+                Part::Operand(field("OBX", &[5, 2])),
+            ])
+        );
+        assert_eq!(
+            assignment("NA.1 + \"^\" + NA.2"),
+            Ok(vec![
+                Part::Operand(component("NA", &[1])),
+                literal("^"),
+                Part::Operand(component("NA", &[2])),
+            ])
+        );
+        assert_eq!(
+            assignment("NA.1"),
+            Ok(vec![Part::Operand(component("NA", &[1]))])
+        );
+    }
+
+    #[test]
+    fn a_concatenation_missing_an_operator_is_refused_as_such() {
+        assert_eq!(
+            assignment("RP.3\"/\"RP.4"),
+            Err(AssignmentError::MissingOperator { token: 0 })
+        );
+        assert_eq!(
+            assignment("NA.1 + \"^\" + NA.2 + \"^\" NA.4"),
+            Err(AssignmentError::MissingOperator { token: 6 })
+        );
+    }
+
+    #[test]
+    fn an_expression_or_narrative_assignment_is_outside_the_grammar() {
+        for text in [
+            "/translate number to day/",
+            "Appointment.participant.period.start + AIG-11",
+            "#placer contact#",
+            "\"http://terminology.hl7.org/CodeSystem/v2-0203\"\\\\",
+            "HD.1+",
+        ] {
+            assert!(
+                matches!(
+                    assignment(text),
+                    Err(AssignmentError::Lex { .. } | AssignmentError::Syntax { .. })
+                ),
+                "{text}: {:?}",
+                assignment(text)
+            );
+        }
     }
 }
