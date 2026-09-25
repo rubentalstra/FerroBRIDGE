@@ -30,14 +30,12 @@ use crate::etl::aql::{CheckedQuery, SINCE_PARAMETER};
 use crate::etl::report::RunReport;
 use crate::etl::tie::{Tie, Windows};
 use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::ids::versioned_object_uid;
 use ferrobridge_openehr::query::{PageSize, QueryPageError};
 use futures_util::StreamExt;
 use omop_cdm::derived;
-use omop_cdm::graph::{
-    EhrId, RecordGraph, Refusal, Source, VersionUid, VersionedObjectUid, VisitKey,
-};
+use omop_cdm::graph::{RecordGraph, Refusal, Source, VisitKey};
 use omop_cdm::writer::{CdmWriter, RunId, VisitConcepts, WriteError};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_its::rest::generated::query::AdhocQueryExecute;
 use openehr_mapping_core::composition::CanonicalComposition;
@@ -188,25 +186,20 @@ fn text<'r>(
 fn source(query: &CheckedQuery, row: &[serde_json::Value]) -> Result<Source, Refusal> {
     let ehr = text(query, row, "ehr_id")?;
     let version = text(query, row, "version_uid")?;
-    let parsed = ObjectVersionId::new(version)
+    let ehr_id = HierObjectId::new(ehr)
+        .map_err(|error| Refusal::new(format!("the ehr_id `{ehr}`: {error}")))?;
+    let version_uid = ObjectVersionId::new(version)
         .map_err(|error| Refusal::new(format!("the version_uid `{version}`: {error}")))?;
-    // NOTE: openEHR RM Common 1.1.0 §OBJECT_VERSION_ID; the versioned object
-    // is the `object_id` part of the version's identifier.
-    let versioned = versioned_object_uid(&parsed);
+    let source = Source::new(ehr_id, version_uid);
     if query.column("versioned_object_uid").is_some() {
         let selected = text(query, row, "versioned_object_uid")?;
-        if versioned.value() != selected {
+        if source.versioned_object_uid().value() != selected {
             return Err(Refusal::new(format!(
                 "the version_uid `{version}` is no version of `{selected}`"
             )));
         }
     }
-    let refused = |error: omop_cdm::graph::EmptyIdentifier| Refusal::new(error.to_string());
-    Ok(Source::new(
-        EhrId::new(ehr).map_err(refused)?,
-        VersionedObjectUid::new(versioned.value()).map_err(refused)?,
-        VersionUid::new(version).map_err(refused)?,
-    ))
+    Ok(source)
 }
 
 /// The templates one run has read from the CDR, by identifier.
@@ -509,7 +502,7 @@ mod tests {
             source(&query, &[json!("ehr-1"), json!(VERSION), json!({})]).expect("the row reads");
         assert_eq!(
             "8849182c-82ad-4088-a07f-48ead4180515",
-            read.versioned_object_uid().as_str()
+            read.versioned_object_uid().value()
         );
     }
 

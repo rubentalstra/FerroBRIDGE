@@ -129,7 +129,7 @@ fn cell(cell: &Cell) -> String {
         Cell::Value(Value::Text(value)) => format!("{value:?}"),
         Cell::Value(Value::Date(value)) => value.to_string(),
         Cell::Value(Value::Datetime(value)) => value.to_string(),
-        Cell::Reference(Reference::Person(ehr)) => format!("person {ehr}"),
+        Cell::Reference(Reference::Person(ehr)) => format!("person {}", ehr.value()),
         Cell::Reference(Reference::Visit(visit)) => format!("visit {}", visit.source()),
         Cell::Reference(Reference::Row(key)) => format!("row {key}"),
     }

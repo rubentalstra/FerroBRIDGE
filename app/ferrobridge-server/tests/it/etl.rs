@@ -83,8 +83,7 @@ impl Laboratory {
     /// Returns the key of the node at `occurrence` of `composition`.
     fn key(composition: &SourceComposition<'_>, occurrence: &str) -> RecordKey {
         RecordKey::new(
-            composition.source.ehr_id().clone(),
-            composition.source.versioned_object_uid().clone(),
+            &composition.source,
             ArchetypeRootPath::new(ROOT).expect("a root path"),
             OccurrencePath::new(occurrence).expect("an occurrence path"),
             Discriminator::new(MappingName::new(MAPPING).expect("a name"), 0, 0),
@@ -140,7 +139,7 @@ impl Laboratory {
     fn graph(&self, composition: &SourceComposition<'_>) -> Result<RecordGraph, Refusal> {
         let index = COMPOSITIONS_UIDS
             .iter()
-            .position(|uid| *uid == composition.source.versioned_object_uid().as_str())
+            .position(|uid| *uid == composition.source.versioned_object_uid().value())
             .ok_or_else(|| Refusal::new("an unknown composition"))?;
         let behaviour = self
             .behaviours

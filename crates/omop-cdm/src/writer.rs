@@ -27,10 +27,12 @@
 use crate::connection::{CdmConnection, ConnectionError};
 use crate::ddl::SchemaName;
 use crate::graph::{
-    self, Cell, EhrId, EmptyIdentifier, RecordGraph, RecordKey, Reference, Report, Value,
-    VersionUid, VersionedObjectUid, Visit, VisitKey,
+    self, Cell, EmptyIdentifier, RecordGraph, RecordKey, Reference, Report, Value, Visit, VisitKey,
 };
 use crate::meta::{ColumnMeta, TableMeta};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::lexical::IdError;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use std::collections::BTreeMap;
 use std::fmt;
 use tokio_postgres::binary_copy::BinaryCopyInWriter;
@@ -91,16 +93,16 @@ pub struct VisitConcepts {
 }
 
 /// The version of a composition last committed, and the run that did it.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Watermark {
-    version_uid: VersionUid,
+    version_uid: ObjectVersionId,
     run_id: RunId,
 }
 
 impl Watermark {
     /// Returns the version committed.
     #[must_use]
-    pub fn version_uid(&self) -> &VersionUid {
+    pub fn version_uid(&self) -> &ObjectVersionId {
         &self.version_uid
     }
 
@@ -196,13 +198,20 @@ pub enum WriteError {
     },
     /// A row refers to an EHR that has no `PERSON`, and the policy creates
     /// none.
-    #[error("no PERSON is known for the EHR {ehr_id}, and the policy creates none")]
+    #[error(
+        "no PERSON is known for the EHR {}, and the policy creates none",
+        ehr_id.value()
+    )]
     UnknownPerson {
         /// The EHR.
-        ehr_id: EhrId,
+        ehr_id: HierObjectId,
     },
     /// A row refers to a visit the visit derivation has not written.
-    #[error("no visit is known for the EHR {} under the source {}", key.ehr_id(), key.source())]
+    #[error(
+        "no visit is known for the EHR {} under the source {}",
+        key.ehr_id().value(),
+        key.source()
+    )]
     UnknownVisit {
         /// The visit's key.
         key: VisitKey,
@@ -222,6 +231,15 @@ pub enum WriteError {
     /// The side table holds an empty identifier.
     #[error("the side table holds an empty identifier")]
     Identifier(#[from] EmptyIdentifier),
+    /// The side table holds a version identifier BASE 1.3 refuses.
+    #[error("the side table holds `{value}` as a version, which is no OBJECT_VERSION_ID")]
+    Version {
+        /// The value found.
+        value: String,
+        /// What the BASE 1.3 identifier grammar refused.
+        #[source]
+        source: IdError,
+    },
     /// The side table names something this writer never writes.
     #[error("the side table holds `{value}` for {what}, which this writer never writes")]
     SideTable {
@@ -430,13 +448,13 @@ async fn allocate(
 async fn person_id(
     transaction: &Transaction<'_>,
     bridge: &SchemaName,
-    ehr_id: &EhrId,
+    ehr_id: &HierObjectId,
     create: bool,
 ) -> Result<i32, WriteError> {
     let found = transaction
         .query_opt(
             &format!("SELECT person_id FROM {bridge}.person_map WHERE ehr_id = $1"),
-            &[&ehr_id.as_str()],
+            &[&ehr_id.value()],
         )
         .await
         .map_err(database(Step::Read))?;
@@ -452,7 +470,7 @@ async fn person_id(
     transaction
         .execute(
             &format!("INSERT INTO {bridge}.person_map (ehr_id, person_id) VALUES ($1, $2)"),
-            &[&ehr_id.as_str(), &id],
+            &[&ehr_id.value(), &id],
         )
         .await
         .map_err(database(Step::Record))?;
@@ -641,10 +659,11 @@ impl CdmWriter {
     /// # Errors
     ///
     /// Returns [`WriteError::Database`] when the side table cannot be read,
-    /// and [`WriteError::SideTable`] when it holds an empty identifier.
+    /// [`WriteError::Identifier`] when it holds an empty run id, and
+    /// [`WriteError::Version`] when its version is no `OBJECT_VERSION_ID`.
     pub async fn watermark(
         &self,
-        versioned_object_uid: &VersionedObjectUid,
+        versioned_object_uid: &HierObjectId,
     ) -> Result<Option<Watermark>, WriteError> {
         let row = self
             .client
@@ -653,7 +672,7 @@ impl CdmWriter {
                     "SELECT version_uid, run_id FROM {}.watermark WHERE versioned_object_uid = $1",
                     self.bridge
                 ),
-                &[&versioned_object_uid.as_str()],
+                &[&versioned_object_uid.value()],
             )
             .await
             .map_err(database(Step::Read))?;
@@ -663,7 +682,12 @@ impl CdmWriter {
         let version: String = row.try_get(0).map_err(database(Step::Read))?;
         let run: String = row.try_get(1).map_err(database(Step::Read))?;
         Ok(Some(Watermark {
-            version_uid: VersionUid::new(version)?,
+            version_uid: ObjectVersionId::new(version.as_str()).map_err(|source| {
+                WriteError::Version {
+                    value: version.clone(),
+                    source,
+                }
+            })?,
             run_id: RunId::new(run)?,
         }))
     }
@@ -697,7 +721,7 @@ impl CdmWriter {
         } = self;
         let transaction = client.transaction().await.map_err(database(Step::Begin))?;
         let source = graph.source();
-        let versioned_object_uid = source.versioned_object_uid().as_str();
+        let versioned_object_uid = source.versioned_object_uid().value();
 
         // NOTE: PostgreSQL docs, 9.28.10 "Advisory Lock Functions": a
         // transaction-level lock serializes two runs over one composition.
@@ -741,8 +765,8 @@ impl CdmWriter {
                 ),
                 &[
                     &versioned_object_uid,
-                    &source.ehr_id().as_str(),
-                    &source.version_uid().as_str(),
+                    &source.ehr_id().value(),
+                    &source.version_uid().value(),
                     &run.as_str(),
                 ],
             )
@@ -791,7 +815,7 @@ impl CdmWriter {
                         "SELECT visit_occurrence_id FROM {bridge}.visit
                          WHERE ehr_id = $1 AND visit_source = $2"
                     ),
-                    &[&key.ehr_id().as_str(), &key.source().as_str()],
+                    &[&key.ehr_id().value(), &key.source().as_str()],
                 )
                 .await
                 .map_err(database(Step::Read))?;
@@ -805,7 +829,7 @@ impl CdmWriter {
                             "INSERT INTO {bridge}.visit (ehr_id, visit_source, visit_occurrence_id)
                              VALUES ($1, $2, $3)"
                         ),
-                        &[&key.ehr_id().as_str(), &key.source().as_str(), &id],
+                        &[&key.ehr_id().value(), &key.source().as_str(), &id],
                     )
                     .await
                     .map_err(database(Step::Record))?;
@@ -1102,11 +1126,11 @@ async fn record_keys(
     for row in graph.rows() {
         let key = row.key();
         let [vo, root, occurrence, table, ehr, mapping] = &mut columns;
-        vo.push(key.versioned_object_uid().as_str());
+        vo.push(key.versioned_object_uid().value());
         root.push(key.archetype_root_path().as_str());
         occurrence.push(key.occurrence_path().as_str());
         table.push(row.table().name);
-        ehr.push(key.ehr_id().as_str());
+        ehr.push(key.ehr_id().value());
         mapping.push(key.discriminator().mapping().as_str());
         entries.push(i32::from(key.discriminator().entry()));
         branches.push(i32::from(key.discriminator().branch()));
@@ -1197,7 +1221,7 @@ async fn write_links(
                     $5::integer[], $6::integer[])"
             ),
             &[
-                &graph.source().versioned_object_uid().as_str(),
+                &graph.source().versioned_object_uid().value(),
                 d1,
                 f1,
                 d2,
@@ -1215,7 +1239,7 @@ struct Resolver<'a, 't> {
     transaction: &'a Transaction<'t>,
     bridge: &'a SchemaName,
     create: bool,
-    persons: BTreeMap<EhrId, i32>,
+    persons: BTreeMap<String, i32>,
     ids: &'a BTreeMap<(&'static str, &'a RecordKey), i32>,
 }
 
@@ -1224,11 +1248,11 @@ impl Resolver<'_, '_> {
     async fn resolve(&mut self, reference: &Reference, target: &str) -> Result<i32, WriteError> {
         match reference {
             Reference::Person(ehr_id) => {
-                if let Some(id) = self.persons.get(ehr_id) {
+                if let Some(id) = self.persons.get(ehr_id.value()) {
                     return Ok(*id);
                 }
                 let id = person_id(self.transaction, self.bridge, ehr_id, self.create).await?;
-                self.persons.insert(ehr_id.clone(), id);
+                self.persons.insert(ehr_id.value().to_owned(), id);
                 Ok(id)
             }
             Reference::Visit(key) => {
@@ -1240,7 +1264,7 @@ impl Resolver<'_, '_> {
                              WHERE ehr_id = $1 AND visit_source = $2",
                             self.bridge
                         ),
-                        &[&key.ehr_id().as_str(), &key.source().as_str()],
+                        &[&key.ehr_id().value(), &key.source().as_str()],
                     )
                     .await
                     .map_err(database(Step::Read))?;
@@ -1265,7 +1289,7 @@ impl Resolver<'_, '_> {
                             self.bridge
                         ),
                         &[
-                            &key.versioned_object_uid().as_str(),
+                            &key.versioned_object_uid().value(),
                             &key.archetype_root_path().as_str(),
                             &key.occurrence_path().as_str(),
                             &table.name,

@@ -14,7 +14,6 @@
 
 use std::collections::BTreeMap;
 
-use omop_cdm::graph::EhrId;
 use omop_cdm::graph::GraphError;
 use omop_cdm::graph::RecordKey;
 use omop_cdm::graph::Reference;
@@ -24,6 +23,7 @@ use omop_cdm::graph::VisitKey;
 use omop_cdm::meta::ColumnMeta;
 use omop_cdm::value::CdmDate;
 use omop_cdm::value::CdmDatetime;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use rust_decimal::Decimal;
 use rust_decimal::prelude::ToPrimitive;
 
@@ -75,7 +75,7 @@ impl Cells {
 /// What the engine fills beside the mapped columns.
 #[derive(Debug)]
 pub(crate) struct Filled<'a> {
-    pub(crate) person: &'a EhrId,
+    pub(crate) person: &'a HierObjectId,
     pub(crate) visit: Option<&'a VisitKey>,
     pub(crate) type_concept: i32,
 }

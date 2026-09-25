@@ -17,7 +17,8 @@
 //! and leaves the tie to the ETL. No specification governs the rule, its
 //! reading of time or its tie-breaker: our own design.
 
-use omop_cdm::graph::{Cell, EhrId, RecordGraph, Refusal, Value, Visit, VisitKey};
+use omop_cdm::graph::{Cell, RecordGraph, Refusal, Value, Visit, VisitKey};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::foundation_types::time::iso8601_date_time::Iso8601DateTime;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_rm::v1_2::common::generic::party_identified::PartyIdentified;
@@ -163,10 +164,10 @@ struct Window {
     end: Wall,
 }
 
-/// The derived visits of a run, by EHR.
+/// The derived visits of a run, by EHR, keyed by the `ehr_id` as written.
 #[derive(Debug, Clone, Default)]
 pub struct Windows {
-    by_ehr: BTreeMap<EhrId, Vec<Window>>,
+    by_ehr: BTreeMap<String, Vec<Window>>,
 }
 
 /// Returns the wall-clock form of one bound of a visit.
@@ -178,7 +179,7 @@ impl Windows {
     /// Indexes `visits` by EHR.
     #[must_use]
     pub fn new(visits: &[Visit]) -> Self {
-        let mut by_ehr: BTreeMap<EhrId, Vec<Window>> = BTreeMap::new();
+        let mut by_ehr: BTreeMap<String, Vec<Window>> = BTreeMap::new();
         for visit in visits {
             let start = bound(
                 visit.start().as_str(),
@@ -196,7 +197,7 @@ impl Windows {
             // that does not is legitimately absent rather than defective.
             if let (Some(start), Some(end)) = (start, end) {
                 by_ehr
-                    .entry(visit.key().ehr_id().clone())
+                    .entry(visit.key().ehr_id().value().to_owned())
                     .or_default()
                     .push(Window {
                         key: visit.key().clone(),
@@ -211,10 +212,10 @@ impl Windows {
     /// Ties a composition of `ehr` at `moment` to a visit, with `facility`
     /// deciding between several.
     #[must_use]
-    pub fn tie(&self, ehr: &EhrId, moment: Wall, facility: Option<&str>) -> Tie {
+    pub fn tie(&self, ehr: &HierObjectId, moment: Wall, facility: Option<&str>) -> Tie {
         let containing: Vec<&Window> = self
             .by_ehr
-            .get(ehr)
+            .get(ehr.value())
             .map(|windows| {
                 windows
                     .iter()
@@ -245,11 +246,12 @@ impl Windows {
 mod tests {
     use super::{Tie, Wall, Windows, anchor, resolved_moment};
     use omop_cdm::graph::{
-        ArchetypeRootPath, Discriminator, EhrId, MappingName, OccurrencePath, RecordGraph,
-        RecordKey, Reference, Row, RowBuilder, Source, Value, VersionUid, VersionedObjectUid,
-        Visit, VisitKey, VisitSource,
+        ArchetypeRootPath, Discriminator, MappingName, OccurrencePath, RecordGraph, RecordKey,
+        Reference, Row, RowBuilder, Source, Value, Visit, VisitKey, VisitSource,
     };
     use omop_cdm::value::{CdmDate, CdmDatetime};
+    use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+    use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
     use openehr_mapping_core::composition::CanonicalComposition;
     use openehr_mapping_core::template::Generation;
     use serde_json::json;
@@ -259,7 +261,7 @@ mod tests {
         let date = |text: &str| CdmDate::new(text.get(..10).expect("a date")).expect("a CDM date");
         Visit::new(
             VisitKey::new(
-                EhrId::new("ehr-1").expect("an id"),
+                HierObjectId::new("ehr-1").expect("an id"),
                 VisitSource::new(source).expect("a source"),
             ),
             (
@@ -282,7 +284,7 @@ mod tests {
     #[test]
     fn the_window_bounds_are_inclusive_and_a_date_compares_by_day() {
         let windows = Windows::new(&[visit("a", "2026-06-13T08:00:00", "2026-06-14T12:00:00")]);
-        let ehr = EhrId::new("ehr-1").expect("an id");
+        let ehr = HierObjectId::new("ehr-1").expect("an id");
         let at = |text: &str| windows.tie(&ehr, Wall::read(text).expect("a moment"), None);
         assert!(matches!(at("2026-06-13T08:00:00"), Tie::Visit(_)));
         assert!(matches!(at("2026-06-14T12:00:00Z"), Tie::Visit(_)));
@@ -294,7 +296,7 @@ mod tests {
         assert_eq!(
             Tie::Outside,
             windows.tie(
-                &EhrId::new("ehr-2").expect("an id"),
+                &HierObjectId::new("ehr-2").expect("an id"),
                 Wall::read("2026-06-13T09:00:00").expect("a moment"),
                 None
             ),
@@ -308,7 +310,7 @@ mod tests {
             visit("ward-a", "2026-06-13T08:00:00", "2026-06-16T12:00:00"),
             visit("ward-b", "2026-06-14T08:00:00", "2026-06-15T12:00:00"),
         ]);
-        let ehr = EhrId::new("ehr-1").expect("an id");
+        let ehr = HierObjectId::new("ehr-1").expect("an id");
         let moment = Wall::read("2026-06-14T10:00:00").expect("a moment");
         assert_eq!(
             Some("ward-b"),
@@ -357,11 +359,13 @@ mod tests {
 
     #[test]
     fn the_resolved_moment_is_the_first_rows_first_date_with_its_time() {
-        let ehr = EhrId::new("ehr-1").expect("an id");
-        let uid = VersionedObjectUid::new("vo-1").expect("an id");
-        let key = RecordKey::new(
+        let ehr = HierObjectId::new("ehr-1").expect("an id");
+        let source = Source::new(
             ehr.clone(),
-            uid.clone(),
+            ObjectVersionId::new("vo-1::synthetic::1").expect("an id"),
+        );
+        let key = RecordKey::new(
+            &source,
             ArchetypeRootPath::new("/content[openEHR-EHR-OBSERVATION.synthetic.v1]")
                 .expect("a root"),
             OccurrencePath::new("/").expect("a path"),
@@ -385,11 +389,7 @@ mod tests {
             })
             .and_then(RowBuilder::build)
             .expect("the row builds");
-        let mut graph = RecordGraph::new(Source::new(
-            ehr,
-            uid,
-            VersionUid::new("vo-1::synthetic::1").expect("an id"),
-        ));
+        let mut graph = RecordGraph::new(source);
         assert_eq!(None, resolved_moment(&graph), "no row, no moment");
         graph.push_row(row).expect("the row fits");
         assert_eq!(Wall::read("2026-06-14T10:30:00"), resolved_moment(&graph));

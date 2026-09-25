@@ -264,6 +264,17 @@ crates on crates.io.
 
 ### Changed
 
+- The `omop-cdm` record graph keys its rows by the `openehr-base` BASE 1.3
+  identifiers (#279): the EHR and the versioned composition are a
+  `HierObjectId` and the version an `ObjectVersionId`, so the ETL runner
+  hands the ids it parsed from the AQL row straight to the CDM writer. The
+  graph's own `EhrId`, `VersionedObjectUid` and `VersionUid` are gone.
+  `Source::new` takes the EHR and the version and reads the versioned
+  composition from the version's `object_id` as written, `RecordKey::new`
+  takes the `Source` it belongs to, and an `ehr_id` a composition or visit
+  row carries must now parse as a BASE 1.3 `HIER_OBJECT_ID`. A watermark
+  whose stored version is no `OBJECT_VERSION_ID` is the new
+  `WriteError::Version`. The side tables store the same strings as before.
 - `ferrobridge-openehr` is the ITS-REST client transport only, and takes the
   openEHR model from the published crates (#276). The version, version
   container, template and `uid_based_id` identifiers are the `openehr-base`
