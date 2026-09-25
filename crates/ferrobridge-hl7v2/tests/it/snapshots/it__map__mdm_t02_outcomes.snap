@@ -26,6 +26,7 @@ expression: summary(&mapped)
     "unmapped-field: TXA[1]-1",
     "unmapped-field: TXA[1]-4",
     "unmapped-segment: OBX[1]",
-    "undecodable: Provenance Provenance.recorded: required property is missing",
-    "undecodable: DocumentReference DocumentReference.status: required property is missing",
+    "missing-required: Provenance lacks Provenance.target",
+    "missing-required: Provenance lacks Provenance.target",
+    "missing-required: DocumentReference lacks DocumentReference.status",
 ]

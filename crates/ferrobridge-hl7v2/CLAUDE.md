@@ -49,7 +49,12 @@ A condition in a form outside the grammar in `map::condition`, a target
 outside `map::notation`, an assignment that is no quoted literal, a
 `Narrative-Condition`, a value a FHIR primitive cannot hold (a time with no
 offset is no `dateTime`), and a resource that does not decode as R4 are each
-a typed `Outcome`, counted and never dropped. A refused or failed translation
+a typed `Outcome`, counted and never dropped. Before a value is written,
+`map::constraint` checks it against its primitive's lexical form through the
+`fhir-types` decoder; after the writes, it drops every element and resource
+lacking an element the element table marks required. Both read the
+constraints from `fhir-types` and name no resource or element, so the Bundle
+decodes. A refused or failed translation
 fails the run with the upstream status (`MapError::Terminology`); an absent
 terminology server is `no-terminology`, never a code passed through.
 

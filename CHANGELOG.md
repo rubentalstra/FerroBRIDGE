@@ -58,7 +58,7 @@ crates on crates.io.
   maps) to an R4 Bundle, records every counted outcome, and counts each
   difference from an expected Bundle as a corpus gap, a supplement (#256), a
   candidate defect or a value beyond the oracle. Two pass lists and badges
-  join the conformance gate: `hl7v2` (8 of 511 today) and `hl7v2-smoke` (26 of
+  join the conformance gate: `hl7v2` (115 of 511 after #302) and `hl7v2-smoke` (189 of
   379, the fetched sets). The testkit's `Case` carries per-case outcome counts
   into the result the gate reads, `pin-freshness.sh` reads the seven new
   commit pins against the head of their branches, and the `test` and
@@ -405,6 +405,22 @@ crates on crates.io.
 
 ### Fixed
 
+- The v2-to-FHIR interpreter emits only Bundles that decode as FHIR R4
+  (#302). A value outside the lexical form of its target primitive, such as
+  an application name with spaces written into the `url`
+  `MessageHeader.source.endpoint`, is never written and counts as
+  `invalid-value` naming the element and the type
+  (<https://hl7.org/fhir/R4/datatypes.html#primitive>). An element lacking an
+  element its definition requires (`MessageHeader.destination` without
+  `endpoint`, an `extension` without `url`, `Provenance.agent` without `who`)
+  is left out, and so is a resource lacking one (`MessageHeader` without
+  `source`), each counted as `missing-required` with the definition path it
+  lacks. A write taking a second alternative of a choice such as
+  `Extension.value[x]` counts as `superseded`. A resource that still does not
+  decode is left out of the Bundle as `undecodable`. The vendored corpus now
+  passes 115 of 511 messages (8 before) and the build-time smoke corpus 189
+  of 379 (26 before), and the corpus test asserts that no Bundle fails to
+  decode and no resource is left out as `undecodable`.
 - A v2 message whose header carries no MSH-9.3 (the v2.3 senders in the
   vendored ReportStream set) resolves its structure from MSH-9.1 and MSH-9.2
   through the generated message index instead of being refused as unnamed

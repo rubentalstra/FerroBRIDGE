@@ -58,6 +58,9 @@ const REPORTSTREAM_TESTS: &str = "prime-router/src/testIntegration/resources/dat
 /// `.hl7` message beside it; in `FHIR_to_HL7/` the direction is the reverse.
 const REPORTSTREAM_CONVERSIONS: &[&str] = &["HL7_to_FHIR", "mappinginventory"];
 
+/// The reason a case fails when the Bundle the map wrote does not decode.
+const UNDECODABLE: &str = "the Bundle does not decode as R4";
+
 /// How many messages of each AIRA example file the smoke corpus reads.
 ///
 /// No specification governs this: our own design; the files hold 13,583
@@ -684,11 +687,7 @@ async fn run(
         object,
         &mut fhir_types::codec::Path::root("Bundle"),
     ) {
-        return Case::fail(
-            &message.id,
-            format!("the Bundle does not decode as R4: {error}"),
-        )
-        .with_outcomes(outcomes);
+        return Case::fail(&message.id, format!("{UNDECODABLE}: {error}")).with_outcomes(outcomes);
     }
     Case::pass(&message.id).with_outcomes(outcomes)
 }
@@ -708,6 +707,24 @@ async fn measure(corpus: Corpus, messages: &[Message]) -> Result<(), Box<dyn Err
         outcome.regressed.is_empty(),
         "cases the {corpus} pass list records no longer pass: {:?}",
         outcome.regressed
+    );
+    let undecodable: Vec<(&str, &str)> = cases
+        .iter()
+        .filter_map(|case| Some((case.id(), case.failure()?)))
+        .filter(|(_, failure)| failure.starts_with(UNDECODABLE))
+        .collect();
+    assert_eq!(
+        undecodable,
+        Vec::<(&str, &str)>::new(),
+        "every Bundle the {corpus} corpus maps decodes as R4"
+    );
+    let left_out: usize = cases
+        .iter()
+        .filter_map(|case| case.outcomes().get("undecodable"))
+        .sum();
+    assert_eq!(
+        left_out, 0,
+        "no resource of the {corpus} corpus is left out of its Bundle for failing to decode"
     );
     Ok(())
 }
