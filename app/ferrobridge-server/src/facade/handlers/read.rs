@@ -10,14 +10,14 @@
 
 use ferrobridge_openehr::client::Client;
 use ferrobridge_openehr::composition::CompositionOutcome;
-use ferrobridge_openehr::composition::UidBasedId;
 use ferrobridge_openehr::ids::EhrId;
-use ferrobridge_openehr::ids::ObjectVersionId;
-use ferrobridge_openehr::ids::VersionedObjectUid;
 use ferrobridge_openehr::ids::entity_tag;
 use http::HeaderMap;
 use http::StatusCode;
 use http::Uri;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 use openehr_mapping_core::composition::CanonicalComposition;
 
 use crate::facade::Facade;
@@ -50,7 +50,7 @@ pub(crate) async fn read(
         binding(facade, resource_type, &internal)?.ok_or_else(|| unknown(resource_type, id))?;
     let program = program_of(facade, &binding)?;
     let ehr_id = EhrId::new(&binding.ehr_id).map_err(|error| stored_identifier(&error))?;
-    let container = VersionedObjectUid::new(&binding.versioned_object_uid)
+    let container = HierObjectId::new(&binding.versioned_object_uid)
         .map_err(|error| stored_identifier(&error))?;
     let (version, composition) =
         fetch(facade, client, &ehr_id, &container, &binding.template_id).await?;
@@ -67,7 +67,7 @@ pub(crate) async fn read(
     Ok(reply::resource(
         StatusCode::OK,
         &rendered.body,
-        &[reply::Header::entity_tag(version.version_tree_id())],
+        &[reply::Header::entity_tag(version.version_tree_id().value())],
     ))
 }
 
@@ -144,15 +144,11 @@ pub(crate) async fn fetch(
     facade: &Facade,
     client: &Client,
     ehr_id: &EhrId,
-    container: &VersionedObjectUid,
+    container: &HierObjectId,
     template_id: &str,
 ) -> Result<(ObjectVersionId, CanonicalComposition), Refusal> {
     let answered = client
-        .composition(
-            ehr_id,
-            &UidBasedId::VersionedObject(container.clone()),
-            None,
-        )
+        .composition(ehr_id, &UidBasedId::HierObjectId(container.clone()), None)
         .await
         .map_err(|error| write::refuse(&status::of_client_error(&error)))?;
     match answered {
@@ -205,14 +201,10 @@ pub(crate) async fn fetch(
 pub(crate) async fn latest_version(
     client: &Client,
     ehr_id: &EhrId,
-    container: &VersionedObjectUid,
+    container: &HierObjectId,
 ) -> Result<ObjectVersionId, Refusal> {
     let answered = client
-        .composition(
-            ehr_id,
-            &UidBasedId::VersionedObject(container.clone()),
-            None,
-        )
+        .composition(ehr_id, &UidBasedId::HierObjectId(container.clone()), None)
         .await
         .map_err(|error| write::refuse(&status::of_client_error(&error)))?;
     match answered {
@@ -243,7 +235,7 @@ pub(crate) async fn latest_version(
 /// version tree id is completed against the version container the map holds.
 pub(crate) fn version_of_etag(
     value: &str,
-    container: &VersionedObjectUid,
+    container: &HierObjectId,
 ) -> Result<ObjectVersionId, Refusal> {
     let bare = entity_tag(value);
     if let Ok(full) = ObjectVersionId::new(bare) {
@@ -255,7 +247,8 @@ pub(crate) fn version_of_etag(
     Err(reply::refusal(
         StatusCode::PRECONDITION_FAILED,
         Issue::error(IssueType::Conflict).diagnosing(format!(
-            "If-Match carries `{bare}`, which names no version of {container}; send the ETag this server last answered with"
+            "If-Match carries `{bare}`, which names no version of {}; send the ETag this server last answered with",
+            container.value()
         )),
     ))
 }
@@ -270,7 +263,7 @@ fn unknown(resource_type: &str, id: &str) -> Refusal {
 }
 
 /// Returns the refusal a malformed stored identifier renders as.
-fn stored_identifier(error: &ferrobridge_openehr::ids::IdError) -> Refusal {
+fn stored_identifier(error: &impl std::fmt::Display) -> Refusal {
     reply::refusal(
         StatusCode::INTERNAL_SERVER_ERROR,
         Issue::error(IssueType::Exception).diagnosing(format!(

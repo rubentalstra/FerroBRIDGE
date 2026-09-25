@@ -302,12 +302,11 @@ async fn fetch(
     client: &ferrobridge_openehr::client::Client,
     template: &str,
 ) -> Result<TemplateSource, Error> {
-    let id = ferrobridge_openehr::ids::TemplateId::new(template).map_err(|source| {
-        Error::TemplateName {
+    let id =
+        ferrobridge_openehr::ids::template_id(template).map_err(|source| Error::TemplateName {
             template: template.to_owned(),
             source: Box::new(source),
-        }
-    })?;
+        })?;
     let outcome = client
         .template(&id)
         .await
@@ -326,7 +325,7 @@ async fn fetch(
             },
         ) => Ok(TemplateSource::Opt2 {
             template: opt,
-            resolved_id: resolved_id.as_str().to_owned(),
+            resolved_id: resolved_id.physical_id(),
         }),
         // NOTE: the client reports `UnknownTemplate` only for a `404` from both
         // definition routes (`definition-codegen.openapi.yaml`, ITS-REST 1.1.0).

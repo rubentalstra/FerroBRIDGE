@@ -365,15 +365,17 @@ impl Client {
 /// "The format is always an `version_uid` identifier enclosed by double
 /// quotes" (`ehr-codegen.openapi.yaml`, `components.parameters.If-Match`), so
 /// the weakness indicator an `ETag` carries never travels back.
-pub(crate) fn if_match_value(version_id: &crate::ids::ObjectVersionId) -> String {
-    format!("\"{version_id}\"")
+pub(crate) fn if_match_value(
+    version_id: &openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId,
+) -> String {
+    format!("\"{}\"", version_id.value())
 }
 
 #[cfg(test)]
 mod tests {
     use super::{Client, if_match_value};
     use crate::config::Config;
-    use crate::ids::ObjectVersionId;
+    use crate::ids::version_from_etag;
 
     fn client() -> Client {
         Client::new(Config::new(
@@ -409,9 +411,12 @@ mod tests {
 
     #[test]
     fn an_if_match_value_is_the_bare_quoted_version_id() {
-        let version_id = ObjectVersionId::from_etag("W/\"8849182c::system::1\"")
+        let version_id = version_from_etag("W/\"8849182c-82ad-4088-a07f-48ead4180515::system::1\"")
             .expect("a well-formed version id");
-        assert_eq!("\"8849182c::system::1\"", if_match_value(&version_id));
+        assert_eq!(
+            "\"8849182c-82ad-4088-a07f-48ead4180515::system::1\"",
+            if_match_value(&version_id)
+        );
     }
 
     #[test]

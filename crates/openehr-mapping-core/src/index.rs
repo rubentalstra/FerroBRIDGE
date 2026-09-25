@@ -797,8 +797,8 @@ pub fn node_id_matches(wanted: &str, carried: &str) -> bool {
 /// template served over the ADL 1.4 route carries the interface form alone and
 /// so states no release version.
 // TODO(#241): read the identifier through `ArchetypeHrid` once openehr-am
-// offers `FromStr` for it (sibling request S2); `openehr-adl`'s parser is a
-// dev-dependency here.
+// offers `FromStr` for it (sibling request S2), as ferrobridge-openehr does
+// through `openehr_adl::hrid::parse_hrid` today.
 #[must_use]
 pub fn archetype_release_version(id: &str) -> Option<&str> {
     let without_namespace = id.rsplit_once("::").map_or(id, |(_, rest)| rest);

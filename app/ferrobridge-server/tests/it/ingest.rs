@@ -402,7 +402,7 @@ async fn a_redelivered_message_is_recognised_by_its_control_id_and_commits_once(
     let placed = |ingested: &Ingested| {
         ingested
             .committed()
-            .map(|entry| (entry.id.to_string(), entry.version.to_string()))
+            .map(|entry| (entry.id.to_string(), entry.version.value().to_owned()))
             .collect::<Vec<_>>()
     };
     assert_eq!(placed(&first), placed(&second));
@@ -475,7 +475,9 @@ async fn the_entries_of_one_message_bind_by_content_whatever_the_version_order()
         .map(|entry| {
             (
                 entry.full_url.clone(),
-                entry.version.versioned_object_uid().as_str().to_owned(),
+                ferrobridge_openehr::ids::versioned_object_uid(&entry.version)
+                    .value()
+                    .to_owned(),
             )
         })
         .collect();

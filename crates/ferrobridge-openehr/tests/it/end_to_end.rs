@@ -8,20 +8,26 @@
 //! this file are joined by a run against a server that answers for itself. The
 //! test runs only when `FERROBRIDGE_E2E=1` admits the container harness.
 
+use crate::support;
 use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::commit::{ChangeType, CommitContext, Committer, LifecycleState};
+use ferrobridge_openehr::commit::CommitContext;
 use ferrobridge_openehr::composition::{
-    CompositionOutcome, CreateCompositionOutcome, DeleteCompositionOutcome, UidBasedId,
+    CompositionOutcome, CreateCompositionOutcome, DeleteCompositionOutcome,
     UpdateCompositionOutcome,
 };
 use ferrobridge_openehr::config::Config;
 use ferrobridge_openehr::ehr::{CreateEhrOutcome, EhrOutcome};
-use ferrobridge_openehr::ids::{EhrId, ObjectVersionId, SubjectId, SubjectNamespace, TemplateId};
+use ferrobridge_openehr::ids::{
+    EhrId, SubjectId, SubjectNamespace, template_id, versioned_object_uid,
+};
 use ferrobridge_openehr::prefer::{Prefer, Returned};
 use ferrobridge_openehr::query::QueryOutcome;
 use ferrobridge_openehr::template::{TemplateOutcome, TemplateSource};
 use ferrobridge_testkit::containers;
 use ferrobridge_testkit::fixtures;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+use openehr_base::v1_3::base_types::identification::template_id::TemplateId;
+use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 use openehr_its::rest::generated::query::AdhocQueryExecute;
 use openehr_rm::v1_2::composition::composition::Composition;
 use openehr_rm::v1_2::ehr::ehr_status::EhrStatus;
@@ -76,7 +82,7 @@ async fn the_client_commits_reads_updates_queries_and_deletes_against_a_real_cdr
     }
     let cdr = containers::cdr().await?;
     let client = Client::new(Config::new(cdr.base_url().parse()?))?;
-    let template_id = TemplateId::new(fixtures::MINIMAL_EVALUATION_TEMPLATE_ID)?;
+    let template_id = template_id(fixtures::MINIMAL_EVALUATION_TEMPLATE_ID)?;
 
     // The fixture parses locally before the CDR is asked to accept it, so a
     // refusal is attributable to the server rather than to the fixture.
@@ -192,7 +198,7 @@ async fn commit(
         .create_composition(
             ehr_id,
             &composition()?,
-            &commit_context(CREATION, template_id)?,
+            &commit_context(CREATION, template_id),
             Prefer::Representation,
         )
         .await?;
@@ -205,7 +211,7 @@ async fn commit(
                 return Err("the representation was asked for and not returned".into());
             };
             assert_eq!(
-                Some(version_id.to_string()),
+                Some(version_id.value().to_owned()),
                 committed.uid.as_ref().map(|uid| uid.value().to_owned()),
                 "the committed composition does not carry the version the ETag named"
             );
@@ -225,7 +231,11 @@ async fn read_back(
     version_id: &ObjectVersionId,
 ) -> Result<(), Box<dyn Error>> {
     let outcome = client
-        .composition(ehr_id, &UidBasedId::Version(version_id.clone()), None)
+        .composition(
+            ehr_id,
+            &UidBasedId::ObjectVersionId(version_id.clone()),
+            None,
+        )
         .await?;
     match outcome {
         CompositionOutcome::Found {
@@ -239,7 +249,7 @@ async fn read_back(
             );
             let mut read = *read;
             assert_eq!(
-                Some(version_id.to_string()),
+                Some(version_id.value().to_owned()),
                 read.uid.as_ref().map(|uid| uid.value().to_owned()),
                 "the composition read back does not carry the version it was read at"
             );
@@ -265,10 +275,10 @@ async fn update(
     let outcome = client
         .update_composition(
             ehr_id,
-            &preceding.versioned_object_uid(),
+            &versioned_object_uid(preceding),
             preceding,
             &composition()?,
-            &commit_context(MODIFICATION, template_id)?,
+            &commit_context(MODIFICATION, template_id),
             Prefer::Representation,
         )
         .await?;
@@ -276,7 +286,7 @@ async fn update(
         UpdateCompositionOutcome::Updated { version_id, .. } => {
             assert_eq!(
                 "2",
-                version_id.version_tree_id(),
+                version_id.version_tree_id().value(),
                 "the update did not become the second version"
             );
             Ok(version_id)
@@ -295,10 +305,10 @@ async fn refuse_a_stale_if_match(
     let outcome = client
         .update_composition(
             ehr_id,
-            &stale.versioned_object_uid(),
+            &versioned_object_uid(stale),
             stale,
             &composition()?,
-            &commit_context(MODIFICATION, template_id)?,
+            &commit_context(MODIFICATION, template_id),
             Prefer::Representation,
         )
         .await?;
@@ -307,10 +317,10 @@ async fn refuse_a_stale_if_match(
             latest_version_id, ..
         } => {
             assert_eq!(
-                Some("2"),
+                Some("2".to_owned()),
                 latest_version_id
                     .as_ref()
-                    .map(ObjectVersionId::version_tree_id),
+                    .map(|id| id.version_tree_id().value().to_owned()),
                 "the 412 did not name the latest version in its ETag"
             );
             Ok(())
@@ -333,7 +343,7 @@ async fn query_finds_the_composition(
     let outcome = client.query_aql(&request).await?;
     match outcome {
         QueryOutcome::Rows(set) => {
-            let wanted = serde_json::Value::String(version_id.to_string());
+            let wanted = serde_json::Value::String(version_id.value().to_owned());
             assert!(
                 set.rows.iter().any(|row| row.contains(&wanted)),
                 "the query did not return the committed composition: {:?}",
@@ -360,8 +370,10 @@ async fn delete_and_read_the_deleted_outcome(
     match outcome {
         DeleteCompositionOutcome::Deleted { version_id } => {
             assert_eq!(
-                Some("3"),
-                version_id.as_ref().map(ObjectVersionId::version_tree_id),
+                Some("3".to_owned()),
+                version_id
+                    .as_ref()
+                    .map(|id| id.version_tree_id().value().to_owned()),
                 "the delete did not report the version it created"
             );
         }
@@ -370,7 +382,7 @@ async fn delete_and_read_the_deleted_outcome(
     let outcome = client
         .composition(
             ehr_id,
-            &UidBasedId::VersionedObject(latest.versioned_object_uid()),
+            &UidBasedId::HierObjectId(versioned_object_uid(latest)),
             None,
         )
         .await?;
@@ -385,21 +397,12 @@ async fn delete_and_read_the_deleted_outcome(
 /// The audit change type travels in `openehr-audit-details` and the lifecycle
 /// state in `openehr-version` (ITS-REST 1.1.0 §Requests and responses/HTTP
 /// headers/openehr-version and openehr-audit-details).
-fn commit_context(
-    change_type: &str,
-    template_id: &TemplateId,
-) -> Result<CommitContext, Box<dyn Error>> {
-    Ok(CommitContext {
-        lifecycle_state: Some(LifecycleState::new(COMPLETE)?),
-        change_type: Some(ChangeType::new(change_type)?),
-        committer: Some(Committer {
-            name: "Synthetic Committer".to_owned(),
-            external_ref: None,
-        }),
-        description: Some("A synthetic commit".to_owned()),
-        system_id: None,
+fn commit_context(change_type: &str, template_id: &TemplateId) -> CommitContext {
+    CommitContext {
+        lifecycle_state: Some(support::coded(COMPLETE)),
+        audit: Some(support::audit(change_type, None)),
         template_id: Some(template_id.clone()),
-    })
+    }
 }
 
 /// Returns the synthetic composition as an RM value.

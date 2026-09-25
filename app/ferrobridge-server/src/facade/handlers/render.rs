@@ -10,12 +10,12 @@
 //! (no specification governs the identity: our own design).
 
 use ferrobridge_openehr::ids::EhrId;
-use ferrobridge_openehr::ids::ObjectVersionId;
 use fhir_types::codec::Object;
 use fhir_types::codec::Value;
 use fhirconnect::engine::outcome::Warning;
 use fhirconnect::resolve::program::Program;
 use http::StatusCode;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::index::WebTemplateIndex;
 use url::Url;
@@ -61,7 +61,7 @@ pub(crate) fn render(
         .unwrap_or_default();
     meta.insert(
         String::from("versionId"),
-        Value::String(String::from(version.version_tree_id())),
+        Value::String(String::from(version.version_tree_id().value())),
     );
     // NOTE: `Meta.source` is "a uri that identifies the source system"
     // (<https://hl7.org/fhir/R4/resource.html#Meta>), so the openEHR version
@@ -189,23 +189,28 @@ pub(crate) fn composition_url(
     ehr_id: &EhrId,
     version: &ObjectVersionId,
 ) -> Result<Url, Refusal> {
-    base.join(&format!("ehr/{}/composition/{version}", ehr_id.as_str()))
-        .map_err(|error| {
-            reply::refusal(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Issue::error(IssueType::Exception).diagnosing(format!(
-                    "the composition URL could not be built from the configured CDR base: {error}"
-                )),
-            )
-        })
+    base.join(&format!(
+        "ehr/{}/composition/{}",
+        ehr_id.as_str(),
+        version.value()
+    ))
+    .map_err(|error| {
+        reply::refusal(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Issue::error(IssueType::Exception).diagnosing(format!(
+                "the composition URL could not be built from the configured CDR base: {error}"
+            )),
+        )
+    })
 }
 
 #[cfg(test)]
 mod tests {
     use super::{composition_url, contain, resource_object};
-    use ferrobridge_openehr::ids::{EhrId, ObjectVersionId};
+    use ferrobridge_openehr::ids::EhrId;
     use fhir_types::codec::Value;
     use http::StatusCode;
+    use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 
     /// A synthetic value no refusal may carry onto the wire.
     const MARKER: &str = "ferrobridge-synthetic-clinical-marker";

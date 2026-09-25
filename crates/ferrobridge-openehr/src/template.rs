@@ -10,10 +10,12 @@
 
 use crate::client::{Call, Client, Idempotency};
 use crate::error::{BodyError, Error, UpstreamError};
-use crate::ids::{ArchetypeHrid, TemplateId, entity_tag};
+use crate::ids::entity_tag;
 use crate::prefer::Prefer;
 use http::{Method, StatusCode};
+use openehr_am::v2_4::aom2::archetype::archetype_hrid::ArchetypeHrid;
 use openehr_am::v2_4::aom2::archetype::operational_template::OperationalTemplate;
+use openehr_base::v1_3::base_types::identification::template_id::TemplateId;
 use serde::Deserialize;
 
 /// The canonical XML media type the ADL 1.4 route answers with.
@@ -35,7 +37,8 @@ pub enum TemplateSource {
     Opt2 {
         /// The operational template itself.
         template: Box<OperationalTemplate>,
-        /// The full HRID the partial request resolved to.
+        /// The full HRID the partial request resolved to; its
+        /// `physical_id` is the identifier to cache under.
         resolved_id: ArchetypeHrid,
     },
 }
@@ -76,7 +79,7 @@ impl Client {
     /// answered a status the `OpenAPI` does not document or a body that cannot
     /// be decoded.
     pub async fn template(&self, template_id: &TemplateId) -> Result<TemplateOutcome, Error> {
-        let url = self.url(&["definition", "template", "adl1.4", template_id.as_str()])?;
+        let url = self.url(&["definition", "template", "adl1.4", &template_id.value])?;
         let call = Call::new(Method::GET, url, Idempotency::Idempotent)
             .accepting(CANONICAL_XML)
             .preferring(Prefer::Representation);
@@ -103,7 +106,7 @@ impl Client {
 
     /// Retrieves the ADL 2 operational template `template_id` names.
     async fn template_adl2(&self, template_id: &TemplateId) -> Result<TemplateOutcome, Error> {
-        let url = self.url(&["definition", "template", "adl2", template_id.as_str()])?;
+        let url = self.url(&["definition", "template", "adl2", &template_id.value])?;
         let call = Call::new(Method::GET, url, Idempotency::Idempotent)
             .accepting(crate::client::CANONICAL_JSON)
             .preferring(Prefer::Representation);
@@ -129,7 +132,7 @@ impl Client {
                             media: "AOM2 canonical JSON",
                             source: Box::new(BodyError::CanonicalJson(source)),
                         })?;
-                let resolved_id = resolved_id(&answer, &template)?;
+                let resolved_id = resolved_id(&answer, &template);
                 Ok(TemplateOutcome::Found(TemplateSource::Opt2 {
                     template: Box::new(template),
                     resolved_id,
@@ -150,16 +153,53 @@ impl Client {
 /// HRID when it is one; otherwise the template's own `archetype_id`, which
 /// AM 2.4 §Identification defines as the artefact's physical identifier,
 /// answers instead.
-fn resolved_id(
-    answer: &crate::client::Answer,
-    template: &OperationalTemplate,
-) -> Result<ArchetypeHrid, Error> {
-    if let Some(etag) = answer.header(http::header::ETAG.as_str()) {
-        // NOTE: the OAS example for ETag_Template_adl2 is a UUID, so an entity
-        // tag that is not an HRID is legitimately not of this form.
-        if let Ok(hrid) = ArchetypeHrid::new(entity_tag(etag)) {
-            return Ok(hrid);
-        }
+fn resolved_id(answer: &crate::client::Answer, template: &OperationalTemplate) -> ArchetypeHrid {
+    answer
+        .header(http::header::ETAG.as_str())
+        .and_then(hrid_from_etag)
+        .unwrap_or_else(|| template.archetype_id.clone())
+}
+
+// TODO(#241): parse through `ArchetypeHrid` itself once openehr-am offers
+// `FromStr` for it (sibling request S2), and drop the openehr-adl dependency.
+/// Returns the archetype HRID an `ETag` value carries, when it carries one.
+fn hrid_from_etag(etag: &str) -> Option<ArchetypeHrid> {
+    // NOTE: the OAS example for ETag_Template_adl2 is a UUID, so an entity
+    // tag that is not an HRID is legitimately not of this form.
+    openehr_adl::hrid::parse_hrid(entity_tag(etag)).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::hrid_from_etag;
+
+    #[test]
+    fn an_hrid_accepts_the_namespaced_three_part_version() {
+        let hrid = "org.highmed::openEHR-EHR-COMPOSITION.t_vital_signs.v1.0.0";
+        assert_eq!(
+            Some(hrid.to_owned()),
+            hrid_from_etag(&format!("W/\"{hrid}\"")).map(|parsed| parsed.physical_id())
+        );
     }
-    ArchetypeHrid::from_aom2(&template.archetype_id).map_err(Error::Identifier)
+
+    #[test]
+    fn an_hrid_accepts_a_partial_version_and_a_release_candidate() {
+        assert!(hrid_from_etag("openEHR-EHR-COMPOSITION.t_vital_signs.v1").is_some());
+        assert!(hrid_from_etag("openEHR-EHR-COMPOSITION.t_vital_signs.v1.8.2-rc.4").is_some());
+    }
+
+    #[test]
+    fn an_hrid_refuses_a_missing_version_marker() {
+        assert!(hrid_from_etag("openEHR-EHR-COMPOSITION.t_vital_signs.1.0.0").is_none());
+    }
+
+    #[test]
+    fn an_hrid_refuses_a_two_part_root() {
+        assert!(hrid_from_etag("openEHR-COMPOSITION.t_vital_signs.v1.0.0").is_none());
+    }
+
+    #[test]
+    fn a_uuid_entity_tag_is_no_hrid() {
+        assert!(hrid_from_etag("W/\"8849182c-82ad-4088-a07f-48ead4180515\"").is_none());
+    }
 }

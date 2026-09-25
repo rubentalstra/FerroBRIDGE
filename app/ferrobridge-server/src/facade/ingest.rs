@@ -21,14 +21,12 @@ use std::collections::BTreeSet;
 use ferrobridge_openehr::client::Client;
 use ferrobridge_openehr::composition::CompositionOutcome;
 use ferrobridge_openehr::composition::CreateCompositionOutcome;
-use ferrobridge_openehr::composition::UidBasedId;
 use ferrobridge_openehr::composition::UpdateCompositionOutcome;
 use ferrobridge_openehr::contribution::ContributionOutcome;
 use ferrobridge_openehr::contribution::CreateContributionOutcome;
 use ferrobridge_openehr::ids::ContributionUid;
 use ferrobridge_openehr::ids::EhrId;
-use ferrobridge_openehr::ids::ObjectVersionId;
-use ferrobridge_openehr::ids::VersionedObjectUid;
+use ferrobridge_openehr::ids::versioned_object_uid;
 use ferrobridge_openehr::prefer::Prefer;
 use ferrobridge_openehr::prefer::Returned;
 use fhir_types::codec::Value;
@@ -36,8 +34,11 @@ use fhirconnect::engine::origin::SourceItem;
 use fhirconnect::resolve::program::TemplateId;
 use fhirconnect::resolve::select::SelectError;
 use http::StatusCode;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
 use openehr_base::v1_3::base_types::identification::object_ref::ObjectRef;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 use openehr_its::rest::generated::common::UpdateVersion;
 use openehr_its::rest::generated::ehr::NewContribution;
 use openehr_its::rest::generated::ehr::Versionable;
@@ -212,7 +213,7 @@ pub struct Skipped {
 }
 
 /// One Bundle entry the service committed.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Committed {
     /// The `fullUrl` of the entry, or its position when it has none.
     pub full_url: String,
@@ -239,7 +240,7 @@ pub enum Commit {
 }
 
 /// What happened to one Bundle entry.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum EntryOutcome {
     /// The entry mapped and its composition is stored.
     Committed(Committed),
@@ -499,7 +500,7 @@ impl<'a> Ingest<'a> {
         inbound: &Inbound,
         program: &Loaded,
         ehr_id: &EhrId,
-        container: &VersionedObjectUid,
+        container: &HierObjectId,
         preceding: &ObjectVersionId,
         provenance: &Provenance,
     ) -> Result<Written, Refused> {
@@ -535,7 +536,7 @@ impl<'a> Ingest<'a> {
                     status::diagnostics(&upstream),
                 );
                 if let Some(latest) = latest_version_id {
-                    answer = answer.with_entity_tag(String::from(latest.version_tree_id()));
+                    answer = answer.with_entity_tag(String::from(latest.version_tree_id().value()));
                 }
                 return Err(Refused::of_answer(&answer));
             }
@@ -1130,7 +1131,7 @@ impl<'a> Ingest<'a> {
         // NOTE: no specification governs this: our own design, the facade serves the
         // first resource of a split and carries every further one as contained, so
         // the entry's identity is its first occurrence.
-        let key = EntryKey::new(version.versioned_object_uid(), entry.path(), 0);
+        let key = EntryKey::new(versioned_object_uid(version), entry.path(), 0);
         let map_key = derive::map_key(&key);
         let recorded = self
             .store
@@ -1146,7 +1147,7 @@ impl<'a> Ingest<'a> {
         };
         let binding = CompositionBinding {
             ehr_id: String::from(ehr_id.as_str()),
-            versioned_object_uid: String::from(version.versioned_object_uid().as_str()),
+            versioned_object_uid: String::from(versioned_object_uid(version).value()),
             template_id: String::from(composition.template_id()),
             resource_type: String::from(resource_type),
             entry_path: String::from(entry.path()),
@@ -1187,7 +1188,7 @@ impl<'a> Ingest<'a> {
     /// the CDR holds the version, so the latest one is read from the CDR.
     async fn stands(&self, known: &ConsumedSource) -> Result<(EhrId, Placed), Refused> {
         let ehr_id = EhrId::new(&known.ehr_id).map_err(|error| stored_identifier(&error))?;
-        let container = VersionedObjectUid::new(&known.versioned_object_uid)
+        let container = HierObjectId::new(&known.versioned_object_uid)
             .map_err(|error| stored_identifier(&error))?;
         let id = FhirResourceId::new(&known.internal_id).map_err(|error| {
             Refused::new(
@@ -1198,7 +1199,7 @@ impl<'a> Ingest<'a> {
             )
         })?;
         let (version, _composition) = self
-            .read(&ehr_id, &UidBasedId::VersionedObject(container))
+            .read(&ehr_id, &UidBasedId::HierObjectId(container))
             .await?;
         let version = version.ok_or_else(|| {
             Refused::new(
@@ -1216,7 +1217,7 @@ impl<'a> Ingest<'a> {
         ehr_id: &EhrId,
         version: &ObjectVersionId,
     ) -> Result<Composition, Refused> {
-        self.read(ehr_id, &UidBasedId::Version(version.clone()))
+        self.read(ehr_id, &UidBasedId::ObjectVersionId(version.clone()))
             .await
             .map(|(_version, composition)| composition)
     }
@@ -1485,7 +1486,8 @@ fn pair(
             return Err(unbound(
                 contribution,
                 &format!(
-                    "its version {version} matches {} of the entries sent, where it must match one",
+                    "its version {} matches {} of the entries sent, where it must match one",
+                    version.value(),
                     matching.len()
                 ),
             ));
@@ -1493,7 +1495,7 @@ fn pair(
         let slot = placed.get_mut(*index).ok_or_else(|| {
             unbound(
                 contribution,
-                &format!("its version {version} matches no entry"),
+                &format!("its version {} matches no entry", version.value()),
             )
         })?;
         if slot.is_some() {
@@ -1554,18 +1556,13 @@ fn listed_versions(
                     "references a version by an id that is no OBJECT_VERSION_ID",
                 )));
             };
-            ObjectVersionId::new(named.value()).map_err(|error| {
-                unreadable(format!(
-                    "references the version `{}`, which does not read: {error}",
-                    named.value()
-                ))
-            })
+            Ok(named.clone())
         })
         .collect()
 }
 
 /// Returns the refusal a malformed stored openEHR identifier renders as.
-fn stored_identifier(error: &ferrobridge_openehr::ids::IdError) -> Refused {
+fn stored_identifier(error: &impl std::fmt::Display) -> Refused {
     Refused::new(
         StatusCode::INTERNAL_SERVER_ERROR,
         Issue::error(IssueType::Exception).diagnosing(format!(

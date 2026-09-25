@@ -1272,9 +1272,9 @@ is taken directly for the OPT2 types. `openehr-adl` (until a CDR serves ADL 2 as
 - `ferrobridge-term` to `fhirconnect`: typed lookup, translate and
   validate outcomes, with a failed call a typed error.
 
-Identifiers cross every seam as distinct newtypes: an `EhrId`, a
-`VersionedObjectUid`, an `ObjectVersionId`, a `FhirResourceId`, a `PersonId`
-are five types, and the derivation functions in section 9 are the only places
+Identifiers cross every seam as distinct types: an `EhrId`, a version
+container `HierObjectId`, an `ObjectVersionId`, a `FhirResourceId`, a
+`PersonId` are five types, and the derivation functions in section 9 are the only places
 they meet.
 
 ## 9. Identity, failure and the specification's recommendations

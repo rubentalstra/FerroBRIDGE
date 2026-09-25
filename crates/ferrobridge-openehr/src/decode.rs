@@ -5,9 +5,9 @@
 
 use crate::client::Answer;
 use crate::error::{BodyError, Error};
-use crate::ids::ObjectVersionId;
 use crate::prefer::{Prefer, Returned};
 use http::header::ETAG;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_its::rest::generated::common::Identifier;
 use serde::de::DeserializeOwned;
 
@@ -66,7 +66,7 @@ pub(crate) fn version_id(answer: &Answer) -> Result<ObjectVersionId, Error> {
             status: answer.status,
             header: "ETag",
         })?;
-    ObjectVersionId::from_etag(etag).map_err(|source| Error::MalformedHeader {
+    crate::ids::version_from_etag(etag).map_err(|source| Error::MalformedHeader {
         url: answer.url.clone(),
         header: "ETag",
         source: Box::new(source),
@@ -83,7 +83,7 @@ pub(crate) fn version_id(answer: &Answer) -> Result<ObjectVersionId, Error> {
 pub(crate) fn optional_version_id(answer: &Answer) -> Result<Option<ObjectVersionId>, Error> {
     match answer.header(ETAG.as_str()) {
         None => Ok(None),
-        Some(etag) => ObjectVersionId::from_etag(etag)
+        Some(etag) => crate::ids::version_from_etag(etag)
             .map(Some)
             .map_err(|source| Error::MalformedHeader {
                 url: answer.url.clone(),

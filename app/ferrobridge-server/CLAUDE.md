@@ -51,8 +51,9 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   facade authors is an `OperationOutcome` with an `issue.code` from the R4
   value set; the openEHR body travels verbatim inside `issue.diagnostics` and
   never reaches the wire as its own document.
-- **Ids are newtypes.** `EhrId`, `VersionedObjectUid` and `ObjectVersionId`
-  come from the ITS-REST client; `FhirResourceId`, `ExternalResourceId` and
+- **Ids are newtypes.** `EhrId` comes from the ITS-REST client, the version
+  container and the version are the `openehr-base` `HierObjectId` and
+  `ObjectVersionId`; `FhirResourceId`, `ExternalResourceId` and
   `PersonId` are this side's. A function never takes a bare `String` where one
   of them belongs, so a swapped argument is a compile error.
 - **The map wins once written.** A derived id is derived once. Changing the

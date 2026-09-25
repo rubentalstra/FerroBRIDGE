@@ -5,7 +5,7 @@
 
 use crate::support;
 use ferrobridge_openehr::error::Error as ClientError;
-use ferrobridge_openehr::ids::TemplateId;
+use ferrobridge_openehr::ids::template_id;
 use ferrobridge_openehr::template::{TemplateOutcome, TemplateSource};
 use std::error::Error;
 use wiremock::matchers::{method, path};
@@ -32,7 +32,7 @@ async fn the_adl1_4_route_answers_the_canonical_opt() -> Result<(), Box<dyn Erro
         .await;
 
     let outcome = support::client(&server)?
-        .template(&TemplateId::new(TEMPLATE)?)
+        .template(&template_id(TEMPLATE)?)
         .await?;
     match outcome {
         TemplateOutcome::Found(TemplateSource::Opt14(template)) => {
@@ -70,11 +70,11 @@ async fn a_404_on_adl1_4_falls_back_to_adl2() -> Result<(), Box<dyn Error>> {
         .await;
 
     let outcome = support::client(&server)?
-        .template(&TemplateId::new(TEMPLATE)?)
+        .template(&template_id(TEMPLATE)?)
         .await?;
     match outcome {
         TemplateOutcome::Found(TemplateSource::Opt2 { resolved_id, .. }) => {
-            assert_eq!(support::OPT2_HRID, resolved_id.as_str());
+            assert_eq!(support::OPT2_HRID, resolved_id.physical_id());
         }
         other => return Err(format!("expected an ADL 2 template, got {other:?}").into()),
     }
@@ -104,7 +104,7 @@ async fn a_406_on_adl1_4_falls_back_to_adl2() -> Result<(), Box<dyn Error>> {
         .await;
 
     let outcome = support::client(&server)?
-        .template(&TemplateId::new(TEMPLATE)?)
+        .template(&template_id(TEMPLATE)?)
         .await?;
     assert!(matches!(
         outcome,
@@ -132,7 +132,7 @@ async fn the_adl2_request_never_offers_text_plain() -> Result<(), Box<dyn Error>
         .await;
 
     let _outcome = support::client(&server)?
-        .template(&TemplateId::new(TEMPLATE)?)
+        .template(&template_id(TEMPLATE)?)
         .await?;
     let accept = support::request_header(&server, 1, "accept").await?;
     assert_eq!(vec!["application/json".to_owned()], accept);
@@ -159,7 +159,7 @@ async fn an_adl2_body_of_the_wrong_type_is_refused() -> Result<(), Box<dyn Error
         .await;
 
     let error = support::client(&server)?
-        .template(&TemplateId::new(TEMPLATE)?)
+        .template(&template_id(TEMPLATE)?)
         .await
         .expect_err("a body that is not an operational template is refused");
     match error {
@@ -186,7 +186,7 @@ async fn a_miss_on_both_routes_is_the_unknown_template_outcome() -> Result<(), B
         .await;
 
     let outcome = support::client(&server)?
-        .template(&TemplateId::new(TEMPLATE)?)
+        .template(&template_id(TEMPLATE)?)
         .await?;
     assert!(matches!(outcome, TemplateOutcome::UnknownTemplate));
     Ok(())
