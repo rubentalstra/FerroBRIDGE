@@ -54,6 +54,22 @@ The first run pulls the images, which are pinned by digest in
 `docs/VERSIONS.md`; later runs start in a few seconds. Each test owns its
 containers and stops them when it ends.
 
+## The sqlx query metadata
+
+`omop-cdm` checks its SQL at compile time from the metadata committed under
+`crates/omop-cdm/.sqlx/`, and the `sqlx-offline` job fails when that metadata
+is stale. After you change a query in `omop-cdm`, start Docker, install
+`sqlx-cli` at the version `docs/VERSIONS.md` pins, and regenerate:
+
+```bash
+scripts/checks/sqlx-offline.sh
+```
+
+Commit the rewritten `.sqlx/` files with the query change. With
+`DATABASE_URL` set in your environment the `sqlx` macros connect to that
+database instead of reading the metadata, so leave it unset for an ordinary
+build.
+
 ## Workflow security rules
 
 Every workflow follows the same four rules, and the analysers above check them:

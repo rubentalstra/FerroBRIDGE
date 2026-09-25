@@ -131,6 +131,12 @@ impl std::str::FromStr for SchemaName {
 /// Returns [`SchemaNameError`] when `schema` is not an unquoted PostgreSQL
 /// identifier. Nothing is substituted in that case.
 pub fn with_schema(sql: &str, schema: &str) -> Result<String, SchemaNameError> {
-    let schema = SchemaName::new(schema)?;
-    Ok(sql.replace(SCHEMA_PLACEHOLDER, schema.as_str()))
+    Ok(in_schema(sql, &SchemaName::new(schema)?))
+}
+
+/// Returns `sql` with every [`SCHEMA_PLACEHOLDER`] replaced by a schema name
+/// that is already checked.
+#[must_use]
+pub fn in_schema(sql: &str, schema: &SchemaName) -> String {
+    sql.replace(SCHEMA_PLACEHOLDER, schema.as_str())
 }

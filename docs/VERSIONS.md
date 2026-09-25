@@ -90,8 +90,9 @@ dependency pins below.
 | `futures-core`, `futures-util` | 0.3.34 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `tokio` | 1.53.1 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `wiremock` | 0.6.5 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
-| `testcontainers` | 0.27.3 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
+| `testcontainers` | 0.28.0 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
 | `tokio-postgres` | 0.7.18 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
+| `sqlx` | 0.9.0 | the root `Cargo.toml` `[workspace.dependencies]` (the concept resolver; the `sqlx-cli` row carries the same version) |
 
 ## Container images (the end-to-end lane)
 
@@ -105,7 +106,7 @@ in code is the matching constant in
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| PostgreSQL image | `postgres:18.6@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280` | the `POSTGRES` constant in `tools/ferrobridge-testkit/src/containers.rs` |
+| PostgreSQL image | `postgres:18.6@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280` | the `POSTGRES` constant in `tools/ferrobridge-testkit/src/containers.rs`, the `sqlx-offline` service in `.github/workflows/ci.yml` |
 | FerroEHR CDR image | `ghcr.io/rubentalstra/ferroehr:4.2.5@sha256:aa5a9e0447befadb396084fd19ce7a6d30ea1fb8e16806615071e9f1748125ca` | the `CDR` constant in `tools/ferrobridge-testkit/src/containers.rs` |
 | FerroEHR CDR database image | `ghcr.io/rubentalstra/ferroehr-postgres:4.2.5@sha256:e094461744fa8510ca8c1c4ecde4460474befb00b310ba41f7d9ff6e67e181bc` | the `CDR_POSTGRES` constant in `tools/ferrobridge-testkit/src/containers.rs` |
 | FerroTERM terminology server image | `ghcr.io/rubentalstra/ferroterm:0.1.3@sha256:b1ef80382e03c2474bfec2ec57a698d83314e1290dd0cb5a2612ea208bde020c` | the `TERMINOLOGY` constant in `tools/ferrobridge-testkit/src/containers.rs` |
@@ -255,7 +256,11 @@ The tier-1 lanes of `.github/workflows/ci.yml` run four analyzers, each pinned
 to an exact version so a CI result matches the local one. `zizmor` and
 `shellcheck` are fetched by `taiki-e/install-action`, which verifies the
 upstream release checksum; `actionlint` and `hadolint` run from their official
-container images, pinned by tag and by digest.
+container images, pinned by tag and by digest. The `sqlx-offline` job installs
+`sqlx-cli` through the same action, which falls back to `cargo-binstall` because
+`sqlx-cli` is not in its own tool list. `sqlx-cli` carries the
+`sqlx` crate's version, because the CLI writes the query metadata the crate's
+macros read.
 
 | Item | Pin | Repeated in |
 |---|---|---|
@@ -263,6 +268,7 @@ container images, pinned by tag and by digest.
 | `actionlint` | 1.7.12 | `.github/workflows/ci.yml` |
 | `shellcheck` | 0.11.0 | `.github/workflows/ci.yml` |
 | `hadolint` | 2.15.1 | `.github/workflows/ci.yml` |
+| `sqlx-cli` | 0.9.0 | `.github/workflows/ci.yml` (the `sqlx-offline` job) |
 
 Keep the locally installed versions on these numbers, so a finding costs a
 local run rather than a CI round trip (`.claude/rules/ci-cd.md`).

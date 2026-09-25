@@ -12,14 +12,19 @@
 #                          ITS-REST) against docs/VERSIONS.md.
 #   2. model crates        fhir-types and the openehr-* crates across
 #                          docs/architecture.md, docs/VERSIONS.md, and the root
-#                          Cargo.toml [workspace.dependencies] requirement.
-#   3. toolchain           rust-toolchain.toml channel, plus the root
+#                          Cargo.toml [workspace.dependencies] requirement,
+#                          and the testcontainers, tokio-postgres and sqlx
+#                          rows of docs/VERSIONS.md against that requirement.
+#   3. toolchain          rust-toolchain.toml channel, plus the root
 #                          Cargo.toml edition, rust-version and resolver.
 #   4. product version     CITATION.cff version against the docs/VERSIONS.md
 #                          product-version row, and against the root Cargo.toml
 #                          [workspace.package] version once that exists.
-#   5. CI tool pins        the zizmor, actionlint, shellcheck and hadolint
-#                          versions .github/workflows/ci.yml installs, and the
+#   5. CI tool pins        the zizmor, actionlint, shellcheck, hadolint and
+#                          sqlx-cli versions .github/workflows/ci.yml installs
+#                          (sqlx-cli also against the sqlx crate row), its
+#                          sqlx-offline service image against the PostgreSQL
+#                          row, and the
 #                          cargo-auditable, cargo-cyclonedx and syft versions
 #                          the two release workflows install, against
 #                          docs/VERSIONS.md.
@@ -170,6 +175,27 @@ else
   note "no docs/architecture.md or docs/VERSIONS.md yet, skipped"
 fi
 
+echo "== dependency crate pins (docs/VERSIONS.md <-> Cargo.toml)"
+if [ -f docs/VERSIONS.md ] && [ -f Cargo.toml ]; then
+  agreed=0
+  for crate in testcontainers tokio-postgres sqlx; do
+    matrix="$(pin_of "$crate" docs/VERSIONS.md)"
+    req="$(manifest_req "$crate")"
+    if [ -z "$matrix" ]; then
+      bad "docs/VERSIONS.md has no $crate row"
+    elif [ -z "$req" ]; then
+      bad "root Cargo.toml has no $crate requirement"
+    elif [ "$req" != "$matrix" ]; then
+      bad "$crate: root Cargo.toml requires $req, docs/VERSIONS.md pins $matrix"
+    else
+      agreed=$((agreed + 1))
+    fi
+  done
+  [ "$agreed" -eq 3 ] && note "OK: all three dependency crate pins agree"
+else
+  note "no docs/VERSIONS.md or root Cargo.toml yet, skipped"
+fi
+
 echo "== toolchain (rust-toolchain.toml and Cargo.toml <-> docs/VERSIONS.md)"
 if [ -f rust-toolchain.toml ]; then
   chan="$(toml_val "[toolchain]" channel rust-toolchain.toml)"
@@ -247,7 +273,7 @@ if [ -f .github/workflows/ci.yml ]; then
   # `tool: name@version` line, or the tag of a digest-pinned image.
   ci_tool_pin() {
     case "$1" in
-    zizmor | shellcheck)
+    zizmor | shellcheck | sqlx-cli)
       sed -nE "s|^[[:space:]]*tool:[[:space:]]*$1@([^[:space:]]+).*|\1|p" \
         .github/workflows/ci.yml | head -n1
       ;;
@@ -261,7 +287,7 @@ if [ -f .github/workflows/ci.yml ]; then
       ;;
     esac
   }
-  for tool in zizmor actionlint shellcheck hadolint; do
+  for tool in zizmor actionlint shellcheck hadolint sqlx-cli; do
     want="$(pin_of "$tool" docs/VERSIONS.md)"
     found="$(ci_tool_pin "$tool")"
     if [ -z "$want" ]; then
@@ -274,6 +300,24 @@ if [ -f .github/workflows/ci.yml ]; then
       note "OK: $tool $found"
     fi
   done
+
+  # The CLI that writes the query metadata and the crate that reads it are
+  # released together, so they carry one version.
+  cli="$(pin_of sqlx-cli docs/VERSIONS.md)"
+  crate="$(pin_of sqlx docs/VERSIONS.md)"
+  if [ -n "$cli" ] && [ "$cli" != "$crate" ]; then
+    bad "sqlx-cli is pinned at $cli, the sqlx crate at $crate"
+  fi
+
+  ci_pg="$(sed -nE 's|^[[:space:]]*image:[[:space:]]*(postgres:[^[:space:]]+)[[:space:]]*$|\1|p' .github/workflows/ci.yml | head -n1)"
+  want_pg="$(pin_of "PostgreSQL image" docs/VERSIONS.md)"
+  if [ -z "$ci_pg" ]; then
+    bad ".github/workflows/ci.yml has no digest-pinned postgres service image"
+  elif [ "$ci_pg" != "$want_pg" ]; then
+    bad "sqlx-offline service: ci.yml runs $ci_pg, docs/VERSIONS.md pins $want_pg"
+  else
+    note "OK: the sqlx-offline service runs $ci_pg"
+  fi
 else
   note "no .github/workflows/ci.yml yet, skipped"
 fi

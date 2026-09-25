@@ -13,3 +13,4 @@ mod ddl;
 mod pins;
 mod tables;
 mod value;
+mod vocabulary;

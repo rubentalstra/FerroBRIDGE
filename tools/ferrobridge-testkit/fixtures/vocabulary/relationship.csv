@@ -1,0 +1,4 @@
+relationship_id,relationship_name,is_hierarchical,defines_ancestry,reverse_relationship_id,relationship_concept_id
+Maps to,Synthetic name for Maps to,0,0,Mapped from,9031
+Mapped from,Synthetic name for Mapped from,0,0,Maps to,9032
+FB related,Synthetic unrelated relationship,0,0,FB related,9033

@@ -1,0 +1,4 @@
+concept_class_id,concept_class_name,concept_class_concept_id
+FB-CLASS,Synthetic concept class,9021
+FB-INGREDIENT,Synthetic ingredient class,9022
+FB-META,Synthetic metadata class,9023

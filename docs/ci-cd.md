@@ -84,6 +84,20 @@ invocation flag to run at all, which puts the lane one forgotten flag away from
 never running. The gate variable is the single switch instead, and this job is
 where it is on.
 
+## The sqlx query metadata
+
+`omop-cdm` checks its SQL at compile time with `sqlx`, from the query metadata
+committed under `crates/omop-cdm/.sqlx/`, so no build needs a database.
+`sqlx-offline` keeps that metadata honest. It runs the PostgreSQL image the
+matrix pins as a `services:` container that trusts local connections, and
+runs `scripts/checks/sqlx-offline.sh --check` with `DATABASE_URL` pointing at
+it. The script applies the vendored OHDSI DDL into a `cdm` schema through
+`psql` and runs `cargo sqlx prepare --check`, which fails when the committed
+metadata no longer describes the queries. Without `DATABASE_URL` the same
+script starts the pinned image in Docker, which is how you regenerate the
+metadata locally. The versions guard compares the service image and the
+`sqlx-cli` pin with `docs/VERSIONS.md`.
+
 `fhir-types-features` runs `cargo hack check -p fhir-types --each-feature
 --locked` plus one wide combination, because the generated crate
 holds the union of its declared root sets and its features select inside it
