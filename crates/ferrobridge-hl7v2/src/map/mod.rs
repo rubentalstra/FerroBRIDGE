@@ -243,7 +243,8 @@ pub enum Outcome {
     },
     /// A `MessageHeader` endpoint written from the facility field because
     /// neither the application nor the network address field is valued:
-    /// MSH-4 for `source`, MSH-6 for `destination`.
+    /// MSH-4 for `source`, MSH-6 for `destination`. The value replaces the
+    /// data-absent-reason extension the guide's rows write on that endpoint.
     FacilityEndpoint {
         /// Where: the facility field.
         at: Location,

@@ -459,6 +459,26 @@ crates on crates.io.
   MSH-24 and MSH-4 is answered `AR`. The smoke corpus passes 187 of 379
   messages (162 before); the 2 AIRA messages that name no sender at all stay
   refused.
+- A v2-to-FHIR row whose own source field is empty runs when it maps that
+  absence: it assigns a literal and its condition requires the field
+  `NOT VALUED` (#318). The MSH map's MSH-24 and MSH-25 rows
+  (`IF MSH-24 NOT VALUED AND MSH-3 NOT VALUED` and the destination pair)
+  now write their data-absent-reason extension on the endpoint, and the
+  data type rows of the same form (`XTN.3` when `XTN.4` is valued) run too.
+  A row on an empty field whose condition only tests another field
+  (`PID-13` with `IF PID-13.2 IS NOT VALUED`) still writes nothing. Where
+  MSH-4 or MSH-6 gives the endpoint, the facility's value replaces the
+  data-absent-reason, since the row's comment leaves the implementer the
+  choice between a known value and the extension. The vendored corpora pass
+  111 of 511 messages (107 before, the four MDM T06 and T10 samples); the
+  smoke corpus stays at 187 of 379.
+- A v2 message whose MSH-9.3 names a structure the definitions lack
+  (`ADT^A08^ADT_A08`, `SIU^S13^SIU_S13`) is grouped by the structure the
+  message definition of MSH-9.1 and MSH-9.2 names, as HL7 v2.5.1 chapter 2
+  §2.15.9.9 derives it through table 0354, and counted as `other-structure`
+  naming both (#319). An MSH-9.3 naming a known structure the definition
+  contradicts stays refused, and so does one with no definition to fall back
+  on (`ORM^O01^ORM_O01`, 10 vendored messages).
 - A v2 message whose header carries no MSH-9.3 (the v2.3 senders in the
   vendored ReportStream set) resolves its structure from MSH-9.1 and MSH-9.2
   through the generated message index instead of being refused as unnamed

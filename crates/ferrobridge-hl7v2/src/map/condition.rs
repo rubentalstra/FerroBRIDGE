@@ -499,9 +499,26 @@ pub fn evaluate(
     }
 }
 
+/// Whether `expr` holds only where `operand` is not valued: a `NOT VALUED`
+/// check of `operand`, alone or as a conjunct.
+///
+/// This is how a row states that it maps the absence of its own source, as
+/// the `segment-msh-to-messageheader` MSH-24 rows do with
+/// `IF MSH-24 NOT VALUED AND MSH-3 NOT VALUED`.
+#[must_use]
+pub fn requires_absent(expr: &Expr, operand: &Operand) -> bool {
+    match expr {
+        Expr::And(left, right) => requires_absent(left, operand) || requires_absent(right, operand),
+        Expr::Test(tested, Check::NotValued { .. }) => tested == operand,
+        Expr::Or(..) | Expr::Not(_) | Expr::Test(..) => false,
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Check, Compare, Expr, Operand, Probe, Unevaluable, evaluate, parse};
+    use super::{
+        Check, Compare, Expr, Operand, Probe, Unevaluable, evaluate, parse, requires_absent,
+    };
 
     fn field(segment: &str, path: &[usize]) -> Operand {
         Operand::Field {
@@ -597,5 +614,17 @@ mod tests {
             evaluate(&expr, &mut probe),
             Err(Unevaluable::Stop(_))
         ));
+    }
+
+    #[test]
+    fn only_a_conjunct_not_valued_check_requires_the_operand_absent() {
+        let own = field("MSH", &[24]);
+        let holds = |text: &str| requires_absent(&parse(text).expect("it parses"), &own);
+        assert!(holds("IF MSH-24 NOT VALUED AND MSH-3 NOT VALUED"));
+        assert!(holds("IF MSH-3 NOT VALUED AND MSH-24 NOT VALUED"));
+        assert!(!holds("IF MSH-3 NOT VALUED"));
+        assert!(!holds("IF MSH-24.1 NOT VALUED"));
+        assert!(!holds("IF MSH-24 NOT VALUED OR MSH-3 NOT VALUED"));
+        assert!(!holds("IF MSH-24 NOT IN (\"A\")"));
     }
 }
