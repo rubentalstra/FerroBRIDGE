@@ -13,14 +13,24 @@ Maintenance rule: every pull request that changes user-visible behaviour adds
 an entry under **[Unreleased]** in the same PR. Cutting a release renames
 [Unreleased] to the version and date, and adds a fresh link reference.
 
-FerroBRIDGE is in its design phase, and the architecture is the output of the
+The architecture is recorded in `docs/architecture.md`, the output of the
 research program on
 [issue #1](https://github.com/rubentalstra/FerroBRIDGE/issues/1). Releases on
-the 0.0.x line carry the repository, its gates, and its documentation. From the
-first tag they also carry a Linux binary per architecture and a container
-image, each with provenance and an SBOM you can verify (`SECURITY.md`).
+the 0.0.x line carry the repository, its gates, its documentation, a Linux
+binary per architecture and a container image, each with provenance and an
+SBOM you can verify (`SECURITY.md`); from 0.0.3 they also carry the library
+crates on crates.io.
 
 ## [Unreleased]
+
+## [0.0.3-rc.1] - 2026-09-25
+
+The FHIR round-trip release. The `fhirconnect` crate runs every FHIRconnect
+method over the generated FHIR model and the openEHR Web Template; the `$tofhir`
+and `$toopenehr` operations and the FHIR R4 facade over a CDR are served by the
+one binary; and the published KDS Diagnose chain round-trips under both lens
+laws, through the operations and against a real CDR, modulo a declared set.
+`v0.0.3-rc.1` rehearses the release lane with this content.
 
 ### Added
 
@@ -936,6 +946,7 @@ release lane with this content and is superseded by this release.
   after each version. Every header, the README badge and licensing section,
   and the community and governance documents name it (#12).
 
-[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.3-rc.1...HEAD
+[0.0.3-rc.1]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.2...v0.0.3-rc.1
 [0.0.2]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/rubentalstra/FerroBRIDGE/releases/tag/v0.0.1
