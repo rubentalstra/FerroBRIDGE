@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! Shared helpers: the structure selection, the corpus, a parse shortcut, the
-//! test face behind the MLLP listener, and the terminology stub.
+//! Shared helpers: the corpus, a parse shortcut, the test face behind the
+//! MLLP listener, and the terminology stub.
 
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -14,11 +14,10 @@ use ferrobridge_hl7v2::decode::{self, Charset};
 use ferrobridge_hl7v2::inbound::{self, Received};
 use ferrobridge_hl7v2::map::corpus::Corpus;
 use ferrobridge_hl7v2::mllp::{Handler, Malformed};
-use ferrobridge_hl7v2::parse::{self, Message, Parsed, StructureError};
+use ferrobridge_hl7v2::parse::{self, Parsed};
 use ferrobridge_term::client::Client;
 use ferrobridge_term::config::{Config, RetryPolicy, WireVersion};
 use ferrobridge_testkit::stubs::terminology;
-use hl7v2_types::model::Structure;
 use wiremock::{Mock, MockServer, Request, Respond, ResponseTemplate};
 
 /// The acknowledgment stamp every test answer carries.
@@ -27,26 +26,11 @@ pub(crate) const STAMP: Stamp<'static> = Stamp {
     timestamp: "20260925143001+0200",
 };
 
-/// Selects the structure a test message names.
-///
-/// The variant of a structure the definitions carry several of is the one
-/// the trigger event's message definition names: `HL7/v2ig`
-/// `input/sourceOfTruth/message/messages/ORU-R01.json` names `ORU_R01-A`,
-/// `ADT-A01.json` names `ADT_A01-A`, `MDM-T02.json` names `MDM_T02-A`.
-pub(crate) fn select(message: &Message) -> Result<&'static Structure, StructureError> {
-    match (message.message_type(1), message.message_type(2)) {
-        (Some("ORU"), Some("R01")) => Ok(&hl7v2_types::structure::oru_r01_a::ORU_R01_A),
-        (Some("ADT"), Some("A01")) => Ok(&hl7v2_types::structure::adt_a01_a::ADT_A01_A),
-        (Some("MDM"), Some("T02")) => Ok(&hl7v2_types::structure::mdm_t02_a::MDM_T02_A),
-        _ => parse::structure_for(message),
-    }
-}
-
 /// Decodes, lexes and groups a fixture, with ASCII as the agreed default.
 pub(crate) fn parsed(bytes: &[u8]) -> Parsed {
     let decoded = decode::decode(bytes, Charset::Ascii).expect("the fixture decodes");
     let lexed = parse::lex(&decoded.text, decoded.charset).expect("the fixture lexes");
-    let structure = select(&lexed.message).expect("the fixture names a structure");
+    let structure = parse::structure_for(&lexed.message).expect("the fixture names a structure");
     parse::group(lexed, structure)
 }
 
@@ -68,7 +52,7 @@ pub(crate) struct Face;
 
 impl Handler for Face {
     fn handle(&self, message: Vec<u8>) -> impl Future<Output = Option<Vec<u8>>> + Send {
-        let reply = match inbound::receive(&message, Charset::Ascii, select, STAMP) {
+        let reply = match inbound::receive(&message, Charset::Ascii, parse::structure_for, STAMP) {
             Received::Parsed(inbound) => inbound.answer(Code::Accept, &[], STAMP).ok(),
             Received::Answered { reply, .. } => Some(reply),
             Received::Unanswerable => None,

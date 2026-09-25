@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DSC` segment: Continuation Pointer.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `DSC` segment definition, `http://hl7.org/v2/StructureDefinition/DSC`.
@@ -18,7 +19,7 @@ pub static DSC: Segment = Segment {
             id: "DSC.1-continuationPointer",
             position: 1,
             name: "Continuation Pointer",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static DSC: Segment = Segment {
             id: "DSC.2-continuationStyle",
             position: 2,
             name: "Continuation Style",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

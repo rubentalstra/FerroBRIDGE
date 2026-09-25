@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BPX` segment: Blood Product Dispense Status.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `BPX` segment definition, `http://hl7.org/v2/StructureDefinition/BPX`.
@@ -18,7 +19,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.1-bpx1",
             position: 1,
             name: "BPX-1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.2-bpx2",
             position: 2,
             name: "BPX-2",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.3-bpx3",
             position: 3,
             name: "BPX-3",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -75,7 +76,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.4-bpx4",
             position: 4,
             name: "BPX-4",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.5-bpx5",
             position: 5,
             name: "BPX-5",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -105,7 +106,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.6-bpx6",
             position: 6,
             name: "BPX-6",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -123,7 +124,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.7-bpx7",
             position: 7,
             name: "BPX-7",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.8-bpx8",
             position: 8,
             name: "BPX-8",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.9-bpx9",
             position: 9,
             name: "BPX-9",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -174,7 +175,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.10-bpx10",
             position: 10,
             name: "BPX-10",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -189,7 +190,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.11-bpx11",
             position: 11,
             name: "BPX-11",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.12-bpx12",
             position: 12,
             name: "BPX-12",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -225,7 +226,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.13-bpx13",
             position: 13,
             name: "BPX-13",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -240,7 +241,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.14-bpx14",
             position: 14,
             name: "BPX-14",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -258,7 +259,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.15-bpx15",
             position: 15,
             name: "BPX-15",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -276,7 +277,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.16-bpx16",
             position: 16,
             name: "BPX-16",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -294,7 +295,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.17-bpx17",
             position: 17,
             name: "BPX-17",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -309,7 +310,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.18-bpx18",
             position: 18,
             name: "BPX-18",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -324,7 +325,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.19-bpx19",
             position: 19,
             name: "BPX-19",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -339,7 +340,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.20-bpx20",
             position: 20,
             name: "BPX-20",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -354,7 +355,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.21-bpx21",
             position: 21,
             name: "BPX-21",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -369,7 +370,7 @@ pub static BPX: Segment = Segment {
             id: "BPX.22-bpx22",
             position: 22,
             name: "BPX-22",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

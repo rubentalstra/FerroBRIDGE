@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `MFE` segment: Master File Entry.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `MFE` segment definition, `http://hl7.org/v2/StructureDefinition/MFE`.
@@ -18,7 +19,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.1-recordLevelEventCode",
             position: 1,
             name: "Record-Level Event Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -39,7 +40,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.2-mfnControlId",
             position: 2,
             name: "MFN Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.3-effectiveDateTime",
             position: 3,
             name: "Effective Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.4-primaryKeyValue",
             position: 4,
             name: "Primary Key Value - MFE",
-            data_type: Some("Varies"),
+            data_type: Some(DataTypeRef::Undefined("Varies")),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -90,7 +91,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.5-primaryKeyValueType",
             position: 5,
             name: "Primary Key Value Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -111,7 +112,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.6-enteredDateTime",
             position: 6,
             name: "Entered Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.7-enteredBy",
             position: 7,
             name: "Entered By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

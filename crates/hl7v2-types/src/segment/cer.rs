@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CER` segment: Certificate Detail.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `CER` segment definition, `http://hl7.org/v2/StructureDefinition/CER`.
@@ -18,7 +19,7 @@ pub static CER: Segment = Segment {
             id: "CER.1-setId",
             position: 1,
             name: "Set ID – CER",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static CER: Segment = Segment {
             id: "CER.2-serialNumber",
             position: 2,
             name: "Serial Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static CER: Segment = Segment {
             id: "CER.3-version",
             position: 3,
             name: "Version",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static CER: Segment = Segment {
             id: "CER.4-grantingAuthority",
             position: 4,
             name: "Granting Authority",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static CER: Segment = Segment {
             id: "CER.5-issuingAuthority",
             position: 5,
             name: "Issuing Authority",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -102,7 +103,7 @@ pub static CER: Segment = Segment {
             id: "CER.6-signature",
             position: 6,
             name: "Signature",
-            data_type: Some("ED"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ed::ED)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -117,7 +118,7 @@ pub static CER: Segment = Segment {
             id: "CER.7-grantingCountry",
             position: 7,
             name: "Granting Country",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -138,7 +139,7 @@ pub static CER: Segment = Segment {
             id: "CER.8-grantingStateProvince",
             position: 8,
             name: "Granting State/Province",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -156,7 +157,7 @@ pub static CER: Segment = Segment {
             id: "CER.9-grantingCountyParish",
             position: 9,
             name: "Granting County/Parish",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -174,7 +175,7 @@ pub static CER: Segment = Segment {
             id: "CER.10-certificateType",
             position: 10,
             name: "Certificate Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -189,7 +190,7 @@ pub static CER: Segment = Segment {
             id: "CER.11-certificateDomain",
             position: 11,
             name: "Certificate Domain",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -204,7 +205,7 @@ pub static CER: Segment = Segment {
             id: "CER.12-subjectId",
             position: 12,
             name: "Subject ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -219,7 +220,7 @@ pub static CER: Segment = Segment {
             id: "CER.13-subjectName",
             position: 13,
             name: "Subject Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -237,7 +238,7 @@ pub static CER: Segment = Segment {
             id: "CER.14-subjectDirectoryAttributeExtension",
             position: 14,
             name: "Subject Directory Attribute Extension",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -252,7 +253,7 @@ pub static CER: Segment = Segment {
             id: "CER.15-subjectPublicKeyInfo",
             position: 15,
             name: "Subject Public Key Info",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -267,7 +268,7 @@ pub static CER: Segment = Segment {
             id: "CER.16-authorityKeyIdentifier",
             position: 16,
             name: "Authority Key Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -282,7 +283,7 @@ pub static CER: Segment = Segment {
             id: "CER.17-basicConstraint",
             position: 17,
             name: "Basic Constraint",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -303,7 +304,7 @@ pub static CER: Segment = Segment {
             id: "CER.18-crlDistributionPoint",
             position: 18,
             name: "CRL Distribution Point",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -318,7 +319,7 @@ pub static CER: Segment = Segment {
             id: "CER.19-jurisdictionCountry",
             position: 19,
             name: "Jurisdiction Country",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -339,7 +340,7 @@ pub static CER: Segment = Segment {
             id: "CER.20-jurisdictionStateProvince",
             position: 20,
             name: "Jurisdiction State/Province",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -357,7 +358,7 @@ pub static CER: Segment = Segment {
             id: "CER.21-jurisdictionCountyParish",
             position: 21,
             name: "Jurisdiction County/Parish",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -375,7 +376,7 @@ pub static CER: Segment = Segment {
             id: "CER.22-jurisdictionBreadth",
             position: 22,
             name: "Jurisdiction Breadth",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -393,7 +394,7 @@ pub static CER: Segment = Segment {
             id: "CER.23-grantingDate",
             position: 23,
             name: "Granting Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -408,7 +409,7 @@ pub static CER: Segment = Segment {
             id: "CER.24-issuingDate",
             position: 24,
             name: "Issuing Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -423,7 +424,7 @@ pub static CER: Segment = Segment {
             id: "CER.25-activationDate",
             position: 25,
             name: "Activation Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -438,7 +439,7 @@ pub static CER: Segment = Segment {
             id: "CER.26-inactivationDate",
             position: 26,
             name: "Inactivation Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -453,7 +454,7 @@ pub static CER: Segment = Segment {
             id: "CER.27-expirationDate",
             position: 27,
             name: "Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -468,7 +469,7 @@ pub static CER: Segment = Segment {
             id: "CER.28-renewalDate",
             position: 28,
             name: "Renewal Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -483,7 +484,7 @@ pub static CER: Segment = Segment {
             id: "CER.29-revocationDate",
             position: 29,
             name: "Revocation Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -498,7 +499,7 @@ pub static CER: Segment = Segment {
             id: "CER.30-revocationReasonCode",
             position: 30,
             name: "Revocation Reason Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -513,7 +514,7 @@ pub static CER: Segment = Segment {
             id: "CER.31-certificateStatusCode",
             position: 31,
             name: "Certificate Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

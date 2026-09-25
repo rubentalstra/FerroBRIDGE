@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PMT` segment: Payment Information.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `PMT` segment definition, `http://hl7.org/v2/StructureDefinition/PMT`.
 pub static PMT: Segment = Segment {
@@ -16,7 +19,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.1-paymentRemittanceAdviceNumber",
             position: 1,
             name: "Payment/Remittance Advice Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.2-paymentRemittanceEffectiveDateTime",
             position: 2,
             name: "Payment/Remittance Effective Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.3-paymentRemittanceExpirationDateTime",
             position: 3,
             name: "Payment/Remittance Expiration Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -61,7 +64,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.4-paymentMethod",
             position: 4,
             name: "Payment Method",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -79,7 +82,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.5-paymentRemittanceDateTime",
             position: 5,
             name: "Payment/Remittance Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -94,7 +97,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.6-paymentRemittanceAmount",
             position: 6,
             name: "Payment/Remittance Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -109,7 +112,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.7-checkNumber",
             position: 7,
             name: "Check Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +127,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.8-payeeBankIdentification",
             position: 8,
             name: "Payee Bank Identification",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +142,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.9-payeeTransitNumber",
             position: 9,
             name: "Payee Transit Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +160,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.10-payeeBankAccountId",
             position: 10,
             name: "Payee Bank Account ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +175,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.11-paymentOrganization",
             position: 11,
             name: "Payment Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -187,7 +190,7 @@ pub static PMT: Segment = Segment {
             id: "PMT.12-esrCodeLine",
             position: 12,
             name: "ESR-Code-Line",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

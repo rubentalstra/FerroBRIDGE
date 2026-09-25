@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DSP` segment: Display Data.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+};
 
 /// The `DSP` segment definition, `http://hl7.org/v2/StructureDefinition/DSP`.
 pub static DSP: Segment = Segment {
@@ -16,7 +19,7 @@ pub static DSP: Segment = Segment {
             id: "DSP.1-setId",
             position: 1,
             name: "Set ID – DSP",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static DSP: Segment = Segment {
             id: "DSP.2-displayLevel",
             position: 2,
             name: "Display Level",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static DSP: Segment = Segment {
             id: "DSP.3-dataLine",
             position: 3,
             name: "Data Line",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +73,7 @@ pub static DSP: Segment = Segment {
             id: "DSP.4-logicalBreakPoint",
             position: 4,
             name: "Logical Break Point",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +91,7 @@ pub static DSP: Segment = Segment {
             id: "DSP.5-resultId",
             position: 5,
             name: "Result ID",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

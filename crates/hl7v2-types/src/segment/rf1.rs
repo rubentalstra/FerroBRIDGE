@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RF1` segment: Referral Information.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `RF1` segment definition, `http://hl7.org/v2/StructureDefinition/RF1`.
 pub static RF1: Segment = Segment {
@@ -16,7 +17,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.1-referralStatus",
             position: 1,
             name: "Referral Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.2-referralPriority",
             position: 2,
             name: "Referral Priority",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.3-referralType",
             position: 3,
             name: "Referral Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.4-referralDisposition",
             position: 4,
             name: "Referral Disposition",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -88,7 +89,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.5-referralCategory",
             position: 5,
             name: "Referral Category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +107,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.6-originatingReferralIdentifier",
             position: 6,
             name: "Originating Referral Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.7-effectiveDate",
             position: 7,
             name: "Effective Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.8-expirationDate",
             position: 8,
             name: "Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +152,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.9-processDate",
             position: 9,
             name: "Process Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +167,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.10-referralReason",
             position: 10,
             name: "Referral Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -184,7 +185,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.11-externalReferralIdentifier",
             position: 11,
             name: "External Referral Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -199,7 +200,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.12-referralDocumentationCompletionStatus",
             position: 12,
             name: "Referral Documentation Completion Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +218,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.13-plannedTreatmentStopDate",
             position: 13,
             name: "Planned Treatment Stop Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.14-referralReasonText",
             position: 14,
             name: "Referral Reason Text",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +254,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.15-numberOfAuthorizedTreatmentsUnits",
             position: 15,
             name: "Number of Authorized Treatments/Units",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -271,7 +272,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.16-numberOfUsedTreatmentsUnits",
             position: 16,
             name: "Number of Used Treatments/Units",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -289,7 +290,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.17-numberOfScheduleTreatmentsUnits",
             position: 17,
             name: "Number of Schedule Treatments/Units",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -307,7 +308,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.18-remainingBenefitAmount",
             position: 18,
             name: "Remaining Benefit Amount",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -325,7 +326,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.19-authorizedProvider",
             position: 19,
             name: "Authorized Provider",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -343,7 +344,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.20-authorizedHealthProfessional",
             position: 20,
             name: "Authorized Health Professional",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -361,7 +362,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.21-sourceText",
             position: 21,
             name: "Source Text",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +380,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.22-sourceDate",
             position: 22,
             name: "Source Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +398,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.23-sourcePhone",
             position: 23,
             name: "Source Phone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -415,7 +416,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.24-comment",
             position: 24,
             name: "Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -433,7 +434,7 @@ pub static RF1: Segment = Segment {
             id: "RF1.25-actionCode",
             position: 25,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

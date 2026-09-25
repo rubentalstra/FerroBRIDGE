@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IAM` segment: Patient Adverse Reaction Information.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `IAM` segment definition, `http://hl7.org/v2/StructureDefinition/IAM`.
@@ -18,7 +19,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.1-setId",
             position: 1,
             name: "Set ID - IAM",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.2-allergenTypeCode",
             position: 2,
             name: "Allergen Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.3-allergenCodeMnemonicDescription",
             position: 3,
             name: "Allergen Code/Mnemonic/Description",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.4-allergySeverityCode",
             position: 4,
             name: "Allergy Severity Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.5-allergyReactionCode",
             position: 5,
             name: "Allergy Reaction Code",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -105,7 +106,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.6-allergyActionCode",
             position: 6,
             name: "Allergy Action Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.7-allergyUniqueIdentifier",
             position: 7,
             name: "Allergy Unique Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.8-actionReason",
             position: 8,
             name: "Action Reason",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.9-sensitivityToCausativeAgentCode",
             position: 9,
             name: "Sensitivity to Causative Agent Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.10-allergenGroupCodeMnemonicDescription",
             position: 10,
             name: "Allergen Group Code/Mnemonic/Description",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -192,7 +193,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.11-onsetDate",
             position: 11,
             name: "Onset Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.12-onsetDateText",
             position: 12,
             name: "Onset Date Text",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -225,7 +226,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.13-reportedDateTime",
             position: 13,
             name: "Reported Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -240,7 +241,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.14-reportedBy",
             position: 14,
             name: "Reported By",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -255,7 +256,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.15-relationshipToPatientCode",
             position: 15,
             name: "Relationship to Patient Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -273,7 +274,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.16-alertDeviceCode",
             position: 16,
             name: "Alert Device Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -291,7 +292,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.17-allergyClinicalStatusCode",
             position: 17,
             name: "Allergy Clinical Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -309,7 +310,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.18-statusedByPerson",
             position: 18,
             name: "Statused by Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -324,7 +325,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.19-statusedByOrganization",
             position: 19,
             name: "Statused by Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -339,7 +340,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.20-statusedAtDateTime",
             position: 20,
             name: "Statused at Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -354,7 +355,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.21-inactivatedByPerson",
             position: 21,
             name: "Inactivated by Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -369,7 +370,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.22-inactivatedDateTime",
             position: 22,
             name: "Inactivated Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -384,7 +385,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.23-initiallyRecordedByPerson",
             position: 23,
             name: "Initially Recorded by Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -399,7 +400,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.24-initiallyRecordedDateTime",
             position: 24,
             name: "Initially Recorded Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -414,7 +415,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.25-modifiedByPerson",
             position: 25,
             name: "Modified by Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -429,7 +430,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.26-modifiedDateTime",
             position: 26,
             name: "Modified Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -444,7 +445,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.27-clinicianIdentifiedAllergenCode",
             position: 27,
             name: "Clinician-Identified Allergen Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -459,7 +460,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.28-initiallyRecordedByOrganization",
             position: 28,
             name: "Initially Recorded by Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -474,7 +475,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.29-modifiedByOrganization",
             position: 29,
             name: "Modified by Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -489,7 +490,7 @@ pub static IAM: Segment = Segment {
             id: "IAM.30-inactivatedByOrganization",
             position: 30,
             name: "Inactivated by Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

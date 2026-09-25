@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `GT1` segment: Guarantor.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `GT1` segment definition, `http://hl7.org/v2/StructureDefinition/GT1`.
@@ -18,7 +19,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.1-setId",
             position: 1,
             name: "Set ID - GT1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.2-guarantorNumber",
             position: 2,
             name: "Guarantor Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -51,7 +52,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.3-guarantorName",
             position: 3,
             name: "Guarantor Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -66,7 +67,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.4-guarantorSpouseName",
             position: 4,
             name: "Guarantor Spouse Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -81,7 +82,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.5-guarantorAddress",
             position: 5,
             name: "Guarantor Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -96,7 +97,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.6-guarantorPhNumHome",
             position: 6,
             name: "Guarantor Ph Num – Home",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -111,7 +112,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.7-guarantorPhNumBusiness",
             position: 7,
             name: "Guarantor Ph Num – Business",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -126,7 +127,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.8-guarantorDateTimeOfBirth",
             position: 8,
             name: "Guarantor Date/Time Of Birth",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.9-guarantorAdministrativeSex",
             position: 9,
             name: "Guarantor Administrative Sex",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.10-guarantorType",
             position: 10,
             name: "Guarantor Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.11-guarantorRelationship",
             position: 11,
             name: "Guarantor Relationship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -195,7 +196,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.12-guarantorSsn",
             position: 12,
             name: "Guarantor SSN",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -213,7 +214,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.13-guarantorDateBegin",
             position: 13,
             name: "Guarantor Date - Begin",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -228,7 +229,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.14-guarantorDateEnd",
             position: 14,
             name: "Guarantor Date - End",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -243,7 +244,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.15-guarantorPriority",
             position: 15,
             name: "Guarantor Priority",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -261,7 +262,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.16-guarantorEmployerName",
             position: 16,
             name: "Guarantor Employer Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -276,7 +277,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.17-guarantorEmployerAddress",
             position: 17,
             name: "Guarantor Employer Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -291,7 +292,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.18-guarantorEmployerPhoneNumber",
             position: 18,
             name: "Guarantor Employer Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -306,7 +307,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.19-guarantorEmployeeIdNumber",
             position: 19,
             name: "Guarantor Employee ID Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -321,7 +322,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.20-guarantorEmploymentStatus",
             position: 20,
             name: "Guarantor Employment Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -339,7 +340,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.21-guarantorOrganizationName",
             position: 21,
             name: "Guarantor Organization Name",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -354,7 +355,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.22-guarantorBillingHoldFlag",
             position: 22,
             name: "Guarantor Billing Hold Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -375,7 +376,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.23-guarantorCreditRatingCode",
             position: 23,
             name: "Guarantor Credit Rating Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -393,7 +394,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.24-guarantorDeathDateAndTime",
             position: 24,
             name: "Guarantor Death Date And Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -408,7 +409,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.25-guarantorDeathFlag",
             position: 25,
             name: "Guarantor Death Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -429,7 +430,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.26-guarantorChargeAdjustmentCode",
             position: 26,
             name: "Guarantor Charge Adjustment Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -447,7 +448,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.27-guarantorHouseholdAnnualIncome",
             position: 27,
             name: "Guarantor Household Annual Income",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -462,7 +463,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.28-guarantorHouseholdSize",
             position: 28,
             name: "Guarantor Household Size",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -480,7 +481,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.29-guarantorEmployerIdNumber",
             position: 29,
             name: "Guarantor Employer ID Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -495,7 +496,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.30-guarantorMaritalStatusCode",
             position: 30,
             name: "Guarantor Marital Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -513,7 +514,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.31-guarantorHireEffectiveDate",
             position: 31,
             name: "Guarantor Hire Effective Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -528,7 +529,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.32-employmentStopDate",
             position: 32,
             name: "Employment Stop Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -543,7 +544,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.33-livingDependency",
             position: 33,
             name: "Living Dependency",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -561,7 +562,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.34-ambulatoryStatus",
             position: 34,
             name: "Ambulatory Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -579,7 +580,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.35-citizenship",
             position: 35,
             name: "Citizenship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -597,7 +598,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.36-primaryLanguage",
             position: 36,
             name: "Primary Language",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -615,7 +616,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.37-livingArrangement",
             position: 37,
             name: "Living Arrangement",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -633,7 +634,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.38-publicityCode",
             position: 38,
             name: "Publicity Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -651,7 +652,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.39-protectionIndicator",
             position: 39,
             name: "Protection Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -672,7 +673,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.40-studentIndicator",
             position: 40,
             name: "Student Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -690,7 +691,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.41-religion",
             position: 41,
             name: "Religion",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -708,7 +709,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.42-mothersMaidenName",
             position: 42,
             name: "Mother's Maiden Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -723,7 +724,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.43-nationality",
             position: 43,
             name: "Nationality",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -741,7 +742,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.44-ethnicGroup",
             position: 44,
             name: "Ethnic Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -759,7 +760,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.45-contactPersonsName",
             position: 45,
             name: "Contact Person's Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -774,7 +775,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.46-contactPersonsTelephoneNumber",
             position: 46,
             name: "Contact Person's Telephone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -789,7 +790,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.47-contactReason",
             position: 47,
             name: "Contact Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -807,7 +808,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.48-contactRelationship",
             position: 48,
             name: "Contact Relationship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -825,7 +826,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.49-jobTitle",
             position: 49,
             name: "Job Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -843,7 +844,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.50-jobCodeClass",
             position: 50,
             name: "Job Code/Class",
-            data_type: Some("JCC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::jcc::JCC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -858,7 +859,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.51-guarantorEmployersOrganizationName",
             position: 51,
             name: "Guarantor Employer's Organization Name",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -873,7 +874,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.52-handicap",
             position: 52,
             name: "Handicap",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -891,7 +892,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.53-jobStatus",
             position: 53,
             name: "Job Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -909,7 +910,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.54-guarantorFinancialClass",
             position: 54,
             name: "Guarantor Financial Class",
-            data_type: Some("FC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::fc::FC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -924,7 +925,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.55-guarantorRace",
             position: 55,
             name: "Guarantor Race",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -942,7 +943,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.56-guarantorBirthPlace",
             position: 56,
             name: "Guarantor Birth Place",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -960,7 +961,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.57-vipIndicator",
             position: 57,
             name: "VIP Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

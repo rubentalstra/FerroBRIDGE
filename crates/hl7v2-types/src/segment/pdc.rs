@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PDC` segment: Product Detail Country.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PDC` segment definition, `http://hl7.org/v2/StructureDefinition/PDC`.
@@ -18,7 +19,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.1-manufacturerDistributor",
             position: 1,
             name: "Manufacturer/Distributor",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -33,7 +34,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.2-country",
             position: 2,
             name: "Country",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.3-brandName",
             position: 3,
             name: "Brand Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.4-deviceFamilyName",
             position: 4,
             name: "Device Family Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.5-genericName",
             position: 5,
             name: "Generic Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -105,7 +106,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.6-modelIdentifier",
             position: 6,
             name: "Model Identifier",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -123,7 +124,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.7-catalogueIdentifier",
             position: 7,
             name: "Catalogue Identifier",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.8-otherIdentifier",
             position: 8,
             name: "Other Identifier",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -159,7 +160,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.9-productCode",
             position: 9,
             name: "Product Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.10-marketingBasis",
             position: 10,
             name: "Marketing Basis",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -198,7 +199,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.11-marketingApprovalId",
             position: 11,
             name: "Marketing Approval ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -216,7 +217,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.12-labeledShelfLife",
             position: 12,
             name: "Labeled Shelf Life",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -231,7 +232,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.13-expectedShelfLife",
             position: 13,
             name: "Expected Shelf Life",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -246,7 +247,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.14-dateFirstMarketed",
             position: 14,
             name: "Date First Marketed",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -261,7 +262,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.15-dateLastMarketed",
             position: 15,
             name: "Date Last Marketed",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

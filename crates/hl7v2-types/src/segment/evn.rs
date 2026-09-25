@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `EVN` segment: Event Type.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, StandardsStatus, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, DataTypeRef, Field, Max, Optionality, Segment, StandardsStatus, Table,
+};
 
 /// The `EVN` segment definition, `http://hl7.org/v2/StructureDefinition/EVN`.
 pub static EVN: Segment = Segment {
@@ -31,7 +34,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.2-recordedDateTime",
             position: 2,
             name: "Recorded Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.3-dateTimePlannedEvent",
             position: 3,
             name: "Date/Time Planned Event",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -61,7 +64,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.4-eventReasonCode",
             position: 4,
             name: "Event Reason Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +82,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.5-operatorId",
             position: 5,
             name: "Operator ID",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -97,7 +100,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.6-eventOccurred",
             position: 6,
             name: "Event Occurred",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +115,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.7-eventFacility",
             position: 7,
             name: "Event Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

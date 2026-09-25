@@ -25,6 +25,23 @@ crates on crates.io.
 
 ### Added
 
+- `hl7v2-types` carries the data type and message definitions (#289).
+  `data_type` holds the 83 data types of the HL7 v2 definitions (12
+  primitive, 71 complex with 448 components), each component with its
+  position, name, data type, cardinality, optionality, lengths and table, and
+  a segment field now points at its data type's static (`Varies`, which has
+  no definition, stays a code). `message` holds the 696 message definitions,
+  indexed by message code and trigger event, each with the structure variant
+  it names, so `ADT^A04` selects `ADT_A01-B`. Every tree and table type
+  derives `PartialEq` and `Eq`. `ferrobridge-hl7v2`'s `parse::structure_for`
+  selects the variant of a structure from that index, so `ORU^R01^ORU_R01`
+  parses as `ORU_R01-A` with no caller-side table. The generator tolerates
+  four more defects of the definitions in the files that carry them: the
+  editorial group name in `MDM_T02-A` to `-E`, `CSU_C09` and `SRM_S01`, the
+  misspelled `defintion` member of the complex data types, the
+  `Message.structure` profile URLs, and the 34 message definitions that name
+  no structure; a conformance length without `length` is tolerated in `CP`,
+  `ERL`, `MO` and `MOP` beside `MSH`.
 - The ITS-REST client reads a contribution back, and a transaction survives a
   retry after its binding failed (#270). `ferrobridge-openehr` gains
   `Client::contribution` for `GET /ehr/{ehr_id}/contribution/{contribution_uid}`

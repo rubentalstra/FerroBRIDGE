@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `TCD` segment: Test Code Detail.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `TCD` segment definition, `http://hl7.org/v2/StructureDefinition/TCD`.
 pub static TCD: Segment = Segment {
@@ -16,7 +17,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.1-tcd1",
             position: 1,
             name: "TCD-1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.2-tcd2",
             position: 2,
             name: "TCD-2",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.3-tcd3",
             position: 3,
             name: "TCD-3",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.4-tcd4",
             position: 4,
             name: "TCD-4",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.5-tcd5",
             position: 5,
             name: "TCD-5",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +95,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.6-tcd6",
             position: 6,
             name: "TCD-6",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.7-tcd7",
             position: 7,
             name: "TCD-7",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.8-tcd8",
             position: 8,
             name: "TCD-8",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.9-tcd9",
             position: 9,
             name: "TCD-9",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +170,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.10-tcd10",
             position: 10,
             name: "TCD-10",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +185,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.11-tcd11",
             position: 11,
             name: "TCD-11",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

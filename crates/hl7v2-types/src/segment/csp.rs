@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CSP` segment: Clinical Study Phase.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `CSP` segment definition, `http://hl7.org/v2/StructureDefinition/CSP`.
 pub static CSP: Segment = Segment {
@@ -16,7 +17,7 @@ pub static CSP: Segment = Segment {
             id: "CSP.1-studyPhaseIdentifier",
             position: 1,
             name: "Study Phase Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static CSP: Segment = Segment {
             id: "CSP.2-dateTimeStudyPhaseBegan",
             position: 2,
             name: "Date/time Study Phase Began",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static CSP: Segment = Segment {
             id: "CSP.3-dateTimeStudyPhaseEnded",
             position: 3,
             name: "Date/time Study Phase Ended",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static CSP: Segment = Segment {
             id: "CSP.4-studyPhaseEvaluability",
             position: 4,
             name: "Study Phase Evaluability",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

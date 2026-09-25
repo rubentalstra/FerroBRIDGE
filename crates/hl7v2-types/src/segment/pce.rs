@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PCE` segment: Patient Charge Cost Center Exception.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `PCE` segment definition, `http://hl7.org/v2/StructureDefinition/PCE`.
 pub static PCE: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PCE: Segment = Segment {
             id: "PCE.1-setId",
             position: 1,
             name: "Set ID – PCE",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static PCE: Segment = Segment {
             id: "PCE.2-accountNumber",
             position: 2,
             name: "Account Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static PCE: Segment = Segment {
             id: "PCE.3-transactionCode",
             position: 3,
             name: "Transaction Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static PCE: Segment = Segment {
             id: "PCE.4-transactionAmountUnit",
             position: 4,
             name: "Transaction Amount - Unit",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

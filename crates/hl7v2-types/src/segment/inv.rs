@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `INV` segment: Inventory Detail.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `INV` segment definition, `http://hl7.org/v2/StructureDefinition/INV`.
 pub static INV: Segment = Segment {
@@ -16,7 +19,7 @@ pub static INV: Segment = Segment {
             id: "INV.1-inv1",
             position: 1,
             name: "INV-1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static INV: Segment = Segment {
             id: "INV.2-inv2",
             position: 2,
             name: "INV-2",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -52,7 +55,7 @@ pub static INV: Segment = Segment {
             id: "INV.3-inv3",
             position: 3,
             name: "INV-3",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +73,7 @@ pub static INV: Segment = Segment {
             id: "INV.4-inv4",
             position: 4,
             name: "INV-4",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +91,7 @@ pub static INV: Segment = Segment {
             id: "INV.5-inv5",
             position: 5,
             name: "INV-5",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +109,7 @@ pub static INV: Segment = Segment {
             id: "INV.6-inv6",
             position: 6,
             name: "INV-6",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +127,7 @@ pub static INV: Segment = Segment {
             id: "INV.7-inv7",
             position: 7,
             name: "INV-7",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +145,7 @@ pub static INV: Segment = Segment {
             id: "INV.8-inv8",
             position: 8,
             name: "INV-8",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +163,7 @@ pub static INV: Segment = Segment {
             id: "INV.9-inv9",
             position: 9,
             name: "INV-9",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +181,7 @@ pub static INV: Segment = Segment {
             id: "INV.10-inv10",
             position: 10,
             name: "INV-10",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +199,7 @@ pub static INV: Segment = Segment {
             id: "INV.11-inv11",
             position: 11,
             name: "INV-11",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +217,7 @@ pub static INV: Segment = Segment {
             id: "INV.12-inv12",
             position: 12,
             name: "INV-12",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +232,7 @@ pub static INV: Segment = Segment {
             id: "INV.13-inv13",
             position: 13,
             name: "INV-13",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +262,7 @@ pub static INV: Segment = Segment {
             id: "INV.15-inv15",
             position: 15,
             name: "INV-15",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -277,7 +280,7 @@ pub static INV: Segment = Segment {
             id: "INV.16-inv16",
             position: 16,
             name: "INV-16",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +298,7 @@ pub static INV: Segment = Segment {
             id: "INV.17-inv17",
             position: 17,
             name: "INV-17",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +316,7 @@ pub static INV: Segment = Segment {
             id: "INV.18-inv18",
             position: 18,
             name: "INV-18",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +334,7 @@ pub static INV: Segment = Segment {
             id: "INV.19-inv19",
             position: 19,
             name: "INV-19",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +349,7 @@ pub static INV: Segment = Segment {
             id: "INV.20-inv20",
             position: 20,
             name: "INV-20",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -361,7 +364,7 @@ pub static INV: Segment = Segment {
             id: "INV.21-inv21",
             position: 21,
             name: "INV-21",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +382,7 @@ pub static INV: Segment = Segment {
             id: "INV.22-inv22",
             position: 22,
             name: "INV-22",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

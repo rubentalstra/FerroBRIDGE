@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BLC` segment: Blood Code.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `BLC` segment definition, `http://hl7.org/v2/StructureDefinition/BLC`.
 pub static BLC: Segment = Segment {
@@ -16,7 +17,7 @@ pub static BLC: Segment = Segment {
             id: "BLC.1-bloodProductCode",
             position: 1,
             name: "Blood Product Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static BLC: Segment = Segment {
             id: "BLC.2-bloodAmount",
             position: 2,
             name: "Blood Amount",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

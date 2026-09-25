@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `FAC` segment: Facility.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `FAC` segment definition, `http://hl7.org/v2/StructureDefinition/FAC`.
@@ -18,7 +19,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.1-facilityId",
             position: 1,
             name: "Facility ID-FAC",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.2-facilityType",
             position: 2,
             name: "Facility Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.3-facilityAddress",
             position: 3,
             name: "Facility Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -69,7 +70,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.4-facilityTelecommunication",
             position: 4,
             name: "Facility Telecommunication",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.5-contactPerson",
             position: 5,
             name: "Contact Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -99,7 +100,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.6-contactTitle",
             position: 6,
             name: "Contact Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -117,7 +118,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.7-contactAddress",
             position: 7,
             name: "Contact Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -132,7 +133,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.8-contactTelecommunication",
             position: 8,
             name: "Contact Telecommunication",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -147,7 +148,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.9-signatureAuthority",
             position: 9,
             name: "Signature Authority",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -162,7 +163,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.10-signatureAuthorityTitle",
             position: 10,
             name: "Signature Authority Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -180,7 +181,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.11-signatureAuthorityAddress",
             position: 11,
             name: "Signature Authority Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -195,7 +196,7 @@ pub static FAC: Segment = Segment {
             id: "FAC.12-signatureAuthorityTelecommunication",
             position: 12,
             name: "Signature Authority Telecommunication",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

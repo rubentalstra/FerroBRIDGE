@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PID` segment: Patient Identification.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `PID` segment definition, `http://hl7.org/v2/StructureDefinition/PID`.
@@ -19,7 +20,7 @@ pub static PID: Segment = Segment {
             id: "PID.1-setId",
             position: 1,
             name: "Set ID - PID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static PID: Segment = Segment {
             id: "PID.3-patientIdentifierList",
             position: 3,
             name: "Patient Identifier List",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -82,7 +83,7 @@ pub static PID: Segment = Segment {
             id: "PID.5-patientName",
             position: 5,
             name: "Patient Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -100,7 +101,7 @@ pub static PID: Segment = Segment {
             id: "PID.6-mothersMaidenName",
             position: 6,
             name: "Mother's Maiden Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -115,7 +116,7 @@ pub static PID: Segment = Segment {
             id: "PID.7-dateTimeOfBirth",
             position: 7,
             name: "Date/Time of Birth",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static PID: Segment = Segment {
             id: "PID.8-administrativeSex",
             position: 8,
             name: "Administrative Sex",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static PID: Segment = Segment {
             id: "PID.10-race",
             position: 10,
             name: "Race",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -181,7 +182,7 @@ pub static PID: Segment = Segment {
             id: "PID.11-patientAddress",
             position: 11,
             name: "Patient Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -241,7 +242,7 @@ pub static PID: Segment = Segment {
             id: "PID.15-primaryLanguage",
             position: 15,
             name: "Primary Language",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +260,7 @@ pub static PID: Segment = Segment {
             id: "PID.16-maritalStatus",
             position: 16,
             name: "Marital Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +278,7 @@ pub static PID: Segment = Segment {
             id: "PID.17-religion",
             position: 17,
             name: "Religion",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static PID: Segment = Segment {
             id: "PID.18-patientAccountNumber",
             position: 18,
             name: "Patient Account Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -343,7 +344,7 @@ pub static PID: Segment = Segment {
             id: "PID.21-mothersIdentifier",
             position: 21,
             name: "Mother's Identifier",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -361,7 +362,7 @@ pub static PID: Segment = Segment {
             id: "PID.22-ethnicGroup",
             position: 22,
             name: "Ethnic Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -379,7 +380,7 @@ pub static PID: Segment = Segment {
             id: "PID.23-birthPlace",
             position: 23,
             name: "Birth Place",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +398,7 @@ pub static PID: Segment = Segment {
             id: "PID.24-multipleBirthIndicator",
             position: 24,
             name: "Multiple Birth Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +419,7 @@ pub static PID: Segment = Segment {
             id: "PID.25-birthOrder",
             position: 25,
             name: "Birth Order",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +437,7 @@ pub static PID: Segment = Segment {
             id: "PID.26-citizenship",
             position: 26,
             name: "Citizenship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -454,7 +455,7 @@ pub static PID: Segment = Segment {
             id: "PID.27-veteransMilitaryStatus",
             position: 27,
             name: "Veterans Military Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +488,7 @@ pub static PID: Segment = Segment {
             id: "PID.29-patientDeathDateAndTime",
             position: 29,
             name: "Patient Death Date and Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -502,7 +503,7 @@ pub static PID: Segment = Segment {
             id: "PID.30-patientDeathIndicator",
             position: 30,
             name: "Patient Death Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -523,7 +524,7 @@ pub static PID: Segment = Segment {
             id: "PID.31-identityUnknownIndicator",
             position: 31,
             name: "Identity Unknown Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -544,7 +545,7 @@ pub static PID: Segment = Segment {
             id: "PID.32-identityReliabilityCode",
             position: 32,
             name: "Identity Reliability Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -562,7 +563,7 @@ pub static PID: Segment = Segment {
             id: "PID.33-lastUpdateDateTime",
             position: 33,
             name: "Last Update Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -577,7 +578,7 @@ pub static PID: Segment = Segment {
             id: "PID.34-lastUpdateFacility",
             position: 34,
             name: "Last Update Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -592,7 +593,7 @@ pub static PID: Segment = Segment {
             id: "PID.35-taxonomicClassificationCode",
             position: 35,
             name: "Taxonomic Classification Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -607,7 +608,7 @@ pub static PID: Segment = Segment {
             id: "PID.36-breedCode",
             position: 36,
             name: "Breed Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -625,7 +626,7 @@ pub static PID: Segment = Segment {
             id: "PID.37-strain",
             position: 37,
             name: "Strain",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -643,7 +644,7 @@ pub static PID: Segment = Segment {
             id: "PID.38-productionClassCode",
             position: 38,
             name: "Production Class Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -661,7 +662,7 @@ pub static PID: Segment = Segment {
             id: "PID.39-tribalCitizenship",
             position: 39,
             name: "Tribal Citizenship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -679,7 +680,7 @@ pub static PID: Segment = Segment {
             id: "PID.40-patientTelecommunicationInformation",
             position: 40,
             name: "Patient Telecommunication Information",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

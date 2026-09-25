@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PCR` segment: Possible Causal Relationship.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PCR` segment definition, `http://hl7.org/v2/StructureDefinition/PCR`.
@@ -18,7 +19,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.1-implicatedProduct",
             position: 1,
             name: "Implicated Product",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.2-genericProduct",
             position: 2,
             name: "Generic Product",
-            data_type: Some("IS"),
+            data_type: Some(DataTypeRef::Defined(&data_type::is::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.3-productClass",
             position: 3,
             name: "Product Class",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -75,7 +76,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.4-totalDurationOfTherapy",
             position: 4,
             name: "Total Duration Of Therapy",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.5-productManufactureDate",
             position: 5,
             name: "Product Manufacture Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -105,7 +106,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.6-productExpirationDate",
             position: 6,
             name: "Product Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.7-productImplantationDate",
             position: 7,
             name: "Product Implantation Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -135,7 +136,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.8-productExplantationDate",
             position: 8,
             name: "Product Explantation Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -150,7 +151,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.9-singleUseDevice",
             position: 9,
             name: "Single Use Device",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -168,7 +169,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.10-indicationForProductUse",
             position: 10,
             name: "Indication For Product Use",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -186,7 +187,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.11-productProblem",
             position: 11,
             name: "Product Problem",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -204,7 +205,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.12-productSerialLotNumber",
             position: 12,
             name: "Product Serial/Lot Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),
@@ -222,7 +223,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.13-productAvailableForInspection",
             position: 13,
             name: "Product Available For Inspection",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -240,7 +241,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.14-productEvaluationPerformed",
             position: 14,
             name: "Product Evaluation Performed",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -258,7 +259,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.15-productEvaluationStatus",
             position: 15,
             name: "Product Evaluation Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -276,7 +277,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.16-productEvaluationResults",
             position: 16,
             name: "Product Evaluation Results",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -294,7 +295,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.17-evaluatedProductSource",
             position: 17,
             name: "Evaluated Product Source",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -315,7 +316,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.18-dateProductReturnedToManufacturer",
             position: 18,
             name: "Date Product Returned To Manufacturer",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -330,7 +331,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.19-deviceOperatorQualifications",
             position: 19,
             name: "Device Operator Qualifications",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -351,7 +352,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.20-relatednessAssessment",
             position: 20,
             name: "Relatedness Assessment",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -372,7 +373,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.21-actionTakenInResponseToTheEvent",
             position: 21,
             name: "Action Taken In Response To The Event",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(6),
@@ -393,7 +394,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.22-eventCausalityObservations",
             position: 22,
             name: "Event Causality Observations",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(6),
@@ -414,7 +415,7 @@ pub static PCR: Segment = Segment {
             id: "PCR.23-indirectExposureMechanism",
             position: 23,
             name: "Indirect Exposure Mechanism",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),

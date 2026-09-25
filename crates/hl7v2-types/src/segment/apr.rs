@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `APR` segment: Appointment Preferences.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `APR` segment definition, `http://hl7.org/v2/StructureDefinition/APR`.
 pub static APR: Segment = Segment {
@@ -16,7 +19,7 @@ pub static APR: Segment = Segment {
             id: "APR.1-timeSelectionCriteria",
             position: 1,
             name: "Time Selection Criteria",
-            data_type: Some("SCV"),
+            data_type: Some(DataTypeRef::Defined(&data_type::scv::SCV)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -34,7 +37,7 @@ pub static APR: Segment = Segment {
             id: "APR.2-resourceSelectionCriteria",
             position: 2,
             name: "Resource Selection Criteria",
-            data_type: Some("SCV"),
+            data_type: Some(DataTypeRef::Defined(&data_type::scv::SCV)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +55,7 @@ pub static APR: Segment = Segment {
             id: "APR.3-locationSelectionCriteria",
             position: 3,
             name: "Location Selection Criteria",
-            data_type: Some("SCV"),
+            data_type: Some(DataTypeRef::Defined(&data_type::scv::SCV)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +73,7 @@ pub static APR: Segment = Segment {
             id: "APR.4-slotSpacingCriteria",
             position: 4,
             name: "Slot Spacing Criteria",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +91,7 @@ pub static APR: Segment = Segment {
             id: "APR.5-fillerOverrideCriteria",
             position: 5,
             name: "Filler Override Criteria",
-            data_type: Some("SCV"),
+            data_type: Some(DataTypeRef::Defined(&data_type::scv::SCV)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

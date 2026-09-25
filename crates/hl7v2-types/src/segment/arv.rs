@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ARV` segment: Access Restrictions.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `ARV` segment definition, `http://hl7.org/v2/StructureDefinition/ARV`.
@@ -18,7 +19,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.2-accessRestrictionActionCode",
             position: 2,
             name: "Access Restriction Action Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.3-accessRestrictionValue",
             position: 3,
             name: "Access Restriction Value",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -75,7 +76,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.4-accessRestrictionReason",
             position: 4,
             name: "Access Restriction Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -93,7 +94,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.5-specialAccessRestrictionInstructions",
             position: 5,
             name: "Special Access Restriction Instructions",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -111,7 +112,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.6-accessRestrictionDateRange",
             position: 6,
             name: "Access Restriction Date Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.7-securityClassificationTag",
             position: 7,
             name: "Security Classification Tag",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -144,7 +145,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.8-securityHandlingInstructions",
             position: 8,
             name: "Security Handling Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -162,7 +163,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.9-accessRestrictionMessageLocation",
             position: 9,
             name: "Access Restriction Message Location",
-            data_type: Some("ERL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::erl::ERL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -177,7 +178,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.10-accessRestrictionInstanceIdentifier",
             position: 10,
             name: "Access Restriction Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

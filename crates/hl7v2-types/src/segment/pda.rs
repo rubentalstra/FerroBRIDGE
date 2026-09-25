@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PDA` segment: Patient Death and Autopsy.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `PDA` segment definition, `http://hl7.org/v2/StructureDefinition/PDA`.
 pub static PDA: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.1-deathCauseCode",
             position: 1,
             name: "Death Cause Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -31,7 +32,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.2-deathLocation",
             position: 2,
             name: "Death Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -46,7 +47,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.3-deathCertifiedIndicator",
             position: 3,
             name: "Death Certified Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.4-deathCertificateSignedDateTime",
             position: 4,
             name: "Death Certificate Signed Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.5-deathCertifiedBy",
             position: 5,
             name: "Death Certified By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +98,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.6-autopsyIndicator",
             position: 6,
             name: "Autopsy Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.7-autopsyStartAndEndDateTime",
             position: 7,
             name: "Autopsy Start and End Date/Time",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.8-autopsyPerformedBy",
             position: 8,
             name: "Autopsy Performed By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +149,7 @@ pub static PDA: Segment = Segment {
             id: "PDA.9-coronerIndicator",
             position: 9,
             name: "Coroner Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

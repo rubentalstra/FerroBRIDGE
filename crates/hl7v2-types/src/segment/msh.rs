@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `MSH` segment: Message Header.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `MSH` segment definition, `http://hl7.org/v2/StructureDefinition/MSH`.
@@ -18,7 +19,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.1-fieldSeparator",
             position: 1,
             name: "Field Separator",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.2-encodingCharacters",
             position: 2,
             name: "Encoding Characters",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.3-sendingApplication",
             position: 3,
             name: "Sending Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.4-sendingFacility",
             position: 4,
             name: "Sending Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.5-receivingApplication",
             position: 5,
             name: "Receiving Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -108,7 +109,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.6-receivingFacility",
             position: 6,
             name: "Receiving Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.7-dateTimeOfMessage",
             position: 7,
             name: "Date/Time of Message",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.8-security",
             position: 8,
             name: "Security",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.9-messageType",
             position: 9,
             name: "Message Type",
-            data_type: Some("MSG"),
+            data_type: Some(DataTypeRef::Defined(&data_type::msg::MSG)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -174,7 +175,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.10-messageControlId",
             position: 10,
             name: "Message Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -195,7 +196,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.11-processingId",
             position: 11,
             name: "Processing ID",
-            data_type: Some("PT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pt::PT)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -210,7 +211,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.12-versionId",
             position: 12,
             name: "Version ID",
-            data_type: Some("VID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::vid::VID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -225,7 +226,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.13-sequenceNumber",
             position: 13,
             name: "Sequence Number",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -240,7 +241,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.14-continuationPointer",
             position: 14,
             name: "Continuation Pointer",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -258,7 +259,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.15-acceptAcknowledgment",
             position: 15,
             name: "Accept Acknowledgment",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -279,7 +280,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.16-applicationAcknowledgmentType",
             position: 16,
             name: "Application Acknowledgment Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -300,7 +301,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.17-countryCode",
             position: 17,
             name: "Country Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -321,7 +322,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.18-characterSet",
             position: 18,
             name: "Character Set",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -342,7 +343,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.19-principalLanguageOfMessage",
             position: 19,
             name: "Principal Language Of Message",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -360,7 +361,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.20-alternateCharacterSetHandlingScheme",
             position: 20,
             name: "Alternate Character Set Handling Scheme",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -381,7 +382,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.21-messageProfileIdentifier",
             position: 21,
             name: "Message Profile Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -396,7 +397,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.22-sendingResponsibleOrganization",
             position: 22,
             name: "Sending Responsible Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -411,7 +412,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.23-receivingResponsibleOrganization",
             position: 23,
             name: "Receiving Responsible Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -426,7 +427,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.24-sendingNetworkAddress",
             position: 24,
             name: "Sending Network Address",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -441,7 +442,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.25-receivingNetworkAddress",
             position: 25,
             name: "Receiving Network Address",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -456,7 +457,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.26-securityClassificationTag",
             position: 26,
             name: "Security Classification Tag",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -474,7 +475,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.27-securityHandlingInstructions",
             position: 27,
             name: "Security Handling Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -492,7 +493,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.28-specialAccessRestrictionInstructions",
             position: 28,
             name: "Special Access Restriction Instructions",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

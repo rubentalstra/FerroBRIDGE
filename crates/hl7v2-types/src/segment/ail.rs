@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `AIL` segment: Appointment Information - Location Resource.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `AIL` segment definition, `http://hl7.org/v2/StructureDefinition/AIL`.
 pub static AIL: Segment = Segment {
@@ -16,7 +17,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.1-setId",
             position: 1,
             name: "Set ID - AIL",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.2-segmentActionCode",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.3-locationResourceId",
             position: 3,
             name: "Location Resource ID",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +71,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.4-locationType",
             position: 4,
             name: "Location Type - AIL",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.5-locationGroup",
             position: 5,
             name: "Location Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.6-startDateTime",
             position: 6,
             name: "Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.7-startDateTimeOffset",
             position: 7,
             name: "Start Date/Time Offset",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.8-startDateTimeOffsetUnits",
             position: 8,
             name: "Start Date/Time Offset Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +149,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.9-duration",
             position: 9,
             name: "Duration",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.10-durationUnits",
             position: 10,
             name: "Duration Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +179,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.11-allowSubstitutionCode",
             position: 11,
             name: "Allow Substitution Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +197,7 @@ pub static AIL: Segment = Segment {
             id: "AIL.12-fillerStatusCode",
             position: 12,
             name: "Filler Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

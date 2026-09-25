@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BUI` segment: Blood Unit information.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `BUI` segment definition, `http://hl7.org/v2/StructureDefinition/BUI`.
 pub static BUI: Segment = Segment {
@@ -16,7 +17,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.1-bui1",
             position: 1,
             name: "BUI-1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.2-bui2",
             position: 2,
             name: "BUI-2",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.3-bui3",
             position: 3,
             name: "BUI-3",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.4-bui4",
             position: 4,
             name: "BUI-4",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.5-bui5",
             position: 5,
             name: "BUI-5",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.6-bui6",
             position: 6,
             name: "BUI-6",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.7-bui7",
             position: 7,
             name: "BUI-7",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.8-bui8",
             position: 8,
             name: "BUI-8",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -148,7 +149,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.9-bui9",
             position: 9,
             name: "BUI-9",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.10-bui10",
             position: 10,
             name: "BUI-10",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -178,7 +179,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.11-bui11",
             position: 11,
             name: "BUI-11",
-            data_type: Some("NR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nr::NR)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -193,7 +194,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.12-bui12",
             position: 12,
             name: "BUI-12",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -211,7 +212,7 @@ pub static BUI: Segment = Segment {
             id: "BUI.13-bui13",
             position: 13,
             name: "BUI-13",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

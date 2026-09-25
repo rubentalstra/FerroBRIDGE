@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `TQ2` segment: Timing/Quantity Relationship.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `TQ2` segment definition, `http://hl7.org/v2/StructureDefinition/TQ2`.
@@ -18,7 +19,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.1-setId",
             position: 1,
             name: "Set ID - TQ2",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.2-sequenceResultsFlag",
             position: 2,
             name: "Sequence/Results Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.3-relatedPlacerNumber",
             position: 3,
             name: "Related Placer Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -72,7 +73,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.4-relatedFillerNumber",
             position: 4,
             name: "Related Filler Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -87,7 +88,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.5-relatedPlacerGroupNumber",
             position: 5,
             name: "Related Placer Group Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -102,7 +103,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.6-sequenceConditionCode",
             position: 6,
             name: "Sequence Condition Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.7-cyclicEntryExitIndicator",
             position: 7,
             name: "Cyclic Entry/Exit Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.8-sequenceConditionTimeInterval",
             position: 8,
             name: "Sequence Condition Time Interval",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -156,7 +157,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.9-cyclicGroupMaximumNumberOfRepeats",
             position: 9,
             name: "Cyclic Group Maximum Number of Repeats",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -174,7 +175,7 @@ pub static TQ2: Segment = Segment {
             id: "TQ2.10-specialServiceRequestRelationship",
             position: 10,
             name: "Special Service Request Relationship",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

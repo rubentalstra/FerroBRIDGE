@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `LDP` segment: Location Department.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `LDP` segment definition, `http://hl7.org/v2/StructureDefinition/LDP`.
@@ -18,7 +19,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - LDP",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.2-locationDepartment",
             position: 2,
             name: "Location Department",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.3-locationService",
             position: 3,
             name: "Location Service",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -72,7 +73,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.4-specialtyType",
             position: 4,
             name: "Specialty Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -90,7 +91,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.5-validPatientClasses",
             position: 5,
             name: "Valid Patient Classes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -111,7 +112,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.6-activeInactiveFlag",
             position: 6,
             name: "Active/Inactive Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -132,7 +133,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.7-activationDate",
             position: 7,
             name: "Activation Date - LDP",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.8-inactivationDate",
             position: 8,
             name: "Inactivation Date - LDP",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +163,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.9-inactivatedReason",
             position: 9,
             name: "Inactivated Reason",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -180,7 +181,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.10-visitingHours",
             position: 10,
             name: "Visiting Hours",
-            data_type: Some("VH"),
+            data_type: Some(DataTypeRef::Defined(&data_type::vh::VH)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -198,7 +199,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.11-contactPhone",
             position: 11,
             name: "Contact Phone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -213,7 +214,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.12-locationCostCenter",
             position: 12,
             name: "Location Cost Center",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

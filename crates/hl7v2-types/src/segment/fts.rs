@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `FTS` segment: File Trailer.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `FTS` segment definition, `http://hl7.org/v2/StructureDefinition/FTS`.
 pub static FTS: Segment = Segment {
@@ -16,7 +17,7 @@ pub static FTS: Segment = Segment {
             id: "FTS.1-fileBatchCount",
             position: 1,
             name: "File Batch Count",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static FTS: Segment = Segment {
             id: "FTS.2-fileTrailerComment",
             position: 2,
             name: "File Trailer Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

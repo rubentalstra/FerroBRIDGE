@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DST` segment: Transport Destination.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `DST` segment definition, `http://hl7.org/v2/StructureDefinition/DST`.
 pub static DST: Segment = Segment {
@@ -16,7 +17,7 @@ pub static DST: Segment = Segment {
             id: "DST.1-dst1",
             position: 1,
             name: "DST-1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static DST: Segment = Segment {
             id: "DST.2-dst2",
             position: 2,
             name: "DST-2",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),

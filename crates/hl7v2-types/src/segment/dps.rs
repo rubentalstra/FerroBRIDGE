@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DPS` segment: Diagnosis and Procedure Code.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `DPS` segment definition, `http://hl7.org/v2/StructureDefinition/DPS`.
 pub static DPS: Segment = Segment {
@@ -16,7 +17,7 @@ pub static DPS: Segment = Segment {
             id: "DPS.1-diagnosisCodeMcp",
             position: 1,
             name: "Diagnosis Code - MCP",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static DPS: Segment = Segment {
             id: "DPS.2-procedureCode",
             position: 2,
             name: "Procedure Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -52,7 +53,7 @@ pub static DPS: Segment = Segment {
             id: "DPS.3-effectiveDateTime",
             position: 3,
             name: "Effective Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static DPS: Segment = Segment {
             id: "DPS.4-expirationDateTime",
             position: 4,
             name: "Expiration Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static DPS: Segment = Segment {
             id: "DPS.5-typeOfLimitation",
             position: 5,
             name: "Type of Limitation",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

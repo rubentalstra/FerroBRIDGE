@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DB1` segment: Disability.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `DB1` segment definition, `http://hl7.org/v2/StructureDefinition/DB1`.
 pub static DB1: Segment = Segment {
@@ -16,7 +17,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.1-setId",
             position: 1,
             name: "Set ID - DB1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.2-disabledPersonCode",
             position: 2,
             name: "Disabled Person Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.3-disabledPersonIdentifier",
             position: 3,
             name: "Disabled Person Identifier",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -67,7 +68,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.4-disabilityIndicator",
             position: 4,
             name: "Disability Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.5-disabilityStartDate",
             position: 5,
             name: "Disability Start Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.6-disabilityEndDate",
             position: 6,
             name: "Disability End Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.7-disabilityReturnToWorkDate",
             position: 7,
             name: "Disability Return to Work Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static DB1: Segment = Segment {
             id: "DB1.8-disabilityUnableToWorkDate",
             position: 8,
             name: "Disability Unable to Work Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

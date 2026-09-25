@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SAC` segment: Specimen Container Detail.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `SAC` segment definition, `http://hl7.org/v2/StructureDefinition/SAC`.
 pub static SAC: Segment = Segment {
@@ -16,7 +19,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.1-sac1",
             position: 1,
             name: "SAC-1",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.2-sac2",
             position: 2,
             name: "SAC-2",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.3-sac3",
             position: 3,
             name: "SAC-3",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -61,7 +64,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.4-sac4",
             position: 4,
             name: "SAC-4",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -76,7 +79,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.5-sac5",
             position: 5,
             name: "SAC-5",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +109,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.7-sac7",
             position: 7,
             name: "SAC-7",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +124,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.8-sac8",
             position: 8,
             name: "SAC-8",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +142,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.9-sac9",
             position: 9,
             name: "SAC-9",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +160,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.10-sac10",
             position: 10,
             name: "SAC-10",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +175,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.11-sac11",
             position: 11,
             name: "SAC-11",
-            data_type: Some("NA"),
+            data_type: Some(DataTypeRef::Defined(&data_type::na::NA)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +190,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.12-sac12",
             position: 12,
             name: "SAC-12",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +208,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.13-sac13",
             position: 13,
             name: "SAC-13",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +223,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.14-sac14",
             position: 14,
             name: "SAC-14",
-            data_type: Some("NA"),
+            data_type: Some(DataTypeRef::Defined(&data_type::na::NA)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +238,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.15-sac15",
             position: 15,
             name: "SAC-15",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -253,7 +256,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.16-sac16",
             position: 16,
             name: "SAC-16",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -271,7 +274,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.17-sac17",
             position: 17,
             name: "SAC-17",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -289,7 +292,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.18-sac18",
             position: 18,
             name: "SAC-18",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -307,7 +310,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.19-sac19",
             position: 19,
             name: "SAC-19",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -325,7 +328,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.20-sac20",
             position: 20,
             name: "SAC-20",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -343,7 +346,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.21-sac21",
             position: 21,
             name: "SAC-21",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -361,7 +364,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.22-sac22",
             position: 22,
             name: "SAC-22",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +382,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.23-sac23",
             position: 23,
             name: "SAC-23",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +400,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.24-sac24",
             position: 24,
             name: "SAC-24",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -415,7 +418,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.25-sac25",
             position: 25,
             name: "SAC-25",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -433,7 +436,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.26-sac26",
             position: 26,
             name: "SAC-26",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -451,7 +454,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.27-sac27",
             position: 27,
             name: "SAC-27",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -469,7 +472,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.28-sac28",
             position: 28,
             name: "SAC-28",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +490,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.29-sac29",
             position: 29,
             name: "SAC-29",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -502,7 +505,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.30-sac30",
             position: 30,
             name: "SAC-30",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +523,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.31-sac31",
             position: 31,
             name: "SAC-31",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -535,7 +538,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.32-sac32",
             position: 32,
             name: "SAC-32",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -553,7 +556,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.33-sac33",
             position: 33,
             name: "SAC-33",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -571,7 +574,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.34-sac34",
             position: 34,
             name: "SAC-34",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -589,7 +592,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.35-sac35",
             position: 35,
             name: "SAC-35",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -607,7 +610,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.36-sac36",
             position: 36,
             name: "SAC-36",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -625,7 +628,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.37-sac37",
             position: 37,
             name: "SAC-37",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -643,7 +646,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.38-sac38",
             position: 38,
             name: "SAC-38",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -661,7 +664,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.39-sac39",
             position: 39,
             name: "SAC-39",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -679,7 +682,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.40-sac40",
             position: 40,
             name: "SAC-40",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -697,7 +700,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.41-sac41",
             position: 41,
             name: "SAC-41",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -715,7 +718,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.42-sac42",
             position: 42,
             name: "SAC-42",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -733,7 +736,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.43-sac43",
             position: 43,
             name: "SAC-43",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -751,7 +754,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.44-sac44",
             position: 44,
             name: "SAC-44",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -769,7 +772,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.45-sac45",
             position: 45,
             name: "SAC-45",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -784,7 +787,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.46-sac46",
             position: 46,
             name: "SAC-46",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -799,7 +802,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.47-sac47",
             position: 47,
             name: "SAC-47",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -817,7 +820,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.48-sac48",
             position: 48,
             name: "SAC-48",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -835,7 +838,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.49-sac49",
             position: 49,
             name: "SAC-49",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

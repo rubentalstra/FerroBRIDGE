@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `AUT` segment: Authorization Information.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `AUT` segment definition, `http://hl7.org/v2/StructureDefinition/AUT`.
@@ -18,7 +19,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.1-authorizingPayorPlanId",
             position: 1,
             name: "Authorizing Payor, Plan ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.2-authorizingPayorCompanyId",
             position: 2,
             name: "Authorizing Payor, Company ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.3-authorizingPayorCompanyName",
             position: 3,
             name: "Authorizing Payor, Company Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.4-authorizationEffectiveDate",
             position: 4,
             name: "Authorization Effective Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.5-authorizationExpirationDate",
             position: 5,
             name: "Authorization Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -102,7 +103,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.6-authorizationIdentifier",
             position: 6,
             name: "Authorization Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -117,7 +118,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.7-reimbursementLimit",
             position: 7,
             name: "Reimbursement Limit",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -132,7 +133,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.8-requestedNumberOfTreatments",
             position: 8,
             name: "Requested Number of Treatments",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.9-authorizedNumberOfTreatments",
             position: 9,
             name: "Authorized Number of Treatments",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +163,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.10-processDate",
             position: 10,
             name: "Process Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.11-requestedDisciplineS",
             position: 11,
             name: "Requested Discipline(s)",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -195,7 +196,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.12-authorizedDisciplineS",
             position: 12,
             name: "Authorized Discipline(s)",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -213,7 +214,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.13-authorizationReferralType",
             position: 13,
             name: "Authorization Referral Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.14-approvalStatus",
             position: 14,
             name: "Approval Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -255,7 +256,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.15-plannedTreatmentStopDate",
             position: 15,
             name: "Planned Treatment Stop Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -273,7 +274,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.16-clinicalService",
             position: 16,
             name: "Clinical Service",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -294,7 +295,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.17-reasonText",
             position: 17,
             name: "Reason Text",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -312,7 +313,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.18-numberOfAuthorizedTreatmentsUnits",
             position: 18,
             name: "Number of Authorized Treatments/Units",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -330,7 +331,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.19-numberOfUsedTreatmentsUnits",
             position: 19,
             name: "Number of Used Treatments/Units",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -348,7 +349,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.20-numberOfScheduleTreatmentsUnits",
             position: 20,
             name: "Number of Schedule Treatments/Units",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -366,7 +367,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.21-encounterType",
             position: 21,
             name: "Encounter Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -387,7 +388,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.22-remainingBenefitAmount",
             position: 22,
             name: "Remaining Benefit Amount",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -405,7 +406,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.23-authorizedProvider",
             position: 23,
             name: "Authorized Provider",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -423,7 +424,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.24-authorizedHealthProfessional",
             position: 24,
             name: "Authorized Health Professional",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -441,7 +442,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.25-sourceText",
             position: 25,
             name: "Source Text",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -459,7 +460,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.26-sourceDate",
             position: 26,
             name: "Source Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -477,7 +478,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.27-sourcePhone",
             position: 27,
             name: "Source Phone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -495,7 +496,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.28-comment",
             position: 28,
             name: "Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -513,7 +514,7 @@ pub static AUT: Segment = Segment {
             id: "AUT.29-actionCode",
             position: 29,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

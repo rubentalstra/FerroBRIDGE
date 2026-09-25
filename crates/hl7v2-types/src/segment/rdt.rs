@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RDT` segment: Table Row Data.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment};
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `RDT` segment definition, `http://hl7.org/v2/StructureDefinition/RDT`.
 pub static RDT: Segment = Segment {
@@ -15,7 +15,7 @@ pub static RDT: Segment = Segment {
         id: "RDT.1-rdt1",
         position: 1,
         name: "RDT-1",
-        data_type: Some("Varies"),
+        data_type: Some(DataTypeRef::Undefined("Varies")),
         cardinality: Cardinality {
             min: 1,
             max: Max::Bounded(1),

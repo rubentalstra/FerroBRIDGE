@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `QID` segment: Query Identification.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `QID` segment definition, `http://hl7.org/v2/StructureDefinition/QID`.
 pub static QID: Segment = Segment {
@@ -16,7 +19,7 @@ pub static QID: Segment = Segment {
             id: "QID.1-queryTag",
             position: 1,
             name: "Query Tag",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static QID: Segment = Segment {
             id: "QID.2-messageQueryName",
             position: 2,
             name: "Message Query Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

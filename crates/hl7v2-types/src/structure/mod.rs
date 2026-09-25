@@ -619,7 +619,7 @@ pub static STRUCTURES: [&crate::model::Structure; 305] = [
     &vxu_v04::VXU_V04,
 ];
 
-/// The message structure whose definition id is `id`, for example `ORU_R01-A`.
+/// Returns the message structure whose definition id is `id`, for example `ORU_R01-A`.
 #[must_use]
 pub fn find(id: &str) -> Option<&'static crate::model::Structure> {
     match STRUCTURES.binary_search_by(|entry| entry.id.cmp(id)) {

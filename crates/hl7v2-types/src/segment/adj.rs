@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ADJ` segment: Adjustment.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `ADJ` segment definition, `http://hl7.org/v2/StructureDefinition/ADJ`.
@@ -18,7 +19,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.1-providerAdjustmentNumber",
             position: 1,
             name: "Provider Adjustment Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.2-payerAdjustmentNumber",
             position: 2,
             name: "Payer Adjustment Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -48,7 +49,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.3-adjustmentSequenceNumber",
             position: 3,
             name: "Adjustment Sequence Number",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -66,7 +67,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.4-adjustmentCategory",
             position: 4,
             name: "Adjustment Category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.5-adjustmentAmount",
             position: 5,
             name: "Adjustment Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -99,7 +100,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.6-adjustmentQuantity",
             position: 6,
             name: "Adjustment Quantity",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -117,7 +118,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.7-adjustmentReasonPa",
             position: 7,
             name: "Adjustment Reason PA",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -135,7 +136,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.8-adjustmentDescription",
             position: 8,
             name: "Adjustment Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -153,7 +154,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.9-originalValue",
             position: 9,
             name: "Original Value",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -171,7 +172,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.10-substituteValue",
             position: 10,
             name: "Substitute Value",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -189,7 +190,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.11-adjustmentAction",
             position: 11,
             name: "Adjustment Action",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.12-providerAdjustmentNumberCrossReference",
             position: 12,
             name: "Provider Adjustment Number Cross Reference",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -222,7 +223,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.13-providerProductServiceLineItemNumberCrossReference",
             position: 13,
             name: "Provider Product/Service Line Item Number Cross Reference",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -237,7 +238,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.14-adjustmentDate",
             position: 14,
             name: "Adjustment Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -252,7 +253,7 @@ pub static ADJ: Segment = Segment {
             id: "ADJ.15-responsibleOrganization",
             position: 15,
             name: "Responsible Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

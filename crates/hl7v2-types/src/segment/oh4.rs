@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OH4` segment: Combat Zone Work.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `OH4` segment definition, `http://hl7.org/v2/StructureDefinition/OH4`.
 pub static OH4: Segment = Segment {
@@ -16,7 +17,7 @@ pub static OH4: Segment = Segment {
             id: "OH4.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static OH4: Segment = Segment {
             id: "OH4.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static OH4: Segment = Segment {
             id: "OH4.3-combatZoneStartDate",
             position: 3,
             name: "Combat Zone Start Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static OH4: Segment = Segment {
             id: "OH4.4-combatZoneEndDate",
             position: 4,
             name: "Combat Zone  End Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static OH4: Segment = Segment {
             id: "OH4.5-enteredDate",
             position: 5,
             name: "Entered Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +98,7 @@ pub static OH4: Segment = Segment {
             id: "OH4.6-combatZoneUniqueIdentifier",
             position: 6,
             name: "Combat Zone Unique Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

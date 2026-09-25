@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CNS` segment: Clear Notification.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `CNS` segment definition, `http://hl7.org/v2/StructureDefinition/CNS`.
 pub static CNS: Segment = Segment {
@@ -16,7 +19,7 @@ pub static CNS: Segment = Segment {
             id: "CNS.1-cns1",
             position: 1,
             name: "CNS-1",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static CNS: Segment = Segment {
             id: "CNS.2-cns2",
             position: 2,
             name: "CNS-2",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static CNS: Segment = Segment {
             id: "CNS.3-cns3",
             position: 3,
             name: "CNS-3",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static CNS: Segment = Segment {
             id: "CNS.4-cns4",
             position: 4,
             name: "CNS-4",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +85,7 @@ pub static CNS: Segment = Segment {
             id: "CNS.5-cns5",
             position: 5,
             name: "CNS-5",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +103,7 @@ pub static CNS: Segment = Segment {
             id: "CNS.6-cns6",
             position: 6,
             name: "CNS-6",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

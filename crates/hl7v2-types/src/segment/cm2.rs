@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CM2` segment: Clinical Study Schedule Master.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+};
 
 /// The `CM2` segment definition, `http://hl7.org/v2/StructureDefinition/CM2`.
 pub static CM2: Segment = Segment {
@@ -16,7 +19,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.1-setId",
             position: 1,
             name: "Set ID- CM2",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.2-scheduledTimePoint",
             position: 2,
             name: "Scheduled Time Point",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.3-descriptionOfTimePoint",
             position: 3,
             name: "Description of Time Point",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.4-eventsScheduledThisTimePoint",
             position: 4,
             name: "Events Scheduled This Time Point",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(200),

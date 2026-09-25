@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PRC` segment: Pricing.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PRC` segment definition, `http://hl7.org/v2/StructureDefinition/PRC`.
@@ -18,7 +19,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - PRC",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.2-facilityId",
             position: 2,
             name: "Facility ID - PRC",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -54,7 +55,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.3-department",
             position: 3,
             name: "Department",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -72,7 +73,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.4-validPatientClasses",
             position: 4,
             name: "Valid Patient Classes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -93,7 +94,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.5-price",
             position: 5,
             name: "Price",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -108,7 +109,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.6-formula",
             position: 6,
             name: "Formula",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -126,7 +127,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.7-minimumQuantity",
             position: 7,
             name: "Minimum Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -144,7 +145,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.8-maximumQuantity",
             position: 8,
             name: "Maximum Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +163,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.9-minimumPrice",
             position: 9,
             name: "Minimum Price",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.10-maximumPrice",
             position: 10,
             name: "Maximum Price",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -192,7 +193,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.11-effectiveStartDate",
             position: 11,
             name: "Effective Start Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.12-effectiveEndDate",
             position: 12,
             name: "Effective End Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -222,7 +223,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.13-priceOverrideFlag",
             position: 13,
             name: "Price Override Flag",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -243,7 +244,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.14-billingCategory",
             position: 14,
             name: "Billing Category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -261,7 +262,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.15-chargeableFlag",
             position: 15,
             name: "Chargeable Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -282,7 +283,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.16-activeInactiveFlag",
             position: 16,
             name: "Active/Inactive Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -303,7 +304,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.17-cost",
             position: 17,
             name: "Cost",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -318,7 +319,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.18-chargeOnIndicator",
             position: 18,
             name: "Charge on Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

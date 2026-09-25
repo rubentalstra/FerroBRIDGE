@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ERR` segment: Error.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `ERR` segment definition, `http://hl7.org/v2/StructureDefinition/ERR`.
@@ -34,7 +35,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.2-errorLocation",
             position: 2,
             name: "Error Location",
-            data_type: Some("ERL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::erl::ERL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -49,7 +50,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.3-hl7ErrorCode",
             position: 3,
             name: "HL7 Error Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.4-severity",
             position: 4,
             name: "Severity",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.5-applicationErrorCode",
             position: 5,
             name: "Application Error Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +107,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.6-applicationErrorParameter",
             position: 6,
             name: "Application Error Parameter",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(10),
@@ -124,7 +125,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.7-diagnosticInformation",
             position: 7,
             name: "Diagnostic Information",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +143,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.8-userMessage",
             position: 8,
             name: "User Message",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +161,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.9-informPersonIndicator",
             position: 9,
             name: "Inform Person Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -178,7 +179,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.10-overrideType",
             position: 10,
             name: "Override Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +197,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.11-overrideReasonCode",
             position: 11,
             name: "Override Reason Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -214,7 +215,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.12-helpDeskContactPoint",
             position: 12,
             name: "Help Desk Contact Point",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

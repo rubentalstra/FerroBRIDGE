@@ -816,7 +816,7 @@ pub enum StructureError {
         name: String,
     },
     /// MSH-9.3 names a structure the definitions carry in several variants,
-    /// which only the trigger event's message definition selects between.
+    /// and no message definition for MSH-9.1 and MSH-9.2 names one of them.
     #[error("the message structure {name:?} has the variants {candidates:?}")]
     Variant {
         /// MSH-9.3 as the message wrote it.
@@ -830,15 +830,16 @@ pub enum StructureError {
 ///
 /// A structure the definitions carry once (`ACK`, `ADT_A02`) is selected by
 /// its id. One they carry in variants (`ORU_R01-A` to `ORU_R01-D`) is
-/// selected by the trigger event's message definition, which the generated
-/// tables do not carry, so the caller names the variant.
+/// selected by the message definition of MSH-9.1 and MSH-9.2
+/// ([`hl7v2_types::message::find`]): `ORU^R01` names `ORU_R01-A` and
+/// `ADT^A04` names `ADT_A01-B`.
 ///
 /// # Errors
 ///
 /// Returns [`StructureError`] when MSH-9.3 is empty, names no structure, or
-/// names one with variants.
+/// names one with variants of which the message definition for MSH-9.1 and
+/// MSH-9.2 names none.
 pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureError> {
-    // TODO(#289): select the variant from the message definitions (event to structure) once the generator emits them.
     let name = message.message_type(3).ok_or(StructureError::Unnamed)?;
     if let Some(structure) = hl7v2_types::structure::find(name) {
         return Ok(structure);
@@ -854,7 +855,13 @@ pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureE
             name: String::from(name),
         });
     }
-    Err(StructureError::Variant {
+    let named = message
+        .message_type(1)
+        .zip(message.message_type(2))
+        .and_then(|(code, event)| hl7v2_types::message::find(code, event))
+        .and_then(|definition| definition.structure)
+        .filter(|structure| candidates.contains(&structure.id));
+    named.ok_or_else(|| StructureError::Variant {
         name: String::from(name),
         candidates,
     })

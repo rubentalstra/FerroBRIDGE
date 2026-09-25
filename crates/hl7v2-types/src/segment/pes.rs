@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PES` segment: Product Experience Sender.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PES` segment definition, `http://hl7.org/v2/StructureDefinition/PES`.
@@ -18,7 +19,7 @@ pub static PES: Segment = Segment {
             id: "PES.1-senderOrganizationName",
             position: 1,
             name: "Sender Organization Name",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -33,7 +34,7 @@ pub static PES: Segment = Segment {
             id: "PES.2-senderIndividualName",
             position: 2,
             name: "Sender Individual Name",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -48,7 +49,7 @@ pub static PES: Segment = Segment {
             id: "PES.3-senderAddress",
             position: 3,
             name: "Sender Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -63,7 +64,7 @@ pub static PES: Segment = Segment {
             id: "PES.4-senderTelephone",
             position: 4,
             name: "Sender Telephone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -78,7 +79,7 @@ pub static PES: Segment = Segment {
             id: "PES.5-senderEventIdentifier",
             position: 5,
             name: "Sender Event Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -93,7 +94,7 @@ pub static PES: Segment = Segment {
             id: "PES.6-senderSequenceNumber",
             position: 6,
             name: "Sender Sequence Number",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -111,7 +112,7 @@ pub static PES: Segment = Segment {
             id: "PES.7-senderEventDescription",
             position: 7,
             name: "Sender Event Description",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -129,7 +130,7 @@ pub static PES: Segment = Segment {
             id: "PES.8-senderComment",
             position: 8,
             name: "Sender Comment",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static PES: Segment = Segment {
             id: "PES.9-senderAwareDateTime",
             position: 9,
             name: "Sender Aware Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +163,7 @@ pub static PES: Segment = Segment {
             id: "PES.10-eventReportDate",
             position: 10,
             name: "Event Report Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static PES: Segment = Segment {
             id: "PES.11-eventReportTimingType",
             position: 11,
             name: "Event Report Timing/Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -198,7 +199,7 @@ pub static PES: Segment = Segment {
             id: "PES.12-eventReportSource",
             position: 12,
             name: "Event Report Source",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -219,7 +220,7 @@ pub static PES: Segment = Segment {
             id: "PES.13-eventReportedTo",
             position: 13,
             name: "Event Reported To",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RFI` segment: Request for Information.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `RFI` segment definition, `http://hl7.org/v2/StructureDefinition/RFI`.
 pub static RFI: Segment = Segment {
@@ -16,7 +17,7 @@ pub static RFI: Segment = Segment {
             id: "RFI.1-requestDate",
             position: 1,
             name: "Request Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static RFI: Segment = Segment {
             id: "RFI.2-responseDueDate",
             position: 2,
             name: "Response Due Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -46,7 +47,7 @@ pub static RFI: Segment = Segment {
             id: "RFI.3-patientConsent",
             position: 3,
             name: "Patient Consent",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static RFI: Segment = Segment {
             id: "RFI.4-dateAdditionalInformationWasSubmitted",
             position: 4,
             name: "Date Additional Information Was Submitted",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

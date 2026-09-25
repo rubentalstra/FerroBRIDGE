@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `LRL` segment: Location Relationship.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `LRL` segment definition, `http://hl7.org/v2/StructureDefinition/LRL`.
 pub static LRL: Segment = Segment {
@@ -16,7 +17,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - LRL",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.2-segmentActionCode",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.3-segmentUniqueKey",
             position: 3,
             name: "Segment Unique Key",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.4-locationRelationshipId",
             position: 4,
             name: "Location Relationship ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.5-organizationalLocationRelationshipValue",
             position: 5,
             name: "Organizational Location Relationship Value",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -100,7 +101,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.6-patientLocationRelationshipValue",
             position: 6,
             name: "Patient Location Relationship Value",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

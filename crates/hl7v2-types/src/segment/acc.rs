@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ACC` segment: Accident.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `ACC` segment definition, `http://hl7.org/v2/StructureDefinition/ACC`.
@@ -19,7 +20,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.1-accidentDateTime",
             position: 1,
             name: "Accident Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.2-accidentCode",
             position: 2,
             name: "Accident Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.3-accidentLocation",
             position: 3,
             name: "Accident Location",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.4-autoAccidentState",
             position: 4,
             name: "Auto Accident State",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.5-accidentJobRelatedIndicator",
             position: 5,
             name: "Accident Job Related Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +110,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.6-accidentDeathIndicator",
             position: 6,
             name: "Accident Death Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.7-enteredBy",
             position: 7,
             name: "Entered By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.8-accidentDescription",
             position: 8,
             name: "Accident Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.9-broughtInBy",
             position: 9,
             name: "Brought In By",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +182,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.10-policeNotifiedIndicator",
             position: 10,
             name: "Police Notified Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +203,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.11-accidentAddress",
             position: 11,
             name: "Accident Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +218,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.12-degreeOfPatientLiability",
             position: 12,
             name: "Degree of patient liability",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.13-accidentIdentifier",
             position: 13,
             name: "Accident Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

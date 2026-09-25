@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ECD` segment: Equipment Command.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `ECD` segment definition, `http://hl7.org/v2/StructureDefinition/ECD`.
@@ -18,7 +19,7 @@ pub static ECD: Segment = Segment {
             id: "ECD.1-ecd1",
             position: 1,
             name: "ECD-1",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static ECD: Segment = Segment {
             id: "ECD.2-ecd2",
             position: 2,
             name: "ECD-2",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static ECD: Segment = Segment {
             id: "ECD.3-ecd3",
             position: 3,
             name: "ECD-3",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static ECD: Segment = Segment {
             id: "ECD.5-ecd5",
             position: 5,
             name: "ECD-5",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),

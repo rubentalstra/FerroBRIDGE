@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ROL` segment: Role.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `ROL` segment definition, `http://hl7.org/v2/StructureDefinition/ROL`.
 pub static ROL: Segment = Segment {
@@ -16,7 +17,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.1-roleInstanceId",
             position: 1,
             name: "Role Instance ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.3-role",
             position: 3,
             name: "Role-ROL",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.4-rolePerson",
             position: 4,
             name: "Role Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -85,7 +86,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.5-roleBeginDateTime",
             position: 5,
             name: "Role Begin Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.6-roleEndDateTime",
             position: 6,
             name: "Role End Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.7-roleDuration",
             position: 7,
             name: "Role Duration",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.8-roleActionReason",
             position: 8,
             name: "Role Action Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.9-providerType",
             position: 9,
             name: "Provider Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -160,7 +161,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.10-organizationUnitType",
             position: 10,
             name: "Organization Unit Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +179,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.11-officeHomeAddressBirthplace",
             position: 11,
             name: "Office/Home Address/Birthplace",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -193,7 +194,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.12-phone",
             position: 12,
             name: "Phone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -208,7 +209,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.13-personsLocation",
             position: 13,
             name: "Person's Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static ROL: Segment = Segment {
             id: "ROL.14-organization",
             position: 14,
             name: "Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

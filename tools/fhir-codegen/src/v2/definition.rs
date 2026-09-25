@@ -60,6 +60,9 @@ pub struct StructureDefinition {
     pub date: Option<IgnoredAny>,
     /// Not read.
     pub description: Option<IgnoredAny>,
+    /// Not read: the standards status, normative version and work group of
+    /// a primitive data type.
+    pub extension: Option<IgnoredAny>,
 }
 
 /// `StructureDefinition.differential`.
@@ -111,6 +114,9 @@ pub struct Element {
     pub code: Option<IgnoredAny>,
     /// Not read.
     pub definition: Option<IgnoredAny>,
+    /// The member `definition` misspelled, which the complex data type files
+    /// write; not read, and a defect outside the files that carry it.
+    pub defintion: Option<IgnoredAny>,
     /// Not read.
     pub comment: Option<IgnoredAny>,
 }
@@ -143,6 +149,8 @@ pub struct Extension {
     pub value_code: Option<String>,
     /// The value when the extension carries an `integer`, whatever JSON type it is written in.
     pub value_integer: Option<Scalar>,
+    /// The value when the extension carries a `boolean`.
+    pub value_boolean: Option<bool>,
     /// The nested extensions of a complex extension.
     #[serde(default)]
     #[expect(
@@ -152,12 +160,74 @@ pub struct Extension {
     pub extension: Vec<Extension>,
 }
 
-/// The header of a data type definition: only its canonical URL is read.
+/// A v2 message definition: a constraint on the `Message` base that names
+/// the message code, the trigger event and the structure.
 #[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DataTypeHeader {
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MessageDefinition {
     /// Always `StructureDefinition`.
     pub resource_type: String,
-    /// The canonical URL, for example `http://hl7.org/v2/StructureDefinition/CWE`.
+    /// The canonical URL, for example `http://hl7.org/v2/StructureDefinition/Message/ORU-R01`.
     pub url: String,
+    /// The resource id, for example `ORU-R01`.
+    pub id: String,
+    /// Always `logical` for the v2 models.
+    pub kind: StructureKind,
+    /// Whether the model is an abstract base.
+    #[serde(rename = "abstract")]
+    pub is_abstract: bool,
+    /// The type the model constrains, `Message`.
+    #[serde(rename = "type")]
+    pub type_name: String,
+    /// The base the definition constrains.
+    pub base_definition: Option<String>,
+    /// `constraint` for every message definition.
+    pub derivation: Option<Derivation>,
+    /// The constrained elements.
+    pub differential: Option<MessageDifferential>,
+    /// Not read.
+    pub name: Option<IgnoredAny>,
+    /// Not read.
+    pub title: Option<IgnoredAny>,
+    /// Not read.
+    pub version: Option<IgnoredAny>,
+    /// Not read.
+    pub status: Option<IgnoredAny>,
+    /// Not read.
+    pub date: Option<IgnoredAny>,
+    /// Not read.
+    pub description: Option<IgnoredAny>,
+}
+
+/// The differential of a [`MessageDefinition`].
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MessageDifferential {
+    /// The elements in definition order.
+    pub element: Vec<MessageElement>,
+}
+
+/// One constrained element of a [`MessageDefinition`].
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct MessageElement {
+    /// The element id, for example `Message.triggerEvent`.
+    pub id: String,
+    /// The element path, equal to the id in every message definition.
+    pub path: String,
+    /// The fixed code of `messageType`, `triggerEvent` and `status`.
+    pub pattern_code: Option<String>,
+    /// The reference type of `structure` and the acknowledgment elements.
+    #[serde(rename = "type")]
+    pub types: Option<Vec<ReferenceType>>,
+}
+
+/// One entry of a [`MessageElement`]'s `type`.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ReferenceType {
+    /// The type code, `Reference`.
+    pub code: String,
+    /// The profiles the reference targets.
+    pub target_profile: Vec<String>,
 }

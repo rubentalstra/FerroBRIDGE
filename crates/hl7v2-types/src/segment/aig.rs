@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `AIG` segment: Appointment Information - General Resource.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `AIG` segment definition, `http://hl7.org/v2/StructureDefinition/AIG`.
@@ -18,7 +19,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.1-setId",
             position: 1,
             name: "Set ID - AIG",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.2-segmentActionCode",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.3-resourceId",
             position: 3,
             name: "Resource ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.4-resourceType",
             position: 4,
             name: "Resource Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.5-resourceGroup",
             position: 5,
             name: "Resource Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -102,7 +103,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.6-resourceQuantity",
             position: 6,
             name: "Resource Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.7-resourceQuantityUnits",
             position: 7,
             name: "Resource Quantity Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -135,7 +136,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.8-startDateTime",
             position: 8,
             name: "Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -150,7 +151,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.9-startDateTimeOffset",
             position: 9,
             name: "Start Date/Time Offset",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.10-startDateTimeOffsetUnits",
             position: 10,
             name: "Start Date/Time Offset Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -180,7 +181,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.11-duration",
             position: 11,
             name: "Duration",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -195,7 +196,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.12-durationUnits",
             position: 12,
             name: "Duration Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -210,7 +211,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.13-allowSubstitutionCode",
             position: 13,
             name: "Allow Substitution Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -228,7 +229,7 @@ pub static AIG: Segment = Segment {
             id: "AIG.14-fillerStatusCode",
             position: 14,
             name: "Filler Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

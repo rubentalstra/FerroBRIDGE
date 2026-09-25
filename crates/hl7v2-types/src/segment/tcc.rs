@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `TCC` segment: Test Code Configuration.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `TCC` segment definition, `http://hl7.org/v2/StructureDefinition/TCC`.
@@ -18,7 +19,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.1-tcc1",
             position: 1,
             name: "TCC-1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.2-tcc2",
             position: 2,
             name: "TCC-2",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -66,7 +67,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.4-tcc4",
             position: 4,
             name: "TCC-4",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -81,7 +82,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.5-tcc5",
             position: 5,
             name: "TCC-5",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -96,7 +97,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.6-tcc6",
             position: 6,
             name: "TCC-6",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -111,7 +112,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.7-tcc7",
             position: 7,
             name: "TCC-7",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.8-tcc8",
             position: 8,
             name: "TCC-8",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -144,7 +145,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.9-tcc9",
             position: 9,
             name: "TCC-9",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.10-tcc10",
             position: 10,
             name: "TCC-10",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -186,7 +187,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.11-tcc11",
             position: 11,
             name: "TCC-11",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.12-tcc12",
             position: 12,
             name: "TCC-12",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -222,7 +223,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.13-tcc13",
             position: 13,
             name: "TCC-13",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -240,7 +241,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.14-tcc14",
             position: 14,
             name: "TCC-14",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -258,7 +259,7 @@ pub static TCC: Segment = Segment {
             id: "TCC.15-tcc15",
             position: 15,
             name: "TCC-15",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

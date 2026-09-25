@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OM4` segment: Observations That Require Specimens.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `OM4` segment definition, `http://hl7.org/v2/StructureDefinition/OM4`.
@@ -18,7 +19,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.2-derivedSpecimen",
             position: 2,
             name: "Derived Specimen",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.3-containerDescription",
             position: 3,
             name: "Container Description",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -78,7 +79,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.4-containerVolume",
             position: 4,
             name: "Container Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -93,7 +94,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.5-containerUnits",
             position: 5,
             name: "Container Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -111,7 +112,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.6-specimen",
             position: 6,
             name: "Specimen",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.7-additive",
             position: 7,
             name: "Additive",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.8-preparation",
             position: 8,
             name: "Preparation",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +163,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.9-specialHandlingRequirements",
             position: 9,
             name: "Special Handling Requirements",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.10-normalCollectionVolume",
             position: 10,
             name: "Normal Collection Volume",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -192,7 +193,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.11-minimumCollectionVolume",
             position: 11,
             name: "Minimum Collection Volume",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.12-specimenRequirements",
             position: 12,
             name: "Specimen Requirements",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -222,7 +223,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.13-specimenPriorities",
             position: 13,
             name: "Specimen Priorities",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -243,7 +244,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.14-specimenRetentionTime",
             position: 14,
             name: "Specimen Retention Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -258,7 +259,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.15-specimenHandlingCode",
             position: 15,
             name: "Specimen Handling Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -276,7 +277,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.16-specimenPreference",
             position: 16,
             name: "Specimen Preference",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -294,7 +295,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.17-preferredSpecimenAttribtureSequenceId",
             position: 17,
             name: "Preferred Specimen/Attribture Sequence ID",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -309,7 +310,7 @@ pub static OM4: Segment = Segment {
             id: "OM4.18-taxonomicClassificationCode",
             position: 18,
             name: "Taxonomic Classification Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

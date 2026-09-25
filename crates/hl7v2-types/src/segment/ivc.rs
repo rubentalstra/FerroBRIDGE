@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IVC` segment: Invoice.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `IVC` segment definition, `http://hl7.org/v2/StructureDefinition/IVC`.
@@ -18,7 +19,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.1-providerInvoiceNumber",
             position: 1,
             name: "Provider Invoice Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.2-payerInvoiceNumber",
             position: 2,
             name: "Payer Invoice Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -48,7 +49,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.3-contractAgreementNumber",
             position: 3,
             name: "Contract/Agreement Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -63,7 +64,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.4-invoiceControl",
             position: 4,
             name: "Invoice Control",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -81,7 +82,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.5-invoiceReason",
             position: 5,
             name: "Invoice Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -99,7 +100,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.6-invoiceType",
             position: 6,
             name: "Invoice Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -117,7 +118,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.7-invoiceDateTime",
             position: 7,
             name: "Invoice Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -132,7 +133,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.8-invoiceAmount",
             position: 8,
             name: "Invoice Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.9-paymentTerms",
             position: 9,
             name: "Payment Terms",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.10-providerOrganization",
             position: 10,
             name: "Provider Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -180,7 +181,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.11-payerOrganization",
             position: 11,
             name: "Payer Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -195,7 +196,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.12-attention",
             position: 12,
             name: "Attention",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -210,7 +211,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.13-lastInvoiceIndicator",
             position: 13,
             name: "Last Invoice Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -231,7 +232,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.14-invoiceBookingPeriod",
             position: 14,
             name: "Invoice Booking Period",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -246,7 +247,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.15-origin",
             position: 15,
             name: "Origin",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -264,7 +265,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.16-invoiceFixedAmount",
             position: 16,
             name: "Invoice Fixed Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -279,7 +280,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.17-specialCosts",
             position: 17,
             name: "Special Costs",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -294,7 +295,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.18-amountForDoctorsTreatment",
             position: 18,
             name: "Amount for Doctors Treatment",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -309,7 +310,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.19-responsiblePhysician",
             position: 19,
             name: "Responsible Physician",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -324,7 +325,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.20-costCenter",
             position: 20,
             name: "Cost Center",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -339,7 +340,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.21-invoicePrepaidAmount",
             position: 21,
             name: "Invoice Prepaid Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -354,7 +355,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.22-totalInvoiceAmountWithoutPrepaidAmount",
             position: 22,
             name: "Total Invoice Amount without Prepaid Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -369,7 +370,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.23-totalAmountOfVat",
             position: 23,
             name: "Total-Amount of VAT",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -384,7 +385,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.24-vatRatesApplied",
             position: 24,
             name: "VAT-Rates applied",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -402,7 +403,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.25-benefitGroup",
             position: 25,
             name: "Benefit Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -420,7 +421,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.26-providerTaxId",
             position: 26,
             name: "Provider Tax ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -438,7 +439,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.27-payerTaxId",
             position: 27,
             name: "Payer Tax ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -456,7 +457,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.28-providerTaxStatus",
             position: 28,
             name: "Provider Tax Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -474,7 +475,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.29-payerTaxStatus",
             position: 29,
             name: "Payer Tax Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -492,7 +493,7 @@ pub static IVC: Segment = Segment {
             id: "IVC.30-salesTaxId",
             position: 30,
             name: "Sales Tax ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

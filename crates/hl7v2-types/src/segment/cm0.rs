@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CM0` segment: Clinical Study Master.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+};
 
 /// The `CM0` segment definition, `http://hl7.org/v2/StructureDefinition/CM0`.
 pub static CM0: Segment = Segment {
@@ -16,7 +19,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.1-setId",
             position: 1,
             name: "Set ID - CM0",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.2-sponsorStudyId",
             position: 2,
             name: "Sponsor Study ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.3-alternateStudyId",
             position: 3,
             name: "Alternate Study ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),
@@ -64,7 +67,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.4-titleOfStudy",
             position: 4,
             name: "Title of Study",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -82,7 +85,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.5-chairmanOfStudy",
             position: 5,
             name: "Chairman of Study",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -97,7 +100,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.6-lastIrbApprovalDate",
             position: 6,
             name: "Last IRB Approval Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +115,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.7-totalAccrualToDate",
             position: 7,
             name: "Total Accrual to Date",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +133,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.8-lastAccrualDate",
             position: 8,
             name: "Last Accrual Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +148,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.9-contactForStudy",
             position: 9,
             name: "Contact for Study",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -160,7 +163,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.10-contactsTelephoneNumber",
             position: 10,
             name: "Contact's Telephone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +178,7 @@ pub static CM0: Segment = Segment {
             id: "CM0.11-contactsAddress",
             position: 11,
             name: "Contact's Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

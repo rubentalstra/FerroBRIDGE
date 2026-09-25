@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PSL` segment: Product/Service Line Item.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PSL` segment definition, `http://hl7.org/v2/StructureDefinition/PSL`.
@@ -18,7 +19,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.1-providerProductServiceLineItemNumber",
             position: 1,
             name: "Provider Product/Service Line Item Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.2-payerProductServiceLineItemNumber",
             position: 2,
             name: "Payer Product/Service Line Item Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -48,7 +49,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.3-productServiceLineItemSequenceNumber",
             position: 3,
             name: "Product/Service Line Item Sequence Number",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -66,7 +67,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.4-providerTrackingId",
             position: 4,
             name: "Provider Tracking ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -81,7 +82,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.5-payerTrackingId",
             position: 5,
             name: "Payer Tracking ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -96,7 +97,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.6-productServiceLineItemStatus",
             position: 6,
             name: "Product/Service Line Item Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.7-productServiceCode",
             position: 7,
             name: "Product/Service Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -132,7 +133,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.8-productServiceCodeModifier",
             position: 8,
             name: "Product/Service Code Modifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -150,7 +151,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.9-productServiceCodeDescription",
             position: 9,
             name: "Product/Service Code Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -168,7 +169,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.10-productServiceEffectiveDate",
             position: 10,
             name: "Product/Service Effective Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -183,7 +184,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.11-productServiceExpirationDate",
             position: 11,
             name: "Product/Service Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -198,7 +199,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.12-productServiceQuantity",
             position: 12,
             name: "Product/Service Quantity",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -216,7 +217,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.13-productServiceUnitCost",
             position: 13,
             name: "Product/Service Unit Cost",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -231,7 +232,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.14-numberOfItemsPerUnit",
             position: 14,
             name: "Number of Items per Unit",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -249,7 +250,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.15-productServiceGrossAmount",
             position: 15,
             name: "Product/Service Gross Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -264,7 +265,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.16-productServiceBilledAmount",
             position: 16,
             name: "Product/Service Billed Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -279,7 +280,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.17-productServiceClarificationCodeType",
             position: 17,
             name: "Product/Service Clarification Code Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(20),
@@ -297,7 +298,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.18-productServiceClarificationCodeValue",
             position: 18,
             name: "Product/Service Clarification Code Value",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(20),
@@ -315,7 +316,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.19-healthDocumentReferenceIdentifier",
             position: 19,
             name: "Health Document Reference Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -330,7 +331,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.20-processingConsiderationCode",
             position: 20,
             name: "Processing Consideration Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(20),
@@ -348,7 +349,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.21-restrictedDisclosureIndicator",
             position: 21,
             name: "Restricted Disclosure Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -369,7 +370,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.22-relatedProductServiceCodeIndicator",
             position: 22,
             name: "Related Product/Service Code Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -387,7 +388,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.23-productServiceAmountForPhysician",
             position: 23,
             name: "Product/Service Amount for Physician",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -402,7 +403,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.24-productServiceCostFactor",
             position: 24,
             name: "Product/Service Cost Factor",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -420,7 +421,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.25-costCenter",
             position: 25,
             name: "Cost Center",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -435,7 +436,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.26-billingPeriod",
             position: 26,
             name: "Billing Period",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -450,7 +451,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.27-daysWithoutBilling",
             position: 27,
             name: "Days without Billing",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -468,7 +469,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.28-sessionNo",
             position: 28,
             name: "Session-No",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -486,7 +487,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.29-executingPhysicianId",
             position: 29,
             name: "Executing Physician ID",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -501,7 +502,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.30-responsiblePhysicianId",
             position: 30,
             name: "Responsible Physician ID",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -516,7 +517,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.31-roleExecutingPhysician",
             position: 31,
             name: "Role Executing Physician",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -534,7 +535,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.32-medicalRoleExecutingPhysician",
             position: 32,
             name: "Medical Role Executing Physician",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -552,7 +553,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.33-sideOfBody",
             position: 33,
             name: "Side of body",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -570,7 +571,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.34-numberOfTpsPp",
             position: 34,
             name: "Number of TP's PP",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -588,7 +589,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.35-tpValuePp",
             position: 35,
             name: "TP-Value PP",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -603,7 +604,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.36-internalScalingFactorPp",
             position: 36,
             name: "Internal Scaling Factor PP",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -621,7 +622,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.37-externalScalingFactorPp",
             position: 37,
             name: "External Scaling Factor PP",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -639,7 +640,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.38-amountPp",
             position: 38,
             name: "Amount PP",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -654,7 +655,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.39-numberOfTpsTechnicalPart",
             position: 39,
             name: "Number of TP's Technical Part",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -672,7 +673,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.40-tpValueTechnicalPart",
             position: 40,
             name: "TP-Value Technical Part",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -687,7 +688,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.41-internalScalingFactorTechnicalPart",
             position: 41,
             name: "Internal Scaling Factor Technical Part",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -705,7 +706,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.42-externalScalingFactorTechnicalPart",
             position: 42,
             name: "External Scaling Factor Technical Part",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -723,7 +724,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.43-amountTechnicalPart",
             position: 43,
             name: "Amount Technical Part",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -738,7 +739,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.44-totalAmountProfessionalPartTechnicalPart",
             position: 44,
             name: "Total Amount Professional Part + Technical Part",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -753,7 +754,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.45-vatRate",
             position: 45,
             name: "VAT-Rate",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -771,7 +772,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.46-mainService",
             position: 46,
             name: "Main-Service",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -789,7 +790,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.47-validation",
             position: 47,
             name: "Validation",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -810,7 +811,7 @@ pub static PSL: Segment = Segment {
             id: "PSL.48-comment",
             position: 48,
             name: "Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

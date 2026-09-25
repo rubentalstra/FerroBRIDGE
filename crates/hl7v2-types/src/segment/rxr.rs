@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXR` segment: Pharmacy/Treatment Route.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `RXR` segment definition, `http://hl7.org/v2/StructureDefinition/RXR`.
 pub static RXR: Segment = Segment {
@@ -16,7 +17,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.1-route",
             position: 1,
             name: "Route",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.2-administrationSite",
             position: 2,
             name: "Administration Site",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.3-administrationDevice",
             position: 3,
             name: "Administration Device",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.4-administrationMethod",
             position: 4,
             name: "Administration Method",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.5-routingInstruction",
             position: 5,
             name: "Routing Instruction",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +107,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.6-administrationSiteModifier",
             position: 6,
             name: "Administration Site Modifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

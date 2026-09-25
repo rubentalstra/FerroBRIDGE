@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SLT` segment: Sterilization Lot.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `SLT` segment definition, `http://hl7.org/v2/StructureDefinition/SLT`.
 pub static SLT: Segment = Segment {
@@ -16,7 +17,7 @@ pub static SLT: Segment = Segment {
             id: "SLT.1-deviceNumber",
             position: 1,
             name: "Device Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static SLT: Segment = Segment {
             id: "SLT.2-deviceName",
             position: 2,
             name: "Device Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static SLT: Segment = Segment {
             id: "SLT.3-number",
             position: 3,
             name: "Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static SLT: Segment = Segment {
             id: "SLT.4-itemIdentifier",
             position: 4,
             name: "Item Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static SLT: Segment = Segment {
             id: "SLT.5-barCode",
             position: 5,
             name: "Bar Code",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

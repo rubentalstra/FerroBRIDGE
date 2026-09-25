@@ -10,15 +10,15 @@
 //! infrastructure resources its operations exchange, and the operations
 //! defined on `CodeSystem`, `ValueSet`, and `ConceptMap`. The resource set is
 //! every concrete `kind: resource` `StructureDefinition` the package defines.
-//! The v2 set is every message structure of the fetched v2 definitions
-//! ([`V2RootSet`]). Each root set is declared here; the transitive closure of
+//! The v2 set is every message structure, segment, data type and message
+//! definition of the fetched v2 definitions ([`V2RootSet`]). Each root set is declared here; the transitive closure of
 //! the types those roots reference is the emitter's job.
 
 use std::collections::BTreeMap;
 
 use crate::fhir::{Derivation, OperationDefinition, StructureDefinition, StructureKind};
 use crate::package::Package;
-use crate::v2::corpus::{Corpus, Sourced};
+use crate::v2::corpus::{Corpus, Sourced, SourcedMessage};
 
 /// The resource types the terminology root set holds, by name.
 pub const ROOT_RESOURCES: [&str; 8] = [
@@ -193,26 +193,35 @@ fn is_terminology_operation(operation: &OperationDefinition) -> bool {
 }
 
 /// The v2 definitions directory holding one file per segment.
-// NOTE: HL7/v2ig input/sourceOfTruth segment/segments-subset and
-// message_structures-subset repeat canonical URLs of the full directories, so
-// the root set reads the full directories only.
+// NOTE: HL7/v2ig input/sourceOfTruth segment/segments-subset, message_structures-subset
+// and messages-subset repeat canonical URLs of the full directories, so the
+// root set reads the full directories only.
 pub const V2_SEGMENT_DIR: &str = "segment/segments";
 
 /// The v2 definitions directory holding one file per message structure.
 pub const V2_STRUCTURE_DIR: &str = "message-structure/message_structures";
 
-/// The v2 definitions directories holding the data types a field names.
-pub const V2_DATA_TYPE_DIRS: [&str; 2] = [
-    "data-type/primitive/primitives",
-    "data-type/complex/complex-data-types",
-];
+/// The v2 definitions directory holding one file per message definition.
+pub const V2_MESSAGE_DIR: &str = "message/messages";
 
-/// The base models the segments and message structures specialize, by file.
+/// The v2 definitions directory holding one file per primitive data type.
+pub const V2_PRIMITIVE_DIR: &str = "data-type/primitive/primitives";
+
+/// The v2 definitions directory holding one file per complex data type.
+pub const V2_COMPLEX_DIR: &str = "data-type/complex/complex-data-types";
+
+/// The v2 definitions directories holding the data types a field names.
+pub const V2_DATA_TYPE_DIRS: [&str; 2] = [V2_PRIMITIVE_DIR, V2_COMPLEX_DIR];
+
+/// The base models the segments, message structures and data types
+/// specialize, by file.
 // NOTE: HL7/v2ig input/sourceOfTruth meta-resources/message--message.json is
-// not valid JSON (line 35), so the loader reads only the two base files named here.
-pub const V2_BASES: [&str; 2] = [
+// not valid JSON (line 35), so the loader reads only the base files named here.
+pub const V2_BASES: [&str; 4] = [
     "meta-resources/segment--segment.json",
     "meta-resources/message-structure--message-structure.json",
+    "meta-resources/dt-primitive--primitive-data-type.json",
+    "meta-resources/dt-complex--complex-data-type.json",
 ];
 
 /// The base every v2 segment definition specializes.
@@ -221,13 +230,23 @@ pub const V2_SEGMENT_BASE: &str = "http://hl7.org/v2/StructureDefinition/Segment
 /// The base every v2 message structure specializes: the roots of the v2 set.
 pub const V2_STRUCTURE_BASE: &str = "http://hl7.org/v2/StructureDefinition/MessageStructure";
 
-/// The v2 root set: every message structure and every segment definition of
-/// the fetched definitions.
+/// The base every primitive data type specializes.
+pub const V2_PRIMITIVE_BASE: &str = "http://hl7.org/v2/StructureDefinition/primitive-data-type";
+
+/// The base every complex data type specializes.
+pub const V2_COMPLEX_BASE: &str = "http://hl7.org/v2/StructureDefinition/complex-data-type";
+
+/// The base every message definition constrains.
+pub const V2_MESSAGE_BASE: &str = "http://hl7.org/v2/StructureDefinition/Message";
+
+/// The v2 root set: every message structure, segment definition, data type
+/// definition and message definition of the fetched definitions.
 ///
 /// The segments are roots of their own, so a segment no structure references
 /// (the batch envelopes `BHS`, `BTS`, `FHS` and `FTS`, and `ADD`, `FAC`, `OVR`,
-/// `PDC` and `PSH`) is emitted beside the ones the structures reach. A
-/// field's data type is checked to exist and emitted by its code only.
+/// `PDC` and `PSH`) is emitted beside the ones the structures reach. The data
+/// types are roots too, so a data type no field names is emitted with its
+/// components, and a field's data type points at its definition.
 #[derive(Debug)]
 pub struct V2RootSet<'a> {
     /// The message structures, keyed by id (`ORU_R01-A`).
@@ -236,6 +255,10 @@ pub struct V2RootSet<'a> {
     // NOTE: no specification governs this: our own design; a batch delivered over
     // MLLP carries the BHS/FHS envelopes no message structure names, so every segment is a root.
     pub segments: BTreeMap<&'a str, &'a Sourced>,
+    /// The primitive and complex data type definitions, keyed by id (`CX`).
+    pub data_types: BTreeMap<&'a str, &'a Sourced>,
+    /// The message definitions, keyed by id (`ORU-R01`).
+    pub messages: BTreeMap<&'a str, &'a SourcedMessage>,
 }
 
 /// The one file in the segment directory that is no segment definition: the
@@ -256,14 +279,17 @@ pub struct NotAStructure {
 }
 
 impl<'a> V2RootSet<'a> {
-    /// Selects every message structure and every segment definition of `corpus`.
+    /// Selects every message structure, segment, data type and message
+    /// definition of `corpus`.
     ///
     /// # Errors
     ///
     /// Returns [`NotAStructure`] for a definition in the structure directory
-    /// that specializes a base other than [`V2_STRUCTURE_BASE`], or one in the
+    /// that specializes a base other than [`V2_STRUCTURE_BASE`], one in the
     /// segment directory, [`V2_SLOT_FILE`] aside, that specializes a base
-    /// other than [`V2_SEGMENT_BASE`].
+    /// other than [`V2_SEGMENT_BASE`], a data type that specializes another
+    /// base than its directory's, or a message definition that constrains a
+    /// base other than [`V2_MESSAGE_BASE`].
     pub fn select(corpus: &'a Corpus) -> Result<Self, NotAStructure> {
         let structures = roots(corpus.structures().values(), V2_STRUCTURE_BASE)?;
         let segments = roots(
@@ -273,9 +299,42 @@ impl<'a> V2RootSet<'a> {
                 .filter(|sourced| sourced.file != V2_SLOT_FILE),
             V2_SEGMENT_BASE,
         )?;
+        let in_dir = |dir: &'static str| {
+            move |sourced: &&'a Sourced| {
+                sourced
+                    .file
+                    .strip_prefix(dir)
+                    .is_some_and(|rest| rest.starts_with('/'))
+            }
+        };
+        let mut data_types = roots(
+            corpus
+                .data_types()
+                .values()
+                .filter(in_dir(V2_PRIMITIVE_DIR)),
+            V2_PRIMITIVE_BASE,
+        )?;
+        data_types.extend(roots(
+            corpus.data_types().values().filter(in_dir(V2_COMPLEX_DIR)),
+            V2_COMPLEX_BASE,
+        )?);
+        let mut messages = BTreeMap::new();
+        for entry in corpus.messages().values() {
+            let named = entry.definition.base_definition.as_deref();
+            if named != Some(V2_MESSAGE_BASE) {
+                return Err(NotAStructure {
+                    file: entry.file.clone(),
+                    base: named.map(str::to_owned),
+                    expected: V2_MESSAGE_BASE,
+                });
+            }
+            messages.insert(entry.definition.id.as_str(), entry);
+        }
         Ok(Self {
             structures,
             segments,
+            data_types,
+            messages,
         })
     }
 }

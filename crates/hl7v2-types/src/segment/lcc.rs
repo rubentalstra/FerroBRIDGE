@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `LCC` segment: Location Charge Code.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `LCC` segment definition, `http://hl7.org/v2/StructureDefinition/LCC`.
 pub static LCC: Segment = Segment {
@@ -16,7 +17,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - LCC",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.2-locationDepartment",
             position: 2,
             name: "Location Department",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.3-accommodationType",
             position: 3,
             name: "Accommodation Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -67,7 +68,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.4-chargeCode",
             position: 4,
             name: "Charge Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,

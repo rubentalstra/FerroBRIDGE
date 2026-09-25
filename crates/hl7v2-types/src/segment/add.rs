@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ADD` segment: Addendum.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `ADD` segment definition, `http://hl7.org/v2/StructureDefinition/ADD`.
 pub static ADD: Segment = Segment {
@@ -15,7 +16,7 @@ pub static ADD: Segment = Segment {
         id: "ADD.1-add1",
         position: 1,
         name: "ADD-1",
-        data_type: Some("ST"),
+        data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
         cardinality: Cardinality {
             min: 0,
             max: Max::Bounded(1),

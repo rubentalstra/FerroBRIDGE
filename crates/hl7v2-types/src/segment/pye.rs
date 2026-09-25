@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PYE` segment: Payee Information.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `PYE` segment definition, `http://hl7.org/v2/StructureDefinition/PYE`.
 pub static PYE: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PYE: Segment = Segment {
             id: "PYE.1-setId",
             position: 1,
             name: "Set ID – PYE",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static PYE: Segment = Segment {
             id: "PYE.2-payeeType",
             position: 2,
             name: "Payee Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static PYE: Segment = Segment {
             id: "PYE.3-payeeRelationshipToInvoicePatient",
             position: 3,
             name: "Payee Relationship to Invoice (Patient)",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static PYE: Segment = Segment {
             id: "PYE.4-payeeIdentificationList",
             position: 4,
             name: "Payee Identification List",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -85,7 +86,7 @@ pub static PYE: Segment = Segment {
             id: "PYE.5-payeePersonName",
             position: 5,
             name: "Payee Person Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(4),
@@ -100,7 +101,7 @@ pub static PYE: Segment = Segment {
             id: "PYE.6-payeeAddress",
             position: 6,
             name: "Payee Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(4),
@@ -115,7 +116,7 @@ pub static PYE: Segment = Segment {
             id: "PYE.7-paymentMethod",
             position: 7,
             name: "Payment Method",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

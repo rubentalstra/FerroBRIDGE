@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ECR` segment: Equipment Command Response.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `ECR` segment definition, `http://hl7.org/v2/StructureDefinition/ECR`.
 pub static ECR: Segment = Segment {
@@ -16,7 +17,7 @@ pub static ECR: Segment = Segment {
             id: "ECR.1-ecr1",
             position: 1,
             name: "ECR-1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static ECR: Segment = Segment {
             id: "ECR.2-ecr2",
             position: 2,
             name: "ECR-2",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static ECR: Segment = Segment {
             id: "ECR.3-ecr3",
             position: 3,
             name: "ECR-3",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),

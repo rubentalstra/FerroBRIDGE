@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SFT` segment: Software.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `SFT` segment definition, `http://hl7.org/v2/StructureDefinition/SFT`.
 pub static SFT: Segment = Segment {
@@ -16,7 +17,7 @@ pub static SFT: Segment = Segment {
             id: "SFT.1-softwareVendorOrganization",
             position: 1,
             name: "Software Vendor Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static SFT: Segment = Segment {
             id: "SFT.2-softwareCertifiedVersionOrReleaseNumber",
             position: 2,
             name: "Software Certified Version or Release Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static SFT: Segment = Segment {
             id: "SFT.3-softwareProductName",
             position: 3,
             name: "Software Product Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static SFT: Segment = Segment {
             id: "SFT.4-softwareBinaryId",
             position: 4,
             name: "Software Binary ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static SFT: Segment = Segment {
             id: "SFT.5-softwareProductInformation",
             position: 5,
             name: "Software Product Information",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static SFT: Segment = Segment {
             id: "SFT.6-softwareInstallDate",
             position: 6,
             name: "Software Install Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

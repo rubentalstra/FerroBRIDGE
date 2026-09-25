@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BPO` segment: Blood Product Order.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `BPO` segment definition, `http://hl7.org/v2/StructureDefinition/BPO`.
@@ -18,7 +19,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.1-setId",
             position: 1,
             name: "Set ID – BPO",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.2-bpUniversalServiceIdentifier",
             position: 2,
             name: "BP Universal Service Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.3-bpProcessingRequirements",
             position: 3,
             name: "BP  Processing Requirements",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -72,7 +73,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.4-bpQuantity",
             position: 4,
             name: "BP Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.5-bpAmount",
             position: 5,
             name: "BP Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -108,7 +109,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.6-bpUnits",
             position: 6,
             name: "BP Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.7-bpIntendedUseDateTime",
             position: 7,
             name: "BP Intended Use Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.8-bpIntendedDispenseFromLocation",
             position: 8,
             name: "BP Intended Dispense From Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -156,7 +157,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.9-bpIntendedDispenseFromAddress",
             position: 9,
             name: "BP Intended Dispense From Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -171,7 +172,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.10-bpRequestedDispenseDateTime",
             position: 10,
             name: "BP Requested Dispense Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -186,7 +187,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.11-bpRequestedDispenseToLocation",
             position: 11,
             name: "BP Requested Dispense To Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -201,7 +202,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.12-bpRequestedDispenseToAddress",
             position: 12,
             name: "BP Requested Dispense To Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -216,7 +217,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.13-bpIndicationForUse",
             position: 13,
             name: "BP Indication for Use",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -234,7 +235,7 @@ pub static BPO: Segment = Segment {
             id: "BPO.14-bpInformedConsentIndicator",
             position: 14,
             name: "BP Informed Consent Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

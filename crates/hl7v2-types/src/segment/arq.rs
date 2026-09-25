@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ARQ` segment: Appointment Request.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `ARQ` segment definition, `http://hl7.org/v2/StructureDefinition/ARQ`.
 pub static ARQ: Segment = Segment {
@@ -16,7 +19,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.1-placerAppointmentId",
             position: 1,
             name: "Placer Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.2-fillerAppointmentId",
             position: 2,
             name: "Filler Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.3-occurrenceNumber",
             position: 3,
             name: "Occurrence Number",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +67,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.4-placerOrderGroupNumber",
             position: 4,
             name: "Placer Order Group Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +82,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.5-scheduleId",
             position: 5,
             name: "Schedule ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +97,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.6-requestEventReason",
             position: 6,
             name: "Request Event Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +112,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.7-appointmentReason",
             position: 7,
             name: "Appointment Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +130,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.8-appointmentType",
             position: 8,
             name: "Appointment Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +148,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.9-appointmentDuration",
             position: 9,
             name: "Appointment Duration",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +166,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.10-appointmentDurationUnits",
             position: 10,
             name: "Appointment Duration Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +181,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.11-requestedStartDateTimeRange",
             position: 11,
             name: "Requested Start Date/Time Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -193,7 +196,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.12-priority",
             position: 12,
             name: "Priority-ARQ",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +214,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.13-repeatingInterval",
             position: 13,
             name: "Repeating Interval",
-            data_type: Some("RI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ri::RI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -226,7 +229,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.14-repeatingIntervalDuration",
             position: 14,
             name: "Repeating Interval Duration",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -244,7 +247,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.15-placerContactPerson",
             position: 15,
             name: "Placer Contact Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -259,7 +262,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.16-placerContactPhoneNumber",
             position: 16,
             name: "Placer Contact Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -274,7 +277,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.17-placerContactAddress",
             position: 17,
             name: "Placer Contact Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -289,7 +292,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.18-placerContactLocation",
             position: 18,
             name: "Placer Contact Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -304,7 +307,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.19-enteredByPerson",
             position: 19,
             name: "Entered By Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -319,7 +322,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.20-enteredByPhoneNumber",
             position: 20,
             name: "Entered By Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -334,7 +337,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.21-enteredByLocation",
             position: 21,
             name: "Entered By Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +352,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.22-parentPlacerAppointmentId",
             position: 22,
             name: "Parent Placer Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +367,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.23-parentFillerAppointmentId",
             position: 23,
             name: "Parent Filler Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +382,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.24-placerOrderNumber",
             position: 24,
             name: "Placer Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -394,7 +397,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.25-fillerOrderNumber",
             position: 25,
             name: "Filler Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -409,7 +412,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.26-alternatePlacerOrderGroupNumber",
             position: 26,
             name: "Alternate Placer Order Group Number",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -2,17 +2,22 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The HL7 v2 message structures and segment fields, generated from the HL7 v2 definitions.
+//! The HL7 v2 message structures, segment fields, data types and message definitions, generated from the HL7 v2 definitions.
 //!
 //! `structure` holds every message structure of the definitions as a
-//! segment-group tree, and `segment` every segment definition with its
-//! field table, the batch envelopes included. The shapes are in `model`. Every file is
-//! `@generated` by `fhir-codegen`; change the emitter and regenerate, never
-//! the output.
+//! segment-group tree, `segment` every segment definition with its
+//! field table, the batch envelopes included, `data_type` every primitive and
+//! complex data type with its component table, and `message` every message
+//! definition with the structure its trigger event selects. The shapes are in
+//! `model`. Every file is `@generated` by `fhir-codegen`; change the emitter
+//! and regenerate, never the output.
 //!
 //! The definitions are `HL7/v2ig` at commit `3adcdbfff654ccbff5cd33aa34bd909a087e8e19`, path `input/sourceOfTruth`:
-//! 305 message structures and 190 segments with 2912 fields.
+//! 305 message structures, 190 segments with 2912 fields, 83 data types (12 primitive,
+//! 71 complex with 448 components) and 696 message definitions.
 
+pub mod data_type;
+pub mod message;
 pub mod model;
 pub mod segment;
 pub mod structure;

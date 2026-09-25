@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXG` segment: Pharmacy/Treatment Give.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `RXG` segment definition, `http://hl7.org/v2/StructureDefinition/RXG`.
@@ -19,7 +20,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.1-giveSubIdCounter",
             position: 1,
             name: "Give Sub-ID Counter",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.2-dispenseSubIdCounter",
             position: 2,
             name: "Dispense Sub-ID Counter",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.4-giveCode",
             position: 4,
             name: "Give Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.5-giveAmountMinimum",
             position: 5,
             name: "Give Amount - Minimum",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.6-giveAmountMaximum",
             position: 6,
             name: "Give Amount - Maximum",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.7-giveUnits",
             position: 7,
             name: "Give Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.8-giveDosageForm",
             position: 8,
             name: "Give Dosage Form",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.9-administrationNotes",
             position: 9,
             name: "Administration Notes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -172,7 +173,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.10-substitutionStatus",
             position: 10,
             name: "Substitution Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +209,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.12-needsHumanReview",
             position: 12,
             name: "Needs Human Review",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +230,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.13-specialAdministrationInstructions",
             position: 13,
             name: "Special Administration Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -250,7 +251,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.14-givePerTimeUnit",
             position: 14,
             name: "Give Per (Time Unit)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -268,7 +269,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.15-giveRateAmount",
             position: 15,
             name: "Give Rate Amount",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -286,7 +287,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.16-giveRateUnits",
             position: 16,
             name: "Give Rate Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -304,7 +305,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.17-giveStrength",
             position: 17,
             name: "Give Strength",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -319,7 +320,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.18-giveStrengthUnits",
             position: 18,
             name: "Give Strength Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -337,7 +338,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.19-substanceNumber",
             position: 19,
             name: "Substance  Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -355,7 +356,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.20-substanceExpirationDate",
             position: 20,
             name: "Substance Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -370,7 +371,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.21-substanceManufacturerName",
             position: 21,
             name: "Substance Manufacturer Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -385,7 +386,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.22-indication",
             position: 22,
             name: "Indication",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -403,7 +404,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.23-giveDrugStrengthVolume",
             position: 23,
             name: "Give Drug Strength Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -421,7 +422,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.24-giveDrugStrengthVolumeUnits",
             position: 24,
             name: "Give Drug Strength Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +440,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.25-giveBarcodeIdentifier",
             position: 25,
             name: "Give Barcode Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +458,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.26-pharmacyOrderType",
             position: 26,
             name: "Pharmacy Order Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -508,7 +509,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.29-deliverToPatientLocation",
             position: 29,
             name: "Deliver-to Patient Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -523,7 +524,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.30-deliverToAddress",
             position: 30,
             name: "Deliver-to Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -538,7 +539,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.31-giveTagIdentifier",
             position: 31,
             name: "Give Tag Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -553,7 +554,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.32-dispenseAmount",
             position: 32,
             name: "Dispense Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -568,7 +569,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.33-dispenseUnits",
             position: 33,
             name: "Dispense Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SPM` segment: Specimen.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `SPM` segment definition, `http://hl7.org/v2/StructureDefinition/SPM`.
@@ -18,7 +19,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.1-setId",
             position: 1,
             name: "Set ID - SPM",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.2-specimenIdentifier",
             position: 2,
             name: "Specimen Identifier",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.3-specimenParentIds",
             position: 3,
             name: "Specimen Parent IDs",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -66,7 +67,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.4-specimenType",
             position: 4,
             name: "Specimen Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.5-specimenTypeModifier",
             position: 5,
             name: "Specimen Type Modifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -102,7 +103,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.6-specimenAdditives",
             position: 6,
             name: "Specimen Additives",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -120,7 +121,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.7-specimenCollectionMethod",
             position: 7,
             name: "Specimen Collection Method",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -138,7 +139,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.8-specimenSourceSite",
             position: 8,
             name: "Specimen Source Site",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -156,7 +157,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.9-specimenSourceSiteModifier",
             position: 9,
             name: "Specimen Source Site Modifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -174,7 +175,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.10-specimenCollectionSite",
             position: 10,
             name: "Specimen Collection Site",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -192,7 +193,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.11-specimenRole",
             position: 11,
             name: "Specimen Role",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -210,7 +211,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.12-specimenCollectionAmount",
             position: 12,
             name: "Specimen Collection Amount",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -225,7 +226,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.13-groupedSpecimenCount",
             position: 13,
             name: "Grouped Specimen Count",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -243,7 +244,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.14-specimenDescription",
             position: 14,
             name: "Specimen Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -258,7 +259,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.15-specimenHandlingCode",
             position: 15,
             name: "Specimen Handling Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -276,7 +277,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.16-specimenRiskCode",
             position: 16,
             name: "Specimen Risk Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -294,7 +295,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.17-specimenCollectionDateTime",
             position: 17,
             name: "Specimen Collection Date/Time",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -309,7 +310,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.18-specimenReceivedDateTime",
             position: 18,
             name: "Specimen Received Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -324,7 +325,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.19-specimenExpirationDateTime",
             position: 19,
             name: "Specimen Expiration Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -339,7 +340,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.20-specimenAvailability",
             position: 20,
             name: "Specimen Availability",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -360,7 +361,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.21-specimenRejectReason",
             position: 21,
             name: "Specimen Reject Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -378,7 +379,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.22-specimenQuality",
             position: 22,
             name: "Specimen Quality",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -396,7 +397,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.23-specimenAppropriateness",
             position: 23,
             name: "Specimen Appropriateness",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -414,7 +415,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.24-specimenCondition",
             position: 24,
             name: "Specimen Condition",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -432,7 +433,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.25-specimenCurrentQuantity",
             position: 25,
             name: "Specimen Current Quantity",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -447,7 +448,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.26-numberOfSpecimenContainers",
             position: 26,
             name: "Number of Specimen Containers",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -465,7 +466,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.27-containerType",
             position: 27,
             name: "Container Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -483,7 +484,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.28-containerCondition",
             position: 28,
             name: "Container Condition",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -501,7 +502,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.29-specimenChildRole",
             position: 29,
             name: "Specimen Child Role",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -519,7 +520,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.30-accessionId",
             position: 30,
             name: "Accession ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -534,7 +535,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.31-otherSpecimenId",
             position: 31,
             name: "Other Specimen ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -549,7 +550,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.32-shipmentId",
             position: 32,
             name: "Shipment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -564,7 +565,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.33-cultureStartDateTime",
             position: 33,
             name: "Culture Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -579,7 +580,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.34-cultureFinalDateTime",
             position: 34,
             name: "Culture Final Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -594,7 +595,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.35-actionCode",
             position: 35,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

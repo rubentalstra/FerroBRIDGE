@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXV` segment: Pharmacy/Treatment Infusion.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `RXV` segment definition, `http://hl7.org/v2/StructureDefinition/RXV`.
@@ -18,7 +19,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.1-setId",
             position: 1,
             name: "Set ID - RXV",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.2-bolusType",
             position: 2,
             name: "Bolus Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.3-bolusDoseAmount",
             position: 3,
             name: "Bolus Dose Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.4-bolusDoseAmountUnits",
             position: 4,
             name: "Bolus Dose Amount Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.5-bolusDoseVolume",
             position: 5,
             name: "Bolus Dose Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -105,7 +106,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.6-bolusDoseVolumeUnits",
             position: 6,
             name: "Bolus Dose Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -123,7 +124,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.7-pcaType",
             position: 7,
             name: "PCA Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -144,7 +145,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.8-pcaDoseAmount",
             position: 8,
             name: "PCA Dose Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +163,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.9-pcaDoseAmountUnits",
             position: 9,
             name: "PCA Dose Amount Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -180,7 +181,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.10-pcaDoseAmountVolume",
             position: 10,
             name: "PCA Dose Amount Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -198,7 +199,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.11-pcaDoseAmountVolumeUnits",
             position: 11,
             name: "PCA Dose Amount Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -216,7 +217,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.12-maxDoseAmount",
             position: 12,
             name: "Max Dose Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.13-maxDoseAmountUnits",
             position: 13,
             name: "Max Dose Amount Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -252,7 +253,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.14-maxDoseAmountVolume",
             position: 14,
             name: "Max Dose Amount Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -270,7 +271,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.15-maxDoseAmountVolumeUnits",
             position: 15,
             name: "Max Dose Amount Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -288,7 +289,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.16-maxDosePerTime",
             position: 16,
             name: "Max Dose per Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -303,7 +304,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.17-lockoutInterval",
             position: 17,
             name: "Lockout Interval",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -318,7 +319,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.18-syringeManufacturer",
             position: 18,
             name: "Syringe Manufacturer",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -333,7 +334,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.19-syringeModelNumber",
             position: 19,
             name: "Syringe Model Number",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -348,7 +349,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.20-syringeSize",
             position: 20,
             name: "Syringe Size",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -366,7 +367,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.21-syringeSizeUnits",
             position: 21,
             name: "Syringe Size Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -381,7 +382,7 @@ pub static RXV: Segment = Segment {
             id: "RXV.22-actionCode",
             position: 22,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

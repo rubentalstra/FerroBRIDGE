@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `AIP` segment: Appointment Information - Personnel Resource.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `AIP` segment definition, `http://hl7.org/v2/StructureDefinition/AIP`.
 pub static AIP: Segment = Segment {
@@ -16,7 +17,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.1-setId",
             position: 1,
             name: "Set ID - AIP",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.2-segmentActionCode",
             position: 2,
             name: "Segment Action code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.3-personnelResourceId",
             position: 3,
             name: "Personnel Resource ID",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +71,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.4-resourceType",
             position: 4,
             name: "Resource Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.5-resourceGroup",
             position: 5,
             name: "Resource Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.6-startDateTime",
             position: 6,
             name: "Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.7-startDateTimeOffset",
             position: 7,
             name: "Start Date/Time Offset",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.8-startDateTimeOffsetUnits",
             position: 8,
             name: "Start Date/Time Offset Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +149,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.9-duration",
             position: 9,
             name: "Duration",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.10-durationUnits",
             position: 10,
             name: "Duration Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +179,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.11-allowSubstitutionCode",
             position: 11,
             name: "Allow Substitution Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +197,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.12-fillerStatusCode",
             position: 12,
             name: "Filler Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OBX` segment: Observation/Result.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `OBX` segment definition, `http://hl7.org/v2/StructureDefinition/OBX`.
@@ -19,7 +20,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.1-setId",
             position: 1,
             name: "Set ID – OBX",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.2-valueType",
             position: 2,
             name: "Value Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -58,7 +59,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.3-observationIdentifier",
             position: 3,
             name: "Observation Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -76,7 +77,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.4-observationSubId",
             position: 4,
             name: "Observation Sub-ID",
-            data_type: Some("OG"),
+            data_type: Some(DataTypeRef::Defined(&data_type::og::OG)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +95,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.5-observationValue",
             position: 5,
             name: "Observation Value",
-            data_type: Some("Varies"),
+            data_type: Some(DataTypeRef::Undefined("Varies")),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +110,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.6-units",
             position: 6,
             name: "Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +128,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.7-referenceRange",
             position: 7,
             name: "Reference Range",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.8-interpretationCodes",
             position: 8,
             name: "Interpretation Codes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -163,7 +164,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.9-probability",
             position: 9,
             name: "Probability",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +182,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.10-natureOfAbnormalTest",
             position: 10,
             name: "Nature of Abnormal Test",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -202,7 +203,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.11-observationResultStatus",
             position: 11,
             name: "Observation Result Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.12-effectiveDateOfReferenceRange",
             position: 12,
             name: "Effective Date of Reference Range",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +239,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.13-userDefinedAccessChecks",
             position: 13,
             name: "User Defined Access Checks",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +257,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.14-dateTimeOfTheObservation",
             position: 14,
             name: "Date/Time of the Observation",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -271,7 +272,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.15-producersId",
             position: 15,
             name: "Producer's ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -289,7 +290,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.16-responsibleObserver",
             position: 16,
             name: "Responsible Observer",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -304,7 +305,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.17-observationMethod",
             position: 17,
             name: "Observation Method",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -322,7 +323,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.18-equipmentInstanceIdentifier",
             position: 18,
             name: "Equipment Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -337,7 +338,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.19-dateTimeOfTheAnalysis",
             position: 19,
             name: "Date/Time of the Analysis",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +353,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.20-observationSite",
             position: 20,
             name: "Observation Site",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -370,7 +371,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.21-observationInstanceIdentifier",
             position: 21,
             name: "Observation Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -385,7 +386,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.22-moodCode",
             position: 22,
             name: "Mood Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -403,7 +404,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.23-performingOrganizationName",
             position: 23,
             name: "Performing Organization Name",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +419,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.24-performingOrganizationAddress",
             position: 24,
             name: "Performing Organization Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -433,7 +434,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.25-performingOrganizationMedicalDirector",
             position: 25,
             name: "Performing Organization Medical Director",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -448,7 +449,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.26-patientResultsReleaseCategory",
             position: 26,
             name: "Patient Results Release Category",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -469,7 +470,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.27-rootCause",
             position: 27,
             name: "Root Cause",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +488,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.28-localProcessControl",
             position: 28,
             name: "Local Process Control",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -505,7 +506,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.29-observationType",
             position: 29,
             name: "Observation Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -523,7 +524,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.30-observationSubType",
             position: 30,
             name: "Observation Sub-Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -541,7 +542,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.31-actionCode",
             position: 31,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -562,7 +563,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.32-observationValueAbsentReason",
             position: 32,
             name: "Observation Value Absent Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -580,7 +581,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.33-observationRelatedSpecimenIdentifier",
             position: 33,
             name: "Observation Related Specimen Identifier",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

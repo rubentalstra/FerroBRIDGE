@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `NCK` segment: System Clock.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment};
 
 /// The `NCK` segment definition, `http://hl7.org/v2/StructureDefinition/NCK`.
 pub static NCK: Segment = Segment {
@@ -15,7 +16,7 @@ pub static NCK: Segment = Segment {
         id: "NCK.1-systemDateTime",
         position: 1,
         name: "System Date/Time",
-        data_type: Some("DTM"),
+        data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
         cardinality: Cardinality {
             min: 1,
             max: Max::Bounded(1),

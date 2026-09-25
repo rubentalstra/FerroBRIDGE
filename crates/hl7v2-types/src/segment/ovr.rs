@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OVR` segment: Override.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `OVR` segment definition, `http://hl7.org/v2/StructureDefinition/OVR`.
 pub static OVR: Segment = Segment {
@@ -16,7 +19,7 @@ pub static OVR: Segment = Segment {
             id: "OVR.1-businessRuleOverrideType",
             position: 1,
             name: "Business Rule Override Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static OVR: Segment = Segment {
             id: "OVR.2-businessRuleOverrideCode",
             position: 2,
             name: "Business Rule Override Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static OVR: Segment = Segment {
             id: "OVR.3-overrideComments",
             position: 3,
             name: "Override Comments",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +73,7 @@ pub static OVR: Segment = Segment {
             id: "OVR.4-overrideEnteredBy",
             position: 4,
             name: "Override Entered By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +88,7 @@ pub static OVR: Segment = Segment {
             id: "OVR.5-overrideAuthorizedBy",
             position: 5,
             name: "Override Authorized By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

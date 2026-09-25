@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OH1` segment: Person Employment Status.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `OH1` segment definition, `http://hl7.org/v2/StructureDefinition/OH1`.
 pub static OH1: Segment = Segment {
@@ -16,7 +17,7 @@ pub static OH1: Segment = Segment {
             id: "OH1.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static OH1: Segment = Segment {
             id: "OH1.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static OH1: Segment = Segment {
             id: "OH1.3-employmentStatus",
             position: 3,
             name: "Employment Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static OH1: Segment = Segment {
             id: "OH1.4-employmentStatusStartDate",
             position: 4,
             name: "Employment Status Start Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static OH1: Segment = Segment {
             id: "OH1.5-employmentStatusEndDate",
             position: 5,
             name: "Employment Status End Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static OH1: Segment = Segment {
             id: "OH1.6-enteredDate",
             position: 6,
             name: "Entered Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static OH1: Segment = Segment {
             id: "OH1.7-employmentStatusUniqueIdentifier",
             position: 7,
             name: "Employment Status Unique Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `AL1` segment: Patient Allergy Information.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `AL1` segment definition, `http://hl7.org/v2/StructureDefinition/AL1`.
@@ -19,7 +20,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.1-setId",
             position: 1,
             name: "Set ID - AL1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.2-allergenTypeCode",
             position: 2,
             name: "Allergen Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.3-allergenCodeMnemonicDescription",
             position: 3,
             name: "Allergen Code/Mnemonic/Description",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.4-allergySeverityCode",
             position: 4,
             name: "Allergy Severity Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.5-allergyReactionCode",
             position: 5,
             name: "Allergy Reaction Code",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

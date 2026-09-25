@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OM1` segment: General.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `OM1` segment definition, `http://hl7.org/v2/StructureDefinition/OM1`.
@@ -19,7 +20,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.2-producersServiceTestObservationId",
             position: 2,
             name: "Producer's Service/Test/Observation ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.3-permittedDataTypes",
             position: 3,
             name: "Permitted Data Types",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -76,7 +77,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.4-specimenRequired",
             position: 4,
             name: "Specimen Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -97,7 +98,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.5-producerId",
             position: 5,
             name: "Producer ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.6-observationDescription",
             position: 6,
             name: "Observation Description",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.7-otherServiceTestObservationIdsForTheObservation",
             position: 7,
             name: "Other Service/Test/Observation IDs for the Observation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -151,7 +152,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.8-otherNames",
             position: 8,
             name: "Other Names",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -169,7 +170,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.9-preferredReportNameForTheObservation",
             position: 9,
             name: "Preferred Report Name for the Observation",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +188,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.10-preferredShortNameOrMnemonicForTheObservation",
             position: 10,
             name: "Preferred Short Name or Mnemonic for the Observation",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +206,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.11-preferredLongNameForTheObservation",
             position: 11,
             name: "Preferred Long Name for the Observation",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.12-orderability",
             position: 12,
             name: "Orderability",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -244,7 +245,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.13-identityOfInstrumentUsedToPerformThisStudy",
             position: 13,
             name: "Identity of Instrument Used to Perform this Study",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -262,7 +263,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.14-codedRepresentationOfMethod",
             position: 14,
             name: "Coded Representation of Method",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -280,7 +281,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.15-portableDeviceIndicator",
             position: 15,
             name: "Portable Device Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -301,7 +302,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.16-observationProducingDepartmentSection",
             position: 16,
             name: "Observation Producing Department/Section",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -319,7 +320,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.17-telephoneNumberOfSection",
             position: 17,
             name: "Telephone Number of Section",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -334,7 +335,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.18-natureOfServiceTestObservation",
             position: 18,
             name: "Nature of Service/Test/Observation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -355,7 +356,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.19-reportSubheader",
             position: 19,
             name: "Report Subheader",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -373,7 +374,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.20-reportDisplayOrder",
             position: 20,
             name: "Report Display Order",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -391,7 +392,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.21-dateTimeStampForAnyChangeInDefinitionForTheObservation",
             position: 21,
             name: "Date/Time Stamp for Any Change in Definition for the Observation",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -406,7 +407,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.22-effectiveDateTimeOfChange",
             position: 22,
             name: "Effective Date/Time of Change",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -421,7 +422,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.23-typicalTurnAroundTime",
             position: 23,
             name: "Typical Turn-Around Time",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +437,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.24-processingTime",
             position: 24,
             name: "Processing Time",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -451,7 +452,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.25-processingPriority",
             position: 25,
             name: "Processing Priority",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -472,7 +473,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.26-reportingPriority",
             position: 26,
             name: "Reporting Priority",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -493,7 +494,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.27-outsideSiteSWhereObservationMayBePerformed",
             position: 27,
             name: "Outside Site(s) Where Observation May Be Performed",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -511,7 +512,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.28-addressOfOutsideSiteS",
             position: 28,
             name: "Address of Outside Site(s)",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -526,7 +527,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.29-phoneNumberOfOutsideSite",
             position: 29,
             name: "Phone Number of Outside Site",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -541,7 +542,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.30-confidentialityCode",
             position: 30,
             name: "Confidentiality Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -559,7 +560,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.31-observationsRequiredToInterpretThisObservation",
             position: 31,
             name: "Observations Required to Interpret this Observation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -577,7 +578,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.32-interpretationOfObservations",
             position: 32,
             name: "Interpretation of Observations",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -592,7 +593,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.33-contraindicationsToObservations",
             position: 33,
             name: "Contraindications to Observations",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -610,7 +611,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.34-reflexTestsObservations",
             position: 34,
             name: "Reflex Tests/Observations",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -628,7 +629,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.35-rulesThatTriggerReflexTesting",
             position: 35,
             name: "Rules that Trigger Reflex Testing",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -643,7 +644,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.36-fixedCannedMessage",
             position: 36,
             name: "Fixed Canned Message",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -661,7 +662,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.37-patientPreparation",
             position: 37,
             name: "Patient Preparation",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -679,7 +680,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.38-procedureMedication",
             position: 38,
             name: "Procedure Medication",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -697,7 +698,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.39-factorsThatMayAffectTheObservation",
             position: 39,
             name: "Factors that may Affect the Observation",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -715,7 +716,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.40-serviceTestObservationPerformanceSchedule",
             position: 40,
             name: "Service/Test/Observation Performance Schedule",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -733,7 +734,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.41-descriptionOfTestMethods",
             position: 41,
             name: "Description of Test Methods",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -748,7 +749,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.42-kindOfQuantityObserved",
             position: 42,
             name: "Kind of Quantity Observed",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -766,7 +767,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.43-pointVersusInterval",
             position: 43,
             name: "Point Versus Interval",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -784,7 +785,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.44-challengeInformation",
             position: 44,
             name: "Challenge Information",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -805,7 +806,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.45-relationshipModifier",
             position: 45,
             name: "Relationship Modifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -823,7 +824,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.46-targetAnatomicSiteOfTest",
             position: 46,
             name: "Target Anatomic Site Of Test",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -841,7 +842,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.47-modalityOfImagingMeasurement",
             position: 47,
             name: "Modality of Imaging Measurement",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -859,7 +860,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.48-exclusiveTest",
             position: 48,
             name: "Exclusive Test",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -880,7 +881,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.49-diagnosticServSectId",
             position: 49,
             name: "Diagnostic Serv Sect ID",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -901,7 +902,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.50-taxonomicClassificationCode",
             position: 50,
             name: "Taxonomic Classification Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -919,7 +920,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.51-otherNames",
             position: 51,
             name: "Other Names",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -937,7 +938,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.52-replacementProducersServiceTestObservationId",
             position: 52,
             name: "Replacement Producer's Service/Test/Observation ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -955,7 +956,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.53-priorResutsInstructions",
             position: 53,
             name: "Prior Resuts Instructions",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -970,7 +971,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.54-specialInstructions",
             position: 54,
             name: "Special Instructions",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -985,7 +986,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.55-testCategory",
             position: 55,
             name: "Test Category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1000,7 +1001,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.56-obsIdAssocWithProducersServiceTestObsId",
             position: 56,
             name: "Observation/Identifier associated with Producer’s Service/Test/Observation ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1018,7 +1019,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.57-typicalTurnAroundTime",
             position: 57,
             name: "Typical Turn-Around Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1033,7 +1034,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.58-genderRestriction",
             position: 58,
             name: "Gender Restriction",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1051,7 +1052,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.59-ageRestriction",
             position: 59,
             name: "Age Restriction",
-            data_type: Some("NR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nr::NR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

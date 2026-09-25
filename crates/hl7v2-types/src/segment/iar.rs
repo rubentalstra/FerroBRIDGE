@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IAR` segment: Allergy Reaction.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `IAR` segment definition, `http://hl7.org/v2/StructureDefinition/IAR`.
 pub static IAR: Segment = Segment {
@@ -16,7 +19,7 @@ pub static IAR: Segment = Segment {
             id: "IAR.1-allergyReactionCode",
             position: 1,
             name: "Allergy Reaction Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static IAR: Segment = Segment {
             id: "IAR.2-allergySeverityCode",
             position: 2,
             name: "Allergy Severity Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static IAR: Segment = Segment {
             id: "IAR.3-sensitivityToCausativeAgentCode",
             position: 3,
             name: "Sensitivity to Causative Agent Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static IAR: Segment = Segment {
             id: "IAR.4-management",
             position: 4,
             name: "Management",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

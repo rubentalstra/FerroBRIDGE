@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OH3` segment: Usual Work.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `OH3` segment definition, `http://hl7.org/v2/StructureDefinition/OH3`.
 pub static OH3: Segment = Segment {
@@ -16,7 +17,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.3-occupation",
             position: 3,
             name: "Occupation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.4-industry",
             position: 4,
             name: "Industry",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.5-usualOccupationDurationYears",
             position: 5,
             name: "Usual Occupation Duration (years)",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.6-startYear",
             position: 6,
             name: "Start year",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.7-enteredDate",
             position: 7,
             name: "Entered Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static OH3: Segment = Segment {
             id: "OH3.8-workUniqueIdentifier",
             position: 8,
             name: "Work Unique Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

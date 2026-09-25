@@ -1154,7 +1154,7 @@ published `openehr-*` crates do.
 |---|---|---|---|
 | `openehr-mapping-core` | the one shared foundation: the header model; the YAML loader (`serde-saphyr`: anchors, aliases, merge keys, source positions); the archetype-keyed mapping registry; the diagnostic model (file, YAML path, mapping name, model path); the RM-path model with `../` resolution; the `aqlPath` index over a Web Template with leaf RM type resolution; relative path derivation; composition build and read over `openehr-its` and `openehr-rm` | hand-written | yes |
 | `fhir-types` | the FHIR model: per-version resources, datatypes and primitives with the strict JSON and XML codecs, the terminology operation contracts, the public element table; emitted by `tools/fhir-codegen` from the vendored HL7 packages | generated | yes (inherited line) |
-| `hl7v2-types` | the HL7 v2 tables a v2 parser walks: every message structure of the v2 definitions as a segment-group tree (positions, cardinalities, choice groups, `Hxx` slots, segment status), and every segment definition, the batch envelopes included, with its field table (position, name, data type code, cardinality, optionality, length and conformance length, table binding); emitted by the `v2` root set of `tools/fhir-codegen` from the fetched `HL7/v2ig` definitions | generated | yes (0.0.0 reservation) |
+| `hl7v2-types` | the HL7 v2 tables a v2 parser walks: every message structure of the v2 definitions as a segment-group tree (positions, cardinalities, choice groups, `Hxx` slots, segment status), and every segment definition, the batch envelopes included, with its field table (position, name, data type, cardinality, optionality, length and conformance length, table binding), every data type with its component table, and every message definition indexed by code and trigger event with the structure variant it names; emitted by the `v2` root set of `tools/fhir-codegen` from the fetched `HL7/v2ig` definitions | generated | yes (0.0.0 reservation) |
 | `fhirconnect` | the FHIRconnect language as one crate with one module per stage: `model` (the AST, FerroBRIDGE's strict schemas, the published schemas vendored and exercised, semantic validation), `resolve` (one immutable program per profile and template, the extension ordering and collision rules), `tree` (the bidirectional path model over the `fhir-types` `Value` tree guided by the element table: choice types, repeating elements, primitive extensions, the three read-side FHIRPath forms, writable versus read-only classification), `engine` (the bidirectional interpreter, the data-type lens matrix, the PROGRAMMED registry), `operations` (the `$tofhir` and `$toopenehr` contracts of section 4.7 over `fhir-types`) | hand-written | yes |
 | `omocl` | the OMOCL language as one crate: `model` (the AST, FerroBRIDGE's authored JSON schema, the key-to-column projection tables, validation) and `engine` (the one-directional interpreter emitting record graphs of typed CDM rows, the `CustomMapping` registry) | hand-written | yes |
 | `omop-cdm` | CDM v5.4 row types and column metadata generated from the OHDSI field definitions; the OHDSI PostgreSQL DDL vendored verbatim and embedded; `graph`, the record graph the OMOCL engine emits and the writer commits; behind the default `database` feature, the vocabulary loader and concept resolver, the derived-table runners and the `COPY` writer, so a metadata-only consumer (`omocl`) takes the crate with `default-features = false` and builds no database client | generated plus hand-written | yes |
@@ -1423,9 +1423,18 @@ with each node's position, cardinality and segment status; per segment the
 field table with position, name, data type code, cardinality, the
 `optionality`, `length` and `conformance-length` extensions, the
 `structuredefinition-standards-status` code and the table binding by number
-and value set URL. Data type components and table contents are not emitted:
-the v2-to-FHIR `TypeInfo` extensions type the fields for the mapper and
-`hl7.terminology` carries the tables. Each defect the definitions carry is
+and value set URL. The root set also holds every primitive (12) and complex
+(71, with 448 components) data type, so a field points at its data type's
+static and a component carries its position, name, data type, cardinality,
+optionality, lengths and table; `Varies` has no definition in the two data
+type directories and stays a code. It holds every message definition (696)
+too, indexed by message code and trigger event, each pointing at the
+structure variant it names (`ADT^A04` names `ADT_A01-B`). The
+`Message.structure` profile URLs match no structure URL, so the generator
+links by name: the one structure whose id, with `_` written `-`, is the last
+step of the profile; a definition that states no trigger event takes it from
+its id (`ACK-A01`). Table contents are not emitted: `hl7.terminology`
+carries them. Each defect the definitions carry is
 tolerated only in the files where it was found, and the same defect elsewhere
 fails the emit. Byte-deterministic; the same `emit --check` covers it.
 

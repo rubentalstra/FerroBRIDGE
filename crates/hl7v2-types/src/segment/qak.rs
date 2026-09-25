@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `QAK` segment: Query Acknowledgment.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `QAK` segment definition, `http://hl7.org/v2/StructureDefinition/QAK`.
@@ -18,7 +19,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.1-queryTag",
             position: 1,
             name: "Query Tag",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.2-queryResponseStatus",
             position: 2,
             name: "Query Response Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.3-messageQueryName",
             position: 3,
             name: "Message Query Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -75,7 +76,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.4-hitCountTotal",
             position: 4,
             name: "Hit Count Total",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -93,7 +94,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.5-thisPayload",
             position: 5,
             name: "This payload",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -111,7 +112,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.6-hitsRemaining",
             position: 6,
             name: "Hits remaining",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

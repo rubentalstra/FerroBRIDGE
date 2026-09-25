@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `NPU` segment: Bed Status Update.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `NPU` segment definition, `http://hl7.org/v2/StructureDefinition/NPU`.
 pub static NPU: Segment = Segment {
@@ -16,7 +17,7 @@ pub static NPU: Segment = Segment {
             id: "NPU.1-bedLocation",
             position: 1,
             name: "Bed Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static NPU: Segment = Segment {
             id: "NPU.2-bedStatus",
             position: 2,
             name: "Bed Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

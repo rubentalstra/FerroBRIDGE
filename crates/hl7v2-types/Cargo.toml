@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 [package]
 name = "hl7v2-types"
-description = "Generated HL7 v2 message structure trees and segment field tables"
+description = "Generated HL7 v2 message structure trees, segment field tables, data type components and message definitions"
 version = "0.0.0"
 edition.workspace = true
 rust-version.workspace = true

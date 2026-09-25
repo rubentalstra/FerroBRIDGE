@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXE` segment: Pharmacy/Treatment Encoded Order.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `RXE` segment definition, `http://hl7.org/v2/StructureDefinition/RXE`.
@@ -34,7 +35,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.2-giveCode",
             position: 2,
             name: "Give Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.3-giveAmountMinimum",
             position: 3,
             name: "Give Amount - Minimum",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.4-giveAmountMaximum",
             position: 4,
             name: "Give Amount - Maximum",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.5-giveUnits",
             position: 5,
             name: "Give Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.6-giveDosageForm",
             position: 6,
             name: "Give Dosage Form",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.7-providersAdministrationInstructions",
             position: 7,
             name: "Provider's Administration Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -151,7 +152,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.9-substitutionStatus",
             position: 9,
             name: "Substitution Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +173,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.10-dispenseAmount",
             position: 10,
             name: "Dispense Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +188,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.11-dispenseUnits",
             position: 11,
             name: "Dispense Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +206,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.12-numberOfRefills",
             position: 12,
             name: "Number of Refills",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.13-orderingProvidersDeaNumber",
             position: 13,
             name: "Ordering Provider's DEA Number",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -238,7 +239,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.14-pharmacistTreatmentSuppliersVerifierId",
             position: 14,
             name: "Pharmacist/Treatment Supplier's Verifier ID",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -253,7 +254,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.15-prescriptionNumber",
             position: 15,
             name: "Prescription Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -271,7 +272,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.16-numberOfRefillsRemaining",
             position: 16,
             name: "Number of Refills Remaining",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -286,7 +287,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.17-numberOfRefillsDosesDispensed",
             position: 17,
             name: "Number of Refills/Doses Dispensed",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -301,7 +302,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.18-dTOfMostRecentRefillOrDoseDispensed",
             position: 18,
             name: "D/T of Most Recent Refill or Dose Dispensed",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -316,7 +317,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.19-totalDailyDose",
             position: 19,
             name: "Total Daily Dose",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +332,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.20-needsHumanReview",
             position: 20,
             name: "Needs Human Review",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +353,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.21-specialDispensingInstructions",
             position: 21,
             name: "Special Dispensing Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -370,7 +371,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.22-givePerTimeUnit",
             position: 22,
             name: "Give Per (Time Unit)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -388,7 +389,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.23-giveRateAmount",
             position: 23,
             name: "Give Rate Amount",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -406,7 +407,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.24-giveRateUnits",
             position: 24,
             name: "Give Rate Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -424,7 +425,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.25-giveStrength",
             position: 25,
             name: "Give Strength",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +440,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.26-giveStrengthUnits",
             position: 26,
             name: "Give Strength Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +458,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.27-giveIndication",
             position: 27,
             name: "Give Indication",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -475,7 +476,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.28-dispensePackageSize",
             position: 28,
             name: "Dispense Package Size",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -490,7 +491,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.29-dispensePackageSizeUnit",
             position: 29,
             name: "Dispense Package Size Unit",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -508,7 +509,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.30-dispensePackageMethod",
             position: 30,
             name: "Dispense Package Method",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -529,7 +530,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.31-supplementaryCode",
             position: 31,
             name: "Supplementary Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -547,7 +548,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.32-originalOrderDateTime",
             position: 32,
             name: "Original Order Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -562,7 +563,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.33-giveDrugStrengthVolume",
             position: 33,
             name: "Give Drug Strength Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -580,7 +581,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.34-giveDrugStrengthVolumeUnits",
             position: 34,
             name: "Give Drug Strength Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -598,7 +599,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.35-controlledSubstanceSchedule",
             position: 35,
             name: "Controlled Substance Schedule",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -616,7 +617,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.36-formularyStatus",
             position: 36,
             name: "Formulary Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -637,7 +638,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.37-pharmaceuticalSubstanceAlternative",
             position: 37,
             name: "Pharmaceutical Substance Alternative",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -655,7 +656,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.38-pharmacyOfMostRecentFill",
             position: 38,
             name: "Pharmacy of Most Recent Fill",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -673,7 +674,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.39-initialDispenseAmount",
             position: 39,
             name: "Initial Dispense Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -688,7 +689,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.40-dispensingPharmacy",
             position: 40,
             name: "Dispensing Pharmacy",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -706,7 +707,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.41-dispensingPharmacyAddress",
             position: 41,
             name: "Dispensing Pharmacy Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -721,7 +722,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.42-deliverToPatientLocation",
             position: 42,
             name: "Deliver-to Patient Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -736,7 +737,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.43-deliverToAddress",
             position: 43,
             name: "Deliver-to Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -751,7 +752,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.44-pharmacyOrderType",
             position: 44,
             name: "Pharmacy Order Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -772,7 +773,7 @@ pub static RXE: Segment = Segment {
             id: "RXE.45-pharmacyPhoneNumber",
             position: 45,
             name: "Pharmacy Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

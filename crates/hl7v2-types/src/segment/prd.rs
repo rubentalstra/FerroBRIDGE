@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PRD` segment: provider data.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `PRD` segment definition, `http://hl7.org/v2/StructureDefinition/PRD`.
 pub static PRD: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.1-providerRole",
             position: 1,
             name: "Provider Role",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -34,7 +35,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.2-providerName",
             position: 2,
             name: "Provider Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -49,7 +50,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.3-providerAddress",
             position: 3,
             name: "Provider Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -64,7 +65,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.4-providerLocation",
             position: 4,
             name: "Provider Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.5-providerCommunicationInformation",
             position: 5,
             name: "Provider Communication Information",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -94,7 +95,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.6-preferredMethodOfContact",
             position: 6,
             name: "Preferred Method of Contact",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +113,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.7-providerIdentifiers",
             position: 7,
             name: "Provider Identifiers",
-            data_type: Some("PLN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pln::PLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -130,7 +131,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.8-effectiveStartDateOfProviderRole",
             position: 8,
             name: "Effective Start Date of Provider Role",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.9-effectiveEndDateOfProviderRole",
             position: 9,
             name: "Effective End Date of Provider Role",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -160,7 +161,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.10-providerOrganizationNameAndIdentifier",
             position: 10,
             name: "Provider Organization Name and Identifier",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +176,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.11-providerOrganizationAddress",
             position: 11,
             name: "Provider Organization Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -190,7 +191,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.12-providerOrganizationLocationInformation",
             position: 12,
             name: "Provider Organization Location Information",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -205,7 +206,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.13-providerOrganizationCommunicationInformation",
             position: 13,
             name: "Provider Organization Communication Information",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -220,7 +221,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.14-providerOrganizationMethodOfContact",
             position: 14,
             name: "Provider Organization Method of Contact",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -20,9 +20,11 @@ resources are the authority for what it emits (`.claude/rules/codegen.md`).
 - The `v2` root set (`src/v2/`, #253) reads the HL7 v2 definitions that
   `scripts/vendor/v2ig.sh` fetches into the ignored `vendor/hl7-v2ig/` and
   emits `crates/hl7v2-types`: `v2::corpus` (the manifest-less loader over the
-  directories `roots` declares), `roots::V2RootSet` (every message structure and segment),
-  `v2::lower` (the differential read as the snapshot, the position-prefixed
-  id rule, the extensions, the segments the structures reach), `v2::render` and `v2::emit`.
+  directories `roots` declares), `roots::V2RootSet` (every message structure,
+  segment, data type and message definition), `v2::lower` (the differential
+  read as the snapshot, the position-prefixed id rule, the extensions, the
+  component tables, and each message definition linked to its structure by
+  name), `v2::render` and `v2::emit`.
   `v2::definition` is the v2 files' own serde projection, refusing every
   member it does not name, so the FHIR projection in `fhir.rs` stays strict.
   A defect of the definitions is tolerated only in the files

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BHS` segment: Batch Header.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `BHS` segment definition, `http://hl7.org/v2/StructureDefinition/BHS`.
@@ -18,7 +19,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.1-batchFieldSeparator",
             position: 1,
             name: "Batch Field Separator",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.2-batchEncodingCharacters",
             position: 2,
             name: "Batch Encoding Characters",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.3-batchSendingApplication",
             position: 3,
             name: "Batch Sending Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.4-batchSendingFacility",
             position: 4,
             name: "Batch Sending Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.5-batchReceivingApplication",
             position: 5,
             name: "Batch Receiving Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -99,7 +100,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.6-batchReceivingFacility",
             position: 6,
             name: "Batch Receiving Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.7-batchCreationDateTime",
             position: 7,
             name: "Batch Creation Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.8-batchSecurity",
             position: 8,
             name: "Batch Security",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.9-batchNameIdType",
             position: 9,
             name: "Batch Name/ID/Type",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.10-batchComment",
             position: 10,
             name: "Batch Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -183,7 +184,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.11-batchControlId",
             position: 11,
             name: "Batch Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -201,7 +202,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.12-referenceBatchControlId",
             position: 12,
             name: "Reference Batch Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -219,7 +220,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.13-batchSendingNetworkAddress",
             position: 13,
             name: "Batch Sending Network Address",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.14-batchReceivingNetworkAddress",
             position: 14,
             name: "Batch Receiving Network Address",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -249,7 +250,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.15-securityClassificationTag",
             position: 15,
             name: "Security Classification Tag",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -267,7 +268,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.16-securityHandlingInstructions",
             position: 16,
             name: "Security Handling Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -285,7 +286,7 @@ pub static BHS: Segment = Segment {
             id: "BHS.17-specialAccessRestrictionInstructions",
             position: 17,
             name: "Special Access Restriction Instructions",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

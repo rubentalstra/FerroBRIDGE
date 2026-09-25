@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CON` segment: Consent.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `CON` segment definition, `http://hl7.org/v2/StructureDefinition/CON`.
 pub static CON: Segment = Segment {
@@ -16,7 +17,7 @@ pub static CON: Segment = Segment {
             id: "CON.1-setId",
             position: 1,
             name: "Set ID - CON",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static CON: Segment = Segment {
             id: "CON.2-consentType",
             position: 2,
             name: "Consent Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static CON: Segment = Segment {
             id: "CON.3-consentFormIdAndVersion",
             position: 3,
             name: "Consent Form ID and Version",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static CON: Segment = Segment {
             id: "CON.4-consentFormNumber",
             position: 4,
             name: "Consent Form Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static CON: Segment = Segment {
             id: "CON.5-consentText",
             position: 5,
             name: "Consent Text",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -97,7 +98,7 @@ pub static CON: Segment = Segment {
             id: "CON.6-subjectSpecificConsentText",
             position: 6,
             name: "Subject-specific Consent Text",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -112,7 +113,7 @@ pub static CON: Segment = Segment {
             id: "CON.7-consentBackgroundInformation",
             position: 7,
             name: "Consent Background Information",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -127,7 +128,7 @@ pub static CON: Segment = Segment {
             id: "CON.8-subjectSpecificConsentBackgroundText",
             position: 8,
             name: "Subject-specific Consent Background Text",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -142,7 +143,7 @@ pub static CON: Segment = Segment {
             id: "CON.9-consenterImposedLimitations",
             position: 9,
             name: "Consenter-imposed limitations",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -157,7 +158,7 @@ pub static CON: Segment = Segment {
             id: "CON.10-consentMode",
             position: 10,
             name: "Consent Mode",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +176,7 @@ pub static CON: Segment = Segment {
             id: "CON.11-consentStatus",
             position: 11,
             name: "Consent Status",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -193,7 +194,7 @@ pub static CON: Segment = Segment {
             id: "CON.12-consentDiscussionDateTime",
             position: 12,
             name: "Consent Discussion Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +209,7 @@ pub static CON: Segment = Segment {
             id: "CON.13-consentDecisionDateTime",
             position: 13,
             name: "Consent Decision Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static CON: Segment = Segment {
             id: "CON.14-consentEffectiveDateTime",
             position: 14,
             name: "Consent Effective Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +239,7 @@ pub static CON: Segment = Segment {
             id: "CON.15-consentEndDateTime",
             position: 15,
             name: "Consent End Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +254,7 @@ pub static CON: Segment = Segment {
             id: "CON.16-subjectCompetenceIndicator",
             position: 16,
             name: "Subject Competence Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -274,7 +275,7 @@ pub static CON: Segment = Segment {
             id: "CON.17-translatorAssistanceIndicator",
             position: 17,
             name: "Translator Assistance Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static CON: Segment = Segment {
             id: "CON.18-languageTranslatedTo",
             position: 18,
             name: "Language Translated To",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +314,7 @@ pub static CON: Segment = Segment {
             id: "CON.19-informationalMaterialSuppliedIndicator",
             position: 19,
             name: "Informational Material Supplied Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -334,7 +335,7 @@ pub static CON: Segment = Segment {
             id: "CON.20-consentBypassReason",
             position: 20,
             name: "Consent Bypass Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +353,7 @@ pub static CON: Segment = Segment {
             id: "CON.21-consentDisclosureLevel",
             position: 21,
             name: "Consent Disclosure Level",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -373,7 +374,7 @@ pub static CON: Segment = Segment {
             id: "CON.22-consentNonDisclosureReason",
             position: 22,
             name: "Consent Non-disclosure Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -391,7 +392,7 @@ pub static CON: Segment = Segment {
             id: "CON.23-nonSubjectConsenterReason",
             position: 23,
             name: "Non-subject Consenter Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -409,7 +410,7 @@ pub static CON: Segment = Segment {
             id: "CON.24-consenterId",
             position: 24,
             name: "Consenter ID",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -424,7 +425,7 @@ pub static CON: Segment = Segment {
             id: "CON.25-relationshipToSubject",
             position: 25,
             name: "Relationship to Subject",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,

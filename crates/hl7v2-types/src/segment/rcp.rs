@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RCP` segment: Response Control Parameter.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `RCP` segment definition, `http://hl7.org/v2/StructureDefinition/RCP`.
 pub static RCP: Segment = Segment {
@@ -16,7 +17,7 @@ pub static RCP: Segment = Segment {
             id: "RCP.1-queryPriority",
             position: 1,
             name: "Query Priority",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static RCP: Segment = Segment {
             id: "RCP.2-quantityLimitedRequest",
             position: 2,
             name: "Quantity Limited Request",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static RCP: Segment = Segment {
             id: "RCP.3-responseModality",
             position: 3,
             name: "Response Modality",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +74,7 @@ pub static RCP: Segment = Segment {
             id: "RCP.4-executionAndDeliveryTime",
             position: 4,
             name: "Execution and Delivery Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static RCP: Segment = Segment {
             id: "RCP.5-modifyIndicator",
             position: 5,
             name: "Modify Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +110,7 @@ pub static RCP: Segment = Segment {
             id: "RCP.6-sortByField",
             position: 6,
             name: "Sort-by Field",
-            data_type: Some("SRT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::srt::SRT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -124,7 +125,7 @@ pub static RCP: Segment = Segment {
             id: "RCP.7-segmentGroupInclusion",
             position: 7,
             name: "Segment group inclusion",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

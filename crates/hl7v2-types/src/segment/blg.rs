@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BLG` segment: Billing.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `BLG` segment definition, `http://hl7.org/v2/StructureDefinition/BLG`.
 pub static BLG: Segment = Segment {
@@ -16,7 +17,7 @@ pub static BLG: Segment = Segment {
             id: "BLG.1-whenToCharge",
             position: 1,
             name: "When to Charge",
-            data_type: Some("CCD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ccd::CCD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static BLG: Segment = Segment {
             id: "BLG.2-chargeType",
             position: 2,
             name: "Charge Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static BLG: Segment = Segment {
             id: "BLG.3-accountId",
             position: 3,
             name: "Account ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static BLG: Segment = Segment {
             id: "BLG.4-chargeTypeReason",
             position: 4,
             name: "Charge Type Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CTD` segment: Contact Data.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `CTD` segment definition, `http://hl7.org/v2/StructureDefinition/CTD`.
 pub static CTD: Segment = Segment {
@@ -16,7 +17,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.1-contactRole",
             position: 1,
             name: "Contact Role",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -34,7 +35,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.2-contactName",
             position: 2,
             name: "Contact Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -49,7 +50,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.3-contactAddress",
             position: 3,
             name: "Contact Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -64,7 +65,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.4-contactLocation",
             position: 4,
             name: "Contact Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.5-contactCommunicationInformation",
             position: 5,
             name: "Contact Communication Information",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -94,7 +95,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.6-preferredMethodOfContact",
             position: 6,
             name: "Preferred Method of Contact",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +113,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.7-contactIdentifiers",
             position: 7,
             name: "Contact Identifiers",
-            data_type: Some("PLN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pln::PLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

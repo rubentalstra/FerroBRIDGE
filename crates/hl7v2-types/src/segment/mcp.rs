@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `MCP` segment: Master File Coverage Policy.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment};
 
 /// The `MCP` segment definition, `http://hl7.org/v2/StructureDefinition/MCP`.
 pub static MCP: Segment = Segment {
@@ -16,7 +17,7 @@ pub static MCP: Segment = Segment {
             id: "MCP.1-setId",
             position: 1,
             name: "Set ID - MCP",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static MCP: Segment = Segment {
             id: "MCP.2-producersServiceTestObservationId",
             position: 2,
             name: "Producer's Service/Test/Observation ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static MCP: Segment = Segment {
             id: "MCP.3-universalServicePriceRangeLowValue",
             position: 3,
             name: "Universal Service Price Range – Low Value",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static MCP: Segment = Segment {
             id: "MCP.4-universalServicePriceRangeHighValue",
             position: 4,
             name: "Universal Service Price Range – High Value",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static MCP: Segment = Segment {
             id: "MCP.5-reasonForUniversalServiceCostRange",
             position: 5,
             name: "Reason for Universal Service Cost Range",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

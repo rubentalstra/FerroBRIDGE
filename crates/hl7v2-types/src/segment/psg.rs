@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PSG` segment: Product/Service Group.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PSG` segment definition, `http://hl7.org/v2/StructureDefinition/PSG`.
@@ -18,7 +19,7 @@ pub static PSG: Segment = Segment {
             id: "PSG.1-providerProductServiceGroupNumber",
             position: 1,
             name: "Provider Product/Service Group Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static PSG: Segment = Segment {
             id: "PSG.2-payerProductServiceGroupNumber",
             position: 2,
             name: "Payer Product/Service Group Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -48,7 +49,7 @@ pub static PSG: Segment = Segment {
             id: "PSG.3-productServiceGroupSequenceNumber",
             position: 3,
             name: "Product/Service Group Sequence Number",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -66,7 +67,7 @@ pub static PSG: Segment = Segment {
             id: "PSG.4-adjudicateAsGroup",
             position: 4,
             name: "Adjudicate as Group",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static PSG: Segment = Segment {
             id: "PSG.5-productServiceGroupBilledAmount",
             position: 5,
             name: "Product/Service Group Billed Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -102,7 +103,7 @@ pub static PSG: Segment = Segment {
             id: "PSG.6-productServiceGroupDescription",
             position: 6,
             name: "Product/Service Group Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

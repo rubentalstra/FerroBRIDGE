@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PRB` segment: Problem Detail.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PRB` segment definition, `http://hl7.org/v2/StructureDefinition/PRB`.
@@ -18,7 +19,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.1-actionCode",
             position: 1,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -39,7 +40,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.2-actionDateTime",
             position: 2,
             name: "Action Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.3-problemId",
             position: 3,
             name: "Problem ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.4-problemInstanceId",
             position: 4,
             name: "Problem Instance ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.5-episodeOfCareId",
             position: 5,
             name: "Episode of Care ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -99,7 +100,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.6-problemListPriority",
             position: 6,
             name: "Problem List Priority",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.7-problemEstablishedDateTime",
             position: 7,
             name: "Problem Established Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.8-anticipatedProblemResolutionDateTime",
             position: 8,
             name: "Anticipated Problem Resolution Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -144,7 +145,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.9-actualProblemResolutionDateTime",
             position: 9,
             name: "Actual Problem Resolution Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.10-problemClassification",
             position: 10,
             name: "Problem Classification",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -174,7 +175,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.11-problemManagementDiscipline",
             position: 11,
             name: "Problem Management Discipline",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -189,7 +190,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.12-problemPersistence",
             position: 12,
             name: "Problem Persistence",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -204,7 +205,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.13-problemConfirmationStatus",
             position: 13,
             name: "Problem Confirmation Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -219,7 +220,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.14-problemLifeCycleStatus",
             position: 14,
             name: "Problem Life Cycle Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.15-problemLifeCycleStatusDateTime",
             position: 15,
             name: "Problem Life Cycle Status Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -249,7 +250,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.16-problemDateOfOnset",
             position: 16,
             name: "Problem Date of Onset",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -264,7 +265,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.17-problemOnsetText",
             position: 17,
             name: "Problem Onset Text",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -282,7 +283,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.18-problemRanking",
             position: 18,
             name: "Problem Ranking",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -297,7 +298,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.19-certaintyOfProblem",
             position: 19,
             name: "Certainty of Problem",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -312,7 +313,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.20-probabilityOfProblem01",
             position: 20,
             name: "Probability of Problem (0-1)",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -330,7 +331,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.21-individualAwarenessOfProblem",
             position: 21,
             name: "Individual Awareness of Problem",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -345,7 +346,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.22-problemPrognosis",
             position: 22,
             name: "Problem Prognosis",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -360,7 +361,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.23-individualAwarenessOfPrognosis",
             position: 23,
             name: "Individual Awareness of Prognosis",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -375,7 +376,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.24-familySignificantOtherAwarenessOfProblemPrognosis",
             position: 24,
             name: "Family/Significant Other Awareness of Problem/Prognosis",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -393,7 +394,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.25-securitySensitivity",
             position: 25,
             name: "Security/Sensitivity",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -408,7 +409,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.26-problemSeverity",
             position: 26,
             name: "Problem Severity",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -426,7 +427,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.27-problemPerspective",
             position: 27,
             name: "Problem Perspective",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -444,7 +445,7 @@ pub static PRB: Segment = Segment {
             id: "PRB.28-moodCode",
             position: 28,
             name: "Mood Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

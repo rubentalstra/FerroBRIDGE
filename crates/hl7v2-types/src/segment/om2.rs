@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OM2` segment: Numeric Observation.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `OM2` segment definition, `http://hl7.org/v2/StructureDefinition/OM2`.
 pub static OM2: Segment = Segment {
@@ -16,7 +19,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.2-unitsOfMeasure",
             position: 2,
             name: "Units of Measure",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.3-rangeOfDecimalPrecision",
             position: 3,
             name: "Range of Decimal Precision",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +73,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.4-correspondingSiUnitsOfMeasure",
             position: 4,
             name: "Corresponding SI Units of Measure",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +91,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.5-siConversionFactor",
             position: 5,
             name: "SI Conversion Factor",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +109,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.6-referenceNormalRangeForOrdinalAndContinuousObservations",
             position: 6,
             name: "Reference (Normal) Range for Ordinal and Continuous Observations",
-            data_type: Some("RFR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::rfr::RFR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -121,7 +124,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.7-criticalRangeForOrdinalAndContinuousObservations",
             position: 7,
             name: "Critical Range for Ordinal and Continuous Observations",
-            data_type: Some("RFR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::rfr::RFR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -136,7 +139,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.8-absoluteRangeForOrdinalAndContinuousObservations",
             position: 8,
             name: "Absolute Range for Ordinal and Continuous Observations",
-            data_type: Some("RFR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::rfr::RFR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +154,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.9-deltaCheckCriteria",
             position: 9,
             name: "Delta Check Criteria",
-            data_type: Some("DLT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dlt::DLT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -166,7 +169,7 @@ pub static OM2: Segment = Segment {
             id: "OM2.10-minimumMeaningfulIncrements",
             position: 10,
             name: "Minimum Meaningful Increments",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

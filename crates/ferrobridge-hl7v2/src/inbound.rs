@@ -76,8 +76,7 @@ pub enum Received {
 ///
 /// `default` is the character set the connection agreed on for a message
 /// whose MSH-18 is empty, and `select` picks the message structure from the
-/// lexed message ([`parse::structure_for`] where the definitions carry one
-/// structure for MSH-9.3).
+/// lexed message ([`parse::structure_for`] selects it from the definitions).
 #[must_use]
 pub fn receive(
     message: &[u8],

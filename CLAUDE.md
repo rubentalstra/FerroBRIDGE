@@ -87,8 +87,10 @@ the testkit tool crate. Beside it:
   the generator below and never hand-edited.
 - `crates/hl7v2-types`: the generated HL7 v2 tables (#253), Apache-2.0,
   emitted whole by the `v2` root set of the generator below from the fetched
-  v2 definitions: every message structure's segment-group tree and the field
-  table of every segment definition, batch envelopes included. Never
+  v2 definitions: every message structure's segment-group tree, the field
+  table of every segment definition (batch envelopes included), the component
+  table of every data type, and every message definition indexed by code and
+  trigger event with the structure variant it names (#289). Never
   hand-edited.
 - `crates/openehr-mapping-core`: the half of the mapping foundation both
   languages share (#74): the header they standardize between them, the YAML

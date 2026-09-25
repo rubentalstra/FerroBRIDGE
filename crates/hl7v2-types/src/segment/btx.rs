@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BTX` segment: Blood Product Transfusion/Disposition.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `BTX` segment definition, `http://hl7.org/v2/StructureDefinition/BTX`.
@@ -18,7 +19,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.1-btx1",
             position: 1,
             name: "BTX-1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.2-btx2",
             position: 2,
             name: "BTX-2",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.3-btx3",
             position: 3,
             name: "BTX-3",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.4-btx4",
             position: 4,
             name: "BTX-4",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.5-btx5",
             position: 5,
             name: "BTX-5",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -105,7 +106,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.6-btx6",
             position: 6,
             name: "BTX-6",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.7-btx7",
             position: 7,
             name: "BTX-7",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -135,7 +136,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.8-btx8",
             position: 8,
             name: "BTX-8",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -153,7 +154,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.9-btx9",
             position: 9,
             name: "BTX-9",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -171,7 +172,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.10-btx10",
             position: 10,
             name: "BTX-10",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -189,7 +190,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.11-btx11",
             position: 11,
             name: "BTX-11",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.12-btx12",
             position: 12,
             name: "BTX-12",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -228,7 +229,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.13-btx13",
             position: 13,
             name: "BTX-13",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -243,7 +244,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.14-btx14",
             position: 14,
             name: "BTX-14",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -258,7 +259,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.15-btx15",
             position: 15,
             name: "BTX-15",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -273,7 +274,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.16-btx16",
             position: 16,
             name: "BTX-16",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -288,7 +289,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.17-btx17",
             position: 17,
             name: "BTX-17",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -303,7 +304,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.18-btx18",
             position: 18,
             name: "BTX-18",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(0),
@@ -321,7 +322,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.19-btx19",
             position: 19,
             name: "BTX-19",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -339,7 +340,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.20-btx20",
             position: 20,
             name: "BTX-20",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -354,7 +355,7 @@ pub static BTX: Segment = Segment {
             id: "BTX.21-btx21",
             position: 21,
             name: "BTX-21",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

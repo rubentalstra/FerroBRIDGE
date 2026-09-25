@@ -10,13 +10,13 @@
 //! URL in ordered maps, and keeps each file's path relative to the tree so a
 //! defect is reported, and tolerated, by the file that carries it.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use crate::roots::{V2_BASES, V2_DATA_TYPE_DIRS, V2_SEGMENT_DIR, V2_STRUCTURE_DIR};
-use crate::v2::definition::{DataTypeHeader, StructureDefinition};
+use crate::roots::{V2_BASES, V2_DATA_TYPE_DIRS, V2_MESSAGE_DIR, V2_SEGMENT_DIR, V2_STRUCTURE_DIR};
+use crate::v2::definition::{MessageDefinition, StructureDefinition};
 
 /// The directory under the fetched tree that holds the definitions.
 pub const SOURCE_OF_TRUTH: &str = "input/sourceOfTruth";
@@ -85,6 +85,16 @@ pub struct Sourced {
     pub definition: StructureDefinition,
 }
 
+/// One message definition and the file it came from, relative to the
+/// definitions tree.
+#[derive(Debug, Clone)]
+pub struct SourcedMessage {
+    /// The file, for example `message/messages/ORU-R01.json`.
+    pub file: String,
+    /// The definition.
+    pub definition: MessageDefinition,
+}
+
 /// The loaded v2 definitions.
 #[derive(Debug)]
 pub struct Corpus {
@@ -92,7 +102,8 @@ pub struct Corpus {
     bases: BTreeMap<String, Sourced>,
     segments: BTreeMap<String, Sourced>,
     structures: BTreeMap<String, Sourced>,
-    data_types: BTreeSet<String>,
+    data_types: BTreeMap<String, Sourced>,
+    messages: BTreeMap<String, SourcedMessage>,
 }
 
 impl Corpus {
@@ -127,19 +138,30 @@ impl Corpus {
         for file in json_files(&tree, V2_STRUCTURE_DIR)? {
             insert(&mut structures, &tree, &file)?;
         }
-        let mut data_types = BTreeSet::new();
+        let mut data_types = BTreeMap::new();
         for dir in V2_DATA_TYPE_DIRS {
             for file in json_files(&tree, dir)? {
-                let path = tree.join(&file);
-                let header: DataTypeHeader = parse(&path, &read(&path)?)?;
-                if header.resource_type != "StructureDefinition" {
-                    return Err(LoadError::NotAStructure {
-                        path: file,
-                        resource_type: header.resource_type,
-                    });
-                }
-                data_types.insert(header.url);
+                insert(&mut data_types, &tree, &file)?;
             }
+        }
+        let mut messages: BTreeMap<String, SourcedMessage> = BTreeMap::new();
+        for file in json_files(&tree, V2_MESSAGE_DIR)? {
+            let path = tree.join(&file);
+            let definition: MessageDefinition = parse(&path, &read(&path)?)?;
+            if definition.resource_type != "StructureDefinition" {
+                return Err(LoadError::NotAStructure {
+                    path: file,
+                    resource_type: definition.resource_type,
+                });
+            }
+            if let Some(first) = messages.get(&definition.url) {
+                return Err(LoadError::DuplicateCanonical {
+                    url: definition.url,
+                    first: first.file.clone(),
+                    second: file,
+                });
+            }
+            messages.insert(definition.url.clone(), SourcedMessage { file, definition });
         }
         Ok(Self {
             commit,
@@ -147,6 +169,7 @@ impl Corpus {
             segments,
             structures,
             data_types,
+            messages,
         })
     }
 
@@ -174,10 +197,16 @@ impl Corpus {
         &self.structures
     }
 
-    /// The canonical URL of every data type definition.
+    /// Every primitive and complex data type definition, by canonical URL.
     #[must_use]
-    pub fn data_types(&self) -> &BTreeSet<String> {
+    pub fn data_types(&self) -> &BTreeMap<String, Sourced> {
         &self.data_types
+    }
+
+    /// Every message definition, by canonical URL.
+    #[must_use]
+    pub fn messages(&self) -> &BTreeMap<String, SourcedMessage> {
+        &self.messages
     }
 }
 
