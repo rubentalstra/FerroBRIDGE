@@ -159,7 +159,7 @@ async fn create_composition_reports_the_422_validation_errors() -> Result<(), Bo
     assert!(
         matches!(
             answered.outcome,
-            CompositionCreateOutcome::UnprocessableEntity
+            CompositionCreateOutcome::UnprocessableEntity { .. }
         ),
         "{:?}",
         answered.outcome
@@ -204,6 +204,44 @@ async fn create_composition_reports_the_400() -> Result<(), Box<dyn Error>> {
 }
 
 #[tokio::test]
+async fn create_composition_reads_a_prose_shape_400_from_the_outcome() -> Result<(), Box<dyn Error>>
+{
+    // NOTE: ITS-REST 1.1.0 §Requests and responses/HTTP status codes shows an
+    // error body with `message`, `code` and `errors` and no `validationErrors`.
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path(format!("/v1/ehr/{EHR}/composition")))
+        .respond_with(ResponseTemplate::new(400).set_body_string(
+            r#"{"message":"the composition body does not parse","code":90000,"errors":[]}"#,
+        ))
+        .mount(&server)
+        .await;
+
+    let answered = support::client(&server)?
+        .create_composition(
+            &EhrId::new(EHR)?,
+            &support::composition()?,
+            &support::commit_context()?,
+            Prefer::Representation,
+        )
+        .await?;
+    match answered.outcome {
+        CompositionCreateOutcome::BadRequest { body } => {
+            assert_eq!(Some("the composition body does not parse"), body.message());
+            assert!(body.validation_errors().is_empty());
+            assert_eq!(
+                Some(
+                    r#"{"message":"the composition body does not parse","code":90000,"errors":[]}"#
+                ),
+                body.text()
+            );
+        }
+        other => return Err(format!("expected the 400 outcome, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn create_composition_reports_the_unknown_ehr() -> Result<(), Box<dyn Error>> {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
@@ -222,7 +260,7 @@ async fn create_composition_reports_the_unknown_ehr() -> Result<(), Box<dyn Erro
         .await?;
     assert!(matches!(
         answered.outcome,
-        CompositionCreateOutcome::NotFound
+        CompositionCreateOutcome::NotFound { .. }
     ));
     Ok(())
 }
@@ -300,7 +338,7 @@ async fn update_composition_reports_the_412_with_the_latest_version() -> Result<
         )
         .await?;
     match answered.outcome {
-        CompositionUpdateOutcome::PreconditionFailed { headers } => {
+        CompositionUpdateOutcome::PreconditionFailed { headers, .. } => {
             assert_eq!(
                 http::StatusCode::PRECONDITION_FAILED,
                 answered.upstream.status()
@@ -404,7 +442,10 @@ async fn composition_by_exact_version_reports_the_404() -> Result<(), Box<dyn Er
             None,
         )
         .await?;
-    assert!(matches!(answered.outcome, CompositionGetOutcome::NotFound));
+    assert!(matches!(
+        answered.outcome,
+        CompositionGetOutcome::NotFound { .. }
+    ));
     Ok(())
 }
 
@@ -453,7 +494,7 @@ async fn delete_composition_reports_a_concurrency_failure_as_409() -> Result<(),
         .delete_composition(&EhrId::new(EHR)?, &ObjectVersionId::new(VERSION_1)?)
         .await?;
     match answered.outcome {
-        CompositionDeleteOutcome::Conflict { headers } => {
+        CompositionDeleteOutcome::Conflict { headers, .. } => {
             assert_eq!(http::StatusCode::CONFLICT, answered.upstream.status());
             let latest = ferrobridge_server::cdr::optional_version_from_etag(
                 "composition_delete",
@@ -483,7 +524,7 @@ async fn delete_composition_reports_an_already_deleted_400() -> Result<(), Box<d
         .await?;
     assert!(matches!(
         answered.outcome,
-        CompositionDeleteOutcome::BadRequest
+        CompositionDeleteOutcome::BadRequest { .. }
     ));
     Ok(())
 }

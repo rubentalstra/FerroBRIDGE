@@ -8,10 +8,10 @@
 //! own every operation: the path, the parameters, `Prefer`, `If-Match`, the
 //! documented statuses as one outcome enum per call, and the retry over
 //! idempotent methods. This module holds what the bridge adds on top: the
-//! handle built from `[cdr]`, the committal metadata headers the operation
-//! parameters do not carry, the `X-Request-Id` echo, the upstream answer kept
-//! for the diagnostics of a refusal, the typed identifiers an `ETag` names, the
-//! two-route template fetch and the AQL paging.
+//! handle built from `[cdr]`, the committal metadata values, the
+//! `X-Request-Id` echo, the upstream answer kept for the response headers the
+//! generated outcomes do not declare, the typed identifiers an `ETag` names,
+//! the two-route template fetch and the AQL paging.
 //!
 //! openEHR is a registered trademark of the openEHR Foundation.
 
@@ -133,12 +133,10 @@ pub enum Returned<T> {
 /// A documented answer of one operation, with the upstream answer it was read
 /// from.
 ///
-/// `outcome` is the generated outcome enum of the operation; `upstream` keeps
-/// the status and the body the CDR sent, because several documented refusals
-/// of the generated outcomes carry no body and the facade's status table puts
-/// the openEHR body into `issue.diagnostics`.
-// TODO(#293): read the refusal body from the outcome once the generated
-// client keeps it on every non-success variant (openehr-its sibling request).
+/// `outcome` is the generated outcome enum of the operation, whose refusal
+/// variants carry the error body; `upstream` keeps the status, the headers and
+/// the body the CDR sent, because a generated outcome carries only the
+/// response headers the `OpenAPI` documents declare for it.
 #[derive(Debug)]
 pub struct Answered<O> {
     /// The generated outcome.
@@ -171,10 +169,7 @@ impl CdrClient {
     pub fn new(config: &CdrConfig) -> Result<Self, CdrError> {
         let transport = ReqwestTransport::with_timeout(config.timeout)
             .map_err(|source| CdrError::Build { source })?;
-        let credentials = config
-            .credentials
-            .as_ref()
-            .map(config::Credentials::runtime);
+        let credentials = config.credentials.clone();
         let mut client = Client::new(transport, config.base_url.clone())
             .map_err(|source| CdrError::client(source, None))?
             .with_retry(config.retry);
@@ -295,11 +290,11 @@ impl CdrClient {
             prefer: Some(prefer.param()),
             accept: None,
             content_type: None,
+            openehr_version: None,
+            openehr_audit_details: None,
         };
         let answered = EhrClient::new(&client).ehr_create(&params, status).await;
-        answered_or_bad_request(&client, answered, || EhrCreateOutcome::BadRequest {
-            body: None,
-        })
+        answered_by(&client, answered)
     }
 
     /// Retrieves the EHR with `ehr_id` (`ehr-codegen.openapi.yaml`,
@@ -357,7 +352,8 @@ impl CdrClient {
         commit: &CommitContext,
         prefer: Prefer,
     ) -> Result<Answered<CompositionCreateOutcome>, CdrError> {
-        let client = self.call(commit.headers()?)?;
+        let headers = commit.headers()?;
+        let client = self.call(HeaderMap::new())?;
         let params = CompositionCreateParams {
             ehr_id: String::from(ehr_id.as_str()),
             prefer: Some(prefer.param()),
@@ -365,13 +361,14 @@ impl CdrClient {
             content_type: None,
             openehr_item_tag: None,
             openehr_version_item_tag: None,
+            openehr_version: headers.version,
+            openehr_audit_details: headers.audit_details,
+            openehr_template_id: headers.template_id,
         };
         let answered = EhrClient::new(&client)
             .composition_create(&params, composition)
             .await;
-        answered_or_bad_request(&client, answered, || CompositionCreateOutcome::BadRequest {
-            body: None,
-        })
+        answered_by(&client, answered)
     }
 
     /// Commits a new version of the composition `versioned_object_uid`.
@@ -393,7 +390,8 @@ impl CdrClient {
         commit: &CommitContext,
         prefer: Prefer,
     ) -> Result<Answered<CompositionUpdateOutcome>, CdrError> {
-        let client = self.call(commit.headers()?)?;
+        let headers = commit.headers()?;
+        let client = self.call(HeaderMap::new())?;
         let params = CompositionUpdateParams {
             ehr_id: String::from(ehr_id.as_str()),
             uid_based_id: String::from(versioned_object_uid.value()),
@@ -403,13 +401,14 @@ impl CdrClient {
             content_type: None,
             openehr_item_tag: None,
             openehr_version_item_tag: None,
+            openehr_version: headers.version,
+            openehr_audit_details: headers.audit_details,
+            openehr_template_id: headers.template_id,
         };
         let answered = EhrClient::new(&client)
             .composition_update(&params, composition)
             .await;
-        answered_or_bad_request(&client, answered, || CompositionUpdateOutcome::BadRequest {
-            body: None,
-        })
+        answered_by(&client, answered)
     }
 
     /// Retrieves a version of a composition.
@@ -458,6 +457,8 @@ impl CdrClient {
         let params = CompositionDeleteParams {
             ehr_id: String::from(ehr_id.as_str()),
             uid_based_id: String::from(preceding.value()),
+            openehr_version: None,
+            openehr_audit_details: None,
         };
         let answered = EhrClient::new(&client).composition_delete(&params).await;
         answered_by(&client, answered)
@@ -487,6 +488,7 @@ impl CdrClient {
             prefer: Some(prefer.param()),
             accept: None,
             content_type: None,
+            openehr_template_id: None,
         };
         let answered = EhrClient::new(&client)
             .contribution_create(&params, contribution)
@@ -504,9 +506,7 @@ impl CdrClient {
                     source: Box::new(source),
                 })
             }
-            answered => answered_or_bad_request(&client, answered, || {
-                ContributionCreateOutcome::BadRequest { body: None }
-            }),
+            answered => answered_by(&client, answered),
         }
     }
 
@@ -594,33 +594,6 @@ fn answered_by<O>(
             .map(|upstream| Answered { outcome, upstream })
             .ok_or(CdrError::Unrecorded),
         Err(source) => Err(CdrError::client(source, upstream)),
-    }
-}
-
-/// Returns the generated answer of `client` with the upstream answer it kept,
-/// reading a `400` whose body the generated `Error` DTO refuses as the
-/// operation's `400` outcome `bad_request` builds.
-///
-/// ITS-REST 1.1.0 shows two error body shapes, and the generated DTO reads
-/// only the `OpenAPI` one, so a `400` in the prose shape is still the
-/// documented refusal and its body travels in [`Answered::upstream`].
-// TODO(#104): drop the recovery once the generated `Error` DTO reads the
-// prose error shape too.
-fn answered_or_bad_request<O>(
-    client: &Client<Scoped<'_>>,
-    answered: Result<O, ClientError>,
-    bad_request: impl FnOnce() -> O,
-) -> Result<Answered<O>, CdrError> {
-    match answered {
-        Err(ClientError::Body { status, .. }) if status == StatusCode::BAD_REQUEST => client
-            .transport()
-            .answered()
-            .map(|upstream| Answered {
-                outcome: bad_request(),
-                upstream,
-            })
-            .ok_or(CdrError::Unrecorded),
-        answered => answered_by(client, answered),
     }
 }
 

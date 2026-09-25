@@ -1094,7 +1094,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -2570,9 +2570,9 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "openehr-adl"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d61ca373188bce56fa0b58af3dd1c0c572ae7226f2b2c20514742651fa68fc8f"
+checksum = "089406d220c1496f4da17d3525de9383616f616b650b59ff20a5a166f1315de6"
 dependencies = [
  "indexmap 2.14.2",
  "openehr-am",
@@ -2588,9 +2588,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-am"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70cc5372403b3a307aa1fa4c1515c7786db5f6a08bea5b676c91baa0036648f7"
+checksum = "3acec2633fc7a2c1d26854fb2adf705c5228b455a5612adca5a4a465b6e3a096"
 dependencies = [
  "openehr-base",
  "openehr-lang",
@@ -2600,9 +2600,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-base"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03c3ba61bdcb3841094b0a0f630fa16e18cdb075b30921e3d644b6437dbd20d2"
+checksum = "75c7fc2fe1f570cdc8458475e552fe27c1ed7335855a629cc51846b5b56c0e1a"
 dependencies = [
  "serde",
  "serde_json",
@@ -2612,9 +2612,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-its"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e07ead9e3ad9a20888a2277e2d878a65bb8f9b90d7b9eb43ca8a73320dcd703b"
+checksum = "ab654c04e9b96c87a349b50d0b3255dbfd866dcc5d08228306ccb6df7bbdb813"
 dependencies = [
  "async-trait",
  "backon",
@@ -2628,6 +2628,7 @@ dependencies = [
  "openehr-term",
  "quick-xml",
  "reqwest",
+ "secrecy",
  "serde",
  "serde_json",
  "serde_path_to_error",
@@ -2639,9 +2640,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-lang"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "888fcf7b1539ea8e664db2a4124b6f35d0ab5a391a1c9b0788b305416436c0ed"
+checksum = "64a8a7e964b205dd0430c16986de4198f7c09423c16fc8128f481d9d94448bb8"
 dependencies = [
  "chumsky",
  "indexmap 2.14.2",
@@ -2672,9 +2673,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-query"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5358f52e846be673d272ca20193451b6cd08879e7822b828638044c2931dc98e"
+checksum = "00c79cc7fd1b6f06345bae72f45ff5cbca72699701eba8dcef080bfb784d73b0"
 dependencies = [
  "chumsky",
  "logos",
@@ -2683,9 +2684,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-rm"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffa05aa5f0992c6508f561caa047137508ab87259051750772882af7ceff85bf"
+checksum = "d401547e95afead8e07b19f9d616f02ad2da414922d89043bc804b317ab26d37"
 dependencies = [
  "openehr-base",
  "openehr-term",
@@ -2700,9 +2701,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-sdt"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9cf043aa7222ac4206a2dce3a82317226bafca9b5778fc92561b8992d451cd0"
+checksum = "d02992c04e3e64191f84130f8e96a319cc9ed0986e6853aadc027c6fc66af312"
 dependencies = [
  "fancy-regex",
  "indexmap 2.14.2",
@@ -2721,9 +2722,9 @@ dependencies = [
 
 [[package]]
 name = "openehr-term"
-version = "0.0.71"
+version = "0.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d516c89b03344e239da5870d117ae6d537f5e27e89307e1daa345e34ce36026"
+checksum = "95f797f44d522d6864fb7a2003416567dbb9179ddd11f10e3e09ebd230b8c724"
 dependencies = [
  "openehr-base",
  "roxmltree",
@@ -3071,7 +3072,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3376,7 +3377,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -3434,7 +3435,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4157,10 +4158,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.4.3",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -4956,7 +4957,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

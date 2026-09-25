@@ -419,7 +419,7 @@ impl wiremock::Respond for ReadCommitted {
             .url
             .path_segments()
             .and_then(Iterator::last)
-            .map(|segment| segment.replace("%3A", ":").replace("%3a", ":"))
+            .map(str::to_owned)
             .unwrap_or_default();
         let found = committed.versions.iter().rev().find(|(version, _)| {
             *version == wanted || version.split("::").next() == Some(wanted.as_str())

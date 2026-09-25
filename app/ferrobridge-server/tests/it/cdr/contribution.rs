@@ -155,7 +155,7 @@ async fn create_contribution_reports_the_409() -> Result<(), Box<dyn Error>> {
         .await?;
     assert!(matches!(
         answered.outcome,
-        ContributionCreateOutcome::Conflict
+        ContributionCreateOutcome::Conflict { .. }
     ));
     Ok(())
 }
@@ -342,7 +342,10 @@ async fn contribution_reports_the_404() -> Result<(), Box<dyn Error>> {
     let answered = support::client(&server)?
         .contribution(&EhrId::new(EHR)?, &ContributionUid::new(CONTRIBUTION)?)
         .await?;
-    assert!(matches!(answered.outcome, ContributionGetOutcome::NotFound));
+    assert!(matches!(
+        answered.outcome,
+        ContributionGetOutcome::NotFound { .. }
+    ));
     let error = answered
         .upstream
         .error()

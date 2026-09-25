@@ -68,11 +68,12 @@ the testkit tool crate. Beside it:
   bounded drain on `SIGTERM`. `serve`, `cdm init` and `etl run` run;
   `vocab load` and `mapping check` parse and name the issue that lands each.
   `src/cdr/` reaches the CDR through the generated ITS-REST 1.1.0 client of
-  `openehr-its` (`rest-client`, #285): the handle built from `[cdr]`, the
-  commit headers the generated parameters do not carry, the `X-Request-Id`
-  echo, the upstream answer kept for a refusal's diagnostics, the typed ids an
-  `ETag` names, the two-route template fetch and the AQL paging, with the
-  `wiremock` contract tests under `tests/it/cdr/`.
+  `openehr-its` (`rest-client`, #285, #293): the handle built from `[cdr]`
+  with its `SecretString` credentials, the commit headers filled into the
+  generated parameters, the `X-Request-Id` echo, the error body each outcome
+  carries read into a refusal's diagnostics, the typed ids an `ETag` names,
+  the two-route template fetch and the AQL paging, with the `wiremock`
+  contract tests under `tests/it/cdr/`.
   `src/etl/` is the OMOP ETL runner (#91): the `[etl]` queries checked at load,
   the paged read, the `Mapper` the OMOCL engine fills (#90, `etl::mapper`
   compiles one program per template on first sight), the visits and the run

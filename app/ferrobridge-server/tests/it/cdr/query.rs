@@ -68,7 +68,7 @@ async fn query_aql_reports_the_400() -> Result<(), Box<dyn Error>> {
     let answered = support::client(&server)?.query_aql(&request()).await?;
     assert!(matches!(
         answered.outcome,
-        QueryExecuteAdhocQueryBodyOutcome::BadRequest
+        QueryExecuteAdhocQueryBodyOutcome::BadRequest { .. }
     ));
     assert_eq!(http::StatusCode::BAD_REQUEST, answered.upstream.status());
     let error = answered
@@ -91,7 +91,7 @@ async fn query_aql_reports_the_408_execution_timeout() -> Result<(), Box<dyn Err
     let answered = support::client(&server)?.query_aql(&request()).await?;
     assert!(matches!(
         answered.outcome,
-        QueryExecuteAdhocQueryBodyOutcome::RequestTimeout
+        QueryExecuteAdhocQueryBodyOutcome::RequestTimeout { .. }
     ));
     Ok(())
 }

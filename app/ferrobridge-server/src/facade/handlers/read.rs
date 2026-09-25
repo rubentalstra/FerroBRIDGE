@@ -212,9 +212,9 @@ async fn latest(
             status::GONE,
             String::from("the CDR reports this composition deleted"),
         ))),
-        CompositionGetOutcome::NotFound => Err(write::refuse(&status::Answer::new(
+        CompositionGetOutcome::NotFound { body } => Err(write::refuse(&status::Answer::new(
             status::NOT_FOUND,
-            status::diagnostics(&answered.upstream),
+            status::diagnostics(StatusCode::NOT_FOUND, &body),
         ))),
     }
 }

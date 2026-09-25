@@ -10,45 +10,9 @@
 
 use std::time::Duration;
 
+use openehr_its::rest::client::Credentials;
 use openehr_its::rest::client::RetryPolicy;
-use secrecy::ExposeSecret;
-use secrecy::SecretString;
 use url::Url;
-
-/// The credentials the client presents on every request.
-///
-/// The secret half stays a [`SecretString`] until the client is built, so
-/// neither a `Debug` rendering of the settings nor a log line can carry it.
-#[derive(Debug, Clone)]
-#[non_exhaustive]
-pub enum Credentials {
-    /// An RFC 6750 bearer token.
-    Bearer(SecretString),
-    /// RFC 7617 basic authentication.
-    Basic {
-        /// The user name, which is not a secret.
-        user: String,
-        /// The password.
-        password: SecretString,
-    },
-}
-
-impl Credentials {
-    /// Returns the credentials the generated-client runtime sends.
-    // TODO(#293): hand the secret over as a `SecretString` once the runtime's
-    // `Credentials` holds one (openehr-its sibling request).
-    pub(crate) fn runtime(&self) -> openehr_its::rest::client::Credentials {
-        match self {
-            Self::Bearer(token) => {
-                openehr_its::rest::client::Credentials::Bearer(token.expose_secret().to_owned())
-            }
-            Self::Basic { user, password } => openehr_its::rest::client::Credentials::Basic {
-                user: user.clone(),
-                password: password.expose_secret().to_owned(),
-            },
-        }
-    }
-}
 
 /// Everything one [`CdrClient`](crate::cdr::CdrClient) needs about one CDR.
 ///
@@ -63,7 +27,9 @@ pub struct CdrConfig {
     pub timeout: Duration,
     /// The retry budget for idempotent calls.
     pub retry: RetryPolicy,
-    /// The credentials, when the deployment needs them.
+    /// The credentials, when the deployment needs them. The secret half is a
+    /// `SecretString`, so neither a `Debug` rendering of the settings nor a log
+    /// line can carry it.
     pub credentials: Option<Credentials>,
 }
 
@@ -106,30 +72,26 @@ impl CdrConfig {
 
 #[cfg(test)]
 mod tests {
-    use super::{CdrConfig, Credentials};
-    use secrecy::SecretString;
+    use super::CdrConfig;
+    use openehr_its::rest::client::Credentials;
     use std::time::Duration;
 
     #[test]
     fn a_bearer_token_is_not_in_the_debug_rendering() {
         let config = CdrConfig::new("http://cdr.invalid/v1".parse().expect("a valid URL"))
-            .with_credentials(Credentials::Bearer(SecretString::from("s3cr3t-token")));
+            .with_credentials(Credentials::bearer("s3cr3t-token"));
         assert!(!format!("{config:?}").contains("s3cr3t-token"));
-        let runtime = config
+        let credentials = config
             .credentials
             .as_ref()
-            .expect("the credentials are set")
-            .runtime();
-        assert!(!format!("{runtime:?}").contains("s3cr3t-token"));
+            .expect("the credentials are set");
+        assert!(!format!("{credentials:?}").contains("s3cr3t-token"));
     }
 
     #[test]
     fn a_basic_password_is_not_in_the_debug_rendering() {
         let config = CdrConfig::new("http://cdr.invalid/v1".parse().expect("a valid URL"))
-            .with_credentials(Credentials::Basic {
-                user: "bridge".to_owned(),
-                password: SecretString::from("s3cr3t-password"),
-            });
+            .with_credentials(Credentials::basic("bridge", "s3cr3t-password"));
         let rendered = format!("{config:?}");
         assert!(!rendered.contains("s3cr3t-password"));
         assert!(rendered.contains("bridge"));
