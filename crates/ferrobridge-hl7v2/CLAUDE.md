@@ -56,7 +56,10 @@ lacking an element the element table marks required. Both read the
 constraints from `fhir-types` and name no resource or element, so the Bundle
 decodes. A `message` Bundle without its `MessageHeader` breaks `bdl-12`,
 so `Run::finish` refuses it (`MapError::NoMessageHeader`) and `inbound`
-answers `AR` to a message valuing neither MSH-3 nor MSH-24. An `HD` written
+answers `AR` to a message valuing none of MSH-3, MSH-24 and MSH-4; with
+MSH-3 and MSH-24 empty, `Run::facility_endpoints` writes the source endpoint
+from MSH-4, and the destination's from MSH-6, as a `facility-endpoint`
+outcome. An `HD` written
 into a `url` goes through `convert::endpoint`, the one place the derived
 `urn:ferrobridge:hl7v2-hd:` form is built. A refused or failed translation
 fails the run with the upstream status (`MapError::Terminology`); an absent

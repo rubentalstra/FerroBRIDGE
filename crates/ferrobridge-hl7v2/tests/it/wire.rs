@@ -252,8 +252,8 @@ async fn a_message_type_the_definitions_do_not_carry_is_answered_ar() {
     listener.stop().await;
 }
 
-// NOTE: HL7 R4 MessageHeader.source is 1..1, and the guide's MSH map writes it from
-// MSH-3 or MSH-24, so a message valuing neither is refused naming MSH-3.
+// NOTE: HL7 R4 MessageHeader.source is 1..1, written from MSH-3, MSH-24 or the sending
+// facility MSH-4, so a message valuing none is refused naming MSH-3.
 #[tokio::test]
 async fn a_message_naming_no_sender_is_answered_ar_at_msh_3() {
     let listener = Listener::start(Codec::default()).await;

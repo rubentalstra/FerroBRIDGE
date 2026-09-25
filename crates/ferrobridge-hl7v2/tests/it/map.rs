@@ -199,6 +199,7 @@ fn row_line(kind: &str, outcome: &Outcome) -> String {
             fhir_type,
             error,
         } => (at, row, format!("{element} is no {fhir_type}: {error}")),
+        Outcome::FacilityEndpoint { at, row, element } => (at, row, element.clone()),
         Outcome::NoDatatypeMap {
             at,
             row,
@@ -526,6 +527,71 @@ async fn a_universal_id_of_type_iso_or_uuid_is_the_endpoint() {
     let object = mapped.bundle().as_object().expect("a Bundle object");
     fhir_types::r4::bundle::Bundle::from_json(object, &mut Path::root("Bundle"))
         .expect("the Bundle decodes as R4");
+}
+
+// NOTE: no specification governs this: our own design; with MSH-3 and MSH-24 empty the
+// sending facility gives the source endpoint, and MSH-6 the destination's, each counted.
+#[tokio::test]
+async fn a_facility_alone_gives_the_endpoint_and_the_fallback_is_counted() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_facilities_only()).await;
+    let (source, destination) = header_parts(&mapped);
+    assert_eq!(text_at(&source, "endpoint"), Some("urn:oid:1.2.3.4.5"));
+    assert_eq!(text_at(&source, "name"), Some("North Lab"));
+    assert_eq!(
+        text_at(&destination, "endpoint"),
+        Some("urn:ferrobridge:hl7v2-hd:SOUTHCLINIC")
+    );
+    assert_eq!(text_at(&destination, "name"), Some("SOUTHCLINIC"));
+    let fallbacks: Vec<(String, String)> = mapped
+        .outcomes()
+        .iter()
+        .filter_map(|outcome| match outcome {
+            Outcome::FacilityEndpoint { at, row, element } => {
+                Some((format!("{at} {}", row.source), element.clone()))
+            }
+            _ => None,
+        })
+        .collect();
+    assert_eq!(
+        fallbacks,
+        vec![
+            (
+                String::from("MSH[1]-4(1) MSH-4"),
+                String::from("MessageHeader.source.endpoint")
+            ),
+            (
+                String::from("MSH[1]-6(1) MSH-6"),
+                String::from("MessageHeader.destination.endpoint")
+            ),
+        ],
+        "{:#?}",
+        summary(&mapped)
+    );
+    let header = entries(mapped.bundle())
+        .first()
+        .and_then(|entry| entry.get("resource"))
+        .cloned()
+        .expect("a MessageHeader");
+    assert!(
+        header
+            .get("sender")
+            .and_then(|sender| sender.get("reference"))
+            .is_some(),
+        "the guide's MSH-4 row keeps its sender Organization: {header:?}"
+    );
+    let object = mapped.bundle().as_object().expect("a Bundle object");
+    fhir_types::r4::bundle::Bundle::from_json(object, &mut Path::root("Bundle"))
+        .expect("the Bundle decodes as R4");
+}
+
+#[tokio::test]
+async fn a_valued_application_takes_no_facility_fallback() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_named_applications()).await;
+    assert!(
+        lines_of(&mapped, "facility-endpoint").is_empty(),
+        "{:#?}",
+        summary(&mapped)
+    );
 }
 
 // NOTE: HL7 R4 Bundle bdl-12: a message Bundle opens with a MessageHeader, and

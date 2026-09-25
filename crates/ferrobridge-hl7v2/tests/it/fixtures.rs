@@ -79,11 +79,23 @@ pub(crate) fn oru_r01_universal_applications() -> Vec<u8> {
     ])
 }
 
-/// A result that names its sender in neither MSH-3 nor MSH-24.
+/// A result that names its sender in none of MSH-3, MSH-24 and MSH-4.
 pub(crate) fn oru_r01_without_sender() -> Vec<u8> {
     message(&[
-        b"MSH|^~\\&||NORTHLAB|EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00007|P|2.5.1",
+        b"MSH|^~\\&|||EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00007|P|2.5.1",
         b"PID|1||PAT-0007^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M",
+        b"ORC|RE|PLC-1|FIL-1",
+        b"OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN",
+        b"OBX|1|NM|2345-7^Glucose^LN||5.4|mmol/L^mmol/L^UCUM|||||F",
+    ])
+}
+
+/// A result that names its sender and receiver only by facility, in MSH-4
+/// and MSH-6.
+pub(crate) fn oru_r01_facilities_only() -> Vec<u8> {
+    message(&[
+        b"MSH|^~\\&||North Lab^1.2.3.4.5^ISO||SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00008|P|2.5.1",
+        b"PID|1||PAT-0008^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M",
         b"ORC|RE|PLC-1|FIL-1",
         b"OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN",
         b"OBX|1|NM|2345-7^Glucose^LN||5.4|mmol/L^mmol/L^UCUM|||||F",

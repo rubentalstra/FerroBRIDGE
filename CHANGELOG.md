@@ -449,6 +449,16 @@ crates on crates.io.
   the cases that left are header-less Bundles now refused, 8 that value
   MSH-24 (whose row into `MessageHeader.source` has no single data type map)
   and 27 that value neither MSH-3 nor MSH-24.
+- A v2 message that values neither MSH-3 nor MSH-24 but names its sending
+  facility in MSH-4 is mapped instead of answered `AR` (#315). The
+  `MessageHeader.source.endpoint` and `source.name` come from the MSH-4 `HD`
+  by the endpoint rule above, the guide's `sender` Organization from MSH-4
+  stays, and the fallback is counted as a `facility-endpoint` outcome naming
+  the field and the element. MSH-6 fills `destination.endpoint` the same way
+  when MSH-5 and MSH-25 are empty. Only a message valuing none of MSH-3,
+  MSH-24 and MSH-4 is answered `AR`. The smoke corpus passes 187 of 379
+  messages (162 before); the 2 AIRA messages that name no sender at all stay
+  refused.
 - A v2 message whose header carries no MSH-9.3 (the v2.3 senders in the
   vendored ReportStream set) resolves its structure from MSH-9.1 and MSH-9.2
   through the generated message index instead of being refused as unnamed

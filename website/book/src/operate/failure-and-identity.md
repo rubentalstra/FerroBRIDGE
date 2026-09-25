@@ -195,10 +195,21 @@ spaces a `url` cannot carry, and the `ferrobridge` prefix marks the value as
 derived so nobody reads it as an identifier the sender assigned. The same
 `HD` always yields the same endpoint.
 
-A message that names its sender in neither MSH-3 nor MSH-24 (Sending Network
-Address) is answered `AR` with an `ERR` at MSH-3 and is not mapped: no
-`MessageHeader.source` can be written for it. The guide's MSH-3 row leaves that
-case to the implementer, and refusing it is FerroBRIDGE's decision. A run that
+When MSH-3 and MSH-24 (Sending Network Address) are both empty and MSH-4
+(Sending Facility) is valued, FerroBRIDGE builds `source.endpoint` and
+`source.name` from the MSH-4 `HD` by the same two rules. The guide still
+writes MSH-4 into `MessageHeader.sender` as an Organization, and that stays.
+The destination side works the same way: with MSH-5 and MSH-25 (Receiving
+Network Address) empty, MSH-6 (Receiving Facility) gives
+`destination.endpoint` and `destination.name`. Each fallback is counted as a
+`facility-endpoint` outcome naming the facility field and the element it
+filled. The guide's MSH-3 and MSH-24 rows leave a message valuing neither to
+the implementer, so the fallback is FerroBRIDGE's own design.
+
+A message that names its sender in none of MSH-3, MSH-24 and MSH-4 is
+answered `AR` with an `ERR` at MSH-3 and is not mapped: no
+`MessageHeader.source` can be written for it. Refusing it is FerroBRIDGE's
+decision. A run that
 still completes no `MessageHeader` is refused with an error naming the element
 it lacks, so no header-less message Bundle is ever produced.
 
