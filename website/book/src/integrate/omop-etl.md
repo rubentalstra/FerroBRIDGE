@@ -54,7 +54,15 @@ definitions, which publish the model in machine-readable form. The PostgreSQL
 DDL is not regenerated: OHDSI renders it through a dialect layer that sits
 outside those definitions, so the rendered files are vendored verbatim and
 applied by `ferrobridge cdm init`, and a test asserts the generated columns
-equal the DDL's. Nothing hand-transcribes a column list.
+equal the DDL's. Nothing hand-transcribes a column list. The foreign keys of
+OHDSI's constraints file are applied only by `cdm init --with-constraints`,
+which PostgreSQL refuses at the pinned OHDSI tag; see
+[What `cdm init` does](../operate/configuration.md#what-cdm-init-does).
+
+Both clients the ETL opens to the CDM database, the concept resolver and the
+writer, connect over the TLS the `sslmode` of `[cdm] url` names: `disable`,
+`require`, `verify-ca` or `verify-full`, with the CA from `[cdm] tls_ca_file`.
+The URL must name one; see [Configuring the server](../operate/configuration.md#cdm).
 
 ## Concept resolution is SQL, not terminology
 

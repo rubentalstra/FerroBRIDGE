@@ -187,6 +187,26 @@ crates on crates.io.
   `ferrobridge vocab load DIR --schema NAME` parses and names #233.
 - `docs/specs/omop-cdm/site/sqlScripts.qmd`, the source of the CDM's SQL
   scripts page, joins the vendored OMOP CDM corpus at the same tag.
+- The CDM database connection carries TLS (#237). The concept resolver's pool
+  and the CDM writer both honour the `sslmode` of `[cdm] url` as libpq
+  documents it, `disable`, `require`, `verify-ca` and `verify-full`, over
+  rustls with the aws-lc-rs provider, and check the certificate against the
+  PEM CA in the new `[cdm] tls_ca` or `tls_ca_file`, or the webpki root set
+  when none is set. A URL without `sslmode` (libpq's default is `prefer`),
+  `prefer`, `allow`, an unknown mode and any other `ssl` URL parameter are
+  refused when the configuration is read, naming the mode or the parameter,
+  and so is a `PGSSLROOTCERT`, `PGSSLCERT` or `PGSSLKEY` in the environment,
+  which the pool's client would read and the writer's would not. The
+  quickstart's `cdm_url` now ends in `?sslmode=disable`. The `etl` lane's
+  startup event carries the `sslmode` in effect.
+  `omop_cdm::connection::CdmConnection` settles the TLS once for both clients,
+  and `CdmWriter::connect_with` takes it.
+- `ferrobridge cdm init` can run again (#238). It reads the schema's tables
+  first: a schema holding every CDM v5.4 table is reported as initialised,
+  with the `cdm_version` of its `CDM_SOURCE` rows, and nothing is applied; a
+  schema holding some of them is refused naming the missing tables; the
+  vendored OHDSI DDL is applied unchanged. `omop_cdm::database::init` returns
+  `Init::Created` or `Init::AlreadyInitialised`.
 
 ### Changed
 
@@ -203,6 +223,14 @@ crates on crates.io.
   `SourceItem::message` builds one from a message control id and type. The
   create, update and transaction handlers keep the HTTP half and answer
   exactly as before.
+- `ferrobridge cdm init --with-constraints` applies OHDSI's
+  `OMOPCDM_postgresql_5.4_constraints.sql` after the tables, one statement at
+  a time in a transaction of its own, and names the file line and the text of
+  a statement PostgreSQL refuses (#232). Without the flag the foreign keys are
+  left out, as before. At the pinned OHDSI tag `v5.4.3` PostgreSQL refuses
+  line 157, a foreign key onto `vocabulary (vocabulary_id)` that the primary
+  keys file gives no key (SQLSTATE `42830`), so the flag fails the run and
+  leaves the tables in place.
 - The vendored OMOCL corpus moves to `SevKohler/OMOCL` commit `c082db8e`
   (#228): six new mapping files and the README acknowledgements, 208 mapping
   files in all.

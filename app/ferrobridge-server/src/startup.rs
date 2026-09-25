@@ -37,6 +37,8 @@ pub struct Lane {
     pub terminology_host: Option<String>,
     /// The host of the CDM database it writes to.
     pub cdm_host: Option<String>,
+    /// The `sslmode` both CDM clients connect with, as libpq spells it.
+    pub cdm_sslmode: Option<&'static str>,
     /// The schema the CDM tables live in.
     pub cdm_schema: Option<String>,
     /// The schema the natural-key side table lives in.
@@ -69,8 +71,6 @@ pub fn lanes(settings: &Settings) -> Vec<Lane> {
     let operations = settings.operations.enabled && settings.mapping_directory.is_some();
     let etl = settings.etl.is_some();
     let cdm = settings.cdm.as_ref();
-    // NOTE: no specification governs this: our own design. A connection string
-    // in the key-value form is no URL, so its host is absent from the summary.
     let database_host = cdm
         .filter(|_| etl)
         .and_then(|cdm| url::Url::parse(cdm.url.expose_secret()).ok())
@@ -98,6 +98,9 @@ pub fn lanes(settings: &Settings) -> Vec<Lane> {
             identifiable: etl,
             cdr_host: cdr_host.filter(|_| etl),
             cdm_host: database_host,
+            cdm_sslmode: cdm
+                .filter(|_| etl)
+                .map(|cdm| cdm.connection.ssl_mode().as_str()),
             cdm_schema: cdm
                 .filter(|_| etl)
                 .map(|cdm| cdm.schema.as_str().to_owned()),
@@ -140,6 +143,7 @@ pub fn log(lanes: &[Lane]) {
             cdr_host = lane.cdr_host.as_deref(),
             terminology_host = lane.terminology_host.as_deref(),
             cdm_host = lane.cdm_host.as_deref(),
+            cdm_sslmode = lane.cdm_sslmode,
             cdm_schema = lane.cdm_schema.as_deref(),
             bridge_schema = lane.bridge_schema.as_deref(),
             contexts = lane.mappings.map(|counts| counts.contexts),

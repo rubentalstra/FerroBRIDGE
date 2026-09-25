@@ -91,7 +91,10 @@ dependency pins below.
 | `tokio` | 1.53.1 | the root `Cargo.toml` `[workspace.dependencies]` |
 | `wiremock` | 0.6.5 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
 | `testcontainers` | 0.28.0 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
-| `tokio-postgres` | 0.7.18 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
+| `tokio-postgres` | 0.7.18 | the root `Cargo.toml` `[workspace.dependencies]` (the CDM writer's client, and the tests that read the CDM back) |
+| `tokio-postgres-rustls` | 0.14.0 | the root `Cargo.toml` `[workspace.dependencies]` (the CDM writer's TLS connector, on the aws-lc-rs provider) |
+| `rustls` | 0.23.45 | the root `Cargo.toml` `[workspace.dependencies]` (the CDM writer's certificate checks after `sslmode`) |
+| `webpki-roots` | 1.0.9 | the root `Cargo.toml` `[workspace.dependencies]` (the root set both CDM clients trust when no CA is configured) |
 | `sqlx` | 0.9.0 | the root `Cargo.toml` `[workspace.dependencies]` (the concept resolver; the `sqlx-cli` row carries the same version) |
 | `rust_decimal` | 1.43.0 | the root `Cargo.toml` `[workspace.dependencies]` (the exact decimal of the OMOCL engine; MIT) |
 

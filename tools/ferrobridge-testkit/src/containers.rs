@@ -11,6 +11,7 @@
 //!
 //! No specification governs the harness; it is FerroBRIDGE's own design.
 
+use crate::tls::TlsMaterial;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 use testcontainers::core::{AccessMode, Healthcheck, IntoContainerPort, Mount, WaitFor};
@@ -317,7 +318,9 @@ pub async fn terminology() -> Result<Terminology, HarnessError> {
 
 /// Starts a PostgreSQL and returns it with the URL of its login role.
 ///
-/// The role, its password and its database are all `ferrobridge`.
+/// The role, its password and its database are all `ferrobridge`. The
+/// server offers no TLS, so the URL says `sslmode=disable`, the mode the CDM
+/// clients need named.
 ///
 /// # Errors
 ///
@@ -352,7 +355,71 @@ pub async fn postgres() -> Result<Postgres, HarnessError> {
             image: POSTGRES.repository,
             source,
         })?;
-    let url = format!("postgres://{POSTGRES_ROLE}:{POSTGRES_ROLE}@{host}:{port}/{POSTGRES_ROLE}");
+    let url = format!(
+        "postgres://{POSTGRES_ROLE}:{POSTGRES_ROLE}@{host}:{port}/{POSTGRES_ROLE}?sslmode=disable"
+    );
+    Ok(Postgres { container, url })
+}
+
+/// The shell line the TLS-only PostgreSQL starts with.
+///
+/// The server key must belong to the server's own user with mode `0600`
+/// (<https://www.postgresql.org/docs/current/ssl-tcp.html>), which a file
+/// copied into the container does not, so the line installs the copies
+/// before it hands over to the image's entrypoint. The `pg_hba.conf` it
+/// writes admits TCP connections over TLS only.
+const TLS_ENTRYPOINT: &str = "set -e; \
+    install -d -o postgres -g postgres -m 700 /run/ferrobridge-tls; \
+    install -o postgres -g postgres -m 600 /tls/server.key /run/ferrobridge-tls/server.key; \
+    install -o postgres -g postgres -m 644 /tls/server.crt /run/ferrobridge-tls/server.crt; \
+    printf 'local all all trust\\nhostssl all all all scram-sha-256\\n' \
+      > /run/ferrobridge-tls/pg_hba.conf; \
+    chown postgres:postgres /run/ferrobridge-tls/pg_hba.conf; \
+    exec docker-entrypoint.sh postgres -c ssl=on \
+      -c ssl_cert_file=/run/ferrobridge-tls/server.crt \
+      -c ssl_key_file=/run/ferrobridge-tls/server.key \
+      -c hba_file=/run/ferrobridge-tls/pg_hba.conf";
+
+/// Starts a PostgreSQL that accepts TCP connections over TLS only, with the
+/// server certificate of `material`, and returns it with the URL of its
+/// login role.
+///
+/// The URL carries no `sslmode`; the caller appends the one under test.
+///
+/// # Errors
+///
+/// Returns [`HarnessError::Container`] when Docker refuses the container or
+/// the mapped port cannot be read.
+pub async fn postgres_tls(material: &TlsMaterial) -> Result<Postgres, HarnessError> {
+    let container = POSTGRES
+        .image()
+        .with_entrypoint("/bin/sh")
+        .with_wait_for(WaitFor::healthcheck())
+        .with_exposed_port(POSTGRES_PORT.tcp())
+        .with_health_check(postgres_health_check(POSTGRES_ROLE, POSTGRES_ROLE))
+        .with_env_var("POSTGRES_USER", POSTGRES_ROLE)
+        .with_env_var("POSTGRES_PASSWORD", POSTGRES_ROLE)
+        .with_env_var("POSTGRES_DB", POSTGRES_ROLE)
+        .with_copy_to("/tls/server.key", material.server_key().to_vec())
+        .with_copy_to("/tls/server.crt", material.server_certificate().to_vec())
+        .with_cmd(["-c", TLS_ENTRYPOINT])
+        .start()
+        .await
+        .map_err(|source| HarnessError::Container {
+            image: POSTGRES.repository,
+            source,
+        })?;
+    let port = container
+        .get_host_port_ipv4(POSTGRES_PORT.tcp())
+        .await
+        .map_err(|source| HarnessError::Container {
+            image: POSTGRES.repository,
+            source,
+        })?;
+    // NOTE: no specification governs this: our own design. The certificate
+    // names `localhost`, so the URL does too, whatever host Docker reports.
+    let url =
+        format!("postgres://{POSTGRES_ROLE}:{POSTGRES_ROLE}@localhost:{port}/{POSTGRES_ROLE}");
     Ok(Postgres { container, url })
 }
 

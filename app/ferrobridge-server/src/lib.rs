@@ -84,10 +84,12 @@ where
         (cli::Command::Serve, None) => Job::Serve,
         (
             cli::Command::Cdm {
-                command: cli::Cdm::Init,
+                command: cli::Cdm::Init { with_constraints },
             },
             None,
-        ) => Job::CdmInit,
+        ) => Job::CdmInit {
+            with_constraints: *with_constraints,
+        },
         (
             cli::Command::Etl {
                 command: cli::Etl::Run { resume, since },
@@ -141,12 +143,12 @@ where
                 ExitCode::FAILURE
             }
         },
-        Job::CdmInit => {
+        Job::CdmInit { with_constraints } => {
             let Some(cdm) = settings.cdm else {
                 eprintln!("ferrobridge: cannot start: `cdm init` needs a [cdm] section");
                 return ExitCode::from(EXIT_CONFIG);
             };
-            match cdm_init_command(&cdm) {
+            match cdm_init_command(&cdm, with_constraints) {
                 Ok(()) => ExitCode::SUCCESS,
                 Err(error) => {
                     tracing::error!(error = format!("{error:#}"), "cdm init failed");
@@ -175,42 +177,85 @@ enum Job {
     /// `serve`.
     Serve,
     /// `cdm init`.
-    CdmInit,
+    CdmInit {
+        /// Whether OHDSI's foreign keys follow the tables.
+        with_constraints: bool,
+    },
     /// `etl run`.
     EtlRun(etl::RunOptions),
 }
 
-/// Applies the CDM DDL and the bridge schema to the configured database.
+/// Applies the CDM DDL and the bridge schema to the configured database, and
+/// prints what it found and did.
 ///
 /// The CDM schema is built in one transaction through `sqlx`, and the bridge
 /// schema through the writer's own `tokio-postgres` connection; the two
-/// clients never share a pool.
-fn cdm_init_command(cdm: &config::CdmSettings) -> anyhow::Result<()> {
+/// clients never share a pool, and both connect over the TLS the `[cdm]`
+/// section settles. A schema that already holds every CDM table is reported
+/// and left as it is; one that holds some of them is refused. With
+/// `with_constraints`, OHDSI's foreign keys follow in a transaction of their
+/// own, so a refusal there leaves the tables in place and names the refused
+/// statement.
+#[expect(
+    clippy::print_stdout,
+    reason = "what the job found and did is its output, written to stdout for the operator"
+)]
+fn cdm_init_command(cdm: &config::CdmSettings, with_constraints: bool) -> anyhow::Result<()> {
     use anyhow::Context;
-    use secrecy::ExposeSecret;
+    use omop_cdm::database::{self, CONSTRAINTS_FILE, Init};
 
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;
     runtime.block_on(async {
-        let options: sqlx::postgres::PgConnectOptions = cdm
-            .url
-            .expose_secret()
-            .parse()
-            .context("reading [cdm] url")?;
-        let pool = omop_cdm::database::CdmPool::connect(
+        tracing::info!(
+            schema = %cdm.schema,
+            ssl_mode = %cdm.connection.ssl_mode(),
+            ca = cdm.connection.has_ca(),
+            "connecting to the CDM database"
+        );
+        let pool = database::CdmPool::connect(
             sqlx::postgres::PgPoolOptions::new().max_connections(1),
-            options,
+            cdm.connection.pool_options(),
             cdm.schema.clone(),
         )
         .await
         .context("connecting to the CDM database")?;
-        omop_cdm::database::init(&pool)
+        let outcome = database::init(&pool)
             .await
             .with_context(|| format!("applying the CDM DDL to schema {}", cdm.schema))?;
+        match &outcome {
+            Init::Created => println!(
+                "CDM schema {}: created the CDM {} tables, primary keys and indices (OHDSI {})",
+                cdm.schema,
+                omop_cdm::CDM_VERSION,
+                omop_cdm::CDM_DEFINITIONS_TAG
+            ),
+            Init::AlreadyInitialised { cdm_versions } if cdm_versions.is_empty() => println!(
+                "CDM schema {}: already initialised, every CDM {} table is present and \
+                 CDM_SOURCE holds no row; nothing applied",
+                cdm.schema,
+                omop_cdm::CDM_VERSION
+            ),
+            Init::AlreadyInitialised { cdm_versions } => println!(
+                "CDM schema {}: already initialised, CDM_SOURCE records cdm_version {}; \
+                 nothing applied",
+                cdm.schema,
+                cdm_versions.join(", ")
+            ),
+        }
+        if with_constraints {
+            let applied = database::constrain(&pool)
+                .await
+                .with_context(|| format!("applying {CONSTRAINTS_FILE} to schema {}", cdm.schema))?;
+            println!(
+                "CDM schema {}: applied the {applied} foreign keys of {CONSTRAINTS_FILE}",
+                cdm.schema
+            );
+        }
         pool.pool().close().await;
-        let mut writer = omop_cdm::writer::CdmWriter::connect(
-            cdm.url.expose_secret(),
+        let mut writer = omop_cdm::writer::CdmWriter::connect_with(
+            &cdm.connection,
             cdm.schema.clone(),
             cdm.bridge_schema.clone(),
             cdm.person_policy,
@@ -221,6 +266,7 @@ fn cdm_init_command(cdm: &config::CdmSettings) -> anyhow::Result<()> {
             .init()
             .await
             .with_context(|| format!("creating the bridge schema {}", cdm.bridge_schema))?;
+        println!("bridge schema {}: in place", cdm.bridge_schema);
         tracing::info!(
             schema = %cdm.schema,
             bridge_schema = %cdm.bridge_schema,

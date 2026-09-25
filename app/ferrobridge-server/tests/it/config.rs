@@ -39,7 +39,7 @@ base_url = "http://tx.invalid/r4"
 wire_version = "r4b"
 
 [cdm]
-url = "postgres://bridge@db.invalid/cdm"
+url = "postgres://bridge@db.invalid/cdm?sslmode=disable"
 
 [mappings]
 directory = "/srv/ferrobridge/mappings"
@@ -82,7 +82,7 @@ fn a_file_states_every_section_and_the_resolver_reads_it() -> Result<(), Box<dyn
         terminology.wire_version
     );
     assert_eq!(
-        Some("postgres://bridge@db.invalid/cdm"),
+        Some("postgres://bridge@db.invalid/cdm?sslmode=disable"),
         settings.cdm.as_ref().map(|cdm| cdm.url.expose_secret())
     );
     let mappings = settings.mappings.as_ref().ok_or("the mapping set is on")?;
@@ -317,13 +317,33 @@ fn a_secret_file_sibling_is_read_at_boot() -> Result<(), Box<dyn StdError>> {
 #[test]
 fn a_cdm_url_file_sibling_is_read_at_boot() -> Result<(), Box<dyn StdError>> {
     let mut file = tempfile::NamedTempFile::new()?;
-    writeln!(file, "postgres://bridge@db.invalid/cdm")?;
+    writeln!(file, "postgres://bridge@db.invalid/cdm?sslmode=disable")?;
     let text = format!("[cdm]\nurl_file = {:?}\n", file.path());
 
     let settings = Config::from_sources(Some(&text), &BTreeMap::new())?.resolve()?;
     assert_eq!(
-        Some("postgres://bridge@db.invalid/cdm"),
+        Some("postgres://bridge@db.invalid/cdm?sslmode=disable"),
         settings.cdm.as_ref().map(|cdm| cdm.url.expose_secret())
+    );
+    Ok(())
+}
+
+#[test]
+fn a_cdm_tls_ca_file_is_read_through_its_environment_name() -> Result<(), Box<dyn StdError>> {
+    let mut file = tempfile::NamedTempFile::new()?;
+    writeln!(file, "not a certificate")?;
+    let environment = BTreeMap::from([(
+        String::from("FERROBRIDGE__CDM__TLS_CA_FILE"),
+        file.path().display().to_string(),
+    )]);
+    let text = "[cdm]\nurl = \"postgres://bridge@db.invalid/cdm?sslmode=verify-full\"\n";
+
+    let error = Config::from_sources(Some(text), &environment)?
+        .resolve()
+        .expect_err("the file holds no certificate");
+    assert!(
+        matches!(&error, Error::CdmConnection { key, .. } if key == "cdm.tls_ca_file"),
+        "the refusal names the key the variable sets: {error:?}"
     );
     Ok(())
 }

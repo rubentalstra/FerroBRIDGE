@@ -131,6 +131,13 @@ wiremock = "0.6.5"
 # catalogue is read with (docs/VERSIONS.md).
 testcontainers = "0.28.0"
 tokio-postgres = "0.7.18"
+# The CDM writer's TLS: the tokio-postgres connector over rustls with the
+# aws-lc-rs provider reqwest and sqlx already carry, and the webpki root set
+# sqlx trusts when no CA file is configured. Verified against crates.io on
+# 2026-09-25.
+tokio-postgres-rustls = { version = "0.14.0", default-features = false, features = ["aws-lc-rs"] }
+rustls = { version = "0.23.45", default-features = false, features = ["std", "tls12", "aws_lc_rs"] }
+webpki-roots = "1.0.9"
 # The concept resolver's SQL over the loaded OHDSI vocabulary, checked at
 # compile time against the vendored DDL through the committed `.sqlx/` query
 # metadata (docs/architecture.md section 5.3). The rustls provider is

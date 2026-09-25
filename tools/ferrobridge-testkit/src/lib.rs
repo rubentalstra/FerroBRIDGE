@@ -10,8 +10,10 @@
 //! PostgreSQL and the reference CDR the end-to-end lane runs against;
 //! [`fixtures`] holds the synthetic documents the suites commit and map;
 //! [`laws`] compares the two ends of a round trip;
-//! [`stubs`] carries the upstream response shapes for `wiremock`; and
-//! [`vocabulary`] holds the synthetic OHDSI vocabulary and its loader.
+//! [`stubs`] carries the upstream response shapes for `wiremock`;
+//! [`tls`] generates the throwaway certificates a TLS-only PostgreSQL starts
+//! with; and [`vocabulary`] holds the synthetic OHDSI vocabulary and its
+//! loader.
 #![doc(test(attr(deny(warnings))))]
 
 // TODO(#88): the synthetic vocabulary takes the observed Athena export shape
@@ -22,6 +24,7 @@ pub mod containers;
 pub mod fixtures;
 pub mod laws;
 pub mod stubs;
+pub mod tls;
 pub mod vocabulary;
 
 use std::fmt;

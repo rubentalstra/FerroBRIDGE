@@ -9,7 +9,7 @@
 //! sibling read at boot. A lane is off until its section is present. No
 //! specification governs the configuration: our own design.
 
-use secrecy::SecretString;
+use secrecy::{ExposeSecret, SecretString};
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::net::SocketAddr;
@@ -268,6 +268,11 @@ pub struct Cdm {
     pub url: Option<String>,
     /// A file holding the connection URL, read at boot.
     pub url_file: Option<PathBuf>,
+    /// The PEM CA the database's certificate is checked against, for the
+    /// URL's `sslmode` of `require`, `verify-ca` or `verify-full`.
+    pub tls_ca: Option<String>,
+    /// A file holding that CA, read at boot.
+    pub tls_ca_file: Option<PathBuf>,
     /// The schema the CDM tables live in.
     pub schema: String,
     /// The schema the bridge keeps its natural-key side table in.
@@ -282,6 +287,8 @@ impl Default for Cdm {
         Self {
             url: None,
             url_file: None,
+            tls_ca: None,
+            tls_ca_file: None,
             schema: String::from("cdm"),
             bridge_schema: String::from("ferrobridge"),
             person_policy: String::from("create_on_first_sight"),
@@ -506,6 +513,15 @@ pub enum Error {
         /// Why the name is refused.
         #[source]
         source: omop_cdm::ddl::SchemaNameError,
+    },
+    /// The CDM database URL, or the CA it is checked against, is refused.
+    #[error("{key} is refused")]
+    CdmConnection {
+        /// The key that holds the refused value.
+        key: String,
+        /// Why it is refused, the `sslmode` named when that is the fault.
+        #[source]
+        source: omop_cdm::connection::ConnectionError,
     },
     /// The person policy names neither of the two values.
     #[error("{key} is `{value}`; the policies are create_on_first_sight and existing")]
@@ -783,6 +799,8 @@ pub struct Settings {
 pub struct CdmSettings {
     /// The PostgreSQL connection URL, which may carry a password.
     pub url: SecretString,
+    /// The connection both CDM clients open, with its TLS settled.
+    pub connection: omop_cdm::connection::CdmConnection,
     /// The schema the CDM tables live in.
     pub schema: omop_cdm::ddl::SchemaName,
     /// The schema the natural-key side table lives in.
@@ -990,8 +1008,28 @@ fn resolve_cdm(cdm: &Cdm) -> Result<CdmSettings, Error> {
             });
         }
     };
+    let ca = match (cdm.tls_ca.as_deref(), cdm.tls_ca_file.as_deref()) {
+        (Some(_), Some(_)) => {
+            return Err(Error::Conflict {
+                key: String::from("cdm.tls_ca"),
+            });
+        }
+        (Some(pem), None) => Some(pem.as_bytes().to_vec()),
+        (None, Some(path)) => Some(std::fs::read(path).map_err(|source| Error::Secret {
+            key: String::from("cdm.tls_ca_file"),
+            path: path.to_path_buf(),
+            source,
+        })?),
+        (None, None) => None,
+    };
+    let connection = omop_cdm::connection::CdmConnection::new(url.expose_secret(), ca.as_deref())
+        .map_err(|source| Error::CdmConnection {
+        key: String::from(cdm_connection_key(&source, cdm)),
+        source,
+    })?;
     Ok(CdmSettings {
         url,
+        connection,
         schema: schema_of("cdm.schema", &cdm.schema)?,
         bridge_schema: schema_of("cdm.bridge_schema", &cdm.bridge_schema)?,
         person_policy,
@@ -1111,6 +1149,31 @@ fn resolve_credentials(section: &str, credentials: &Credentials) -> Result<Optio
             key: format!("{section}.user"),
         }),
         (None, None, None) => Ok(None),
+    }
+}
+
+/// Returns the key whose value `error` refuses: the CA's for a CA fault, the
+/// URL's for every other.
+fn cdm_connection_key(error: &omop_cdm::connection::ConnectionError, cdm: &Cdm) -> &'static str {
+    use omop_cdm::connection::ConnectionError;
+    match error {
+        ConnectionError::NoCertificate
+        | ConnectionError::Pem { .. }
+        | ConnectionError::Root { .. }
+        | ConnectionError::CaWithoutTls => {
+            if cdm.tls_ca_file.is_some() {
+                "cdm.tls_ca_file"
+            } else {
+                "cdm.tls_ca"
+            }
+        }
+        _ => {
+            if cdm.url_file.is_some() {
+                "cdm.url_file"
+            } else {
+                "cdm.url"
+            }
+        }
     }
 }
 

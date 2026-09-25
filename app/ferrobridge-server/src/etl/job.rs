@@ -18,7 +18,6 @@ use omop_cdm::database::{CdmPool, ConnectError};
 use omop_cdm::graph::EmptyIdentifier;
 use omop_cdm::vocabulary::ConceptResolver;
 use omop_cdm::writer::{CdmWriter, RunId, WriteError};
-use secrecy::ExposeSecret;
 
 /// Why `etl run` could not run.
 #[derive(Debug, thiserror::Error)]
@@ -33,9 +32,6 @@ pub enum JobError {
     /// The CDR client could not be built.
     #[error("building the CDR client the run reads through")]
     Client(#[source] ferrobridge_openehr::error::Error),
-    /// The `[cdm]` URL is no PostgreSQL connection URL.
-    #[error("reading [cdm] url")]
-    CdmUrl(#[source] sqlx::Error),
     /// The concept resolver could not connect to the CDM database.
     #[error("connecting the concept resolver to the CDM database")]
     Resolver(#[source] ConnectError),
@@ -71,8 +67,8 @@ pub fn missing_section(settings: &Settings) -> Option<&'static str> {
 ///
 /// The OMOCL set is read before any upstream is called, so a mapping that
 /// does not load refuses the start. The concept resolver and the writer open
-/// their own connections to the `[cdm]` database; the two clients never
-/// share a pool. The run carries a fresh UUID as its identifier.
+/// their own connections to the `[cdm]` database, over the TLS the
+/// configuration settled; the two clients never share a pool. The run carries a fresh UUID as its identifier.
 ///
 /// # Errors
 ///
@@ -92,11 +88,9 @@ pub async fn run(settings: &Settings, options: &RunOptions) -> Result<RunReport,
     };
     let set = read_set(directory).map_err(JobError::Mappings)?;
     let client = ferrobridge_openehr::client::Client::new(cdr.clone()).map_err(JobError::Client)?;
-    let options_url: sqlx::postgres::PgConnectOptions =
-        cdm.url.expose_secret().parse().map_err(JobError::CdmUrl)?;
     let pool = CdmPool::connect(
         sqlx::postgres::PgPoolOptions::new().max_connections(2),
-        options_url,
+        cdm.connection.pool_options(),
         cdm.schema.clone(),
     )
     .await
@@ -106,8 +100,8 @@ pub async fn run(settings: &Settings, options: &RunOptions) -> Result<RunReport,
         CdmVocabulary::new(ConceptResolver::new(pool)),
         VocabularyAliases::default(),
     );
-    let mut writer = CdmWriter::connect(
-        cdm.url.expose_secret(),
+    let mut writer = CdmWriter::connect_with(
+        &cdm.connection,
         cdm.schema.clone(),
         cdm.bridge_schema.clone(),
         cdm.person_policy,

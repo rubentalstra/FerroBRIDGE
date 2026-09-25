@@ -31,7 +31,7 @@ fn refusal(text: &str) -> Result<Error, Box<dyn StdError>> {
 
 #[test]
 fn the_cdm_section_defaults_its_schemas_and_policy() -> Result<(), Box<dyn StdError>> {
-    let text = "[cdm]\nurl = \"postgres://db.invalid/cdm\"\n";
+    let text = "[cdm]\nurl = \"postgres://db.invalid/cdm?sslmode=disable\"\n";
     let settings = Config::from_sources(Some(text), &BTreeMap::new())?.resolve()?;
     let cdm = settings.cdm.as_ref().ok_or("the CDM lane is on")?;
     assert_eq!("cdm", cdm.schema.as_str());
@@ -45,8 +45,9 @@ fn the_cdm_section_defaults_its_schemas_and_policy() -> Result<(), Box<dyn StdEr
 
 #[test]
 fn a_schema_that_is_no_identifier_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
-    let error =
-        refusal("[cdm]\nurl = \"postgres://db.invalid/cdm\"\nbridge_schema = \"bridge; drop\"\n")?;
+    let error = refusal(
+        "[cdm]\nurl = \"postgres://db.invalid/cdm?sslmode=disable\"\nbridge_schema = \"bridge; drop\"\n",
+    )?;
     match &error {
         Error::Schema { key, .. } => assert_eq!("cdm.bridge_schema", key),
         other => return Err(format!("expected a schema error, got {other:?}").into()),
@@ -56,7 +57,9 @@ fn a_schema_that_is_no_identifier_refuses_to_boot() -> Result<(), Box<dyn StdErr
 
 #[test]
 fn an_unknown_person_policy_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
-    let error = refusal("[cdm]\nurl = \"postgres://db.invalid/cdm\"\nperson_policy = \"merge\"\n")?;
+    let error = refusal(
+        "[cdm]\nurl = \"postgres://db.invalid/cdm?sslmode=disable\"\nperson_policy = \"merge\"\n",
+    )?;
     assert!(matches!(error, Error::PersonPolicy { .. }), "{error:?}");
     Ok(())
 }

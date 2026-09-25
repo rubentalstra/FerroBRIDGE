@@ -25,6 +25,8 @@
 // observed file format.
 
 #[cfg(feature = "database")]
+pub mod connection;
+#[cfg(feature = "database")]
 pub mod database;
 pub mod ddl;
 #[cfg(feature = "database")]
