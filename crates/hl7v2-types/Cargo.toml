@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "hl7v2-types"
+description = "Generated HL7 v2 message structure trees and segment field tables"
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+# Apache-2.0 beside fhir-types: generated Rust is the project's own code
+# (owner ruling on #251); the HL7 v2 definitions it is generated from are
+# never packaged (tools/fhir-codegen/vendor/hl7-v2ig/PROVENANCE.md).
+license = "Apache-2.0"
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+documentation = "https://docs.rs/hl7v2-types"
+readme = "README.md"
+keywords = ["hl7", "hl7v2", "healthcare", "codegen"]
+categories = ["data-structures", "parser-implementations", "science"]
+# The 0.0.0 name reservation until the first publish; `include` is the
+# packaged content.
+publish = true
+include = ["src/**", "README.md", "LICENSE"]
+
+[lib]
+# Generated doc text is not a curated example set (.claude/rules/testing.md).
+doctest = false
+
+[lints]
+workspace = true

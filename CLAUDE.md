@@ -55,7 +55,7 @@ v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 ## Repo map
 
 The Cargo workspace (#107) holds the root manifests with the full lint set,
-seven library crates (six at 0.0.0, the version that holds their crates.io
+eight library crates (seven at 0.0.0, the version that holds their crates.io
 names until a first publish, and `fhir-types` on its own published line), and
 the testkit tool crate. Beside it:
 
@@ -79,6 +79,11 @@ the testkit tool crate. Beside it:
 
 - `crates/fhir-types`: the generated FHIR model, Apache-2.0, emitted whole by
   the generator below and never hand-edited.
+- `crates/hl7v2-types`: the generated HL7 v2 tables (#253), Apache-2.0,
+  emitted whole by the `v2` root set of the generator below from the fetched
+  v2 definitions: every message structure's segment-group tree and the field
+  table of every segment definition, batch envelopes included. Never
+  hand-edited.
 - `crates/openehr-mapping-core`: the half of the mapping foundation both
   languages share (#74): the header they standardize between them, the YAML
   loader with anchors and source positions, the registry by mapping name and
@@ -300,7 +305,7 @@ managed, or embedded service and for for-fee distribution), and Apache License
 `SPDX-FileCopyrightText: Vernum Projecten B.V.` and `SPDX-License-Identifier: BUSL-1.1`
 in its header. A generated file keeps its `// @generated … DO NOT EDIT.` banner
 on the first line and carries the two SPDX lines under it, written by its
-emitter, which names Apache-2.0 for `crates/fhir-types`. A contribution
+emitter, which names Apache-2.0 for `crates/fhir-types` and `crates/hl7v2-types`. A contribution
 is licensed under the same licence and grants the Licensor the relicensing
 right in CONTRIBUTING.md § Licensing of contributions; the pull request
 checkbox records it and `contribution-licence-guard` enforces it.
@@ -309,9 +314,10 @@ recorded in a `PROVENANCE.md` beside each vendored tree
 (`.claude/rules/vendored-inputs.md`).
 
 The decision and its history are recorded in
-`.claude/memory/license-busl.md`. Two places name Apache 2.0 as a licence of
-its own: `LICENSE`, where it is the Change License, and `crates/fhir-types`,
-the one crate published under it.
+`.claude/memory/license-busl.md`. Three places name Apache 2.0 as a licence of
+its own: `LICENSE`, where it is the Change License, and `crates/fhir-types`
+and `crates/hl7v2-types`, the two crates published under it (the second by
+the owner ruling on #251: generated Rust is the project's own code).
 
 ## Working discipline (`.claude/`)
 

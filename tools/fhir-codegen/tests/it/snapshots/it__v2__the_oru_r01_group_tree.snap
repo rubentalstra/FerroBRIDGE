@@ -1,0 +1,71 @@
+---
+source: tools/fhir-codegen/tests/it/v2.rs
+expression: tree
+---
+1 MSH 1..1 Some(A)
+2 ARV 0..* Some(A)
+3 SFT 0..* Some(A)
+4 UAC 0..1 Some(A)
+5 PATIENT_RESULT 1..* Sequence
+  1 PATIENT 0..1 Sequence
+    1 PID 1..1 Some(A)
+    2 PD1 0..1 Some(A)
+    3 GSP 0..* Some(A)
+    4 GSR 0..* Some(A)
+    5 GSC 0..* Some(A)
+    6 PRT 0..* Some(A)
+    7 OH1 0..* Some(A)
+    8 OH2 0..* Some(A)
+    9 OH3 0..1 Some(A)
+    10 OH4 0..* Some(A)
+    11 NTE 0..* Some(A)
+    12 NEXT_OF_KIN 0..* Sequence
+      1 NK1 1..1 Some(A)
+      2 GSP 0..* Some(A)
+      3 GSR 0..* Some(A)
+      4 OH2 0..* Some(A)
+      5 OH3 0..1 Some(A)
+    13 ARV 0..* Some(B)
+    14 PATIENT_OBSERVATION 0..* Sequence
+      1 OBX 1..1 Some(A)
+      2 PRT 0..* Some(A)
+    15 VISIT 0..1 Sequence
+      1 PV1 1..1 Some(A)
+      2 PV2 0..1 Some(A)
+      3 PRT 0..* Some(A)
+    16 INSURANCE 0..* Sequence
+      1 IN1 1..1 Some(A)
+      2 IN2 0..1 Some(A)
+      3 IN3 0..1 Some(A)
+  2 ORDER_OBSERVATION 1..* Sequence
+    1 COMMON_ORDER 0..1 Sequence
+      1 ORC 1..1 Some(A)
+      2 PRT 0..* Some(A)
+      3 ORDER_DOCUMENT 0..1 Sequence
+        1 OBX 1..1 Some(A)
+        2 PRT 0..* Some(A)
+        3 TXA 1..1 Some(A)
+    2 OBR 1..1 Some(A)
+    3 NTE 0..* Some(A)
+    4 OBSERVATION_PARTICIPATION 0..* Sequence
+      1 PRT 1..1 Some(A)
+      2 DEV 0..* Some(A)
+    5 TIMING_QTY 0..* Sequence
+      1 TQ1 1..1 Some(A)
+      2 TQ2 0..* Some(A)
+    6 CTD 0..1 Some(A)
+    7 OBSERVATION 0..* Sequence
+      1 OBX 1..1 Some(A)
+      2 PRT 0..* Some(A)
+      3 NTE 0..* Some(A)
+    8 FT1 0..* Some(A)
+    9 CTI 0..* Some(A)
+    10 SPECIMEN 0..* Sequence
+      1 SPM 1..1 Some(A)
+      2 SPECIMEN_OBSERVATION 0..* Sequence
+        1 OBX 1..1 Some(A)
+        2 PRT 0..* Some(A)
+  3 DEVICE 0..* Sequence
+    1 DEV 1..1 Some(A)
+    2 OBX 0..* Some(A)
+6 DSC 0..1 Some(A)

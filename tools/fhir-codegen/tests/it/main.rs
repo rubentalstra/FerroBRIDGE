@@ -29,6 +29,7 @@ mod precision;
 mod roots;
 mod serialize;
 mod snapshot;
+mod v2;
 mod value_conversion;
 mod xml;
 

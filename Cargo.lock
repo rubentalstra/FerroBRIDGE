@@ -1178,6 +1178,7 @@ dependencies = [
  "anyhow",
  "clap",
  "fhir-types",
+ "hl7v2-types",
  "insta",
  "proptest",
  "regex",
@@ -1559,6 +1560,10 @@ checksum = "4aaa26c720c68b866f2c96ef5c1264b3e6f473fe5d4ce61cd44bbe913e553018"
 dependencies = [
  "hmac",
 ]
+
+[[package]]
+name = "hl7v2-types"
+version = "0.0.0"
 
 [[package]]
 name = "hmac"

@@ -66,6 +66,13 @@ pub fn field_name(element_name: &str) -> String {
     }
 }
 
+/// Whether `name` is a Rust keyword, which an identifier can only take in the
+/// raw form.
+#[must_use]
+pub fn is_keyword(name: &str) -> bool {
+    KEYWORDS.contains(&name)
+}
+
 /// The `snake_case` module (file) name for a Rust type name.
 #[must_use]
 pub fn module_name(type_name: &str) -> String {

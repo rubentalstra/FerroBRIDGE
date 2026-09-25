@@ -8,12 +8,14 @@ paths: ["crates/**", "scripts/release/**", ".github/workflows/publish-crates.yml
 # Published crates discipline (crates.io)
 
 The `crates/*` members are published on crates.io under plain names
-(`fhir-types`, `openehr-mapping-core`, `fhirconnect`, `omocl`, `omop-cdm`,
+(`fhir-types`, `hl7v2-types`, `openehr-mapping-core`, `fhirconnect`, `omocl`, `omop-cdm`,
 `ferrobridge-openehr`, `ferrobridge-term`) so other projects can depend on
 them. The server (`app/*`) and the tools (`tools/*`) are never published.
-Every member is BUSL-1.1 except `fhir-types`, which is Apache-2.0
-(`docs/architecture.md` §4.1) so the generated FHIR model stays usable by any
-Rust project. Published versions are immutable, so version hygiene is a hard
+Every member is BUSL-1.1 except the two generated crates, which are
+Apache-2.0: `fhir-types` (`docs/architecture.md` §4.1), so the generated FHIR
+model stays usable by any Rust project, and `hl7v2-types` (owner ruling on
+#251: generated Rust is the project's own code; the HL7 v2 definitions it is
+generated from are never packaged). Published versions are immutable, so version hygiene is a hard
 rule, machine-enforced by the `crate-version-guard` CI job.
 
 ## Two version lines
@@ -44,7 +46,7 @@ rule, machine-enforced by the `crate-version-guard` CI job.
 - Not every bumped version is published; gaps in the published sequence are
   normal. Publishing different content under an existing version is what is
   forbidden, and crates.io refuses it.
-- `crates/fhir-types/src/**` is generated, so a bump there follows a generator
+- `crates/fhir-types/src/**` and `crates/hl7v2-types/src/**` are generated, so a bump there follows a generator
   change and a regeneration, never a hand-edit (`codegen.md`).
 
 ## The publish lane is per crate, resumable, and verified

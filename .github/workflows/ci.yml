@@ -338,6 +338,19 @@ jobs:
       - uses: taiki-e/install-action@76c2e6406e52637deed7160d77bded76bd83e06e # v2.87.14
         with:
           tool: cargo-nextest,cargo-hack
+      # The fhir-codegen tests read the HL7 v2 definitions, which are fetched
+      # at build time and never committed; the same cache and check as
+      # codegen-drift.
+      - name: Read the pinned HL7 v2 definitions commit
+        id: v2ig
+        run: echo "commit=$(bash scripts/vendor/v2ig.sh --commit)" >> "$GITHUB_OUTPUT"
+      - name: Restore the HL7 v2 definitions
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/fhir-codegen/vendor/hl7-v2ig/input
+          key: hl7-v2ig-${{ steps.v2ig.outputs.commit }}
+      - name: Fetch and verify the HL7 v2 definitions
+        run: bash scripts/vendor/v2ig.sh
       # One package at a time, as the clippy and msrv lanes do: a workspace-wide
       # test build schedules the generated giants side by side and the runner
       # kills it with exit 143 (docs/ci-cd.md).

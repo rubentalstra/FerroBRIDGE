@@ -50,7 +50,8 @@
 #                          records that repository's licence.
 #  11. licence            LICENSE is the Business Source License 1.1 and no
 #                          first-party file claims MIT or Apache-2.0 as its
-#                          own, crates/fhir-types excepted (Apache-2.0).
+#                          own, crates/fhir-types and crates/hl7v2-types
+#                          excepted (Apache-2.0).
 #
 # Usage:
 #   scripts/checks/versions.sh
@@ -617,7 +618,10 @@ if [ -f LICENSE ]; then
   fi
   # crates/fhir-types is excepted: it is the one first-party crate under
   # Apache-2.0 (docs/architecture.md section 4.1), generated from the CC0 HL7
-  # FHIR packages and published so any Rust project can depend on it. The SPDX
+  # FHIR packages and published so any Rust project can depend on it.
+  # crates/hl7v2-types is excepted beside it: the Rust fhir-codegen generates
+  # from the HL7 v2 definitions is the project's own code under Apache-2.0
+  # (owner ruling on #251), and the definitions are never committed. The SPDX
   # tag is anchored to the start of its line, after an optional comment marker,
   # so a header claim is caught while the same text quoted inside a string
   # literal (the emitter that writes that crate's header) is not.
@@ -629,10 +633,10 @@ if [ -f LICENSE ]; then
     stale=1
   done < <(git grep -n -E '^[[:space:]]*([/#*]+|<!--)?[[:space:]]*SPDX-License-Identifier: (MIT|Apache-2\.0)|License-MIT|License-Apache|^license = "(MIT|Apache-2\.0)"|^license: (MIT|Apache-2\.0)|image\.licenses="?(MIT|Apache)' \
     -- ':!LICENSE' ':!CHANGELOG.md' ':!scripts/checks/versions.sh' ':(glob,exclude)**/vendor/**' \
-    ':(glob,exclude)docs/specs/**' ':(glob,exclude)crates/fhir-types/**' \
+    ':(glob,exclude)docs/specs/**' ':(glob,exclude)crates/fhir-types/**' ':(glob,exclude)crates/hl7v2-types/**' \
     ':(glob,exclude)crates/fhirconnect/tests/fixtures/projects/ferrobridge/kds_diagnose/**' \
     ':(glob,exclude)crates/omop-cdm/sql/*.sql' || true)
-  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types, the KDS project fixtures and the omop-cdm era scripts excepted, Apache-2.0)"
+  [ "$stale" -eq 0 ] && note "OK: every first-party file names BUSL-1.1 (crates/fhir-types, crates/hl7v2-types, the KDS project fixtures and the omop-cdm era scripts excepted, Apache-2.0)"
 else
   note "no LICENSE yet, skipped"
 fi

@@ -271,7 +271,7 @@ fn lower_models(
     Ok(models)
 }
 
-fn write_tree(root: &Path, files: &BTreeMap<String, String>) -> Result<(), EmitError> {
+pub(crate) fn write_tree(root: &Path, files: &BTreeMap<String, String>) -> Result<(), EmitError> {
     for (relative, content) in files {
         let path = root.join(relative);
         if let Some(parent) = path.parent() {
@@ -285,7 +285,7 @@ fn write_tree(root: &Path, files: &BTreeMap<String, String>) -> Result<(), EmitE
     Ok(())
 }
 
-fn read_tree(
+pub(crate) fn read_tree(
     root: &Path,
     files: &BTreeMap<String, String>,
 ) -> Result<BTreeMap<String, String>, EmitError> {
@@ -305,7 +305,7 @@ fn read_tree(
 ///
 /// The union tree holds thousands of files, more than one command line holds,
 /// so the paths go in batches (<https://doc.rust-lang.org/std/process/struct.Command.html>).
-fn rustfmt(
+pub(crate) fn rustfmt(
     root: &Path,
     files: &BTreeMap<String, String>,
     crate_dir: &Path,
@@ -366,7 +366,7 @@ fn compare(
 }
 
 /// Every file under `dir`, recursively, as `prefix/…` relative paths.
-fn files_under(dir: &Path, prefix: &str) -> Result<Vec<String>, EmitError> {
+pub(crate) fn files_under(dir: &Path, prefix: &str) -> Result<Vec<String>, EmitError> {
     let entries = fs::read_dir(dir).map_err(|source| EmitError::Io {
         path: dir.to_path_buf(),
         source,

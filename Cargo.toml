@@ -63,6 +63,7 @@ sha2 = "0.11.0"
 # Published from this workspace, so the requirement carries both a path and a
 # version: cargo resolves the path locally and the version on crates.io.
 fhir-types = { path = "crates/fhir-types", version = "0.1.106", default-features = false }
+hl7v2-types = { path = "crates/hl7v2-types", version = "0.0.0" }
 openehr-mapping-core = { path = "crates/openehr-mapping-core", version = "0.0.0" }
 # The OMOP CDM layer, taken metadata-only by default: a consumer that writes
 # to a CDM database turns on its `database` feature.

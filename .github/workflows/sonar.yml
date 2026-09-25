@@ -63,6 +63,22 @@ jobs:
         with:
           tool: cargo-llvm-cov,cargo-nextest
 
+      # The fhir-codegen tests read the HL7 v2 definitions, which are fetched
+      # at build time and never committed (ci.yml codegen-drift).
+      - name: Read the pinned HL7 v2 definitions commit
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        id: v2ig
+        run: echo "commit=$(bash scripts/vendor/v2ig.sh --commit)" >> "$GITHUB_OUTPUT"
+      - name: Restore the HL7 v2 definitions
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/fhir-codegen/vendor/hl7-v2ig/input
+          key: hl7-v2ig-${{ steps.v2ig.outputs.commit }}
+      - name: Fetch and verify the HL7 v2 definitions
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        run: bash scripts/vendor/v2ig.sh
+
       # The lcov file sonar.rust.lcov.reportPaths names. One package at a time:
       # a workspace-wide instrumented build schedules the two generated giants
       # side by side and the runner kills it with exit 143 (#146), the same
