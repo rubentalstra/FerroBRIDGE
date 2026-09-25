@@ -23,14 +23,15 @@ crates on crates.io.
 
 ## [Unreleased]
 
-## [0.0.3-rc.1] - 2026-09-25
+## [0.0.3] - 2026-09-25
 
 The FHIR round-trip release. The `fhirconnect` crate runs every FHIRconnect
 method over the generated FHIR model and the openEHR Web Template; the `$tofhir`
 and `$toopenehr` operations and the FHIR R4 facade over a CDR are served by the
 one binary; and the published KDS Diagnose chain round-trips under both lens
 laws, through the operations and against a real CDR, modulo a declared set.
-`v0.0.3-rc.1` rehearses the release lane with this content.
+`v0.0.3-rc.1`, cut the same day, rehearsed the release lane with this content
+and is superseded by this release.
 
 ### Added
 
@@ -946,7 +947,7 @@ release lane with this content and is superseded by this release.
   after each version. Every header, the README badge and licensing section,
   and the community and governance documents name it (#12).
 
-[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.3-rc.1...HEAD
-[0.0.3-rc.1]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.2...v0.0.3-rc.1
+[Unreleased]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.3...HEAD
+[0.0.3]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/rubentalstra/FerroBRIDGE/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/rubentalstra/FerroBRIDGE/releases/tag/v0.0.1
