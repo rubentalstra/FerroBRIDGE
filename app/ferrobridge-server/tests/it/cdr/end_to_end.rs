@@ -171,7 +171,7 @@ async fn find_by_subject(client: &CdrClient, ehr_id: &EhrId) -> Result<(), Box<d
             );
             Ok(())
         }
-        other @ EhrGetBySubjectOutcome::NotFound => {
+        other @ EhrGetBySubjectOutcome::NotFound { .. } => {
             Err(format!("the subject did not find its EHR: {other:?}").into())
         }
     }
@@ -336,7 +336,7 @@ async fn refuse_a_stale_if_match(
         )
         .await?;
     match answered.outcome {
-        CompositionUpdateOutcome::PreconditionFailed { headers } => {
+        CompositionUpdateOutcome::PreconditionFailed { headers, .. } => {
             let latest = ferrobridge_server::cdr::optional_version_from_etag(
                 "composition_update",
                 headers.etag.as_deref(),

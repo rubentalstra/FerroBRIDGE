@@ -9,12 +9,9 @@
 //! ones; the same section's deprecation table maps the 1.0.3 spellings
 //! (`openEHR-VERSION`, `openEHR-AUDIT_DETAILS`, `openEHR-TEMPLATE_ID`, which
 //! carried the attribute path in the header NAME) onto them, and the bridge
-//! sends only the 1.1.0 form. The generated `composition_create` and
-//! `composition_update` parameters carry none of them, so the bridge adds them
-//! to the request itself.
+//! sends only the 1.1.0 form. The generated parameters of the commit
+//! operations carry the three as fields, and this module renders their values.
 
-use http::HeaderMap;
-use http::HeaderName;
 use http::HeaderValue;
 use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
 use openehr_base::v1_3::base_types::identification::party_ref::PartyRef;
@@ -89,6 +86,18 @@ fn quotable(kind: &'static str, text: &str) -> Result<String, CodeError> {
     Ok(text.to_owned())
 }
 
+/// The committal metadata headers one commit renders into, in the shape the
+/// generated parameters of the commit operations carry them.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct CommitHeaders {
+    /// The `openehr-version` value.
+    pub version: Option<String>,
+    /// The `openehr-audit-details` values, one field line each.
+    pub audit_details: Option<Vec<String>>,
+    /// The `openehr-template-id` value.
+    pub template_id: Option<String>,
+}
+
 /// The committal metadata one commit carries.
 ///
 /// Every member is optional: "None of these headers are mandatory, but
@@ -111,49 +120,50 @@ pub struct CommitContext {
 }
 
 impl CommitContext {
-    /// Returns the headers this context renders into, in wire order.
+    /// Returns the header values this context renders into, in wire order.
     ///
     /// # Errors
     /// Returns [`HeaderError::Attribute`] when a member carries text the
     /// quoted attribute form cannot hold, and [`HeaderError::Value`] when a
     /// member carries text no HTTP header value can hold.
-    pub fn headers(&self) -> Result<HeaderMap, HeaderError> {
-        let mut rendered: Vec<(&'static str, String)> = Vec::new();
+    pub fn headers(&self) -> Result<CommitHeaders, HeaderError> {
+        let mut headers = CommitHeaders::default();
         if let Some(state) = self.lifecycle_state.as_ref() {
             let code = quoted(
                 VERSION_HEADER,
                 "lifecycle_state",
                 &state.defining_code.code_string,
             )?;
-            rendered.push((
+            headers.version = Some(header_value(
                 VERSION_HEADER,
                 format!("lifecycle_state.code_string=\"{code}\""),
-            ));
+            )?);
         }
         if let Some(audit) = self.audit.as_ref() {
+            let mut lines = Vec::new();
             let code = attribute("change_type", &audit.change_type.defining_code.code_string)?;
-            rendered.push((
-                AUDIT_DETAILS_HEADER,
-                format!("change_type.code_string=\"{code}\""),
-            ));
+            lines.push(format!("change_type.code_string=\"{code}\""));
             if let Some(description) = audit.description.as_ref() {
                 let value = match description {
                     DvText::DvText(text) => &text.value,
                     DvText::DvCodedText(text) => &text.value,
                 };
                 let description = attribute("description", value)?;
-                rendered.push((
-                    AUDIT_DETAILS_HEADER,
-                    format!("description.value=\"{description}\""),
-                ));
+                lines.push(format!("description.value=\"{description}\""));
             }
             if let Some(committer) = committer_value(&audit.committer)? {
-                rendered.push((AUDIT_DETAILS_HEADER, committer));
+                lines.push(committer);
             }
             if let Some(system_id) = audit.system_id.as_ref() {
                 let system_id = attribute("system_id", system_id)?;
-                rendered.push((AUDIT_DETAILS_HEADER, format!("system_id=\"{system_id}\"")));
+                lines.push(format!("system_id=\"{system_id}\""));
             }
+            headers.audit_details = Some(
+                lines
+                    .into_iter()
+                    .map(|line| header_value(AUDIT_DETAILS_HEADER, line))
+                    .collect::<Result<_, _>>()?,
+            );
         }
         if let Some(template_id) = self.template_id.as_ref() {
             if template_id.value.is_empty() {
@@ -164,18 +174,17 @@ impl CommitContext {
                     },
                 });
             }
-            rendered.push((TEMPLATE_ID_HEADER, template_id.value.clone()));
-        }
-        let mut headers = HeaderMap::new();
-        for (name, value) in rendered {
-            let value = HeaderValue::from_str(&value).map_err(|source| HeaderError::Value {
-                header: name,
-                source,
-            })?;
-            headers.append(HeaderName::from_static(name), value);
+            headers.template_id =
+                Some(header_value(TEMPLATE_ID_HEADER, template_id.value.clone())?);
         }
         Ok(headers)
     }
+}
+
+/// Returns `value` when it can travel as a value of `header`.
+fn header_value(header: &'static str, value: String) -> Result<String, HeaderError> {
+    HeaderValue::from_str(&value).map_err(|source| HeaderError::Value { header, source })?;
+    Ok(value)
 }
 
 /// Returns `text` as a quoted attribute value of `header`, refusing a quote or
@@ -256,20 +265,20 @@ mod tests {
 
     fn rendered(context: &CommitContext) -> Vec<(&'static str, String)> {
         let headers = context.headers().expect("the context renders");
-        [VERSION_HEADER, AUDIT_DETAILS_HEADER, TEMPLATE_ID_HEADER]
+        let version = headers
+            .version
             .into_iter()
-            .flat_map(|name| {
-                headers.get_all(name).iter().map(move |value| {
-                    (
-                        name,
-                        value
-                            .to_str()
-                            .expect("a rendered value is ASCII")
-                            .to_owned(),
-                    )
-                })
-            })
-            .collect()
+            .map(|value| (VERSION_HEADER, value));
+        let audit = headers
+            .audit_details
+            .into_iter()
+            .flatten()
+            .map(|value| (AUDIT_DETAILS_HEADER, value));
+        let template = headers
+            .template_id
+            .into_iter()
+            .map(|value| (TEMPLATE_ID_HEADER, value));
+        version.chain(audit).chain(template).collect()
     }
 
     fn coded(code: &str) -> DvCodedText {

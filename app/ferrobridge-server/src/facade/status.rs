@@ -24,9 +24,9 @@
 
 use http::StatusCode;
 use openehr_its::rest::client::ClientError;
+use openehr_its::rest::client::ErrorBody;
 
 use crate::cdr::error::CdrError;
-use crate::cdr::error::Upstream;
 use crate::facade::outcome::Issue;
 use crate::facade::outcome::IssueType;
 
@@ -218,50 +218,31 @@ impl Answer {
     }
 }
 
-/// Returns the diagnostics text of one upstream answer.
+/// Returns the diagnostics text of one `status` answer whose body is `body`.
 ///
 /// The openEHR error body travels verbatim: the `message` and every
 /// `validationErrors` entry the CDR sent, and the raw body when the CDR sent
 /// something that is not an error body. It never reaches the wire as its own
 /// document (`docs/architecture.md` §4.6).
 #[must_use]
-pub fn diagnostics(upstream: &Upstream) -> String {
-    let mut text = format!("the openEHR service answered {}", upstream.status());
-    match upstream.error() {
-        Some(error) => {
-            if let Some(message) = error.message.as_deref() {
-                text.push_str(": ");
-                text.push_str(message);
-            }
-            for entry in &error.validation_errors {
+pub fn diagnostics(status: StatusCode, body: &ErrorBody) -> String {
+    let mut text = format!("the openEHR service answered {status}");
+    match body.message() {
+        Some(message) => {
+            text.push_str(": ");
+            text.push_str(message);
+            for entry in body.validation_errors() {
                 text.push_str("; ");
                 text.push_str(entry);
             }
         }
-        None if !upstream.body().is_empty() => {
+        None if !body.is_empty() => {
             text.push_str(": ");
-            text.push_str(upstream.body());
+            text.push_str(&String::from_utf8_lossy(body.raw()));
         }
         None => {}
     }
     text
-}
-
-/// Returns the diagnostics of a refusal the generated client read, from the
-/// answer the CDR sent when it was kept, and from the status and the `Error`
-/// message the refusal carries otherwise.
-fn refusal_diagnostics(
-    upstream: Option<&Upstream>,
-    status: StatusCode,
-    detail: Option<&str>,
-) -> String {
-    match upstream {
-        Some(upstream) => diagnostics(upstream),
-        None => match detail {
-            Some(message) => format!("the openEHR service answered {status}: {message}"),
-            None => format!("the openEHR service answered {status}"),
-        },
-    }
 }
 
 /// Returns the answer one CDR call that reached no usable documented answer
@@ -273,10 +254,7 @@ fn refusal_diagnostics(
 #[must_use]
 pub fn of_client_error(error: &CdrError) -> Answer {
     match *error {
-        CdrError::Client {
-            ref source,
-            ref upstream,
-        } => of_generated_error(source, upstream.as_deref()),
+        CdrError::Client { ref source, .. } => of_generated_error(source),
         _ => Answer::new(
             INTERNAL,
             format!("the openEHR client refused this call ({})", error.kind()),
@@ -284,47 +262,37 @@ pub fn of_client_error(error: &CdrError) -> Answer {
     }
 }
 
-/// Returns the answer one refusal of the generated client maps to, `upstream`
-/// being the answer the CDR sent when the call reached it.
-fn of_generated_error(error: &ClientError, upstream: Option<&Upstream>) -> Answer {
+/// Returns the answer one refusal of the generated client maps to, with the
+/// body the CDR sent when the call reached it.
+fn of_generated_error(error: &ClientError) -> Answer {
     match *error {
         ClientError::Unauthorized {
             ref challenge,
-            ref detail,
+            ref body,
             ..
         } => Answer {
             row: UNAUTHORIZED,
-            issue: Issue::error(UNAUTHORIZED.issue).diagnosing(refusal_diagnostics(
-                upstream,
-                StatusCode::UNAUTHORIZED,
-                detail.as_deref(),
-            )),
+            issue: Issue::error(UNAUTHORIZED.issue)
+                .diagnosing(diagnostics(StatusCode::UNAUTHORIZED, body)),
             entity_tag: None,
             challenge: challenge.clone(),
         },
         ClientError::ServiceFailure {
-            status, ref detail, ..
-        } => Answer::new(
-            UPSTREAM,
-            refusal_diagnostics(upstream, status, detail.as_deref()),
-        ),
+            status, ref body, ..
+        } => Answer::new(UPSTREAM, diagnostics(status, body)),
         ClientError::Transport { .. } => Answer::new(
             UPSTREAM,
             String::from("the openEHR service could not be reached"),
         ),
         ClientError::UndocumentedStatus {
-            status, ref detail, ..
-        } => Answer::new(
-            UNDOCUMENTED,
-            refusal_diagnostics(upstream, status, detail.as_deref()),
-        ),
+            status, ref body, ..
+        } => Answer::new(UNDOCUMENTED, diagnostics(status, body)),
         // NOTE: ITS-REST 1.1.0 §Requests and responses/HTTP status codes lists
         // `403` for every operation and no operation documents it, so the row is
         // the one every status outside an operation's set takes.
-        ClientError::Forbidden { ref detail, .. } => Answer::new(
-            UNDOCUMENTED,
-            refusal_diagnostics(upstream, StatusCode::FORBIDDEN, detail.as_deref()),
-        ),
+        ClientError::Forbidden { ref body, .. } => {
+            Answer::new(UNDOCUMENTED, diagnostics(StatusCode::FORBIDDEN, body))
+        }
         _ => Answer::new(
             INTERNAL,
             format!(
@@ -341,12 +309,12 @@ mod tests {
         BAD_REQUEST, GONE, NOT_FOUND, PRECONDITION_FAILED, UNAUTHORIZED, UNDOCUMENTED,
         UNPROCESSABLE, UPSTREAM, diagnostics, of_client_error,
     };
-    use crate::cdr::error::{CdrError, Upstream};
-    use http::{HeaderMap, Method, StatusCode};
-    use openehr_its::rest::client::ClientError;
+    use crate::cdr::error::CdrError;
+    use http::{Method, StatusCode};
+    use openehr_its::rest::client::{ClientError, ErrorBody};
 
-    fn upstream(status: StatusCode, body: &str) -> Upstream {
-        Upstream::new(status, HeaderMap::new(), body.to_owned())
+    fn body(text: &str) -> ErrorBody {
+        ErrorBody::from_bytes(text.as_bytes().to_vec())
     }
 
     #[test]
@@ -389,9 +357,9 @@ mod tests {
                 method: Method::GET,
                 path: String::from("/ehr"),
                 challenge: Some(String::from("Bearer realm=\"cdr\"")),
-                detail: None,
+                body: body(""),
             },
-            Some(upstream(StatusCode::UNAUTHORIZED, "")),
+            None,
         );
         let answer = of_client_error(&error);
         assert_eq!(StatusCode::UNAUTHORIZED, answer.status());
@@ -406,7 +374,7 @@ mod tests {
                 method: Method::GET,
                 path: String::from("/ehr"),
                 status: StatusCode::SERVICE_UNAVAILABLE,
-                detail: None,
+                body: body(""),
             },
             None,
         );
@@ -428,7 +396,7 @@ mod tests {
             ClientError::Forbidden {
                 method: Method::POST,
                 path: String::from("/ehr"),
-                detail: Some(String::from("no write grant")),
+                body: body(r#"{"message":"no write grant","validationErrors":[]}"#),
             },
             None,
         );
@@ -446,28 +414,31 @@ mod tests {
 
     #[test]
     fn the_validation_errors_travel_verbatim() {
-        let upstream = upstream(
+        let text = diagnostics(
             StatusCode::UNPROCESSABLE_ENTITY,
-            r#"{"message":"the composition is invalid","validationErrors":["/content[0] is required"]}"#,
+            &body(
+                r#"{"message":"the composition is invalid","validationErrors":["/content[0] is required"]}"#,
+            ),
         );
-        let text = diagnostics(&upstream);
         assert!(text.contains("the composition is invalid"), "{text}");
         assert!(text.contains("/content[0] is required"), "{text}");
     }
 
     #[test]
     fn a_body_that_is_no_error_document_still_reaches_the_diagnostics() {
-        let upstream = upstream(StatusCode::UNPROCESSABLE_ENTITY, "a plain-text refusal");
-        assert!(diagnostics(&upstream).contains("a plain-text refusal"));
+        let refusal = body("a plain-text refusal");
+        assert!(
+            diagnostics(StatusCode::UNPROCESSABLE_ENTITY, &refusal)
+                .contains("a plain-text refusal")
+        );
     }
 
     #[test]
     fn an_error_body_member_outside_the_openehr_shape_stays_out_of_the_diagnostics() {
-        let upstream = upstream(
+        let text = diagnostics(
             StatusCode::CONFLICT,
-            r#"{"message":"an EHR exists","trace":"ferrobridge-stack-trace-0001"}"#,
+            &body(r#"{"message":"an EHR exists","trace":"ferrobridge-stack-trace-0001"}"#),
         );
-        let text = diagnostics(&upstream);
         assert!(text.contains("an EHR exists"), "{text}");
         assert!(!text.contains("ferrobridge-stack-trace-0001"), "{text}");
     }

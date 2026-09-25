@@ -127,7 +127,7 @@ pub async fn resolve(
         .map_err(client_error)?;
     let ehr_id = match found.outcome {
         EhrGetBySubjectOutcome::Ok { body, .. } => ehr_id_of(&body)?,
-        EhrGetBySubjectOutcome::NotFound => match policy {
+        EhrGetBySubjectOutcome::NotFound { .. } => match policy {
             Policy::Existing => {
                 return Err(EhrError::Absent {
                     subject: person.to_string(),
@@ -159,12 +159,14 @@ async fn create(client: &CdrClient, person: &PersonId) -> Result<EhrId, EhrError
             crate::cdr::ehr_id_from_etag(StatusCode::NO_CONTENT, headers.etag.as_deref())
                 .map_err(client_error)
         }
-        EhrCreateOutcome::BadRequest { .. } | EhrCreateOutcome::Conflict => {
-            Err(EhrError::Refused {
-                subject: person.to_string(),
-                detail: crate::facade::status::diagnostics(&answered.upstream),
-            })
-        }
+        EhrCreateOutcome::BadRequest { body } => Err(EhrError::Refused {
+            subject: person.to_string(),
+            detail: crate::facade::status::diagnostics(StatusCode::BAD_REQUEST, &body),
+        }),
+        EhrCreateOutcome::Conflict { body } => Err(EhrError::Refused {
+            subject: person.to_string(),
+            detail: crate::facade::status::diagnostics(StatusCode::CONFLICT, &body),
+        }),
     }
 }
 

@@ -330,6 +330,17 @@ crates on crates.io.
 
 ### Changed
 
+- The nine `openehr-*` crates step from 0.0.71 to 0.0.72, whose generated
+  ITS-REST client carries what the bridge's CDR client added around it
+  (#293, FerroEHR #3487). The composition commit headers travel through the
+  generated parameters as `openehr-version`, `openehr-audit-details` and
+  `openehr-template-id`; a refusal's `issue.diagnostics` reads the error body
+  the generated outcome or `ClientError` carries, so a `400` in the prose
+  error shape is the documented `400`; a version uid travels with its `:`
+  literal in the path segment; and `[cdr]` credentials are the
+  `openehr-its` `Credentials`, built with `Credentials::basic` and
+  `Credentials::bearer` over a `SecretString`, in place of the bridge's own
+  copy of that type.
 - The nine `openehr-*` crates step from 0.0.69 to 0.0.71, and `openehr-its`
   is taken with the new `rest` feature in place of `rest-server`, so the
   ITS-REST DTOs come without axum. 0.0.71 also ships the `rest-client`

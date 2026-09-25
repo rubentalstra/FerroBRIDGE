@@ -945,9 +945,9 @@ fn resolve_cdr(cdr: &Cdr) -> Result<crate::cdr::config::CdrConfig, Error> {
         });
     if let Some(scheme) = resolve_credentials("cdr.credentials", &cdr.credentials)? {
         config = config.with_credentials(match scheme {
-            Scheme::Bearer(token) => crate::cdr::config::Credentials::Bearer(token),
+            Scheme::Bearer(token) => openehr_its::rest::client::Credentials::bearer(token),
             Scheme::Basic { user, password } => {
-                crate::cdr::config::Credentials::Basic { user, password }
+                openehr_its::rest::client::Credentials::basic(user, password)
             }
         });
     }

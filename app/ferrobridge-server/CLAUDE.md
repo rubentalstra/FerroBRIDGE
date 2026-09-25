@@ -44,15 +44,16 @@ the real run path; a binary-only crate cannot be imported from `tests/`
 - **The generated client owns every operation.** The paths, the parameters,
   `Prefer`, `If-Match`, the outcome enum per call and the retry are the
   `openehr_its::rest::generated::<group>::client` operations over one
-  `openehr_its::rest::client::Client<ReqwestTransport>`. The module adds only
-  what they lack: the commit headers (absent from the three `OpenAPI`
-  documents), the `X-Request-Id` echo, the upstream answer kept beside each
-  outcome, the ids an `ETag` names, the two-route template fetch and the AQL
-  paging. A gap in the generated client is a request to `openehr-its`, never a
-  hand-written copy of the operation here.
+  `openehr_its::rest::client::Client<ReqwestTransport>`; the commit headers
+  are fields of the generated parameters since 0.0.72 (`CommitHeaders`). The
+  module adds only what they lack: the `X-Request-Id` echo, the answer kept
+  beside each outcome for the `ETag` of an adl2 template or of a `201` whose
+  body does not decode, the ids an `ETag` names, the two-route template fetch
+  and the AQL paging. A gap in the generated client is a request to
+  `openehr-its`, never a hand-written copy of the operation here.
 - **A documented status is an outcome, never an error**, and a refusal keeps
-  the status and body the CDR sent (`Answered::upstream`,
-  `CdrError::Client::upstream`), so the facade's status table diagnoses it.
+  the status and the `ErrorBody` the outcome or `ClientError` carries, so the
+  facade's status table diagnoses it (`facade::status::diagnostics`).
 - **The commit headers carry the 1.1.0 value form** (`openehr-version`,
   `openehr-audit-details`, `openehr-template-id`) and never the deprecated
   1.0.3 spelling.

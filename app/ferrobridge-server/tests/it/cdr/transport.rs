@@ -8,10 +8,10 @@
 use super::support;
 use ferrobridge_server::cdr::CdrClient;
 use ferrobridge_server::cdr::Prefer;
-use ferrobridge_server::cdr::config::{CdrConfig, Credentials};
+use ferrobridge_server::cdr::config::CdrConfig;
 use ferrobridge_server::cdr::error::CdrError;
 use ferrobridge_server::cdr::ids::{EhrId, RequestId};
-use openehr_its::rest::client::{ClientError, RetryPolicy, TransportError};
+use openehr_its::rest::client::{ClientError, Credentials, RetryPolicy, TransportError};
 use openehr_its::rest::generated::ehr::client::EhrGetByIdOutcome;
 use secrecy::SecretString;
 use std::error::Error;

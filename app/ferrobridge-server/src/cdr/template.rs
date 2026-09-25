@@ -97,9 +97,7 @@ impl CdrClient {
         let answered = DefinitionClient::new(&client)
             .definition_template_adl1_4_get(&params)
             .await;
-        let answered = crate::cdr::answered_or_bad_request(&client, answered, || {
-            DefinitionTemplateAdl14GetOutcome::BadRequest { body: None }
-        })?;
+        let answered = crate::cdr::answered_by(&client, answered)?;
         match answered.outcome {
             DefinitionTemplateAdl14GetOutcome::Ok { body, .. } => {
                 let text = String::from_utf8_lossy(&body);
@@ -115,8 +113,8 @@ impl CdrClient {
             DefinitionTemplateAdl14GetOutcome::BadRequest { .. } => {
                 Ok(TemplateOutcome::BadRequest(answered.upstream))
             }
-            DefinitionTemplateAdl14GetOutcome::NotFound
-            | DefinitionTemplateAdl14GetOutcome::NotAcceptable => {
+            DefinitionTemplateAdl14GetOutcome::NotFound { .. }
+            | DefinitionTemplateAdl14GetOutcome::NotAcceptable { .. } => {
                 self.template_adl2(template_id).await
             }
         }
@@ -132,9 +130,7 @@ impl CdrClient {
         let answered = DefinitionClient::new(&client)
             .definition_template_adl2_get(&params)
             .await;
-        let answered = crate::cdr::answered_or_bad_request(&client, answered, || {
-            DefinitionTemplateAdl2GetOutcome::BadRequest { body: None }
-        })?;
+        let answered = crate::cdr::answered_by(&client, answered)?;
         match answered.outcome {
             DefinitionTemplateAdl2GetOutcome::Ok { body, .. } => {
                 let body_error = |source: BodyError| CdrError::Body {
@@ -160,7 +156,9 @@ impl CdrClient {
             DefinitionTemplateAdl2GetOutcome::BadRequest { .. } => {
                 Ok(TemplateOutcome::BadRequest(answered.upstream))
             }
-            DefinitionTemplateAdl2GetOutcome::NotFound => Ok(TemplateOutcome::UnknownTemplate),
+            DefinitionTemplateAdl2GetOutcome::NotFound { .. } => {
+                Ok(TemplateOutcome::UnknownTemplate)
+            }
         }
     }
 }

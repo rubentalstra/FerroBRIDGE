@@ -135,8 +135,10 @@ async fn create_ehr_keeps_a_400_body_in_the_prose_error_shape() -> Result<(), Bo
         .await?;
     assert!(
         matches!(
-            answered.outcome,
-            EhrCreateOutcome::BadRequest { body: None }
+            &answered.outcome,
+            EhrCreateOutcome::BadRequest { body }
+                if body.message() == Some("malformed EHR_STATUS")
+                    && body.validation_errors().is_empty()
         ),
         "{:?}",
         answered.outcome
@@ -161,7 +163,10 @@ async fn create_ehr_reports_the_409_conflict() -> Result<(), Box<dyn Error>> {
     let answered = support::client(&server)?
         .create_ehr(None, Prefer::Representation)
         .await?;
-    assert!(matches!(answered.outcome, EhrCreateOutcome::Conflict));
+    assert!(matches!(
+        answered.outcome,
+        EhrCreateOutcome::Conflict { .. }
+    ));
     assert_eq!(http::StatusCode::CONFLICT, answered.upstream.status());
     Ok(())
 }
@@ -187,7 +192,7 @@ async fn ehr_by_subject_sends_both_parameters() -> Result<(), Box<dyn Error>> {
         EhrGetBySubjectOutcome::Ok { body, .. } => {
             assert_eq!("7d44b88c-4199-4bad-97dc-d78268e01398", body.ehr_id.value());
         }
-        other @ EhrGetBySubjectOutcome::NotFound => {
+        other @ EhrGetBySubjectOutcome::NotFound { .. } => {
             return Err(format!("expected an EHR, got {other:?}").into());
         }
     }
@@ -213,7 +218,10 @@ async fn ehr_by_subject_reports_the_404() -> Result<(), Box<dyn Error>> {
             &SubjectNamespace::new("synthetic-examples")?,
         )
         .await?;
-    assert!(matches!(answered.outcome, EhrGetBySubjectOutcome::NotFound));
+    assert!(matches!(
+        answered.outcome,
+        EhrGetBySubjectOutcome::NotFound { .. }
+    ));
     Ok(())
 }
 
@@ -229,6 +237,9 @@ async fn ehr_by_id_reports_the_404() -> Result<(), Box<dyn Error>> {
     let answered = support::client(&server)?
         .ehr(&EhrId::new("7d44b88c-4199-4bad-97dc-d78268e01398")?)
         .await?;
-    assert!(matches!(answered.outcome, EhrGetByIdOutcome::NotFound));
+    assert!(matches!(
+        answered.outcome,
+        EhrGetByIdOutcome::NotFound { .. }
+    ));
     Ok(())
 }

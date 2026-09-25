@@ -139,8 +139,8 @@ impl CdrClient {
                 let answered = self.query_aql(&request).await?;
                 let rows = match answered.outcome {
                     QueryExecuteAdhocQueryBodyOutcome::Ok { body, .. } => body.rows,
-                    QueryExecuteAdhocQueryBodyOutcome::BadRequest
-                    | QueryExecuteAdhocQueryBodyOutcome::RequestTimeout => {
+                    QueryExecuteAdhocQueryBodyOutcome::BadRequest { .. }
+                    | QueryExecuteAdhocQueryBodyOutcome::RequestTimeout { .. } => {
                         return Err(QueryPageError::Refused(answered.upstream));
                     }
                 };

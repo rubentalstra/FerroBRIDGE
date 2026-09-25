@@ -44,7 +44,6 @@ use crate::cdr::CdrClient;
 use crate::cdr::Prefer;
 use crate::cdr::Returned;
 use crate::cdr::error::CdrError;
-use crate::cdr::error::Upstream;
 use crate::cdr::ids::ContributionUid;
 use crate::cdr::ids::EhrId;
 use crate::cdr::ids::versioned_object_uid;
@@ -729,14 +728,26 @@ impl<'a> Ingest<'a> {
                 .map_err(|error| cdr_refusal(&error))?;
                 (version, composition.clone())
             }
-            CompositionCreateOutcome::UnprocessableEntity => {
-                return Err(upstream_refusal(status::UNPROCESSABLE, &answered.upstream));
+            CompositionCreateOutcome::UnprocessableEntity { body } => {
+                return Err(upstream_refusal(
+                    status::UNPROCESSABLE,
+                    StatusCode::UNPROCESSABLE_ENTITY,
+                    &body,
+                ));
             }
-            CompositionCreateOutcome::NotFound => {
-                return Err(upstream_refusal(status::NOT_FOUND, &answered.upstream));
+            CompositionCreateOutcome::NotFound { body } => {
+                return Err(upstream_refusal(
+                    status::NOT_FOUND,
+                    StatusCode::NOT_FOUND,
+                    &body,
+                ));
             }
-            CompositionCreateOutcome::BadRequest { .. } => {
-                return Err(upstream_refusal(status::BAD_REQUEST, &answered.upstream));
+            CompositionCreateOutcome::BadRequest { body } => {
+                return Err(upstream_refusal(
+                    status::BAD_REQUEST,
+                    StatusCode::BAD_REQUEST,
+                    &body,
+                ));
             }
         };
         self.record(program, inbound, &ehr_id, &version, &stored)
@@ -881,10 +892,14 @@ impl<'a> Ingest<'a> {
                 .map_err(|error| cdr_refusal(&error))?;
                 (version, composition.clone())
             }
-            CompositionUpdateOutcome::UnprocessableEntity => {
-                return Err(upstream_refusal(status::UNPROCESSABLE, &answered.upstream));
+            CompositionUpdateOutcome::UnprocessableEntity { body } => {
+                return Err(upstream_refusal(
+                    status::UNPROCESSABLE,
+                    StatusCode::UNPROCESSABLE_ENTITY,
+                    &body,
+                ));
             }
-            CompositionUpdateOutcome::PreconditionFailed { headers } => {
+            CompositionUpdateOutcome::PreconditionFailed { body, headers } => {
                 let latest = crate::cdr::optional_version_from_etag(
                     "composition_update",
                     headers.etag.as_deref(),
@@ -892,18 +907,26 @@ impl<'a> Ingest<'a> {
                 .map_err(|error| cdr_refusal(&error))?;
                 let mut answer = status::Answer::new(
                     status::PRECONDITION_FAILED,
-                    status::diagnostics(&answered.upstream),
+                    status::diagnostics(StatusCode::PRECONDITION_FAILED, &body),
                 );
                 if let Some(latest) = latest {
                     answer = answer.with_entity_tag(String::from(latest.version_tree_id().value()));
                 }
                 return Err(Refused::of_answer(&answer));
             }
-            CompositionUpdateOutcome::NotFound => {
-                return Err(upstream_refusal(status::NOT_FOUND, &answered.upstream));
+            CompositionUpdateOutcome::NotFound { body } => {
+                return Err(upstream_refusal(
+                    status::NOT_FOUND,
+                    StatusCode::NOT_FOUND,
+                    &body,
+                ));
             }
-            CompositionUpdateOutcome::BadRequest { .. } => {
-                return Err(upstream_refusal(status::BAD_REQUEST, &answered.upstream));
+            CompositionUpdateOutcome::BadRequest { body } => {
+                return Err(upstream_refusal(
+                    status::BAD_REQUEST,
+                    StatusCode::BAD_REQUEST,
+                    &body,
+                ));
             }
         };
         self.record(program, inbound, ehr_id, &version, &stored)
@@ -1286,11 +1309,11 @@ impl<'a> Ingest<'a> {
             })?;
         match answered.outcome {
             ContributionGetOutcome::Ok { body, .. } => Ok(body),
-            ContributionGetOutcome::NotFound => Err(unbound(
+            ContributionGetOutcome::NotFound { body } => Err(unbound(
                 contribution,
                 &format!(
                     "reading it back found nothing: {}",
-                    status::diagnostics(&answered.upstream)
+                    status::diagnostics(StatusCode::NOT_FOUND, &body)
                 ),
             )),
         }
@@ -1551,16 +1574,20 @@ impl<'a> Ingest<'a> {
                 .map_err(|error| cdr_refusal(&error))?;
                 Ok((contribution_uid, Returned::Minimal))
             }
-            ContributionCreateOutcome::BadRequest { .. } => {
-                Err(refuse_all(mapped, &status::BAD_REQUEST, &answered.upstream))
-            }
-            ContributionCreateOutcome::NotFound => {
-                Err(refuse_all(mapped, &status::NOT_FOUND, &answered.upstream))
-            }
-            ContributionCreateOutcome::Conflict => Err(refuse_all(
+            ContributionCreateOutcome::BadRequest { body } => Err(refuse_all(
+                mapped,
+                &status::BAD_REQUEST,
+                &status::diagnostics(StatusCode::BAD_REQUEST, &body),
+            )),
+            ContributionCreateOutcome::NotFound { body } => Err(refuse_all(
+                mapped,
+                &status::NOT_FOUND,
+                &status::diagnostics(StatusCode::NOT_FOUND, &body),
+            )),
+            ContributionCreateOutcome::Conflict { body } => Err(refuse_all(
                 mapped,
                 &status::PRECONDITION_FAILED,
-                &answered.upstream,
+                &status::diagnostics(StatusCode::CONFLICT, &body),
             )),
         }
     }
@@ -1807,9 +1834,11 @@ impl<'a> Ingest<'a> {
                 status::GONE,
                 String::from("the CDR reports this composition deleted"),
             ))),
-            CompositionGetOutcome::NotFound => {
-                Err(upstream_refusal(status::NOT_FOUND, &answered.upstream))
-            }
+            CompositionGetOutcome::NotFound { body } => Err(upstream_refusal(
+                status::NOT_FOUND,
+                StatusCode::NOT_FOUND,
+                &body,
+            )),
         }
     }
 }
@@ -2473,26 +2502,33 @@ fn cdr_refusal(error: &CdrError) -> Refused {
     Refused::of_answer(&status::of_client_error(error))
 }
 
-/// Returns the refusal a documented CDR refusal decides through `row`.
-fn upstream_refusal(row: status::Row, upstream: &Upstream) -> Refused {
-    Refused::of_answer(&status::Answer::new(row, status::diagnostics(upstream)))
+/// Returns the refusal a documented CDR `answered` refusal with `body` decides
+/// through `row`.
+fn upstream_refusal(
+    row: status::Row,
+    answered: StatusCode,
+    body: &openehr_its::rest::client::ErrorBody,
+) -> Refused {
+    Refused::of_answer(&status::Answer::new(
+        row,
+        status::diagnostics(answered, body),
+    ))
 }
 
 /// Returns the refusal a rejected contribution renders as.
 ///
 /// Nothing was committed, so the answer names every entry the Bundle mapped:
 /// a caller cannot tell from a partial list which entries still stand.
-fn refuse_all(mapped: &[Mapped<'_>], row: &status::Row, upstream: &Upstream) -> Refused {
-    let detail = status::diagnostics(upstream);
+fn refuse_all(mapped: &[Mapped<'_>], row: &status::Row, detail: &str) -> Refused {
     let mut issues = vec![
         Issue::error(row.issue())
-            .diagnosing(detail.clone())
+            .diagnosing(detail.to_owned())
             .detailing("the CDR refused the contribution, so no entry of this Bundle is stored"),
     ];
     for entry in mapped {
         issues.push(
             Issue::error(row.issue())
-                .diagnosing(detail.clone())
+                .diagnosing(detail.to_owned())
                 .at(entry.full_url.clone()),
         );
     }
