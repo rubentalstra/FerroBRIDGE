@@ -15,7 +15,7 @@
 //!
 //! - [`program`] is the immutable output and the types it is built from.
 //! - [`compile`] is the compiler, a pure function of its inputs.
-//! - [`derive`] derives the data-type pair of a mapping with no `type` key.
+//! - [`derive`](mod@derive) derives the data-type pair of a mapping with no `type` key.
 //! - `extensions` applies `add`, `append` and `overwrite` to a model mapping.
 //! - [`select`] picks the program one request runs.
 //! - [`error`] holds the diagnostic codes the compiler raises.
