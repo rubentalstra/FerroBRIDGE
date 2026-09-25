@@ -55,7 +55,7 @@ v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 ## Repo map
 
 The Cargo workspace (#107) holds the root manifests with the full lint set,
-eight library crates (seven at 0.0.0, the version that holds their crates.io
+nine library crates (eight at 0.0.0, the version that holds their crates.io
 names until a first publish, and `fhir-types` on its own published line), and
 the testkit tool crate. Beside it:
 
@@ -108,6 +108,14 @@ the testkit tool crate. Beside it:
   `ValueSet/$validate-code`, R4 and R4B over the generated `fhir-types`
   operation contracts, with the batch form and a `tx-issue-type` coding
   surfaced in every typed error.
+- `crates/ferrobridge-hl7v2`: the HL7 v2 face (#254). `mllp` is the MLLP
+  Release 1 frame codec and listener, `decode` the MSH-18 character sets,
+  `parse` the positional split grouped by the `hl7v2-types` structure tree,
+  `ack` the original-mode acknowledgment and `inbound` one message through
+  them. `map` runs the v2-to-FHIR guide's ConceptMaps, read from a directory
+  at run time, writing FHIR R4 through `fhirconnect::tree` and translating
+  every table value through `ferrobridge-term`, with every condition, target
+  or value it cannot carry a counted outcome.
 - `tools/fhir-codegen`: the generator, with the six vendored HL7 FHIR packages
   under `vendor/` (380 MB, a `PROVENANCE.md` each; the sixth is the v2-to-FHIR
   guide, #252) and the HL7 v2 definitions fetched at build time into the

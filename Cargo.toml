@@ -71,13 +71,20 @@ omop-cdm = { path = "crates/omop-cdm", version = "0.0.0", default-features = fal
 # Path-only, with no version: cargo strips the dev-dependency from a packaged
 # crates/* manifest instead of looking it up on crates.io.
 ferrobridge-testkit = { path = "tools/ferrobridge-testkit" }
-# Path-only too: the unpublished server is their one consumer here, so no
-# packaged manifest renders a version requirement for either.
+# Path-only too: the unpublished server is its one consumer here, so no
+# packaged manifest renders a version requirement for it.
 ferrobridge-openehr = { path = "crates/ferrobridge-openehr" }
-ferrobridge-term = { path = "crates/ferrobridge-term" }
-# The FHIRconnect language crate: the facade and the operations surface are
-# its two in-process consumers, so the requirement is path-only too.
-fhirconnect = { path = "crates/fhirconnect" }
+# Published from this workspace and consumed by the published
+# ferrobridge-hl7v2, so the requirement carries both a path and a version.
+ferrobridge-term = { path = "crates/ferrobridge-term", version = "0.0.0" }
+# The HL7 v2 face's crate (MLLP, MSH-18 decoding, parsing, the ACK and the
+# v2-to-FHIR ConceptMap interpreter): the server is its one consumer, so the
+# requirement is path-only.
+ferrobridge-hl7v2 = { path = "crates/ferrobridge-hl7v2" }
+# The FHIRconnect language crate: the facade, the operations surface and the
+# published ferrobridge-hl7v2 consume it, so the requirement carries both a
+# path and a version.
+fhirconnect = { path = "crates/fhirconnect", version = "0.0.0" }
 # The OMOCL language crate: the ETL runner is its one in-process consumer, so
 # the requirement is path-only too.
 omocl = { path = "crates/omocl" }
@@ -127,6 +134,19 @@ uuid = { version = "1.26.1", default-features = false, features = ["v4", "std"] 
 futures-core = "0.3.34"
 futures-util = { version = "0.3.34", default-features = false, features = ["alloc"] }
 tokio = { version = "1.53.1", default-features = false }
+# The MLLP frame codec of the HL7 v2 face, over the tokio-util and bytes the
+# lock already carries through axum and reqwest. Verified against crates.io on
+# 2026-09-25.
+tokio-util = { version = "0.7.19", default-features = false, features = ["codec"] }
+bytes = "1.12.1"
+# The MSH-18 character sets of the HL7 v2 face, in the lock already through
+# serde-saphyr. Verified against crates.io on 2026-09-25.
+encoding_rs = "0.8.42"
+# The lexer and parser of the v2-to-FHIR condition and target grammars, the
+# pair openehr-query builds its AQL parser on and the lock already carries.
+# Verified against crates.io on 2026-09-25.
+logos = "0.16.1"
+chumsky = "0.13.0"
 # Test-only.
 wiremock = "0.6.5"
 # The end-to-end lane's container harness and the PostgreSQL client the CDM

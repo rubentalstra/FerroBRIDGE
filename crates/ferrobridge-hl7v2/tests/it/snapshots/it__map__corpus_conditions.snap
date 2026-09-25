@@ -1,0 +1,7 @@
+---
+source: crates/ferrobridge-hl7v2/tests/it/map.rs
+expression: "format!(\"computable: {computable}\\nrefused: {refused}\\nnarrative: {narrative}\\n\")"
+---
+computable: 398
+refused: 61
+narrative: 210
