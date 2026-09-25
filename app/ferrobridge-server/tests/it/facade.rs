@@ -262,41 +262,11 @@ async fn mount_update(cdr: &MockServer, response: ResponseTemplate) {
 /// reference each committed version (`ehr-codegen.openapi.yaml`,
 /// `201_CONTRIBUTION` and the `Contribution` schema).
 pub(crate) fn contribution_created(contribution: &str, versions: &[&str]) -> ResponseTemplate {
-    let references: Vec<serde_json::Value> = versions
-        .iter()
-        .map(|version| {
-            serde_json::json!({
-                "_type": "OBJECT_REF",
-                "namespace": "local",
-                "type": "COMPOSITION",
-                "id": { "_type": "OBJECT_VERSION_ID", "value": version }
-            })
-        })
-        .collect();
-    let body = serde_json::json!({
-        "_type": "CONTRIBUTION",
-        "uid": { "_type": "HIER_OBJECT_ID", "value": contribution },
-        "versions": references,
-        "audit": {
-            "_type": "AUDIT_DETAILS",
-            "system_id": "ferrobridge.test",
-            "time_committed": { "_type": "DV_DATE_TIME", "value": "2026-09-25T09:00:00Z" },
-            "change_type": {
-                "_type": "DV_CODED_TEXT",
-                "value": "creation",
-                "defining_code": {
-                    "_type": "CODE_PHRASE",
-                    "terminology_id": { "_type": "TERMINOLOGY_ID", "value": "openehr" },
-                    "code_string": "249"
-                }
-            },
-            "committer": { "_type": "PARTY_SELF" }
-        }
-    });
+    let body = ferrobridge_testkit::stubs::its_rest::contribution_body(contribution, versions);
     ResponseTemplate::new(201)
         .insert_header("ETag", format!("W/\"{contribution}\""))
         .insert_header("Content-Type", "application/json")
-        .set_body_string(body.to_string())
+        .set_body_string(body)
 }
 
 /// How the echo CDR answers what a contribution committed.
@@ -304,6 +274,10 @@ pub(crate) fn contribution_created(contribution: &str, versions: &[&str]) -> Res
 pub(crate) enum Echo {
     /// The version list in the order the versions were sent.
     Sent,
+    /// An empty `201`, as a CDR that does not honour
+    /// `Prefer: return=representation` answers, with the CONTRIBUTION served
+    /// on its read.
+    Minimal,
     /// The version list reversed, which ITS-REST does not forbid.
     Reversed,
     /// The versions in order, each read back naming an item no entry sent.
@@ -352,8 +326,41 @@ impl wiremock::Respond for TakeContribution {
         if self.echo == Echo::Reversed {
             named.reverse();
         }
+        if self.echo == Echo::Minimal {
+            return ferrobridge_testkit::stubs::its_rest::contribution_created_minimal(
+                CONTRIBUTION,
+            );
+        }
         let named: Vec<&str> = named.iter().map(String::as_str).collect();
         contribution_created(CONTRIBUTION, &named)
+    }
+}
+
+/// The stub CDR half that answers the CONTRIBUTION it committed on its read
+/// (`ehr-codegen.openapi.yaml`, `contribution_get`).
+struct ReadContribution {
+    /// What was committed.
+    committed: Arc<std::sync::Mutex<Committed>>,
+}
+
+impl wiremock::Respond for ReadContribution {
+    fn respond(&self, _request: &wiremock::Request) -> ResponseTemplate {
+        let Ok(committed) = self.committed.lock() else {
+            return ResponseTemplate::new(500);
+        };
+        let named: Vec<&str> = committed
+            .versions
+            .iter()
+            .map(|(version, _)| version.as_str())
+            .collect();
+        if named.is_empty() {
+            return ferrobridge_testkit::stubs::its_rest::not_found(
+                "no contribution was committed",
+            );
+        }
+        ferrobridge_testkit::stubs::its_rest::retrieved(
+            &ferrobridge_testkit::stubs::its_rest::contribution_body(CONTRIBUTION, &named),
+        )
     }
 }
 
@@ -398,6 +405,15 @@ pub(crate) async fn mount_echo(cdr: &MockServer, containers: &'static [&'static 
             committed: Arc::clone(&committed),
             containers,
             echo,
+        })
+        .mount(cdr)
+        .await;
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/contribution/{CONTRIBUTION}"
+        )))
+        .respond_with(ReadContribution {
+            committed: Arc::clone(&committed),
         })
         .mount(cdr)
         .await;
@@ -1625,6 +1641,108 @@ async fn a_committed_version_that_matches_no_entry_binds_nothing() -> Result<(),
         harness.store.consumed(&source)?,
         "an unverified binding records no consumed source"
     );
+    Ok(())
+}
+
+/// Returns the consumed-source key of the synthetic Condition.
+fn condition_source()
+-> Result<ferrobridge_server::facade::identity::record::SourceVersion, Box<dyn StdError>> {
+    Ok(
+        ferrobridge_server::facade::identity::record::SourceVersion::new(
+            "Condition",
+            ferrobridge_server::facade::identity::ExternalResourceId::new(
+                "ferrobridge-synthetic-condition-1",
+            )?,
+            None,
+        ),
+    )
+}
+
+#[tokio::test]
+async fn a_commit_answered_without_its_versions_binds_from_the_contribution_read_back()
+-> Result<(), Box<dyn StdError>> {
+    // An empty `201` names the contribution in its `ETag`
+    // (`ehr-codegen.openapi.yaml`, `201_CONTRIBUTION`), and `contribution_get`
+    // answers the CONTRIBUTION whose `versions` the entries bind from.
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_echo(&harness.cdr, ECHOED, Echo::Minimal).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition())]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let response = &body["entry"][0]["response"];
+    assert_eq!(Some("201 Created"), response["status"].as_str(), "{body}");
+    assert_eq!(Some("W/\"1\""), response["etag"].as_str());
+    assert_eq!(
+        CONTAINER,
+        bound_container(&harness, response["location"].as_str())?
+    );
+    assert_eq!(
+        1,
+        harness
+            .received("GET", &format!("/ehr/{EHR_ID}/contribution/{CONTRIBUTION}"))
+            .await,
+        "the versions are read back once"
+    );
+    assert!(harness.store.consumed(&condition_source()?)?.is_some());
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_contribution_that_cannot_be_read_back_is_a_typed_failure_and_its_retry_commits_nothing()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/contribution/{CONTRIBUTION}"
+        )))
+        .respond_with(ferrobridge_testkit::stubs::its_rest::not_found(
+            "the contribution is not readable yet",
+        ))
+        .up_to_n_times(1)
+        .with_priority(1)
+        .mount(&harness.cdr)
+        .await;
+    mount_echo(&harness.cdr, ECHOED, Echo::Minimal).await;
+    let bundle = transaction_of(&[("urn:uuid:0000-good", condition())]);
+
+    let (status, body) = post_transaction(&harness, &bundle).await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    let diagnostics = first_issue(&body)["diagnostics"]
+        .as_str()
+        .unwrap_or_default();
+    assert!(
+        diagnostics.contains(CONTRIBUTION),
+        "the failure names the committed contribution: {body}"
+    );
+    let source = condition_source()?;
+    assert_eq!(None, harness.store.consumed(&source)?);
+    let committed = harness
+        .store
+        .committed(&source)?
+        .ok_or("the commit is recorded before the binding")?;
+    assert_eq!(CONTRIBUTION, committed.contribution_uid);
+
+    let (status, body) = post_transaction(&harness, &bundle).await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let response = &body["entry"][0]["response"];
+    assert_eq!(Some("200 OK"), response["status"].as_str(), "{body}");
+    assert_eq!(
+        CONTAINER,
+        bound_container(&harness, response["location"].as_str())?
+    );
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "the retry commits nothing"
+    );
+    assert!(harness.store.consumed(&source)?.is_some());
     Ok(())
 }
 

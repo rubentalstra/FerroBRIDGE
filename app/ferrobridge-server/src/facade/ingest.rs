@@ -23,6 +23,7 @@ use ferrobridge_openehr::composition::CompositionOutcome;
 use ferrobridge_openehr::composition::CreateCompositionOutcome;
 use ferrobridge_openehr::composition::UidBasedId;
 use ferrobridge_openehr::composition::UpdateCompositionOutcome;
+use ferrobridge_openehr::contribution::ContributionOutcome;
 use ferrobridge_openehr::contribution::CreateContributionOutcome;
 use ferrobridge_openehr::ids::ContributionUid;
 use ferrobridge_openehr::ids::EhrId;
@@ -53,6 +54,7 @@ use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::PersonId;
 use crate::facade::identity::derive;
 use crate::facade::identity::derive::EntryKey;
+use crate::facade::identity::record::CommittedSource;
 use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
 use crate::facade::identity::record::SourceVersion;
@@ -229,9 +231,10 @@ pub struct Committed {
 pub enum Commit {
     /// Every committed entry went in as one version of this CONTRIBUTION.
     Contribution(ContributionUid),
-    /// The identity map already recorded every entry's source, so nothing was
-    /// committed and each entry names the composition its first delivery
-    /// produced.
+    /// The identity map already recorded every entry's source as consumed, or
+    /// as committed by one contribution whose binding it then finished, so
+    /// nothing was committed and each entry names the composition its first
+    /// delivery produced.
     AlreadyConsumed,
 }
 
@@ -563,6 +566,14 @@ impl<'a> Ingest<'a> {
     /// each entry at the composition its first delivery produced; a Bundle
     /// only some of whose entries were consumed is refused, because a
     /// transaction is all or nothing (<https://hl7.org/fhir/R4/http.html#transaction>).
+    ///
+    /// The commit is two steps. The contribution uid the CDR answers is
+    /// recorded against every keyed entry ([`CommittedSource`]) before any
+    /// entry is bound; the versions then come from the answer's CONTRIBUTION
+    /// or, when it carries none, from the CONTRIBUTION read back by that uid.
+    /// A Bundle whose every entry one recorded contribution committed is bound
+    /// from that contribution read back, commits nothing and answers
+    /// [`Commit::AlreadyConsumed`], so a retry after a failed binding is safe.
     /// No specification governs the redelivery rule: our own design.
     ///
     /// # Errors
@@ -571,9 +582,10 @@ impl<'a> Ingest<'a> {
     /// under [`UnmappedEntries::Refuse`], every entry no program maps), a
     /// second subject, two entries with one source key, a Bundle with nothing
     /// to commit, and an EHR that cannot be resolved; a `409` naming every
-    /// entry already consumed when not all were; the CDR's refusal of the
-    /// contribution through the status table, naming every mapped entry; a
-    /// `500` when the contribution's answer cannot bind its entries or the
+    /// entry already consumed or committed when not all were; the CDR's
+    /// refusal of the contribution through the status table, naming every
+    /// mapped entry; a `500` naming the contribution when it cannot be read
+    /// back or its versions cannot bind the entries; and a `500` when the
     /// identity store cannot be read or written.
     pub async fn ingest_bundle(
         &self,
@@ -602,22 +614,36 @@ impl<'a> Ingest<'a> {
         let sources = sources_of(&partition.mapped, provenance)?;
         distinct(&partition.mapped, &sources)?;
         let mut known = Vec::with_capacity(sources.len());
+        let mut committed = Vec::with_capacity(sources.len());
         for source in &sources {
-            let recorded = match source {
-                Some(source) => self
-                    .store
-                    .consumed(source)
-                    .map_err(|error| store_refusal(&error))?,
-                None => None,
+            let (recorded, contribution) = match source {
+                Some(source) => (
+                    self.store
+                        .consumed(source)
+                        .map_err(|error| store_refusal(&error))?,
+                    self.store
+                        .committed(source)
+                        .map_err(|error| store_refusal(&error))?,
+                ),
+                None => (None, None),
             };
             known.push(recorded);
+            committed.push(contribution);
         }
         let consumed = known.iter().flatten().count();
         if consumed > 0 && consumed == known.len() {
             return self.replay(partition, &known).await;
         }
-        if consumed > 0 {
-            return Err(partly_consumed(&partition.mapped, &known));
+        if let Some(first) = one_contribution(&committed) {
+            return self.reconcile(partition, &sources, first).await;
+        }
+        let seen: Vec<bool> = known
+            .iter()
+            .zip(&committed)
+            .map(|(recorded, contribution)| recorded.is_some() || contribution.is_some())
+            .collect();
+        if seen.contains(&true) {
+            return Err(partly_consumed(&partition.mapped, &seen));
         }
         let ehr_id = ehr::resolve(&self.client, self.store, subject, self.settings.ehr_policy)
             .await
@@ -627,13 +653,86 @@ impl<'a> Ingest<'a> {
                     Issue::error(IssueType::Processing).diagnosing(chain(&error)),
                 )
             })?;
-        let (contribution, versions) = self.commit_all(&ehr_id, &partition.mapped).await?;
+        let (contribution, returned) = self.commit_all(&ehr_id, &partition.mapped).await?;
+        self.record_commitment(&sources, &ehr_id, &contribution)?;
+        let versions = self
+            .committed_versions(&ehr_id, &contribution, returned, &partition.mapped)
+            .await?;
+        let placed = self.place(&partition.mapped, &sources, &ehr_id, versions)?;
+        Ok(Ingested {
+            ehr_id,
+            commit: Commit::Contribution(contribution),
+            entries: outcomes(partition, placed),
+        })
+    }
+
+    /// Binds a Bundle whose every entry an earlier delivery committed in
+    /// `committed` and did not finish binding, from the contribution read
+    /// back.
+    ///
+    /// Nothing is committed a second time: the versions come from the
+    /// CONTRIBUTION the CDR holds, verified entry by entry as a first delivery
+    /// verifies them.
+    async fn reconcile(
+        &self,
+        partition: Partition<'_>,
+        sources: &[Option<SourceVersion>],
+        committed: &CommittedSource,
+    ) -> Result<Ingested, Refused> {
+        let ehr_id = EhrId::new(&committed.ehr_id).map_err(|error| stored_identifier(&error))?;
+        let contribution = ContributionUid::new(&committed.contribution_uid)
+            .map_err(|error| stored_identifier(&error))?;
+        let versions = self
+            .committed_versions(&ehr_id, &contribution, Returned::Minimal, &partition.mapped)
+            .await?;
+        let placed = self.place(&partition.mapped, sources, &ehr_id, versions)?;
+        Ok(Ingested {
+            ehr_id,
+            commit: Commit::AlreadyConsumed,
+            entries: outcomes(partition, placed),
+        })
+    }
+
+    /// Records that every keyed entry of a Bundle was committed in
+    /// `contribution`, before any of them is bound.
+    fn record_commitment(
+        &self,
+        sources: &[Option<SourceVersion>],
+        ehr_id: &EhrId,
+        contribution: &ContributionUid,
+    ) -> Result<(), Refused> {
+        let record = CommittedSource {
+            ehr_id: String::from(ehr_id.as_str()),
+            contribution_uid: String::from(contribution.as_str()),
+        };
+        for source in sources.iter().flatten() {
+            self.store
+                .record_committed(source, &record)
+                .map_err(|error| {
+                    unbound(
+                        contribution,
+                        &format!("its commit could not be recorded: {}", chain(&error)),
+                    )
+                })?;
+        }
+        Ok(())
+    }
+
+    /// Binds and consumes each mapped entry at the version `versions` names
+    /// for it, in entry order.
+    fn place(
+        &self,
+        mapped: &[Mapped<'_>],
+        sources: &[Option<SourceVersion>],
+        ehr_id: &EhrId,
+        versions: Vec<ObjectVersionId>,
+    ) -> Result<Vec<Placed>, Refused> {
         let mut placed = Vec::with_capacity(versions.len());
-        for ((entry, version), source) in partition.mapped.iter().zip(versions).zip(&sources) {
+        for ((entry, version), source) in mapped.iter().zip(versions).zip(sources) {
             let (id, stood) = self.bind(
                 entry.program,
                 entry.inbound.resource_type(),
-                &ehr_id,
+                ehr_id,
                 &version,
                 &entry.built,
             )?;
@@ -642,11 +741,68 @@ impl<'a> Ingest<'a> {
             }
             placed.push(Placed { id, version });
         }
-        Ok(Ingested {
-            ehr_id,
-            commit: Commit::Contribution(contribution),
-            entries: outcomes(partition, placed),
-        })
+        Ok(placed)
+    }
+
+    /// Returns the version each mapped entry produced in `contribution`, in
+    /// entry order.
+    ///
+    /// The versions come from the representation the commit answered, or,
+    /// when it answered none, from the CONTRIBUTION read back by its uid
+    /// (`ehr-codegen.openapi.yaml`, `contribution_get`). Each version is then
+    /// read and matched to its entry ([`pair`]).
+    async fn committed_versions(
+        &self,
+        ehr_id: &EhrId,
+        contribution: &ContributionUid,
+        returned: Returned<Contribution>,
+        mapped: &[Mapped<'_>],
+    ) -> Result<Vec<ObjectVersionId>, Refused> {
+        let stored = match returned {
+            Returned::Representation(stored) => *stored,
+            Returned::Minimal | Returned::Identifier(_) => {
+                self.read_contribution(ehr_id, contribution).await?
+            }
+        };
+        let versions = listed_versions(contribution, &stored, mapped.len())?;
+        let mut read = Vec::with_capacity(versions.len());
+        for version in versions {
+            let composition = self.version_of(ehr_id, &version).await?;
+            read.push((version, composition));
+        }
+        pair(contribution, mapped, read)
+    }
+
+    /// Reads the committed CONTRIBUTION `contribution` back from the CDR.
+    async fn read_contribution(
+        &self,
+        ehr_id: &EhrId,
+        contribution: &ContributionUid,
+    ) -> Result<Contribution, Refused> {
+        let answered = self
+            .client
+            .contribution(ehr_id, contribution)
+            .await
+            .map_err(|error| {
+                unbound(
+                    contribution,
+                    &format!("reading it back failed: {}", chain(&error)),
+                )
+            })?;
+        match answered {
+            ContributionOutcome::Found(stored) => Ok(*stored),
+            ContributionOutcome::NotFound(upstream) => Err(unbound(
+                contribution,
+                &format!(
+                    "reading it back found nothing: {}",
+                    status::diagnostics(&upstream)
+                ),
+            )),
+            _ => Err(unbound(
+                contribution,
+                "reading it back answered what this version cannot read",
+            )),
+        }
     }
 
     /// Answers a Bundle whose every entry the identity map already consumed,
@@ -832,13 +988,17 @@ impl<'a> Ingest<'a> {
         ))
     }
 
-    /// Commits every mapped entry as one CONTRIBUTION, and returns it with
-    /// the version each entry produced, in entry order.
+    /// Commits every mapped entry as one CONTRIBUTION, and returns its uid
+    /// with what the answer carried.
+    ///
+    /// A `201` whose body is neither schema the operation admits still named
+    /// the committed contribution, so it answers as one that returned nothing
+    /// and the versions are read back.
     async fn commit_all(
         &self,
         ehr_id: &EhrId,
         mapped: &[Mapped<'_>],
-    ) -> Result<(ContributionUid, Vec<ObjectVersionId>), Refused> {
+    ) -> Result<(ContributionUid, Returned<Contribution>), Refused> {
         let system_id = &self.settings.system_id;
         let contribution = NewContribution {
             uid: None,
@@ -855,25 +1015,22 @@ impl<'a> Ingest<'a> {
                 .collect(),
             audit: commit::audit(commit::Change::Creation, system_id),
         };
-        let answered = self
+        let answered = match self
             .client
             .create_contribution(ehr_id, &contribution, Prefer::Representation)
             .await
-            .map_err(|error| Refused::of_answer(&status::of_client_error(&error)))?;
+        {
+            Ok(answered) => answered,
+            Err(ferrobridge_openehr::error::Error::CommittedBody {
+                contribution_uid, ..
+            }) => return Ok((contribution_uid, Returned::Minimal)),
+            Err(error) => return Err(Refused::of_answer(&status::of_client_error(&error))),
+        };
         match answered {
             CreateContributionOutcome::Created {
                 contribution_uid,
                 returned,
-            } => {
-                let versions = committed_versions(&contribution_uid, returned, mapped.len())?;
-                let mut stored = Vec::with_capacity(versions.len());
-                for version in versions {
-                    let composition = self.version_of(ehr_id, &version).await?;
-                    stored.push((version, composition));
-                }
-                let paired = pair(&contribution_uid, mapped, stored)?;
-                Ok((contribution_uid, paired))
-            }
+            } => Ok((contribution_uid, returned)),
             CreateContributionOutcome::BadRequest(upstream) => {
                 Err(refuse_all(mapped, &status::BAD_REQUEST, &upstream))
             }
@@ -1175,17 +1332,28 @@ fn distinct(mapped: &[Mapped<'_>], sources: &[Option<SourceVersion>]) -> Result<
     }
 }
 
+/// Returns the contribution every entry of a Bundle was committed in, when
+/// one contribution committed them all.
+fn one_contribution(committed: &[Option<CommittedSource>]) -> Option<&CommittedSource> {
+    let first = committed.first()?.as_ref()?;
+    committed
+        .iter()
+        .all(|record| record.as_ref() == Some(first))
+        .then_some(first)
+}
+
 /// Returns the refusal of a Bundle only some of whose entries were consumed.
 ///
 /// A transaction is all or nothing (<https://hl7.org/fhir/R4/http.html#transaction>),
 /// so the Bundle neither commits its fresh entries nor answers the consumed
-/// ones; the refusal names every entry an earlier delivery consumed.
-fn partly_consumed(mapped: &[Mapped<'_>], known: &[Option<ConsumedSource>]) -> Refused {
+/// ones; the refusal names every entry an earlier delivery consumed or
+/// committed, as `seen` marks them.
+fn partly_consumed(mapped: &[Mapped<'_>], seen: &[bool]) -> Refused {
     let mut issues = vec![Issue::error(IssueType::Duplicate).diagnosing(
         "an earlier delivery consumed some entries of this Bundle and not the others, so nothing is committed",
     )];
-    for (entry, record) in mapped.iter().zip(known) {
-        if record.is_some() {
+    for (entry, was_seen) in mapped.iter().zip(seen) {
+        if *was_seen {
             issues.push(
                 Issue::error(IssueType::Duplicate)
                     .diagnosing("an earlier delivery already consumed this entry")
@@ -1355,21 +1523,17 @@ fn pair(
 
 /// Returns the versions a committed contribution names.
 ///
-/// `Prefer: return=representation` answers the CONTRIBUTION, whose `versions`
-/// reference every version it committed (`ehr-codegen.openapi.yaml`,
-/// `201_CONTRIBUTION`). A contribution that answers no representation, or a
-/// version list whose length is not the entries', cannot bind the entries,
-/// and the refusal names the contribution so it can be reconciled. The list
-/// states no order, so [`pair`] matches each version to its entry.
-fn committed_versions(
+/// The CONTRIBUTION's `versions` reference every version it committed
+/// (`ehr-codegen.openapi.yaml`, `components.schemas.Contribution`). A version
+/// list whose length is not the entries' cannot bind the entries, and the
+/// refusal names the contribution so it can be reconciled. The list states no
+/// order, so [`pair`] matches each version to its entry.
+fn listed_versions(
     contribution: &ContributionUid,
-    returned: Returned<Contribution>,
+    stored: &Contribution,
     expected: usize,
 ) -> Result<Vec<ObjectVersionId>, Refused> {
     let unreadable = |why: String| unbound(contribution, &why);
-    let Returned::Representation(stored) = returned else {
-        return Err(unreadable(String::from("returned no representation of it")));
-    };
     let references: &[ObjectRef] = stored.versions.as_ref();
     if references.len() != expected {
         return Err(unreadable(format!(

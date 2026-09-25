@@ -6,7 +6,9 @@
 //! Four tables, as `docs/architecture.md` §9 names them: a patient identifier
 //! to an `ehr_id`, an external resource id to the internal one, an internal
 //! resource id to the composition it lives in, and a source resource `id` with
-//! its `meta.versionId` to the mapping that consumed them.
+//! its `meta.versionId` to the mapping that consumed them. A fifth table keys
+//! the same source to the CONTRIBUTION that committed it, written before the
+//! binding so a re-sent Bundle is recognised when its first binding failed.
 //!
 //! Every write is record-once. "Once assigned, this value never changes"
 //! (<https://hl7.org/fhir/R4/resource.html>), so a `record_*` call answers with
@@ -23,6 +25,7 @@ use ferrobridge_openehr::ids::EhrId;
 use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::PersonId;
+use crate::facade::identity::record::CommittedSource;
 use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
 use crate::facade::identity::record::SourceVersion;
@@ -169,9 +172,29 @@ pub trait Store: fmt::Debug + Send + Sync {
         source: &SourceVersion,
         consumed: &ConsumedSource,
     ) -> Result<ConsumedSource, StoreError>;
+
+    /// Returns the contribution `source` was committed in, when the map
+    /// knows.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StoreError`] when the store cannot be read.
+    fn committed(&self, source: &SourceVersion) -> Result<Option<CommittedSource>, StoreError>;
+
+    /// Records the contribution `source` was committed in, and returns the
+    /// record that stands.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StoreError`] when the store cannot be read or written.
+    fn record_committed(
+        &self,
+        source: &SourceVersion,
+        committed: &CommittedSource,
+    ) -> Result<CommittedSource, StoreError>;
 }
 
-/// The four tables, as one map each.
+/// The tables, as one map each.
 #[derive(Debug, Default)]
 struct Tables {
     /// Patient identifier to `ehr_id`.
@@ -182,6 +205,9 @@ struct Tables {
     bindings: BTreeMap<String, CompositionBinding>,
     /// Source resource `id` and `meta.versionId` to what consumed them.
     sources: BTreeMap<String, ConsumedSource>,
+    /// Source resource `id` and `meta.versionId` to the contribution that
+    /// committed them.
+    contributions: BTreeMap<String, CommittedSource>,
 }
 
 /// The identity map a test drives, held in memory and lost with the process.
@@ -309,6 +335,26 @@ impl Store for MemoryStore {
                 .sources
                 .entry(key)
                 .or_insert_with(|| consumed.clone())
+                .clone()
+        })
+    }
+
+    fn committed(&self, source: &SourceVersion) -> Result<Option<CommittedSource>, StoreError> {
+        let key = source.storage_key();
+        self.with(|tables| tables.contributions.get(&key).cloned())
+    }
+
+    fn record_committed(
+        &self,
+        source: &SourceVersion,
+        committed: &CommittedSource,
+    ) -> Result<CommittedSource, StoreError> {
+        let key = source.storage_key();
+        self.with(|tables| {
+            tables
+                .contributions
+                .entry(key)
+                .or_insert_with(|| committed.clone())
                 .clone()
         })
     }
