@@ -10,13 +10,20 @@
 //! what makes the commit itself atomic (`ehr-codegen.openapi.yaml`,
 //! `contribution_create`). The mapping and the commit are
 //! [`crate::facade::ingest`]'s, run with [`UnmappedEntries::Refuse`] so an
-//! entry no program maps refuses the Bundle.
+//! entry no program maps refuses the Bundle. A committed Bundle answers a
+//! `transaction-response` Bundle naming each entry's resource id and version,
+//! and a Bundle an earlier delivery already committed answers the same ids
+//! without a second commit.
 //!
 //! `batch` has no implementation in this milestone and the
 //! `CapabilityStatement` does not declare it, so a `batch` Bundle is refused
 //! with `not-supported` (<https://hl7.org/fhir/R4/http.html#transaction>).
 
+use fhir_types::codec::Json as _;
 use fhir_types::codec::Value;
+use fhir_types::r4::bundle::Bundle;
+use fhir_types::r4::bundle::BundleEntry;
+use fhir_types::r4::bundle::BundleEntryResponse;
 use http::HeaderMap;
 use http::StatusCode;
 use http::Uri;
@@ -25,6 +32,8 @@ use crate::facade::Facade;
 use crate::facade::handlers::Body;
 use crate::facade::handlers::Refusal;
 use crate::facade::handlers::read;
+use crate::facade::ingest::Commit;
+use crate::facade::ingest::Ingested;
 use crate::facade::ingest::Provenance;
 use crate::facade::ingest::UnmappedEntries;
 use crate::facade::outcome::Issue;
@@ -36,6 +45,9 @@ const TRANSACTION: &str = "transaction";
 
 /// The `Bundle.type` this milestone refuses.
 const BATCH: &str = "batch";
+
+/// The `Bundle.type` a committed transaction answers with.
+const RESPONSE: &str = "transaction-response";
 
 /// `POST [base]`.
 pub(crate) async fn transaction(
@@ -77,17 +89,56 @@ pub(crate) async fn transaction(
             &Provenance::EachResource,
         )
         .await?;
-    Ok(reply::issues(
-        StatusCode::OK,
-        &[
-            Issue::information(IssueType::Informational).diagnosing(format!(
-                "{} entries committed as contribution {}",
-                ingested.committed().count(),
-                ingested.contribution()
+    let response = response_bundle(&facade.settings().base_url, &ingested);
+    let body = response.to_json().map_err(|error| {
+        reply::refusal(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Issue::error(IssueType::Exception).diagnosing(format!(
+                "the transaction-response Bundle could not be encoded: {error}"
             )),
-        ],
-        &[],
-    ))
+        )
+    })?;
+    Ok(reply::resource(StatusCode::OK, &body, &[]))
+}
+
+/// Returns the `transaction-response` Bundle of one ingested transaction.
+///
+/// "the server SHALL return a Bundle with type set to … `transaction-response`
+/// that contains one entry for each entry in the request, in the same order",
+/// each with a `response` carrying the status, `location` and `ETag`
+/// (<https://hl7.org/fhir/R4/http.html#transaction-response>). The location and
+/// the tag are the ones a single create answers. An entry an earlier delivery
+/// consumed answers `200 OK`, a fresh one `201 Created`.
+fn response_bundle(base_url: &str, ingested: &Ingested) -> Bundle {
+    let status = match *ingested.commit() {
+        Commit::Contribution(_) => "201 Created",
+        Commit::AlreadyConsumed => "200 OK",
+    };
+    let base = base_url.trim_end_matches('/');
+    Bundle {
+        r#type: RESPONSE.into(),
+        entry: ingested
+            .committed()
+            .map(|entry| BundleEntry {
+                response: Some(BundleEntryResponse {
+                    status: status.into(),
+                    location: Some(
+                        format!(
+                            "{base}/{}/{}/_history/{}",
+                            entry.resource_type,
+                            entry.id,
+                            entry.version.version_tree_id()
+                        )
+                        .into(),
+                    ),
+                    etag: Some(format!("W/\"{}\"", entry.version.version_tree_id()).into()),
+                    ..BundleEntryResponse::default()
+                }),
+                ..BundleEntry::default()
+            })
+            .collect(),
+        ..Bundle::default()
+    }
 }
 
 #[cfg(test)]

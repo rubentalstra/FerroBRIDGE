@@ -53,6 +53,9 @@ const VERSION_ONE: &str = "8849182c-82ad-4088-a07f-48ead4180515::ferrobridge.tes
 /// The version a second commit produces.
 const VERSION_TWO: &str = "8849182c-82ad-4088-a07f-48ead4180515::ferrobridge.test::2";
 
+/// The contribution the stub CDR answers a transaction with.
+const CONTRIBUTION: &str = "7b0a4c2e-0000-4000-8000-00000000000c";
+
 /// The FHIR service base the facade answers under.
 const BASE_URL: &str = "http://ferrobridge.invalid/fhir";
 
@@ -253,6 +256,170 @@ async fn mount_update(cdr: &MockServer, response: ResponseTemplate) {
         .mount(cdr)
         .await;
 }
+
+/// Returns the `201` a contribution commit answers under
+/// `Prefer: return=representation`: the CONTRIBUTION, whose `versions`
+/// reference each committed version (`ehr-codegen.openapi.yaml`,
+/// `201_CONTRIBUTION` and the `Contribution` schema).
+pub(crate) fn contribution_created(contribution: &str, versions: &[&str]) -> ResponseTemplate {
+    let references: Vec<serde_json::Value> = versions
+        .iter()
+        .map(|version| {
+            serde_json::json!({
+                "_type": "OBJECT_REF",
+                "namespace": "local",
+                "type": "COMPOSITION",
+                "id": { "_type": "OBJECT_VERSION_ID", "value": version }
+            })
+        })
+        .collect();
+    let body = serde_json::json!({
+        "_type": "CONTRIBUTION",
+        "uid": { "_type": "HIER_OBJECT_ID", "value": contribution },
+        "versions": references,
+        "audit": {
+            "_type": "AUDIT_DETAILS",
+            "system_id": "ferrobridge.test",
+            "time_committed": { "_type": "DV_DATE_TIME", "value": "2026-09-25T09:00:00Z" },
+            "change_type": {
+                "_type": "DV_CODED_TEXT",
+                "value": "creation",
+                "defining_code": {
+                    "_type": "CODE_PHRASE",
+                    "terminology_id": { "_type": "TERMINOLOGY_ID", "value": "openehr" },
+                    "code_string": "249"
+                }
+            },
+            "committer": { "_type": "PARTY_SELF" }
+        }
+    });
+    ResponseTemplate::new(201)
+        .insert_header("ETag", format!("W/\"{contribution}\""))
+        .insert_header("Content-Type", "application/json")
+        .set_body_string(body.to_string())
+}
+
+/// How the echo CDR answers what a contribution committed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Echo {
+    /// The version list in the order the versions were sent.
+    Sent,
+    /// The version list reversed, which ITS-REST does not forbid.
+    Reversed,
+    /// The versions in order, each read back naming an item no entry sent.
+    Foreign,
+}
+
+/// The compositions a stub CDR committed, by version and by container.
+#[derive(Debug, Default)]
+struct Committed {
+    /// Every committed composition, in commit order.
+    versions: Vec<(String, serde_json::Value)>,
+}
+
+/// The stub CDR half that takes a contribution and remembers its versions.
+struct TakeContribution {
+    /// What was committed.
+    committed: Arc<std::sync::Mutex<Committed>>,
+    /// The version containers handed out, in order.
+    containers: &'static [&'static str],
+    /// How the answer lists the versions.
+    echo: Echo,
+}
+
+impl wiremock::Respond for TakeContribution {
+    fn respond(&self, request: &wiremock::Request) -> ResponseTemplate {
+        let Ok(body) = serde_json::from_slice::<serde_json::Value>(&request.body) else {
+            return ResponseTemplate::new(400);
+        };
+        let Ok(mut committed) = self.committed.lock() else {
+            return ResponseTemplate::new(500);
+        };
+        let mut named = Vec::new();
+        for data in body["versions"].as_array().into_iter().flatten() {
+            let Some(container) = self.containers.get(committed.versions.len()) else {
+                return ResponseTemplate::new(500);
+            };
+            let version = format!("{container}::ferrobridge.test::1");
+            let mut stored = data["data"].clone();
+            if self.echo == Echo::Foreign {
+                stored["feeder_audit"]["originating_system_item_ids"][0]["id"] =
+                    serde_json::json!("an-item-no-entry-sent");
+            }
+            committed.versions.push((version.clone(), stored));
+            named.push(version);
+        }
+        if self.echo == Echo::Reversed {
+            named.reverse();
+        }
+        let named: Vec<&str> = named.iter().map(String::as_str).collect();
+        contribution_created(CONTRIBUTION, &named)
+    }
+}
+
+/// The stub CDR half that answers a committed composition by its version or
+/// by its container.
+struct ReadCommitted {
+    /// What was committed.
+    committed: Arc<std::sync::Mutex<Committed>>,
+}
+
+impl wiremock::Respond for ReadCommitted {
+    fn respond(&self, request: &wiremock::Request) -> ResponseTemplate {
+        let Ok(committed) = self.committed.lock() else {
+            return ResponseTemplate::new(500);
+        };
+        let wanted = request
+            .url
+            .path_segments()
+            .and_then(Iterator::last)
+            .map(|segment| segment.replace("%3A", ":").replace("%3a", ":"))
+            .unwrap_or_default();
+        let found = committed.versions.iter().find(|(version, _)| {
+            *version == wanted || version.split("::").next() == Some(wanted.as_str())
+        });
+        match found {
+            Some((version, composition)) => ResponseTemplate::new(200)
+                .insert_header("ETag", format!("W/\"{version}\""))
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(composition.to_string()),
+            None => ResponseTemplate::new(404),
+        }
+    }
+}
+
+/// Mounts a stub CDR that takes contributions, handing out `containers` in
+/// order, and reads back what it committed.
+pub(crate) async fn mount_echo(cdr: &MockServer, containers: &'static [&'static str], echo: Echo) {
+    let committed = Arc::new(std::sync::Mutex::new(Committed::default()));
+    Mock::given(matchers::method("POST"))
+        .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
+        .respond_with(TakeContribution {
+            committed: Arc::clone(&committed),
+            containers,
+            echo,
+        })
+        .mount(cdr)
+        .await;
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path_regex(format!(
+            "^/ehr/{EHR_ID}/composition/.+$"
+        )))
+        .respond_with(ReadCommitted { committed })
+        .mount(cdr)
+        .await;
+}
+
+/// The containers the echo CDR hands out for a transaction.
+const ECHOED: &[&str] = &[
+    CONTAINER,
+    "5f0e2b1a-0000-4000-8000-00000000000d",
+    "6a1f3c2b-0000-4000-8000-00000000000f",
+];
+
+/// The containers the echo CDR hands out beside a create that took
+/// [`CONTAINER`].
+const ECHOED_BESIDE_CREATE: &[&str] = &["5f0e2b1a-0000-4000-8000-00000000000d"];
 
 /// Returns the canonical JSON of an EHR whose `ehr_id` is [`EHR_ID`].
 pub(crate) fn ehr_body() -> String {
@@ -1149,14 +1316,7 @@ async fn a_transaction_that_maps_in_full_commits_one_contribution() -> Result<()
 {
     let harness = harness().await;
     mount_ehr(&harness.cdr).await;
-    Mock::given(matchers::method("POST"))
-        .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
-        .respond_with(
-            ResponseTemplate::new(201)
-                .insert_header("ETag", "W/\"7b0a4c2e-0000-4000-8000-00000000000c\""),
-        )
-        .mount(&harness.cdr)
-        .await;
+    mount_echo(&harness.cdr, ECHOED, Echo::Sent).await;
     let bundle = serde_json::json!({
         "resourceType": "Bundle",
         "type": "transaction",
@@ -1176,6 +1336,294 @@ async fn a_transaction_that_maps_in_full_commits_one_contribution() -> Result<()
             .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
             .await,
         "the whole Bundle commits as one contribution"
+    );
+    Ok(())
+}
+
+/// Returns a transaction Bundle carrying one `POST` entry per resource.
+fn transaction_of(resources: &[(&str, serde_json::Value)]) -> serde_json::Value {
+    let entries: Vec<serde_json::Value> = resources
+        .iter()
+        .map(|(full_url, resource)| {
+            serde_json::json!({
+                "fullUrl": full_url,
+                "resource": resource,
+                "request": { "method": "POST", "url": "Condition" }
+            })
+        })
+        .collect();
+    serde_json::json!({ "resourceType": "Bundle", "type": "transaction", "entry": entries })
+}
+
+/// Posts `bundle` to the system endpoint and returns the answer.
+async fn post_transaction(
+    harness: &Harness,
+    bundle: &serde_json::Value,
+) -> Result<(StatusCode, serde_json::Value), Box<dyn StdError>> {
+    call(
+        harness.app(),
+        Request::post("/fhir")
+            .header(header::CONTENT_TYPE, "application/fhir+json")
+            .body(Body::from(bundle.to_string()))?,
+    )
+    .await
+}
+
+/// Mounts the echo CDR whose first commit produces [`VERSION_ONE`].
+async fn mount_contribution(cdr: &MockServer) {
+    mount_echo(cdr, ECHOED, Echo::Sent).await;
+}
+
+#[tokio::test]
+async fn each_transaction_entry_answers_the_location_and_etag_a_create_answers()
+-> Result<(), Box<dyn StdError>> {
+    // A transaction answers a `transaction-response` Bundle whose entries each
+    // carry the status, `location` and `ETag`
+    // (<https://hl7.org/fhir/R4/http.html#transaction-response>).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_contribution(&harness.cdr).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition())]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert_eq!(Some("Bundle"), body["resourceType"].as_str(), "{body}");
+    assert_eq!(Some("transaction-response"), body["type"].as_str());
+    let response = &body["entry"][0]["response"];
+    assert_eq!(Some("201 Created"), response["status"].as_str(), "{body}");
+    assert_eq!(Some("W/\"1\""), response["etag"].as_str());
+    let location = response["location"]
+        .as_str()
+        .ok_or("the entry answers a location")?;
+    let id = location
+        .strip_prefix(&format!("{BASE_URL}/Condition/"))
+        .and_then(|rest| rest.strip_suffix("/_history/1"))
+        .ok_or(format!("{location} is no [base]/Condition/[id]/_history/1"))?;
+    let internal = ferrobridge_server::facade::identity::FhirResourceId::new(id)?;
+    let binding = harness
+        .store
+        .binding_of("Condition", &internal)?
+        .ok_or("the transaction recorded the entry's identity binding")?;
+    assert_eq!(CONTAINER, binding.versioned_object_uid);
+    assert_eq!(EHR_ID, binding.ehr_id);
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_transaction_sent_twice_commits_once_and_answers_the_same_ids()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_contribution(&harness.cdr).await;
+    let bundle = transaction_of(&[("urn:uuid:0000-good", condition())]);
+    let (first_status, first) = post_transaction(&harness, &bundle).await?;
+    let (second_status, second) = post_transaction(&harness, &bundle).await?;
+    assert_eq!(StatusCode::OK, first_status, "{first}");
+    assert_eq!(StatusCode::OK, second_status, "{second}");
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "a re-sent transaction commits nothing"
+    );
+    let first_location = first["entry"][0]["response"]["location"].as_str();
+    assert!(first_location.is_some(), "{first}");
+    assert_eq!(
+        first_location,
+        second["entry"][0]["response"]["location"].as_str(),
+        "the re-sent transaction names the resource its first delivery created: {second}"
+    );
+    assert_eq!(
+        Some("200 OK"),
+        second["entry"][0]["response"]["status"].as_str()
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_partly_consumed_transaction_is_refused_naming_the_consumed_entries()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_contribution(&harness.cdr).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-old", condition())]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let mut fresh = condition();
+    fresh["id"] = serde_json::json!("ferrobridge-synthetic-condition-2");
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[
+            ("urn:uuid:0000-old", condition()),
+            ("urn:uuid:0000-new", fresh),
+        ]),
+    )
+    .await?;
+    assert_eq!(StatusCode::CONFLICT, status, "{body}");
+    assert_eq!(Some("duplicate"), first_issue(&body)["code"].as_str());
+    let named: Vec<&str> = body["issue"]
+        .as_array()
+        .ok_or("the refusal carries issues")?
+        .iter()
+        .filter_map(|issue| issue["location"][0].as_str())
+        .collect();
+    assert_eq!(vec!["urn:uuid:0000-old"], named, "{body}");
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "a refused transaction commits nothing"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_transaction_carrying_one_resource_twice_is_refused() -> Result<(), Box<dyn StdError>> {
+    // "A resource can only appear in a transaction once (by identity)"
+    // (<https://hl7.org/fhir/R4/http.html#transaction>).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_contribution(&harness.cdr).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[
+            ("urn:uuid:0000-one", condition()),
+            ("urn:uuid:0000-two", condition()),
+        ]),
+    )
+    .await?;
+    assert_eq!(StatusCode::UNPROCESSABLE_ENTITY, status, "{body}");
+    assert_eq!(Some("duplicate"), first_issue(&body)["code"].as_str());
+    assert_eq!(
+        Some("urn:uuid:0000-two"),
+        first_issue(&body)["location"][0].as_str()
+    );
+    assert_eq!(
+        0,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_contribution_answer_naming_no_versions_for_the_entries_is_a_typed_failure()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("POST"))
+        .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
+        .respond_with(contribution_created(
+            CONTRIBUTION,
+            &[VERSION_ONE, VERSION_TWO],
+        ))
+        .mount(&harness.cdr)
+        .await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition())]),
+    )
+    .await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    let diagnostics = first_issue(&body)["diagnostics"]
+        .as_str()
+        .unwrap_or_default();
+    assert!(
+        diagnostics.contains(CONTRIBUTION),
+        "the failure names the committed contribution: {body}"
+    );
+    Ok(())
+}
+
+/// Returns the container the identity map bound the entry `location` names
+/// to.
+fn bound_container(harness: &Harness, location: Option<&str>) -> Result<String, Box<dyn StdError>> {
+    let location = location.ok_or("the entry answers a location")?;
+    let id = location
+        .strip_prefix(&format!("{BASE_URL}/Condition/"))
+        .and_then(|rest| rest.split('/').next())
+        .ok_or(format!("{location} is no Condition location"))?;
+    let internal = ferrobridge_server::facade::identity::FhirResourceId::new(id)?;
+    let binding = harness
+        .store
+        .binding_of("Condition", &internal)?
+        .ok_or("the entry's binding is recorded")?;
+    Ok(binding.versioned_object_uid)
+}
+
+#[tokio::test]
+async fn a_reversed_version_list_still_binds_each_entry_to_its_own_composition()
+-> Result<(), Box<dyn StdError>> {
+    // ITS-REST 1.1.0 states no order for `CONTRIBUTION.versions`, so each
+    // version is matched to its entry by the FEEDER_AUDIT read back.
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_echo(&harness.cdr, ECHOED, Echo::Reversed).await;
+    let mut second = condition();
+    second["id"] = serde_json::json!("ferrobridge-synthetic-condition-2");
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[
+            ("urn:uuid:0000-first", condition()),
+            ("urn:uuid:0000-second", second),
+        ]),
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    let first_bound = bound_container(&harness, body["entry"][0]["response"]["location"].as_str())?;
+    let second_bound =
+        bound_container(&harness, body["entry"][1]["response"]["location"].as_str())?;
+    let echoed_first = ECHOED.first().copied().ok_or("a first container")?;
+    let echoed_second = ECHOED.get(1).copied().ok_or("a second container")?;
+    assert_eq!(
+        echoed_first, first_bound,
+        "the first entry's own composition"
+    );
+    assert_eq!(
+        echoed_second, second_bound,
+        "the second entry's own composition"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_committed_version_that_matches_no_entry_binds_nothing() -> Result<(), Box<dyn StdError>>
+{
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_echo(&harness.cdr, ECHOED, Echo::Foreign).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition())]),
+    )
+    .await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    let diagnostics = first_issue(&body)["diagnostics"]
+        .as_str()
+        .unwrap_or_default();
+    assert!(
+        diagnostics.contains(CONTRIBUTION) && diagnostics.contains("matches 0"),
+        "the failure names the contribution and the unmatched version: {body}"
+    );
+    let source = ferrobridge_server::facade::identity::record::SourceVersion::new(
+        "Condition",
+        ferrobridge_server::facade::identity::ExternalResourceId::new(
+            "ferrobridge-synthetic-condition-1",
+        )?,
+        None,
+    );
+    assert_eq!(
+        None,
+        harness.store.consumed(&source)?,
+        "an unverified binding records no consumed source"
     );
     Ok(())
 }
@@ -1510,14 +1958,7 @@ async fn both_json_media_types_are_read_on_every_write() -> Result<(), Box<dyn S
             "$validate as {media}: {}",
             validated.1
         );
-        Mock::given(matchers::method("POST"))
-            .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
-            .respond_with(
-                ResponseTemplate::new(201)
-                    .insert_header("ETag", "W/\"7b0a4c2e-0000-4000-8000-00000000000c\""),
-            )
-            .mount(&harness.cdr)
-            .await;
+        mount_echo(&harness.cdr, ECHOED_BESIDE_CREATE, Echo::Sent).await;
         let mut fresh = condition();
         fresh["id"] = serde_json::json!("a-transaction-entry");
         let bundle = serde_json::json!({

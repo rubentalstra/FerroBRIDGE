@@ -16,8 +16,12 @@
 //! A refusal is a [`Refused`]: the status and the `OperationOutcome` issues a
 //! handler renders, left unrendered so the service carries no transport.
 
+use std::collections::BTreeSet;
+
 use ferrobridge_openehr::client::Client;
+use ferrobridge_openehr::composition::CompositionOutcome;
 use ferrobridge_openehr::composition::CreateCompositionOutcome;
+use ferrobridge_openehr::composition::UidBasedId;
 use ferrobridge_openehr::composition::UpdateCompositionOutcome;
 use ferrobridge_openehr::contribution::CreateContributionOutcome;
 use ferrobridge_openehr::ids::ContributionUid;
@@ -31,16 +35,20 @@ use fhirconnect::engine::origin::SourceItem;
 use fhirconnect::resolve::program::TemplateId;
 use fhirconnect::resolve::select::SelectError;
 use http::StatusCode;
+use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
+use openehr_base::v1_3::base_types::identification::object_ref::ObjectRef;
 use openehr_its::rest::generated::common::UpdateVersion;
 use openehr_its::rest::generated::ehr::NewContribution;
 use openehr_its::rest::generated::ehr::Versionable;
 use openehr_mapping_core::composition::CanonicalComposition;
+use openehr_rm::v1_2::common::change_control::contribution::Contribution;
 use openehr_rm::v1_2::composition::composition::Composition;
 
 use crate::facade::Settings;
 use crate::facade::commit;
 use crate::facade::ehr;
 use crate::facade::engine;
+use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::PersonId;
 use crate::facade::identity::derive;
@@ -210,6 +218,21 @@ pub struct Committed {
     pub resource_type: String,
     /// The template of the composition the entry produced.
     pub template_id: String,
+    /// The logical id the entry's resource has.
+    pub id: FhirResourceId,
+    /// The composition version the entry stands at.
+    pub version: ObjectVersionId,
+}
+
+/// How the committed entries of a Bundle reached the CDR.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Commit {
+    /// Every committed entry went in as one version of this CONTRIBUTION.
+    Contribution(ContributionUid),
+    /// The identity map already recorded every entry's source, so nothing was
+    /// committed and each entry names the composition its first delivery
+    /// produced.
+    AlreadyConsumed,
 }
 
 /// What happened to one Bundle entry.
@@ -221,31 +244,43 @@ pub enum EntryOutcome {
     Skipped(Skipped),
 }
 
-/// What one committed Bundle produced.
+/// What one ingested Bundle produced.
 ///
-/// Every committed entry went into the CDR as one version of the one
-/// CONTRIBUTION this names (`ehr-codegen.openapi.yaml`, `contribution_create`).
+/// Every committed entry went into the CDR as one version of one
+/// CONTRIBUTION (`ehr-codegen.openapi.yaml`, `contribution_create`), or, for a
+/// Bundle whose every source the identity map already recorded, stands where
+/// its first delivery put it.
 #[derive(Debug, Clone)]
 pub struct Ingested {
-    /// The EHR every composition was written into.
+    /// The EHR every composition lives in.
     ehr_id: EhrId,
-    /// The contribution that carries every committed composition.
-    contribution: ContributionUid,
+    /// How the committed entries reached the CDR.
+    commit: Commit,
     /// One outcome per entry, in Bundle order.
     entries: Vec<EntryOutcome>,
 }
 
 impl Ingested {
-    /// Returns the EHR every composition was written into.
+    /// Returns the EHR every composition lives in.
     #[must_use]
     pub const fn ehr_id(&self) -> &EhrId {
         &self.ehr_id
     }
 
-    /// Returns the contribution that carries every committed composition.
+    /// Returns how the committed entries reached the CDR.
     #[must_use]
-    pub const fn contribution(&self) -> &ContributionUid {
-        &self.contribution
+    pub const fn commit(&self) -> &Commit {
+        &self.commit
+    }
+
+    /// Returns the contribution that carries every committed composition,
+    /// when this delivery committed one.
+    #[must_use]
+    pub const fn contribution(&self) -> Option<&ContributionUid> {
+        match self.commit {
+            Commit::Contribution(ref uid) => Some(uid),
+            Commit::AlreadyConsumed => None,
+        }
     }
 
     /// Returns one outcome per entry, in Bundle order.
@@ -287,33 +322,61 @@ pub struct Ingest<'a> {
 
 /// One Bundle entry that mapped, ready to commit.
 #[derive(Debug)]
-struct Mapped {
+struct Mapped<'p> {
     /// The `fullUrl` the Bundle gave the entry, for a refusal that names it.
     full_url: String,
-    /// The composition the entry produced.
+    /// The entry's position in the Bundle.
+    position: usize,
+    /// The resource the entry carries.
+    inbound: Inbound,
+    /// The program the entry ran.
+    program: &'p Loaded,
+    /// The template of the composition the entry produced.
+    template_id: String,
+    /// The composition as the engine built it.
+    built: CanonicalComposition,
+    /// The composition as the strict reader read it back.
     composition: Box<Composition>,
 }
 
 /// What mapping one Bundle entry produced.
 #[derive(Debug)]
-enum Mapping {
+enum Mapping<'p> {
     /// The entry mapped, for the subject it names.
-    Mapped(Mapped, Committed, PersonId),
+    Mapped(Box<Mapped<'p>>, PersonId),
     /// No program ran: the skip, and the issue that refuses the Bundle.
     Unmapped(Skipped, Issue),
 }
 
+/// Where one entry of a Bundle stands before the commit.
+#[derive(Debug)]
+enum Pending {
+    /// The entry mapped: its index among the mapped entries.
+    Mapped(usize),
+    /// No program ran over the entry.
+    Skipped(Skipped),
+}
+
 /// Every entry of a Bundle, mapped and partitioned.
 #[derive(Debug, Default)]
-struct Partition {
+struct Partition<'p> {
     /// The entries that mapped, in Bundle order.
-    mapped: Vec<Mapped>,
-    /// One outcome per entry that mapped or was skipped, in Bundle order.
-    outcomes: Vec<EntryOutcome>,
+    mapped: Vec<Mapped<'p>>,
+    /// One slot per entry that mapped or was skipped, in Bundle order.
+    pending: Vec<Pending>,
     /// The issues that refuse the Bundle.
     failures: Vec<Issue>,
     /// The one subject every mapped entry names.
     subject: Option<PersonId>,
+}
+
+/// Where one committed entry stands.
+#[derive(Debug)]
+struct Placed {
+    /// The logical id the entry's resource has.
+    id: FhirResourceId,
+    /// The composition version the entry stands at.
+    version: ObjectVersionId,
 }
 
 impl<'a> Ingest<'a> {
@@ -493,13 +556,25 @@ impl<'a> Ingest<'a> {
     /// into one EHR, so the mapped entries must name one subject. The Bundle's
     /// `type` is the caller's to check.
     ///
+    /// Each committed entry records its identity binding and, when it has a
+    /// key ([`SourceVersion`]), its consumed source, as a single create does.
+    /// A Bundle whose every mapped entry has a key the identity map already
+    /// recorded commits nothing and answers [`Commit::AlreadyConsumed`], with
+    /// each entry at the composition its first delivery produced; a Bundle
+    /// only some of whose entries were consumed is refused, because a
+    /// transaction is all or nothing (<https://hl7.org/fhir/R4/http.html#transaction>).
+    /// No specification governs the redelivery rule: our own design.
+    ///
     /// # Errors
     ///
     /// Returns a `422` [`Refused`] naming every entry that does not map (and,
     /// under [`UnmappedEntries::Refuse`], every entry no program maps), a
-    /// second subject, a Bundle with nothing to commit, and an EHR that cannot
-    /// be resolved; the CDR's refusal of the contribution through the status
-    /// table, naming every mapped entry.
+    /// second subject, two entries with one source key, a Bundle with nothing
+    /// to commit, and an EHR that cannot be resolved; a `409` naming every
+    /// entry already consumed when not all were; the CDR's refusal of the
+    /// contribution through the status table, naming every mapped entry; a
+    /// `500` when the contribution's answer cannot bind its entries or the
+    /// identity store cannot be read or written.
     pub async fn ingest_bundle(
         &self,
         bundle: &Value,
@@ -517,14 +592,34 @@ impl<'a> Ingest<'a> {
                 partition.failures,
             ));
         }
-        let Some(subject) = partition.subject else {
+        let Some(ref subject) = partition.subject else {
             return Err(Refused::new(
                 StatusCode::UNPROCESSABLE_ENTITY,
                 Issue::error(IssueType::Required)
                     .diagnosing("the Bundle carries no entry this server maps"),
             ));
         };
-        let ehr_id = ehr::resolve(&self.client, self.store, &subject, self.settings.ehr_policy)
+        let sources = sources_of(&partition.mapped, provenance)?;
+        distinct(&partition.mapped, &sources)?;
+        let mut known = Vec::with_capacity(sources.len());
+        for source in &sources {
+            let recorded = match source {
+                Some(source) => self
+                    .store
+                    .consumed(source)
+                    .map_err(|error| store_refusal(&error))?,
+                None => None,
+            };
+            known.push(recorded);
+        }
+        let consumed = known.iter().flatten().count();
+        if consumed > 0 && consumed == known.len() {
+            return self.replay(partition, &known).await;
+        }
+        if consumed > 0 {
+            return Err(partly_consumed(&partition.mapped, &known));
+        }
+        let ehr_id = ehr::resolve(&self.client, self.store, subject, self.settings.ehr_policy)
             .await
             .map_err(|error| {
                 Refused::new(
@@ -532,11 +627,53 @@ impl<'a> Ingest<'a> {
                     Issue::error(IssueType::Processing).diagnosing(chain(&error)),
                 )
             })?;
-        let contribution = self.commit_all(&ehr_id, &partition.mapped).await?;
+        let (contribution, versions) = self.commit_all(&ehr_id, &partition.mapped).await?;
+        let mut placed = Vec::with_capacity(versions.len());
+        for ((entry, version), source) in partition.mapped.iter().zip(versions).zip(&sources) {
+            let (id, stood) = self.bind(
+                entry.program,
+                entry.inbound.resource_type(),
+                &ehr_id,
+                &version,
+                &entry.built,
+            )?;
+            if let Some(source) = source {
+                self.consume(source, &stood, &id)?;
+            }
+            placed.push(Placed { id, version });
+        }
         Ok(Ingested {
             ehr_id,
-            contribution,
-            entries: partition.outcomes,
+            commit: Commit::Contribution(contribution),
+            entries: outcomes(partition, placed),
+        })
+    }
+
+    /// Answers a Bundle whose every entry the identity map already consumed,
+    /// with each entry where its first delivery put it.
+    async fn replay(
+        &self,
+        partition: Partition<'_>,
+        known: &[Option<ConsumedSource>],
+    ) -> Result<Ingested, Refused> {
+        let mut ehr_id = None;
+        let mut placed = Vec::with_capacity(known.len());
+        for record in known.iter().flatten() {
+            let (ehr, stands) = self.stands(record).await?;
+            ehr_id.get_or_insert(ehr);
+            placed.push(stands);
+        }
+        let Some(ehr_id) = ehr_id else {
+            return Err(Refused::new(
+                StatusCode::UNPROCESSABLE_ENTITY,
+                Issue::error(IssueType::Required)
+                    .diagnosing("the Bundle carries no entry this server maps"),
+            ));
+        };
+        Ok(Ingested {
+            ehr_id,
+            commit: Commit::AlreadyConsumed,
+            entries: outcomes(partition, placed),
         })
     }
 
@@ -547,7 +684,7 @@ impl<'a> Ingest<'a> {
         entries: &[Value],
         unmapped: UnmappedEntries,
         provenance: &Provenance,
-    ) -> Partition {
+    ) -> Partition<'a> {
         let mut partition = Partition::default();
         for (index, entry) in entries.iter().enumerate() {
             let full_url = entry
@@ -562,8 +699,8 @@ impl<'a> Ingest<'a> {
                 );
                 continue;
             };
-            match self.map_one(resource, &full_url, provenance) {
-                Ok(Mapping::Mapped(one, committed, person)) => {
+            match self.map_one(resource, &full_url, index, provenance) {
+                Ok(Mapping::Mapped(one, person)) => {
                     match partition.subject {
                         None => partition.subject = Some(person),
                         Some(ref held) if held == &person => {}
@@ -577,13 +714,15 @@ impl<'a> Ingest<'a> {
                             );
                         }
                     }
-                    partition.mapped.push(one);
-                    partition.outcomes.push(EntryOutcome::Committed(committed));
+                    partition
+                        .pending
+                        .push(Pending::Mapped(partition.mapped.len()));
+                    partition.mapped.push(*one);
                 }
                 Ok(Mapping::Unmapped(skipped, issue)) => match unmapped {
                     UnmappedEntries::Refuse => partition.failures.push(issue),
                     UnmappedEntries::SkipAndCount => {
-                        partition.outcomes.push(EntryOutcome::Skipped(skipped));
+                        partition.pending.push(Pending::Skipped(skipped));
                     }
                 },
                 Err(issue) => partition.failures.push(issue),
@@ -597,8 +736,9 @@ impl<'a> Ingest<'a> {
         &self,
         resource: &Value,
         full_url: &str,
+        position: usize,
         provenance: &Provenance,
-    ) -> Result<Mapping, Issue> {
+    ) -> Result<Mapping<'a>, Issue> {
         let inbound = Inbound::of(resource.clone(), "").map_err(|error| {
             Issue::error(IssueType::Structure)
                 .diagnosing(chain(&error))
@@ -679,25 +819,26 @@ impl<'a> Ingest<'a> {
                 .at(String::from(full_url))
         })?;
         Ok(Mapping::Mapped(
-            Mapped {
+            Box::new(Mapped {
                 full_url: String::from(full_url),
-                composition: Box::new(rm),
-            },
-            Committed {
-                full_url: String::from(full_url),
-                resource_type: String::from(inbound.resource_type()),
+                position,
                 template_id: String::from(composition.template_id()),
-            },
+                inbound,
+                program,
+                built: composition,
+                composition: Box::new(rm),
+            }),
             subject,
         ))
     }
 
-    /// Commits every mapped entry as one CONTRIBUTION.
+    /// Commits every mapped entry as one CONTRIBUTION, and returns it with
+    /// the version each entry produced, in entry order.
     async fn commit_all(
         &self,
         ehr_id: &EhrId,
-        mapped: &[Mapped],
-    ) -> Result<ContributionUid, Refused> {
+        mapped: &[Mapped<'_>],
+    ) -> Result<(ContributionUid, Vec<ObjectVersionId>), Refused> {
         let system_id = &self.settings.system_id;
         let contribution = NewContribution {
             uid: None,
@@ -716,13 +857,23 @@ impl<'a> Ingest<'a> {
         };
         let answered = self
             .client
-            .create_contribution(ehr_id, &contribution, Prefer::Minimal)
+            .create_contribution(ehr_id, &contribution, Prefer::Representation)
             .await
             .map_err(|error| Refused::of_answer(&status::of_client_error(&error)))?;
         match answered {
             CreateContributionOutcome::Created {
-                contribution_uid, ..
-            } => Ok(contribution_uid),
+                contribution_uid,
+                returned,
+            } => {
+                let versions = committed_versions(&contribution_uid, returned, mapped.len())?;
+                let mut stored = Vec::with_capacity(versions.len());
+                for version in versions {
+                    let composition = self.version_of(ehr_id, &version).await?;
+                    stored.push((version, composition));
+                }
+                let paired = pair(&contribution_uid, mapped, stored)?;
+                Ok((contribution_uid, paired))
+            }
             CreateContributionOutcome::BadRequest(upstream) => {
                 Err(refuse_all(mapped, &status::BAD_REQUEST, &upstream))
             }
@@ -783,6 +934,34 @@ impl<'a> Ingest<'a> {
         version: &ObjectVersionId,
         composition: &CanonicalComposition,
     ) -> Result<Written, Refused> {
+        let resource_type = inbound.resource_type();
+        let (id, stood) = self.bind(program, resource_type, ehr_id, version, composition)?;
+        if let Some(external) = inbound.id() {
+            let source = SourceVersion::new(
+                resource_type,
+                external.clone(),
+                inbound.version_id().map(str::to_owned),
+            );
+            self.consume(&source, &stood, &id)?;
+        }
+        Ok(Written {
+            id,
+            ehr_id: ehr_id.clone(),
+            version: version.clone(),
+            composition: composition.clone(),
+        })
+    }
+
+    /// Records the identity binding of one committed composition, and returns
+    /// the resource id and the binding that stand.
+    fn bind(
+        &self,
+        program: &Loaded,
+        resource_type: &str,
+        ehr_id: &EhrId,
+        version: &ObjectVersionId,
+        composition: &CanonicalComposition,
+    ) -> Result<(FhirResourceId, CompositionBinding), Refused> {
         let entry = engine::entry_of(program.program(), composition).ok_or_else(|| {
             Refused::new(
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -796,7 +975,6 @@ impl<'a> Ingest<'a> {
         // the entry's identity is its first occurrence.
         let key = EntryKey::new(version.versioned_object_uid(), entry.path(), 0);
         let map_key = derive::map_key(&key);
-        let resource_type = inbound.resource_type();
         let recorded = self
             .store
             .internal_of(resource_type, &map_key)
@@ -822,31 +1000,414 @@ impl<'a> Ingest<'a> {
             .store
             .record_binding(resource_type, &id, &binding)
             .map_err(|error| store_refusal(&error))?;
-        if let Some(external) = inbound.id() {
-            let source = SourceVersion::new(
-                resource_type,
-                external.clone(),
-                inbound.version_id().map(str::to_owned),
-            );
-            self.store
-                .record_consumed(
-                    &source,
-                    &ConsumedSource {
-                        ehr_id: stood.ehr_id.clone(),
-                        versioned_object_uid: stood.versioned_object_uid.clone(),
-                        internal_id: String::from(id.as_str()),
-                        context: stood.context.clone(),
-                    },
-                )
-                .map_err(|error| store_refusal(&error))?;
-        }
-        Ok(Written {
-            id,
-            ehr_id: ehr_id.clone(),
-            version: version.clone(),
-            composition: composition.clone(),
-        })
+        Ok((id, stood))
     }
+
+    /// Records that `source` was consumed by the composition `stood` binds.
+    fn consume(
+        &self,
+        source: &SourceVersion,
+        stood: &CompositionBinding,
+        id: &FhirResourceId,
+    ) -> Result<(), Refused> {
+        self.store
+            .record_consumed(
+                source,
+                &ConsumedSource {
+                    ehr_id: stood.ehr_id.clone(),
+                    versioned_object_uid: stood.versioned_object_uid.clone(),
+                    internal_id: String::from(id.as_str()),
+                    context: stood.context.clone(),
+                },
+            )
+            .map_err(|error| store_refusal(&error))?;
+        Ok(())
+    }
+
+    /// Returns where the composition a consumed source produced stands now.
+    ///
+    /// The identity map holds the version container and the resource id, and
+    /// the CDR holds the version, so the latest one is read from the CDR.
+    async fn stands(&self, known: &ConsumedSource) -> Result<(EhrId, Placed), Refused> {
+        let ehr_id = EhrId::new(&known.ehr_id).map_err(|error| stored_identifier(&error))?;
+        let container = VersionedObjectUid::new(&known.versioned_object_uid)
+            .map_err(|error| stored_identifier(&error))?;
+        let id = FhirResourceId::new(&known.internal_id).map_err(|error| {
+            Refused::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Issue::error(IssueType::Exception).diagnosing(format!(
+                    "the identity map holds a FHIR id this version cannot read: {error}"
+                )),
+            )
+        })?;
+        let (version, _composition) = self
+            .read(&ehr_id, &UidBasedId::VersionedObject(container))
+            .await?;
+        let version = version.ok_or_else(|| {
+            Refused::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Issue::error(IssueType::Exception)
+                    .diagnosing("the CDR answered a composition with no ETag"),
+            )
+        })?;
+        Ok((ehr_id, Placed { id, version }))
+    }
+
+    /// Returns the composition the CDR holds as `version`.
+    async fn version_of(
+        &self,
+        ehr_id: &EhrId,
+        version: &ObjectVersionId,
+    ) -> Result<Composition, Refused> {
+        self.read(ehr_id, &UidBasedId::Version(version.clone()))
+            .await
+            .map(|(_version, composition)| composition)
+    }
+
+    /// Reads one composition, and returns it with the version its `ETag`
+    /// names.
+    async fn read(
+        &self,
+        ehr_id: &EhrId,
+        uid: &UidBasedId,
+    ) -> Result<(Option<ObjectVersionId>, Composition), Refused> {
+        let answered = self
+            .client
+            .composition(ehr_id, uid, None)
+            .await
+            .map_err(|error| Refused::of_answer(&status::of_client_error(&error)))?;
+        match answered {
+            CompositionOutcome::Found {
+                version_id,
+                composition,
+            } => Ok((version_id, *composition)),
+            CompositionOutcome::Deleted => Err(Refused::of_answer(&status::Answer::new(
+                status::GONE,
+                String::from("the CDR reports this composition deleted"),
+            ))),
+            CompositionOutcome::NotFound(upstream) => {
+                Err(upstream_refusal(status::NOT_FOUND, &upstream))
+            }
+            _ => Err(Refused::of_answer(&status::unread("composition_get"))),
+        }
+    }
+}
+
+/// Returns the consumed-source key of each mapped entry, in order.
+///
+/// An entry mapped from a resource is keyed by its `resourceType`, `id` and
+/// `meta.versionId`, as a single create is; an entry of a message is keyed by
+/// the message and its position ([`SourceVersion::of_message_entry`]). An
+/// entry with no id has no key, so the Bundle it rides in cannot be
+/// recognised when it is sent again.
+fn sources_of(
+    mapped: &[Mapped<'_>],
+    provenance: &Provenance,
+) -> Result<Vec<Option<SourceVersion>>, Refused> {
+    mapped
+        .iter()
+        .map(|entry| match provenance {
+            Provenance::EachResource => Ok(entry.inbound.id().map(|external| {
+                SourceVersion::new(
+                    entry.inbound.resource_type(),
+                    external.clone(),
+                    entry.inbound.version_id().map(str::to_owned),
+                )
+            })),
+            Provenance::Item(item) => {
+                let Some(control) = item.id() else {
+                    return Ok(None);
+                };
+                ExternalResourceId::new(control)
+                    .and_then(|control| {
+                        SourceVersion::of_message_entry(
+                            item.resource_type(),
+                            control,
+                            entry.position,
+                        )
+                    })
+                    .map(Some)
+                    .map_err(|error| {
+                        Refused::new(
+                            StatusCode::UNPROCESSABLE_ENTITY,
+                            Issue::error(IssueType::Value)
+                                .diagnosing(format!(
+                                    "the message cannot key the identity map: {error}"
+                                ))
+                                .at(entry.full_url.clone()),
+                        )
+                    })
+            }
+        })
+        .collect()
+}
+
+/// Refuses a Bundle in which two entries carry one source key.
+///
+/// "A resource can only appear in a transaction once (by identity)"
+/// (<https://hl7.org/fhir/R4/http.html#transaction>), and one key would bind
+/// two compositions to one consumed source.
+fn distinct(mapped: &[Mapped<'_>], sources: &[Option<SourceVersion>]) -> Result<(), Refused> {
+    let mut seen = BTreeSet::new();
+    let issues: Vec<Issue> = mapped
+        .iter()
+        .zip(sources)
+        .filter_map(|(entry, source)| {
+            let source = source.as_ref()?;
+            if seen.insert(source.storage_key()) {
+                return None;
+            }
+            Some(
+                Issue::error(IssueType::Duplicate)
+                    .diagnosing(format!(
+                        "{}/{} appears in this transaction more than once",
+                        source.resource_type(),
+                        source.id()
+                    ))
+                    .at(entry.full_url.clone()),
+            )
+        })
+        .collect();
+    if issues.is_empty() {
+        Ok(())
+    } else {
+        Err(Refused::of(StatusCode::UNPROCESSABLE_ENTITY, issues))
+    }
+}
+
+/// Returns the refusal of a Bundle only some of whose entries were consumed.
+///
+/// A transaction is all or nothing (<https://hl7.org/fhir/R4/http.html#transaction>),
+/// so the Bundle neither commits its fresh entries nor answers the consumed
+/// ones; the refusal names every entry an earlier delivery consumed.
+fn partly_consumed(mapped: &[Mapped<'_>], known: &[Option<ConsumedSource>]) -> Refused {
+    let mut issues = vec![Issue::error(IssueType::Duplicate).diagnosing(
+        "an earlier delivery consumed some entries of this Bundle and not the others, so nothing is committed",
+    )];
+    for (entry, record) in mapped.iter().zip(known) {
+        if record.is_some() {
+            issues.push(
+                Issue::error(IssueType::Duplicate)
+                    .diagnosing("an earlier delivery already consumed this entry")
+                    .at(entry.full_url.clone()),
+            );
+        }
+    }
+    Refused::of(StatusCode::CONFLICT, issues)
+}
+
+/// Returns one outcome per entry, in Bundle order, each mapped entry at the
+/// place `placed` gives it.
+fn outcomes(partition: Partition<'_>, placed: Vec<Placed>) -> Vec<EntryOutcome> {
+    let mut committed: Vec<Option<Committed>> = partition
+        .mapped
+        .iter()
+        .zip(placed)
+        .map(|(entry, place)| {
+            Some(Committed {
+                full_url: entry.full_url.clone(),
+                resource_type: String::from(entry.inbound.resource_type()),
+                template_id: entry.template_id.clone(),
+                id: place.id,
+                version: place.version,
+            })
+        })
+        .collect();
+    // NOTE: no specification governs this: our own design; `map_entries` hands
+    // each mapped index out once and every caller places each mapped entry, so
+    // a slot that finds nothing cannot occur.
+    partition
+        .pending
+        .into_iter()
+        .filter_map(|slot| match slot {
+            Pending::Skipped(skipped) => Some(EntryOutcome::Skipped(skipped)),
+            Pending::Mapped(index) => committed
+                .get_mut(index)
+                .and_then(Option::take)
+                .map(EntryOutcome::Committed),
+        })
+        .collect()
+}
+
+/// Returns the refusal of a committed contribution whose answer cannot bind
+/// its entries, naming the contribution so it can be reconciled.
+fn unbound(contribution: &ContributionUid, why: &str) -> Refused {
+    Refused::of_answer(&status::Answer::new(
+        status::UNDOCUMENTED,
+        format!(
+            "the CDR committed contribution {contribution} and {why}, so its entries cannot be bound to their compositions"
+        ),
+    ))
+}
+
+/// What names the item one composition was mapped from: the
+/// `originating_system_item_ids[0]` type and id and the
+/// `originating_system_audit.version_id` the engine writes into its
+/// `FEEDER_AUDIT`
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html#_feeder_audit_class>).
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct AuditKey {
+    /// The item's type.
+    item_type: Option<String>,
+    /// The item's id.
+    item_id: Option<String>,
+    /// The item's version.
+    version_id: Option<String>,
+}
+
+impl AuditKey {
+    /// Returns the key the `FEEDER_AUDIT` of `composition` states.
+    fn of(composition: &Composition) -> Self {
+        let audit = composition.feeder_audit.as_ref();
+        let item = audit
+            .and_then(|audit| audit.originating_system_item_ids.as_deref())
+            .and_then(<[_]>::first);
+        Self {
+            item_type: item.and_then(|item| item.r#type.clone()),
+            item_id: item.map(|item| item.id.clone()),
+            version_id: audit.and_then(|audit| audit.originating_system_audit.version_id.clone()),
+        }
+    }
+}
+
+/// Whether two compositions carry the same content, the CDR-assigned `uid`
+/// aside.
+fn same_content(sent: &Composition, stored: &Composition) -> bool {
+    let mut sent = sent.clone();
+    let mut stored = stored.clone();
+    sent.uid = None;
+    stored.uid = None;
+    sent == stored
+}
+
+/// Returns the entry each committed version is the composition of, one
+/// version per entry, in entry order.
+///
+/// `stored` is each version the contribution named with the composition the
+/// CDR holds for it. A version matches an entry when its `FEEDER_AUDIT` names
+/// the entry's item ([`AuditKey`]); where several entries name one item, as
+/// the entries of one message do, it must also carry the entry's content. A
+/// version that matches no entry, or more than one, or an entry two versions
+/// match, refuses the whole answer. No specification governs the matching:
+/// our own design.
+fn pair(
+    contribution: &ContributionUid,
+    mapped: &[Mapped<'_>],
+    stored: Vec<(ObjectVersionId, Composition)>,
+) -> Result<Vec<ObjectVersionId>, Refused> {
+    let keys: Vec<AuditKey> = mapped
+        .iter()
+        .map(|entry| AuditKey::of(&entry.composition))
+        .collect();
+    let mut placed: Vec<Option<ObjectVersionId>> = vec![None; mapped.len()];
+    for (version, composition) in stored {
+        let key = AuditKey::of(&composition);
+        let sharing = keys.iter().filter(|candidate| **candidate == key).count();
+        let matching: Vec<usize> = mapped
+            .iter()
+            .zip(&keys)
+            .enumerate()
+            .filter(|(_, (entry, candidate))| {
+                **candidate == key
+                    && (sharing == 1 || same_content(&entry.composition, &composition))
+            })
+            .map(|(index, _)| index)
+            .collect();
+        let [index] = matching.as_slice() else {
+            return Err(unbound(
+                contribution,
+                &format!(
+                    "its version {version} matches {} of the entries sent, where it must match one",
+                    matching.len()
+                ),
+            ));
+        };
+        let slot = placed.get_mut(*index).ok_or_else(|| {
+            unbound(
+                contribution,
+                &format!("its version {version} matches no entry"),
+            )
+        })?;
+        if slot.is_some() {
+            let full_url = mapped
+                .get(*index)
+                .map_or("an entry", |entry| entry.full_url.as_str());
+            return Err(unbound(
+                contribution,
+                &format!("two of its versions match {full_url}"),
+            ));
+        }
+        *slot = Some(version);
+    }
+    placed
+        .into_iter()
+        .zip(mapped)
+        .map(|(slot, entry)| {
+            slot.ok_or_else(|| {
+                unbound(
+                    contribution,
+                    &format!("none of its versions matches {}", entry.full_url),
+                )
+            })
+        })
+        .collect()
+}
+
+/// Returns the versions a committed contribution names.
+///
+/// `Prefer: return=representation` answers the CONTRIBUTION, whose `versions`
+/// reference every version it committed (`ehr-codegen.openapi.yaml`,
+/// `201_CONTRIBUTION`). A contribution that answers no representation, or a
+/// version list whose length is not the entries', cannot bind the entries,
+/// and the refusal names the contribution so it can be reconciled. The list
+/// states no order, so [`pair`] matches each version to its entry.
+fn committed_versions(
+    contribution: &ContributionUid,
+    returned: Returned<Contribution>,
+    expected: usize,
+) -> Result<Vec<ObjectVersionId>, Refused> {
+    let unreadable = |why: String| unbound(contribution, &why);
+    let Returned::Representation(stored) = returned else {
+        return Err(unreadable(String::from("returned no representation of it")));
+    };
+    let references: &[ObjectRef] = stored.versions.as_ref();
+    if references.len() != expected {
+        return Err(unreadable(format!(
+            "names {} versions for {expected} entries",
+            references.len()
+        )));
+    }
+    references
+        .iter()
+        .map(|reference| {
+            let ObjectRef::ObjectRef(data) = reference else {
+                return Err(unreadable(String::from(
+                    "references a version by a reference that is no OBJECT_REF",
+                )));
+            };
+            let ObjectId::ObjectVersionId(ref named) = data.id else {
+                return Err(unreadable(String::from(
+                    "references a version by an id that is no OBJECT_VERSION_ID",
+                )));
+            };
+            ObjectVersionId::new(named.value()).map_err(|error| {
+                unreadable(format!(
+                    "references the version `{}`, which does not read: {error}",
+                    named.value()
+                ))
+            })
+        })
+        .collect()
+}
+
+/// Returns the refusal a malformed stored openEHR identifier renders as.
+fn stored_identifier(error: &ferrobridge_openehr::ids::IdError) -> Refused {
+    Refused::new(
+        StatusCode::INTERNAL_SERVER_ERROR,
+        Issue::error(IssueType::Exception).diagnosing(format!(
+            "the identity map holds an openEHR identifier this version cannot read: {error}"
+        )),
+    )
 }
 
 /// Selects the program one inbound resource runs, pinned by `pin`.
@@ -978,7 +1539,7 @@ fn upstream_refusal(
 /// Nothing was committed, so the answer names every entry the Bundle mapped:
 /// a caller cannot tell from a partial list which entries still stand.
 fn refuse_all(
-    mapped: &[Mapped],
+    mapped: &[Mapped<'_>],
     row: &status::Row,
     upstream: &ferrobridge_openehr::error::UpstreamError,
 ) -> Refused {

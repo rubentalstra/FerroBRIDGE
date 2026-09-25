@@ -54,6 +54,32 @@ patient identifier to `ehr_id` relation, the external to internal resource id
 relation, and the resource id to composition relation, so a `PUT` resolves and
 a re-sent Bundle is recognised.
 
+## A re-sent transaction commits once
+
+Every entry the facade commits records the source it consumed. A resource is
+keyed by its `resourceType`, `id` and `meta.versionId`, the same key a single
+create uses. A message is keyed by its type, its control id and the entry's
+position in the Bundle, so a redelivered message is recognised even when it is
+rebuilt with fresh resource ids. When every entry of a Bundle was consumed
+before, the Bundle commits nothing and answers the resources the first delivery
+created. When only some were, the Bundle is refused with `409` and nothing is
+committed. An entry without an `id` has no key, so its Bundle commits again
+each time it is sent. These rules are FerroBRIDGE's own design.
+
+The CDR does not say in which order it lists the versions of a contribution.
+After the commit, FerroBRIDGE reads each version back and matches it to the
+entry it came from by the `FEEDER_AUDIT` the engine wrote: the item's type,
+its id and its version. Where several entries name the same item, as the
+entries of one message do, the composition content decides. A version that
+matches no entry or more than one refuses the answer with a `500` that names
+the contribution, and no binding is recorded.
+
+The facade asks the CDR for the committed contribution with
+`Prefer: return=representation`. A CDR that ignores the header and answers
+without the contribution is a typed `500` after the commit, naming the
+contribution, and nothing is recorded, so a retry commits again. Issue #270
+tracks reading the contribution back in that case.
+
 On the OMOP side every CDM v5.4 primary key is a 32-bit integer, so ids come
 from database sequences and a bridge-owned side table maps each source record
 to its row. That table is what makes a re-run replace rather than duplicate,

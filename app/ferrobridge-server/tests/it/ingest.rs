@@ -8,13 +8,18 @@
 //! an entry no program maps are asserted at the seam a non-HTTP face calls.
 
 use crate::facade::EHR_ID;
+use crate::facade::Echo;
 use crate::facade::client;
 use crate::facade::ehr_body;
 use crate::facade::handle;
+use crate::facade::mount_echo;
 use crate::facade::settings;
+use ferrobridge_openehr::ids::ContributionUid;
 use ferrobridge_server::facade::Facade;
 use ferrobridge_server::facade::identity::store::MemoryStore;
+use ferrobridge_server::facade::ingest::Commit;
 use ferrobridge_server::facade::ingest::EntryOutcome;
+use ferrobridge_server::facade::ingest::Ingested;
 use ferrobridge_server::facade::ingest::Provenance;
 use ferrobridge_server::facade::ingest::SkipReason;
 use ferrobridge_server::facade::ingest::UnmappedEntries;
@@ -40,6 +45,19 @@ const PROFILE: &str = "http://example.org/fhir/StructureDefinition/ferrobridge-i
 /// The contribution the stub CDR answers a commit with.
 const CONTRIBUTION: &str = "7b0a4c2e-0000-4000-8000-00000000000c";
 
+/// The version container the stub CDR's commit produces.
+const CONTAINER: &str = "3c9d6a70-0000-4000-8000-00000000000e";
+
+/// The version the stub CDR's commit produces.
+const VERSION: &str = "3c9d6a70-0000-4000-8000-00000000000e::ferrobridge.test::1";
+
+/// The containers the stub CDR hands out, in commit order.
+const CONTAINERS: &[&str] = &[
+    CONTAINER,
+    "3c9d6a70-0000-4000-8000-000000000010",
+    "3c9d6a70-0000-4000-8000-000000000011",
+];
+
 /// The control id of the synthetic message the Bundle stands for.
 const CONTROL_ID: &str = "MSG-0001";
 
@@ -54,6 +72,12 @@ fn message() -> Provenance {
 /// Returns a facade over the Observation mapping set and a stub CDR that
 /// serves its template, resolves the EHR and takes a contribution.
 async fn facade() -> Result<(MockServer, Facade), Box<dyn StdError>> {
+    facade_answering(Echo::Sent).await
+}
+
+/// Returns the facade of [`facade`] over a CDR that lists what it committed
+/// as `echo` says.
+async fn facade_answering(echo: Echo) -> Result<(MockServer, Facade), Box<dyn StdError>> {
     let cdr = MockServer::start().await;
     Mock::given(matchers::method("GET"))
         .and(matchers::path(
@@ -71,13 +95,7 @@ async fn facade() -> Result<(MockServer, Facade), Box<dyn StdError>> {
         .respond_with(ResponseTemplate::new(200).set_body_string(ehr_body()))
         .mount(&cdr)
         .await;
-    Mock::given(matchers::method("POST"))
-        .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
-        .respond_with(
-            ResponseTemplate::new(201).insert_header("ETag", format!("W/\"{CONTRIBUTION}\"")),
-        )
-        .mount(&cdr)
-        .await;
+    mount_echo(&cdr, CONTAINERS, echo).await;
     let set = programs::read_set(std::path::Path::new(FIXTURES))?;
     let templates = programs::fetch_templates(&set, &client(&cdr)).await?;
     let compiled = programs::compile_set(&set, &templates)?;
@@ -187,7 +205,10 @@ async fn skip_and_count_commits_the_mapped_entry_and_types_every_skip()
         ingested.entries().last(),
         Some(EntryOutcome::Committed(_))
     ));
-    assert_eq!(CONTRIBUTION, ingested.contribution().as_str());
+    assert_eq!(
+        Some(CONTRIBUTION),
+        ingested.contribution().map(ContributionUid::as_str)
+    );
     assert_eq!(EHR_ID, ingested.ehr_id().as_str());
     assert_eq!(1, contributions(&cdr).await, "the one mapped entry commits");
     Ok(())
@@ -343,5 +364,127 @@ async fn a_bundle_whose_every_entry_is_skipped_commits_nothing_and_is_refused()
             .collect::<Vec<_>>()
     );
     assert_eq!(0, contributions(&cdr).await);
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_redelivered_message_is_recognised_by_its_control_id_and_commits_once()
+-> Result<(), Box<dyn StdError>> {
+    let (cdr, facade) = facade().await?;
+    let ingest = facade.ingest(facade.client().clone());
+    let first = ingest
+        .ingest_bundle(
+            &bundle(&observation()),
+            UnmappedEntries::SkipAndCount,
+            &message(),
+        )
+        .await
+        .map_err(|refused| format!("the first delivery was refused: {refused:?}"))?;
+    // The redelivered message rebuilds its Bundle with a fresh resource id,
+    // so only the control id can recognise it.
+    let mut rebuilt = observation();
+    rebuilt["id"] = serde_json::json!("ferrobridge-synthetic-observation-rebuilt");
+    let second = ingest
+        .ingest_bundle(&bundle(&rebuilt), UnmappedEntries::SkipAndCount, &message())
+        .await
+        .map_err(|refused| format!("the redelivery was refused: {refused:?}"))?;
+
+    assert_eq!(
+        &Commit::Contribution(ContributionUid::new(CONTRIBUTION)?),
+        first.commit()
+    );
+    assert_eq!(&Commit::AlreadyConsumed, second.commit());
+    assert_eq!(
+        1,
+        contributions(&cdr).await,
+        "the redelivery commits nothing"
+    );
+    let placed = |ingested: &Ingested| {
+        ingested
+            .committed()
+            .map(|entry| (entry.id.to_string(), entry.version.to_string()))
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(placed(&first), placed(&second));
+    assert_eq!(
+        vec![(placed(&first)[0].0.clone(), String::from(VERSION))],
+        placed(&second)
+    );
+    assert_eq!(2, second.skipped().count(), "the skips are typed again");
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_message_with_another_control_id_commits_again() -> Result<(), Box<dyn StdError>> {
+    let (cdr, facade) = facade().await?;
+    let ingest = facade.ingest(facade.client().clone());
+    ingest
+        .ingest_bundle(
+            &bundle(&observation()),
+            UnmappedEntries::SkipAndCount,
+            &message(),
+        )
+        .await
+        .map_err(|refused| format!("the first message was refused: {refused:?}"))?;
+    let other = Provenance::Item(SourceItem::message(
+        MessageControlId::new("MSG-0002")?,
+        MessageType::new("ORU^R01")?,
+    ));
+    let second = ingest
+        .ingest_bundle(
+            &bundle(&observation()),
+            UnmappedEntries::SkipAndCount,
+            &other,
+        )
+        .await
+        .map_err(|refused| format!("the second message was refused: {refused:?}"))?;
+    assert!(matches!(second.commit(), Commit::Contribution(_)));
+    assert_eq!(2, contributions(&cdr).await);
+    Ok(())
+}
+
+#[tokio::test]
+async fn the_entries_of_one_message_bind_by_content_whatever_the_version_order()
+-> Result<(), Box<dyn StdError>> {
+    // Every entry of one message names the same item in its FEEDER_AUDIT, so
+    // a reversed version list is told apart by what each composition carries.
+    let (cdr, facade) = facade_answering(Echo::Reversed).await?;
+    let early = observation();
+    let mut late = observation();
+    late["id"] = serde_json::json!("ferrobridge-synthetic-observation-2");
+    late["effectiveDateTime"] = serde_json::json!("2026-09-13T10:00:00+02:00");
+    let document = serde_json::json!({
+        "resourceType": "Bundle",
+        "type": "transaction",
+        "entry": [
+            { "fullUrl": "urn:uuid:0000-early", "resource": early },
+            { "fullUrl": "urn:uuid:0000-late", "resource": late }
+        ]
+    });
+    let ingested = facade
+        .ingest(facade.client().clone())
+        .ingest_bundle(
+            &fhir_types::codec::Value::from_serde_json(document),
+            UnmappedEntries::Refuse,
+            &message(),
+        )
+        .await
+        .map_err(|refused| format!("the Bundle was refused: {refused:?}"))?;
+    let bound: Vec<(String, String)> = ingested
+        .committed()
+        .map(|entry| {
+            (
+                entry.full_url.clone(),
+                entry.version.versioned_object_uid().as_str().to_owned(),
+            )
+        })
+        .collect();
+    let expected: Vec<(String, String)> = ["urn:uuid:0000-early", "urn:uuid:0000-late"]
+        .iter()
+        .zip(CONTAINERS)
+        .map(|(full_url, container)| ((*full_url).to_owned(), (*container).to_owned()))
+        .collect();
+    assert_eq!(expected, bound);
+    assert_eq!(1, contributions(&cdr).await);
     Ok(())
 }

@@ -13,6 +13,7 @@ use serde::Serialize;
 
 use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
+use crate::facade::identity::IdError;
 
 /// Where one FHIR resource lives in the CDR.
 ///
@@ -87,6 +88,33 @@ impl SourceVersion {
         }
     }
 
+    /// Returns the key of the entry at `position` of the Bundle one message
+    /// stands for.
+    ///
+    /// One message can carry several resources, so the key is the message's
+    /// type and control id with the entry's Bundle position in the version
+    /// slot, and a redelivered message meets the keys its first delivery
+    /// recorded. The type slot reads `message:` before the message type, a
+    /// colon no FHIR resource type carries, so a message key never meets a
+    /// resource key. No specification governs this key: our own design.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`IdError`] when the message type is empty or carries a
+    /// control character, which the key's separator could then collide with.
+    pub fn of_message_entry(
+        message_type: &str,
+        control_id: ExternalResourceId,
+        position: usize,
+    ) -> Result<Self, IdError> {
+        let checked = ExternalResourceId::new(message_type)?;
+        Ok(Self {
+            resource_type: format!("message:{checked}"),
+            id: control_id,
+            version_id: Some(format!("entry-{position}")),
+        })
+    }
+
     /// Returns the resource type the sender declared.
     #[must_use]
     pub fn resource_type(&self) -> &str {
@@ -152,6 +180,21 @@ mod tests {
         assert_eq!("Condition\u{1f}c-1\u{1f}2", with.storage_key());
         assert_eq!("Condition\u{1f}c-1\u{1f}", without.storage_key());
         assert_ne!(with.storage_key(), without.storage_key());
+    }
+
+    #[test]
+    fn a_message_entry_key_never_meets_a_resource_key() {
+        let control = ExternalResourceId::new("MSG-0001").expect("a legal external id");
+        let entry = SourceVersion::of_message_entry("ORU^R01", control.clone(), 2)
+            .expect("a legal message type");
+        assert_eq!(
+            "message:ORU^R01\u{1f}MSG-0001\u{1f}entry-2",
+            entry.storage_key()
+        );
+        let other = SourceVersion::of_message_entry("ORU^R01", control.clone(), 3)
+            .expect("a legal message type");
+        assert_ne!(entry.storage_key(), other.storage_key());
+        assert!(SourceVersion::of_message_entry("ORU\u{1f}R01", control, 2).is_err());
     }
 
     #[test]

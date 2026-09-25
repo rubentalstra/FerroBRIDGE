@@ -150,6 +150,17 @@ and commits the lot through one ITS-REST contribution so the CDR makes it
 atomic. Any failure answers one `OperationOutcome` naming every failing entry
 by `fullUrl`, and nothing is committed.
 
+A committed transaction answers `200` with a `transaction-response` Bundle,
+one entry per request entry in the same order. Each entry's `response` carries
+`201 Created`, the `location` `[base]/[type]/[id]/_history/[vid]` and the
+`etag` `W/"[vid]"`, the values a single create answers. Send the same Bundle
+again and nothing is committed: each entry answers `200 OK` with the location
+of the resource the first delivery created. A Bundle only some of whose
+entries an earlier delivery consumed is refused with `409`, naming those
+entries, and a Bundle that carries one resource twice is refused with `422`.
+The redelivery rule is on the
+[failure and identity](../operate/failure-and-identity.md) page.
+
 ## `$validate` is a dry run of this server
 
 `POST /fhir/{type}/$validate` runs the whole inbound path up to the commit and
