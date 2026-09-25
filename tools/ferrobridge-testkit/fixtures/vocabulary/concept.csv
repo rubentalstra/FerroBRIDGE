@@ -31,6 +31,7 @@ concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concep
 9013,Synthetic Unit domain,Metadata,FB-META,FB-META,,DOM-UNIT,1970-01-01,2099-12-31,
 9014,Synthetic Metadata domain,Metadata,FB-META,FB-META,,DOM-METADATA,1970-01-01,2099-12-31,
 9015,Synthetic Drug domain,Metadata,FB-META,FB-META,,DOM-DRUG,1970-01-01,2099-12-31,
+9016,Synthetic Specimen domain,Metadata,FB-META,FB-META,,DOM-SPECIMEN,1970-01-01,2099-12-31,
 9021,Synthetic concept class,Metadata,FB-META,FB-META,,CLS-CLASS,1970-01-01,2099-12-31,
 9022,Synthetic ingredient class,Metadata,FB-META,FB-META,,CLS-INGREDIENT,1970-01-01,2099-12-31,
 9023,Synthetic metadata class,Metadata,FB-META,FB-META,,CLS-META,1970-01-01,2099-12-31,

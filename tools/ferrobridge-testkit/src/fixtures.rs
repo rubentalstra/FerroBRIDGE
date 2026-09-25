@@ -34,6 +34,25 @@ pub const DIAGNOSE_OPT: &str = include_str!("../fixtures/opt/diagnose.opt");
 /// The template identifier [`DIAGNOSE_OPT`] declares.
 pub const DIAGNOSE_TEMPLATE_ID: &str = "ferrobridge.diagnose.v1";
 
+/// A synthetic operational template shaped like a laboratory report.
+///
+/// One `COMPOSITION` holds any number of
+/// `OBSERVATION.laboratory_test_result.v1`, each with one repeating `EVENT`
+/// whose item tree slots any number of `CLUSTER.laboratory_test_analyte.v1`
+/// (a coded name, a `DV_QUANTITY` result and a result time) and at most one
+/// `CLUSTER.specimen.v1` (a coded type and a received time). The at-codes are
+/// the ones the OMOCL laboratory mappings write. The template identifier is
+/// `ferrobridge.laboratory_report.v1`.
+pub const LABORATORY_REPORT_OPT: &str = include_str!("../fixtures/opt/laboratory_report.opt");
+
+/// The template identifier [`LABORATORY_REPORT_OPT`] declares.
+pub const LABORATORY_REPORT_TEMPLATE_ID: &str = "ferrobridge.laboratory_report.v1";
+
+/// A synthetic FLAT composition of [`LABORATORY_REPORT_OPT`]: one result with
+/// two analytes (the second without a result time) and one specimen.
+pub const LABORATORY_REPORT_FLAT: &str =
+    include_str!("../fixtures/composition/laboratory_report.flat.json");
+
 /// The published `KDS_Diagnose` operational template, vendored verbatim.
 ///
 /// One `COMPOSITION.report.v1` holding `EVALUATION.problem_diagnosis.v1` with
@@ -158,6 +177,23 @@ mod tests {
                     "the KDS Condition names a URL outside the matched systems: {url}"
                 );
             }
+        }
+    }
+
+    #[test]
+    fn the_laboratory_template_declares_its_identifier_and_the_mapped_archetypes() {
+        use super::{LABORATORY_REPORT_OPT, LABORATORY_REPORT_TEMPLATE_ID};
+        let declared = format!("<template_id>\n    <value>{LABORATORY_REPORT_TEMPLATE_ID}</value>");
+        assert!(LABORATORY_REPORT_OPT.contains(&declared));
+        for archetype in [
+            "openEHR-EHR-OBSERVATION.laboratory_test_result.v1",
+            "openEHR-EHR-CLUSTER.laboratory_test_analyte.v1",
+            "openEHR-EHR-CLUSTER.specimen.v1",
+        ] {
+            assert!(
+                LABORATORY_REPORT_OPT.contains(archetype),
+                "the laboratory template does not slot {archetype}"
+            );
         }
     }
 

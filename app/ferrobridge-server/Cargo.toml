@@ -41,6 +41,9 @@ openehr-mapping-core.workspace = true
 # The ETL checks its configured AQL at load (docs/architecture.md section 5.4).
 openehr-query.workspace = true
 openehr-rm.workspace = true
+# The mapping language the ETL runs: the loader, the compiler and the engine
+# (docs/architecture.md section 5.2).
+omocl.workspace = true
 # The OMOP sink: the record graph, the CDM writer and the derived tables.
 omop-cdm = { workspace = true, features = ["database"] }
 # The AQL result set arrives as a stream of pages.

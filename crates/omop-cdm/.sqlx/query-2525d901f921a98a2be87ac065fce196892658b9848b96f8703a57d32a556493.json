@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT domain_concept_id FROM domain WHERE domain_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "domain_concept_id",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "domain",
+            "name": "domain_concept_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2525d901f921a98a2be87ac065fce196892658b9848b96f8703a57d32a556493"
+}

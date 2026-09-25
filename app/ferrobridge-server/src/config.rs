@@ -69,6 +69,9 @@ pub struct Mappings {
     /// When set, it wins over the `[cdr]` for the two operations; the facade
     /// always takes its templates from the CDR.
     pub templates: Option<PathBuf>,
+    /// The directory the OMOCL files `etl run` maps with are read from,
+    /// recursively.
+    pub omocl: Option<PathBuf>,
 }
 
 /// The FHIR R4 facade lane.
@@ -651,6 +654,7 @@ impl Config {
             cdm: self.cdm.as_ref().map(resolve_cdm).transpose()?,
             etl: self.etl.as_ref().map(resolve_etl).transpose()?,
             mapping_directory: self.mappings.directory.clone(),
+            omocl_directory: self.mappings.omocl.clone(),
             mappings: resolve_mappings(&self.mappings)?,
             facade: if self.facade.enabled {
                 Some(resolve_facade(&self.facade)?)
@@ -756,6 +760,9 @@ pub struct Settings {
     pub etl: Option<crate::etl::EtlSettings>,
     /// The directory the mapping files are read from, when one is configured.
     pub mapping_directory: Option<PathBuf>,
+    /// The directory the OMOCL mapping files are read from, when one is
+    /// configured.
+    pub omocl_directory: Option<PathBuf>,
     /// The mapping set the operations compile from disk, when both
     /// directories are set.
     ///

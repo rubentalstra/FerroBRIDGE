@@ -46,6 +46,18 @@ second.
 - **`load`** runs all of it over one file or a set, indexed by mapping name and
   archetype through the shared registry.
 
+## The resolve and engine modules
+
+`omocl::resolve::compile` binds a loaded set to one template: every file at
+every archetype root it maps, each `Include` below its including root, each
+`CustomMapping` to its converter, every path checked against the Web
+Template. `omocl::engine::run` walks one canonical composition with the
+program into an `omop_cdm::graph::RecordGraph` of typed CDM v5.4 rows under
+natural keys, with `FACT_RELATIONSHIP` links, and the refused records and
+unread elements in the graph's report. Concepts come from any
+`ConceptSource`, so the SQL resolver of `omop-cdm` and a test stub plug in
+alike.
+
 199 of the 208 files of the vendored library load; the nine it refuses are
 pinned by the tests with the defect each carries.
 

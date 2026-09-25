@@ -109,8 +109,7 @@ impl Command {
     #[must_use]
     pub const fn pending_issue(&self) -> Option<u32> {
         match self {
-            Self::Serve | Self::Cdm { .. } => None,
-            Self::Etl { .. } => Some(90),
+            Self::Serve | Self::Cdm { .. } | Self::Etl { .. } => None,
             Self::Vocab { .. } => Some(233),
             Self::Mapping { .. } => Some(82),
         }
@@ -250,9 +249,9 @@ mod tests {
             },
         };
         assert_eq!(
-            Some(90),
+            None,
             etl.pending_issue(),
-            "the runner waits on the OMOCL engine"
+            "the runner maps with the OMOCL engine"
         );
         assert_eq!("etl run", etl.spelling());
         assert_eq!(

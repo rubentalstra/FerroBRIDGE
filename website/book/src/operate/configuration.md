@@ -142,15 +142,20 @@ by EHR and source, each visit spanning the earliest start to the latest end.
 
 ### `[mappings]`
 
-The FHIRconnect mapping set this deployment runs. The facade, the two
-FHIRconnect operations and the mapping subcommands read the same set. The set
+The mapping sets this deployment runs. The facade, the two FHIRconnect
+operations and the mapping subcommands read the FHIRconnect set in
+`directory`; `etl run` reads the OMOCL set in `omocl`. The FHIRconnect set
 and its templates are read once at boot, and a mapping that does not compile
-refuses the start rather than the first request that touches it.
+refuses the start rather than the first request that touches it. The OMOCL
+set is read once when `etl run` starts and compiled against each template
+the first time a composition of it arrives, because an OMOCL file names an
+archetype and no template.
 
 | Key | Default | Meaning |
 |---|---|---|
 | `directory` | none | The directory the mapping files are read from, recursively (`.yml`, `.yaml`) |
 | `templates` | none | The directory holding the operational templates the two operations compile against, as OPT 1.4 XML (`.opt`) |
+| `omocl` | none | The directory the OMOCL files `ferrobridge etl run` maps with are read from, recursively (`.yml`, `.yaml`); read and validated once at start, and every file an `Include` names must be in it |
 
 The facade always takes its templates from the CDR and needs `directory`
 alone. The two FHIRconnect operations take theirs from one of two sources:

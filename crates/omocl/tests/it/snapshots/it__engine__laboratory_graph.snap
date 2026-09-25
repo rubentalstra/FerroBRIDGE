@@ -1,0 +1,40 @@
+---
+source: crates/omocl/tests/it/engine.rs
+expression: render(&graph)?
+---
+measurement composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1]/ Laboratory_test_analyte_v1#0.0 (Laboratory_test_analyte_v1)
+  measurement_concept_id = 1001
+  measurement_date = 2026-09-20
+  measurement_datetime = 2026-09-20T09:15:00
+  measurement_source_concept_id = 1001
+  measurement_source_value = "SYN-LAB-1"
+  measurement_type_concept_id = 7001
+  person_id = person ehr-synthetic-1
+  unit_concept_id = 3001
+  unit_source_concept_id = 3001
+  unit_source_value = "mmol/L"
+  value_as_number = 7.25
+  value_source_value = "7.25"
+  visit_occurrence_id = visit visit-synthetic-1
+measurement composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 2]/ Laboratory_test_analyte_v1#0.0 (Laboratory_test_analyte_v1)
+  measurement_concept_id = 1002
+  measurement_date = 2026-09-20
+  measurement_datetime = 2026-09-20T08:00:00
+  measurement_source_concept_id = 2001
+  measurement_source_value = "SYN-LAB-2"
+  measurement_type_concept_id = 7001
+  person_id = person ehr-synthetic-1
+  unit_concept_id = 0
+  unit_source_value = "g/L"
+  value_as_number = 140.0
+  value_source_value = "140"
+  visit_occurrence_id = visit visit-synthetic-1
+specimen composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1]/ Specimen_v1#0.0 (Specimen_v1)
+  person_id = person ehr-synthetic-1
+  specimen_concept_id = 4001
+  specimen_date = 2026-09-20
+  specimen_datetime = 2026-09-20T08:30:00
+  specimen_source_value = "SYN-SPEC-1"
+  specimen_type_concept_id = 7001
+link measurement composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1]/ Laboratory_test_analyte_v1#0.0 [9011] <-> specimen composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1]/ Specimen_v1#0.0 [9016]
+link measurement composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 2]/ Laboratory_test_analyte_v1#0.0 [9011] <-> specimen composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1]/ Specimen_v1#0.0 [9016]

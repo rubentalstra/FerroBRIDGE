@@ -1,0 +1,30 @@
+---
+source: crates/omocl/tests/it/resolve.rs
+expression: program.to_string()
+---
+program ferrobridge.laboratory_report.v1
+  scope Laboratory_test_result_v1 (openEHR-EHR-OBSERVATION.laboratory_test_result.v1) at /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
+    include#0 openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 up 0 down data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]
+      scope Laboratory_test_analyte_v1 (openEHR-EHR-CLUSTER.laboratory_test_analyte.v1) at /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]
+        record#0 Measurement
+          concept_id: path up 0 down items[at0024]
+          measurement_date: path up 0 down items[at0025] | path up 2 down . | path up 3 down .
+          operator_concept_id optional: path up 0 down items[at0001]
+          range_high optional: path up 0 down items[at0001]
+          range_low optional: path up 0 down items[at0001]
+          unit optional: path up 0 down items[at0001]
+          value: path up 0 down items[at0001]
+    include#1 openEHR-EHR-CLUSTER.specimen.v1 up 0 down data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.specimen.v1]
+      scope Specimen_v1 (openEHR-EHR-CLUSTER.specimen.v1) at /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.specimen.v1]
+        record#0 Specimen
+          anatomic_site_concept optional: unbound `/items[at0013]/items[openEHR-EHR-CLUSTER.anatomical_location.v1]/items[at0001]`
+          concept_id: path up 0 down items[at0029] | unbound `/items[at0098]`
+          quantity optional: unbound `/items[at0099]`
+          specimen_date: path up 0 down items[at0034]
+          specimen_source_id optional: unbound `/items[at0001]`
+    custom#3 FactRelationshipCustomConverter
+  unbound Specimen_v1#0 anatomic_site_concept `/items[at0013]/items[openEHR-EHR-CLUSTER.anatomical_location.v1]/items[at0001]` below /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.specimen.v1]
+  unbound Specimen_v1#0 concept_id `/items[at0098]` below /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.specimen.v1]
+  unbound Specimen_v1#0 quantity `/items[at0099]` below /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.specimen.v1]
+  unbound Specimen_v1#0 specimen_source_id `/items[at0001]` below /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.specimen.v1]
+  unbound Laboratory_test_result_v1#2 Include `/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.laboratory_test_panel.v0]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]` below /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]

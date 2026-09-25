@@ -36,6 +36,10 @@ serde-saphyr = { version = "1.3.0", default-features = false, features = ["deser
 # schemas are self-contained, so no remote or file reference resolver is built.
 jsonschema = { version = "0.57.0", default-features = false }
 thiserror = "2.0.21"
+# The exact decimal the OMOCL `multiplication` product and every DV_QUANTITY
+# magnitude are carried in, so no factor passes through a float. Verified
+# against crates.io on 2026-09-25.
+rust_decimal = { version = "1.43.0", default-features = false, features = ["std"] }
 # The lexical form of each FHIR primitive: the generated codec compiles the
 # `regex` extension of the primitive's value element and checks a decoded value
 # against it, and the generator compiles every form it writes. Verified against
@@ -73,6 +77,9 @@ ferrobridge-term = { path = "crates/ferrobridge-term" }
 # The FHIRconnect language crate: the facade and the operations surface are
 # its two in-process consumers, so the requirement is path-only too.
 fhirconnect = { path = "crates/fhirconnect" }
+# The OMOCL language crate: the ETL runner is its one in-process consumer, so
+# the requirement is path-only too.
+omocl = { path = "crates/omocl" }
 # The openEHR model, from the published crates (docs/architecture.md section 3).
 # openehr-its is the ITS wire layer: the OPT 1.4 reader (`opt14`), canonical
 # JSON (`json`) and the generated ITS-REST 1.1.0 contract (`rest-server`), the

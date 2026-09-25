@@ -210,7 +210,7 @@ pub enum WriteError {
         /// The table.
         table: &'static str,
         /// The key.
-        key: RecordKey,
+        key: Box<RecordKey>,
     },
     /// The CDM metadata has no table the writer names.
     #[error("the CDM metadata refused a table the writer names")]
@@ -472,8 +472,11 @@ fn bridge_ddl(bridge: &SchemaName) -> String {
                 cdm_table text NOT NULL,
                 ehr_id text NOT NULL,
                 mapping text NOT NULL,
+                entry integer NOT NULL,
+                branch integer NOT NULL,
                 surrogate_id integer NOT NULL,
-                PRIMARY KEY (versioned_object_uid, archetype_root_path, occurrence_path, cdm_table),
+                PRIMARY KEY (versioned_object_uid, archetype_root_path, occurrence_path,
+                    mapping, entry, branch, cdm_table),
                 UNIQUE (cdm_table, surrogate_id))"
         ),
         format!(
@@ -857,11 +860,7 @@ async fn assign_ids<'g>(
         let key = row.key();
         let id = if table == "person" {
             person_id(transaction, bridge, key.ehr_id(), true).await?
-        } else if let Some(id) = earlier.ids.get(&(
-            table,
-            key.archetype_root_path().as_str().to_owned(),
-            key.occurrence_path().as_str().to_owned(),
-        )) {
+        } else if let Some(id) = earlier.ids.get(&EarlierKey::of(table, key)) {
             *id
         } else {
             allocate(transaction, bridge, table).await?
@@ -893,7 +892,7 @@ async fn stage_graph(
             .copied()
             .ok_or_else(|| WriteError::UnknownRow {
                 table: table.name,
-                key: row.key().clone(),
+                key: Box::new(row.key().clone()),
             })?;
         let mut values = BTreeMap::from([(key_column.name, Staged::Integer(Some(id)))]);
         let mut concept_zero: BTreeMap<&'static str, u64> = BTreeMap::new();
@@ -927,10 +926,36 @@ async fn stage_graph(
     Ok(tables)
 }
 
+/// One natural key as the side table holds it.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct EarlierKey {
+    table: &'static str,
+    root: String,
+    occurrence: String,
+    mapping: String,
+    entry: i32,
+    branch: i32,
+}
+
+impl EarlierKey {
+    /// Returns the side table key of `key` in `table`.
+    fn of(table: &'static str, key: &RecordKey) -> Self {
+        let discriminator = key.discriminator();
+        Self {
+            table,
+            root: key.archetype_root_path().as_str().to_owned(),
+            occurrence: key.occurrence_path().as_str().to_owned(),
+            mapping: discriminator.mapping().as_str().to_owned(),
+            entry: i32::from(discriminator.entry()),
+            branch: i32::from(discriminator.branch()),
+        }
+    }
+}
+
 /// The rows an earlier version of a composition wrote, from the side table.
 struct Earlier {
-    /// The id of each natural key, by table, archetype root and occurrence.
-    ids: BTreeMap<(&'static str, String, String), i32>,
+    /// The id of each natural key.
+    ids: BTreeMap<EarlierKey, i32>,
 }
 
 /// Reads the side table rows of `versioned_object_uid`.
@@ -942,7 +967,8 @@ async fn earlier_rows(
     let rows = transaction
         .query(
             &format!(
-                "SELECT cdm_table, archetype_root_path, occurrence_path, surrogate_id
+                "SELECT cdm_table, archetype_root_path, occurrence_path, mapping, entry, branch,
+                    surrogate_id
                  FROM {bridge}.record WHERE versioned_object_uid = $1"
             ),
             &[&versioned_object_uid],
@@ -954,7 +980,10 @@ async fn earlier_rows(
         let table: String = row.try_get(0).map_err(database(Step::Read))?;
         let root: String = row.try_get(1).map_err(database(Step::Read))?;
         let occurrence: String = row.try_get(2).map_err(database(Step::Read))?;
-        let id: i32 = row.try_get(3).map_err(database(Step::Read))?;
+        let mapping: String = row.try_get(3).map_err(database(Step::Read))?;
+        let entry: i32 = row.try_get(4).map_err(database(Step::Read))?;
+        let branch: i32 = row.try_get(5).map_err(database(Step::Read))?;
+        let id: i32 = row.try_get(6).map_err(database(Step::Read))?;
         let meta = graph::cdm_table(&table)
             .ok()
             .filter(|meta| graph::primary_key(meta).is_some())
@@ -962,7 +991,17 @@ async fn earlier_rows(
                 what: "a CDM table with an integer key",
                 value: table.clone(),
             })?;
-        ids.insert((meta.name, root, occurrence), id);
+        ids.insert(
+            EarlierKey {
+                table: meta.name,
+                root,
+                occurrence,
+                mapping,
+                entry,
+                branch,
+            },
+            id,
+        );
     }
     Ok(Earlier { ids })
 }
@@ -977,8 +1016,8 @@ async fn delete_earlier(
     earlier: &Earlier,
 ) -> Result<(), WriteError> {
     let mut by_table: BTreeMap<&'static str, Vec<i32>> = BTreeMap::new();
-    for ((table, _, _), id) in &earlier.ids {
-        by_table.entry(table).or_default().push(*id);
+    for (key, id) in &earlier.ids {
+        by_table.entry(key.table).or_default().push(*id);
     }
     for (table, ids) in &by_table {
         let meta = graph::cdm_table(table)?;
@@ -1036,6 +1075,8 @@ async fn record_keys(
 ) -> Result<(), WriteError> {
     let mut columns: [Vec<&str>; 6] = Default::default();
     let mut surrogate = Vec::new();
+    let mut entries: Vec<i32> = Vec::new();
+    let mut branches: Vec<i32> = Vec::new();
     for row in graph.rows() {
         let key = row.key();
         let [vo, root, occurrence, table, ehr, mapping] = &mut columns;
@@ -1044,13 +1085,15 @@ async fn record_keys(
         occurrence.push(key.occurrence_path().as_str());
         table.push(row.table().name);
         ehr.push(key.ehr_id().as_str());
-        mapping.push(row.mapping().as_str());
+        mapping.push(key.discriminator().mapping().as_str());
+        entries.push(i32::from(key.discriminator().entry()));
+        branches.push(i32::from(key.discriminator().branch()));
         let id =
             ids.get(&(row.table().name, key))
                 .copied()
                 .ok_or_else(|| WriteError::UnknownRow {
                     table: row.table().name,
-                    key: key.clone(),
+                    key: Box::new(key.clone()),
                 })?;
         surrogate.push(id);
     }
@@ -1059,11 +1102,13 @@ async fn record_keys(
         .execute(
             &format!(
                 "INSERT INTO {bridge}.record (versioned_object_uid, archetype_root_path,
-                    occurrence_path, cdm_table, ehr_id, mapping, surrogate_id)
+                    occurrence_path, cdm_table, ehr_id, mapping, entry, branch, surrogate_id)
                  SELECT * FROM UNNEST($1::text[], $2::text[], $3::text[], $4::text[],
-                    $5::text[], $6::text[], $7::integer[])"
+                    $5::text[], $6::text[], $7::integer[], $8::integer[], $9::integer[])"
             ),
-            &[vo, root, occurrence, table, ehr, mapping, &surrogate],
+            &[
+                vo, root, occurrence, table, ehr, mapping, &entries, &branches, &surrogate,
+            ],
         )
         .await
         .map_err(database(Step::Record))?;
@@ -1085,7 +1130,7 @@ async fn write_links(
             .copied()
             .ok_or_else(|| WriteError::UnknownRow {
                 table: end.table().name,
-                key: end.key().clone(),
+                key: Box::new(end.key().clone()),
             })
     };
     let mut rows = Vec::new();
@@ -1193,7 +1238,8 @@ impl Resolver<'_, '_> {
                         &format!(
                             "SELECT surrogate_id FROM {}.record
                              WHERE versioned_object_uid = $1 AND archetype_root_path = $2
-                               AND occurrence_path = $3 AND cdm_table = $4",
+                               AND occurrence_path = $3 AND cdm_table = $4
+                               AND mapping = $5 AND entry = $6 AND branch = $7",
                             self.bridge
                         ),
                         &[
@@ -1201,6 +1247,9 @@ impl Resolver<'_, '_> {
                             &key.archetype_root_path().as_str(),
                             &key.occurrence_path().as_str(),
                             &table.name,
+                            &key.discriminator().mapping().as_str(),
+                            &i32::from(key.discriminator().entry()),
+                            &i32::from(key.discriminator().branch()),
                         ],
                     )
                     .await
@@ -1209,7 +1258,7 @@ impl Resolver<'_, '_> {
                     Some(row) => row.try_get(0).map_err(database(Step::Read)),
                     None => Err(WriteError::UnknownRow {
                         table: table.name,
-                        key: key.clone(),
+                        key: Box::new(key.clone()),
                     }),
                 }
             }

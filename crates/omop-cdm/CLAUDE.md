@@ -55,8 +55,11 @@ Full discipline: `.claude/rules/codegen.md`.
 - The generated row structs carry `i32` surrogate keys, which a graph does not
   have yet, so a graph row is a column-keyed cell map checked against
   `ColumnMeta`. Never fill a key with a placeholder to reuse the structs.
-- `database`, `vocabulary`, `writer` and `derived` sit behind the default
-  `database` feature. `cargo hack check --each-feature -p omop-cdm` stays
+- `database`, `writer`, `derived` and the SQL half of `vocabulary`
+  (`ConceptResolver`, `LookupError`, `ResolveError::Query`) sit behind the
+  default `database` feature; the plain vocabulary types (`SourceKey`,
+  `Resolution`, `ConceptId` and the rest) compile always so the engine names
+  them. `cargo hack check --each-feature -p omop-cdm` stays
   green; a test that needs PostgreSQL is gated with
   `#[cfg(feature = "database")]` in `tests/it/main.rs`.
 - The writer owns one `tokio-postgres` connection and every statement of a

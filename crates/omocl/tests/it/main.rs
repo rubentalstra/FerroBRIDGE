@@ -9,8 +9,11 @@
 
 mod corpus;
 mod domain;
+mod engine;
+mod lab;
 mod pins;
 mod projection;
 mod refusals;
+mod resolve;
 mod snapshots;
 mod support;

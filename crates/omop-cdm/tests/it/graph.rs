@@ -6,9 +6,9 @@
 //! required column, and a graph holds only its own composition's rows.
 
 use omop_cdm::graph::{
-    ArchetypeRootPath, EhrId, GraphError, Link, LinkEnd, MappingName, OccurrencePath, RecordGraph,
-    RecordKey, Reference, Refusal, Row, RowBuilder, Source, Value, VersionUid, VersionedObjectUid,
-    Visit, VisitKey, VisitSource,
+    ArchetypeRootPath, Discriminator, EhrId, GraphError, Link, LinkEnd, MappingName,
+    OccurrencePath, RecordGraph, RecordKey, Reference, Refusal, Row, RowBuilder, Source, Value,
+    VersionUid, VersionedObjectUid, Visit, VisitKey, VisitSource,
 };
 use omop_cdm::value::CdmDate;
 use std::error::Error;
@@ -26,19 +26,16 @@ fn key(occurrence: &str) -> Result<RecordKey, Box<dyn Error>> {
         VersionedObjectUid::new(COMPOSITION)?,
         ArchetypeRootPath::new("/content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]")?,
         OccurrencePath::new(occurrence)?,
+        Discriminator::new(MappingName::new("Laboratory_test_analyte_v1")?, 0, 0),
     ))
 }
 
 /// Returns a measurement builder with every required column but the date.
 fn measurement(occurrence: &str) -> Result<RowBuilder, Box<dyn Error>> {
-    Ok(Row::builder(
-        "measurement",
-        key(occurrence)?,
-        MappingName::new("Laboratory_test_analyte_v1")?,
-    )?
-    .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
-    .value("measurement_concept_id", Value::Integer(1001))?
-    .value("measurement_type_concept_id", Value::Integer(32817))?)
+    Ok(Row::builder("measurement", key(occurrence)?)?
+        .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+        .value("measurement_concept_id", Value::Integer(1001))?
+        .value("measurement_type_concept_id", Value::Integer(32817))?)
 }
 
 /// Returns the graph of the synthetic composition.
@@ -88,8 +85,7 @@ fn a_missing_required_date_refuses_the_row_and_names_the_column() -> Result<(), 
 #[test]
 fn a_table_outside_the_cdm_schema_is_refused() -> Result<(), Box<dyn Error>> {
     for table in ["concept", "cohort", "no_such_table"] {
-        let error = Row::builder(table, key("/")?, MappingName::new("m")?)
-            .expect_err("only CDM-schema tables take rows");
+        let error = Row::builder(table, key("/")?).expect_err("only CDM-schema tables take rows");
         assert!(
             matches!(error, GraphError::UnknownTable { .. }),
             "{table}: {error:?}"
@@ -107,8 +103,7 @@ fn fact_relationship_and_the_derived_tables_take_no_rows() -> Result<(), Box<dyn
         "drug_era",
         "dose_era",
     ] {
-        let error = Row::builder(table, key("/")?, MappingName::new("m")?)
-            .expect_err("the writer owns these tables");
+        let error = Row::builder(table, key("/")?).expect_err("the writer owns these tables");
         assert!(
             matches!(error, GraphError::NotWritable { .. }),
             "{table}: {error:?}"
@@ -204,11 +199,7 @@ fn a_reference_must_fit_the_columns_foreign_key() -> Result<(), Box<dyn Error>> 
         ("measurement_source_value", visit.clone()),
         ("visit_occurrence_id", Reference::Row(key("/")?)),
     ];
-    let builder = Row::builder(
-        "measurement",
-        key("/")?,
-        MappingName::new("Laboratory_test_analyte_v1")?,
-    )?;
+    let builder = Row::builder("measurement", key("/")?)?;
     for (column, reference) in refused {
         let error = builder
             .clone()
@@ -230,8 +221,9 @@ fn a_graph_refuses_a_row_of_another_composition() -> Result<(), Box<dyn Error>> 
         VersionedObjectUid::new("another-composition")?,
         ArchetypeRootPath::new("/content[x]")?,
         OccurrencePath::new("/")?,
+        Discriminator::new(MappingName::new("Laboratory_test_analyte_v1")?, 0, 0),
     );
-    let row = Row::builder("measurement", other, MappingName::new("m")?)?
+    let row = Row::builder("measurement", other)?
         .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
         .value("measurement_concept_id", Value::Integer(1001))?
         .value("measurement_date", date("2026-06-15")?)?

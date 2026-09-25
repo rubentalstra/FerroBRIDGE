@@ -19,6 +19,7 @@
 //! `fetch` paging.
 
 pub mod aql;
+pub mod mapper;
 pub mod report;
 pub mod visits;
 
