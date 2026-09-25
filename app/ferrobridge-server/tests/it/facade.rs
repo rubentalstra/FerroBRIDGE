@@ -1747,6 +1747,68 @@ async fn a_contribution_that_cannot_be_read_back_is_a_typed_failure_and_its_retr
 }
 
 #[tokio::test]
+async fn a_single_create_of_a_committed_unbound_entry_binds_from_the_read_back_and_commits_nothing()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/contribution/{CONTRIBUTION}"
+        )))
+        .respond_with(ferrobridge_testkit::stubs::its_rest::not_found(
+            "the contribution is not readable yet",
+        ))
+        .up_to_n_times(1)
+        .with_priority(1)
+        .mount(&harness.cdr)
+        .await;
+    mount_echo(&harness.cdr, ECHOED, Echo::Minimal).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[("urn:uuid:0000-good", condition())]),
+    )
+    .await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    let source = condition_source()?;
+    assert_eq!(None, harness.store.consumed(&source)?);
+    assert!(harness.store.committed(&source)?.is_some());
+
+    let response = raw(harness.app(), post_condition(&condition())).await?;
+    let status = response.status();
+    let location = response
+        .headers()
+        .get(header::LOCATION)
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
+    let bytes = axum::body::to_bytes(response.into_body(), 1024 * 1024).await?;
+    assert_eq!(
+        StatusCode::OK,
+        status,
+        "{}",
+        String::from_utf8_lossy(&bytes)
+    );
+    assert_eq!(CONTAINER, bound_container(&harness, location.as_deref())?);
+    let rendered: serde_json::Value = serde_json::from_slice(&bytes)?;
+    assert_eq!(Some("Condition"), rendered["resourceType"].as_str());
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "one contribution across both deliveries"
+    );
+    assert_eq!(
+        0,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/composition"))
+            .await,
+        "the single create commits nothing"
+    );
+    assert!(harness.store.consumed(&source)?.is_some());
+    Ok(())
+}
+
+#[tokio::test]
 async fn a_batch_bundle_is_not_supported_in_this_milestone() -> Result<(), Box<dyn StdError>> {
     let harness = harness().await;
     // FHIR JSON forbids an empty array (<https://hl7.org/fhir/R4/json.html>),

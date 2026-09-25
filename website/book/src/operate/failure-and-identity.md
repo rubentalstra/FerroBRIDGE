@@ -70,7 +70,16 @@ The CDR does not say in which order it lists the versions of a contribution.
 After the commit, FerroBRIDGE reads each version back and matches it to the
 entry it came from by the `FEEDER_AUDIT` the engine wrote: the item's type,
 its id and its version. Where several entries name the same item, as the
-entries of one message do, the composition content decides. A version that
+entries of one message do, the composition content decides. That comparison
+masks what two mappings of one entry can differ in without the source
+changing: the composition `uid` the CDR assigns, and every time the engine
+filled from its clock because no mapping wrote it. The engine reads the clock
+once per resource and hands that instant to the builder as the `ctx/time`
+default, which fills `EVENT_CONTEXT.start_time`, `HISTORY.origin`,
+`EVENT.time` and `ACTION.time` where the mapping left them empty (ITS-REST
+Simplified Formats, master06 §time). Each `DV_DATE_TIME` whose value is that
+instant is left out of the comparison, so a Bundle mapped again at a later
+instant still matches the compositions its first delivery stored. A version that
 matches no entry or more than one refuses the answer with a `500` that names
 the contribution, and no binding is recorded.
 
@@ -86,6 +95,14 @@ read back or bound is a `500` naming the contribution, and the recorded uid
 stays. When you send the same Bundle again, the facade finds that uid,
 commits nothing, reads the contribution back and binds from it, and answers
 `200 OK` for each entry as for any re-sent Bundle.
+
+A single create shares that rule. When you `POST` a resource whose `id` and
+`meta.versionId` a transaction committed and did not finish binding, the
+facade reads the recorded contribution back, finds the version whose
+`FEEDER_AUDIT` names the resource, binds it, commits nothing, and answers
+`200 OK` with the composition the first delivery produced. The other versions
+of that contribution belong to the transaction's other entries and are passed
+over.
 
 On the OMOP side every CDM v5.4 primary key is a 32-bit integer, so ids come
 from database sequences and a bridge-owned side table maps each source record
