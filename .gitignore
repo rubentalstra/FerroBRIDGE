@@ -60,3 +60,11 @@ fuzz/coverage/
 # (.claude/rules/vendored-inputs.md).
 /tools/fhir-codegen/vendor/hl7-v2ig/*
 !/tools/fhir-codegen/vendor/hl7-v2ig/PROVENANCE.md
+
+# The HL7 v2 message sets scripts/vendor/hl7v2-samples.sh --build-time fetches.
+# Neither repository grants redistribution, so only each PROVENANCE.md is
+# committed (.claude/rules/vendored-inputs.md).
+/crates/ferrobridge-hl7v2/vendor/nist/*
+!/crates/ferrobridge-hl7v2/vendor/nist/PROVENANCE.md
+/crates/ferrobridge-hl7v2/vendor/aira-mqe/*
+!/crates/ferrobridge-hl7v2/vendor/aira-mqe/PROVENANCE.md

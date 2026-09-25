@@ -39,7 +39,9 @@
 #                          against the product version and the workspace
 #                          version.
 #   9. vendored corpora    every docs/specs/*/PROVENANCE.md, the vendored
-#                          fixtures and the build-time HL7 v2 definitions name
+#                          fixtures, the HL7 v2 message sets under
+#                          crates/ferrobridge-hl7v2/vendor/ and the
+#                          build-time HL7 v2 definitions name
 #                          the commit or tag the docs/VERSIONS.md corpus row
 #                          pins for them, and every sha256 or tree digest the
 #                          row records.
@@ -531,7 +533,14 @@ docs/specs/omop-cdm|OMOP CDM definitions and PostgreSQL DDL
 docs/specs/its-rest|openEHR ITS-REST OpenAPI
 tools/ferrobridge-testkit/fixtures/opt/kds|KDS Diagnose operational template (fixture)
 tools/fhir-codegen/vendor/hl7-v2ig|HL7 v2 definitions (v2ig source of truth, never committed)
-tools/fhir-codegen/vendor/hl7-v2ig|HL7 v2+ licence page"
+tools/fhir-codegen/vendor/hl7-v2ig|HL7 v2+ licence page
+crates/ferrobridge-hl7v2/vendor/fhir-converter|HL7 v2 samples: Microsoft FHIR-Converter
+crates/ferrobridge-hl7v2/vendor/reportstream|HL7 v2 samples: CDC ReportStream data tests
+crates/ferrobridge-hl7v2/vendor/v2-to-fhir|HL7 v2 samples: HL7 v2-to-FHIR benchmark messages
+crates/ferrobridge-hl7v2/vendor/nist|HL7 v2 samples: NIST LRI (build time, never committed)
+crates/ferrobridge-hl7v2/vendor/nist|HL7 v2 samples: NIST LOI (build time, never committed)
+crates/ferrobridge-hl7v2/vendor/nist|HL7 v2 samples: NIST syndromic surveillance (build time, never committed)
+crates/ferrobridge-hl7v2/vendor/aira-mqe|HL7 v2 samples: AIRA MQE (build time, never committed)"
 
 if [ -f docs/VERSIONS.md ]; then
   agreed=0

@@ -161,8 +161,9 @@ the testkit tool crate. Beside it:
   claims a licence other than `BUSL-1.1`; `crate-version-guard.sh`, the crate
   bump rule; `favicon-sync.sh`, the book theme favicon against the brand mark;
   `pin-freshness.sh`, every pin no ecosystem watches against its newest
-  upstream release; and `conformance.sh`, the pass-list gate over the four
-  corpora under `conformance/` (a regression fails, a new pass asks for the
+  upstream release; and `conformance.sh`, the pass-list gate over the six
+  corpora under `conformance/` (the HL7 v2 messages count twice: the vendored
+  sets and the build-time smoke sets) (a regression fails, a new pass asks for the
   list, `--update` rewrites the lists and the shields.io badge JSON).
 - `.github/`: issue and pull-request templates, CODEOWNERS, Dependabot, and
   ten workflows (CI, Docs, Scorecard, CodeQL, SonarQube Cloud, Release,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
-# The conformance gate (#24): runs the four corpus tests, compares what they
+# The conformance gate (#24): runs the six corpus tests, compares what they
 # measured with the committed pass lists under conformance/, and renders one
 # shields.io endpoint badge per corpus (https://shields.io/badges/endpoint-badge).
 #
@@ -17,12 +17,17 @@
 # disagrees with its list, and a README badge naming no committed badge fail
 # too, because the list is what the ratchet protects.
 #
-# Needs cargo, cargo-nextest and jq. Exit 0 when clean, 1 on a regression or
-# (under --check) drift, 2 on a usage error or a missing result.
+# The hl7v2-smoke corpus reads the NIST and AIRA sets, which it fetches first
+# through scripts/vendor/hl7v2-samples.sh --build-time (a no-op when they are
+# on disk at their pins).
+#
+# Needs cargo, cargo-nextest, jq, and the tools that script needs. Exit 0 when
+# clean, 1 on a regression or (under --check) drift, 2 on a usage error, a
+# missing result or a failed fetch.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-readonly CORPORA=(fhirconnect-mapping-lib omocl roundtrip draft-rest-api)
+readonly CORPORA=(fhirconnect-mapping-lib omocl roundtrip draft-rest-api hl7v2 hl7v2-smoke)
 readonly OUT=target/conformance
 readonly BADGES=conformance/badges
 
@@ -44,6 +49,8 @@ label_of() {
     omocl) echo "OMOCL mapping library" ;;
     roundtrip) echo "FHIR round-trip laws" ;;
     draft-rest-api) echo "FHIRconnect REST API (draft)" ;;
+    hl7v2) echo "HL7 v2 message corpora" ;;
+    hl7v2-smoke) echo "HL7 v2 smoke corpora (NIST, AIRA)" ;;
     *) return 1 ;;
   esac
 }
@@ -82,8 +89,14 @@ export FERROBRIDGE_CONFORMANCE_OUT="$PWD/$OUT"
 if [[ "$mode" = update ]]; then
   export FERROBRIDGE_CONFORMANCE_UPDATE=1
 fi
+# The hl7v2-smoke corpus reads the HL7 v2 sets fetched at build time; the
+# script keeps a tree already at its pinned digest without a download.
+if ! scripts/vendor/hl7v2-samples.sh --build-time; then
+  echo "conformance: the build-time HL7 v2 sets could not be fetched" >&2
+  exit 2
+fi
 # One package per invocation, as the CI test lane runs them.
-for package in fhirconnect omocl; do
+for package in fhirconnect omocl ferrobridge-hl7v2; do
   if ! cargo nextest run --locked -p "$package" --no-tests=fail --no-fail-fast \
     -E 'test(/^[a-z_]+::conformance_/)'; then
     echo "conformance: a $package corpus test failed; a case its list records no longer passes"
@@ -136,7 +149,7 @@ done
 
 # Every conformance badge the README shows names a committed badge file, and
 # every corpus has one on the README.
-readme_badges="$(grep -oE 'conformance%2Fbadges%2F[a-z-]+\.json' README.md | sed 's/.*%2F//' || true)"
+readme_badges="$(grep -oE 'conformance%2Fbadges%2F[a-z0-9-]+\.json' README.md | sed 's/.*%2F//' || true)"
 for corpus in "${CORPORA[@]}"; do
   if ! grep -qx "$corpus.json" <<<"$readme_badges"; then
     echo "conformance: README.md shows no badge for $corpus"

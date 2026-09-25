@@ -42,6 +42,28 @@ crates on crates.io.
   `Message.structure` profile URLs, and the 34 message definitions that name
   no structure; a conformance length without `length` is tolerated in `CP`,
   `ERL`, `MO` and `MOP` beside `MSH`.
+- HL7 v2 message corpora for the v2 face, and their corpus test (#292).
+  `scripts/vendor/hl7v2-samples.sh` vendors three sets verbatim under
+  `crates/ferrobridge-hl7v2/vendor/`, each with its `PROVENANCE.md` and
+  upstream `LICENSE`: the Microsoft FHIR-Converter samples with their expected
+  R4 Bundles (MIT, 139 messages), the CDC ReportStream data tests (CC0-1.0, 364
+  `.hl7` files), and the HL7 v2-to-FHIR benchmark page, from which the script
+  extracts the seven benchmark messages into derived files (Apache-2.0). With
+  `--build-time` it fetches the NIST LRI, LOI and syndromic surveillance test
+  bundles and the AIRA MQE examples into ignored directories, as
+  `scripts/vendor/v2ig.sh` does, since neither repository carries a licence.
+  The crate's `include` keeps every vendored file out of the package. The
+  corpus test runs every message from an MLLP frame through decoding, parsing,
+  the v2-to-FHIR interpreter (with the table maps answered from the guide's own
+  maps) to an R4 Bundle, records every counted outcome, and counts each
+  difference from an expected Bundle as a corpus gap, a supplement (#256), a
+  candidate defect or a value beyond the oracle. Two pass lists and badges
+  join the conformance gate: `hl7v2` (8 of 511 today) and `hl7v2-smoke` (26 of
+  379, the fetched sets). The testkit's `Case` carries per-case outcome counts
+  into the result the gate reads, `pin-freshness.sh` reads the seven new
+  commit pins against the head of their branches, and the `test` and
+  `conformance` jobs restore the build-time sets from a cache keyed on their
+  pins.
 - The ITS-REST client reads a contribution back, and a transaction survives a
   retry after its binding failed (#270). `ferrobridge-openehr` gains
   `Client::contribution` for `GET /ehr/{ehr_id}/contribution/{contribution_uid}`
