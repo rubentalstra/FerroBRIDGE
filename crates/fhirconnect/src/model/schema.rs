@@ -20,11 +20,10 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use openehr_mapping_core::diagnostic::Diagnostic;
-use openehr_mapping_core::diagnostic::ModelPath;
 use openehr_mapping_core::header::MappingType;
 use openehr_mapping_core::loader::MappingDocument;
-use openehr_mapping_core::position::Position;
-use openehr_mapping_core::value::MappingValue;
+use openehr_mapping_core::schema::locate;
+use openehr_mapping_core::schema::to_json;
 use openehr_mapping_core::value::PositionedValue;
 
 use crate::model::error::ModelCode;
@@ -147,73 +146,6 @@ fn compile_one(source: &str, kind: SchemaKind) -> Result<jsonschema::Validator, 
         })
 }
 
-/// Projects a positioned YAML tree into JSON for the validation call.
-///
-/// Returns the position of the offending node when the tree holds a float
-/// JSON cannot represent, which is the only value the projection can refuse.
-fn to_json(node: &PositionedValue) -> Result<serde_json::Value, Position> {
-    match *node.value() {
-        MappingValue::Null => Ok(serde_json::Value::Null),
-        MappingValue::Bool(value) => Ok(serde_json::Value::Bool(value)),
-        MappingValue::Signed(value) => Ok(serde_json::Value::Number(value.into())),
-        MappingValue::Unsigned(value) => Ok(serde_json::Value::Number(value.into())),
-        MappingValue::Float(value) => serde_json::Number::from_f64(value.get())
-            .map(serde_json::Value::Number)
-            .ok_or_else(|| node.position()),
-        MappingValue::Text(ref value) => Ok(serde_json::Value::String(value.clone())),
-        MappingValue::Sequence(ref items) => items
-            .iter()
-            .map(to_json)
-            .collect::<Result<Vec<serde_json::Value>, Position>>()
-            .map(serde_json::Value::Array),
-        MappingValue::Mapping(ref entries) => {
-            let mut object = serde_json::Map::with_capacity(entries.len());
-            for (key, entry) in entries {
-                object.insert(key.clone(), to_json(entry.value())?);
-            }
-            Ok(serde_json::Value::Object(object))
-        }
-    }
-}
-
-/// Resolves a JSON Pointer against the positioned tree.
-///
-/// Returns the model path of the pointer and the position of the deepest node
-/// it reaches, so a schema error about `/mappings/3/link` points at the `link`
-/// key rather than at the document root. The pointer grammar is RFC 6901
-/// (<https://www.rfc-editor.org/rfc/rfc6901>): `~1` is `/` and `~0` is `~`.
-fn locate(root: &PositionedValue, pointer: &str) -> (ModelPath, Position) {
-    let mut path = ModelPath::root();
-    let mut node = root;
-    let mut position = root.position();
-    for raw in pointer.split('/').skip(1) {
-        let token = raw.replace("~1", "/").replace("~0", "~");
-        match node.value() {
-            MappingValue::Mapping(_) => {
-                let Some(entry) = node.entry(&token) else {
-                    break;
-                };
-                path = path.field(&token);
-                position = entry.key_position();
-                node = entry.value();
-            }
-            MappingValue::Sequence(items) => {
-                let Ok(index) = token.parse::<usize>() else {
-                    break;
-                };
-                let Some(item) = items.get(index) else {
-                    break;
-                };
-                path = path.index(index);
-                position = item.position();
-                node = item;
-            }
-            _ => break,
-        }
-    }
-    (path, position)
-}
-
 /// The two schemas FHIRconnect publishes.
 ///
 /// The published schemas are vendored under `docs/specs/fhirconnect/`, outside
@@ -302,10 +234,10 @@ mod tests {
     use openehr_mapping_core::loader::load_str;
     use openehr_mapping_core::position::Position;
 
-    use super::locate;
     use super::strict;
     use crate::model::error::ModelCode;
     use crate::model::error::SchemaKind;
+    use openehr_mapping_core::schema::locate;
 
     const MODEL: &str = "grammar: FHIRConnect/v1.0.0\ntype: model\nmetadata:\n  name: \
                          EVALUATION.test.v1\n  version: 1.0.0\nspec:\n  system: FHIR\n  version: \

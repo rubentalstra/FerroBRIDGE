@@ -1,0 +1,13 @@
+---
+source: crates/omocl/tests/it/snapshots.rs
+expression: render(&file)?
+---
+Laboratory_test_result_v1 1.0.0 archetype=openEHR-EHR-OBSERVATION.laboratory_test_result.v1 @10:16
+spec Omop V5_4 @7:3
+include openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 @13:5
+  base_path /data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1] @14:16
+include openEHR-EHR-CLUSTER.specimen.v1 @17:5
+  base_path /data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.specimen.v1] @18:16
+include openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 @21:5
+  base_path /data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.laboratory_test_panel.v0]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1] @22:16
+custom FactRelationshipCustomConverter @26:11

@@ -114,6 +114,6 @@ fn the_omocl_corpus_has_no_repeated_name() -> Result<(), Box<dyn Error>> {
         }
     }
     assert_eq!(refused, Vec::<String>::new());
-    assert_eq!(registry.len(), 201);
+    assert_eq!(registry.len(), 206);
     Ok(())
 }

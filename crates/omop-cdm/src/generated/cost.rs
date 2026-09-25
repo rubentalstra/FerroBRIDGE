@@ -273,6 +273,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: true,
         primary_key: true,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -282,6 +283,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -291,6 +293,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("domain", "domain_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -300,6 +303,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -309,6 +313,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -318,6 +323,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -327,6 +333,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -336,6 +343,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -345,6 +353,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -354,6 +363,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -363,6 +373,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -372,6 +383,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -381,6 +393,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -390,6 +403,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -399,6 +413,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -408,6 +423,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -417,6 +433,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -426,6 +443,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -435,6 +453,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -444,6 +463,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -453,6 +473,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -462,6 +483,7 @@ pub static COST_COLUMNS: [crate::meta::ColumnMeta; 22] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
 ];

@@ -56,6 +56,7 @@ pub static CONCEPT_CLASS_COLUMNS: [crate::meta::ColumnMeta; 3] = [
         required: true,
         primary_key: true,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -65,6 +66,7 @@ pub static CONCEPT_CLASS_COLUMNS: [crate::meta::ColumnMeta; 3] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -74,6 +76,7 @@ pub static CONCEPT_CLASS_COLUMNS: [crate::meta::ColumnMeta; 3] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
 ];

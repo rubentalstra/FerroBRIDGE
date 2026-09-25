@@ -1,0 +1,327 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ferrobridge.eu/schemas/omocl/v1.0.0/omocl-mapping.schema.json",
+  "title": "OMOCL v1.0.0 mapping file",
+  "description": "An OMOCL mapping file, authored by FerroBRIDGE because OMOCL publishes no schema. Read from the OMOCL railroad images and syntax tables (https://github.com/SevKohler/OMOCL/wiki/Syntax-and-grammar) and from the OMOCL mapping library. Closed at every level; the keys of each CDM target are the keys of the omocl crate's projection table.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["grammar", "metadata", "spec", "mappings"],
+  "properties": {
+    "grammar": { "const": "OMOCL/v1.0.0" },
+    "type": { "const": "model" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string" }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "version", "openEhrConfig"],
+      "properties": {
+        "system": { "const": "OMOP" },
+        "version": { "enum": [5.4, "5.4"] },
+        "openEhrConfig": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["archetype"],
+          "properties": {
+            "archetype": { "$ref": "#/definitions/archetypeId" }
+          }
+        }
+      }
+    },
+    "mappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/entity" }
+    }
+  },
+  "definitions": {
+    "archetypeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*-[A-Za-z][A-Za-z0-9_]*-[A-Za-z][A-Za-z0-9_]*\\.[A-Za-z][A-Za-z0-9_]*(-[A-Za-z][A-Za-z0-9_]*)*\\.v(0|[1-9][0-9]*)$"
+    },
+    "path": { "type": "string", "minLength": 1 },
+    "conceptId": {
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647
+    },
+    "alternative": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path"],
+          "properties": { "path": { "$ref": "#/definitions/path" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code"],
+          "properties": { "code": { "$ref": "#/definitions/conceptId" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["conceptMap"],
+          "properties": {
+            "conceptMap": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "mapping"],
+              "properties": {
+                "path": { "$ref": "#/definitions/path" },
+                "mapping": {
+                  "type": "object",
+                  "minProperties": 1,
+                  "propertyNames": { "pattern": "^at[0-9]{4}(\\.[0-9]+)*$" },
+                  "additionalProperties": { "$ref": "#/definitions/conceptId" }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["multiplication"],
+          "properties": {
+            "multiplication": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["path"],
+                    "properties": { "path": { "$ref": "#/definitions/path" } }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["code"],
+                    "properties": { "code": { "type": "integer" } }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "column": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alternatives"],
+      "properties": {
+        "optional": { "type": "boolean" },
+        "alternatives": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/alternative" }
+        }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": [
+            "Measurement",
+            "Observation",
+            "DrugExposure",
+            "ConditionOccurrence",
+            "ProcedureOccurrence",
+            "DeviceExposure",
+            "Specimen",
+            "Visit",
+            "Death",
+            "Person",
+            "Include",
+            "CustomMapping"
+          ]
+        }
+      },
+      "allOf": [
+        { "if": { "required": ["type"], "properties": { "type": { "const": "Measurement" } } }, "then": { "$ref": "#/definitions/Measurement" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "Observation" } } }, "then": { "$ref": "#/definitions/Observation" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "DrugExposure" } } }, "then": { "$ref": "#/definitions/DrugExposure" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "ConditionOccurrence" } } }, "then": { "$ref": "#/definitions/ConditionOccurrence" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "ProcedureOccurrence" } } }, "then": { "$ref": "#/definitions/ProcedureOccurrence" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "DeviceExposure" } } }, "then": { "$ref": "#/definitions/DeviceExposure" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "Specimen" } } }, "then": { "$ref": "#/definitions/Specimen" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "Visit" } } }, "then": { "$ref": "#/definitions/Visit" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "Death" } } }, "then": { "$ref": "#/definitions/Death" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "Person" } } }, "then": { "$ref": "#/definitions/Person" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "Include" } } }, "then": { "$ref": "#/definitions/Include" } },
+        { "if": { "required": ["type"], "properties": { "type": { "const": "CustomMapping" } } }, "then": { "$ref": "#/definitions/CustomMapping" } }
+      ]
+    },
+    "Measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Measurement" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "concept_id": { "$ref": "#/definitions/column" },
+        "measurement_date": { "$ref": "#/definitions/column" },
+        "operator_concept_id": { "$ref": "#/definitions/column" },
+        "range_high": { "$ref": "#/definitions/column" },
+        "range_low": { "$ref": "#/definitions/column" },
+        "unit": { "$ref": "#/definitions/column" },
+        "value": { "$ref": "#/definitions/column" }
+      }
+    },
+    "Observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Observation" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "concept_id": { "$ref": "#/definitions/column" },
+        "observation_date": { "$ref": "#/definitions/column" },
+        "qualifier": { "$ref": "#/definitions/column" },
+        "unit": { "$ref": "#/definitions/column" },
+        "value": { "$ref": "#/definitions/column" }
+      }
+    },
+    "DrugExposure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "DrugExposure" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "concept_id": { "$ref": "#/definitions/column" },
+        "days_supply": { "$ref": "#/definitions/column" },
+        "dose_unit_source_value": { "$ref": "#/definitions/column" },
+        "drug_exposure_end_date": { "$ref": "#/definitions/column" },
+        "drug_exposure_start_date": { "$ref": "#/definitions/column" },
+        "lot_number": { "$ref": "#/definitions/column" },
+        "provider_id": { "$ref": "#/definitions/column" },
+        "quantity": { "$ref": "#/definitions/column" },
+        "refills": { "$ref": "#/definitions/column" },
+        "route_concept_id": { "$ref": "#/definitions/column" },
+        "sig": { "$ref": "#/definitions/column" },
+        "stop_reason": { "$ref": "#/definitions/column" },
+        "verbatim_end_date": { "$ref": "#/definitions/column" }
+      }
+    },
+    "ConditionOccurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "ConditionOccurrence" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "concept_id": { "$ref": "#/definitions/column" },
+        "condition_end_date": { "$ref": "#/definitions/column" },
+        "condition_start_date": { "$ref": "#/definitions/column" },
+        "condition_status_concept_id": { "$ref": "#/definitions/column" },
+        "provider_id": { "$ref": "#/definitions/column" },
+        "stop_reason": { "$ref": "#/definitions/column" },
+        "visit_detail_id": { "$ref": "#/definitions/column" }
+      }
+    },
+    "ProcedureOccurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "ProcedureOccurrence" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "concept_id": { "$ref": "#/definitions/column" },
+        "modifier": { "$ref": "#/definitions/column" },
+        "procedure_date": { "$ref": "#/definitions/column" },
+        "procedure_end_date": { "$ref": "#/definitions/column" },
+        "procedure_start_date": { "$ref": "#/definitions/column" },
+        "provider_id": { "$ref": "#/definitions/column" },
+        "quantity": { "$ref": "#/definitions/column" }
+      }
+    },
+    "DeviceExposure": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "DeviceExposure" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "concept_id": { "$ref": "#/definitions/column" },
+        "device_exposure_end_date": { "$ref": "#/definitions/column" },
+        "device_exposure_start_date": { "$ref": "#/definitions/column" },
+        "production_id": { "$ref": "#/definitions/column" },
+        "unique_device_id": { "$ref": "#/definitions/column" },
+        "visit_detail_id": { "$ref": "#/definitions/column" }
+      }
+    },
+    "Specimen": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Specimen" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "anatomic_site_concept": { "$ref": "#/definitions/column" },
+        "concept_id": { "$ref": "#/definitions/column" },
+        "quantity": { "$ref": "#/definitions/column" },
+        "specimen_date": { "$ref": "#/definitions/column" },
+        "specimen_source_id": { "$ref": "#/definitions/column" }
+      }
+    },
+    "Visit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Visit" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "end_datetime": { "$ref": "#/definitions/column" },
+        "start_datetime": { "$ref": "#/definitions/column" },
+        "visit_concept": { "$ref": "#/definitions/column" }
+      }
+    },
+    "Death": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Death" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "cause": { "$ref": "#/definitions/column" },
+        "death_date": { "$ref": "#/definitions/column" }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Person" },
+        "base_path": { "$ref": "#/definitions/path" },
+        "birth_datetime": { "$ref": "#/definitions/column" },
+        "ethnicity_concept_id": { "$ref": "#/definitions/column" },
+        "gender_concept": { "$ref": "#/definitions/column" },
+        "year_of_birth": { "$ref": "#/definitions/column" }
+      }
+    },
+    "Include": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "archetype_id"],
+      "properties": {
+        "type": { "const": "Include" },
+        "archetype_id": { "$ref": "#/definitions/archetypeId" },
+        "base_path": { "$ref": "#/definitions/path" }
+      }
+    },
+    "CustomMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name"],
+      "properties": {
+        "type": { "const": "CustomMapping" },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

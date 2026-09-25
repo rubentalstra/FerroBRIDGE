@@ -1,0 +1,16 @@
+---
+source: crates/omocl/tests/it/corpus.rs
+expression: rendered
+---
+ConditionOccurrence: concept_id, condition_end_date, condition_start_date, condition_status_concept_id, provider_id, type, visit_detail_id
+CustomMapping: name, type
+Death: death_date, type
+DeviceExposure: concept_id, device_exposure_end_date, device_exposure_start_date, production_id, type, unique_device_id, visit_detail_id
+DrugExposure: base_path, concept_id, drug_exposure_end_date, drug_exposure_start_date, provider_id, quantity, route_concept_id, type
+Include: archetype_id, base_path, type
+Measurement: base_path, concept_id, measurement_date, operator_concept_id, qualifier, range_high, range_low, type, unit, value
+Observation: concept_id, observation_date, qualifier, type, unit, value
+Person: birth_datetime, ethnicity_concept_id, gender_concept, type, year_of_birth
+ProcedureOccurrence: base_path, concept_id, procedure_end_date, procedure_start_date, type
+Specimen: anatomic_site_concept, concept_id, quantity, specimen_date, specimen_source_id, type
+Visit: end_datetime, start_datetime, type, visit_concept

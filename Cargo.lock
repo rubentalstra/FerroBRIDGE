@@ -2351,6 +2351,13 @@ name = "omocl"
 version = "0.0.0"
 dependencies = [
  "ferrobridge-testkit",
+ "insta",
+ "jsonschema",
+ "omop-cdm",
+ "openehr-mapping-core",
+ "serde_json",
+ "tempfile",
+ "thiserror",
 ]
 
 [[package]]

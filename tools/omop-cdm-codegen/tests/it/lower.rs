@@ -137,3 +137,35 @@ fn a_quoted_column_name_loses_its_sql_quoting() -> Result<(), Box<dyn Error>> {
     );
     Ok(())
 }
+
+#[test]
+fn a_concept_column_carries_the_domain_its_definition_names() -> Result<(), Box<dyn Error>> {
+    let model = model()?;
+    let domain = |table_name: &str, column_name: &str| -> Result<Option<String>, String> {
+        let table = model
+            .tables
+            .iter()
+            .find(|table| table.name == table_name)
+            .ok_or_else(|| format!("no {table_name} table"))?;
+        let column = table
+            .columns
+            .iter()
+            .find(|column| column.name == column_name)
+            .ok_or_else(|| format!("no {table_name}.{column_name} column"))?;
+        Ok(column.fk_domain.clone())
+    };
+    assert_eq!(
+        domain("measurement", "measurement_concept_id")?.as_deref(),
+        Some("Measurement")
+    );
+    assert_eq!(
+        domain("drug_exposure", "drug_type_concept_id")?.as_deref(),
+        Some("Type Concept")
+    );
+    assert_eq!(
+        domain("observation", "observation_concept_id")?,
+        None,
+        "a definition that writes `NA` lowers to no domain"
+    );
+    Ok(())
+}

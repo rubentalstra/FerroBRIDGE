@@ -127,6 +127,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -136,6 +137,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -145,6 +147,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -154,6 +157,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -163,6 +167,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -172,6 +177,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("vocabulary", "vocabulary_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -181,6 +187,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -190,6 +197,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -199,6 +207,7 @@ pub static SOURCE_TO_CONCEPT_MAP_COLUMNS: [crate::meta::ColumnMeta; 9] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
 ];

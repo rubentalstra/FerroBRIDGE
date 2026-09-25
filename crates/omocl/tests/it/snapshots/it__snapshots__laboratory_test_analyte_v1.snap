@@ -1,0 +1,23 @@
+---
+source: crates/omocl/tests/it/snapshots.rs
+expression: render(&file)?
+---
+Laboratory_test_analyte_v1 1.0.0 archetype=openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 @10:17
+spec Omop V5_4 @7:3
+record Measurement @13:5
+  concept_id optional=false @14:5
+    path /items[at0024] @16:17
+  measurement_date optional=false @17:5
+    path /items[at0025] @19:17
+    path ../.. @20:17
+    path ../../.. @21:17
+  operator_concept_id optional=true @34:5
+    path /items[at0001] @36:21
+  range_high optional=true @31:5
+    path /items[at0001] @33:21
+  range_low optional=true @28:5
+    path /items[at0001] @30:21
+  unit optional=true @25:5
+    path /items[at0001] @27:21
+  value optional=false @22:5
+    path /items[at0001] @24:17

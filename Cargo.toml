@@ -60,6 +60,7 @@ sha2 = "0.11.0"
 # version: cargo resolves the path locally and the version on crates.io.
 fhir-types = { path = "crates/fhir-types", version = "0.1.106", default-features = false }
 openehr-mapping-core = { path = "crates/openehr-mapping-core", version = "0.0.0" }
+omop-cdm = { path = "crates/omop-cdm", version = "0.0.0" }
 # Path-only, with no version: cargo strips the dev-dependency from a packaged
 # crates/* manifest instead of looking it up on crates.io.
 ferrobridge-testkit = { path = "tools/ferrobridge-testkit" }

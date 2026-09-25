@@ -245,8 +245,8 @@ fn the_omocl_corpus_carries_its_full_yaml_corpus() -> Result<(), Box<dyn Error>>
     let files = files_under(&repo_root().join("docs/specs/omocl"))?;
     assert_eq!(
         count_with_extension(&files, &["yml", "yaml"]),
-        202,
-        "the OMOCL corpus is pinned at 202 mapping files"
+        208,
+        "the OMOCL corpus is pinned at 208 mapping files"
     );
     Ok(())
 }

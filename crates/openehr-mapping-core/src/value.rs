@@ -92,8 +92,8 @@ impl fmt::Display for ValueKind {
 /// One resolved YAML node.
 ///
 /// Numbers keep the widest form the parser resolved them into rather than one
-/// common numeric type, so a 64-bit OMOP `concept_id` survives the load
-/// unchanged.
+/// common numeric type, so a number such as an OMOP `concept_id` survives the
+/// load unchanged.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MappingValue {
     /// The YAML null, and the value of a key written with no value at all.
