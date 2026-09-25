@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RDF` segment: Table Row Definition.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `RDF` segment definition, `http://hl7.org/v2/StructureDefinition/RDF`.
 pub static RDF: Segment = Segment {
@@ -16,7 +19,7 @@ pub static RDF: Segment = Segment {
             id: "RDF.1-numberOfColumnsPerRow",
             position: 1,
             name: "Number of Columns per Row",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static RDF: Segment = Segment {
             id: "RDF.2-columnDescription",
             position: 2,
             name: "Column Description",
-            data_type: Some("RCD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::rcd::RCD)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,

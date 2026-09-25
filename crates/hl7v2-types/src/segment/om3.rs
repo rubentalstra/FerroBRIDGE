@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OM3` segment: Categorical Service/Test/Observation.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `OM3` segment definition, `http://hl7.org/v2/StructureDefinition/OM3`.
@@ -18,7 +19,7 @@ pub static OM3: Segment = Segment {
             id: "OM3.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static OM3: Segment = Segment {
             id: "OM3.2-preferredCodingSystem",
             position: 2,
             name: "Preferred Coding System",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static OM3: Segment = Segment {
             id: "OM3.3-validCodedAnswers",
             position: 3,
             name: "Valid Coded \"Answers\"",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -72,7 +73,7 @@ pub static OM3: Segment = Segment {
             id: "OM3.4-normalTextCodesForCategoricalObservations",
             position: 4,
             name: "Normal Text/Codes for Categorical Observations",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -90,7 +91,7 @@ pub static OM3: Segment = Segment {
             id: "OM3.5-abnormalTextCodesForCategoricalObservations",
             position: 5,
             name: "Abnormal Text/Codes for Categorical Observations",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -108,7 +109,7 @@ pub static OM3: Segment = Segment {
             id: "OM3.6-criticalTextCodesForCategoricalObservations",
             position: 6,
             name: "Critical Text/Codes for Categorical Observations",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -126,7 +127,7 @@ pub static OM3: Segment = Segment {
             id: "OM3.7-valueType",
             position: 7,
             name: "Value Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

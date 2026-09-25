@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IN3` segment: Insurance Additional Information, Certification.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConditionalCode, ConformanceLength, Field, Length, Max, Optionality, Segment,
-    Table,
+    Cardinality, ConditionalCode, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality,
+    Segment, Table,
 };
 
 /// The `IN3` segment definition, `http://hl7.org/v2/StructureDefinition/IN3`.
@@ -19,7 +20,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.1-setId",
             position: 1,
             name: "Set ID - IN3",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.2-certificationNumber",
             position: 2,
             name: "Certification Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.3-certifiedBy",
             position: 3,
             name: "Certified By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -67,7 +68,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.4-certificationRequired",
             position: 4,
             name: "Certification Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.5-penalty",
             position: 5,
             name: "Penalty",
-            data_type: Some("MOP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mop::MOP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.6-certificationDateTime",
             position: 6,
             name: "Certification Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.7-certificationModifyDateTime",
             position: 7,
             name: "Certification Modify Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.8-operator",
             position: 8,
             name: "Operator",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -148,7 +149,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.9-certificationBeginDate",
             position: 9,
             name: "Certification Begin Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.10-certificationEndDate",
             position: 10,
             name: "Certification End Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +179,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.11-days",
             position: 11,
             name: "Days",
-            data_type: Some("DTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtn::DTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +194,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.12-nonConcurCodeDescription",
             position: 12,
             name: "Non-Concur Code/Description",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +212,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.13-nonConcurEffectiveDateTime",
             position: 13,
             name: "Non-Concur Effective Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -226,7 +227,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.14-physicianReviewer",
             position: 14,
             name: "Physician Reviewer",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -244,7 +245,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.15-certificationContact",
             position: 15,
             name: "Certification Contact",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -262,7 +263,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.16-certificationContactPhoneNumber",
             position: 16,
             name: "Certification Contact Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +278,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.17-appealReason",
             position: 17,
             name: "Appeal Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.18-certificationAgency",
             position: 18,
             name: "Certification Agency",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +314,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.19-certificationAgencyPhoneNumber",
             position: 19,
             name: "Certification Agency Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -328,7 +329,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.20-preCertificationRequirement",
             position: 20,
             name: "Pre-Certification Requirement",
-            data_type: Some("ICD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::icd::ICD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -346,7 +347,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.21-caseManager",
             position: 21,
             name: "Case Manager",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +365,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.22-secondOpinionDate",
             position: 22,
             name: "Second Opinion Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +380,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.23-secondOpinionStatus",
             position: 23,
             name: "Second Opinion Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +398,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.24-secondOpinionDocumentationReceived",
             position: 24,
             name: "Second Opinion Documentation Received",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -415,7 +416,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.25-secondOpinionPhysician",
             position: 25,
             name: "Second Opinion Physician",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -433,7 +434,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.26-certificationType",
             position: 26,
             name: "Certification Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -451,7 +452,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.27-certificationCategory",
             position: 27,
             name: "Certification Category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -469,7 +470,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.28-onlineVerificationDateTime",
             position: 28,
             name: "Online Verification Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -484,7 +485,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.29-onlineVerificationResult",
             position: 29,
             name: "Online Verification Result",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -505,7 +506,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.30-onlineVerificationResultErrorCode",
             position: 30,
             name: "Online Verification Result Error Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -526,7 +527,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.31-onlineVerificationResultCheckDigit",
             position: 31,
             name: "Online Verification Result Check Digit",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

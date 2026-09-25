@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PKG` segment: Packaging.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PKG` segment definition, `http://hl7.org/v2/StructureDefinition/PKG`.
@@ -18,7 +19,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.1-setId",
             position: 1,
             name: "Set Id - PKG",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.2-packagingUnits",
             position: 2,
             name: "Packaging Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.3-defaultOrderUnitOfMeasureIndicator",
             position: 3,
             name: "Default Order Unit Of Measure Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.4-packageQuantity",
             position: 4,
             name: "Package Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.5-price",
             position: 5,
             name: "Price",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -105,7 +106,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.6-futureItemPrice",
             position: 6,
             name: "Future Item Price",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.7-futureItemPriceEffectiveDate",
             position: 7,
             name: "Future Item Price Effective Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -135,7 +136,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.8-globalTradeItemNumber",
             position: 8,
             name: "Global Trade Item Number",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -150,7 +151,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.9-contractPrice",
             position: 9,
             name: "Contract Price",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.10-quantityOfEach",
             position: 10,
             name: "Quantity of Each",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -180,7 +181,7 @@ pub static PKG: Segment = Segment {
             id: "PKG.11-vendorCatalogNumber",
             position: 11,
             name: "Vendor Catalog Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

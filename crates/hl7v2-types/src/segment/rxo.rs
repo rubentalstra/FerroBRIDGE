@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXO` segment: Pharmacy/Treatment Order.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `RXO` segment definition, `http://hl7.org/v2/StructureDefinition/RXO`.
@@ -19,7 +20,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.1-requestedGiveCode",
             position: 1,
             name: "Requested Give Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.2-requestedGiveAmountMinimum",
             position: 2,
             name: "Requested Give Amount - Minimum",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.3-requestedGiveAmountMaximum",
             position: 3,
             name: "Requested Give Amount - Maximum",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.4-requestedGiveUnits",
             position: 4,
             name: "Requested Give Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.5-requestedDosageForm",
             position: 5,
             name: "Requested Dosage Form",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.6-providersPharmacyTreatmentInstructions",
             position: 6,
             name: "Provider's Pharmacy/Treatment Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -121,7 +122,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.7-providersAdministrationInstructions",
             position: 7,
             name: "Provider's Administration Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -154,7 +155,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.9-allowSubstitutions",
             position: 9,
             name: "Allow Substitutions",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +176,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.10-requestedDispenseCode",
             position: 10,
             name: "Requested Dispense Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +194,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.11-requestedDispenseAmount",
             position: 11,
             name: "Requested Dispense Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +209,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.12-requestedDispenseUnits",
             position: 12,
             name: "Requested Dispense Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -226,7 +227,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.13-numberOfRefills",
             position: 13,
             name: "Number Of Refills",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +260,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.15-pharmacistTreatmentSuppliersVerifierId",
             position: 15,
             name: "Pharmacist/Treatment Supplier's Verifier ID",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -274,7 +275,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.16-needsHumanReview",
             position: 16,
             name: "Needs Human Review",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.17-requestedGivePerTimeUnit",
             position: 17,
             name: "Requested Give Per (Time Unit)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +314,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.18-requestedGiveStrength",
             position: 18,
             name: "Requested Give Strength",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +329,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.19-requestedGiveStrengthUnits",
             position: 19,
             name: "Requested Give Strength Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +347,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.20-indication",
             position: 20,
             name: "Indication",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -364,7 +365,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.21-requestedGiveRateAmount",
             position: 21,
             name: "Requested Give Rate Amount",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -382,7 +383,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.22-requestedGiveRateUnits",
             position: 22,
             name: "Requested Give Rate Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -400,7 +401,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.23-totalDailyDose",
             position: 23,
             name: "Total Daily Dose",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -415,7 +416,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.24-supplementaryCode",
             position: 24,
             name: "Supplementary Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -433,7 +434,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.25-requestedDrugStrengthVolume",
             position: 25,
             name: "Requested Drug Strength Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -451,7 +452,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.26-requestedDrugStrengthVolumeUnits",
             position: 26,
             name: "Requested Drug Strength Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -469,7 +470,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.27-pharmacyOrderType",
             position: 27,
             name: "Pharmacy Order Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -490,7 +491,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.28-dispensingInterval",
             position: 28,
             name: "Dispensing Interval",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -505,7 +506,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.29-medicationInstanceIdentifier",
             position: 29,
             name: "Medication Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +521,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.30-segmentInstanceIdentifier",
             position: 30,
             name: "Segment Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -535,7 +536,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.31-moodCode",
             position: 31,
             name: "Mood Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -553,7 +554,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.32-dispensingPharmacy",
             position: 32,
             name: "Dispensing Pharmacy",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -571,7 +572,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.33-dispensingPharmacyAddress",
             position: 33,
             name: "Dispensing Pharmacy Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -586,7 +587,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.34-deliverToPatientLocation",
             position: 34,
             name: "Deliver-to Patient Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -601,7 +602,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.35-deliverToAddress",
             position: 35,
             name: "Deliver-to Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -616,7 +617,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.36-pharmacyPhoneNumber",
             position: 36,
             name: "Pharmacy Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

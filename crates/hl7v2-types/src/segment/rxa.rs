@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXA` segment: Pharmacy/Treatment Administration.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `RXA` segment definition, `http://hl7.org/v2/StructureDefinition/RXA`.
@@ -19,7 +20,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.1-giveSubIdCounter",
             position: 1,
             name: "Give Sub-ID Counter",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.2-administrationSubIdCounter",
             position: 2,
             name: "Administration Sub-ID Counter",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.3-dateTimeStartOfAdministration",
             position: 3,
             name: "Date/Time Start of Administration",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.4-dateTimeEndOfAdministration",
             position: 4,
             name: "Date/Time End of Administration",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.5-administeredCode",
             position: 5,
             name: "Administered Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.6-administeredAmount",
             position: 6,
             name: "Administered Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.7-administeredUnits",
             position: 7,
             name: "Administered Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.8-administeredDosageForm",
             position: 8,
             name: "Administered Dosage Form",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.9-administrationNotes",
             position: 9,
             name: "Administration Notes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -202,7 +203,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.12-administeredPerTimeUnit",
             position: 12,
             name: "Administered Per (Time Unit)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +221,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.13-administeredStrength",
             position: 13,
             name: "Administered Strength",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.14-administeredStrengthUnits",
             position: 14,
             name: "Administered Strength Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +254,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.15-substanceNumber",
             position: 15,
             name: "Substance  Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -271,7 +272,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.16-substanceExpirationDate",
             position: 16,
             name: "Substance Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -286,7 +287,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.17-substanceManufacturerName",
             position: 17,
             name: "Substance Manufacturer Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -301,7 +302,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.18-substanceTreatmentRefusalReason",
             position: 18,
             name: "Substance/Treatment Refusal Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -319,7 +320,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.19-indication",
             position: 19,
             name: "Indication",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -337,7 +338,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.20-completionStatus",
             position: 20,
             name: "Completion Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -358,7 +359,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.21-actionCode",
             position: 21,
             name: "Action Code – RXA",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +380,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.22-systemEntryDateTime",
             position: 22,
             name: "System Entry Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -394,7 +395,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.23-administeredDrugStrengthVolume",
             position: 23,
             name: "Administered Drug Strength Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -412,7 +413,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.24-administeredDrugStrengthVolumeUnits",
             position: 24,
             name: "Administered Drug Strength Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -430,7 +431,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.25-administeredBarcodeIdentifier",
             position: 25,
             name: "Administered Barcode Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -448,7 +449,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.26-pharmacyOrderType",
             position: 26,
             name: "Pharmacy Order Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -469,7 +470,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.27-administerAt",
             position: 27,
             name: "Administer-at",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -484,7 +485,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.28-administeredAtAddress",
             position: 28,
             name: "Administered-at Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -499,7 +500,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.29-administeredTagIdentifier",
             position: 29,
             name: "Administered Tag Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

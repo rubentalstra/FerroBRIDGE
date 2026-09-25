@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `GSR` segment: Recorded Gender and Sex.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `GSR` segment definition, `http://hl7.org/v2/StructureDefinition/GSR`.
 pub static GSR: Segment = Segment {
@@ -16,7 +17,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.3-gsrInstanceIdentifier",
             position: 3,
             name: "GSR Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.4-recordedGenderOrSex",
             position: 4,
             name: "Recorded Gender or Sex",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.5-sourceDocumentFieldLabel",
             position: 5,
             name: "Source Document Field Label",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.6-sourceDocumentTypeForRecordedSexOrGender",
             position: 6,
             name: "Source Document Type for Recorded Sex or Gender",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.7-sourceDocumentJurisdictionForRecordedSexOrGender",
             position: 7,
             name: "Source Document Jurisdiction for Recorded Sex or Gender",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +140,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.8-acquisitionDate",
             position: 8,
             name: "Acquisition Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.9-validityPeriod",
             position: 9,
             name: "Validity Period",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +170,7 @@ pub static GSR: Segment = Segment {
             id: "GSR.10-comment",
             position: 10,
             name: "Comment",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

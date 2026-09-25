@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OM5` segment: Observation Batteries (Sets).
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `OM5` segment definition, `http://hl7.org/v2/StructureDefinition/OM5`.
 pub static OM5: Segment = Segment {
@@ -16,7 +19,7 @@ pub static OM5: Segment = Segment {
             id: "OM5.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static OM5: Segment = Segment {
             id: "OM5.2-testObservationsIncludedWithinAnOrderedTestBattery",
             position: 2,
             name: "Test/Observations Included Within an Ordered Test Battery",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +55,7 @@ pub static OM5: Segment = Segment {
             id: "OM5.3-observationIdSuffixes",
             position: 3,
             name: "Observation ID Suffixes",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DON` segment: Donation.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `DON` segment definition, `http://hl7.org/v2/StructureDefinition/DON`.
@@ -18,7 +19,7 @@ pub static DON: Segment = Segment {
             id: "DON.1-donationIdentificationNumberDin",
             position: 1,
             name: "Donation Identification Number - DIN",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static DON: Segment = Segment {
             id: "DON.2-donationType",
             position: 2,
             name: "Donation Type",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -48,7 +49,7 @@ pub static DON: Segment = Segment {
             id: "DON.3-phlebotomyStartDateTime",
             position: 3,
             name: "Phlebotomy Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -63,7 +64,7 @@ pub static DON: Segment = Segment {
             id: "DON.4-phlebotomyEndDateTime",
             position: 4,
             name: "Phlebotomy End Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -78,7 +79,7 @@ pub static DON: Segment = Segment {
             id: "DON.5-donationDuration",
             position: 5,
             name: "Donation Duration",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -93,7 +94,7 @@ pub static DON: Segment = Segment {
             id: "DON.6-donationDurationUnits",
             position: 6,
             name: "Donation Duration Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -111,7 +112,7 @@ pub static DON: Segment = Segment {
             id: "DON.7-intendedProcedureType",
             position: 7,
             name: "Intended Procedure Type",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -129,7 +130,7 @@ pub static DON: Segment = Segment {
             id: "DON.8-actualProcedureType",
             position: 8,
             name: "Actual Procedure Type",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -147,7 +148,7 @@ pub static DON: Segment = Segment {
             id: "DON.9-donorEligibilityFlag",
             position: 9,
             name: "Donor Eligibility Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static DON: Segment = Segment {
             id: "DON.10-donorEligibilityProcedureType",
             position: 10,
             name: "Donor Eligibility Procedure Type",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -183,7 +184,7 @@ pub static DON: Segment = Segment {
             id: "DON.11-donorEligibilityDate",
             position: 11,
             name: "Donor Eligibility Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -198,7 +199,7 @@ pub static DON: Segment = Segment {
             id: "DON.12-processInterruption",
             position: 12,
             name: "Process Interruption",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -216,7 +217,7 @@ pub static DON: Segment = Segment {
             id: "DON.13-processInterruptionReason",
             position: 13,
             name: "Process Interruption Reason",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static DON: Segment = Segment {
             id: "DON.14-phlebotomyIssue",
             position: 14,
             name: "Phlebotomy Issue",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -252,7 +253,7 @@ pub static DON: Segment = Segment {
             id: "DON.15-intendedRecipientBloodRelative",
             position: 15,
             name: "Intended Recipient Blood Relative",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -270,7 +271,7 @@ pub static DON: Segment = Segment {
             id: "DON.16-intendedRecipientName",
             position: 16,
             name: "Intended Recipient Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -285,7 +286,7 @@ pub static DON: Segment = Segment {
             id: "DON.17-intendedRecipientDob",
             position: 17,
             name: "Intended Recipient DOB",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -300,7 +301,7 @@ pub static DON: Segment = Segment {
             id: "DON.18-intendedRecipientFacility",
             position: 18,
             name: "Intended Recipient Facility",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -315,7 +316,7 @@ pub static DON: Segment = Segment {
             id: "DON.19-intendedRecipientProcedureDate",
             position: 19,
             name: "Intended Recipient Procedure Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -330,7 +331,7 @@ pub static DON: Segment = Segment {
             id: "DON.20-intendedRecipientOrderingProvider",
             position: 20,
             name: "Intended Recipient Ordering Provider",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -345,7 +346,7 @@ pub static DON: Segment = Segment {
             id: "DON.21-phlebotomyStatus",
             position: 21,
             name: "Phlebotomy Status",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -363,7 +364,7 @@ pub static DON: Segment = Segment {
             id: "DON.22-armStick",
             position: 22,
             name: "Arm Stick",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -381,7 +382,7 @@ pub static DON: Segment = Segment {
             id: "DON.23-bleedStartPhlebotomist",
             position: 23,
             name: "Bleed Start Phlebotomist",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -396,7 +397,7 @@ pub static DON: Segment = Segment {
             id: "DON.24-bleedEndPhlebotomist",
             position: 24,
             name: "Bleed End Phlebotomist",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -411,7 +412,7 @@ pub static DON: Segment = Segment {
             id: "DON.25-aphaeresisTypeMachine",
             position: 25,
             name: "Aphaeresis Type Machine",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -429,7 +430,7 @@ pub static DON: Segment = Segment {
             id: "DON.26-aphaeresisMachineSerialNumber",
             position: 26,
             name: "Aphaeresis Machine Serial Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -447,7 +448,7 @@ pub static DON: Segment = Segment {
             id: "DON.27-donorReaction",
             position: 27,
             name: "Donor Reaction",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -465,7 +466,7 @@ pub static DON: Segment = Segment {
             id: "DON.28-finalReviewStaffId",
             position: 28,
             name: "Final Review Staff ID",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -480,7 +481,7 @@ pub static DON: Segment = Segment {
             id: "DON.29-finalReviewDateTime",
             position: 29,
             name: "Final Review Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -495,7 +496,7 @@ pub static DON: Segment = Segment {
             id: "DON.30-numberOfTubesCollected",
             position: 30,
             name: "Number of Tubes Collected",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -510,7 +511,7 @@ pub static DON: Segment = Segment {
             id: "DON.31-donationSampleIdentifier",
             position: 31,
             name: "Donation Sample Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -525,7 +526,7 @@ pub static DON: Segment = Segment {
             id: "DON.32-donationAcceptStaff",
             position: 32,
             name: "Donation Accept Staff",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -540,7 +541,7 @@ pub static DON: Segment = Segment {
             id: "DON.33-donationMaterialReviewStaff",
             position: 33,
             name: "Donation Material Review Staff",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -555,7 +556,7 @@ pub static DON: Segment = Segment {
             id: "DON.34-actionCode",
             position: 34,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

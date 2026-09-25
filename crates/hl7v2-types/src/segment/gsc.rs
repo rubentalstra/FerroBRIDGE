@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `GSC` segment: Sex Parameter for Clinical Use.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `GSC` segment definition, `http://hl7.org/v2/StructureDefinition/GSC`.
 pub static GSC: Segment = Segment {
@@ -16,7 +17,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.3-gscInstanceIdentifier",
             position: 3,
             name: "GSC Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.4-sexParameterForClinicalUse",
             position: 4,
             name: "Sex Parameter for Clinical Use",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.5-validityPeriod",
             position: 5,
             name: "Validity Period",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.6-context",
             position: 6,
             name: "Context",
-            data_type: Some("ERL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::erl::ERL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -115,7 +116,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.7-evidence",
             position: 7,
             name: "Evidence",
-            data_type: Some("ERL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::erl::ERL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -130,7 +131,7 @@ pub static GSC: Segment = Segment {
             id: "GSC.8-comment",
             position: 8,
             name: "Comment",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

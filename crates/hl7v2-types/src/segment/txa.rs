@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `TXA` segment: Transcription Document Header.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `TXA` segment definition, `http://hl7.org/v2/StructureDefinition/TXA`.
 pub static TXA: Segment = Segment {
@@ -16,7 +17,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.1-setId",
             position: 1,
             name: "Set ID- TXA",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.2-documentType",
             position: 2,
             name: "Document Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.3-documentContentPresentation",
             position: 3,
             name: "Document Content Presentation",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.4-activityDateTime",
             position: 4,
             name: "Activity Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.5-primaryActivityProviderCodeName",
             position: 5,
             name: "Primary Activity Provider Code/Name",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -100,7 +101,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.6-originationDateTime",
             position: 6,
             name: "Origination Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.7-transcriptionDateTime",
             position: 7,
             name: "Transcription Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.8-editDateTime",
             position: 8,
             name: "Edit Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -145,7 +146,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.9-originatorCodeName",
             position: 9,
             name: "Originator Code/Name",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -160,7 +161,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.10-assignedDocumentAuthenticator",
             position: 10,
             name: "Assigned Document Authenticator",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -175,7 +176,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.11-transcriptionistCodeName",
             position: 11,
             name: "Transcriptionist Code/Name",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -190,7 +191,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.12-uniqueDocumentNumber",
             position: 12,
             name: "Unique Document Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -205,7 +206,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.13-parentDocumentNumber",
             position: 13,
             name: "Parent Document Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +221,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.14-placerOrderNumber",
             position: 14,
             name: "Placer Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -235,7 +236,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.15-fillerOrderNumber",
             position: 15,
             name: "Filler Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -250,7 +251,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.16-uniqueDocumentFileName",
             position: 16,
             name: "Unique Document File Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -265,7 +266,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.17-documentCompletionStatus",
             position: 17,
             name: "Document Completion Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -286,7 +287,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.18-documentConfidentialityStatus",
             position: 18,
             name: "Document Confidentiality Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -307,7 +308,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.19-documentAvailabilityStatus",
             position: 19,
             name: "Document Availability Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +329,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.20-documentStorageStatus",
             position: 20,
             name: "Document Storage Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +350,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.21-documentChangeReason",
             position: 21,
             name: "Document Change Reason",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +365,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.22-authenticationPersonTimeStampSet",
             position: 22,
             name: "Authentication Person, Time Stamp (set)",
-            data_type: Some("PPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ppn::PPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -379,7 +380,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.23-distributedCopiesCodeAndNameOfRecipientS",
             position: 23,
             name: "Distributed Copies (Code and Name of Recipient(s) )",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -394,7 +395,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.24-folderAssignment",
             position: 24,
             name: "Folder Assignment",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -412,7 +413,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.25-documentTitle",
             position: 25,
             name: "Document Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -427,7 +428,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.26-agreedDueDateTime",
             position: 26,
             name: "Agreed Due Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -442,7 +443,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.27-creatingFacility",
             position: 27,
             name: "Creating Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +458,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.28-creatingSpecialty",
             position: 28,
             name: "Creating Specialty",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -475,7 +476,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.29-documentClass",
             position: 29,
             name: "Document Class",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -493,7 +494,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.30-documentEvent",
             position: 30,
             name: "Document Event",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -511,7 +512,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.31-folderInstanceAssociation",
             position: 31,
             name: "Folder Instance Association",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ODT` segment: diet tray instructions.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `ODT` segment definition, `http://hl7.org/v2/StructureDefinition/ODT`.
 pub static ODT: Segment = Segment {
@@ -16,7 +19,7 @@ pub static ODT: Segment = Segment {
             id: "ODT.1-trayType",
             position: 1,
             name: "Tray Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static ODT: Segment = Segment {
             id: "ODT.2-servicePeriod",
             position: 2,
             name: "Service Period",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(10),
@@ -52,7 +55,7 @@ pub static ODT: Segment = Segment {
             id: "ODT.3-textInstruction",
             position: 3,
             name: "Text Instruction",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

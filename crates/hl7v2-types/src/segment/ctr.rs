@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CTR` segment: Contract Master Outbound.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `CTR` segment definition, `http://hl7.org/v2/StructureDefinition/CTR`.
 pub static CTR: Segment = Segment {
@@ -16,7 +19,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.1-contractIdentifier",
             position: 1,
             name: "Contract Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.2-contractDescription",
             position: 2,
             name: "Contract Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.3-contractStatus",
             position: 3,
             name: "Contract Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.4-effectiveDate",
             position: 4,
             name: "Effective Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -82,7 +85,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.5-expirationDate",
             position: 5,
             name: "Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -97,7 +100,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.6-contractOwnerName",
             position: 6,
             name: "Contract Owner Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +115,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.7-contractOriginatorName",
             position: 7,
             name: "Contract Originator Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +130,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.8-supplierType",
             position: 8,
             name: "Supplier Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -145,7 +148,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.9-contractType",
             position: 9,
             name: "Contract Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +166,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.10-freeOnBoardFreightTerms",
             position: 10,
             name: "Free On Board Freight Terms",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +184,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.11-priceProtectionDate",
             position: 11,
             name: "Price Protection Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +199,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.12-fixedPriceContractIndicator",
             position: 12,
             name: "Fixed Price Contract Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +217,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.13-groupPurchasingOrganization",
             position: 13,
             name: "Group Purchasing Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +232,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.14-maximumMarkup",
             position: 14,
             name: "Maximum Markup",
-            data_type: Some("MOP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mop::MOP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -244,7 +247,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.15-actualMarkup",
             position: 15,
             name: "Actual Markup",
-            data_type: Some("MOP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mop::MOP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +262,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.16-corporation",
             position: 16,
             name: "Corporation",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -274,7 +277,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.17-parentOfCorporation",
             position: 17,
             name: "Parent of Corporation",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -289,7 +292,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.18-pricingTierLevel",
             position: 18,
             name: "Pricing Tier Level",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -307,7 +310,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.19-contractPriority",
             position: 19,
             name: "Contract Priority",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -322,7 +325,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.20-classOfTrade",
             position: 20,
             name: "Class of Trade",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -340,7 +343,7 @@ pub static CTR: Segment = Segment {
             id: "CTR.21-associatedContractId",
             position: 21,
             name: "Associated Contract ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

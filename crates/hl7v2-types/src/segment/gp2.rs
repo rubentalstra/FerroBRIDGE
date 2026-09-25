@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `GP2` segment: Grouping/Reimbursement - Procedure Line Item.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `GP2` segment definition, `http://hl7.org/v2/StructureDefinition/GP2`.
 pub static GP2: Segment = Segment {
@@ -16,7 +19,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.1-revenueCode",
             position: 1,
             name: "Revenue Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.2-numberOfServiceUnits",
             position: 2,
             name: "Number of Service Units",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.3-charge",
             position: 3,
             name: "Charge",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.4-reimbursementActionCode",
             position: 4,
             name: "Reimbursement Action Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +88,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.5-denialOrRejectionCode",
             position: 5,
             name: "Denial or Rejection Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +106,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.6-oceEditCode",
             position: 6,
             name: "OCE Edit Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -121,7 +124,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.7-ambulatoryPaymentClassificationCode",
             position: 7,
             name: "Ambulatory Payment Classification Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +142,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.8-modifierEditCode",
             position: 8,
             name: "Modifier Edit Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -157,7 +160,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.9-paymentAdjustmentCode",
             position: 9,
             name: "Payment Adjustment Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +178,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.10-packagingStatusCode",
             position: 10,
             name: "Packaging Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +196,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.11-expectedCmsPaymentAmount",
             position: 11,
             name: "Expected CMS Payment Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +211,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.12-reimbursementTypeCode",
             position: 12,
             name: "Reimbursement Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -226,7 +229,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.13-coPayAmount",
             position: 13,
             name: "Co-Pay Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +244,7 @@ pub static GP2: Segment = Segment {
             id: "GP2.14-payRatePerServiceUnit",
             position: 14,
             name: "Pay Rate per Service Unit",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

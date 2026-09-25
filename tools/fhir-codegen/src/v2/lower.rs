@@ -16,7 +16,10 @@
 //! and `group` for the two members of an `Hxx` slot. The name after the first
 //! `-` that follows the position runs to the next `.` and may itself hold `-`
 //! or `+` (`4-ANTI-MICROBIAL_DEVICE_DATA`). Positions run 1, 2, ... among
-//! siblings, and every refusal names the file and the element id.
+//! siblings, and every refusal names the file and the element id. A data type
+//! component is `DT.n` (`CX.1`) with its type as a canonical URL. A message
+//! definition is a constraint on the `Message` base whose `Message.structure`
+//! is linked to a structure by name ([`Defect::StructureProfileName`]).
 //!
 //! Each defect the definitions carry is tolerated only in the files where it
 //! was found ([`Defect::tolerated_in`]); the same defect anywhere else is
@@ -26,9 +29,12 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::fhir::{Derivation, StructureKind};
-use crate::roots::{V2_SEGMENT_BASE, V2_SEGMENT_DIR, V2RootSet};
-use crate::v2::corpus::{Corpus, Sourced};
-use crate::v2::definition::{Element, Extension, Scalar, StructureDefinition};
+use crate::roots::{
+    V2_COMPLEX_BASE, V2_COMPLEX_DIR, V2_MESSAGE_BASE, V2_MESSAGE_DIR, V2_PRIMITIVE_BASE,
+    V2_SEGMENT_BASE, V2_SEGMENT_DIR, V2RootSet,
+};
+use crate::v2::corpus::{Corpus, Sourced, SourcedMessage};
+use crate::v2::definition::{Element, Extension, MessageElement, Scalar, StructureDefinition};
 
 /// The `optionality` extension on a segment field.
 pub const OPTIONALITY: &str = "http://hl7.org/v2/StructureDefinition/optionality";
@@ -43,6 +49,8 @@ pub const STANDARDS_STATUS: &str =
 pub const SEGMENT_STATUS: &str = "http://hl7.org/v2/StructureDefinition/v2-segment-status";
 /// The value set prefix of a table binding.
 pub const TABLE_VALUE_SET: &str = "http://terminology.hl7.org/ValueSet/v2-";
+/// The editorial placeholder some structures give a group in place of its name.
+pub const PLACEHOLDER_GROUP_NAME: &str = "FIXME";
 /// The type code of a segment group.
 const BACKBONE: &str = "BackboneElement";
 /// The canonical URL prefix of a v2 definition.
@@ -73,6 +81,16 @@ pub enum Defect {
     UndefinedDataType,
     /// A message structure with no element under its root.
     EmptyStructure,
+    /// A segment group whose name is the editorial placeholder
+    /// [`PLACEHOLDER_GROUP_NAME`] in place of a group name.
+    PlaceholderGroupName,
+    /// An element member `defintion`, the misspelling of `definition`.
+    MisspelledDefinition,
+    /// A message definition whose `Message.structure` targets a profile URL
+    /// no message structure carries, writing `-` for the `_` of the id.
+    StructureProfileName,
+    /// A message definition with no `Message.structure`.
+    MessageWithoutStructure,
 }
 
 impl Defect {
@@ -106,9 +124,15 @@ impl Defect {
                 "segment/segments/TCC.json",
                 "segment/segments/TQ2.json",
             ],
-            // NOTE: segment/segments/MSH.json gives MSH.10 a conformance-length
-            // with `noTruncate` and no `length`.
-            Self::ConformanceLengthWithoutLength => &["segment/segments/MSH.json"],
+            // NOTE: MSH.10, CP.3, CP.4, ERL.1 to ERL.6, MO.1 and MOP.2 carry a
+            // conformance-length with `noTruncate` and no `length`.
+            Self::ConformanceLengthWithoutLength => &[
+                "data-type/complex/complex-data-types/cp.json",
+                "data-type/complex/complex-data-types/erl.json",
+                "data-type/complex/complex-data-types/mo.json",
+                "data-type/complex/complex-data-types/mop.json",
+                "segment/segments/MSH.json",
+            ],
             // NOTE: segment/segments/DSP.json gives three conformance-lengths a
             // `length` and no `noTruncate`.
             Self::ConformanceLengthWithoutNoTruncate => &["segment/segments/DSP.json"],
@@ -128,8 +152,8 @@ impl Defect {
             // NOTE: segment/segments/EQU.json gives EQU.1 `min` 1 and `max` 0; both
             // are emitted as written.
             Self::MinAboveMax => &["segment/segments/EQU.json"],
-            // NOTE: these files type one field `Varies`, which no data type
-            // definition under data-type/ defines; the code is emitted as written.
+            // NOTE: these files type one field `Varies`, whose only definition is
+            // data-type/Varies.json outside the two type directories; the code stays.
             Self::UndefinedDataType => &[
                 "segment/segments/MFA.json",
                 "segment/segments/MFE.json",
@@ -140,6 +164,61 @@ impl Defect {
             // NOTE: message-structure/message_structures/QBP_Q21-F.json holds only
             // its root element, so the structure is emitted with no nodes.
             Self::EmptyStructure => &["message-structure/message_structures/QBP_Q21-F.json"],
+            // NOTE: these files name one group with the editorial placeholder (MDM_T02-A.15),
+            // which is also its short and definition; the name is emitted as written.
+            Self::PlaceholderGroupName => &[
+                "message-structure/message_structures/CSU_C09.json",
+                "message-structure/message_structures/MDM_T02-A.json",
+                "message-structure/message_structures/MDM_T02-B.json",
+                "message-structure/message_structures/MDM_T02-C.json",
+                "message-structure/message_structures/MDM_T02-D.json",
+                "message-structure/message_structures/MDM_T02-E.json",
+                "message-structure/message_structures/SRM_S01.json",
+            ],
+            // NOTE: https://hl7.org/fhir/R5/elementdefinition.html names the member
+            // `definition`; the complex data type files write `defintion`, which is not read.
+            Self::MisspelledDefinition => &[V2_COMPLEX_DIR],
+            // NOTE: these files target http://hl7.org/fhir/StructureDefinition/MessageStructure/ORU-R01-A
+            // for http://hl7.org/v2/StructureDefinition/ORU_R01-A, so the structure is linked by name.
+            Self::StructureProfileName => &[V2_MESSAGE_DIR],
+            // NOTE: meta-resources/message--message.json gives Message.structure `min` 1;
+            // these files state none (32 withdrawn, EHC-E30 and EHC-E31 active).
+            Self::MessageWithoutStructure => &[
+                "message/messages/ADT-A18.json",
+                "message/messages/ADT-A30.json",
+                "message/messages/ADT-A34.json",
+                "message/messages/ADT-A35.json",
+                "message/messages/ADT-A36.json",
+                "message/messages/ADT-A39.json",
+                "message/messages/ADT-A46.json",
+                "message/messages/ADT-A48.json",
+                "message/messages/EHC-E30.json",
+                "message/messages/EHC-E31.json",
+                "message/messages/MFN-M01.json",
+                "message/messages/MFN-M03.json",
+                "message/messages/NMQ-N01.json",
+                "message/messages/OUL-R21.json",
+                "message/messages/PPT-PCL.json",
+                "message/messages/PPV-PCA.json",
+                "message/messages/PRR-PC5.json",
+                "message/messages/PTR-PCF.json",
+                "message/messages/QRY-A19.json",
+                "message/messages/QRY-P04.json",
+                "message/messages/QRY-PC4.json",
+                "message/messages/QRY-PC9.json",
+                "message/messages/QRY-PCE.json",
+                "message/messages/QRY-PCK.json",
+                "message/messages/QRY-R02.json",
+                "message/messages/QRY-R04.json",
+                "message/messages/QRY-T12.json",
+                "message/messages/RQC-I05.json",
+                "message/messages/RQC-I06.json",
+                "message/messages/SQM-S25.json",
+                "message/messages/SUR-P09.json",
+                "message/messages/VXR-V03.json",
+                "message/messages/VXX-V02.json",
+                "message/messages/XQ-V01.json",
+            ],
         }
     }
 
@@ -412,15 +491,82 @@ pub struct Structure {
     pub nodes: Vec<Node>,
 }
 
-/// The lowered v2 tables: the structures and segments of the root set.
+/// One component of a complex data type.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Component {
+    /// The element id, for example `CX.1`.
+    pub id: String,
+    /// The position from 1.
+    pub position: u16,
+    /// The element `short`.
+    pub name: String,
+    /// The data type code, `None` for a `W` component.
+    pub data_type: Option<String>,
+    /// The cardinality, `None` for a `W` component.
+    pub cardinality: Option<Cardinality>,
+    /// The optionality.
+    pub optionality: Optionality,
+    /// The length.
+    pub length: Option<Length>,
+    /// The conformance length.
+    pub conformance_length: Option<ConformanceLength>,
+    /// The table.
+    pub table: Option<Table>,
+}
+
+/// One data type definition.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DataType {
+    /// The definition id, which is the data type code.
+    pub code: String,
+    /// The canonical URL.
+    pub url: String,
+    /// The root element's `short`.
+    pub name: String,
+    /// The components in position order, empty for a primitive.
+    pub components: Vec<Component>,
+}
+
+/// A message definition's status code.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MessageStatus {
+    /// `active`.
+    Active,
+    /// `withdrawn`.
+    Withdrawn,
+}
+
+/// One message definition.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Message {
+    /// The definition id, for example `ORU-R01`.
+    pub id: String,
+    /// The canonical URL.
+    pub url: String,
+    /// The message code.
+    pub code: String,
+    /// The trigger event.
+    pub event: String,
+    /// The id of the message structure it names, when it names one.
+    pub structure: Option<String>,
+    /// The status.
+    pub status: MessageStatus,
+}
+
+/// The lowered v2 tables: the structures, segments, data types and message
+/// definitions of the root set.
 #[derive(Debug, Clone)]
 pub struct Model {
     /// The pinned v2ig commit.
     pub commit: String,
     /// Every message structure, by id.
     pub structures: BTreeMap<String, Structure>,
-    /// Every segment a structure references, by id.
+    /// Every segment definition, by id.
     pub segments: BTreeMap<String, Segment>,
+    /// Every primitive and complex data type, by code.
+    pub data_types: BTreeMap<String, DataType>,
+    /// Every message definition, by id.
+    pub messages: BTreeMap<String, Message>,
     /// Every tolerated defect the lowering met, with the file that carries it.
     pub tolerated: BTreeSet<(Defect, String)>,
 }
@@ -457,10 +603,22 @@ impl Model {
         for (id, sourced) in reached {
             segments.insert(id, lower_segment(corpus, &Input::of(sourced, &hits))?);
         }
+        let mut data_types = BTreeMap::new();
+        for (id, sourced) in &roots.data_types {
+            let data_type = lower_data_type(corpus, &Input::of(sourced, &hits))?;
+            data_types.insert((*id).to_owned(), data_type);
+        }
+        let mut messages = BTreeMap::new();
+        for (id, sourced) in &roots.messages {
+            let message = lower_message(sourced, &structures, &hits)?;
+            messages.insert((*id).to_owned(), message);
+        }
         Ok(Self {
             commit: corpus.commit().to_owned(),
             structures,
             segments,
+            data_types,
+            messages,
             tolerated: hits.into_inner(),
         })
     }
@@ -472,6 +630,24 @@ impl Model {
             .values()
             .map(|segment| segment.fields.len())
             .sum()
+    }
+
+    /// The number of components over every emitted data type.
+    #[must_use]
+    pub fn component_count(&self) -> usize {
+        self.data_types
+            .values()
+            .map(|data_type| data_type.components.len())
+            .sum()
+    }
+
+    /// The number of primitive data types: those with no components.
+    #[must_use]
+    pub fn primitive_count(&self) -> usize {
+        self.data_types
+            .values()
+            .filter(|data_type| data_type.components.is_empty())
+            .count()
     }
 }
 
@@ -493,23 +669,33 @@ impl<'a> Input<'a> {
 }
 
 fn invalid(sourced: &Input<'_>, element: &str, reason: impl Into<String>) -> LowerError {
+    invalid_in(sourced.file, element, reason)
+}
+
+fn invalid_in(file: &str, element: &str, reason: impl Into<String>) -> LowerError {
     LowerError::Invalid {
-        file: sourced.file.to_owned(),
+        file: file.to_owned(),
         element: element.to_owned(),
         reason: reason.into(),
     }
 }
 
 fn defect(sourced: &Input<'_>, element: &str, defect: Defect) -> Result<(), LowerError> {
-    if defect.is_tolerated(sourced.file) {
-        sourced
-            .hits
-            .borrow_mut()
-            .insert((defect, sourced.file.to_owned()));
+    defect_in(sourced.file, sourced.hits, element, defect)
+}
+
+fn defect_in(
+    file: &str,
+    hits: &RefCell<BTreeSet<(Defect, String)>>,
+    element: &str,
+    defect: Defect,
+) -> Result<(), LowerError> {
+    if defect.is_tolerated(file) {
+        hits.borrow_mut().insert((defect, file.to_owned()));
         Ok(())
     } else {
         Err(LowerError::Defect {
-            file: sourced.file.to_owned(),
+            file: file.to_owned(),
             element: element.to_owned(),
             defect,
         })
@@ -569,6 +755,9 @@ fn elements<'a>(sourced: &Input<'a>, base: &str) -> Result<&'a [Element], LowerE
                 &element.id,
                 format!("path {} differs from the id", element.path),
             ));
+        }
+        if element.defintion.is_some() {
+            defect(sourced, &element.id, Defect::MisspelledDefinition)?;
         }
     }
     Ok(elements)
@@ -677,7 +866,7 @@ fn data_type(
         (Some(code), _) => {
             if !corpus
                 .data_types()
-                .contains(&format!("{V2_CANONICAL}{code}"))
+                .contains_key(&format!("{V2_CANONICAL}{code}"))
             {
                 defect(sourced, &element.id, Defect::UndefinedDataType)?;
             }
@@ -753,7 +942,38 @@ fn lower_field(
         .clone()
         .ok_or_else(|| invalid(sourced, &element.id, "no short name"))?;
     let cardinality = cardinality(sourced, element)?;
+    let extensions = element_extensions(sourced, element, true)?;
+    let data_type = data_type(corpus, sourced, element, extensions.optionality)?;
+    let table = table(sourced, element)?;
+    Ok(Field {
+        id: element.id.clone(),
+        position,
+        name,
+        data_type,
+        cardinality,
+        optionality: extensions.optionality,
+        length: extensions.length,
+        conformance_length: extensions.conformance_length,
+        table,
+        standards_status: extensions.standards_status,
+    })
+}
 
+/// The v2 extensions of a field or a component.
+struct Extensions {
+    optionality: Optionality,
+    length: Option<Length>,
+    conformance_length: Option<ConformanceLength>,
+    standards_status: Option<StandardsStatus>,
+}
+
+/// Reads the extensions of a field (`standards_status` allowed) or a
+/// component, each at most once and the optionality always.
+fn element_extensions(
+    sourced: &Input<'_>,
+    element: &Element,
+    standards_status_allowed: bool,
+) -> Result<Extensions, LowerError> {
     let mut optionality = None;
     let mut length = None;
     let mut conformance_length = None;
@@ -769,7 +989,7 @@ fn lower_field(
             CONFORMANCE_LENGTH => conformance_length
                 .replace(lower_conformance_length(sourced, element, extension)?)
                 .is_some(),
-            STANDARDS_STATUS => standards_status
+            STANDARDS_STATUS if standards_status_allowed => standards_status
                 .replace(lower_standards_status(sourced, element, extension)?)
                 .is_some(),
             other => {
@@ -790,18 +1010,10 @@ fn lower_field(
     }
     let optionality =
         optionality.ok_or_else(|| invalid(sourced, &element.id, "no optionality extension"))?;
-    let data_type = data_type(corpus, sourced, element, optionality)?;
-    let table = table(sourced, element)?;
-    Ok(Field {
-        id: element.id.clone(),
-        position,
-        name,
-        data_type,
-        cardinality,
+    Ok(Extensions {
         optionality,
         length,
         conformance_length,
-        table,
         standards_status,
     })
 }
@@ -811,7 +1023,10 @@ fn value_code<'a>(
     element: &Element,
     extension: &'a Extension,
 ) -> Result<&'a str, LowerError> {
-    if extension.value_integer.is_some() || !extension.extension.is_empty() {
+    if extension.value_integer.is_some()
+        || extension.value_boolean.is_some()
+        || !extension.extension.is_empty()
+    {
         return Err(invalid(
             sourced,
             &element.id,
@@ -875,14 +1090,26 @@ fn lower_optionality(
     Ok(Optionality::Conditional(inner(first)?, inner(second)?))
 }
 
-/// The nested `valueInteger`s of a complex extension, by nested URL.
+/// The value of one nested extension of a complex extension.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Nested {
+    /// A `valueInteger`, `None` where it is written `null`.
+    Integer(Option<u64>),
+    /// A `valueBoolean`.
+    Boolean(bool),
+}
+
+/// The nested `valueInteger`s and `valueBoolean`s of a complex extension, by nested URL.
 fn integers(
     sourced: &Input<'_>,
     element: &Element,
     extension: &Extension,
     names: &[&str],
-) -> Result<BTreeMap<String, Option<u64>>, LowerError> {
-    if extension.value_code.is_some() || extension.value_integer.is_some() {
+) -> Result<BTreeMap<String, Nested>, LowerError> {
+    if extension.value_code.is_some()
+        || extension.value_integer.is_some()
+        || extension.value_boolean.is_some()
+    {
         return Err(invalid(
             sourced,
             &element.id,
@@ -901,19 +1128,27 @@ fn integers(
                 format!("{} carries {:?}", extension.url, nested.url),
             ));
         }
-        let value = match &nested.value_integer {
-            None => {
-                defect(sourced, &element.id, Defect::MissingInteger)?;
-                None
+        let value = match (&nested.value_integer, nested.value_boolean) {
+            (None, Some(flag)) => Nested::Boolean(flag),
+            (Some(_), Some(_)) => {
+                return Err(invalid(
+                    sourced,
+                    &element.id,
+                    format!("{} carries an integer and a boolean", nested.url),
+                ));
             }
-            Some(Scalar::Integer(number)) => Some(*number),
-            Some(Scalar::Text(text)) => {
+            (None, None) => {
+                defect(sourced, &element.id, Defect::MissingInteger)?;
+                Nested::Integer(None)
+            }
+            (Some(Scalar::Integer(number)), None) => Nested::Integer(Some(*number)),
+            (Some(Scalar::Text(text)), None) => {
                 defect(sourced, &element.id, Defect::TextInteger)?;
-                Some(
+                Nested::Integer(Some(
                     text.parse::<u64>()
                         .map_err(NumberError::from)
                         .map_err(number(sourced, element, text))?,
-                )
+                ))
             }
         };
         if values.insert(nested.url.clone(), value).is_some() {
@@ -933,20 +1168,51 @@ fn to_u32(sourced: &Input<'_>, element: &Element, value: u64) -> Result<u32, Low
         .map_err(number(sourced, element, &value))
 }
 
+/// An integer nested in a complex extension.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum NestedInteger {
+    /// No nested extension of that name.
+    Absent,
+    /// A nested extension whose value is `null`.
+    Null,
+    /// A nested extension with a value.
+    Value(u64),
+}
+
+/// The integer nested under `name`, refusing a boolean there.
+fn nested_integer(
+    sourced: &Input<'_>,
+    element: &Element,
+    values: &BTreeMap<String, Nested>,
+    name: &str,
+) -> Result<NestedInteger, LowerError> {
+    match values.get(name) {
+        None => Ok(NestedInteger::Absent),
+        Some(Nested::Integer(None)) => Ok(NestedInteger::Null),
+        Some(Nested::Integer(Some(value))) => Ok(NestedInteger::Value(*value)),
+        Some(Nested::Boolean(_)) => Err(invalid(
+            sourced,
+            &element.id,
+            format!("{name} is a boolean, not an integer"),
+        )),
+    }
+}
+
 fn lower_length(
     sourced: &Input<'_>,
     element: &Element,
     extension: &Extension,
 ) -> Result<Length, LowerError> {
     let values = integers(sourced, element, extension, &["min", "max"])?;
-    let min = values
-        .get("min")
-        .copied()
-        .flatten()
-        .ok_or_else(|| invalid(sourced, &element.id, "a length without min"))?;
-    let max = match values.get("max") {
-        Some(max) => *max,
-        None => return Err(invalid(sourced, &element.id, "a length without max")),
+    let NestedInteger::Value(min) = nested_integer(sourced, element, &values, "min")? else {
+        return Err(invalid(sourced, &element.id, "a length without min"));
+    };
+    let max = match nested_integer(sourced, element, &values, "max")? {
+        NestedInteger::Absent => {
+            return Err(invalid(sourced, &element.id, "a length without max"));
+        }
+        NestedInteger::Null => None,
+        NestedInteger::Value(max) => Some(max),
     };
     Ok(Length {
         min: to_u32(sourced, element, min)?,
@@ -960,23 +1226,25 @@ fn lower_conformance_length(
     extension: &Extension,
 ) -> Result<ConformanceLength, LowerError> {
     let values = integers(sourced, element, extension, &["length", "noTruncate"])?;
-    let length = match values.get("length") {
-        Some(Some(length)) => Some(to_u32(sourced, element, *length)?),
-        Some(None) => {
+    let length = match nested_integer(sourced, element, &values, "length")? {
+        NestedInteger::Value(length) => Some(to_u32(sourced, element, length)?),
+        NestedInteger::Null => {
             return Err(invalid(
                 sourced,
                 &element.id,
                 "a conformance length without a value",
             ));
         }
-        None => {
+        NestedInteger::Absent => {
             defect(sourced, &element.id, Defect::ConformanceLengthWithoutLength)?;
             None
         }
     };
+    // NOTE: no specification governs this: our own design; no definition of the
+    // conformance-length extension is published, and fields write 1/0 where components write true/false.
     let no_truncate = match values.get("noTruncate") {
-        Some(Some(0)) => Some(false),
-        Some(Some(1)) => Some(true),
+        Some(Nested::Integer(Some(0)) | Nested::Boolean(false)) => Some(false),
+        Some(Nested::Integer(Some(1)) | Nested::Boolean(true)) => Some(true),
         Some(other) => {
             return Err(invalid(
                 sourced,
@@ -1207,6 +1475,9 @@ fn lower_node<'a>(
                 cardinality: slot,
             });
         }
+        if name == PLACEHOLDER_GROUP_NAME {
+            defect(sourced, &element.id, Defect::PlaceholderGroupName)?;
+        }
         let (kind, nodes) = lower_children(corpus, sourced, children, &element.id, reached)?;
         return Ok(Node::Group {
             id: element.id.clone(),
@@ -1338,4 +1609,362 @@ fn segment_status(
         });
     }
     Ok(status.flatten())
+}
+
+fn lower_data_type(corpus: &Corpus, sourced: &Input<'_>) -> Result<DataType, LowerError> {
+    let definition = sourced.definition;
+    let id = definition.id.as_str();
+    let primitive = definition.base_definition.as_deref() == Some(V2_PRIMITIVE_BASE);
+    let base = if primitive {
+        V2_PRIMITIVE_BASE
+    } else {
+        V2_COMPLEX_BASE
+    };
+    let elements = elements(sourced, base)?;
+    if definition.type_name != definition.url {
+        return Err(invalid(
+            sourced,
+            id,
+            format!("type {} is not the canonical URL", definition.type_name),
+        ));
+    }
+    let Some((root, components)) = elements.split_first() else {
+        return Err(invalid(sourced, id, "the differential has no elements"));
+    };
+    if root.types.is_some() || root.binding.is_some() || !root.extension.is_empty() {
+        return Err(invalid(
+            sourced,
+            &root.id,
+            "the root element carries a type, a binding or an extension",
+        ));
+    }
+    let name = root
+        .short
+        .clone()
+        .ok_or_else(|| invalid(sourced, &root.id, "the root element has no short name"))?;
+    match (primitive, components.is_empty()) {
+        (true, false) => {
+            return Err(invalid(
+                sourced,
+                id,
+                "a primitive data type with components",
+            ));
+        }
+        (false, true) => {
+            return Err(invalid(
+                sourced,
+                id,
+                "a complex data type with no components",
+            ));
+        }
+        _ => {}
+    }
+    let mut lowered = Vec::with_capacity(components.len());
+    for (index, element) in components.iter().enumerate() {
+        lowered.push(lower_component(corpus, sourced, element, index)?);
+    }
+    Ok(DataType {
+        code: id.to_owned(),
+        url: definition.url.clone(),
+        name,
+        components: lowered,
+    })
+}
+
+fn lower_component(
+    corpus: &Corpus,
+    sourced: &Input<'_>,
+    element: &Element,
+    index: usize,
+) -> Result<Component, LowerError> {
+    let data_type = sourced.definition.id.as_str();
+    let digits = element
+        .id
+        .strip_prefix(data_type)
+        .and_then(|rest| rest.strip_prefix('.'))
+        .ok_or_else(|| {
+            invalid(
+                sourced,
+                &element.id,
+                format!("not a component of {data_type}"),
+            )
+        })?;
+    let position = position(sourced, &element.id, digits)?;
+    if usize::from(position) != index + 1 {
+        return Err(invalid(
+            sourced,
+            &element.id,
+            format!("component {} out of order", index + 1),
+        ));
+    }
+    if element.content_reference.is_some() {
+        return Err(invalid(
+            sourced,
+            &element.id,
+            "a component carries a contentReference",
+        ));
+    }
+    let name = element
+        .short
+        .clone()
+        .ok_or_else(|| invalid(sourced, &element.id, "no short name"))?;
+    let extensions = element_extensions(sourced, element, false)?;
+    let withdrawn = extensions.optionality == Optionality::W;
+    let code = match (single_type(sourced, element)?, withdrawn) {
+        (None, true) => None,
+        (None, false) => {
+            return Err(invalid(
+                sourced,
+                &element.id,
+                "an untyped component whose optionality is not W",
+            ));
+        }
+        (Some(_), true) => {
+            return Err(invalid(
+                sourced,
+                &element.id,
+                "a typed component whose optionality is W",
+            ));
+        }
+        (Some(url), false) => {
+            let Some(code) = url.strip_prefix(V2_CANONICAL) else {
+                return Err(invalid(
+                    sourced,
+                    &element.id,
+                    format!("type {url} is not a v2 canonical URL"),
+                ));
+            };
+            if !corpus.data_types().contains_key(url) {
+                return Err(invalid(
+                    sourced,
+                    &element.id,
+                    format!("type {url} is no data type definition"),
+                ));
+            }
+            Some(code.to_owned())
+        }
+    };
+    let cardinality = if withdrawn && element.min.is_none() && element.max.is_none() {
+        None
+    } else {
+        Some(cardinality(sourced, element)?)
+    };
+    let table = table(sourced, element)?;
+    Ok(Component {
+        id: element.id.clone(),
+        position,
+        name,
+        data_type: code,
+        cardinality,
+        optionality: extensions.optionality,
+        length: extensions.length,
+        conformance_length: extensions.conformance_length,
+        table,
+    })
+}
+
+// The element ids a message definition constrains.
+const MESSAGE_TYPE: &str = "Message.messageType";
+const TRIGGER_EVENT: &str = "Message.triggerEvent";
+const MESSAGE_STRUCTURE: &str = "Message.structure";
+const MESSAGE_STATUS: &str = "Message.status";
+const ACKNOWLEDGEMENTS: [&str; 3] = [
+    "Message.acknowledgementChoreography.originalModeResponse",
+    "Message.acknowledgementChoreography.enhancedModeImmediateResponse",
+    "Message.acknowledgementChoreography.enhancedModeApplicationResponse",
+];
+/// The profile URL prefix `Message.structure` targets.
+const STRUCTURE_PROFILE: &str = "http://hl7.org/fhir/StructureDefinition/MessageStructure/";
+
+fn lower_message(
+    sourced: &SourcedMessage,
+    structures: &BTreeMap<String, Structure>,
+    hits: &RefCell<BTreeSet<(Defect, String)>>,
+) -> Result<Message, LowerError> {
+    let file = sourced.file.as_str();
+    let definition = &sourced.definition;
+    let id = definition.id.as_str();
+    if definition.kind != StructureKind::Logical
+        || definition.is_abstract
+        || definition.type_name != "Message"
+        || definition.derivation != Some(Derivation::Constraint)
+        || definition.base_definition.as_deref() != Some(V2_MESSAGE_BASE)
+    {
+        return Err(invalid_in(
+            file,
+            id,
+            format!("not a concrete logical constraint on {V2_MESSAGE_BASE}"),
+        ));
+    }
+    if definition.url != format!("{V2_CANONICAL}Message/{id}") {
+        return Err(invalid_in(
+            file,
+            id,
+            format!("canonical URL {} does not end in its id", definition.url),
+        ));
+    }
+    let Some(differential) = &definition.differential else {
+        return Err(invalid_in(file, id, "no differential"));
+    };
+    let (codes, structure_element) = message_elements(file, &differential.element)?;
+    let Some(code) = codes.get(MESSAGE_TYPE).copied() else {
+        return Err(invalid_in(file, id, "no Message.messageType"));
+    };
+    let Some(id_event) = id
+        .strip_prefix(code)
+        .and_then(|rest| rest.strip_prefix('-'))
+        .filter(|event| !event.is_empty())
+    else {
+        return Err(invalid_in(
+            file,
+            id,
+            format!("the id is not {code}-<event>"),
+        ));
+    };
+    // NOTE: no specification governs this: our own design; message--message.json gives
+    // Message.triggerEvent `min` 0, and a definition that states none names its event in its id.
+    let event = match codes.get(TRIGGER_EVENT) {
+        Some(stated) if *stated != id_event => {
+            return Err(invalid_in(
+                file,
+                TRIGGER_EVENT,
+                format!("the trigger event {stated} is not the {id_event} the id names"),
+            ));
+        }
+        _ => id_event,
+    };
+    let status = match codes.get(MESSAGE_STATUS).copied() {
+        Some("active") => MessageStatus::Active,
+        Some("withdrawn") => MessageStatus::Withdrawn,
+        other => {
+            return Err(invalid_in(
+                file,
+                MESSAGE_STATUS,
+                format!("status {other:?}"),
+            ));
+        }
+    };
+    let structure = match structure_element {
+        None => {
+            defect_in(file, hits, id, Defect::MessageWithoutStructure)?;
+            None
+        }
+        Some(element) => Some(message_structure(file, element, structures, hits)?),
+    };
+    Ok(Message {
+        id: id.to_owned(),
+        url: definition.url.clone(),
+        code: code.to_owned(),
+        event: event.to_owned(),
+        structure,
+        status,
+    })
+}
+
+/// The fixed codes of a message definition by element id, and its
+/// `Message.structure` element, each checked for its shape and given once.
+type MessageElements<'a> = (BTreeMap<&'a str, &'a str>, Option<&'a MessageElement>);
+
+fn message_elements<'a>(
+    file: &str,
+    elements: &'a [MessageElement],
+) -> Result<MessageElements<'a>, LowerError> {
+    let mut codes: BTreeMap<&str, &str> = BTreeMap::new();
+    let mut structure_element = None;
+    for element in elements {
+        if element.path != element.id {
+            return Err(invalid_in(
+                file,
+                &element.id,
+                format!("path {} differs from the id", element.path),
+            ));
+        }
+        let element_id = element.id.as_str();
+        let is_code = [MESSAGE_TYPE, TRIGGER_EVENT, MESSAGE_STATUS].contains(&element_id);
+        let is_reference =
+            element_id == MESSAGE_STRUCTURE || ACKNOWLEDGEMENTS.contains(&element_id);
+        if !is_code && !is_reference {
+            return Err(invalid_in(
+                file,
+                element_id,
+                "an element the lowering does not know",
+            ));
+        }
+        let shape_ok = if is_code {
+            element.pattern_code.is_some() && element.types.is_none()
+        } else {
+            element.pattern_code.is_none() && element.types.is_some()
+        };
+        if !shape_ok {
+            return Err(invalid_in(
+                file,
+                element_id,
+                "a code element without a patternCode or a reference element without a type",
+            ));
+        }
+        let duplicate = if let Some(code) = &element.pattern_code {
+            codes.insert(element_id, code.as_str()).is_some()
+        } else if element_id == MESSAGE_STRUCTURE {
+            structure_element.replace(element).is_some()
+        } else {
+            false
+        };
+        if duplicate {
+            return Err(invalid_in(file, element_id, "the id is given twice"));
+        }
+    }
+    Ok((codes, structure_element))
+}
+
+/// The id of the structure `Message.structure` names: the one structure whose
+/// id, with every `_` written `-`, is the last step of the target profile.
+fn message_structure(
+    file: &str,
+    element: &MessageElement,
+    structures: &BTreeMap<String, Structure>,
+    hits: &RefCell<BTreeSet<(Defect, String)>>,
+) -> Result<String, LowerError> {
+    let profile = match element.types.as_deref() {
+        Some([only]) if only.code == "Reference" => match only.target_profile.as_slice() {
+            [profile] => profile.as_str(),
+            _ => {
+                return Err(invalid_in(
+                    file,
+                    &element.id,
+                    "not exactly one target profile",
+                ));
+            }
+        },
+        _ => {
+            return Err(invalid_in(
+                file,
+                &element.id,
+                "not exactly one Reference type",
+            ));
+        }
+    };
+    let Some(name) = profile.strip_prefix(STRUCTURE_PROFILE) else {
+        return Err(invalid_in(
+            file,
+            &element.id,
+            format!("target profile {profile} names no message structure"),
+        ));
+    };
+    defect_in(file, hits, &element.id, Defect::StructureProfileName)?;
+    let mut matches = structures
+        .keys()
+        .filter(|candidate| candidate.replace('_', "-") == name);
+    match (matches.next(), matches.next()) {
+        (Some(only), None) => Ok(only.clone()),
+        (None, _) => Err(invalid_in(
+            file,
+            &element.id,
+            format!("target profile {profile} matches no message structure by name"),
+        )),
+        (Some(first), Some(second)) => Err(invalid_in(
+            file,
+            &element.id,
+            format!("target profile {profile} matches both {first} and {second}"),
+        )),
+    }
 }

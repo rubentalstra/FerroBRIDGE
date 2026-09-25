@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PAC` segment: Shipment Package.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `PAC` segment definition, `http://hl7.org/v2/StructureDefinition/PAC`.
 pub static PAC: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.1-setId",
             position: 1,
             name: "Set Id – PAC",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.2-packageId",
             position: 2,
             name: "Package ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.3-parentPackageId",
             position: 3,
             name: "Parent Package ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.4-positionInParentPackage",
             position: 4,
             name: "Position in Parent Package",
-            data_type: Some("NA"),
+            data_type: Some(DataTypeRef::Defined(&data_type::na::NA)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.5-packageType",
             position: 5,
             name: "Package Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -97,7 +98,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.6-packageCondition",
             position: 6,
             name: "Package Condition",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -115,7 +116,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.7-packageHandlingCode",
             position: 7,
             name: "Package Handling Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -133,7 +134,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.8-packageRiskCode",
             position: 8,
             name: "Package Risk Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -151,7 +152,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.9-actionCode",
             position: 9,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

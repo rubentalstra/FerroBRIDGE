@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SGH` segment: Segment Group Header.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+};
 
 /// The `SGH` segment definition, `http://hl7.org/v2/StructureDefinition/SGH`.
 pub static SGH: Segment = Segment {
@@ -16,7 +19,7 @@ pub static SGH: Segment = Segment {
             id: "SGH.1-setId",
             position: 1,
             name: "Set ID – SGH",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static SGH: Segment = Segment {
             id: "SGH.2-segmentGroupName",
             position: 2,
             name: "Segment Group Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

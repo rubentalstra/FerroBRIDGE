@@ -19,14 +19,16 @@ use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 use fhir_codegen::roots::{
-    V2_BASES, V2_DATA_TYPE_DIRS, V2_SEGMENT_DIR, V2_STRUCTURE_DIR, V2RootSet,
+    V2_BASES, V2_COMPLEX_DIR, V2_DATA_TYPE_DIRS, V2_MESSAGE_DIR, V2_PRIMITIVE_DIR, V2_SEGMENT_DIR,
+    V2_STRUCTURE_DIR, V2RootSet,
 };
 use fhir_codegen::v2::corpus::{Corpus, LoadError, SOURCE_OF_TRUTH};
 use fhir_codegen::v2::emit::{EmitError, EmitOptions, emit};
 use fhir_codegen::v2::lower::{Defect, LowerError, Model};
 use fhir_codegen::v2::render::names;
 use hl7v2_types::model::{
-    Cardinality, ConditionalCode, GroupKind, Max, Node, Optionality, SegmentStatus, StandardsStatus,
+    Cardinality, ConditionalCode, ConformanceLength, DataTypeRef, Field, Group, GroupKind, Length,
+    Max, MessageStatus, Node, Optionality, SegmentRef, SegmentStatus, StandardsStatus, Table,
 };
 use serde_json::Value;
 
@@ -227,9 +229,20 @@ fn emitted_fields_agree_with_the_segment_definitions() {
             assert_eq!(element["short"], field.name, "{context}");
             assert_eq!(
                 element["type"][0]["code"].as_str(),
-                field.data_type,
+                field.data_type.map(|data_type| data_type.code()),
                 "{context}"
             );
+            match field.data_type {
+                Some(DataTypeRef::Defined(data_type)) => assert_eq!(
+                    hl7v2_types::data_type::find(data_type.code),
+                    Some(data_type),
+                    "{context}"
+                ),
+                Some(DataTypeRef::Undefined(code)) => {
+                    assert!(hl7v2_types::data_type::find(code).is_none(), "{context}");
+                }
+                None => {}
+            }
             assert_eq!(raw_cardinality(element), field.cardinality, "{context}");
             let optionality =
                 extension(element, "http://hl7.org/v2/StructureDefinition/optionality")
@@ -239,39 +252,7 @@ fn emitted_fields_agree_with_the_segment_definitions() {
                 Some(optionality_code(field.optionality).as_str()),
                 "{context}"
             );
-            let length = extension(element, "http://hl7.org/v2/StructureDefinition/length");
-            assert_eq!(length.is_some(), field.length.is_some(), "{context}");
-            if let (Some(length), Some(emitted)) = (length, field.length) {
-                assert_eq!(
-                    nested(length, "min").and_then(raw_integer),
-                    Some(u64::from(emitted.min))
-                );
-                assert_eq!(
-                    nested(length, "max").and_then(raw_integer),
-                    emitted.max.map(u64::from)
-                );
-            }
-            let conformance = extension(
-                element,
-                "http://hl7.org/v2/StructureDefinition/conformance-length",
-            );
-            assert_eq!(
-                conformance.is_some(),
-                field.conformance_length.is_some(),
-                "{context}"
-            );
-            if let (Some(conformance), Some(emitted)) = (conformance, field.conformance_length) {
-                assert_eq!(
-                    nested(conformance, "length").and_then(raw_integer),
-                    emitted.length.map(u64::from),
-                    "{context}"
-                );
-                assert_eq!(
-                    nested(conformance, "noTruncate").and_then(raw_integer),
-                    emitted.no_truncate.map(u64::from),
-                    "{context}"
-                );
-            }
+            assert_lengths(element, field.length, field.conformance_length, context);
             let value_set = element["binding"]["valueSet"].as_str();
             assert_eq!(
                 value_set,
@@ -493,6 +474,10 @@ fn every_tolerated_defect_is_met_where_it_is_listed() {
         Defect::MinAboveMax,
         Defect::UndefinedDataType,
         Defect::EmptyStructure,
+        Defect::PlaceholderGroupName,
+        Defect::MisspelledDefinition,
+        Defect::StructureProfileName,
+        Defect::MessageWithoutStructure,
     ];
     for defect in defects {
         for scope in defect.tolerated_in() {
@@ -529,6 +514,305 @@ fn definition_ids_render_as_module_and_static_names() {
     assert_eq!(names("CON"), (String::from("con_"), String::from("CON")));
     assert_eq!(names("LPT1"), (String::from("lpt1_"), String::from("LPT1")));
     assert_eq!(names("COM"), (String::from("com"), String::from("COM")));
+    // `fn` is a Rust keyword, so the FN data type's module takes a trailing `_`.
+    assert_eq!(names("FN"), (String::from("fn_"), String::from("FN")));
+    assert_eq!(
+        names("ACK-O59_A"),
+        (String::from("ack_o59_a"), String::from("ACK_O59_A"))
+    );
+}
+
+fn raw_bool_or_integer(value: &Value) -> Option<bool> {
+    match value {
+        Value::Bool(flag) => Some(*flag),
+        other => match raw_integer(other) {
+            Some(1) => Some(true),
+            Some(0) => Some(false),
+            _ => None,
+        },
+    }
+}
+
+/// Compares the `length` and `conformance-length` extensions of `element` with
+/// the emitted ones; `noTruncate` is `1`/`0` on a field and `true`/`false` on a component.
+fn assert_lengths(
+    element: &Value,
+    length: Option<Length>,
+    conformance_length: Option<ConformanceLength>,
+    context: &str,
+) {
+    let raw = extension(element, "http://hl7.org/v2/StructureDefinition/length");
+    assert_eq!(raw.is_some(), length.is_some(), "{context}");
+    if let (Some(raw), Some(emitted)) = (raw, length) {
+        assert_eq!(
+            nested(raw, "min").and_then(raw_integer),
+            Some(u64::from(emitted.min))
+        );
+        assert_eq!(
+            nested(raw, "max").and_then(raw_integer),
+            emitted.max.map(u64::from)
+        );
+    }
+    let conformance = extension(
+        element,
+        "http://hl7.org/v2/StructureDefinition/conformance-length",
+    );
+    assert_eq!(
+        conformance.is_some(),
+        conformance_length.is_some(),
+        "{context}"
+    );
+    if let (Some(conformance), Some(emitted)) = (conformance, conformance_length) {
+        assert_eq!(
+            nested(conformance, "length").and_then(raw_integer),
+            emitted.length.map(u64::from),
+            "{context}"
+        );
+        let no_truncate = conformance["extension"]
+            .as_array()
+            .and_then(|nested| nested.iter().find(|entry| entry["url"] == "noTruncate"))
+            .and_then(|entry| {
+                raw_bool_or_integer(if entry["valueBoolean"].is_null() {
+                    &entry["valueInteger"]
+                } else {
+                    &entry["valueBoolean"]
+                })
+            });
+        assert_eq!(no_truncate, emitted.no_truncate, "{context}");
+    }
+}
+
+#[test]
+fn every_data_type_file_is_emitted_and_its_components_agree() {
+    let mut components = 0;
+    let mut primitives = 0;
+    let files: Vec<String> = V2_DATA_TYPE_DIRS
+        .iter()
+        .flat_map(|dir| json_files(dir))
+        .collect();
+    assert_eq!(files.len(), 83);
+    assert_eq!(hl7v2_types::data_type::DATA_TYPES.len(), files.len());
+    for file in &files {
+        let definition = raw(file);
+        let code = definition["id"].as_str().expect("id");
+        let emitted = hl7v2_types::data_type::find(code).expect("every data type is emitted");
+        assert_eq!(definition["url"], emitted.url);
+        let elements = elements(&definition);
+        let (root, raw_components) = elements.split_first().expect("a root element");
+        assert_eq!(root["short"], emitted.name);
+        assert_eq!(raw_components.len(), emitted.components.len(), "{code}");
+        if file.starts_with(V2_PRIMITIVE_DIR) {
+            primitives += 1;
+            assert!(emitted.components.is_empty(), "{code} is primitive");
+        } else {
+            assert!(file.starts_with(V2_COMPLEX_DIR));
+        }
+        for (index, (element, component)) in
+            raw_components.iter().zip(emitted.components).enumerate()
+        {
+            components += 1;
+            let context = &component.id;
+            assert_eq!(element["id"], component.id);
+            assert_eq!(usize::from(component.position), index + 1, "{context}");
+            assert_eq!(element["short"], component.name, "{context}");
+            assert_eq!(
+                element["type"][0]["code"].as_str().map(str::to_owned),
+                component.data_type.map(|data_type| format!(
+                    "http://hl7.org/v2/StructureDefinition/{}",
+                    data_type.code
+                )),
+                "{context}"
+            );
+            if element["min"].is_null() {
+                assert_eq!(component.cardinality, None, "{context}");
+            } else {
+                assert_eq!(
+                    Some(raw_cardinality(element)),
+                    component.cardinality,
+                    "{context}"
+                );
+            }
+            let optionality =
+                extension(element, "http://hl7.org/v2/StructureDefinition/optionality")
+                    .expect("optionality");
+            assert_eq!(
+                optionality["valueCode"].as_str(),
+                Some(optionality_code(component.optionality).as_str()),
+                "{context}"
+            );
+            assert_lengths(
+                element,
+                component.length,
+                component.conformance_length,
+                context,
+            );
+            assert_eq!(
+                element["binding"]["valueSet"].as_str(),
+                component.table.map(|table| table.value_set),
+                "{context}"
+            );
+        }
+    }
+    assert_eq!(primitives, 12);
+    assert_eq!(components, 448);
+    assert_eq!(components, MODEL.component_count());
+}
+
+#[test]
+fn every_message_file_is_emitted_with_the_structure_it_names() {
+    let files = json_files(V2_MESSAGE_DIR);
+    assert_eq!(files.len(), 696);
+    assert_eq!(hl7v2_types::message::MESSAGES.len(), files.len());
+    for file in &files {
+        let definition = raw(file);
+        let id = definition["id"].as_str().expect("id");
+        let pattern = |element: &str| {
+            elements(&definition)
+                .iter()
+                .find(|entry| entry["id"] == element)
+                .map(|entry| entry["patternCode"].as_str().expect("a code").to_owned())
+        };
+        let code = pattern("Message.messageType").expect("a message type");
+        let event = pattern("Message.triggerEvent").unwrap_or_else(|| {
+            id.strip_prefix(&format!("{code}-"))
+                .expect("the id names the event")
+                .to_owned()
+        });
+        let emitted = hl7v2_types::message::find(&code, &event).expect("every message is emitted");
+        assert_eq!(emitted.id, id);
+        assert_eq!(definition["url"], emitted.url);
+        let status = match pattern("Message.status").as_deref() {
+            Some("active") => MessageStatus::Active,
+            Some("withdrawn") => MessageStatus::Withdrawn,
+            other => panic!("unexpected status {other:?}"),
+        };
+        assert_eq!(emitted.status, status, "{id}");
+        let profile = elements(&definition)
+            .iter()
+            .find(|entry| entry["id"] == "Message.structure")
+            .map(|entry| {
+                entry["type"][0]["targetProfile"][0]
+                    .as_str()
+                    .expect("a profile")
+                    .to_owned()
+            });
+        match (profile, emitted.structure) {
+            (Some(profile), Some(structure)) => assert_eq!(
+                profile.rsplit_once('/').map(|(_, name)| name.to_owned()),
+                Some(structure.id.replace('_', "-")),
+                "{id}"
+            ),
+            (None, None) => {}
+            (profile, structure) => panic!("{id}: {profile:?} against {structure:?}"),
+        }
+    }
+    let order: Vec<(&str, &str)> = hl7v2_types::message::MESSAGES
+        .iter()
+        .map(|message| (message.code, message.event))
+        .collect();
+    assert!(
+        order.windows(2).all(|pair| pair[0] < pair[1]),
+        "the index is ordered by code and event, with no pair twice"
+    );
+}
+
+#[test]
+fn the_trigger_event_selects_the_structure_variant() {
+    let structure = |code: &str, event: &str| {
+        hl7v2_types::message::find(code, event)
+            .and_then(|message| message.structure)
+            .map(|structure| structure.id)
+    };
+    assert_eq!(structure("ORU", "R01"), Some("ORU_R01-A"));
+    assert_eq!(structure("ORU", "R40"), Some("ORU_R01-B"));
+    assert_eq!(structure("ADT", "A01"), Some("ADT_A01-A"));
+    assert_eq!(structure("ADT", "A04"), Some("ADT_A01-B"));
+    assert_eq!(structure("MDM", "T02"), Some("MDM_T02-A"));
+    // ACK-A01.json states no trigger event; its id names A01.
+    assert_eq!(structure("ACK", "A01"), Some("ACK"));
+    let withdrawn = hl7v2_types::message::find("ADT", "A18").expect("ADT^A18");
+    assert_eq!(withdrawn.structure, None);
+    assert_eq!(withdrawn.status, MessageStatus::Withdrawn);
+    assert!(hl7v2_types::message::find("ORU", "Z99").is_none());
+}
+
+#[test]
+fn the_placeholder_group_name_is_emitted_as_written() {
+    let structure = hl7v2_types::structure::find("MDM_T02-A").expect("MDM_T02-A");
+    let group = structure
+        .nodes
+        .iter()
+        .find_map(|node| match node {
+            Node::Group(group) if group.id == "MDM_T02-A.15-FIXME" => Some(group),
+            _ => None,
+        })
+        .expect("the group at position 15");
+    assert_eq!(group.name, "FIXME");
+    assert_eq!(group.position, 15);
+}
+
+#[test]
+fn the_tree_and_table_types_compare_by_value() {
+    let structure = hl7v2_types::structure::find("ORU_R01-A").expect("ORU_R01-A");
+    assert_eq!(
+        structure.nodes.first(),
+        Some(&Node::Segment(SegmentRef {
+            id: "ORU_R01-A.1-MSH",
+            position: 1,
+            segment: &hl7v2_types::segment::msh::MSH,
+            cardinality: Cardinality {
+                min: 1,
+                max: Max::Bounded(1),
+            },
+            status: Some(SegmentStatus::A),
+        }))
+    );
+    assert!(matches!(
+        structure.nodes.get(4),
+        Some(Node::Group(Group {
+            name: "PATIENT_RESULT",
+            ..
+        }))
+    ));
+    let obx = hl7v2_types::segment::find("OBX").expect("OBX");
+    assert_eq!(
+        obx.fields.get(1),
+        Some(&Field {
+            id: "OBX.2-valueType",
+            position: 2,
+            name: "Value Type",
+            data_type: Some(DataTypeRef::Defined(&hl7v2_types::data_type::id::ID)),
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+            optionality: Optionality::C,
+            length: Some(Length {
+                min: 2,
+                max: Some(3),
+            }),
+            conformance_length: None,
+            table: Some(Table {
+                id: "0125",
+                value_set: "http://terminology.hl7.org/ValueSet/v2-0125",
+            }),
+            standards_status: None,
+        })
+    );
+    let cx = hl7v2_types::data_type::find("CX").expect("CX");
+    let first = cx.components.first().expect("CX.1");
+    assert_eq!(first.data_type, Some(&hl7v2_types::data_type::st::ST));
+    assert_eq!(
+        first.conformance_length,
+        Some(ConformanceLength {
+            length: Some(15),
+            no_truncate: Some(true),
+        })
+    );
+    assert_ne!(
+        hl7v2_types::structure::find("ORU_R01-A"),
+        hl7v2_types::structure::find("ORU_R01-B")
+    );
 }
 
 /// A copy of the definitions the loader reads, for a test to damage.
@@ -540,7 +824,7 @@ fn copy_definitions() -> tempfile::TempDir {
     )
     .expect("provenance copied");
     let target = dir.path().join(SOURCE_OF_TRUTH);
-    let mut dirs = vec![V2_SEGMENT_DIR, V2_STRUCTURE_DIR];
+    let mut dirs = vec![V2_SEGMENT_DIR, V2_STRUCTURE_DIR, V2_MESSAGE_DIR];
     dirs.extend(V2_DATA_TYPE_DIRS);
     for sub in dirs {
         fs::create_dir_all(target.join(sub)).expect("dir created");
@@ -611,6 +895,127 @@ fn a_text_integer_outside_its_files_is_refused() {
             ..
         })
     ));
+}
+
+const ORU_R01: &str = "message/messages/ORU-R01.json";
+const CX: &str = "data-type/complex/complex-data-types/cx.json";
+
+fn refused_defect(copy: &Path, expected_file: &str, expected: Defect) {
+    match lower_copy(copy) {
+        Err(LowerError::Defect { file, defect, .. }) => {
+            assert_eq!(file, expected_file);
+            assert_eq!(defect, expected);
+        }
+        other => panic!("expected {expected:?} refused in {expected_file}, got {other:?}"),
+    }
+}
+
+fn refused_invalid(copy: &Path, expected_file: &str, expected: &str) {
+    match lower_copy(copy) {
+        Err(LowerError::Invalid { file, reason, .. }) => {
+            assert_eq!(file, expected_file);
+            assert!(reason.contains(expected), "{reason}");
+        }
+        other => panic!("expected {expected:?} in {expected_file}, got {other:?}"),
+    }
+}
+
+fn message_elements(value: &mut Value) -> &mut Vec<Value> {
+    value["differential"]["element"]
+        .as_array_mut()
+        .expect("elements")
+}
+
+#[test]
+fn a_message_without_a_structure_outside_its_files_is_refused() {
+    let copy = copy_definitions();
+    damage(copy.path(), ORU_R01, |value| {
+        message_elements(value).retain(|element| element["id"] != "Message.structure");
+    });
+    refused_defect(copy.path(), ORU_R01, Defect::MessageWithoutStructure);
+}
+
+#[test]
+fn a_structure_name_that_matches_no_structure_is_refused() {
+    let copy = copy_definitions();
+    damage(copy.path(), ORU_R01, |value| {
+        for element in message_elements(value) {
+            if element["id"] == "Message.structure" {
+                element["type"][0]["targetProfile"][0] = Value::from(
+                    "http://hl7.org/fhir/StructureDefinition/MessageStructure/ORU-R99-Z",
+                );
+            }
+        }
+    });
+    refused_invalid(copy.path(), ORU_R01, "matches no message structure");
+}
+
+#[test]
+fn a_trigger_event_the_id_does_not_name_is_refused() {
+    let copy = copy_definitions();
+    damage(copy.path(), ORU_R01, |value| {
+        for element in message_elements(value) {
+            if element["id"] == "Message.triggerEvent" {
+                element["patternCode"] = Value::from("R02");
+            }
+        }
+    });
+    refused_invalid(copy.path(), ORU_R01, "is not the R01 the id names");
+}
+
+#[test]
+fn an_unknown_message_element_is_refused() {
+    let copy = copy_definitions();
+    damage(copy.path(), ORU_R01, |value| {
+        message_elements(value).push(serde_json::json!({
+            "id": "Message.sender",
+            "path": "Message.sender",
+            "patternCode": "LAB"
+        }));
+    });
+    refused_invalid(copy.path(), ORU_R01, "does not know");
+}
+
+#[test]
+fn a_misspelled_definition_outside_the_complex_types_is_refused() {
+    let copy = copy_definitions();
+    damage(copy.path(), OBX, |value| {
+        value["differential"]["element"][1]["defintion"] = Value::from("synthetic");
+    });
+    refused_defect(copy.path(), OBX, Defect::MisspelledDefinition);
+}
+
+#[test]
+fn a_placeholder_group_name_outside_its_files_is_refused() {
+    let copy = copy_definitions();
+    let path = copy.path().join(SOURCE_OF_TRUTH).join(ORU_R01_A);
+    let text = fs::read_to_string(&path).expect("readable");
+    fs::write(
+        &path,
+        text.replace("ORU_R01-A.5-PATIENT_RESULT", "ORU_R01-A.5-FIXME"),
+    )
+    .expect("written");
+    refused_defect(copy.path(), ORU_R01_A, Defect::PlaceholderGroupName);
+}
+
+#[test]
+fn a_component_naming_no_data_type_is_refused() {
+    let copy = copy_definitions();
+    damage(copy.path(), CX, |value| {
+        value["differential"]["element"][1]["type"][0]["code"] =
+            Value::from("http://hl7.org/v2/StructureDefinition/NOPE");
+    });
+    refused_invalid(copy.path(), CX, "is no data type definition");
+}
+
+#[test]
+fn a_component_out_of_order_is_refused() {
+    let copy = copy_definitions();
+    damage(copy.path(), CX, |value| {
+        value["differential"]["element"][1]["id"] = Value::from("CX.2");
+        value["differential"]["element"][1]["path"] = Value::from("CX.2");
+    });
+    refused_invalid(copy.path(), CX, "out of order");
 }
 
 fn refused_for(copy: &Path, expected: &str) {
@@ -718,8 +1123,9 @@ fn emitting_twice_is_byte_identical_and_check_passes() {
     let second = tempfile::tempdir().expect("tempdir");
     let report = emit(&options(first.path(), false)).expect("first emit");
     emit(&options(second.path(), false)).expect("second emit");
-    // lib.rs, model.rs, two index modules, one module per structure and per segment.
-    assert_eq!(report.files.len(), 4 + 305 + 190);
+    // lib.rs, model.rs, four index modules, one module per structure, segment,
+    // data type and message definition.
+    assert_eq!(report.files.len(), 6 + 305 + 190 + 83 + 696);
     assert_eq!(
         tree(&first.path().join("src")),
         tree(&second.path().join("src"))

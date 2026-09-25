@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SDD` segment: Sterilization Device Data.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `SDD` segment definition, `http://hl7.org/v2/StructureDefinition/SDD`.
 pub static SDD: Segment = Segment {
@@ -16,7 +19,7 @@ pub static SDD: Segment = Segment {
             id: "SDD.1-number",
             position: 1,
             name: "Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static SDD: Segment = Segment {
             id: "SDD.2-deviceNumber",
             position: 2,
             name: "Device Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static SDD: Segment = Segment {
             id: "SDD.3-deviceName",
             position: 3,
             name: "Device Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +67,7 @@ pub static SDD: Segment = Segment {
             id: "SDD.4-deviceDataState",
             position: 4,
             name: "Device Data State",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +85,7 @@ pub static SDD: Segment = Segment {
             id: "SDD.5-loadStatus",
             position: 5,
             name: "Load Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +103,7 @@ pub static SDD: Segment = Segment {
             id: "SDD.6-controlCode",
             position: 6,
             name: "Control Code",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +121,7 @@ pub static SDD: Segment = Segment {
             id: "SDD.7-operatorName",
             position: 7,
             name: "Operator Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

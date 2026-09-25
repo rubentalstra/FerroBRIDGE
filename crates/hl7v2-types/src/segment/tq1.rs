@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `TQ1` segment: Timing/Quantity.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `TQ1` segment definition, `http://hl7.org/v2/StructureDefinition/TQ1`.
@@ -18,7 +19,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.1-setId",
             position: 1,
             name: "Set ID - TQ1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.2-quantity",
             position: 2,
             name: "Quantity",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.3-repeatPattern",
             position: 3,
             name: "Repeat Pattern",
-            data_type: Some("RPT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::rpt::RPT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -66,7 +67,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.4-explicitTime",
             position: 4,
             name: "Explicit Time",
-            data_type: Some("TM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tm::TM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -81,7 +82,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.5-relativeTimeAndUnits",
             position: 5,
             name: "Relative Time and Units",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -96,7 +97,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.6-serviceDuration",
             position: 6,
             name: "Service Duration",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -111,7 +112,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.7-startDateTime",
             position: 7,
             name: "Start date/time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.8-endDateTime",
             position: 8,
             name: "End date/time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.9-priority",
             position: 9,
             name: "Priority",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -159,7 +160,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.10-conditionText",
             position: 10,
             name: "Condition text",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.11-textInstruction",
             position: 11,
             name: "Text instruction",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -195,7 +196,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.12-conjunction",
             position: 12,
             name: "Conjunction",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -216,7 +217,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.13-occurrenceDuration",
             position: 13,
             name: "Occurrence duration",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -231,7 +232,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.14-totalOccurrences",
             position: 14,
             name: "Total occurrences",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

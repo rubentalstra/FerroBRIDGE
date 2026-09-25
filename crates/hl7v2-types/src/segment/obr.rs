@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OBR` segment: Observation Request.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `OBR` segment definition, `http://hl7.org/v2/StructureDefinition/OBR`.
@@ -19,7 +20,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.1-setId",
             position: 1,
             name: "Set ID – OBR",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.2-placerOrderNumber",
             position: 2,
             name: "Placer Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.3-fillerOrderNumber",
             position: 3,
             name: "Filler Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.4-universalServiceIdentifier",
             position: 4,
             name: "Universal Service Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.7-observationDateTime",
             position: 7,
             name: "Observation Date/Time #",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.8-observationEndDateTime",
             position: 8,
             name: "Observation End Date/Time #",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.9-collectionVolume",
             position: 9,
             name: "Collection Volume *",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +161,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.10-collectorIdentifier",
             position: 10,
             name: "Collector Identifier *",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -175,7 +176,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.11-specimenActionCode",
             position: 11,
             name: "Specimen Action Code *",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +197,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.12-dangerCode",
             position: 12,
             name: "Danger Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +215,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.13-relevantClinicalInformation",
             position: 13,
             name: "Relevant Clinical Information",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -280,7 +281,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.17-orderCallbackPhoneNumber",
             position: 17,
             name: "Order Callback Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -295,7 +296,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.18-placerField1",
             position: 18,
             name: "Placer Field 1",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +314,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.19-placerField2",
             position: 19,
             name: "Placer Field 2",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +332,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.20-fillerField1",
             position: 20,
             name: "Filler Field 1 +",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +350,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.21-fillerField2",
             position: 21,
             name: "Filler Field 2 +",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -367,7 +368,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.22-resultsRptStatusChngDateTime",
             position: 22,
             name: "Results Rpt/Status Chng – Date/Time +",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -382,7 +383,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.23-chargeToPractice",
             position: 23,
             name: "Charge to Practice +",
-            data_type: Some("MOC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::moc::MOC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +398,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.24-diagnosticServSectId",
             position: 24,
             name: "Diagnostic Serv Sect ID",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +419,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.25-resultStatus",
             position: 25,
             name: "Result Status +",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +440,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.26-parentResult",
             position: 26,
             name: "Parent Result +",
-            data_type: Some("PRL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::prl::PRL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -484,7 +485,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.29-parentResultsObservationIdentifier",
             position: 29,
             name: "Parent  Results Observation Identifier",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -499,7 +500,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.30-transportationMode",
             position: 30,
             name: "Transportation Mode",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +521,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.31-reasonForStudy",
             position: 31,
             name: "Reason for Study",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -598,7 +599,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.36-scheduledDateTime",
             position: 36,
             name: "Scheduled Date/Time +",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -613,7 +614,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.37-numberOfSampleContainers",
             position: 37,
             name: "Number of Sample Containers *",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -631,7 +632,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.38-transportLogisticsOfCollectedSample",
             position: 38,
             name: "Transport Logistics of Collected Sample *",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -649,7 +650,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.39-collectorsComment",
             position: 39,
             name: "Collector's Comment *",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -667,7 +668,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.40-transportArrangementResponsibility",
             position: 40,
             name: "Transport Arrangement Responsibility",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -685,7 +686,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.41-transportArranged",
             position: 41,
             name: "Transport Arranged",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -706,7 +707,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.42-escortRequired",
             position: 42,
             name: "Escort Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -727,7 +728,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.43-plannedPatientTransportComment",
             position: 43,
             name: "Planned Patient Transport Comment",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -745,7 +746,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.44-procedureCode",
             position: 44,
             name: "Procedure Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -763,7 +764,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.45-procedureCodeModifier",
             position: 45,
             name: "Procedure Code Modifier",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -781,7 +782,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.46-placerSupplementalServiceInformation",
             position: 46,
             name: "Placer Supplemental Service Information",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -799,7 +800,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.47-fillerSupplementalServiceInformation",
             position: 47,
             name: "Filler Supplemental Service Information",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -817,7 +818,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.48-medicallyNecessaryDuplicateProcedureReason",
             position: 48,
             name: "Medically Necessary Duplicate Procedure Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -835,7 +836,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.49-resultHandling",
             position: 49,
             name: "Result Handling",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -868,7 +869,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.51-observationGroupId",
             position: 51,
             name: "Observation Group ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -883,7 +884,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.52-parentObservationGroupId",
             position: 52,
             name: "Parent Observation Group ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -898,7 +899,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.53-alternatePlacerOrderNumber",
             position: 53,
             name: "Alternate Placer Order Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -913,7 +914,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.54-parentOrder",
             position: 54,
             name: "Parent Order",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -931,7 +932,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.55-actionCode",
             position: 55,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `VND` segment: Purchasing Vendor.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `VND` segment definition, `http://hl7.org/v2/StructureDefinition/VND`.
@@ -18,7 +19,7 @@ pub static VND: Segment = Segment {
             id: "VND.1-setId",
             position: 1,
             name: "Set Id – VND",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static VND: Segment = Segment {
             id: "VND.2-vendorIdentifier",
             position: 2,
             name: "Vendor Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static VND: Segment = Segment {
             id: "VND.3-vendorName",
             position: 3,
             name: "Vendor Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static VND: Segment = Segment {
             id: "VND.4-vendorCatalogNumber",
             position: 4,
             name: "Vendor Catalog Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static VND: Segment = Segment {
             id: "VND.5-primaryVendorIndicator",
             position: 5,
             name: "Primary Vendor Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -102,7 +103,7 @@ pub static VND: Segment = Segment {
             id: "VND.6-corporation",
             position: 6,
             name: "Corporation",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -117,7 +118,7 @@ pub static VND: Segment = Segment {
             id: "VND.7-primaryContact",
             position: 7,
             name: "Primary Contact",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -132,7 +133,7 @@ pub static VND: Segment = Segment {
             id: "VND.8-contractAdjustment",
             position: 8,
             name: "Contract Adjustment",
-            data_type: Some("MOP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mop::MOP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static VND: Segment = Segment {
             id: "VND.9-associatedContractId",
             position: 9,
             name: "Associated Contract ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -162,7 +163,7 @@ pub static VND: Segment = Segment {
             id: "VND.10-classOfTrade",
             position: 10,
             name: "Class of Trade",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -177,7 +178,7 @@ pub static VND: Segment = Segment {
             id: "VND.11-pricingTierLevel",
             position: 11,
             name: "Pricing Tier Level",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PEO` segment: Product Experience Observation.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PEO` segment definition, `http://hl7.org/v2/StructureDefinition/PEO`.
@@ -18,7 +19,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.1-eventIdentifiersUsed",
             position: 1,
             name: "Event Identifiers Used",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -36,7 +37,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.2-eventSymptomDiagnosisCode",
             position: 2,
             name: "Event Symptom/Diagnosis Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -54,7 +55,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.3-eventOnsetDateTime",
             position: 3,
             name: "Event Onset Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.4-eventExacerbationDateTime",
             position: 4,
             name: "Event Exacerbation Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.5-eventImprovedDateTime",
             position: 5,
             name: "Event Improved Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -99,7 +100,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.6-eventEndedDataTime",
             position: 6,
             name: "Event Ended Data/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.7-eventLocationOccurredAddress",
             position: 7,
             name: "Event Location Occurred Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -129,7 +130,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.8-eventQualification",
             position: 8,
             name: "Event Qualification",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -150,7 +151,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.9-eventSerious",
             position: 9,
             name: "Event Serious",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -171,7 +172,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.10-eventExpected",
             position: 10,
             name: "Event Expected",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -192,7 +193,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.11-eventOutcome",
             position: 11,
             name: "Event Outcome",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -213,7 +214,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.12-patientOutcome",
             position: 12,
             name: "Patient Outcome",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.13-eventDescriptionFromOthers",
             position: 13,
             name: "Event Description from Others",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -252,7 +253,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.14-eventDescriptionFromOriginalReporter",
             position: 14,
             name: "Event Description from Original Reporter",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -270,7 +271,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.15-eventDescriptionFromPatient",
             position: 15,
             name: "Event Description from Patient",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -288,7 +289,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.16-eventDescriptionFromPractitioner",
             position: 16,
             name: "Event Description from Practitioner",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -306,7 +307,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.17-eventDescriptionFromAutopsy",
             position: 17,
             name: "Event Description from Autopsy",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -324,7 +325,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.18-causeOfDeath",
             position: 18,
             name: "Cause Of Death",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -342,7 +343,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.19-primaryObserverName",
             position: 19,
             name: "Primary Observer Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -357,7 +358,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.20-primaryObserverAddress",
             position: 20,
             name: "Primary Observer Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -372,7 +373,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.21-primaryObserverTelephone",
             position: 21,
             name: "Primary Observer Telephone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -387,7 +388,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.22-primaryObserversQualification",
             position: 22,
             name: "Primary Observer's Qualification",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -408,7 +409,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.23-confirmationProvidedBy",
             position: 23,
             name: "Confirmation Provided By",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -429,7 +430,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.24-primaryObserverAwareDateTime",
             position: 24,
             name: "Primary Observer Aware Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -444,7 +445,7 @@ pub static PEO: Segment = Segment {
             id: "PEO.25-primaryObserversIdentityMayBeDivulged",
             position: 25,
             name: "Primary Observer's identity May Be Divulged",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

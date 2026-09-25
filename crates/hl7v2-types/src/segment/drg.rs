@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DRG` segment: Diagnosis Related Group.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `DRG` segment definition, `http://hl7.org/v2/StructureDefinition/DRG`.
@@ -18,7 +19,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.1-diagnosticRelatedGroup",
             position: 1,
             name: "Diagnostic Related Group",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.2-drgAssignedDateTime",
             position: 2,
             name: "DRG Assigned Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.3-drgApprovalIndicator",
             position: 3,
             name: "DRG Approval Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.4-drgGrouperReviewCode",
             position: 4,
             name: "DRG Grouper Review Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.5-outlierType",
             position: 5,
             name: "Outlier Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -108,7 +109,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.6-outlierDays",
             position: 6,
             name: "Outlier Days",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.7-outlierCost",
             position: 7,
             name: "Outlier Cost",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -141,7 +142,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.8-drgPayor",
             position: 8,
             name: "DRG Payor",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.9-outlierReimbursement",
             position: 9,
             name: "Outlier Reimbursement",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -174,7 +175,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.10-confidentialIndicator",
             position: 10,
             name: "Confidential Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -195,7 +196,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.11-drgTransferType",
             position: 11,
             name: "DRG Transfer Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -213,7 +214,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.12-nameOfCoder",
             position: 12,
             name: "Name of Coder",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -228,7 +229,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.13-grouperStatus",
             position: 13,
             name: "Grouper Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -246,7 +247,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.14-pcclValueCode",
             position: 14,
             name: "PCCL Value Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -264,7 +265,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.15-effectiveWeight",
             position: 15,
             name: "Effective Weight",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -282,7 +283,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.16-monetaryAmount",
             position: 16,
             name: "Monetary Amount",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -297,7 +298,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.17-statusPatient",
             position: 17,
             name: "Status Patient",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -315,7 +316,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.18-grouperSoftwareName",
             position: 18,
             name: "Grouper Software Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -333,7 +334,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.19-grouperSoftwareVersion",
             position: 19,
             name: "Grouper Software Version",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -351,7 +352,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.20-statusFinancialCalculation",
             position: 20,
             name: "Status Financial Calculation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -369,7 +370,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.21-relativeDiscountSurcharge",
             position: 21,
             name: "Relative Discount/Surcharge",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -384,7 +385,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.22-basicCharge",
             position: 22,
             name: "Basic Charge",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -399,7 +400,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.23-totalCharge",
             position: 23,
             name: "Total Charge",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -414,7 +415,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.24-discountSurcharge",
             position: 24,
             name: "Discount/Surcharge",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -429,7 +430,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.25-calculatedDays",
             position: 25,
             name: "Calculated Days",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -447,7 +448,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.26-statusGender",
             position: 26,
             name: "Status Gender",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -465,7 +466,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.27-statusAge",
             position: 27,
             name: "Status Age",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -483,7 +484,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.28-statusLengthOfStay",
             position: 28,
             name: "Status Length of Stay",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -501,7 +502,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.29-statusSameDayFlag",
             position: 29,
             name: "Status Same Day Flag",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -519,7 +520,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.30-statusSeparationMode",
             position: 30,
             name: "Status Separation Mode",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -537,7 +538,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.31-statusWeightAtBirth",
             position: 31,
             name: "Status Weight at Birth",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -555,7 +556,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.32-statusRespirationMinutes",
             position: 32,
             name: "Status Respiration Minutes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -573,7 +574,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.33-statusAdmission",
             position: 33,
             name: "Status Admission",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

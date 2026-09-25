@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PRT` segment: Participation Information.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `PRT` segment definition, `http://hl7.org/v2/StructureDefinition/PRT`.
 pub static PRT: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.1-participationInstanceId",
             position: 1,
             name: "Participation Instance ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.3-actionReason",
             position: 3,
             name: "Action Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.4-roleOfParticipation",
             position: 4,
             name: "Role of Participation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.5-person",
             position: 5,
             name: "Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -103,7 +104,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.6-personProviderType",
             position: 6,
             name: "Person Provider Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.7-organizationUnitType",
             position: 7,
             name: "Organization Unit Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.8-organization",
             position: 8,
             name: "Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -151,7 +152,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.9-location",
             position: 9,
             name: "Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -166,7 +167,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.10-device",
             position: 10,
             name: "Device",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -181,7 +182,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.11-beginDateTimeArrivalTime",
             position: 11,
             name: "Begin Date/Time (arrival time)",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +197,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.12-endDateTimeDepartureTime",
             position: 12,
             name: "End Date/Time (departure time)",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +212,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.13-qualitativeDuration",
             position: 13,
             name: "Qualitative Duration",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -226,7 +227,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.14-address",
             position: 14,
             name: "Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -241,7 +242,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.15-telecommunicationAddress",
             position: 15,
             name: "Telecommunication Address",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -256,7 +257,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.16-udiDeviceIdentifier",
             position: 16,
             name: "UDI Device Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -271,7 +272,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.17-deviceManufactureDate",
             position: 17,
             name: "Device Manufacture Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -286,7 +287,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.18-deviceExpiryDate",
             position: 18,
             name: "Device Expiry Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -301,7 +302,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.19-deviceLotNumber",
             position: 19,
             name: "Device Lot Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -316,7 +317,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.20-deviceSerialNumber",
             position: 20,
             name: "Device Serial Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +332,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.21-deviceDonationIdentification",
             position: 21,
             name: "Device Donation Identification",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +347,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.22-deviceType",
             position: 22,
             name: "Device Type",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +365,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.23-preferredMethodOfContact",
             position: 23,
             name: "Preferred Method of Contact",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -382,7 +383,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.24-contactIdentifiers",
             position: 24,
             name: "Contact Identifiers",
-            data_type: Some("PLN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pln::PLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

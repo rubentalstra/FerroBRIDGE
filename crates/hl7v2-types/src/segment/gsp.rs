@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `GSP` segment: Person Gender and Sex.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `GSP` segment definition, `http://hl7.org/v2/StructureDefinition/GSP`.
 pub static GSP: Segment = Segment {
@@ -16,7 +17,7 @@ pub static GSP: Segment = Segment {
             id: "GSP.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static GSP: Segment = Segment {
             id: "GSP.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static GSP: Segment = Segment {
             id: "GSP.3-gspInstanceIdentifier",
             position: 3,
             name: "GSP Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static GSP: Segment = Segment {
             id: "GSP.4-sogiConcept",
             position: 4,
             name: "SOGI Concept",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static GSP: Segment = Segment {
             id: "GSP.5-sogiConceptValue",
             position: 5,
             name: "SOGI Concept Value",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static GSP: Segment = Segment {
             id: "GSP.6-validityRange",
             position: 6,
             name: "Validity Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static GSP: Segment = Segment {
             id: "GSP.7-comment",
             position: 7,
             name: "Comment",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

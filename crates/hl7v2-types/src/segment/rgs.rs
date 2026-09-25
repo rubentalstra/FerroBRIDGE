@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RGS` segment: Resource Group.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `RGS` segment definition, `http://hl7.org/v2/StructureDefinition/RGS`.
 pub static RGS: Segment = Segment {
@@ -16,7 +17,7 @@ pub static RGS: Segment = Segment {
             id: "RGS.1-setId",
             position: 1,
             name: "Set ID - RGS",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static RGS: Segment = Segment {
             id: "RGS.2-segmentActionCode",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static RGS: Segment = Segment {
             id: "RGS.3-resourceGroupId",
             position: 3,
             name: "Resource Group ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

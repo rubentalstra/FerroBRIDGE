@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ISD` segment: Interaction Status Detail.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `ISD` segment definition, `http://hl7.org/v2/StructureDefinition/ISD`.
 pub static ISD: Segment = Segment {
@@ -16,7 +17,7 @@ pub static ISD: Segment = Segment {
             id: "ISD.1-isd1",
             position: 1,
             name: "ISD-1",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static ISD: Segment = Segment {
             id: "ISD.2-isd2",
             position: 2,
             name: "ISD-2",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static ISD: Segment = Segment {
             id: "ISD.3-isd3",
             position: 3,
             name: "ISD-3",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

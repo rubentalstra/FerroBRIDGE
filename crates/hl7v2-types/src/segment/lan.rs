@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `LAN` segment: Language Detail.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `LAN` segment definition, `http://hl7.org/v2/StructureDefinition/LAN`.
 pub static LAN: Segment = Segment {
@@ -16,7 +17,7 @@ pub static LAN: Segment = Segment {
             id: "LAN.1-setId",
             position: 1,
             name: "Set ID – LAN",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static LAN: Segment = Segment {
             id: "LAN.2-languageCode",
             position: 2,
             name: "Language Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static LAN: Segment = Segment {
             id: "LAN.3-languageAbilityCode",
             position: 3,
             name: "Language Ability Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +71,7 @@ pub static LAN: Segment = Segment {
             id: "LAN.4-languageProficiencyCode",
             position: 4,
             name: "Language Proficiency Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OM7` segment: Additional Basic Attributes.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `OM7` segment definition, `http://hl7.org/v2/StructureDefinition/OM7`.
@@ -19,7 +20,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.2-universalServiceIdentifier",
             position: 2,
             name: "Universal Service Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.3-categoryIdentifier",
             position: 3,
             name: "Category Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +71,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.4-categoryDescription",
             position: 4,
             name: "Category Description",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.5-categorySynonym",
             position: 5,
             name: "Category Synonym",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -106,7 +107,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.6-effectiveTestServiceStartDateTime",
             position: 6,
             name: "Effective Test/Service Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.7-effectiveTestServiceEndDateTime",
             position: 7,
             name: "Effective Test/Service End Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.8-testServiceDefaultDurationQuantity",
             position: 8,
             name: "Test/Service Default Duration Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.9-testServiceDefaultDurationUnits",
             position: 9,
             name: "Test/Service Default Duration Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +173,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.10-testServiceDefaultFrequency",
             position: 10,
             name: "Test/Service Default Frequency",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -190,7 +191,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.11-consentIndicator",
             position: 11,
             name: "Consent Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +212,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.12-consentIdentifier",
             position: 12,
             name: "Consent Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +230,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.13-consentEffectiveStartDateTime",
             position: 13,
             name: "Consent Effective Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -244,7 +245,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.14-consentEffectiveEndDateTime",
             position: 14,
             name: "Consent Effective End Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +260,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.15-consentIntervalQuantity",
             position: 15,
             name: "Consent Interval Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +278,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.16-consentIntervalUnits",
             position: 16,
             name: "Consent Interval Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.17-consentWaitingPeriodQuantity",
             position: 17,
             name: "Consent Waiting Period Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +314,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.18-consentWaitingPeriodUnits",
             position: 18,
             name: "Consent Waiting Period Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +332,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.19-effectiveDateTimeOfChange",
             position: 19,
             name: "Effective Date/Time of Change",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +347,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.20-enteredBy",
             position: 20,
             name: "Entered By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -361,7 +362,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.21-orderableAtLocation",
             position: 21,
             name: "Orderable-at Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -376,7 +377,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.22-formularyStatus",
             position: 22,
             name: "Formulary Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +398,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.23-specialOrderIndicator",
             position: 23,
             name: "Special Order Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +419,7 @@ pub static OM7: Segment = Segment {
             id: "OM7.24-primaryKeyValueCdm",
             position: 24,
             name: "Primary Key Value - CDM",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

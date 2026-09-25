@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IIM` segment: Inventory Item Master.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `IIM` segment definition, `http://hl7.org/v2/StructureDefinition/IIM`.
 pub static IIM: Segment = Segment {
@@ -16,7 +19,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - IIM",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.2-serviceItemCode",
             position: 2,
             name: "Service Item Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.3-inventoryNumber",
             position: 3,
             name: "Inventory  Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +67,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.4-inventoryExpirationDate",
             position: 4,
             name: "Inventory Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +82,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.5-inventoryManufacturerName",
             position: 5,
             name: "Inventory Manufacturer Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +97,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.6-inventoryLocation",
             position: 6,
             name: "Inventory Location",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +112,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.7-inventoryReceivedDate",
             position: 7,
             name: "Inventory Received Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +127,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.8-inventoryReceivedQuantity",
             position: 8,
             name: "Inventory Received Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +145,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.9-inventoryReceivedQuantityUnit",
             position: 9,
             name: "Inventory Received Quantity Unit",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +160,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.10-inventoryReceivedItemCost",
             position: 10,
             name: "Inventory Received Item Cost",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +175,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.11-inventoryOnHandDate",
             position: 11,
             name: "Inventory On Hand Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +190,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.12-inventoryOnHandQuantity",
             position: 12,
             name: "Inventory On Hand Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +208,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.13-inventoryOnHandQuantityUnit",
             position: 13,
             name: "Inventory On Hand Quantity Unit",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +223,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.14-procedureCode",
             position: 14,
             name: "Procedure Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +241,7 @@ pub static IIM: Segment = Segment {
             id: "IIM.15-procedureCodeModifier",
             position: 15,
             name: "Procedure Code Modifier",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

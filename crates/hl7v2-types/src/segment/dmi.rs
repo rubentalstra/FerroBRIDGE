@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DMI` segment: DRG Master File Information.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `DMI` segment definition, `http://hl7.org/v2/StructureDefinition/DMI`.
 pub static DMI: Segment = Segment {
@@ -16,7 +19,7 @@ pub static DMI: Segment = Segment {
             id: "DMI.1-diagnosticRelatedGroup",
             position: 1,
             name: "Diagnostic Related Group",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static DMI: Segment = Segment {
             id: "DMI.2-majorDiagnosticCategory",
             position: 2,
             name: "Major Diagnostic Category",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static DMI: Segment = Segment {
             id: "DMI.3-lowerAndUpperTrimPoints",
             position: 3,
             name: "Lower and Upper Trim Points",
-            data_type: Some("NR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nr::NR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static DMI: Segment = Segment {
             id: "DMI.4-averageLengthOfStay",
             position: 4,
             name: "Average Length of Stay",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +88,7 @@ pub static DMI: Segment = Segment {
             id: "DMI.5-relativeWeight",
             position: 5,
             name: "Relative Weight",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

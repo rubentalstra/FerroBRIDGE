@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PR1` segment: Procedures.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `PR1` segment definition, `http://hl7.org/v2/StructureDefinition/PR1`.
@@ -19,7 +20,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.1-setId",
             position: 1,
             name: "Set ID - PR1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.3-procedureCode",
             position: 3,
             name: "Procedure Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.5-procedureDateTime",
             position: 5,
             name: "Procedure Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.6-procedureFunctionalType",
             position: 6,
             name: "Procedure Functional Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.7-procedureMinutes",
             position: 7,
             name: "Procedure Minutes",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +152,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.9-anesthesiaCode",
             position: 9,
             name: "Anesthesia Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +170,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.10-anesthesiaMinutes",
             position: 10,
             name: "Anesthesia Minutes",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +218,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.13-consentCode",
             position: 13,
             name: "Consent Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.14-procedurePriority",
             position: 14,
             name: "Procedure Priority",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +257,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.15-associatedDiagnosisCode",
             position: 15,
             name: "Associated Diagnosis Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -274,7 +275,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.16-procedureCodeModifier",
             position: 16,
             name: "Procedure Code Modifier",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -292,7 +293,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.17-procedureDrgType",
             position: 17,
             name: "Procedure DRG Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +311,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.18-tissueTypeCode",
             position: 18,
             name: "Tissue Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -328,7 +329,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.19-procedureIdentifier",
             position: 19,
             name: "Procedure Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -343,7 +344,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.20-procedureActionCode",
             position: 20,
             name: "Procedure Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +365,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.21-drgProcedureDeterminationStatus",
             position: 21,
             name: "DRG Procedure Determination Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -382,7 +383,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.22-drgProcedureRelevance",
             position: 22,
             name: "DRG Procedure Relevance",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -400,7 +401,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.23-treatingOrganizationalUnit",
             position: 23,
             name: "Treating Organizational Unit",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -415,7 +416,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.24-respiratoryWithinSurgery",
             position: 24,
             name: "Respiratory Within Surgery",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +437,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.25-parentProcedureId",
             position: 25,
             name: "Parent Procedure ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

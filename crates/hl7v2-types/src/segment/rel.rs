@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `REL` segment: Clinical Relationship.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `REL` segment definition, `http://hl7.org/v2/StructureDefinition/REL`.
@@ -18,7 +19,7 @@ pub static REL: Segment = Segment {
             id: "REL.1-setId",
             position: 1,
             name: "Set ID –REL",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static REL: Segment = Segment {
             id: "REL.2-relationshipType",
             position: 2,
             name: "Relationship Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static REL: Segment = Segment {
             id: "REL.3-thisRelationshipInstanceIdentifier",
             position: 3,
             name: "This Relationship Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static REL: Segment = Segment {
             id: "REL.4-sourceInformationInstanceIdentifier",
             position: 4,
             name: "Source Information Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static REL: Segment = Segment {
             id: "REL.5-targetInformationInstanceIdentifier",
             position: 5,
             name: "Target Information Instance Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -99,7 +100,7 @@ pub static REL: Segment = Segment {
             id: "REL.6-assertingEntityInstanceId",
             position: 6,
             name: "Asserting Entity Instance ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static REL: Segment = Segment {
             id: "REL.7-assertingPerson",
             position: 7,
             name: "Asserting Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static REL: Segment = Segment {
             id: "REL.8-assertingOrganization",
             position: 8,
             name: "Asserting Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -144,7 +145,7 @@ pub static REL: Segment = Segment {
             id: "REL.9-assertorAddress",
             position: 9,
             name: "Assertor Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static REL: Segment = Segment {
             id: "REL.10-assertorContact",
             position: 10,
             name: "Assertor Contact",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -174,7 +175,7 @@ pub static REL: Segment = Segment {
             id: "REL.11-assertionDateRange",
             position: 11,
             name: "Assertion Date Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -189,7 +190,7 @@ pub static REL: Segment = Segment {
             id: "REL.12-negationIndicator",
             position: 12,
             name: "Negation Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -210,7 +211,7 @@ pub static REL: Segment = Segment {
             id: "REL.13-certaintyOfRelationship",
             position: 13,
             name: "Certainty of Relationship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -225,7 +226,7 @@ pub static REL: Segment = Segment {
             id: "REL.14-priorityNo",
             position: 14,
             name: "Priority No",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -243,7 +244,7 @@ pub static REL: Segment = Segment {
             id: "REL.15-prioritySequenceNoRelPreferenceForConsideration",
             position: 15,
             name: "Priority  Sequence No (rel preference for consideration)",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -261,7 +262,7 @@ pub static REL: Segment = Segment {
             id: "REL.16-separabilityIndicator",
             position: 16,
             name: "Separability Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -282,7 +283,7 @@ pub static REL: Segment = Segment {
             id: "REL.17-sourceInformationInstanceObjectType",
             position: 17,
             name: "Source Information Instance Object Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -300,7 +301,7 @@ pub static REL: Segment = Segment {
             id: "REL.18-targetInformationInstanceObjectType",
             position: 18,
             name: "Target Information Instance Object Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

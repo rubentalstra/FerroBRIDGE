@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `EDU` segment: Educational Detail.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `EDU` segment definition, `http://hl7.org/v2/StructureDefinition/EDU`.
 pub static EDU: Segment = Segment {
@@ -16,7 +17,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.1-setId",
             position: 1,
             name: "Set ID – EDU",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.2-academicDegree",
             position: 2,
             name: "Academic Degree",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.3-academicDegreeProgramDateRange",
             position: 3,
             name: "Academic Degree Program Date Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.4-academicDegreeProgramParticipationDateRange",
             position: 4,
             name: "Academic Degree Program Participation Date Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.5-academicDegreeGrantedDate",
             position: 5,
             name: "Academic Degree Granted Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +98,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.6-school",
             position: 6,
             name: "School",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +113,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.7-schoolTypeCode",
             position: 7,
             name: "School Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.8-schoolAddress",
             position: 8,
             name: "School Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static EDU: Segment = Segment {
             id: "EDU.9-majorFieldOfStudy",
             position: 9,
             name: "Major Field of Study",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

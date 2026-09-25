@@ -157,17 +157,54 @@ fn a_valued_field_beyond_the_segment_table_is_counted() {
     )));
 }
 
-#[test]
-fn a_structure_the_definitions_carry_in_variants_needs_the_caller_to_name_one() {
-    let decoded = ferrobridge_hl7v2::decode::decode(
-        &fixtures::oru_r01(),
-        ferrobridge_hl7v2::decode::Charset::Ascii,
-    )
-    .expect("the message decodes");
+/// Lexes `bytes` as ASCII and selects its structure.
+fn select(bytes: &[u8]) -> Result<&'static str, StructureError> {
+    let decoded =
+        ferrobridge_hl7v2::decode::decode(bytes, ferrobridge_hl7v2::decode::Charset::Ascii)
+            .expect("the message decodes");
     let lexed = ferrobridge_hl7v2::parse::lex(&decoded.text, decoded.charset).expect("it lexes");
+    structure_for(&lexed.message).map(|structure| structure.id)
+}
+
+/// A synthetic header with `message_type` as MSH-9, and an EVN, a PID and a PV1.
+fn with_type(message_type: &str) -> Vec<u8> {
+    let header = format!(
+        "MSH|^~\\&|ADMIT|NORTHHOSP|EHR|SOUTHCLINIC|20260925090000+0200||{message_type}|MSG00009|P|2.5.1"
+    );
+    fixtures::message(&[
+        header.as_bytes(),
+        b"EVN||20260925085900+0200",
+        b"PID|1||PAT-0009^^^NORTHHOSP^MR||Test^Anna^^^^^L||19920304|F",
+        b"PV1|1|O",
+    ])
+}
+
+#[test]
+fn the_message_definition_of_the_trigger_event_selects_the_variant() {
+    // HL7/v2ig input/sourceOfTruth/message/messages/ORU-R01.json names ORU_R01-A.
+    assert_eq!(select(&fixtures::oru_r01()), Ok("ORU_R01-A"));
+}
+
+#[test]
+fn a_variant_other_than_the_first_is_chosen_from_the_message_table() {
+    // HL7/v2ig input/sourceOfTruth/message/messages/ADT-A04.json names ADT_A01-B.
+    assert_eq!(select(&with_type("ADT^A04^ADT_A01")), Ok("ADT_A01-B"));
+}
+
+#[test]
+fn a_structure_in_variants_no_message_definition_names_is_refused() {
     assert!(matches!(
-        structure_for(&lexed.message),
+        select(&with_type("ORU^Z99^ORU_R01")),
         Err(StructureError::Variant { ref candidates, .. })
             if candidates == &["ORU_R01-A", "ORU_R01-B", "ORU_R01-C", "ORU_R01-D"]
+    ));
+}
+
+#[test]
+fn a_message_definition_naming_a_variant_of_another_structure_is_refused() {
+    // ADT^A04 names ADT_A01-B, which is no variant of the ADT_A05 MSH-9.3 names.
+    assert!(matches!(
+        select(&with_type("ADT^A04^ADT_A05")),
+        Err(StructureError::Variant { .. })
     ));
 }

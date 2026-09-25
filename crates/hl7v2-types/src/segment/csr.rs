@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CSR` segment: Clinical Study Registration.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `CSR` segment definition, `http://hl7.org/v2/StructureDefinition/CSR`.
 pub static CSR: Segment = Segment {
@@ -16,7 +17,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.1-sponsorStudyId",
             position: 1,
             name: "Sponsor Study ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.2-alternateStudyId",
             position: 2,
             name: "Alternate Study ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -46,7 +47,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.3-institutionRegisteringThePatient",
             position: 3,
             name: "Institution Registering the Patient",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.4-sponsorPatientId",
             position: 4,
             name: "Sponsor Patient ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.5-alternatePatientId",
             position: 5,
             name: "Alternate Patient ID - CSR",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +95,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.6-dateTimeOfPatientStudyRegistration",
             position: 6,
             name: "Date/Time of Patient Study Registration",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -109,7 +110,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.7-personPerformingStudyRegistration",
             position: 7,
             name: "Person Performing Study Registration",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -124,7 +125,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.8-studyAuthorizingProvider",
             position: 8,
             name: "Study Authorizing Provider",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -139,7 +140,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.9-dateTimePatientStudyConsentSigned",
             position: 9,
             name: "Date/Time Patient Study Consent Signed",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.10-patientStudyEligibilityStatus",
             position: 10,
             name: "Patient Study Eligibility Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +173,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.11-studyRandomizationDateTime",
             position: 11,
             name: "Study Randomization Date/time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),
@@ -187,7 +188,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.12-randomizedStudyArm",
             position: 12,
             name: "Randomized Study Arm",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),
@@ -205,7 +206,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.13-stratumForStudyRandomization",
             position: 13,
             name: "Stratum for Study Randomization",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),
@@ -223,7 +224,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.14-patientEvaluabilityStatus",
             position: 14,
             name: "Patient Evaluability Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +242,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.15-dateTimeEndedStudy",
             position: 15,
             name: "Date/Time Ended Study",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +257,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.16-reasonEndedStudy",
             position: 16,
             name: "Reason Ended Study",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -274,7 +275,7 @@ pub static CSR: Segment = Segment {
             id: "CSR.17-actionCode",
             position: 17,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

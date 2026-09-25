@@ -3,10 +3,12 @@
 
 //! Rendering the lowered v2 tables to the source of `hl7v2-types`.
 //!
-//! One module per segment under `segment/` and one per message structure
-//! under `structure/`, each holding one `static`; a structure's tree refers to
-//! the segment statics, so the parser reaches a segment's field table from the
-//! node that places it. Every file opens with the `@generated` banner.
+//! One module per segment under `segment/`, per message structure under
+//! `structure/`, per data type under `data_type/` and per message definition
+//! under `message/`, each holding one `static`. A structure's tree refers to
+//! the segment statics, a field and a component to the data type statics, and
+//! a message definition to its structure, so each table is one step from the
+//! entry that names it. Every file opens with the `@generated` banner.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{self, Write};
@@ -14,8 +16,9 @@ use std::fmt::{self, Write};
 use crate::naming::is_keyword;
 use crate::render::SPDX;
 use crate::v2::lower::{
-    Cardinality, ConditionalCode, Field, GroupKind, Model, Node, Optionality, Segment,
-    SegmentStatus, StandardsStatus, Structure,
+    Cardinality, Component, ConditionalCode, ConformanceLength, DataType, Field, GroupKind, Length,
+    Message, MessageStatus, Model, Node, Optionality, Segment, SegmentStatus, StandardsStatus,
+    Structure, Table,
 };
 
 /// The hand-written shapes the tables are statics of.
@@ -53,6 +56,22 @@ pub enum RenderError {
         /// The segment id.
         segment: String,
     },
+    /// A component names a data type the model does not hold.
+    #[error("{component} names data type {data_type}, which the model does not hold")]
+    MissingDataType {
+        /// The component id.
+        component: String,
+        /// The data type code.
+        data_type: String,
+    },
+    /// A message definition names a structure the model does not hold.
+    #[error("{message} names structure {structure}, which the model does not hold")]
+    MissingStructure {
+        /// The message id.
+        message: String,
+        /// The structure id.
+        structure: String,
+    },
 }
 
 /// The banner every file of `hl7v2-types` starts with.
@@ -71,7 +90,8 @@ pub fn banner(model: &Model) -> String {
 /// result in lower case and the static in upper case. A module name that is a
 /// device name Windows reserves for files (`CON` renders as `con`) takes a
 /// trailing `_`, so the crate checks out and builds there: the `CON` segment
-/// is the module `con_` holding the static `CON`.
+/// is the module `con_` holding the static `CON`. A module name that is a Rust
+/// keyword takes the same trailing `_`: the `FN` data type is the module `fn_`.
 #[must_use]
 pub fn names(id: &str) -> (String, String) {
     let base: String = id
@@ -79,7 +99,7 @@ pub fn names(id: &str) -> (String, String) {
         .map(|ch| if ch.is_ascii_alphanumeric() { ch } else { '_' })
         .collect();
     let mut module = base.to_ascii_lowercase();
-    if is_reserved_file_name(&module) {
+    if is_reserved_file_name(&module) || is_keyword(&module) {
         module.push('_');
     }
     (module, base.to_ascii_uppercase())
@@ -107,6 +127,8 @@ pub fn render(model: &Model) -> Result<BTreeMap<String, String>, RenderError> {
     let banner = banner(model);
     let segment_names = module_names(model.segments.keys())?;
     let structure_names = module_names(model.structures.keys())?;
+    let data_type_names = module_names(model.data_types.keys())?;
+    let message_names = module_names(model.messages.keys())?;
     let mut files = BTreeMap::new();
     files.insert(String::from("lib.rs"), render_lib(&banner, model)?);
     files.insert(String::from("model.rs"), format!("{banner}{MODEL}"));
@@ -118,11 +140,19 @@ pub fn render(model: &Model) -> Result<BTreeMap<String, String>, RenderError> {
         String::from("structure/mod.rs"),
         render_index(&banner, &structure_names, Index::Structure)?,
     );
+    files.insert(
+        String::from("data_type/mod.rs"),
+        render_index(&banner, &data_type_names, Index::DataType)?,
+    );
+    files.insert(
+        String::from("message/mod.rs"),
+        render_message_index(&banner, model, &message_names)?,
+    );
     for (id, segment) in &model.segments {
         let (module, name) = names(id);
         files.insert(
             format!("segment/{module}.rs"),
-            render_segment(&banner, &name, segment)?,
+            render_segment(&banner, &name, segment, &data_type_names)?,
         );
     }
     for (id, structure) in &model.structures {
@@ -130,6 +160,20 @@ pub fn render(model: &Model) -> Result<BTreeMap<String, String>, RenderError> {
         files.insert(
             format!("structure/{module}.rs"),
             render_structure(&banner, &name, structure, &segment_names)?,
+        );
+    }
+    for (code, data_type) in &model.data_types {
+        let (module, name) = names(code);
+        files.insert(
+            format!("data_type/{module}.rs"),
+            render_data_type(&banner, &name, data_type, &data_type_names)?,
+        );
+    }
+    for (id, message) in &model.messages {
+        let (module, name) = names(id);
+        files.insert(
+            format!("message/{module}.rs"),
+            render_message(&banner, &name, message, &structure_names)?,
         );
     }
     Ok(files)
@@ -164,17 +208,24 @@ fn module_names<'a>(
 fn render_lib(banner: &str, model: &Model) -> Result<String, RenderError> {
     let mut out = String::from(banner);
     out.push_str(
-        "//! The HL7 v2 message structures and segment fields, generated from the HL7 v2 definitions.\n//!\n//! `structure` holds every message structure of the definitions as a\n//! segment-group tree, and `segment` every segment definition with its\n//! field table, the batch envelopes included. The shapes are in `model`. Every file is\n//! `@generated` by `fhir-codegen`; change the emitter and regenerate, never\n//! the output.\n",
+        "//! The HL7 v2 message structures, segment fields, data types and message definitions, generated from the HL7 v2 definitions.\n//!\n//! `structure` holds every message structure of the definitions as a\n//! segment-group tree, `segment` every segment definition with its\n//! field table, the batch envelopes included, `data_type` every primitive and\n//! complex data type with its component table, and `message` every message\n//! definition with the structure its trigger event selects. The shapes are in\n//! `model`. Every file is `@generated` by `fhir-codegen`; change the emitter\n//! and regenerate, never the output.\n",
     );
     writeln!(
         out,
-        "//!\n//! The definitions are `HL7/v2ig` at commit `{}`, path `input/sourceOfTruth`:\n//! {} message structures and {} segments with {} fields.\n",
+        "//!\n//! The definitions are `HL7/v2ig` at commit `{}`, path `input/sourceOfTruth`:\n//! {} message structures, {} segments with {} fields, {} data types ({} primitive,\n//! {} complex with {} components) and {} message definitions.\n",
         model.commit,
         model.structures.len(),
         model.segments.len(),
-        model.field_count()
+        model.field_count(),
+        model.data_types.len(),
+        model.primitive_count(),
+        model.data_types.len() - model.primitive_count(),
+        model.component_count(),
+        model.messages.len(),
     )?;
-    out.push_str("pub mod model;\npub mod segment;\npub mod structure;\n");
+    out.push_str(
+        "pub mod data_type;\npub mod message;\npub mod model;\npub mod segment;\npub mod structure;\n",
+    );
     Ok(out)
 }
 
@@ -182,6 +233,7 @@ fn render_lib(banner: &str, model: &Model) -> Result<String, RenderError> {
 enum Index {
     Segment,
     Structure,
+    DataType,
 }
 
 fn render_index(
@@ -189,12 +241,13 @@ fn render_index(
     names: &BTreeMap<String, (String, String)>,
     index: Index,
 ) -> Result<String, RenderError> {
-    let (doc, kind, list, noun, example) = match index {
+    let (doc, kind, list, noun, key, example) = match index {
         Index::Segment => (
             "Every segment definition, one module each.",
             "Segment",
             "SEGMENTS",
             "segment",
+            "definition id",
             "OBX",
         ),
         Index::Structure => (
@@ -202,8 +255,21 @@ fn render_index(
             "Structure",
             "STRUCTURES",
             "message structure",
+            "definition id",
             "ORU_R01-A",
         ),
+        Index::DataType => (
+            "Every primitive and complex data type of the HL7 v2 definitions, one module each.",
+            "DataType",
+            "DATA_TYPES",
+            "data type",
+            "code",
+            "CX",
+        ),
+    };
+    let field = match index {
+        Index::Segment | Index::Structure => "id",
+        Index::DataType => "code",
     };
     let mut out = String::from(banner);
     writeln!(out, "//! {doc}\n")?;
@@ -220,7 +286,43 @@ fn render_index(
     }
     writeln!(
         out,
-        "];\n\n/// The {noun} whose definition id is `id`, for example `{example}`.\n#[must_use]\npub fn find(id: &str) -> Option<&'static crate::model::{kind}> {{\n    match {list}.binary_search_by(|entry| entry.id.cmp(id)) {{\n        Ok(index) => {list}.get(index).copied(),\n        Err(_) => None,\n    }}\n}}"
+        "];\n\n/// Returns the {noun} whose {key} is `{field}`, for example `{example}`.\n#[must_use]\npub fn find({field}: &str) -> Option<&'static crate::model::{kind}> {{\n    match {list}.binary_search_by(|entry| entry.{field}.cmp({field})) {{\n        Ok(index) => {list}.get(index).copied(),\n        Err(_) => None,\n    }}\n}}"
+    )?;
+    Ok(out)
+}
+
+/// The message index: every message definition in `(code, event)` order.
+fn render_message_index(
+    banner: &str,
+    model: &Model,
+    names: &BTreeMap<String, (String, String)>,
+) -> Result<String, RenderError> {
+    let mut out = String::from(banner);
+    writeln!(
+        out,
+        "//! Every message definition of the HL7 v2 definitions, one module each.\n"
+    )?;
+    for (module, _) in names.values() {
+        writeln!(out, "pub mod {module};")?;
+    }
+    let mut ordered: Vec<(&str, &str, &(String, String))> = Vec::with_capacity(names.len());
+    for (id, message) in &model.messages {
+        if let Some(entry) = names.get(id) {
+            ordered.push((&message.code, &message.event, entry));
+        }
+    }
+    ordered.sort_by(|left, right| (left.0, left.1).cmp(&(right.0, right.1)));
+    writeln!(
+        out,
+        "\n/// Every message definition, in `(code, event)` order.\npub static MESSAGES: [&crate::model::Message; {}] = [",
+        ordered.len()
+    )?;
+    for (_, _, (module, name)) in &ordered {
+        writeln!(out, "    &{module}::{name},")?;
+    }
+    writeln!(
+        out,
+        "];\n\n/// Returns the message definition sent as `code^event` (`MSH-9.1` and\n/// `MSH-9.2`), for example `ORU` and `R01`.\n#[must_use]\npub fn find(code: &str, event: &str) -> Option<&'static crate::model::Message> {{\n    match MESSAGES.binary_search_by(|entry| (entry.code, entry.event).cmp(&(code, event))) {{\n        Ok(index) => MESSAGES.get(index).copied(),\n        Err(_) => None,\n    }}\n}}"
     )?;
     Ok(out)
 }
@@ -264,12 +366,8 @@ fn optional_u32(value: Option<u32>) -> String {
     value.map_or_else(|| String::from("None"), |value| format!("Some({value})"))
 }
 
-fn field(field: &Field, uses: &mut BTreeSet<&'static str>) -> String {
-    let data_type = field
-        .data_type
-        .as_ref()
-        .map_or_else(|| String::from("None"), |code| format!("Some({code:?})"));
-    let length = field.length.map_or_else(
+fn length(value: Option<Length>, uses: &mut BTreeSet<&'static str>) -> String {
+    value.map_or_else(
         || String::from("None"),
         |length| {
             uses.insert("Length");
@@ -279,8 +377,14 @@ fn field(field: &Field, uses: &mut BTreeSet<&'static str>) -> String {
                 optional_u32(length.max)
             )
         },
-    );
-    let conformance_length = field.conformance_length.map_or_else(
+    )
+}
+
+fn conformance_length(
+    value: Option<ConformanceLength>,
+    uses: &mut BTreeSet<&'static str>,
+) -> String {
+    value.map_or_else(
         || String::from("None"),
         |value| {
             uses.insert("ConformanceLength");
@@ -292,8 +396,11 @@ fn field(field: &Field, uses: &mut BTreeSet<&'static str>) -> String {
                 optional_u32(value.length)
             )
         },
-    );
-    let table = field.table.as_ref().map_or_else(
+    )
+}
+
+fn table(value: Option<&Table>, uses: &mut BTreeSet<&'static str>) -> String {
+    value.map_or_else(
         || String::from("None"),
         |table| {
             uses.insert("Table");
@@ -302,7 +409,37 @@ fn field(field: &Field, uses: &mut BTreeSet<&'static str>) -> String {
                 table.id, table.value_set
             )
         },
+    )
+}
+
+/// The path of the data type static `code` names, from a sibling module.
+fn data_type_path(code: &str, data_types: &BTreeMap<String, (String, String)>) -> Option<String> {
+    data_types
+        .get(code)
+        .map(|(module, name)| format!("&data_type::{module}::{name}"))
+}
+
+fn field(
+    field: &Field,
+    data_types: &BTreeMap<String, (String, String)>,
+    uses: &mut BTreeSet<&'static str>,
+) -> String {
+    let data_type = field.data_type.as_ref().map_or_else(
+        || String::from("None"),
+        |code| {
+            uses.insert("DataTypeRef");
+            match data_type_path(code, data_types) {
+                Some(path) => {
+                    uses.insert("data_type");
+                    format!("Some(DataTypeRef::Defined({path}))")
+                }
+                None => format!("Some(DataTypeRef::Undefined({code:?}))"),
+            }
+        },
     );
+    let length = length(field.length, uses);
+    let conformance_length = conformance_length(field.conformance_length, uses);
+    let table = table(field.table.as_ref(), uses);
     let standards_status = field.standards_status.map_or_else(
         || String::from("None"),
         |status| {
@@ -323,17 +460,32 @@ fn field(field: &Field, uses: &mut BTreeSet<&'static str>) -> String {
     )
 }
 
+/// The `use` lines for `uses`: the model shapes, and the `data_type`
+/// module when a static names one.
 fn uses_line(uses: &BTreeSet<&'static str>) -> String {
-    let names: Vec<&str> = uses.iter().copied().collect();
-    format!("use crate::model::{{{}}};\n", names.join(", "))
+    let names: Vec<&str> = uses
+        .iter()
+        .copied()
+        .filter(|name| *name != "data_type")
+        .collect();
+    let mut out = format!("use crate::model::{{{}}};\n", names.join(", "));
+    if uses.contains("data_type") {
+        out.push_str("use crate::data_type;\n");
+    }
+    out
 }
 
-fn render_segment(banner: &str, name: &str, segment: &Segment) -> Result<String, RenderError> {
+fn render_segment(
+    banner: &str,
+    name: &str,
+    segment: &Segment,
+    data_types: &BTreeMap<String, (String, String)>,
+) -> Result<String, RenderError> {
     let mut uses: BTreeSet<&'static str> =
         ["Cardinality", "Field", "Max", "Optionality", "Segment"].into();
     let mut fields = String::new();
     for entry in &segment.fields {
-        writeln!(fields, "        {},", field(entry, &mut uses))?;
+        writeln!(fields, "        {},", field(entry, data_types, &mut uses))?;
     }
     let mut out = String::from(banner);
     writeln!(
@@ -462,6 +614,125 @@ fn render_structure(
         out,
         "\n/// The `{}` message structure definition, `{}`.\npub static {name}: Structure = Structure {{\n    id: {:?},\n    url: {:?},\n    nodes: {tree},\n}};",
         structure.id, structure.url, structure.id, structure.url
+    )?;
+    Ok(out)
+}
+
+fn component(
+    component: &Component,
+    data_types: &BTreeMap<String, (String, String)>,
+    uses: &mut BTreeSet<&'static str>,
+) -> Result<String, RenderError> {
+    let data_type = match &component.data_type {
+        None => String::from("None"),
+        Some(code) => {
+            let Some(path) = data_type_path(code, data_types) else {
+                return Err(RenderError::MissingDataType {
+                    component: component.id.clone(),
+                    data_type: code.clone(),
+                });
+            };
+            uses.insert("data_type");
+            format!("Some({path})")
+        }
+    };
+    let count = component.cardinality.map_or_else(
+        || String::from("None"),
+        |count| {
+            uses.extend(["Cardinality", "Max"]);
+            format!("Some({})", cardinality(count))
+        },
+    );
+    let length = length(component.length, uses);
+    let conformance_length = conformance_length(component.conformance_length, uses);
+    let table = table(component.table.as_ref(), uses);
+    Ok(format!(
+        "Component {{ id: {:?}, position: {}, name: {:?}, data_type: {data_type}, cardinality: {count}, optionality: {}, length: {length}, conformance_length: {conformance_length}, table: {table} }}",
+        component.id,
+        component.position,
+        component.name,
+        optionality(component.optionality, uses),
+    ))
+}
+
+fn render_data_type(
+    banner: &str,
+    name: &str,
+    data_type: &DataType,
+    data_types: &BTreeMap<String, (String, String)>,
+) -> Result<String, RenderError> {
+    let mut uses: BTreeSet<&'static str> = ["DataType"].into();
+    let mut components = String::new();
+    for entry in &data_type.components {
+        uses.extend(["Component", "Optionality"]);
+        writeln!(
+            components,
+            "        {},",
+            component(entry, data_types, &mut uses)?
+        )?;
+    }
+    let kind = if data_type.components.is_empty() {
+        "primitive"
+    } else {
+        "complex"
+    };
+    let mut out = String::from(banner);
+    writeln!(
+        out,
+        "//! The `{}` {kind} data type: {}.\n",
+        data_type.code,
+        data_type.name.trim_end_matches('.')
+    )?;
+    out.push_str(&uses_line(&uses));
+    let components = if components.is_empty() {
+        String::from("&[]")
+    } else {
+        format!("&[\n{components}    ]")
+    };
+    writeln!(
+        out,
+        "\n/// The `{}` data type definition, `{}`.\npub static {name}: DataType = DataType {{\n    code: {:?},\n    url: {:?},\n    name: {:?},\n    components: {components},\n}};",
+        data_type.code, data_type.url, data_type.code, data_type.url, data_type.name
+    )?;
+    Ok(out)
+}
+
+fn render_message(
+    banner: &str,
+    name: &str,
+    message: &Message,
+    structures: &BTreeMap<String, (String, String)>,
+) -> Result<String, RenderError> {
+    let structure = match &message.structure {
+        None => String::from("None"),
+        Some(id) => {
+            let Some((module, static_name)) = structures.get(id) else {
+                return Err(RenderError::MissingStructure {
+                    message: message.id.clone(),
+                    structure: id.clone(),
+                });
+            };
+            format!("Some(&structure::{module}::{static_name})")
+        }
+    };
+    let status = match message.status {
+        MessageStatus::Active => "MessageStatus::Active",
+        MessageStatus::Withdrawn => "MessageStatus::Withdrawn",
+    };
+    let mut out = String::from(banner);
+    writeln!(
+        out,
+        "//! The `{}^{}` message definition.\n",
+        message.code, message.event
+    )?;
+    out.push_str("use crate::model::{Message, MessageStatus};\n");
+    if message.structure.is_some() {
+        out.push_str("use crate::structure;\n");
+    }
+    writeln!(
+        out,
+        "\n/// The `{}` message definition, `{}`.\npub static {name}: Message = Message {{\n    id: {:?},\n    url: {:?},\n    code: {:?},\n    event: {:?},\n    structure: {structure},\n    status: {status},\n}};",
+        message.id, message.url, message.id, message.url, message.code, message.event
     )?;
     Ok(out)
 }

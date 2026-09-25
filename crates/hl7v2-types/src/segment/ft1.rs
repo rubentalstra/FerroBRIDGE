@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `FT1` segment: Financial Transaction.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `FT1` segment definition, `http://hl7.org/v2/StructureDefinition/FT1`.
@@ -19,7 +20,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.1-setId",
             position: 1,
             name: "Set ID - FT1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.2-transactionId",
             position: 2,
             name: "Transaction ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.3-transactionBatchId",
             position: 3,
             name: "Transaction Batch ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +74,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.4-transactionDate",
             position: 4,
             name: "Transaction Date",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.5-transactionPostingDate",
             position: 5,
             name: "Transaction Posting Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.6-transactionType",
             position: 6,
             name: "Transaction Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.7-transactionCode",
             position: 7,
             name: "Transaction Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -169,7 +170,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.10-transactionQuantity",
             position: 10,
             name: "Transaction Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +188,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.11-transactionAmountExtended",
             position: 11,
             name: "Transaction Amount - Extended",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +203,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.12-transactionAmountUnit",
             position: 12,
             name: "Transaction Amount - Unit",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +218,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.13-departmentCode",
             position: 13,
             name: "Department Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.14-healthPlanId",
             position: 14,
             name: "Health Plan ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +254,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.15-insuranceAmount",
             position: 15,
             name: "Insurance Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -268,7 +269,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.16-assignedPatientLocation",
             position: 16,
             name: "Assigned Patient Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -283,7 +284,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.17-feeSchedule",
             position: 17,
             name: "Fee Schedule",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -301,7 +302,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.18-patientType",
             position: 18,
             name: "Patient Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -319,7 +320,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.19-diagnosisCode",
             position: 19,
             name: "Diagnosis Code - FT1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -337,7 +338,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.20-performedByCode",
             position: 20,
             name: "Performed By Code",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -355,7 +356,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.21-orderedByCode",
             position: 21,
             name: "Ordered By Code",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -370,7 +371,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.22-unitCost",
             position: 22,
             name: "Unit Cost",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -385,7 +386,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.23-fillerOrderNumber",
             position: 23,
             name: "Filler Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -400,7 +401,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.24-enteredByCode",
             position: 24,
             name: "Entered By Code",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -415,7 +416,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.25-procedureCode",
             position: 25,
             name: "Procedure Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -433,7 +434,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.26-procedureCodeModifier",
             position: 26,
             name: "Procedure Code Modifier",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -451,7 +452,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.27-advancedBeneficiaryNoticeCode",
             position: 27,
             name: "Advanced Beneficiary Notice Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -469,7 +470,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.28-medicallyNecessaryDuplicateProcedureReason",
             position: 28,
             name: "Medically Necessary Duplicate Procedure Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +488,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.29-ndcCode",
             position: 29,
             name: "NDC Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -505,7 +506,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.30-paymentReferenceId",
             position: 30,
             name: "Payment Reference ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +521,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.31-transactionReferenceKey",
             position: 31,
             name: "Transaction Reference Key",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -538,7 +539,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.32-performingFacility",
             position: 32,
             name: "Performing Facility",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -553,7 +554,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.33-orderingFacility",
             position: 33,
             name: "Ordering Facility",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -568,7 +569,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.34-itemNumber",
             position: 34,
             name: "Item Number",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -583,7 +584,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.35-modelNumber",
             position: 35,
             name: "Model Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -601,7 +602,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.36-specialProcessingCode",
             position: 36,
             name: "Special Processing Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -616,7 +617,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.37-clinicCode",
             position: 37,
             name: "Clinic Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -631,7 +632,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.38-referralNumber",
             position: 38,
             name: "Referral Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -646,7 +647,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.39-authorizationNumber",
             position: 39,
             name: "Authorization Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -661,7 +662,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.40-serviceProviderTaxonomyCode",
             position: 40,
             name: "Service Provider Taxonomy Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -676,7 +677,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.41-revenueCode",
             position: 41,
             name: "Revenue Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -694,7 +695,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.42-prescriptionNumber",
             position: 42,
             name: "Prescription Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -709,7 +710,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.43-ndcQtyAndUom",
             position: 43,
             name: "NDC Qty and UOM",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -724,7 +725,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.44-dmeCertificateOfMedicalNecessityTransmissionCode",
             position: 44,
             name: "DME Certificate of Medical Necessity Transmission Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -739,7 +740,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.45-dmeCertificationTypeCode",
             position: 45,
             name: "DME Certification Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -754,7 +755,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.46-dmeDurationValue",
             position: 46,
             name: "DME Duration Value",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -769,7 +770,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.47-dmeCertificationRevisionDate",
             position: 47,
             name: "DME Certification Revision Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -784,7 +785,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.48-dmeInitialCertificationDate",
             position: 48,
             name: "DME Initial Certification Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -799,7 +800,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.49-dmeLastCertificationDate",
             position: 49,
             name: "DME Last Certification Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -814,7 +815,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.50-dmeLengthOfMedicalNecessityDays",
             position: 50,
             name: "DME Length of Medical Necessity Days",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -829,7 +830,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.51-dmeRentalPrice",
             position: 51,
             name: "DME Rental Price",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -844,7 +845,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.52-dmePurchasePrice",
             position: 52,
             name: "DME Purchase Price",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -859,7 +860,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.53-dmeFrequencyCode",
             position: 53,
             name: "DME Frequency Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -874,7 +875,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.54-dmeCertificationConditionIndicator",
             position: 54,
             name: "DME Certification Condition Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -889,7 +890,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.55-dmeConditionIndicatorCode",
             position: 55,
             name: "DME Condition Indicator Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -904,7 +905,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.56-serviceReasonCode",
             position: 56,
             name: "Service Reason Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

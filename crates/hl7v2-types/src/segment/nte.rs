@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `NTE` segment: Notes and Comments.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `NTE` segment definition, `http://hl7.org/v2/StructureDefinition/NTE`.
 pub static NTE: Segment = Segment {
@@ -16,7 +17,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.1-setId",
             position: 1,
             name: "Set ID - NTE",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.2-sourceOfComment",
             position: 2,
             name: "Source of Comment",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.3-comment",
             position: 3,
             name: "Comment",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -67,7 +68,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.4-commentType",
             position: 4,
             name: "Comment Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.5-enteredBy",
             position: 5,
             name: "Entered By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.6-enteredDateTime",
             position: 6,
             name: "Entered Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.7-effectiveStartDate",
             position: 7,
             name: "Effective Start Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.8-expirationDate",
             position: 8,
             name: "Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.9-codedComment",
             position: 9,
             name: "Coded Comment",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `UB2` segment: UB92 Data.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `UB2` segment definition, `http://hl7.org/v2/StructureDefinition/UB2`.
 pub static UB2: Segment = Segment {
@@ -16,7 +17,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.1-setId",
             position: 1,
             name: "Set ID - UB2",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.2-coInsuranceDays9",
             position: 2,
             name: "Co-Insurance Days (9)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.3-conditionCode2430",
             position: 3,
             name: "Condition Code (24-30)",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(7),
@@ -70,7 +71,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.4-coveredDays7",
             position: 4,
             name: "Covered Days (7)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.5-nonCoveredDays8",
             position: 5,
             name: "Non-Covered Days (8)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +107,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.6-valueAmountCode3941",
             position: 6,
             name: "Value Amount & Code (39-41)",
-            data_type: Some("UVC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::uvc::UVC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(12),
@@ -121,7 +122,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.7-occurrenceCodeDate3235",
             position: 7,
             name: "Occurrence Code & Date (32-35)",
-            data_type: Some("OCD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ocd::OCD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(8),
@@ -136,7 +137,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.8-occurrenceSpanCodeDates36",
             position: 8,
             name: "Occurrence Span Code/Dates (36)",
-            data_type: Some("OSP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::osp::OSP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -151,7 +152,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.9-uniformBillingLocator2State",
             position: 9,
             name: "Uniform Billing Locator 2 (state)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -169,7 +170,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.10-uniformBillingLocator11State",
             position: 10,
             name: "Uniform Billing Locator 11 (state)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -187,7 +188,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.11-uniformBillingLocator31National",
             position: 11,
             name: "Uniform Billing Locator 31 (national)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +206,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.12-documentControlNumber",
             position: 12,
             name: "Document Control Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),
@@ -223,7 +224,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.13-uniformBillingLocator49National",
             position: 13,
             name: "Uniform Billing Locator 49 (national)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(23),
@@ -241,7 +242,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.14-uniformBillingLocator56State",
             position: 14,
             name: "Uniform Billing Locator 56 (state)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -259,7 +260,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.15-uniformBillingLocator57Sational",
             position: 15,
             name: "Uniform Billing Locator 57 (sational)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +278,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.16-uniformBillingLocator78State",
             position: 16,
             name: "Uniform Billing Locator 78 (state)",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -295,7 +296,7 @@ pub static UB2: Segment = Segment {
             id: "UB2.17-specialVisitCount",
             position: 17,
             name: "Special Visit Count",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

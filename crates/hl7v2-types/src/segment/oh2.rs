@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OH2` segment: Past or Present Job.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `OH2` segment definition, `http://hl7.org/v2/StructureDefinition/OH2`.
 pub static OH2: Segment = Segment {
@@ -16,7 +17,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.1-setId",
             position: 1,
             name: "Set ID",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.3-enteredDate",
             position: 3,
             name: "Entered Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.4-occupation",
             position: 4,
             name: "Occupation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.5-industry",
             position: 5,
             name: "Industry",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.6-workClassification",
             position: 6,
             name: "Work Classification",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.7-jobStartDate",
             position: 7,
             name: "Job Start Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +140,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.8-jobEndDate",
             position: 8,
             name: "Job End Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +158,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.9-workSchedule",
             position: 9,
             name: "Work Schedule",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +176,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.10-averageHoursWorkedPerDay",
             position: 10,
             name: "Average Hours worked per Day",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -190,7 +191,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.11-averageDaysWorkedPerWeek",
             position: 11,
             name: "Average Days Worked per Week",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +206,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.12-employerOrganization",
             position: 12,
             name: "Employer Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.13-employerAddress",
             position: 13,
             name: "Employer Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -241,7 +242,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.14-supervisoryLevel",
             position: 14,
             name: "Supervisory Level",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +260,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.15-jobDuties",
             position: 15,
             name: "Job Duties",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +278,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.16-occupationalHazards",
             position: 16,
             name: "Occupational Hazards",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -295,7 +296,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.17-jobUniqueIdentifier",
             position: 17,
             name: "Job Unique Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +311,7 @@ pub static OH2: Segment = Segment {
             id: "OH2.18-currentJobIndicator",
             position: 18,
             name: "Current Job Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

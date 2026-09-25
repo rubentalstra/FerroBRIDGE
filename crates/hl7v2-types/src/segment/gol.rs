@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `GOL` segment: Goal Detail.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `GOL` segment definition, `http://hl7.org/v2/StructureDefinition/GOL`.
@@ -19,7 +20,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.1-actionCode",
             position: 1,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -40,7 +41,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.2-actionDateTime",
             position: 2,
             name: "Action Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.3-goalId",
             position: 3,
             name: "Goal ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.4-goalInstanceId",
             position: 4,
             name: "Goal Instance ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.5-episodeOfCareId",
             position: 5,
             name: "Episode of Care ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.6-goalListPriority",
             position: 6,
             name: "Goal List Priority",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.7-goalEstablishedDateTime",
             position: 7,
             name: "Goal Established Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.8-expectedGoalAchieveDateTime",
             position: 8,
             name: "Expected Goal Achieve Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +149,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.9-goalClassification",
             position: 9,
             name: "Goal Classification",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.10-goalManagementDiscipline",
             position: 10,
             name: "Goal Management Discipline",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +179,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.11-currentGoalReviewStatus",
             position: 11,
             name: "Current Goal Review Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +194,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.12-currentGoalReviewDateTime",
             position: 12,
             name: "Current Goal Review Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +209,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.13-nextGoalReviewDateTime",
             position: 13,
             name: "Next Goal Review Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.14-previousGoalReviewDateTime",
             position: 14,
             name: "Previous Goal Review Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +254,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.16-goalEvaluation",
             position: 16,
             name: "Goal Evaluation",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -268,7 +269,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.17-goalEvaluationComment",
             position: 17,
             name: "Goal Evaluation Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -286,7 +287,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.18-goalLifeCycleStatus",
             position: 18,
             name: "Goal Life Cycle Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -301,7 +302,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.19-goalLifeCycleStatusDateTime",
             position: 19,
             name: "Goal Life Cycle Status Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -316,7 +317,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.20-goalTargetType",
             position: 20,
             name: "Goal Target Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -331,7 +332,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.21-goalTargetName",
             position: 21,
             name: "Goal Target Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -346,7 +347,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.22-moodCode",
             position: 22,
             name: "Mood Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

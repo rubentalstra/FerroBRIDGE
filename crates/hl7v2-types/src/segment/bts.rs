@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `BTS` segment: Batch Trailer.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `BTS` segment definition, `http://hl7.org/v2/StructureDefinition/BTS`.
 pub static BTS: Segment = Segment {
@@ -16,7 +17,7 @@ pub static BTS: Segment = Segment {
             id: "BTS.1-batchMessageCount",
             position: 1,
             name: "Batch Message Count",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static BTS: Segment = Segment {
             id: "BTS.2-batchComment",
             position: 2,
             name: "Batch Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static BTS: Segment = Segment {
             id: "BTS.3-batchTotals",
             position: 3,
             name: "Batch Totals",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

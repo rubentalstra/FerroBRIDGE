@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PM1` segment: Payer Master File.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `PM1` segment definition, `http://hl7.org/v2/StructureDefinition/PM1`.
 pub static PM1: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.1-healthPlanId",
             position: 1,
             name: "Health Plan ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.2-insuranceCompanyId",
             position: 2,
             name: "Insurance Company ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -49,7 +50,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.3-insuranceCompanyName",
             position: 3,
             name: "Insurance Company Name",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -64,7 +65,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.4-insuranceCompanyAddress",
             position: 4,
             name: "Insurance Company Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -79,7 +80,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.5-insuranceCoContactPerson",
             position: 5,
             name: "Insurance Co Contact Person",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -94,7 +95,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.6-insuranceCoPhoneNumber",
             position: 6,
             name: "Insurance Co Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +110,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.7-groupNumber",
             position: 7,
             name: "Group Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +125,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.8-groupName",
             position: 8,
             name: "Group Name",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -139,7 +140,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.9-planEffectiveDate",
             position: 9,
             name: "Plan Effective Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.10-planExpirationDate",
             position: 10,
             name: "Plan Expiration Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +170,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.11-patientDobRequired",
             position: 11,
             name: "Patient DOB Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +188,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.12-patientGenderRequired",
             position: 12,
             name: "Patient Gender Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +206,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.13-patientRelationshipRequired",
             position: 13,
             name: "Patient Relationship Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +224,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.14-patientSignatureRequired",
             position: 14,
             name: "Patient Signature Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +242,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.15-diagnosisRequired",
             position: 15,
             name: "Diagnosis Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +260,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.16-serviceRequired",
             position: 16,
             name: "Service Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +278,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.17-patientNameRequired",
             position: 17,
             name: "Patient Name Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.18-patientAddressRequired",
             position: 18,
             name: "Patient Address Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +314,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.19-subscribersNameRequired",
             position: 19,
             name: "Subscribers Name Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +332,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.20-workmansCompIndicator",
             position: 20,
             name: "Workman's Comp Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +350,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.21-billTypeRequired",
             position: 21,
             name: "Bill Type Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -367,7 +368,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.22-commercialCarrierNameAndAddressRequired",
             position: 22,
             name: "Commercial Carrier Name and Address Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -385,7 +386,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.23-policyNumberPattern",
             position: 23,
             name: "Policy Number Pattern",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -400,7 +401,7 @@ pub static PM1: Segment = Segment {
             id: "PM1.24-groupNumberPattern",
             position: 24,
             name: "Group Number Pattern",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

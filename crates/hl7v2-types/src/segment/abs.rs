@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ABS` segment: Abstract.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `ABS` segment definition, `http://hl7.org/v2/StructureDefinition/ABS`.
@@ -18,7 +19,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.1-dischargeCareProvider",
             position: 1,
             name: "Discharge Care Provider",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.2-transferMedicalServiceCode",
             position: 2,
             name: "Transfer Medical Service Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.3-severityOfIllnessCode",
             position: 3,
             name: "Severity of Illness Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.4-dateTimeOfAttestation",
             position: 4,
             name: "Date/Time of Attestation",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -87,7 +88,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.5-attestedBy",
             position: 5,
             name: "Attested By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -102,7 +103,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.6-triageCode",
             position: 6,
             name: "Triage Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.7-abstractCompletionDateTime",
             position: 7,
             name: "Abstract Completion Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -135,7 +136,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.8-abstractedBy",
             position: 8,
             name: "Abstracted By",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -150,7 +151,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.9-caseCategoryCode",
             position: 9,
             name: "Case Category Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -168,7 +169,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.10-caesarianSectionIndicator",
             position: 10,
             name: "Caesarian Section Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -189,7 +190,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.11-gestationCategoryCode",
             position: 11,
             name: "Gestation Category Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -207,7 +208,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.12-gestationPeriodWeeks",
             position: 12,
             name: "Gestation Period - Weeks",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -225,7 +226,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.13-newbornCode",
             position: 13,
             name: "Newborn Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -243,7 +244,7 @@ pub static ABS: Segment = Segment {
             id: "ABS.14-stillbornIndicator",
             position: 14,
             name: "Stillborn Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

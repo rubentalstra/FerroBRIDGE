@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `QRI` segment: Query Response Instance.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `QRI` segment definition, `http://hl7.org/v2/StructureDefinition/QRI`.
@@ -18,7 +19,7 @@ pub static QRI: Segment = Segment {
             id: "QRI.1-candidateConfidence",
             position: 1,
             name: "Candidate Confidence",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static QRI: Segment = Segment {
             id: "QRI.2-matchReasonCode",
             position: 2,
             name: "Match Reason Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -57,7 +58,7 @@ pub static QRI: Segment = Segment {
             id: "QRI.3-algorithmDescriptor",
             position: 3,
             name: "Algorithm Descriptor",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PTH` segment: Pathway.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `PTH` segment definition, `http://hl7.org/v2/StructureDefinition/PTH`.
 pub static PTH: Segment = Segment {
@@ -16,7 +17,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.1-actionCode",
             position: 1,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.2-pathwayId",
             position: 2,
             name: "Pathway ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.3-pathwayInstanceId",
             position: 3,
             name: "Pathway Instance ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.4-pathwayEstablishedDateTime",
             position: 4,
             name: "Pathway Established Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.5-pathwayLifeCycleStatus",
             position: 5,
             name: "Pathway Life Cycle Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +98,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.6-changePathwayLifeCycleStatusDateTime",
             position: 6,
             name: "Change Pathway Life Cycle Status Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +113,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.7-moodCode",
             position: 7,
             name: "Mood Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

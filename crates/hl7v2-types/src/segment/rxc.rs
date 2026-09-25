@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXC` segment: Pharmacy/Treatment Component Order.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `RXC` segment definition, `http://hl7.org/v2/StructureDefinition/RXC`.
@@ -18,7 +19,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.1-rxComponentType",
             position: 1,
             name: "RX Component Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -39,7 +40,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.2-componentCode",
             position: 2,
             name: "Component Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.3-componentAmount",
             position: 3,
             name: "Component Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.4-componentUnits",
             position: 4,
             name: "Component Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.5-componentStrength",
             position: 5,
             name: "Component Strength",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -105,7 +106,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.6-componentStrengthUnits",
             position: 6,
             name: "Component Strength Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -123,7 +124,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.7-supplementaryCode",
             position: 7,
             name: "Supplementary Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -141,7 +142,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.8-componentDrugStrengthVolume",
             position: 8,
             name: "Component Drug Strength Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -159,7 +160,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.9-componentDrugStrengthVolumeUnits",
             position: 9,
             name: "Component Drug Strength Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -177,7 +178,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.10-dispenseAmount",
             position: 10,
             name: "Dispense Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -192,7 +193,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.11-dispenseUnits",
             position: 11,
             name: "Dispense Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

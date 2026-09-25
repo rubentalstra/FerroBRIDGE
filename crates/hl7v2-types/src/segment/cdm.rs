@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CDM` segment: Charge Description Master.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `CDM` segment definition, `http://hl7.org/v2/StructureDefinition/CDM`.
@@ -18,7 +19,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - CDM",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.2-chargeCodeAlias",
             position: 2,
             name: "Charge Code Alias",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -54,7 +55,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.3-chargeDescriptionShort",
             position: 3,
             name: "Charge Description Short",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.4-chargeDescriptionLong",
             position: 4,
             name: "Charge Description Long",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.5-descriptionOverrideIndicator",
             position: 5,
             name: "Description Override Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -111,7 +112,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.6-explodingCharges",
             position: 6,
             name: "Exploding Charges",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -129,7 +130,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.7-procedureCode",
             position: 7,
             name: "Procedure Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -147,7 +148,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.8-activeInactiveFlag",
             position: 8,
             name: "Active/Inactive Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -168,7 +169,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.9-inventoryNumber",
             position: 9,
             name: "Inventory Number",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -186,7 +187,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.10-resourceLoad",
             position: 10,
             name: "Resource Load",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -204,7 +205,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.11-contractNumber",
             position: 11,
             name: "Contract Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -219,7 +220,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.12-contractOrganization",
             position: 12,
             name: "Contract Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -234,7 +235,7 @@ pub static CDM: Segment = Segment {
             id: "CDM.13-roomFeeIndicator",
             position: 13,
             name: "Room Fee Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

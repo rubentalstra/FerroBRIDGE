@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `EQP` segment: Equipment Log/Service.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `EQP` segment definition, `http://hl7.org/v2/StructureDefinition/EQP`.
 pub static EQP: Segment = Segment {
@@ -16,7 +19,7 @@ pub static EQP: Segment = Segment {
             id: "EQP.1-eqp1",
             position: 1,
             name: "EQP-1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static EQP: Segment = Segment {
             id: "EQP.2-eqp2",
             position: 2,
             name: "EQP-2",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static EQP: Segment = Segment {
             id: "EQP.3-eqp3",
             position: 3,
             name: "EQP-3",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static EQP: Segment = Segment {
             id: "EQP.4-eqp4",
             position: 4,
             name: "EQP-4",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +85,7 @@ pub static EQP: Segment = Segment {
             id: "EQP.5-eqp5",
             position: 5,
             name: "EQP-5",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

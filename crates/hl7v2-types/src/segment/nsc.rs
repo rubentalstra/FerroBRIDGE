@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `NSC` segment: Application Status Change.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `NSC` segment definition, `http://hl7.org/v2/StructureDefinition/NSC`.
 pub static NSC: Segment = Segment {
@@ -16,7 +17,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.1-applicationChangeType",
             position: 1,
             name: "Application Change Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.2-currentCpu",
             position: 2,
             name: "Current CPU",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.3-currentFileserver",
             position: 3,
             name: "Current Fileserver",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.4-currentApplication",
             position: 4,
             name: "Current Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.5-currentFacility",
             position: 5,
             name: "Current Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.6-newCpu",
             position: 6,
             name: "New CPU",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.7-newFileserver",
             position: 7,
             name: "New Fileserver",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.8-newApplication",
             position: 8,
             name: "New Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +149,7 @@ pub static NSC: Segment = Segment {
             id: "NSC.9-newFacility",
             position: 9,
             name: "New Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

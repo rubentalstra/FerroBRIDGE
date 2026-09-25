@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RQ1` segment: Requisition Detail-1.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `RQ1` segment definition, `http://hl7.org/v2/StructureDefinition/RQ1`.
@@ -18,7 +19,7 @@ pub static RQ1: Segment = Segment {
             id: "RQ1.1-anticipatedPrice",
             position: 1,
             name: "Anticipated Price",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static RQ1: Segment = Segment {
             id: "RQ1.2-manufacturerIdentifier",
             position: 2,
             name: "Manufacturer Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static RQ1: Segment = Segment {
             id: "RQ1.3-manufacturersCatalog",
             position: 3,
             name: "Manufacturer's Catalog",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static RQ1: Segment = Segment {
             id: "RQ1.4-vendorId",
             position: 4,
             name: "Vendor ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static RQ1: Segment = Segment {
             id: "RQ1.5-vendorCatalog",
             position: 5,
             name: "Vendor Catalog",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -108,7 +109,7 @@ pub static RQ1: Segment = Segment {
             id: "RQ1.6-taxable",
             position: 6,
             name: "Taxable",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static RQ1: Segment = Segment {
             id: "RQ1.7-substituteAllowed",
             position: 7,
             name: "Substitute Allowed",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IVT` segment: Material Location.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `IVT` segment definition, `http://hl7.org/v2/StructureDefinition/IVT`.
@@ -18,7 +19,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.1-setId",
             position: 1,
             name: "Set Id – IVT",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.2-inventoryLocationIdentifier",
             position: 2,
             name: "Inventory Location Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.3-inventoryLocationName",
             position: 3,
             name: "Inventory Location Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.4-sourceLocationIdentifier",
             position: 4,
             name: "Source Location Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.5-sourceLocationName",
             position: 5,
             name: "Source Location Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -102,7 +103,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.6-itemStatus",
             position: 6,
             name: "Item Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.7-binLocationIdentifier",
             position: 7,
             name: "Bin Location Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -135,7 +136,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.8-orderPackaging",
             position: 8,
             name: "Order Packaging",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -153,7 +154,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.9-issuePackaging",
             position: 9,
             name: "Issue Packaging",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -168,7 +169,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.10-defaultInventoryAssetAccount",
             position: 10,
             name: "Default Inventory Asset Account",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -183,7 +184,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.11-patientChargeableIndicator",
             position: 11,
             name: "Patient Chargeable Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -201,7 +202,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.12-transactionCode",
             position: 12,
             name: "Transaction Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -219,7 +220,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.13-transactionAmountUnit",
             position: 13,
             name: "Transaction Amount - Unit",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.14-itemImportanceCode",
             position: 14,
             name: "Item Importance Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -252,7 +253,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.15-stockedItemIndicator",
             position: 15,
             name: "Stocked Item Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -270,7 +271,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.16-consignmentItemIndicator",
             position: 16,
             name: "Consignment Item Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -288,7 +289,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.17-reusableItemIndicator",
             position: 17,
             name: "Reusable Item Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -306,7 +307,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.18-reusableCost",
             position: 18,
             name: "Reusable Cost",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -321,7 +322,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.19-substituteItemIdentifier",
             position: 19,
             name: "Substitute Item Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -336,7 +337,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.20-latexFreeSubstituteItemIdentifier",
             position: 20,
             name: "Latex-Free Substitute Item Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -351,7 +352,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.21-recommendedReorderTheory",
             position: 21,
             name: "Recommended Reorder Theory",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -369,7 +370,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.22-recommendedSafetyStockDays",
             position: 22,
             name: "Recommended Safety Stock Days",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -387,7 +388,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.23-recommendedMaximumDaysInventory",
             position: 23,
             name: "Recommended Maximum Days Inventory",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -405,7 +406,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.24-recommendedOrderPoint",
             position: 24,
             name: "Recommended Order Point",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -423,7 +424,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.25-recommendedOrderAmount",
             position: 25,
             name: "Recommended Order Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -441,7 +442,7 @@ pub static IVT: Segment = Segment {
             id: "IVT.26-operatingRoomParLevelIndicator",
             position: 26,
             name: "Operating Room Par Level Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

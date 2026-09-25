@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ODS` segment: dietary orders, supplements, and preferences.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `ODS` segment definition, `http://hl7.org/v2/StructureDefinition/ODS`.
@@ -18,7 +19,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.1-type",
             position: 1,
             name: "Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -39,7 +40,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.2-servicePeriod",
             position: 2,
             name: "Service Period",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(10),
@@ -57,7 +58,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.3-dietSupplementOrPreferenceCode",
             position: 3,
             name: "Diet, Supplement, or Preference Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(20),
@@ -75,7 +76,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.4-textInstruction",
             position: 4,
             name: "Text Instruction",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),

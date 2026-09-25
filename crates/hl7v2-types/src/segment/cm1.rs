@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CM1` segment: Clinical Study Phase Master.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+};
 
 /// The `CM1` segment definition, `http://hl7.org/v2/StructureDefinition/CM1`.
 pub static CM1: Segment = Segment {
@@ -16,7 +19,7 @@ pub static CM1: Segment = Segment {
             id: "CM1.1-setId",
             position: 1,
             name: "Set ID - CM1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static CM1: Segment = Segment {
             id: "CM1.2-studyPhaseIdentifier",
             position: 2,
             name: "Study Phase Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static CM1: Segment = Segment {
             id: "CM1.3-descriptionOfStudyPhase",
             position: 3,
             name: "Description of Study Phase",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

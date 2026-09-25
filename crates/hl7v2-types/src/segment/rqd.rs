@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RQD` segment: Requisition Detail.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `RQD` segment definition, `http://hl7.org/v2/StructureDefinition/RQD`.
@@ -18,7 +19,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.1-requisitionLineNumber",
             position: 1,
             name: "Requisition Line Number",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.2-itemCodeInternal",
             position: 2,
             name: "Item Code - Internal",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.3-itemCodeExternal",
             position: 3,
             name: "Item Code - External",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.4-hospitalItemCode",
             position: 4,
             name: "Hospital Item Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.5-requisitionQuantity",
             position: 5,
             name: "Requisition Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -108,7 +109,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.6-requisitionUnitOfMeasure",
             position: 6,
             name: "Requisition Unit of Measure",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -126,7 +127,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.7-costCenterAccountNumber",
             position: 7,
             name: "Cost Center Account Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -144,7 +145,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.8-itemNaturalAccountCode",
             position: 8,
             name: "Item Natural Account Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +163,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.9-deliverToId",
             position: 9,
             name: "Deliver To ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -180,7 +181,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.10-dateNeeded",
             position: 10,
             name: "Date Needed",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

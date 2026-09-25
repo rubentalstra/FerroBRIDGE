@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RXD` segment: Pharmacy/Treatment Dispense.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `RXD` segment definition, `http://hl7.org/v2/StructureDefinition/RXD`.
@@ -19,7 +20,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.1-dispenseSubIdCounter",
             position: 1,
             name: "Dispense Sub-ID Counter",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.2-dispenseGiveCode",
             position: 2,
             name: "Dispense/Give Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.3-dateTimeDispensed",
             position: 3,
             name: "Date/Time Dispensed",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.4-actualDispenseAmount",
             position: 4,
             name: "Actual Dispense Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.5-actualDispenseUnits",
             position: 5,
             name: "Actual Dispense Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.6-actualDosageForm",
             position: 6,
             name: "Actual Dosage Form",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.7-prescriptionNumber",
             position: 7,
             name: "Prescription Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -139,7 +140,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.8-numberOfRefillsRemaining",
             position: 8,
             name: "Number of Refills Remaining",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +155,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.9-dispenseNotes",
             position: 9,
             name: "Dispense Notes",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -172,7 +173,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.10-dispensingProvider",
             position: 10,
             name: "Dispensing Provider",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -187,7 +188,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.11-substitutionStatus",
             position: 11,
             name: "Substitution Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +209,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.12-totalDailyDose",
             position: 12,
             name: "Total Daily Dose",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +239,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.14-needsHumanReview",
             position: 14,
             name: "Needs Human Review",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +260,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.15-specialDispensingInstructions",
             position: 15,
             name: "Special Dispensing Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +278,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.16-actualStrength",
             position: 16,
             name: "Actual Strength",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -292,7 +293,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.17-actualStrengthUnit",
             position: 17,
             name: "Actual Strength Unit",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +311,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.18-substanceNumber",
             position: 18,
             name: "Substance  Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -328,7 +329,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.19-substanceExpirationDate",
             position: 19,
             name: "Substance Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -343,7 +344,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.20-substanceManufacturerName",
             position: 20,
             name: "Substance Manufacturer Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -358,7 +359,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.21-indication",
             position: 21,
             name: "Indication",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -376,7 +377,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.22-dispensePackageSize",
             position: 22,
             name: "Dispense Package Size",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -391,7 +392,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.23-dispensePackageSizeUnit",
             position: 23,
             name: "Dispense Package Size Unit",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -409,7 +410,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.24-dispensePackageMethod",
             position: 24,
             name: "Dispense Package Method",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -430,7 +431,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.25-supplementaryCode",
             position: 25,
             name: "Supplementary Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -448,7 +449,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.26-initiatingLocation",
             position: 26,
             name: "Initiating Location",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -466,7 +467,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.27-packagingAssemblyLocation",
             position: 27,
             name: "Packaging/Assembly Location",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -484,7 +485,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.28-actualDrugStrengthVolume",
             position: 28,
             name: "Actual Drug Strength Volume",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -502,7 +503,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.29-actualDrugStrengthVolumeUnits",
             position: 29,
             name: "Actual Drug Strength Volume Units",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +521,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.30-dispenseToPharmacy",
             position: 30,
             name: "Dispense to Pharmacy",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -538,7 +539,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.31-dispenseToPharmacyAddress",
             position: 31,
             name: "Dispense to Pharmacy Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -553,7 +554,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.32-pharmacyOrderType",
             position: 32,
             name: "Pharmacy Order Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -574,7 +575,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.33-dispenseType",
             position: 33,
             name: "Dispense Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -592,7 +593,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.34-pharmacyPhoneNumber",
             position: 34,
             name: "Pharmacy Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -607,7 +608,7 @@ pub static RXD: Segment = Segment {
             id: "RXD.35-dispenseTagIdentifier",
             position: 35,
             name: "Dispense Tag Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

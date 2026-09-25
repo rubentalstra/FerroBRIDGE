@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IPC` segment: Imaging Procedure Control.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `IPC` segment definition, `http://hl7.org/v2/StructureDefinition/IPC`.
@@ -18,7 +19,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.1-accessionIdentifier",
             position: 1,
             name: "Accession Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.2-requestedProcedureId",
             position: 2,
             name: "Requested Procedure ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -48,7 +49,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.3-studyInstanceUid",
             position: 3,
             name: "Study Instance UID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -63,7 +64,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.4-scheduledProcedureStepId",
             position: 4,
             name: "Scheduled Procedure Step ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -78,7 +79,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.5-modality",
             position: 5,
             name: "Modality",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -96,7 +97,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.6-protocolCode",
             position: 6,
             name: "Protocol Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -114,7 +115,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.7-scheduledStationName",
             position: 7,
             name: "Scheduled Station Name",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.8-scheduledProcedureStepLocation",
             position: 8,
             name: "Scheduled Procedure Step Location",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -147,7 +148,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.9-scheduledStationAeTitle",
             position: 9,
             name: "Scheduled Station AE Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static IPC: Segment = Segment {
             id: "IPC.10-actionCode",
             position: 10,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ORG` segment: Practitioner Organization Unit.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `ORG` segment definition, `http://hl7.org/v2/StructureDefinition/ORG`.
 pub static ORG: Segment = Segment {
@@ -16,7 +17,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.1-setId",
             position: 1,
             name: "Set ID – ORG",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.2-organizationUnitCode",
             position: 2,
             name: "Organization Unit Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.3-organizationUnitTypeCode",
             position: 3,
             name: "Organization Unit Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.4-primaryOrgUnitIndicator",
             position: 4,
             name: "Primary Org Unit Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +92,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.5-practitionerOrgUnitIdentifier",
             position: 5,
             name: "Practitioner Org Unit Identifier",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +107,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.6-healthCareProviderTypeCode",
             position: 6,
             name: "Health Care Provider Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +125,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.7-healthCareProviderClassificationCode",
             position: 7,
             name: "Health Care Provider Classification Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +143,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.8-healthCareProviderAreaOfSpecializationCode",
             position: 8,
             name: "Health Care Provider Area of Specialization Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +161,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.9-effectiveDateRange",
             position: 9,
             name: "Effective Date Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +176,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.10-employmentStatusCode",
             position: 10,
             name: "Employment Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +194,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.11-boardApprovalIndicator",
             position: 11,
             name: "Board Approval Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +215,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.12-primaryCarePhysicianIndicator",
             position: 12,
             name: "Primary Care Physician Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static ORG: Segment = Segment {
             id: "ORG.13-costCenterCode",
             position: 13,
             name: "Cost Center Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

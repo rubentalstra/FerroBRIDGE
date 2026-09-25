@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `MRG` segment: Merge Patient Information.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, StandardsStatus, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, DataTypeRef, Field, Max, Optionality, Segment, StandardsStatus, Table,
+};
 
 /// The `MRG` segment definition, `http://hl7.org/v2/StructureDefinition/MRG`.
 pub static MRG: Segment = Segment {
@@ -16,7 +19,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.1-priorPatientIdentifierList",
             position: 1,
             name: "Prior Patient Identifier List",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -49,7 +52,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.3-priorPatientAccountNumber",
             position: 3,
             name: "Prior Patient Account Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +85,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.5-priorVisitNumber",
             position: 5,
             name: "Prior Visit Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +103,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.6-priorAlternateVisitId",
             position: 6,
             name: "Prior Alternate Visit ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -118,7 +121,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.7-priorPatientName",
             position: 7,
             name: "Prior Patient Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

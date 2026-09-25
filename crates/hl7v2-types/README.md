@@ -1,8 +1,9 @@
 # hl7v2-types
 
-HL7 v2 message structure trees and segment field tables as Rust data.
+HL7 v2 message structure trees, segment field tables, data type component
+tables and message definitions as Rust data.
 
-The crate holds two tables a v2 parser walks:
+The crate holds the tables a v2 parser walks:
 
 - `structure`: every message structure of the HL7 v2 definitions (305 of
   them, for example `ORU_R01-A` and `ADT_A01-A`) as a `static` tree of
@@ -17,14 +18,26 @@ The crate holds two tables a v2 parser walks:
   the other segments no structure references (`ADD`, `FAC`, `OVR`, `PDC`,
   `PSH`) are in it too.
 
-`structure::find` and `segment::find` look an entry up by its definition id.
-A tree node points at the segment's own `static`, so the field table is one
-step from the node that places the segment. The shapes are in `model`. Every
-field and node carries the element id of its definition (`OBX.1-setId`,
+- `data_type`: every data type definition (83: 12 primitive, 71 complex with
+  448 components), each complex type with its components by position: the
+  component name, its data type, cardinality, optionality code, length and
+  conformance length, and table. A field points at its data type's `static`;
+  `Varies`, which no data type definition defines, stays a code.
+- `message`: every message definition (696), indexed by message code and
+  trigger event (`MSH-9.1` and `MSH-9.2`), each pointing at the message
+  structure variant it names: `message::find("ADT", "A04")` names
+  `ADT_A01-B`. The 34 definitions that name no structure carry none.
+
+`structure::find`, `segment::find` and `data_type::find` look an entry up by
+its definition id, and `message::find` by code and event. A tree node points
+at the segment's own `static`, so the field table is one step from the node
+that places the segment. The shapes are in `model`, and every one of them
+compares by value (`PartialEq`, `Eq`). Every field, component and node
+carries the element id of its definition (`OBX.1-setId`, `CX.1`,
 `ORU_R01-A.5-PATIENT_RESULT`), and every code is carried as the definitions
 write it.
 
-The crate carries no data type components and no table contents. The v2
+The crate carries no table contents. The v2
 tables are published as FHIR `CodeSystem` and `ValueSet` resources in the HL7
 terminology package, which a terminology server serves by the value set URL a
 field names.

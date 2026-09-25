@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PSS` segment: Product/Service Section.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+};
 
 /// The `PSS` segment definition, `http://hl7.org/v2/StructureDefinition/PSS`.
 pub static PSS: Segment = Segment {
@@ -16,7 +19,7 @@ pub static PSS: Segment = Segment {
             id: "PSS.1-providerProductServiceSectionNumber",
             position: 1,
             name: "Provider Product/Service Section Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static PSS: Segment = Segment {
             id: "PSS.2-payerProductServiceSectionNumber",
             position: 2,
             name: "Payer Product/Service Section Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static PSS: Segment = Segment {
             id: "PSS.3-productServiceSectionSequenceNumber",
             position: 3,
             name: "Product/Service Section Sequence Number",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -64,7 +67,7 @@ pub static PSS: Segment = Segment {
             id: "PSS.4-billedAmount",
             position: 4,
             name: "Billed Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -79,7 +82,7 @@ pub static PSS: Segment = Segment {
             id: "PSS.5-sectionDescriptionOrHeading",
             position: 5,
             name: "Section Description or Heading",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

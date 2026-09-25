@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `MFA` segment: Master File Acknowledgment.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `MFA` segment definition, `http://hl7.org/v2/StructureDefinition/MFA`.
@@ -18,7 +19,7 @@ pub static MFA: Segment = Segment {
             id: "MFA.1-recordLevelEventCode",
             position: 1,
             name: "Record-Level Event Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -39,7 +40,7 @@ pub static MFA: Segment = Segment {
             id: "MFA.2-mfnControlId",
             position: 2,
             name: "MFN Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -57,7 +58,7 @@ pub static MFA: Segment = Segment {
             id: "MFA.3-eventCompletionDateTime",
             position: 3,
             name: "Event Completion Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -72,7 +73,7 @@ pub static MFA: Segment = Segment {
             id: "MFA.4-mfnRecordLevelErrorReturn",
             position: 4,
             name: "MFN Record Level Error Return",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -90,7 +91,7 @@ pub static MFA: Segment = Segment {
             id: "MFA.5-primaryKeyValue",
             position: 5,
             name: "Primary Key Value - MFA",
-            data_type: Some("Varies"),
+            data_type: Some(DataTypeRef::Undefined("Varies")),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -108,7 +109,7 @@ pub static MFA: Segment = Segment {
             id: "MFA.6-primaryKeyValueType",
             position: 6,
             name: "Primary Key Value Type - MFA",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,

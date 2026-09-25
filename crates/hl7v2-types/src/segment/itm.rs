@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ITM` segment: Material Item.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `ITM` segment definition, `http://hl7.org/v2/StructureDefinition/ITM`.
 pub static ITM: Segment = Segment {
@@ -16,7 +19,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.1-itemIdentifier",
             position: 1,
             name: "Item Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.2-itemDescription",
             position: 2,
             name: "Item Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.3-itemStatus",
             position: 3,
             name: "Item Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.4-itemType",
             position: 4,
             name: "Item Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +88,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.5-itemCategory",
             position: 5,
             name: "Item Category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +103,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.6-subjectToExpirationIndicator",
             position: 6,
             name: "Subject to Expiration Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +121,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.7-manufacturerIdentifier",
             position: 7,
             name: "Manufacturer Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +136,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.8-manufacturerName",
             position: 8,
             name: "Manufacturer Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +154,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.9-manufacturerCatalogNumber",
             position: 9,
             name: "Manufacturer Catalog Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +172,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.10-manufacturerLabelerIdentificationCode",
             position: 10,
             name: "Manufacturer Labeler Identification Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +187,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.11-patientChargeableIndicator",
             position: 11,
             name: "Patient Chargeable Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +205,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.12-transactionCode",
             position: 12,
             name: "Transaction Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +223,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.13-transactionAmountUnit",
             position: 13,
             name: "Transaction Amount - Unit",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +238,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.14-stockedItemIndicator",
             position: 14,
             name: "Stocked Item Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +256,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.15-supplyRiskCodes",
             position: 15,
             name: "Supply Risk Codes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -271,7 +274,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.16-approvingRegulatoryAgency",
             position: 16,
             name: "Approving Regulatory Agency",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -289,7 +292,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.17-latexIndicator",
             position: 17,
             name: "Latex Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -307,7 +310,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.18-rulingAct",
             position: 18,
             name: "Ruling Act",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -325,7 +328,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.19-itemNaturalAccountCode",
             position: 19,
             name: "Item Natural Account Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -343,7 +346,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.20-approvedToBuyQuantity",
             position: 20,
             name: "Approved To Buy Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -361,7 +364,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.21-approvedToBuyPrice",
             position: 21,
             name: "Approved To Buy Price",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -376,7 +379,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.22-taxableItemIndicator",
             position: 22,
             name: "Taxable Item Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -394,7 +397,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.23-freightChargeIndicator",
             position: 23,
             name: "Freight Charge Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -412,7 +415,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.24-itemSetIndicator",
             position: 24,
             name: "Item Set Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -430,7 +433,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.25-itemSetIdentifier",
             position: 25,
             name: "Item Set Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -445,7 +448,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.26-trackDepartmentUsageIndicator",
             position: 26,
             name: "Track Department Usage Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -463,7 +466,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.27-procedureCode",
             position: 27,
             name: "Procedure Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -481,7 +484,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.28-procedureCodeModifier",
             position: 28,
             name: "Procedure Code Modifier",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -499,7 +502,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.29-specialHandlingCode",
             position: 29,
             name: "Special Handling Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -517,7 +520,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.30-hazardousIndicator",
             position: 30,
             name: "Hazardous Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -535,7 +538,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.31-sterileIndicator",
             position: 31,
             name: "Sterile Indicator",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -553,7 +556,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.32-materialDataSafetySheetNumber",
             position: 32,
             name: "Material Data Safety Sheet Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -568,7 +571,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.33-unitedNationsStandardProductsAndServicesCodeUnspsc",
             position: 33,
             name: "United Nations Standard Products and Services Code (UNSPSC)",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -586,7 +589,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.34-contractDate",
             position: 34,
             name: "Contract Date",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -601,7 +604,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.35-manufacturerContactName",
             position: 35,
             name: "Manufacturer Contact Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -616,7 +619,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.36-manufacturerContactInformation",
             position: 36,
             name: "Manufacturer Contact Information",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -631,7 +634,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.37-classOfTrade",
             position: 37,
             name: "Class of Trade",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -646,7 +649,7 @@ pub static ITM: Segment = Segment {
             id: "ITM.38-fieldLevelEventCode",
             position: 38,
             name: "Field Level Event Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

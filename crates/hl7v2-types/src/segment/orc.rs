@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ORC` segment: Common Order.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, StandardsStatus, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, StandardsStatus, Table,
+};
 
 /// The `ORC` segment definition, `http://hl7.org/v2/StructureDefinition/ORC`.
 pub static ORC: Segment = Segment {
@@ -16,7 +19,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.1-orderControl",
             position: 1,
             name: "Order Control",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +40,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.2-placerOrderNumber",
             position: 2,
             name: "Placer Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.3-fillerOrderNumber",
             position: 3,
             name: "Filler Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +70,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.4-placerOrderGroupNumber",
             position: 4,
             name: "Placer Order Group Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +85,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.5-orderStatus",
             position: 5,
             name: "Order Status",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +106,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.6-responseFlag",
             position: 6,
             name: "Response Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +142,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.8-parentOrder",
             position: 8,
             name: "Parent Order",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -154,7 +157,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.9-dateTimeOfOrderEvent",
             position: 9,
             name: "Date/Time of Order Event",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +217,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.13-enterersLocation",
             position: 13,
             name: "Enterer's Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +232,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.14-callBackPhoneNumber",
             position: 14,
             name: "Call Back Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -244,7 +247,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.15-orderEffectiveDateTime",
             position: 15,
             name: "Order Effective Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +262,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.16-orderControlCodeReason",
             position: 16,
             name: "Order Control Code Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +331,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.20-advancedBeneficiaryNoticeCode",
             position: 20,
             name: "Advanced Beneficiary Notice Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -406,7 +409,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.25-orderStatusModifier",
             position: 25,
             name: "Order Status Modifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -424,7 +427,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.26-advancedBeneficiaryNoticeOverrideReason",
             position: 26,
             name: "Advanced Beneficiary Notice Override Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -442,7 +445,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.27-fillersExpectedAvailabilityDateTime",
             position: 27,
             name: "Filler's Expected Availability Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +460,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.28-confidentialityCode",
             position: 28,
             name: "Confidentiality Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -475,7 +478,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.29-orderType",
             position: 29,
             name: "Order Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -493,7 +496,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.30-entererAuthorizationMode",
             position: 30,
             name: "Enterer Authorization Mode",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -526,7 +529,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.32-advancedBeneficiaryNoticeDate",
             position: 32,
             name: "Advanced Beneficiary Notice Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -541,7 +544,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.33-alternatePlacerOrderNumber",
             position: 33,
             name: "Alternate Placer Order Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -556,7 +559,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.34-orderWorkflowProfile",
             position: 34,
             name: "Order Workflow Profile",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -574,7 +577,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.35-actionCode",
             position: 35,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -595,7 +598,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.36-orderStatusDateRange",
             position: 36,
             name: "Order Status Date Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -610,7 +613,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.37-orderCreationDateTime",
             position: 37,
             name: "Order Creation Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -625,7 +628,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.38-fillerOrderGroupNumber",
             position: 38,
             name: "Filler Order Group Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

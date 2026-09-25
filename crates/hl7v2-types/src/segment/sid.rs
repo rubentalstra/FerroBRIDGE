@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SID` segment: Substance Identifier.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `SID` segment definition, `http://hl7.org/v2/StructureDefinition/SID`.
 pub static SID: Segment = Segment {
@@ -16,7 +19,7 @@ pub static SID: Segment = Segment {
             id: "SID.1-sid1",
             position: 1,
             name: "SID-1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static SID: Segment = Segment {
             id: "SID.2-sid2",
             position: 2,
             name: "SID-2",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static SID: Segment = Segment {
             id: "SID.3-sid3",
             position: 3,
             name: "SID-3",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +73,7 @@ pub static SID: Segment = Segment {
             id: "SID.4-sid4",
             position: 4,
             name: "SID-4",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

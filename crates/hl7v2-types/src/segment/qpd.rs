@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `QPD` segment: Query Parameter Definition.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `QPD` segment definition, `http://hl7.org/v2/StructureDefinition/QPD`.
 pub static QPD: Segment = Segment {
@@ -16,7 +19,7 @@ pub static QPD: Segment = Segment {
             id: "QPD.1-messageQueryName",
             position: 1,
             name: "Message Query Name",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static QPD: Segment = Segment {
             id: "QPD.2-queryTag",
             position: 2,
             name: "Query Tag",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static QPD: Segment = Segment {
             id: "QPD.3-qpd3",
             position: 3,
             name: "QPD-3",
-            data_type: Some("Varies"),
+            data_type: Some(DataTypeRef::Undefined("Varies")),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

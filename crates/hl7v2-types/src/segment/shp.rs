@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SHP` segment: Shipment.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `SHP` segment definition, `http://hl7.org/v2/StructureDefinition/SHP`.
@@ -18,7 +19,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.1-shipmentId",
             position: 1,
             name: "Shipment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -33,7 +34,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.2-internalShipmentId",
             position: 2,
             name: "Internal Shipment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -48,7 +49,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.3-shipmentStatus",
             position: 3,
             name: "Shipment Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -66,7 +67,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.4-shipmentStatusDateTime",
             position: 4,
             name: "Shipment Status Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -81,7 +82,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.5-shipmentStatusReason",
             position: 5,
             name: "Shipment Status Reason",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -96,7 +97,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.6-shipmentPriority",
             position: 6,
             name: "Shipment Priority",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.7-shipmentConfidentiality",
             position: 7,
             name: "Shipment Confidentiality",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -132,7 +133,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.8-numberOfPackagesInShipment",
             position: 8,
             name: "Number of Packages in Shipment",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -150,7 +151,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.9-shipmentCondition",
             position: 9,
             name: "Shipment Condition",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -168,7 +169,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.10-shipmentHandlingCode",
             position: 10,
             name: "Shipment Handling Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -186,7 +187,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.11-shipmentRiskCode",
             position: 11,
             name: "Shipment Risk Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -204,7 +205,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.12-actionCode",
             position: 12,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

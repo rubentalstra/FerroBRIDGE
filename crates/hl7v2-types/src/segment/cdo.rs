@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CDO` segment: Cumulative Dosage.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `CDO` segment definition, `http://hl7.org/v2/StructureDefinition/CDO`.
 pub static CDO: Segment = Segment {
@@ -16,7 +17,7 @@ pub static CDO: Segment = Segment {
             id: "CDO.1-setId",
             position: 1,
             name: "Set ID – CDO",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static CDO: Segment = Segment {
             id: "CDO.2-actionCode",
             position: 2,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static CDO: Segment = Segment {
             id: "CDO.3-cumulativeDosageLimit",
             position: 3,
             name: "Cumulative Dosage Limit",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static CDO: Segment = Segment {
             id: "CDO.4-cumulativeDosageLimitTimeInterval",
             position: 4,
             name: "Cumulative Dosage Limit Time Interval",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

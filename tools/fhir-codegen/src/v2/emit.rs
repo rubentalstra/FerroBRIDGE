@@ -37,6 +37,12 @@ pub struct EmitReport {
     pub segments: usize,
     /// The number of segment fields.
     pub fields: usize,
+    /// The number of data types.
+    pub data_types: usize,
+    /// The number of data type components.
+    pub components: usize,
+    /// The number of message definitions.
+    pub messages: usize,
     /// The files written or checked, relative to `src/`.
     pub files: Vec<String>,
 }
@@ -117,6 +123,9 @@ pub fn emit(options: &EmitOptions) -> Result<EmitReport, EmitError> {
         structures: model.structures.len(),
         segments: model.segments.len(),
         fields: model.field_count(),
+        data_types: model.data_types.len(),
+        components: model.component_count(),
+        messages: model.messages.len(),
         files: formatted.keys().cloned().collect(),
     })
 }

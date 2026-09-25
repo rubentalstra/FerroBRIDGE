@@ -1461,7 +1461,7 @@ fn definition_type(segment: &str, position: usize) -> Option<String> {
         .iter()
         .find(|field| usize::from(field.position) == position)?
         .data_type
-        .map(String::from)
+        .map(|data_type| String::from(data_type.code()))
 }
 
 /// The type a `varies` field holds: OBX-5 is of the type OBX-2 names.

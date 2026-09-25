@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `STF` segment: Staff Identification.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `STF` segment definition, `http://hl7.org/v2/StructureDefinition/STF`.
@@ -19,7 +20,7 @@ pub static STF: Segment = Segment {
             id: "STF.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value – STF",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static STF: Segment = Segment {
             id: "STF.2-staffIdentifierList",
             position: 2,
             name: "Staff Identifier List",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -55,7 +56,7 @@ pub static STF: Segment = Segment {
             id: "STF.3-staffName",
             position: 3,
             name: "Staff Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +71,7 @@ pub static STF: Segment = Segment {
             id: "STF.4-staffType",
             position: 4,
             name: "Staff Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -88,7 +89,7 @@ pub static STF: Segment = Segment {
             id: "STF.5-administrativeSex",
             position: 5,
             name: "Administrative Sex",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +107,7 @@ pub static STF: Segment = Segment {
             id: "STF.6-dateTimeOfBirth",
             position: 6,
             name: "Date/Time of Birth",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static STF: Segment = Segment {
             id: "STF.7-activeInactiveFlag",
             position: 7,
             name: "Active/Inactive Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +143,7 @@ pub static STF: Segment = Segment {
             id: "STF.8-department",
             position: 8,
             name: "Department",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -160,7 +161,7 @@ pub static STF: Segment = Segment {
             id: "STF.9-hospitalService",
             position: 9,
             name: "Hospital Service – STF",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -178,7 +179,7 @@ pub static STF: Segment = Segment {
             id: "STF.10-phone",
             position: 10,
             name: "Phone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -193,7 +194,7 @@ pub static STF: Segment = Segment {
             id: "STF.11-officeHomeAddressBirthplace",
             position: 11,
             name: "Office/Home Address/Birthplace",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -208,7 +209,7 @@ pub static STF: Segment = Segment {
             id: "STF.12-institutionActivationDate",
             position: 12,
             name: "Institution Activation Date",
-            data_type: Some("DIN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::din::DIN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -226,7 +227,7 @@ pub static STF: Segment = Segment {
             id: "STF.13-institutionInactivationDate",
             position: 13,
             name: "Institution Inactivation Date",
-            data_type: Some("DIN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::din::DIN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -244,7 +245,7 @@ pub static STF: Segment = Segment {
             id: "STF.14-backupPersonId",
             position: 14,
             name: "Backup Person ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -259,7 +260,7 @@ pub static STF: Segment = Segment {
             id: "STF.15-eMailAddress",
             position: 15,
             name: "E-Mail Address",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +278,7 @@ pub static STF: Segment = Segment {
             id: "STF.16-preferredMethodOfContact",
             position: 16,
             name: "Preferred Method of Contact",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static STF: Segment = Segment {
             id: "STF.17-maritalStatus",
             position: 17,
             name: "Marital Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +314,7 @@ pub static STF: Segment = Segment {
             id: "STF.18-jobTitle",
             position: 18,
             name: "Job Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +332,7 @@ pub static STF: Segment = Segment {
             id: "STF.19-jobCodeClass",
             position: 19,
             name: "Job Code/Class",
-            data_type: Some("JCC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::jcc::JCC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +350,7 @@ pub static STF: Segment = Segment {
             id: "STF.20-employmentStatusCode",
             position: 20,
             name: "Employment Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -367,7 +368,7 @@ pub static STF: Segment = Segment {
             id: "STF.21-additionalInsuredOnAuto",
             position: 21,
             name: "Additional Insured on Auto",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -388,7 +389,7 @@ pub static STF: Segment = Segment {
             id: "STF.22-driversLicenseNumberStaff",
             position: 22,
             name: "Driver's License Number – Staff",
-            data_type: Some("DLN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dln::DLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -403,7 +404,7 @@ pub static STF: Segment = Segment {
             id: "STF.23-copyAutoIns",
             position: 23,
             name: "Copy Auto Ins",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -424,7 +425,7 @@ pub static STF: Segment = Segment {
             id: "STF.24-autoInsExpires",
             position: 24,
             name: "Auto Ins Expires",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +440,7 @@ pub static STF: Segment = Segment {
             id: "STF.25-dateLastDmvReview",
             position: 25,
             name: "Date Last DMV Review",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -454,7 +455,7 @@ pub static STF: Segment = Segment {
             id: "STF.26-dateNextDmvReview",
             position: 26,
             name: "Date Next DMV Review",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -469,7 +470,7 @@ pub static STF: Segment = Segment {
             id: "STF.27-race",
             position: 27,
             name: "Race",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +488,7 @@ pub static STF: Segment = Segment {
             id: "STF.28-ethnicGroup",
             position: 28,
             name: "Ethnic Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -505,7 +506,7 @@ pub static STF: Segment = Segment {
             id: "STF.29-reActivationApprovalIndicator",
             position: 29,
             name: "Re-activation Approval Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -526,7 +527,7 @@ pub static STF: Segment = Segment {
             id: "STF.30-citizenship",
             position: 30,
             name: "Citizenship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -544,7 +545,7 @@ pub static STF: Segment = Segment {
             id: "STF.31-dateTimeOfDeath",
             position: 31,
             name: "Date/Time of Death",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -559,7 +560,7 @@ pub static STF: Segment = Segment {
             id: "STF.32-deathIndicator",
             position: 32,
             name: "Death Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -580,7 +581,7 @@ pub static STF: Segment = Segment {
             id: "STF.33-institutionRelationshipTypeCode",
             position: 33,
             name: "Institution Relationship Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -598,7 +599,7 @@ pub static STF: Segment = Segment {
             id: "STF.34-institutionRelationshipPeriod",
             position: 34,
             name: "Institution Relationship Period",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -613,7 +614,7 @@ pub static STF: Segment = Segment {
             id: "STF.35-expectedReturnDate",
             position: 35,
             name: "Expected Return Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -628,7 +629,7 @@ pub static STF: Segment = Segment {
             id: "STF.36-costCenterCode",
             position: 36,
             name: "Cost Center Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -646,7 +647,7 @@ pub static STF: Segment = Segment {
             id: "STF.37-genericClassificationIndicator",
             position: 37,
             name: "Generic Classification Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -667,7 +668,7 @@ pub static STF: Segment = Segment {
             id: "STF.38-inactiveReasonCode",
             position: 38,
             name: "Inactive Reason Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -685,7 +686,7 @@ pub static STF: Segment = Segment {
             id: "STF.39-genericResourceTypeOrCategory",
             position: 39,
             name: "Generic resource type or category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -703,7 +704,7 @@ pub static STF: Segment = Segment {
             id: "STF.40-religion",
             position: 40,
             name: "Religion",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -721,7 +722,7 @@ pub static STF: Segment = Segment {
             id: "STF.41-signature",
             position: 41,
             name: "Signature",
-            data_type: Some("ED"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ed::ED)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

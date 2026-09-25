@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `DG1` segment: Diagnosis.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `DG1` segment definition, `http://hl7.org/v2/StructureDefinition/DG1`.
@@ -19,7 +20,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.1-setId",
             position: 1,
             name: "Set ID - DG1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.3-diagnosisCode",
             position: 3,
             name: "Diagnosis Code - DG1",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.5-diagnosisDateTime",
             position: 5,
             name: "Diagnosis Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.6-diagnosisType",
             position: 6,
             name: "Diagnosis Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -241,7 +242,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.15-diagnosisPriority",
             position: 15,
             name: "Diagnosis Priority",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -262,7 +263,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.16-diagnosingClinician",
             position: 16,
             name: "Diagnosing Clinician",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +278,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.17-diagnosisClassification",
             position: 17,
             name: "Diagnosis Classification",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +296,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.18-confidentialIndicator",
             position: 18,
             name: "Confidential Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -316,7 +317,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.19-attestationDateTime",
             position: 19,
             name: "Attestation Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +332,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.20-diagnosisIdentifier",
             position: 20,
             name: "Diagnosis Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +347,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.21-diagnosisActionCode",
             position: 21,
             name: "Diagnosis Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -367,7 +368,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.22-parentDiagnosis",
             position: 22,
             name: "Parent Diagnosis",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -382,7 +383,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.23-drgCclValueCode",
             position: 23,
             name: "DRG CCL Value Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -400,7 +401,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.24-drgGroupingUsage",
             position: 24,
             name: "DRG Grouping Usage",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -421,7 +422,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.25-drgDiagnosisDeterminationStatus",
             position: 25,
             name: "DRG Diagnosis Determination Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +440,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.26-presentOnAdmissionPoaIndicator",
             position: 26,
             name: "Present On Admission (POA) Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IPR` segment: Invoice Processing Results.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `IPR` segment definition, `http://hl7.org/v2/StructureDefinition/IPR`.
 pub static IPR: Segment = Segment {
@@ -16,7 +19,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.1-iprIdentifier",
             position: 1,
             name: "IPR Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.2-providerCrossReferenceIdentifier",
             position: 2,
             name: "Provider Cross Reference Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -46,7 +49,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.3-payerCrossReferenceIdentifier",
             position: 3,
             name: "Payer Cross Reference Identifier",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -61,7 +64,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.4-iprStatus",
             position: 4,
             name: "IPR Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -79,7 +82,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.5-iprDateTime",
             position: 5,
             name: "IPR Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -94,7 +97,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.6-adjudicatedPaidAmount",
             position: 6,
             name: "Adjudicated/Paid Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +112,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.7-expectedPaymentDateTime",
             position: 7,
             name: "Expected Payment Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +127,7 @@ pub static IPR: Segment = Segment {
             id: "IPR.8-iprChecksum",
             position: 8,
             name: "IPR Checksum",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

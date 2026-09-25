@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PSH` segment: Product Summary Header.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `PSH` segment definition, `http://hl7.org/v2/StructureDefinition/PSH`.
@@ -18,7 +19,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.1-reportType",
             position: 1,
             name: "Report Type",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.2-reportFormIdentifier",
             position: 2,
             name: "Report Form Identifier",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.3-reportDate",
             position: 3,
             name: "Report Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.4-reportIntervalStartDate",
             position: 4,
             name: "Report Interval Start Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.5-reportIntervalEndDate",
             position: 5,
             name: "Report Interval End Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -99,7 +100,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.6-quantityManufactured",
             position: 6,
             name: "Quantity Manufactured",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.7-quantityDistributed",
             position: 7,
             name: "Quantity Distributed",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.8-quantityDistributedMethod",
             position: 8,
             name: "Quantity Distributed Method",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -150,7 +151,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.9-quantityDistributedComment",
             position: 9,
             name: "Quantity Distributed Comment",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -168,7 +169,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.10-quantityInUse",
             position: 10,
             name: "Quantity in Use",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -183,7 +184,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.11-quantityInUseMethod",
             position: 11,
             name: "Quantity in Use Method",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -204,7 +205,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.12-quantityInUseComment",
             position: 12,
             name: "Quantity in Use Comment",
-            data_type: Some("FT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ft::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -222,7 +223,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.13-numberOfProductExperienceReportsFiledByFacility",
             position: 13,
             name: "Number of Product Experience Reports Filed by Facility",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(8),
@@ -240,7 +241,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.14-numberOfProductExperienceReportsFiledByDistributor",
             position: 14,
             name: "Number of Product Experience Reports Filed by Distributor",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(8),

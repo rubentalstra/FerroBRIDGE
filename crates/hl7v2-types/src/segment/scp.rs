@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SCP` segment: Sterilizer Configuration.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `SCP` segment definition, `http://hl7.org/v2/StructureDefinition/SCP`.
 pub static SCP: Segment = Segment {
@@ -16,7 +19,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.1-numberOfDecontaminationSterilizationDevices",
             position: 1,
             name: "Number Of Decontamination/Sterilization Devices",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.2-laborCalculationType",
             position: 2,
             name: "Labor Calculation Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.3-dateFormat",
             position: 3,
             name: "Date Format",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +73,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.4-deviceNumber",
             position: 4,
             name: "Device Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +88,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.5-deviceName",
             position: 5,
             name: "Device Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +106,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.6-deviceModelName",
             position: 6,
             name: "Device Model Name",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +124,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.7-deviceType",
             position: 7,
             name: "Device Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +142,7 @@ pub static SCP: Segment = Segment {
             id: "SCP.8-control",
             position: 8,
             name: "Control",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

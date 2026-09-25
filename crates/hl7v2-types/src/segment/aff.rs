@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `AFF` segment: Professional Affiliation.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+};
 
 /// The `AFF` segment definition, `http://hl7.org/v2/StructureDefinition/AFF`.
 pub static AFF: Segment = Segment {
@@ -16,7 +19,7 @@ pub static AFF: Segment = Segment {
             id: "AFF.1-setId",
             position: 1,
             name: "Set ID – AFF",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static AFF: Segment = Segment {
             id: "AFF.2-professionalOrganization",
             position: 2,
             name: "Professional Organization",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static AFF: Segment = Segment {
             id: "AFF.3-professionalOrganizationAddress",
             position: 3,
             name: "Professional Organization Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +67,7 @@ pub static AFF: Segment = Segment {
             id: "AFF.4-professionalOrganizationAffiliationDateRange",
             position: 4,
             name: "Professional Organization Affiliation Date Range",
-            data_type: Some("DR"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dr::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -79,7 +82,7 @@ pub static AFF: Segment = Segment {
             id: "AFF.5-professionalAffiliationAdditionalInformation",
             position: 5,
             name: "Professional Affiliation Additional Information",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

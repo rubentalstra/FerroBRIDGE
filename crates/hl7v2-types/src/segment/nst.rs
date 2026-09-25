@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `NST` segment: Application Control-Level Statistics.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `NST` segment definition, `http://hl7.org/v2/StructureDefinition/NST`.
 pub static NST: Segment = Segment {
@@ -16,7 +17,7 @@ pub static NST: Segment = Segment {
             id: "NST.1-statisticsAvailable",
             position: 1,
             name: "Statistics Available",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static NST: Segment = Segment {
             id: "NST.2-sourceIdentifier",
             position: 2,
             name: "Source Identifier",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static NST: Segment = Segment {
             id: "NST.3-sourceType",
             position: 3,
             name: "Source Type",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static NST: Segment = Segment {
             id: "NST.4-statisticsStart",
             position: 4,
             name: "Statistics Start",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static NST: Segment = Segment {
             id: "NST.5-statisticsEnd",
             position: 5,
             name: "Statistics End",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static NST: Segment = Segment {
             id: "NST.6-receiveCharacterCount",
             position: 6,
             name: "Receive Character Count",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static NST: Segment = Segment {
             id: "NST.7-sendCharacterCount",
             position: 7,
             name: "Send Character Count",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static NST: Segment = Segment {
             id: "NST.8-messagesReceived",
             position: 8,
             name: "Messages Received",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static NST: Segment = Segment {
             id: "NST.9-messagesSent",
             position: 9,
             name: "Messages Sent",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +161,7 @@ pub static NST: Segment = Segment {
             id: "NST.10-checksumErrorsReceived",
             position: 10,
             name: "Checksum Errors Received",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +176,7 @@ pub static NST: Segment = Segment {
             id: "NST.11-lengthErrorsReceived",
             position: 11,
             name: "Length Errors Received",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -190,7 +191,7 @@ pub static NST: Segment = Segment {
             id: "NST.12-otherErrorsReceived",
             position: 12,
             name: "Other Errors Received",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +206,7 @@ pub static NST: Segment = Segment {
             id: "NST.13-connectTimeouts",
             position: 13,
             name: "Connect Timeouts",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +221,7 @@ pub static NST: Segment = Segment {
             id: "NST.14-receiveTimeouts",
             position: 14,
             name: "Receive Timeouts",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static NST: Segment = Segment {
             id: "NST.15-applicationControlLevelErrors",
             position: 15,
             name: "Application control-level Errors",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -14,12 +14,14 @@ off-limits to hand edits; the only hand-maintained files are `Cargo.toml`,
   on any difference. Both need the definitions on disk: run
   `scripts/vendor/v2ig.sh` first.
 - The root set is every message structure under
-  `message-structure/message_structures/` and every segment definition under
-  `segment/segments/` (the `Hxx` slot file aside), so the batch envelopes and
-  the segments no structure references are emitted too. Data type
-  components are not emitted (the v2-to-FHIR `TypeInfo` extensions type the
-  fields for the mapper), and neither are table contents (`hl7.terminology`
-  carries them).
+  `message-structure/message_structures/`, every segment definition under
+  `segment/segments/` (the `Hxx` slot file aside), every data type under
+  `data-type/primitive/primitives/` and `data-type/complex/complex-data-types/`,
+  and every message definition under `message/messages/`, so the batch
+  envelopes and the segments no structure references are emitted too. A
+  message definition names its structure by a profile URL no structure
+  carries, so the emitter links it by name. Table contents are not emitted
+  (`hl7.terminology` carries them).
   Widening the root set is a recorded decision, never a per-file addition.
 - The emitter tolerates each defect of the definitions only in the files
   where it was found (`fhir_codegen::v2::lower::Defect`); the same defect

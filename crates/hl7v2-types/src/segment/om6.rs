@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OM6` segment: Observations that are Calculated from Other Observations.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `OM6` segment definition, `http://hl7.org/v2/StructureDefinition/OM6`.
 pub static OM6: Segment = Segment {
@@ -16,7 +17,7 @@ pub static OM6: Segment = Segment {
             id: "OM6.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static OM6: Segment = Segment {
             id: "OM6.2-derivationRule",
             position: 2,
             name: "Derivation Rule",
-            data_type: Some("TX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tx::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

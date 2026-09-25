@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SCD` segment: Anti-Microbial Cycle Data.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `SCD` segment definition, `http://hl7.org/v2/StructureDefinition/SCD`.
 pub static SCD: Segment = Segment {
@@ -16,7 +19,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.1-cycleStartTime",
             position: 1,
             name: "Cycle Start Time",
-            data_type: Some("TM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tm::TM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.2-cycleCount",
             position: 2,
             name: "Cycle Count",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.3-tempMax",
             position: 3,
             name: "Temp Max",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +67,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.4-tempMin",
             position: 4,
             name: "Temp Min",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +82,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.5-loadNumber",
             position: 5,
             name: "Load Number",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +100,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.6-conditionTime",
             position: 6,
             name: "Condition Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +115,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.7-sterilizeTime",
             position: 7,
             name: "Sterilize Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +130,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.8-exhaustTime",
             position: 8,
             name: "Exhaust Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +145,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.9-totalCycleTime",
             position: 9,
             name: "Total Cycle Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +160,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.10-deviceStatus",
             position: 10,
             name: "Device Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +178,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.11-cycleStartDateTime",
             position: 11,
             name: "Cycle Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -190,7 +193,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.12-dryTime",
             position: 12,
             name: "Dry Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +208,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.13-leakRate",
             position: 13,
             name: "Leak Rate",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +223,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.14-controlTemperature",
             position: 14,
             name: "Control Temperature",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +238,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.15-sterilizerTemperature",
             position: 15,
             name: "Sterilizer Temperature",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -250,7 +253,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.16-cycleCompleteTime",
             position: 16,
             name: "Cycle Complete Time",
-            data_type: Some("TM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::tm::TM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -265,7 +268,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.17-underTemperature",
             position: 17,
             name: "Under Temperature",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +283,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.18-overTemperature",
             position: 18,
             name: "Over Temperature",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +298,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.19-abortCycle",
             position: 19,
             name: "Abort Cycle",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +316,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.20-alarm",
             position: 20,
             name: "Alarm",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +334,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.21-longInChargePhase",
             position: 21,
             name: "Long in Charge Phase",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +352,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.22-longInExhaustPhase",
             position: 22,
             name: "Long in Exhaust Phase",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -367,7 +370,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.23-longInFastExhaustPhase",
             position: 23,
             name: "Long in Fast Exhaust Phase",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -385,7 +388,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.24-reset",
             position: 24,
             name: "Reset",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -403,7 +406,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.25-operatorUnload",
             position: 25,
             name: "Operator - Unload",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +421,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.26-doorOpen",
             position: 26,
             name: "Door Open",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +439,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.27-readingFailure",
             position: 27,
             name: "Reading Failure",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -454,7 +457,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.28-cycleType",
             position: 28,
             name: "Cycle Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -472,7 +475,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.29-thermalRinseTime",
             position: 29,
             name: "Thermal Rinse Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +490,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.30-washTime",
             position: 30,
             name: "Wash Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -502,7 +505,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.31-injectionRate",
             position: 31,
             name: "Injection Rate",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -517,7 +520,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.32-procedureCode",
             position: 32,
             name: "Procedure Code",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -535,7 +538,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.33-patientIdentifierList",
             position: 33,
             name: "Patient Identifier List",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -550,7 +553,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.34-attendingDoctor",
             position: 34,
             name: "Attending Doctor",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -568,7 +571,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.35-dilutionFactor",
             position: 35,
             name: "Dilution Factor",
-            data_type: Some("SN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::sn::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -583,7 +586,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.36-fillTime",
             position: 36,
             name: "Fill Time",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -598,7 +601,7 @@ pub static SCD: Segment = Segment {
             id: "SCD.37-inletTemperature",
             position: 37,
             name: "Inlet Temperature",
-            data_type: Some("CQ"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cq::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

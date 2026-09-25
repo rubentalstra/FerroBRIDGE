@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `STZ` segment: Sterilization Parameter.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `STZ` segment definition, `http://hl7.org/v2/StructureDefinition/STZ`.
 pub static STZ: Segment = Segment {
@@ -16,7 +17,7 @@ pub static STZ: Segment = Segment {
             id: "STZ.1-sterilizationType",
             position: 1,
             name: "Sterilization Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static STZ: Segment = Segment {
             id: "STZ.2-sterilizationCycle",
             position: 2,
             name: "Sterilization Cycle",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +53,7 @@ pub static STZ: Segment = Segment {
             id: "STZ.3-maintenanceCycle",
             position: 3,
             name: "Maintenance Cycle",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static STZ: Segment = Segment {
             id: "STZ.4-maintenanceType",
             position: 4,
             name: "Maintenance Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

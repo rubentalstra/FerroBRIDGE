@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `EQU` segment: Equipment Detail.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `EQU` segment definition, `http://hl7.org/v2/StructureDefinition/EQU`.
 pub static EQU: Segment = Segment {
@@ -16,7 +17,7 @@ pub static EQU: Segment = Segment {
             id: "EQU.1-equ1",
             position: 1,
             name: "EQU-1",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(0),
@@ -31,7 +32,7 @@ pub static EQU: Segment = Segment {
             id: "EQU.2-equ2",
             position: 2,
             name: "EQU-2",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -46,7 +47,7 @@ pub static EQU: Segment = Segment {
             id: "EQU.3-equ3",
             position: 3,
             name: "EQU-3",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -64,7 +65,7 @@ pub static EQU: Segment = Segment {
             id: "EQU.4-equ4",
             position: 4,
             name: "EQU-4",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +83,7 @@ pub static EQU: Segment = Segment {
             id: "EQU.5-equ5",
             position: 5,
             name: "EQU-5",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static EQU: Segment = Segment {
             id: "EQU.6-equ6",
             position: 6,
             name: "EQU-6",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

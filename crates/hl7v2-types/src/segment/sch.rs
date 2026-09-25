@@ -4,8 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `SCH` segment: Schedule Activity Information.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Max, Optionality, Segment, StandardsStatus, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, StandardsStatus,
+    Table,
 };
 
 /// The `SCH` segment definition, `http://hl7.org/v2/StructureDefinition/SCH`.
@@ -18,7 +20,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.1-placerAppointmentId",
             position: 1,
             name: "Placer Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -33,7 +35,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.2-fillerAppointmentId",
             position: 2,
             name: "Filler Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -48,7 +50,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.3-occurrenceNumber",
             position: 3,
             name: "Occurrence Number",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -66,7 +68,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.4-placerOrderGroupNumber",
             position: 4,
             name: "Placer Order Group Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -81,7 +83,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.5-scheduleId",
             position: 5,
             name: "Schedule ID",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -96,7 +98,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.6-eventReason",
             position: 6,
             name: "Event Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -111,7 +113,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.7-appointmentReason",
             position: 7,
             name: "Appointment Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +131,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.8-appointmentType",
             position: 8,
             name: "Appointment Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -162,7 +164,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.10-appointmentDurationUnits",
             position: 10,
             name: "Appointment Duration Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -192,7 +194,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.12-placerContactPerson",
             position: 12,
             name: "Placer Contact Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -207,7 +209,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.13-placerContactPhoneNumber",
             position: 13,
             name: "Placer Contact Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -222,7 +224,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.14-placerContactAddress",
             position: 14,
             name: "Placer Contact Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -237,7 +239,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.15-placerContactLocation",
             position: 15,
             name: "Placer Contact Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -252,7 +254,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.16-fillerContactPerson",
             position: 16,
             name: "Filler Contact Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -267,7 +269,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.17-fillerContactPhoneNumber",
             position: 17,
             name: "Filler Contact Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -282,7 +284,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.18-fillerContactAddress",
             position: 18,
             name: "Filler Contact Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -297,7 +299,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.19-fillerContactLocation",
             position: 19,
             name: "Filler Contact Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -312,7 +314,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.20-enteredByPerson",
             position: 20,
             name: "Entered by Person",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -327,7 +329,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.21-enteredByPhoneNumber",
             position: 21,
             name: "Entered by Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -342,7 +344,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.22-enteredByLocation",
             position: 22,
             name: "Entered by Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -357,7 +359,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.23-parentPlacerAppointmentId",
             position: 23,
             name: "Parent Placer Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -372,7 +374,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.24-parentFillerAppointmentId",
             position: 24,
             name: "Parent Filler Appointment ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -387,7 +389,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.25-fillerStatusCode",
             position: 25,
             name: "Filler Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -405,7 +407,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.26-placerOrderNumber",
             position: 26,
             name: "Placer Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -420,7 +422,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.27-fillerOrderNumber",
             position: 27,
             name: "Filler Order Number",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -435,7 +437,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.28-alternatePlacerOrderGroupNumber",
             position: 28,
             name: "Alternate Placer Order Group Number",
-            data_type: Some("EIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::eip::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

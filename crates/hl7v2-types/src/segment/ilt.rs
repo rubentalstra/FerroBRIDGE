@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `ILT` segment: Material Lot.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `ILT` segment definition, `http://hl7.org/v2/StructureDefinition/ILT`.
@@ -18,7 +19,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.1-setId",
             position: 1,
             name: "Set Id - ILT",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.2-inventoryNumber",
             position: 2,
             name: "Inventory  Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.3-inventoryExpirationDate",
             position: 3,
             name: "Inventory Expiration Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.4-inventoryReceivedDate",
             position: 4,
             name: "Inventory Received Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.5-inventoryReceivedQuantity",
             position: 5,
             name: "Inventory Received Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -102,7 +103,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.6-inventoryReceivedQuantityUnit",
             position: 6,
             name: "Inventory Received Quantity Unit",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.7-inventoryReceivedItemCost",
             position: 7,
             name: "Inventory Received Item Cost",
-            data_type: Some("MO"),
+            data_type: Some(DataTypeRef::Defined(&data_type::mo::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -135,7 +136,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.8-inventoryOnHandDate",
             position: 8,
             name: "Inventory On Hand Date",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -150,7 +151,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.9-inventoryOnHandQuantity",
             position: 9,
             name: "Inventory On Hand Quantity",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -168,7 +169,7 @@ pub static ILT: Segment = Segment {
             id: "ILT.10-inventoryOnHandQuantityUnit",
             position: 10,
             name: "Inventory On Hand Quantity Unit",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

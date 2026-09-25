@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `IN2` segment: Insurance Additional Information.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `IN2` segment definition, `http://hl7.org/v2/StructureDefinition/IN2`.
@@ -18,7 +19,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.1-insuredsEmployeeId",
             position: 1,
             name: "Insured's Employee ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -33,7 +34,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.2-insuredsSocialSecurityNumber",
             position: 2,
             name: "Insured's Social Security Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -51,7 +52,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.3-insuredsEmployersNameAndId",
             position: 3,
             name: "Insured's Employer's Name and ID",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -66,7 +67,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.4-employerInformationData",
             position: 4,
             name: "Employer Information Data",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.5-mailClaimParty",
             position: 5,
             name: "Mail Claim Party",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -102,7 +103,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.6-medicareHealthInsCardNumber",
             position: 6,
             name: "Medicare Health Ins Card Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -120,7 +121,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.7-medicaidCaseName",
             position: 7,
             name: "Medicaid Case Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -135,7 +136,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.8-medicaidCaseNumber",
             position: 8,
             name: "Medicaid Case Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -153,7 +154,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.9-militarySponsorName",
             position: 9,
             name: "Military Sponsor Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -168,7 +169,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.10-militaryIdNumber",
             position: 10,
             name: "Military ID Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -186,7 +187,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.11-dependentOfMilitaryRecipient",
             position: 11,
             name: "Dependent Of Military Recipient",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -204,7 +205,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.12-militaryOrganization",
             position: 12,
             name: "Military Organization",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -222,7 +223,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.13-militaryStation",
             position: 13,
             name: "Military Station",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -240,7 +241,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.14-militaryService",
             position: 14,
             name: "Military Service",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -258,7 +259,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.15-militaryRankGrade",
             position: 15,
             name: "Military Rank/Grade",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -276,7 +277,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.16-militaryStatus",
             position: 16,
             name: "Military Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -294,7 +295,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.17-militaryRetireDate",
             position: 17,
             name: "Military Retire Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -309,7 +310,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.18-militaryNonAvailCertOnFile",
             position: 18,
             name: "Military Non-Avail Cert On File",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -330,7 +331,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.19-babyCoverage",
             position: 19,
             name: "Baby Coverage",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -351,7 +352,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.20-combineBabyBill",
             position: 20,
             name: "Combine Baby Bill",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -372,7 +373,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.21-bloodDeductible",
             position: 21,
             name: "Blood Deductible",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -390,7 +391,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.22-specialCoverageApprovalName",
             position: 22,
             name: "Special Coverage Approval Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -405,7 +406,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.23-specialCoverageApprovalTitle",
             position: 23,
             name: "Special Coverage Approval Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -423,7 +424,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.24-nonCoveredInsuranceCode",
             position: 24,
             name: "Non-Covered Insurance Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -441,7 +442,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.25-payorId",
             position: 25,
             name: "Payor ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -456,7 +457,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.26-payorSubscriberId",
             position: 26,
             name: "Payor Subscriber ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -471,7 +472,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.27-eligibilitySource",
             position: 27,
             name: "Eligibility Source",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -489,7 +490,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.28-roomCoverageTypeAmount",
             position: 28,
             name: "Room Coverage Type/Amount",
-            data_type: Some("RMC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::rmc::RMC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -504,7 +505,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.29-policyTypeAmount",
             position: 29,
             name: "Policy Type/Amount",
-            data_type: Some("PTA"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pta::PTA)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -519,7 +520,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.30-dailyDeductible",
             position: 30,
             name: "Daily Deductible",
-            data_type: Some("DDI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ddi::DDI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -534,7 +535,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.31-livingDependency",
             position: 31,
             name: "Living Dependency",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -552,7 +553,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.32-ambulatoryStatus",
             position: 32,
             name: "Ambulatory Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -570,7 +571,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.33-citizenship",
             position: 33,
             name: "Citizenship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -588,7 +589,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.34-primaryLanguage",
             position: 34,
             name: "Primary Language",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -606,7 +607,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.35-livingArrangement",
             position: 35,
             name: "Living Arrangement",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -624,7 +625,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.36-publicityCode",
             position: 36,
             name: "Publicity Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -642,7 +643,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.37-protectionIndicator",
             position: 37,
             name: "Protection Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -663,7 +664,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.38-studentIndicator",
             position: 38,
             name: "Student Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -681,7 +682,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.39-religion",
             position: 39,
             name: "Religion",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -699,7 +700,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.40-mothersMaidenName",
             position: 40,
             name: "Mother's Maiden Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -714,7 +715,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.41-nationality",
             position: 41,
             name: "Nationality",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -732,7 +733,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.42-ethnicGroup",
             position: 42,
             name: "Ethnic Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -750,7 +751,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.43-maritalStatus",
             position: 43,
             name: "Marital Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -768,7 +769,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.44-insuredsEmploymentStartDate",
             position: 44,
             name: "Insured's Employment Start Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -783,7 +784,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.45-employmentStopDate",
             position: 45,
             name: "Employment Stop Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -798,7 +799,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.46-jobTitle",
             position: 46,
             name: "Job Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -816,7 +817,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.47-jobCodeClass",
             position: 47,
             name: "Job Code/Class",
-            data_type: Some("JCC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::jcc::JCC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -831,7 +832,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.48-jobStatus",
             position: 48,
             name: "Job Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -849,7 +850,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.49-employerContactPersonName",
             position: 49,
             name: "Employer Contact Person Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -864,7 +865,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.50-employerContactPersonPhoneNumber",
             position: 50,
             name: "Employer Contact Person Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -879,7 +880,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.51-employerContactReason",
             position: 51,
             name: "Employer Contact Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -897,7 +898,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.52-insuredsContactPersonsName",
             position: 52,
             name: "Insured's Contact Person's Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -912,7 +913,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.53-insuredsContactPersonPhoneNumber",
             position: 53,
             name: "Insured's Contact Person Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -927,7 +928,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.54-insuredsContactPersonReason",
             position: 54,
             name: "Insured's Contact Person Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -945,7 +946,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.55-relationshipToThePatientStartDate",
             position: 55,
             name: "Relationship to the Patient Start Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -960,7 +961,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.56-relationshipToThePatientStopDate",
             position: 56,
             name: "Relationship to the Patient Stop Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -975,7 +976,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.57-insuranceCoContactReason",
             position: 57,
             name: "Insurance Co Contact Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -993,7 +994,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.58-insuranceCoContactPhoneNumber",
             position: 58,
             name: "Insurance Co Contact Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1008,7 +1009,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.59-policyScope",
             position: 59,
             name: "Policy Scope",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1026,7 +1027,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.60-policySource",
             position: 60,
             name: "Policy Source",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1044,7 +1045,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.61-patientMemberNumber",
             position: 61,
             name: "Patient Member Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1059,7 +1060,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.62-guarantorsRelationshipToInsured",
             position: 62,
             name: "Guarantor's Relationship to Insured",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1077,7 +1078,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.63-insuredsPhoneNumberHome",
             position: 63,
             name: "Insured's Phone Number - Home",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1092,7 +1093,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.64-insuredsEmployerPhoneNumber",
             position: 64,
             name: "Insured's Employer Phone Number",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1107,7 +1108,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.65-militaryHandicappedProgram",
             position: 65,
             name: "Military Handicapped Program",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1125,7 +1126,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.66-suspendFlag",
             position: 66,
             name: "Suspend Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1146,7 +1147,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.67-copayLimitFlag",
             position: 67,
             name: "Copay Limit Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1167,7 +1168,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.68-stoplossLimitFlag",
             position: 68,
             name: "Stoploss Limit Flag",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1188,7 +1189,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.69-insuredOrganizationNameAndId",
             position: 69,
             name: "Insured Organization Name and ID",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1203,7 +1204,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.70-insuredEmployerOrganizationNameAndId",
             position: 70,
             name: "Insured Employer Organization Name and ID",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1218,7 +1219,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.71-race",
             position: 71,
             name: "Race",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1236,7 +1237,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.72-patientsRelationshipToInsured",
             position: 72,
             name: "Patient's Relationship to Insured",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1254,7 +1255,7 @@ pub static IN2: Segment = Segment {
             id: "IN2.73-coPayAmount",
             position: 73,
             name: "Co-Pay Amount",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

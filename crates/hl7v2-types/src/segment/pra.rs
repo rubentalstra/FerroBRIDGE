@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PRA` segment: Practitioner Detail.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, StandardsStatus, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, StandardsStatus, Table,
+};
 
 /// The `PRA` segment definition, `http://hl7.org/v2/StructureDefinition/PRA`.
 pub static PRA: Segment = Segment {
@@ -16,7 +19,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - PRA",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +37,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.2-practitionerGroup",
             position: 2,
             name: "Practitioner Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +55,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.3-practitionerCategory",
             position: 3,
             name: "Practitioner Category",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +73,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.4-providerBilling",
             position: 4,
             name: "Provider Billing",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +94,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.5-specialty",
             position: 5,
             name: "Specialty",
-            data_type: Some("SPD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::spd::SPD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +112,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.6-practitionerIdNumbers",
             position: 6,
             name: "Practitioner ID Numbers",
-            data_type: Some("PLN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pln::PLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -127,7 +130,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.7-privileges",
             position: 7,
             name: "Privileges",
-            data_type: Some("PIP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pip::PIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -142,7 +145,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.8-dateEnteredPractice",
             position: 8,
             name: "Date Entered Practice",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +160,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.9-institution",
             position: 9,
             name: "Institution",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +178,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.10-dateLeftPractice",
             position: 10,
             name: "Date Left Practice",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -190,7 +193,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.11-governmentReimbursementBillingEligibility",
             position: 11,
             name: "Government Reimbursement Billing Eligibility",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -208,7 +211,7 @@ pub static PRA: Segment = Segment {
             id: "PRA.12-setId",
             position: 12,
             name: "Set ID - PRA",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

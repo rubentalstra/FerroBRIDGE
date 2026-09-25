@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `MSA` segment: Message Acknowledgment.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `MSA` segment definition, `http://hl7.org/v2/StructureDefinition/MSA`.
@@ -19,7 +20,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.1-acknowledgmentCode",
             position: 1,
             name: "Acknowledgment Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -40,7 +41,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.2-messageControlId",
             position: 2,
             name: "Message Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -76,7 +77,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.4-expectedSequenceNumber",
             position: 4,
             name: "Expected Sequence Number",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +122,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.7-messageWaitingNumber",
             position: 7,
             name: "Message Waiting Number",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.8-messageWaitingPriority",
             position: 8,
             name: "Message Waiting Priority",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

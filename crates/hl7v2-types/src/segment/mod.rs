@@ -389,7 +389,7 @@ pub static SEGMENTS: [&crate::model::Segment; 190] = [
     &vnd::VND,
 ];
 
-/// The segment whose definition id is `id`, for example `OBX`.
+/// Returns the segment whose definition id is `id`, for example `OBX`.
 #[must_use]
 pub fn find(id: &str) -> Option<&'static crate::model::Segment> {
     match SEGMENTS.binary_search_by(|entry| entry.id.cmp(id)) {

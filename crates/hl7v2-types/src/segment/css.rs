@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CSS` segment: Clinical Study Data Schedule.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `CSS` segment definition, `http://hl7.org/v2/StructureDefinition/CSS`.
 pub static CSS: Segment = Segment {
@@ -16,7 +17,7 @@ pub static CSS: Segment = Segment {
             id: "CSS.1-studyScheduledTimePoint",
             position: 1,
             name: "Study Scheduled Time Point",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static CSS: Segment = Segment {
             id: "CSS.2-studyScheduledPatientTimePoint",
             position: 2,
             name: "Study Scheduled Patient Time Point",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static CSS: Segment = Segment {
             id: "CSS.3-studyQualityControlCodes",
             position: 3,
             name: "Study Quality Control Codes",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(3),

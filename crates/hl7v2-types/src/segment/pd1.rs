@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PD1` segment: Patient Additional Demographic.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, StandardsStatus, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, StandardsStatus, Table,
+};
 
 /// The `PD1` segment definition, `http://hl7.org/v2/StructureDefinition/PD1`.
 pub static PD1: Segment = Segment {
@@ -16,7 +19,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.1-livingDependency",
             position: 1,
             name: "Living Dependency",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -34,7 +37,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.2-livingArrangement",
             position: 2,
             name: "Living Arrangement",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +55,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.3-patientPrimaryFacility",
             position: 3,
             name: "Patient Primary Facility",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -85,7 +88,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.5-studentIndicator",
             position: 5,
             name: "Student Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +106,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.6-handicap",
             position: 6,
             name: "Handicap",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +124,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.7-livingWillCode",
             position: 7,
             name: "Living Will Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +142,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.8-organDonorCode",
             position: 8,
             name: "Organ Donor Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +160,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.9-separateBill",
             position: 9,
             name: "Separate Bill",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +181,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.10-duplicatePatient",
             position: 10,
             name: "Duplicate Patient",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -193,7 +196,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.11-publicityCode",
             position: 11,
             name: "Publicity Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +214,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.12-protectionIndicator",
             position: 12,
             name: "Protection Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -232,7 +235,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.13-protectionIndicatorEffectiveDate",
             position: 13,
             name: "Protection Indicator Effective Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -247,7 +250,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.14-placeOfWorship",
             position: 14,
             name: "Place of Worship",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -262,7 +265,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.15-advanceDirectiveCode",
             position: 15,
             name: "Advance Directive Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -280,7 +283,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.16-immunizationRegistryStatus",
             position: 16,
             name: "Immunization Registry Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -298,7 +301,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.17-immunizationRegistryStatusEffectiveDate",
             position: 17,
             name: "Immunization Registry Status Effective Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +316,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.18-publicityCodeEffectiveDate",
             position: 18,
             name: "Publicity Code Effective Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +331,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.19-militaryBranch",
             position: 19,
             name: "Military Branch",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +349,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.20-militaryRankGrade",
             position: 20,
             name: "Military Rank/Grade",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +367,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.21-militaryStatus",
             position: 21,
             name: "Military Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -382,7 +385,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.22-advanceDirectiveLastVerifiedDate",
             position: 22,
             name: "Advance Directive Last Verified Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +400,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.23-retirementDate",
             position: 23,
             name: "Retirement Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

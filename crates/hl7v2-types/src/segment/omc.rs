@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `OMC` segment: Supporting Clinical Information.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConditionalCode, ConformanceLength, Field, Length, Max, Optionality, Segment,
-    Table,
+    Cardinality, ConditionalCode, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality,
+    Segment, Table,
 };
 
 /// The `OMC` segment definition, `http://hl7.org/v2/StructureDefinition/OMC`.
@@ -19,7 +20,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.1-sequenceNumberTestObservationMasterFile",
             position: 1,
             name: "Sequence Number - Test/Observation Master File",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.2-segmentActionCode",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -61,7 +62,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.3-segmentUniqueKey",
             position: 3,
             name: "Segment Unique Key",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +80,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.4-clinicalInformationRequest",
             position: 4,
             name: "Clinical Information Request",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -97,7 +98,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.5-collectionEventProcessStep",
             position: 5,
             name: "Collection Event/Process Step",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -115,7 +116,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.6-communicationLocation",
             position: 6,
             name: "Communication Location",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -133,7 +134,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.7-answerRequired",
             position: 7,
             name: "Answer Required",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +152,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.8-hintHelpText",
             position: 8,
             name: "Hint/Help Text",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +167,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.9-typeOfAnswer",
             position: 9,
             name: "Type of Answer",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +185,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.10-multipleAnswersAllowed",
             position: 10,
             name: "Multiple Answers Allowed",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +203,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.11-answerChoices",
             position: 11,
             name: "Answer Choices",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -220,7 +221,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.12-characterLimit",
             position: 12,
             name: "Character Limit",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +236,7 @@ pub static OMC: Segment = Segment {
             id: "OMC.13-numberOfDecimals",
             position: 13,
             name: "Number of Decimals",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,8 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `FHS` segment: File Header.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment, Table,
 };
 
 /// The `FHS` segment definition, `http://hl7.org/v2/StructureDefinition/FHS`.
@@ -18,7 +19,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.1-fileFieldSeparator",
             position: 1,
             name: "File Field Separator",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -36,7 +37,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.2-fileEncodingCharacters",
             position: 2,
             name: "File Encoding Characters",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -54,7 +55,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.3-fileSendingApplication",
             position: 3,
             name: "File Sending Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -69,7 +70,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.4-fileSendingFacility",
             position: 4,
             name: "File Sending Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -84,7 +85,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.5-fileReceivingApplication",
             position: 5,
             name: "File Receiving Application",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -99,7 +100,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.6-fileReceivingFacility",
             position: 6,
             name: "File Receiving Facility",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -114,7 +115,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.7-fileCreationDateTime",
             position: 7,
             name: "File Creation Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -129,7 +130,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.8-fileSecurity",
             position: 8,
             name: "File Security",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -147,7 +148,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.9-fileNameId",
             position: 9,
             name: "File Name/ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -165,7 +166,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.10-fileHeaderComment",
             position: 10,
             name: "File Header Comment",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -183,7 +184,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.11-fileControlId",
             position: 11,
             name: "File Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -201,7 +202,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.12-referenceFileControlId",
             position: 12,
             name: "Reference File Control ID",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -219,7 +220,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.13-fileSendingNetworkAddress",
             position: 13,
             name: "File Sending Network Address",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -234,7 +235,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.14-fileReceivingNetworkAddress",
             position: 14,
             name: "File Receiving Network Address",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -249,7 +250,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.15-securityClassificationTag",
             position: 15,
             name: "Security Classification Tag",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -267,7 +268,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.16-securityHandlingInstructions",
             position: 16,
             name: "Security Handling Instructions",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -285,7 +286,7 @@ pub static FHS: Segment = Segment {
             id: "FHS.17-specialAccessRestrictionInstructions",
             position: 17,
             name: "Special Access Restriction Instructions",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

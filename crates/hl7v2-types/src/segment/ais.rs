@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `AIS` segment: Appointment Information - Service.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `AIS` segment definition, `http://hl7.org/v2/StructureDefinition/AIS`.
 pub static AIS: Segment = Segment {
@@ -16,7 +17,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.1-setId",
             position: 1,
             name: "Set ID - AIS",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.2-segmentActionCode",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.3-universalServiceIdentifier",
             position: 3,
             name: "Universal Service Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.4-startDateTime",
             position: 4,
             name: "Start Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +86,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.5-startDateTimeOffset",
             position: 5,
             name: "Start Date/Time Offset",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +101,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.6-startDateTimeOffsetUnits",
             position: 6,
             name: "Start Date/Time Offset Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +116,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.7-duration",
             position: 7,
             name: "Duration",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +131,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.8-durationUnits",
             position: 8,
             name: "Duration Units",
-            data_type: Some("CNE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cne::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +146,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.9-allowSubstitutionCode",
             position: 9,
             name: "Allow Substitution Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +164,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.10-fillerStatusCode",
             position: 10,
             name: "Filler Status Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +182,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.11-placerSupplementalServiceInformation",
             position: 11,
             name: "Placer Supplemental Service Information",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -199,7 +200,7 @@ pub static AIS: Segment = Segment {
             id: "AIS.12-fillerSupplementalServiceInformation",
             position: 12,
             name: "Filler Supplemental Service Information",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

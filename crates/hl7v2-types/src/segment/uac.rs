@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `UAC` segment: User Authentication Credential.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `UAC` segment definition, `http://hl7.org/v2/StructureDefinition/UAC`.
 pub static UAC: Segment = Segment {
@@ -16,7 +17,7 @@ pub static UAC: Segment = Segment {
             id: "UAC.1-userAuthenticationCredentialTypeCode",
             position: 1,
             name: "User Authentication Credential Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static UAC: Segment = Segment {
             id: "UAC.2-userAuthenticationCredential",
             position: 2,
             name: "User Authentication Credential",
-            data_type: Some("ED"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ed::ED)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

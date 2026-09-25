@@ -15,10 +15,13 @@ fn main() -> anyhow::Result<()> {
             }
             println!("fhir-codegen: {} files", report.files.len());
             println!(
-                "fhir-codegen: hl7v2-types: {} message structures, {} segments, {} fields, {} files",
+                "fhir-codegen: hl7v2-types: {} message structures, {} segments, {} fields, {} data types, {} components, {} messages, {} files",
                 hl7v2.structures,
                 hl7v2.segments,
                 hl7v2.fields,
+                hl7v2.data_types,
+                hl7v2.components,
+                hl7v2.messages,
                 hl7v2.files.len()
             );
         }

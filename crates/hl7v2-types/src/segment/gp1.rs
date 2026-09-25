@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `GP1` segment: Grouping/Reimbursement - Visit.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `GP1` segment definition, `http://hl7.org/v2/StructureDefinition/GP1`.
 pub static GP1: Segment = Segment {
@@ -16,7 +17,7 @@ pub static GP1: Segment = Segment {
             id: "GP1.1-typeOfBillCode",
             position: 1,
             name: "Type of Bill Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static GP1: Segment = Segment {
             id: "GP1.2-revenueCode",
             position: 2,
             name: "Revenue Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +53,7 @@ pub static GP1: Segment = Segment {
             id: "GP1.3-overallClaimDispositionCode",
             position: 3,
             name: "Overall Claim Disposition Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static GP1: Segment = Segment {
             id: "GP1.4-oceEditsPerVisitCode",
             position: 4,
             name: "OCE Edits per Visit Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -88,7 +89,7 @@ pub static GP1: Segment = Segment {
             id: "GP1.5-outlierCost",
             position: 5,
             name: "Outlier Cost",
-            data_type: Some("CP"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cp::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

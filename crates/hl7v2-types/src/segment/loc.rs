@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `LOC` segment: Location Identification.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{
+    Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment, Table,
+};
 
 /// The `LOC` segment definition, `http://hl7.org/v2/StructureDefinition/LOC`.
 pub static LOC: Segment = Segment {
@@ -16,7 +19,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.1-primaryKeyValue",
             position: 1,
             name: "Primary Key Value - LOC",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +34,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.2-locationDescription",
             position: 2,
             name: "Location Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +52,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.3-locationType",
             position: 3,
             name: "Location Type - LOC",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -70,7 +73,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.4-organizationName",
             position: 4,
             name: "Organization Name - LOC",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -85,7 +88,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.5-locationAddress",
             position: 5,
             name: "Location Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -100,7 +103,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.6-locationPhone",
             position: 6,
             name: "Location Phone",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -115,7 +118,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.7-licenseNumber",
             position: 7,
             name: "License Number",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -133,7 +136,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.8-locationEquipment",
             position: 8,
             name: "Location Equipment",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -154,7 +157,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.9-locationServiceCode",
             position: 9,
             name: "Location Service Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

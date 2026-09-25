@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `VAR` segment: Variance.
 
-use crate::model::{Cardinality, ConformanceLength, Field, Max, Optionality, Segment};
+use crate::data_type;
+use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Optionality, Segment};
 
 /// The `VAR` segment definition, `http://hl7.org/v2/StructureDefinition/VAR`.
 pub static VAR: Segment = Segment {
@@ -16,7 +17,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.1-varianceInstanceId",
             position: 1,
             name: "Variance Instance ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.2-documentedDateTime",
             position: 2,
             name: "Documented Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -46,7 +47,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.3-statedVarianceDateTime",
             position: 3,
             name: "Stated Variance Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -61,7 +62,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.4-varianceOriginator",
             position: 4,
             name: "Variance Originator",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -76,7 +77,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.5-varianceClassification",
             position: 5,
             name: "Variance Classification",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +92,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.6-varianceDescription",
             position: 6,
             name: "Variance Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `CTI` segment: Clinical Trial Identification.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `CTI` segment definition, `http://hl7.org/v2/StructureDefinition/CTI`.
 pub static CTI: Segment = Segment {
@@ -16,7 +17,7 @@ pub static CTI: Segment = Segment {
             id: "CTI.1-sponsorStudyId",
             position: 1,
             name: "Sponsor Study ID",
-            data_type: Some("EI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::ei::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -31,7 +32,7 @@ pub static CTI: Segment = Segment {
             id: "CTI.2-studyPhaseIdentifier",
             position: 2,
             name: "Study Phase Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static CTI: Segment = Segment {
             id: "CTI.3-studyScheduledTimePoint",
             position: 3,
             name: "Study Scheduled Time Point",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +68,7 @@ pub static CTI: Segment = Segment {
             id: "CTI.4-actionCode",
             position: 4,
             name: "Action Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `PV1` segment: Patient Visit.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `PV1` segment definition, `http://hl7.org/v2/StructureDefinition/PV1`.
@@ -19,7 +20,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.1-setId",
             position: 1,
             name: "Set ID - PV1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.2-patientClass",
             position: 2,
             name: "Patient Class",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +56,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.3-assignedPatientLocation",
             position: 3,
             name: "Assigned Patient Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +71,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.4-admissionType",
             position: 4,
             name: "Admission Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.5-preadmitNumber",
             position: 5,
             name: "Preadmit Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.6-priorPatientLocation",
             position: 6,
             name: "Prior Patient Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +119,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.7-attendingDoctor",
             position: 7,
             name: "Attending Doctor",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -136,7 +137,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.8-referringDoctor",
             position: 8,
             name: "Referring Doctor",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -154,7 +155,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.9-consultingDoctor",
             position: 9,
             name: "Consulting Doctor",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -169,7 +170,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.10-hospitalService",
             position: 10,
             name: "Hospital Service",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +188,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.11-temporaryLocation",
             position: 11,
             name: "Temporary Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +203,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.12-preadmitTestIndicator",
             position: 12,
             name: "Preadmit Test Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +221,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.13-reAdmissionIndicator",
             position: 13,
             name: "Re-admission Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +239,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.14-admitSource",
             position: 14,
             name: "Admit Source",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +257,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.15-ambulatoryStatus",
             position: 15,
             name: "Ambulatory Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -274,7 +275,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.16-vipIndicator",
             position: 16,
             name: "VIP Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -292,7 +293,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.17-admittingDoctor",
             position: 17,
             name: "Admitting Doctor",
-            data_type: Some("XCN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xcn::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -310,7 +311,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.18-patientType",
             position: 18,
             name: "Patient Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +329,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.19-visitNumber",
             position: 19,
             name: "Visit Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -343,7 +344,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.20-financialClass",
             position: 20,
             name: "Financial Class",
-            data_type: Some("FC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::fc::FC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -361,7 +362,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.21-chargePriceIndicator",
             position: 21,
             name: "Charge Price Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +380,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.22-courtesyCode",
             position: 22,
             name: "Courtesy Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +398,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.23-creditRating",
             position: 23,
             name: "Credit Rating",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -415,7 +416,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.24-contractCode",
             position: 24,
             name: "Contract Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -433,7 +434,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.25-contractEffectiveDate",
             position: 25,
             name: "Contract Effective Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -448,7 +449,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.26-contractAmount",
             position: 26,
             name: "Contract Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -466,7 +467,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.27-contractPeriod",
             position: 27,
             name: "Contract Period",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -484,7 +485,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.28-interestCode",
             position: 28,
             name: "Interest Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -502,7 +503,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.29-transferToBadDebtCode",
             position: 29,
             name: "Transfer to Bad Debt Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +521,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.30-transferToBadDebtDate",
             position: 30,
             name: "Transfer to Bad Debt Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -535,7 +536,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.31-badDebtAgencyCode",
             position: 31,
             name: "Bad Debt Agency Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -553,7 +554,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.32-badDebtTransferAmount",
             position: 32,
             name: "Bad Debt Transfer Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -571,7 +572,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.33-badDebtRecoveryAmount",
             position: 33,
             name: "Bad Debt Recovery Amount",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -589,7 +590,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.34-deleteAccountIndicator",
             position: 34,
             name: "Delete Account Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -607,7 +608,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.35-deleteAccountDate",
             position: 35,
             name: "Delete Account Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -622,7 +623,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.36-dischargeDisposition",
             position: 36,
             name: "Discharge Disposition",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -640,7 +641,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.37-dischargedToLocation",
             position: 37,
             name: "Discharged to Location",
-            data_type: Some("DLD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dld::DLD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -658,7 +659,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.38-dietType",
             position: 38,
             name: "Diet Type",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -676,7 +677,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.39-servicingFacility",
             position: 39,
             name: "Servicing Facility",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -709,7 +710,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.41-accountStatus",
             position: 41,
             name: "Account Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -727,7 +728,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.42-pendingLocation",
             position: 42,
             name: "Pending Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -742,7 +743,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.43-priorTemporaryLocation",
             position: 43,
             name: "Prior Temporary Location",
-            data_type: Some("PL"),
+            data_type: Some(DataTypeRef::Defined(&data_type::pl::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -757,7 +758,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.44-admitDateTime",
             position: 44,
             name: "Admit Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -772,7 +773,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.45-dischargeDateTime",
             position: 45,
             name: "Discharge Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -787,7 +788,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.46-currentPatientBalance",
             position: 46,
             name: "Current Patient Balance",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -805,7 +806,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.47-totalCharges",
             position: 47,
             name: "Total Charges",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -823,7 +824,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.48-totalAdjustments",
             position: 48,
             name: "Total Adjustments",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -841,7 +842,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.49-totalPayments",
             position: 49,
             name: "Total Payments",
-            data_type: Some("NM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::nm::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -859,7 +860,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.50-alternateVisitId",
             position: 50,
             name: "Alternate Visit ID",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -877,7 +878,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.51-visitIndicator",
             position: 51,
             name: "Visit Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -910,7 +911,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.53-serviceEpisodeDescription",
             position: 53,
             name: "Service Episode Description",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -928,7 +929,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.54-serviceEpisodeIdentifier",
             position: 54,
             name: "Service Episode Identifier",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

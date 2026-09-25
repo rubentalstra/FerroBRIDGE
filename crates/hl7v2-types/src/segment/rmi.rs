@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `RMI` segment: Risk Management Incident.
 
-use crate::model::{Cardinality, Field, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, Table};
 
 /// The `RMI` segment definition, `http://hl7.org/v2/StructureDefinition/RMI`.
 pub static RMI: Segment = Segment {
@@ -16,7 +17,7 @@ pub static RMI: Segment = Segment {
             id: "RMI.1-riskManagementIncidentCode",
             position: 1,
             name: "Risk Management Incident Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static RMI: Segment = Segment {
             id: "RMI.2-dateTimeIncident",
             position: 2,
             name: "Date/Time Incident",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +50,7 @@ pub static RMI: Segment = Segment {
             id: "RMI.3-incidentTypeCode",
             position: 3,
             name: "Incident Type Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `MFI` segment: Master File Identification.
 
-use crate::model::{Cardinality, Field, Length, Max, Optionality, Segment, Table};
+use crate::data_type;
+use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Segment, Table};
 
 /// The `MFI` segment definition, `http://hl7.org/v2/StructureDefinition/MFI`.
 pub static MFI: Segment = Segment {
@@ -16,7 +17,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.1-masterFileIdentifier",
             position: 1,
             name: "Master File Identifier",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +35,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.2-masterFileApplicationIdentifier",
             position: 2,
             name: "Master File Application Identifier",
-            data_type: Some("HD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::hd::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +53,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.3-fileLevelEventCode",
             position: 3,
             name: "File-Level Event Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -73,7 +74,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.4-enteredDateTime",
             position: 4,
             name: "Entered Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +89,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.5-effectiveDateTime",
             position: 5,
             name: "Effective Date/Time",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +104,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.6-responseLevelCode",
             position: 6,
             name: "Response Level Code",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

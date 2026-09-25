@@ -4,9 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `NK1` segment: Next of Kin / Associated Parties.
 
+use crate::data_type;
 use crate::model::{
-    Cardinality, ConformanceLength, Field, Length, Max, Optionality, Segment, StandardsStatus,
-    Table,
+    Cardinality, ConformanceLength, DataTypeRef, Field, Length, Max, Optionality, Segment,
+    StandardsStatus, Table,
 };
 
 /// The `NK1` segment definition, `http://hl7.org/v2/StructureDefinition/NK1`.
@@ -19,7 +20,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.1-setId",
             position: 1,
             name: "Set ID - NK1",
-            data_type: Some("SI"),
+            data_type: Some(DataTypeRef::Defined(&data_type::si::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +38,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.2-name",
             position: 2,
             name: "Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -55,7 +56,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.3-relationship",
             position: 3,
             name: "Relationship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +74,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.4-address",
             position: 4,
             name: "Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -118,7 +119,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.7-contactRole",
             position: 7,
             name: "Contact Role",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +137,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.8-startDate",
             position: 8,
             name: "Start Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +152,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.9-endDate",
             position: 9,
             name: "End Date",
-            data_type: Some("DT"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dt::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +167,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.10-nextOfKinAssociatedPartiesJobTitle",
             position: 10,
             name: "Next of Kin / Associated Parties Job Title",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +185,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.11-nextOfKinAssociatedPartiesJobCodeClass",
             position: 11,
             name: "Next of Kin / Associated Parties Job Code/Class",
-            data_type: Some("JCC"),
+            data_type: Some(DataTypeRef::Defined(&data_type::jcc::JCC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -199,7 +200,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.12-nextOfKinAssociatedPartiesEmployeeNumber",
             position: 12,
             name: "Next of Kin / Associated Parties Employee Number",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +215,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.13-organizationName",
             position: 13,
             name: "Organization Name - NK1",
-            data_type: Some("XON"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xon::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -229,7 +230,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.14-maritalStatus",
             position: 14,
             name: "Marital Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -247,7 +248,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.15-administrativeSex",
             position: 15,
             name: "Administrative Sex",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -265,7 +266,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.16-dateTimeOfBirth",
             position: 16,
             name: "Date/Time of Birth",
-            data_type: Some("DTM"),
+            data_type: Some(DataTypeRef::Defined(&data_type::dtm::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +281,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.17-livingDependency",
             position: 17,
             name: "Living Dependency",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -298,7 +299,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.18-ambulatoryStatus",
             position: 18,
             name: "Ambulatory Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -316,7 +317,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.19-citizenship",
             position: 19,
             name: "Citizenship",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -334,7 +335,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.20-primaryLanguage",
             position: 20,
             name: "Primary Language",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +353,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.21-livingArrangement",
             position: 21,
             name: "Living Arrangement",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -370,7 +371,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.22-publicityCode",
             position: 22,
             name: "Publicity Code",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -388,7 +389,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.23-protectionIndicator",
             position: 23,
             name: "Protection Indicator",
-            data_type: Some("ID"),
+            data_type: Some(DataTypeRef::Defined(&data_type::id::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -409,7 +410,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.24-studentIndicator",
             position: 24,
             name: "Student Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -427,7 +428,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.25-religion",
             position: 25,
             name: "Religion",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -445,7 +446,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.26-mothersMaidenName",
             position: 26,
             name: "Mother's Maiden Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -460,7 +461,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.27-nationality",
             position: 27,
             name: "Nationality",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -478,7 +479,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.28-ethnicGroup",
             position: 28,
             name: "Ethnic Group",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -496,7 +497,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.29-contactReason",
             position: 29,
             name: "Contact Reason",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -514,7 +515,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.30-contactPersonsName",
             position: 30,
             name: "Contact Person's Name",
-            data_type: Some("XPN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xpn::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -547,7 +548,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.32-contactPersonsAddress",
             position: 32,
             name: "Contact Person's Address",
-            data_type: Some("XAD"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xad::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -562,7 +563,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.33-nextOfKinAssociatedPartysIdentifiers",
             position: 33,
             name: "Next of Kin/Associated Party's Identifiers",
-            data_type: Some("CX"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cx::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -577,7 +578,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.34-jobStatus",
             position: 34,
             name: "Job Status",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -595,7 +596,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.35-race",
             position: 35,
             name: "Race",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -613,7 +614,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.36-handicap",
             position: 36,
             name: "Handicap",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -631,7 +632,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.37-contactPersonSocialSecurityNumber",
             position: 37,
             name: "Contact Person Social Security Number",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -649,7 +650,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.38-nextOfKinBirthPlace",
             position: 38,
             name: "Next of Kin Birth Place",
-            data_type: Some("ST"),
+            data_type: Some(DataTypeRef::Defined(&data_type::st::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -667,7 +668,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.39-vipIndicator",
             position: 39,
             name: "VIP Indicator",
-            data_type: Some("CWE"),
+            data_type: Some(DataTypeRef::Defined(&data_type::cwe::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -685,7 +686,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.40-nextOfKinTelecommunicationInformation",
             position: 40,
             name: "Next of Kin Telecommunication Information",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -700,7 +701,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.41-contactPersonsTelecommunicationInformation",
             position: 41,
             name: "Contact Person's Telecommunication Information",
-            data_type: Some("XTN"),
+            data_type: Some(DataTypeRef::Defined(&data_type::xtn::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
