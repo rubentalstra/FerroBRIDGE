@@ -67,3 +67,4 @@
 - [Legacy standards are first class](legacy-standards-first-class.md): the bridge spans the oldest wire formats (HL7 v2.x first) to the newest; built in from the start and scheduled into the current milestone; owner 2026-09-25, research on #248
 
 - [openehr-its rest-client upstream](openehr-its-rest-client-upstream.md) — FerroEHR#3485 builds the client; delete ferrobridge-openehr when it ships
+- [HL7 v2 test corpora](hl7v2-test-corpora.md) — the vendored v2 message sets, their licences, and that no real traffic is public
