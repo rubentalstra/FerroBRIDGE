@@ -365,6 +365,25 @@ fn read_mappings(directory: &Path) -> Result<MappingSet, Error> {
     })
 }
 
+/// Logs every warning a compiled program carries, once, as it loads.
+///
+/// A warning is a disagreement the compiler accepted, so the program runs and
+/// the operator learns of it here. The record names the context, the file,
+/// the line and the diagnostic code, and never the content of a mapping.
+pub fn log_warnings(program: &fhirconnect::resolve::program::Program) {
+    for warning in program.warnings() {
+        tracing::warn!(
+            context = %program.context(),
+            file = %warning.file().display(),
+            line = warning
+                .position()
+                .map_or(0, openehr_mapping_core::position::Position::line),
+            code = %warning.code(),
+            "a mapping context compiled with a warning"
+        );
+    }
+}
+
 /// Compiles every context of `loaded` against the templates `set` holds.
 fn compile_all(set: &mut ProgramSet, loaded: &MappingSet) -> Result<(), Error> {
     for context in loaded.contexts() {
@@ -389,6 +408,7 @@ fn compile_all(set: &mut ProgramSet, loaded: &MappingSet) -> Result<(), Error> {
             context: name.as_str().to_owned(),
             report: report(&diagnostics),
         })?;
+        log_warnings(&program);
         set.insert_program(program)
             .map_err(|source| Error::Insert {
                 context: name.as_str().to_owned(),

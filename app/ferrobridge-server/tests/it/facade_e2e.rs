@@ -237,14 +237,7 @@ async fn the_kds_template_admits_the_synthetic_composition_on_a_real_cdr()
     Ok(())
 }
 
-// TODO(#86): run once the engine closes four gaps. G1: an untyped mapping onto
-// a primitive dateTime takes the string kind, so no DV_DATE_TIME cell reads it.
-// G2: an untyped mapping onto a structural node runs a data cell instead of
-// anchoring its children. G3: a choice element with no type filter takes no
-// kind from the instance. G4: the required-child check counts a structural
-// anchor as a missing value.
 #[tokio::test]
-#[ignore = "the engine refuses the published chain; see the TODO above"]
 async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
 -> Result<(), Box<dyn StdError>> {
     if !containers::e2e_enabled() {
@@ -318,8 +311,15 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
         .nth(2)
         .ok_or("the snapshot carries a body")?;
     let engine: serde_json::Value = serde_json::from_str(body)?;
+    // NOTE: engine/defaults-for-fields.adoc, the composer is defaulted "with a value such
+    // as `FHIRconnect`": the engine's law runs on that default, the facade on its own.
+    let defaulted = serde_json::json!("recorder.display = \"FHIRconnect\"");
+    let configured = serde_json::json!(format!(
+        "recorder.display = \"{}\"",
+        ferrobridge_server::facade::engine::COMPOSER
+    ));
     for list in ["lost", "added", "changed"] {
-        let expected: Vec<&serde_json::Value> = engine[list]
+        let expected: Vec<serde_json::Value> = engine[list]
             .as_array()
             .ok_or("the snapshot carries the list")?
             .iter()
@@ -327,11 +327,16 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
                 row.as_str()
                     .is_some_and(|row| !row.starts_with("id ") && !row.starts_with("meta."))
             })
+            .map(|row| {
+                if *row == defaulted {
+                    configured.clone()
+                } else {
+                    row.clone()
+                }
+            })
             .collect();
         assert_eq!(
-            set[list]
-                .as_array()
-                .map(|rows| rows.iter().collect::<Vec<_>>()),
+            set[list].as_array().cloned(),
             Some(expected),
             "the facade and the engine disagree on {list}"
         );

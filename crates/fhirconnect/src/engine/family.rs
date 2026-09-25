@@ -8,11 +8,12 @@
 //! model that no Web Template node stands for, so the composition seam reaches
 //! them as the `_`-prefixed families Simplified Formats spells under the node
 //! they belong to: `_feeder_audit` on any `LOCATABLE`, `_link:i` on any
-//! `LOCATABLE` and `_other_participation:i` on an `ENTRY` (openEHR ITS-REST
-//! 1.1.0, Simplified Formats, the RM mapping tables for `LOCATABLE`, `ENTRY`,
-//! `LINK`, `FEEDER_AUDIT` and `PARTICIPATION`). This module writes those keys
-//! as [`NodeValue`]s and reads the same attributes back out of the canonical
-//! JSON of the node.
+//! `LOCATABLE`, `_other_participation:i` on an `ENTRY` and `_participation:i`
+//! under the `context` of a composition (openEHR ITS-REST 1.1.0, Simplified
+//! Formats, `docs/specs/its-rest/docs/simplified_formats/master05-rm_mapping.adoc`,
+//! the sections `EVENT_CONTEXT`, the `ENTRY` classes, `LINK`, `FEEDER_AUDIT`
+//! and `PARTICIPATION`). This module writes those keys as [`NodeValue`]s and
+//! reads the same attributes back out of the canonical JSON of the node.
 
 use openehr_mapping_core::composition::NodeValue;
 use openehr_mapping_core::composition::RmPosition;
@@ -124,8 +125,47 @@ pub struct ParticipationParts<'text> {
     pub id_namespace: &'text str,
 }
 
-/// Returns the `_other_participation:i` family of one `PARTICIPATION` on an
-/// `ENTRY` node.
+/// One list of `PARTICIPATION`s the reference model gives a class, with the
+/// FLAT family it travels as.
+///
+/// `ENTRY.other_participations` and `EVENT_CONTEXT.participations` are the
+/// same `List<PARTICIPATION>`
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/ehr.html#_entry_class>,
+/// <https://specifications.openehr.org/releases/RM/Release-1.1.0/ehr.html#_event_context_class>),
+/// spelled `_other_participation:i` and `_participation:i` (`master05-rm_mapping.adoc`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ParticipationList {
+    /// The owner class the list belongs to, or an ancestor of it.
+    pub owner: &'static str,
+    /// The reference-model attribute that holds the list.
+    pub attribute: &'static str,
+    /// The FLAT family one participation of it is written under.
+    pub family: &'static str,
+}
+
+/// The participations of an `ENTRY`.
+pub const ENTRY_PARTICIPATIONS: ParticipationList = ParticipationList {
+    owner: "ENTRY",
+    attribute: "other_participations",
+    family: "_other_participation",
+};
+
+/// The participations of an `EVENT_CONTEXT`.
+pub const CONTEXT_PARTICIPATIONS: ParticipationList = ParticipationList {
+    owner: "EVENT_CONTEXT",
+    attribute: "participations",
+    family: "_participation",
+};
+
+/// Returns the participation list `tail` names below a node of `class`.
+#[must_use]
+pub fn participation_list(class: &str, tail: &[&str]) -> Option<ParticipationList> {
+    [ENTRY_PARTICIPATIONS, CONTEXT_PARTICIPATIONS]
+        .into_iter()
+        .find(|list| tail == [list.attribute] && openehr_rm::v1_2::model::is_a(class, list.owner))
+}
+
+/// Returns the family of one `PARTICIPATION` of `list` on `node`.
 ///
 /// The performer is inlined as `|name`, `|id`, `|id_scheme` and
 /// `|id_namespace` on the participation itself (Simplified Formats, the
@@ -133,11 +173,12 @@ pub struct ParticipationParts<'text> {
 #[must_use]
 pub fn participation(
     node: &ResolvedNode,
+    list: ParticipationList,
     positions: &[RmPosition],
     index: usize,
     parts: &ParticipationParts<'_>,
 ) -> Vec<NodeValue> {
-    let family = vec![format!("_other_participation:{index}")];
+    let family = vec![format!("{}:{index}", list.family)];
     let mut data = vec![("function", parts.function)];
     if let Some(name) = parts.name {
         data.push(("name", name));
@@ -194,15 +235,18 @@ pub struct Participation {
     pub name: Option<String>,
 }
 
-/// Returns the participations of an `ENTRY` whose function is `function`.
+/// Returns the participations of `list` whose function is `function`.
 ///
-/// `value` is the canonical JSON of the entry, whose `other_participations`
-/// is the `ENTRY` attribute
+/// `value` is the canonical JSON of the node that holds the list
 /// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html#_participation_class>).
 #[must_use]
-pub fn participations(value: &serde_json::Value, function: &str) -> Vec<Participation> {
+pub fn participations(
+    value: &serde_json::Value,
+    list: ParticipationList,
+    function: &str,
+) -> Vec<Participation> {
     value
-        .get("other_participations")
+        .get(list.attribute)
         .and_then(serde_json::Value::as_array)
         .map(|found| {
             found

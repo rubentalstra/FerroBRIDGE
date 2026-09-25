@@ -74,28 +74,36 @@ mappings:
 
   # The published method writes "$archetype/diagnose/other_participations" and
   # EVALUATION has no "diagnose" attribute; ENTRY.other_participations is the
-  # RM attribute it means (openEHR RM 1.1.0, ENTRY). Recorded on #101.
+  # RM attribute it means (openEHR RM 1.1.0, ENTRY). Its manual `function` and
+  # its untyped performer write tails no FLAT part carries, so the method is
+  # written in the participationsFunction form concept-mappings.adoc gives for
+  # it. Recorded on #101.
   - name: "other_participations"
     extension: "overwrite"
     with:
       fhir: "$resource.asserter"
       openehr: "$archetype/other_participations"
+    participationsFunction: "asserter"
+
+  # The published method maps the asserter into EVENT_CONTEXT.participations
+  # through the same manual `function` and untyped performer; this extension
+  # writes the context participation in the participationsFunction form.
+  - name: "participations"
+    extension: "overwrite"
+    with:
+      fhir: "$resource.asserter"
+      openehr: "$composition/context/participations"
+    participationsFunction: "asserter"
+
+  # The published method maps bodySite onto `$archetype/data[at0012]`, which
+  # the synthetic template carries as no node, so the tail is `data` below the
+  # EVALUATION and no FLAT part carries it; bodySiteCluster maps the body site.
+  - name: "bodySite"
+    extension: "overwrite"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype"
       type: "NONE"
-    followedBy:
-      mappings:
-        - name: "participationFunction"
-          with:
-            fhir: "$fhirRoot"
-            openehr: "$openehrRoot"
-          manual:
-            - name: "function"
-              openehr:
-                - path: "function"
-                  value: "asserter"
-        - name: "performer"
-          with:
-            fhir: "$fhirRoot"
-            openehr: "$openehrRoot"
 
   - name: "bodySiteCluster"
     extension: "overwrite"

@@ -14,6 +14,7 @@ use core::error::Error;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
+use core::str::FromStr;
 use fhir_types::codec::Value;
 use fhir_types::r4::schema::SCHEMAS;
 use fhirconnect::engine::condition::Verdict;
@@ -35,11 +36,18 @@ use fhirconnect::engine::traverse::SplitRefusal;
 use fhirconnect::engine::traverse::to_fhir;
 use fhirconnect::engine::traverse::to_openehr;
 use fhirconnect::model::ast::Direction;
+
 use fhirconnect::resolve::program::Attachment;
 use fhirconnect::resolve::program::Condition;
+use fhirconnect::resolve::program::Derived;
+use fhirconnect::resolve::program::FhirTarget;
+use fhirconnect::resolve::program::Manual;
+use fhirconnect::resolve::program::ManualPath;
+use fhirconnect::resolve::program::ManualValue;
 use fhirconnect::resolve::program::Mapping;
 use fhirconnect::resolve::program::MappingParts;
 use fhirconnect::resolve::program::Method;
+use fhirconnect::resolve::program::OpenehrTarget;
 use fhirconnect::resolve::program::Pin;
 use fhirconnect::resolve::program::Preprocessor;
 use fhirconnect::resolve::program::ProfileBinding;
@@ -47,14 +55,17 @@ use fhirconnect::resolve::program::ProfileUrl;
 use fhirconnect::resolve::program::Program;
 use fhirconnect::resolve::program::ProgramParts;
 use fhirconnect::resolve::program::ResourceType;
+use fhirconnect::resolve::program::Target;
 use fhirconnect::resolve::program::TemplateBinding;
 use fhirconnect::resolve::program::TemplateId;
+use fhirconnect::tree::path::FhirPath;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::composition::NodeValue;
 use openehr_mapping_core::header::MappingName;
 use openehr_mapping_core::index::AqlPath;
 use openehr_mapping_core::index::WebTemplateIndex;
 use openehr_mapping_core::template::Generation;
+use openehr_rm::v1_2::paths::RmPath;
 
 use crate::support::compiled;
 use crate::support::template;
@@ -816,6 +827,7 @@ fn slot_parts(model: &MappingName, mappings: Vec<Mapping>) -> MappingParts {
         fhir: None,
         openehr: None,
         data_type: None,
+        derived: None,
         value: None,
         direction: None,
         fhir_condition: None,
@@ -1134,9 +1146,7 @@ fn the_tails_leaf_class_selects_the_cell() -> Result<(), Box<dyn Error>> {
     let phrase =
         mapping(&program, "certainty.certaintyPhrase").ok_or("the phrase mapping compiled")?;
     assert_eq!(
-        phrase
-            .openehr()
-            .and_then(fhirconnect::resolve::program::OpenehrTarget::leaf_class),
+        phrase.openehr().and_then(OpenehrTarget::leaf_class),
         Some("CODE_PHRASE"),
         "the resolver records the tail's class"
     );
@@ -1183,12 +1193,72 @@ fn the_tails_leaf_class_selects_the_cell() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+/// Returns a copy of `target` naming `tail` below its node.
+///
+/// The compiler refuses a tail no FLAT part carries at load
+/// (`fc-uncarried-tail`), so the engine's own refusal is reached only through
+/// a program the compiler never saw, which this builds.
+fn with_tail(target: &OpenehrTarget, tail: &str) -> Result<OpenehrTarget, Box<dyn Error>> {
+    let path: RmPath = format!("{}/value/{tail}", target.path()).parse()?;
+    Ok(OpenehrTarget::new(
+        path,
+        target.node().clone(),
+        tail.parse()?,
+        target.occurrences().to_vec(),
+    ))
+}
+
+/// Returns the parts of a plain value mapping of the tail carrier.
+fn value_parts(
+    name: &str,
+    fhir: FhirTarget,
+    openehr: OpenehrTarget,
+) -> Result<MappingParts, Box<dyn Error>> {
+    Ok(MappingParts {
+        method: Method::Value,
+        name: String::from(name),
+        fhir: Some(fhir),
+        openehr: Some(openehr),
+        ..slot_parts(&MappingName::new("ferrobridge_tail")?, Vec::new())
+    })
+}
+
+/// Resolves `expression` against the R4 `Condition`.
+fn condition_target(expression: &str) -> Result<FhirTarget, Box<dyn Error>> {
+    let path = FhirPath::from_str(expression)?;
+    let resolved = fhirconnect::tree::element::resolve(&SCHEMAS, "Condition", &path)?;
+    Ok(FhirTarget::new(path, resolved))
+}
+
+/// Returns the tail carrier's program with `certainty` in place of its own
+/// certainty mapping, as a program the compiler never saw.
+fn uncompiled(certainty: Mapping) -> Result<Arc<Program>, Box<dyn Error>> {
+    let carrier = compiled("ferrobridge_tail")?;
+    let problem = mapping(&carrier, "problemName").ok_or("the problem mapping")?;
+    cyclic_program(
+        &MappingName::new("ferrobridge_tail")?,
+        vec![problem.clone(), certainty],
+    )
+}
+
 #[test]
 fn a_tail_no_flat_part_carries_is_refused_in_both_directions() -> Result<(), Box<dyn Error>> {
     // DV_TEXT.hyperlink is an attribute of the reference model, and the
     // Simplified Formats DV_TEXT table writes no part for it, so a write
-    // through it would be lost on the way to the wire.
-    let program = compiled("ferrobridge_tail_unsupported")?;
+    // through it would be lost on the way to the wire. The compiler refuses
+    // it at load; this is the engine's backstop.
+    let carrier = compiled("ferrobridge_tail")?;
+    let node = mapping(&carrier, "certainty")
+        .and_then(Mapping::openehr)
+        .ok_or("the certainty node")?;
+    let program = uncompiled(Mapping::new(MappingParts {
+        derived: Some(Derived::Element("string")),
+        ..value_parts(
+            "certaintyLink",
+            condition_target("$resource.verificationStatus.text")?,
+            with_tail(node, "hyperlink/value")?.with_leaf_class("String"),
+        )?
+    }))?;
     let index = template()?;
     let error = to_openehr(
         &program,
@@ -1620,6 +1690,63 @@ fn a_link_to_what_no_ehr_uri_names_refuses() -> Result<(), Box<dyn Error>> {
     assert!(
         matches!(error, EngineError::LinkTarget { ref target, .. } if target == "Encounter/synthetic-encounter-1"),
         "the refusal names the target: {error}"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_participation_on_the_event_context_is_written_and_read_back() -> Result<(), Box<dyn Error>> {
+    // RM 1.1.0 ehr.html §EVENT_CONTEXT: `participations` is the same
+    // List<PARTICIPATION> as ENTRY.other_participations, and Simplified
+    // Formats writes it as `context/_participation:i` (master05 §EVENT_CONTEXT).
+    let program = compiled("ferrobridge_context_participation")?;
+    let index = template()?;
+    let asserter = serde_json::json!({
+        "reference": "Practitioner/synthetic-practitioner-2",
+        "display": "Synthetic Practitioner Two"
+    });
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &condition_with(serde_json::json!({"asserter": asserter}))?,
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let flat = index.flatten(inbound.value())?;
+    assert!(
+        flat.iter().any(
+            |(key, value)| key.ends_with("context/_participation:0|function")
+                && *value == serde_json::json!("asserter")
+        ),
+        "the context carries the participation: {flat:?}"
+    );
+    let context = index.node(&AqlPath::new("/context"))?;
+    let written = index
+        .read(inbound.value(), context, &[])?
+        .ok_or("the context was written")?;
+    assert_eq!(
+        written
+            .pointer("/participations/0/performer/name")
+            .and_then(serde_json::Value::as_str),
+        Some("Synthetic Practitioner Two")
+    );
+    let outbound = to_fhir(
+        &program,
+        &SCHEMAS,
+        &index,
+        inbound.value(),
+        &Seams::default(),
+        &CallContext::new(),
+    )?;
+    assert_eq!(
+        outbound
+            .value()
+            .get("asserter")
+            .map(|found| found.to_serde_json(&mut fhir_types::codec::Path::root("Reference")))
+            .transpose()?,
+        Some(asserter),
     );
     Ok(())
 }
@@ -2070,8 +2197,28 @@ fn the_contexts_openehr_condition_gates_a_run_out_of_openehr() -> Result<(), Box
 #[test]
 fn a_manual_path_no_flat_part_carries_is_refused() -> Result<(), Box<dyn Error>> {
     // DV_TEXT.hyperlink is an RM attribute the Simplified Formats DV_TEXT table
-    // writes no part for, so a manual write through it would be lost.
-    let program = compiled("ferrobridge_manual_unsupported")?;
+    // writes no part for, so a manual write through it would be lost. The
+    // compiler refuses it at load; this is the engine's backstop.
+    let carrier = compiled("ferrobridge_tail")?;
+    let node = mapping(&carrier, "certainty")
+        .and_then(Mapping::openehr)
+        .ok_or("the certainty node")?;
+    let linked = Manual::new(
+        String::from("linked"),
+        Vec::new(),
+        vec![ManualPath::new(
+            Target::Openehr(Box::new(with_tail(node, "hyperlink/value")?)),
+            ManualValue::Literal(String::from("http://example.org/ferrobridge/certainty")),
+        )],
+        None,
+        None,
+        None,
+        None,
+    );
+    let program = uncompiled(Mapping::new(MappingParts {
+        manual: vec![linked],
+        ..value_parts("certainty", condition_target("$resource")?, node.clone())?
+    }))?;
     let index = template()?;
     let error = to_openehr(
         &program,

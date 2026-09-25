@@ -26,6 +26,7 @@ use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
 use openehr_rm::v1_2::data_types::text::dv_text::DvText;
 use openehr_rm::v1_2::data_types::text::dv_text::DvTextData;
 use openehr_rm::v1_2::data_types::text::term_mapping::TermMapping;
+use openehr_rm::v1_2::model;
 use serde_json::Value;
 
 /// One openEHR value a data-type cell produced or consumed.
@@ -270,6 +271,11 @@ pub enum Carried {
     Boolean,
     /// A data value of the tail's leaf class, read and written by its cell.
     Value,
+    /// A data value of the tail's leaf class that is an attribute of a
+    /// structural node, which FLAT writes as the `_`-prefixed family of the
+    /// node (`_provider` on an `ENTRY`) and the engine writes as the value's
+    /// parts under that family.
+    Family,
 }
 
 /// The attribute tails each class's FLAT parts carry, with what they hold.
@@ -339,7 +345,30 @@ pub fn carried(rm_type: &str, tail: &[&str]) -> Option<(&'static str, Carried)> 
             .find(|&&(owner, path, _)| owner == class && path == wanted)
             .map(|&(owner, _, held)| (owner, held))
     };
-    lookup(rm_type).or_else(|| subtype.and_then(lookup))
+    lookup(rm_type)
+        .or_else(|| subtype.and_then(lookup))
+        .or_else(|| {
+            FAMILIES
+                .iter()
+                .find(|&&(owner, path)| path == wanted && model::is_a(rm_type, owner))
+                .map(|&(owner, _)| (owner, Carried::Family))
+        })
+}
+
+/// The attributes of a structural class FLAT writes as a `_`-prefixed family
+/// of the class's node.
+///
+/// `ENTRY.provider` is a `PARTY_PROXY`
+/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/ehr.html#_entry_class>),
+/// and Simplified Formats spells it `_provider` under the entry's node
+/// (`docs/specs/its-rest/docs/simplified_formats/master05-rm_mapping.adoc`,
+/// §OBSERVATION), the shape `family` spells `_other_participation` in.
+const FAMILIES: &[(&str, &str)] = &[("ENTRY", "provider")];
+
+/// Returns the FLAT family a tail of [`Carried::Family`] is written under.
+#[must_use]
+pub fn family_of(tail: &[&str]) -> Vec<String> {
+    tail.iter().map(|segment| format!("_{segment}")).collect()
 }
 
 /// The parts of a `DV_TEXT` (Simplified Formats, §`DV_TEXT`).

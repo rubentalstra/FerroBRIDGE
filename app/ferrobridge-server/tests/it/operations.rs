@@ -624,9 +624,13 @@ fn mapped_condition(answer: &serde_json::Value) -> Result<&serde_json::Value, Bo
 
 /// Runs `$toopenehr` then `$tofhir` over `condition` and returns what the
 /// second leg mapped back.
+///
+/// `patient` is the `context.patient` reference the second leg carries, for
+/// a program that maps no subject of its own.
 async fn both_legs(
     root: &tempfile::TempDir,
     condition: &serde_json::Value,
+    patient: Option<serde_json::Value>,
 ) -> Result<serde_json::Value, Box<dyn StdError>> {
     let carried = serde_json::json!({
         "resourceType": "Bundle",
@@ -655,9 +659,19 @@ async fn both_legs(
             }),
         );
     }
+    let mut parameters = vec![serde_json::json!({
+        "name": "composition",
+        "valueString": built.to_string(),
+    })];
+    if let Some(reference) = patient {
+        parameters.push(serde_json::json!({
+            "name": "context",
+            "part": [{ "name": "patient", "valueReference": reference }],
+        }));
+    }
     let request = serde_json::json!({
         "resourceType": "Parameters",
-        "parameter": [{ "name": "composition", "valueString": built.to_string() }],
+        "parameter": parameters,
     });
     let (status, _, body) = call(
         app(root)?,
@@ -682,7 +696,7 @@ async fn the_two_operations_round_trip_a_condition_modulo_what_the_program_maps(
     let root = mapping_tree()?;
     let input =
         serde_json::from_str::<serde_json::Value>(&bundle()?)?["entry"][0]["resource"].clone();
-    let output = both_legs(&root, &input).await?;
+    let output = both_legs(&root, &input, None).await?;
     let set = ferrobridge_testkit::laws::declared(&[], &[], &input, &output);
     assert_eq!(
         set["lost"],
@@ -717,14 +731,13 @@ async fn the_two_operations_round_trip_a_condition_modulo_what_the_program_maps(
     Ok(())
 }
 
-// TODO(#86): run once the engine closes four gaps. G1: an untyped mapping onto
-// a primitive dateTime takes the string kind, so no DV_DATE_TIME cell reads it.
-// G2: an untyped mapping onto a structural node runs a data cell instead of
-// anchoring its children. G3: a choice element with no type filter takes no
-// kind from the instance. G4: the required-child check counts a structural
-// anchor as a missing value.
+/// The KDS program maps no subject, and `Condition.subject` is `1..1`
+/// (<https://hl7.org/fhir/R4/condition.html>), so the second leg carries the
+/// input's subject as `context.patient`, which "takes precedence"
+/// (`engine/rest-api.adoc` §Resolving the patient). The wire's declared set
+/// is then the engine's with exactly two rows moved: the subject is not lost,
+/// and the id is the one `$tofhir` derives from the composition's version.
 #[tokio::test]
-#[ignore = "the engine refuses the published chain; see the TODO above"]
 async fn the_two_operations_round_trip_the_kds_condition_as_the_engine_does()
 -> Result<(), Box<dyn StdError>> {
     let root = tempfile::tempdir()?;
@@ -736,7 +749,8 @@ async fn the_two_operations_round_trip_the_kds_condition_as_the_engine_does()
     )?;
     let input: serde_json::Value =
         serde_json::from_str(ferrobridge_testkit::fixtures::KDS_DIAGNOSE_CONDITION)?;
-    let output = both_legs(&root, &input).await?;
+    let patient = serde_json::json!({ "identifier": input["subject"]["identifier"].clone() });
+    let output = both_legs(&root, &input, Some(patient)).await?;
     let set = ferrobridge_testkit::laws::declared(&[], &[], &input, &output);
     let pinned = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
@@ -747,11 +761,82 @@ async fn the_two_operations_round_trip_the_kds_condition_as_the_engine_does()
         .nth(2)
         .ok_or("the snapshot carries a body")?;
     let engine: serde_json::Value = serde_json::from_str(body)?;
-    for list in ["lost", "added", "changed"] {
-        assert_eq!(
-            set[list], engine[list],
-            "the wire and the engine disagree on {list}"
-        );
-    }
+    let id = format!("id = {}", input["id"]);
+    let moved = |row: &&serde_json::Value| {
+        row.as_str()
+            .is_some_and(|row| row == id || row.starts_with("subject.identifier."))
+    };
+    let engine_lost: Vec<&serde_json::Value> = engine["lost"]
+        .as_array()
+        .ok_or("the engine's lost list")?
+        .iter()
+        .filter(|row| !moved(row))
+        .collect();
+    assert_eq!(
+        engine["lost"].as_array().map(Vec::len),
+        Some(engine_lost.len().saturating_add(3)),
+        "the engine lost the id and the two subject identifier rows: {engine}"
+    );
+    assert_eq!(set["lost"], serde_json::json!(engine_lost), "{set}");
+    assert_eq!(set["added"], engine["added"], "{set}");
+    assert_eq!(engine["changed"], serde_json::json!([]), "{engine}");
+    assert_eq!(
+        set["changed"],
+        serde_json::json!([format!(
+            "id: {} became \"d2b3c1a0-0000-4000-8000-000000000001\"",
+            input["id"]
+        )]),
+        "{set}"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_compiler_warning_reaches_the_log_once_as_the_lane_loads() -> Result<(), Box<dyn StdError>> {
+    // The KDS project context lists an extension of a model no mapping of it
+    // reaches, which the compiler accepts with `fc-unreached-extension`.
+    let root = tempfile::tempdir()?;
+    crate::kds::write_mappings(&root.path().join("mappings"))?;
+    std::fs::create_dir_all(root.path().join("templates"))?;
+    std::fs::write(
+        root.path().join("templates").join("KDS_Diagnose.opt"),
+        ferrobridge_testkit::fixtures::KDS_DIAGNOSE_OPT,
+    )?;
+    let settings = MappingSettings {
+        directory: root.path().join("mappings"),
+        templates: root.path().join("templates"),
+    };
+    let logs = support::Logs::default();
+    let capture = ferrobridge_server::telemetry::subscriber(
+        ferrobridge_server::telemetry::Rendering::Json,
+        "warn",
+        false,
+        logs.clone(),
+    );
+    let loaded = tracing::subscriber::with_default(capture, || mappings::load(&settings));
+    loaded?;
+    let text = logs.text();
+    let lines: Vec<&str> = text
+        .lines()
+        .filter(|line| line.contains("fc-unreached-extension"))
+        .collect();
+    assert_eq!(lines.len(), 1, "one line per warning: {text}");
+    let line: serde_json::Value = serde_json::from_str(lines.first().ok_or("one line")?)?;
+    assert_eq!(Some("WARN"), line["level"].as_str(), "{line}");
+    assert_eq!(
+        Some("ferrobridge_kds_diagnose.context"),
+        line["context"].as_str(),
+        "{line}"
+    );
+    assert!(
+        line["file"]
+            .as_str()
+            .is_some_and(|file| file.ends_with("ferrobridge_kds_diagnose.context.yml")),
+        "{line}"
+    );
+    assert!(
+        !text.contains("COMPOSITION.report.v1.Condition"),
+        "the record names the file and the code, never what the mapping says: {text}"
+    );
     Ok(())
 }

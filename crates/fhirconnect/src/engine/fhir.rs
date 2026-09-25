@@ -69,6 +69,28 @@ impl FhirKind {
         }
     }
 
+    /// Returns the kind a FHIR type code names, `None` for a type no cell
+    /// carries.
+    ///
+    /// The codes are the `ElementDefinition.type.code` values of the element
+    /// table (<https://hl7.org/fhir/R4/elementdefinition.html>), as
+    /// [`crate::resolve::derive`] derives them for a mapping with no `type`
+    /// key.
+    #[must_use]
+    pub fn of_code(code: &str) -> Option<Self> {
+        match code {
+            "string" => Some(Self::String),
+            "dateTime" => Some(Self::DateTime),
+            "Coding" => Some(Self::Coding),
+            "CodeableConcept" => Some(Self::CodeableConcept),
+            "Period" => Some(Self::Period),
+            "Reference" => Some(Self::Reference),
+            "Identifier" => Some(Self::Identifier),
+            "Quantity" => Some(Self::Quantity),
+            _ => None,
+        }
+    }
+
     /// Returns the kind the element table resolved a path to.
     ///
     /// A primitive element travels as text unless the mapping's `type` key
@@ -303,6 +325,22 @@ mod tests {
                 .expect("a dateTime has a JSON form"),
             document,
             "the fractional seconds and the offset survive"
+        );
+    }
+
+    #[test]
+    fn every_pair_the_resolver_derives_names_a_kind_the_cells_carry() {
+        for &(class, codes) in crate::resolve::derive::PAIRS {
+            for code in codes {
+                assert!(
+                    FhirKind::of_code(code).is_some(),
+                    "{class} pairs with {code}, which no kind carries"
+                );
+            }
+        }
+        assert_eq!(
+            FhirKind::of_code(crate::resolve::derive::TEXT),
+            Some(FhirKind::String)
         );
     }
 

@@ -41,7 +41,7 @@ verbatim with a `PROVENANCE.md` per tree (`vendored-inputs.md`):
 - `docs/specs/omocl/`: the OMOCL corpus.
 - `docs/specs/omop-cdm/`: the CDM v5.4 field and table definitions and the
   PostgreSQL DDL.
-- `docs/specs/its-rest/`: the three `STABLE` ITS-REST 1.1.0 OpenAPI documents.
+- `docs/specs/its-rest/`: the three `STABLE` ITS-REST 1.1.0 OpenAPI documents, and the Simplified Formats and Simplified Data Template sub-specifications (the FLAT families).
 - `tools/fhir-codegen/vendor/`: the HL7 FHIR packages the generator reads.
 
 Read the vendored text for a citation and name the file and section; the

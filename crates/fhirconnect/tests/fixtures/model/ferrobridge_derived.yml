@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose mappings carry no `type` key, so
+# the compiler derives each data-type pair from the two sides: a primitive
+# dateTime, a structural anchor with a child, a choice element no filter
+# resolves, an Extension against a data value, and ENTRY.provider, against
+# the synthetic ferrobridge.diagnose.v1 template.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_derived
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "recorded"
+    with:
+      fhir: "$resource.recordedDate"
+      openehr: "$composition/context/start_time"
+
+  - name: "entry"
+    with:
+      fhir: "$resource"
+      openehr: "$archetype"
+    followedBy:
+      mappings:
+        - name: "problemName"
+          with:
+            fhir: "code"
+            openehr: "data[at0001]/items[at0002]"
+
+  - name: "onset"
+    with:
+      fhir: "$resource.onset"
+      openehr: "$archetype/data[at0001]/items[at0077]"
+
+  - name: "certainty"
+    with:
+      fhir: "$resource.extension"
+      openehr: "$archetype/data[at0001]/items[at0073]"
+    fhirCondition:
+      targetRoot: "$resource.extension"
+      targetAttribute: "url"
+      operator: "one of"
+      criteria: "http://example.org/fhir/StructureDefinition/ferrobridge-certainty"
+    followedBy:
+      mappings:
+        - name: "url"
+          with:
+            fhir: "$fhirRoot"
+          manual:
+            - name: "url"
+              fhir:
+                - path: "url"
+                  value: "http://example.org/fhir/StructureDefinition/ferrobridge-certainty"
+
+  - name: "provider"
+    with:
+      fhir: "$resource.recorder"
+      openehr: "$archetype/provider"

@@ -212,6 +212,31 @@ impl Resolved {
         &self.location
     }
 
+    /// Returns the FHIR type code of the element the walk ends on.
+    ///
+    /// A complex element names its type, and a primitive the one code its
+    /// definition lists (<https://hl7.org/fhir/R4/elementdefinition.html>,
+    /// `ElementDefinition.type.code`). `None` for a choice no filter
+    /// resolved, a resource, a deferred reference and the sibling object of a
+    /// primitive, none of which has one type.
+    #[must_use]
+    pub fn type_code(&self) -> Option<&'static str> {
+        match self.location {
+            Location::Complex(schema) => Some(schema.name),
+            Location::Primitive(_) | Location::Attribute => match self.moves.last() {
+                Some(Move::Member(field) | Move::Extension { field, .. }) => match field.types {
+                    [code] => Some(*code),
+                    _ => None,
+                },
+                _ => None,
+            },
+            Location::PrimitiveElement
+            | Location::Choice(_)
+            | Location::Resource
+            | Location::Deferred => None,
+        }
+    }
+
     /// Returns the element path the walk ends on, the resource type when the
     /// path has no element step.
     #[must_use]
@@ -467,13 +492,21 @@ impl<T: Table + ?Sized> Walk<'_, T> {
                     .collect::<Vec<_>>()
                     .join(", "),
             })?;
+        // NOTE: a chosen alternative has the one type its suffix names
+        // (<https://hl7.org/fhir/R4/formats.html#choice>), so the field keeps that code alone.
+        let types = field
+            .types
+            .iter()
+            .position(|code| code.eq_ignore_ascii_case(suffix))
+            .and_then(|at| field.types.get(at))
+            .map_or(field.types, core::slice::from_ref);
         let chosen = Field {
             path: field.path.clone(),
             key: format!("{}{suffix}", field.key),
             kind: *kind,
             min: field.min,
             max: field.max,
-            types: field.types,
+            types,
         };
         self.location = self.landing(*kind)?;
         let last = self.moves.len().saturating_sub(1);

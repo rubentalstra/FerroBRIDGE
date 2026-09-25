@@ -6,14 +6,14 @@
 //! A mapping directory is read once at boot: every FHIRconnect file is loaded
 //! and validated, the operational template each context names is fetched from
 //! the CDR, and the context is compiled against it into an immutable program
-//! (`docs/architecture.md` §4.3). A mapping that does not compile is a boot
-//! refusal, never a failure on the request that first touches it.
+//! (no specification governs this: our own design). A mapping that does not
+//! compile is a boot refusal, never a failure on the request that first
+//! touches it.
 //!
 //! Selection is by the set of `meta.profile`. The engine chapter keys on
 //! `meta.url`, which R4 does not define; the element is `meta.profile`, a list
 //! (<https://hl7.org/fhir/R4/resource.html#Meta>), so matching is set
-//! membership and every declared profile is considered
-//! (`docs/architecture.md` §4.6).
+//! membership and every declared profile is considered.
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -167,8 +167,8 @@ impl Programs {
     /// Returns the resource types at least one program maps, in order.
     ///
     /// The `CapabilityStatement` names exactly these, and a type outside the
-    /// set answers `404` with `not-supported` on the wire
-    /// (`docs/architecture.md` §4.6).
+    /// set answers `404` with `not-supported` on the wire (no specification
+    /// governs this: our own design).
     #[must_use]
     pub fn resource_types(&self) -> BTreeSet<String> {
         self.loaded
@@ -294,8 +294,8 @@ pub fn read_set(directory: &Path) -> Result<MappingSet, LoadError> {
 /// Compiles every context of `set` against the templates in `indexes`.
 ///
 /// `indexes` is keyed by template identifier; a context whose template is
-/// absent is a refusal, because "a mapping cannot name a template the CDR has
-/// not loaded" (`docs/architecture.md` §12).
+/// absent is a refusal, because a mapping cannot name a template the CDR has
+/// not loaded (no specification governs this: our own design).
 ///
 /// # Errors
 ///
@@ -324,6 +324,7 @@ pub fn compile_set(
             &StaticMappingCodes::default(),
         )
         .map_err(|diagnostics| mappings_error(&diagnostics))?;
+        crate::mappings::log_warnings(&program);
         loaded.push(Loaded {
             program,
             index: Arc::clone(index),

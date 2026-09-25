@@ -8,8 +8,9 @@
 # Changed: the metadata name and version are FerroBRIDGE's; the profile, the
 # template, the archetype list and the start are the published file's. The extension
 # list names FerroBRIDGE's stand-ins for KDS_problem_diagnose and
-# KDS_composition.Condition, which do not load, and the published
-# KDS_problem_qualifier and KDS_lebensphase verbatim. KDS_anatomical_location
+# KDS_composition.Condition, which do not load, for KDS_problem_qualifier,
+# whose manual paths write a string onto TERMINOLOGY_ID, and the published
+# KDS_lebensphase verbatim. KDS_anatomical_location
 # loads but is not listed: the one branch that reaches it slots a cluster that
 # does not compile (#173). The round-trip test records each refusal by line.
 grammar: FHIRConnect/v1.0.0
@@ -36,7 +37,8 @@ context:
     - "COMPOSITION.report.v1.Condition"
   extensions:
     - "ferrobridge_kds_problem_diagnose"
-    - "KDS_problem_qualifier"
+    - "ferrobridge_kds_problem_qualifier"
+
     - "KDS_lebensphase"
     - "ferrobridge_kds_composition.Condition"
   start: "EVALUATION.problem_diagnosis.v1"

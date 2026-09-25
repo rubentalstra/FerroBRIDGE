@@ -1,0 +1,33 @@
+---
+source: crates/fhirconnect/tests/it/roundtrip.rs
+expression: declared
+---
+{
+  "first_leg": [
+    "DV_CODED_TEXT against CodeableConcept filled DV_TEXT.value by a rule that runs one way",
+    "DV_CODED_TEXT against CodeableConcept filled DV_TEXT.value by a rule that runs one way",
+    "DV_CODED_TEXT against CodeableConcept filled DV_TEXT.value by a rule that runs one way",
+    "the mapping metaURL did not run: its unidirectional marker names the other direction",
+    "DV_CODED_TEXT against CodeableConcept filled DV_TEXT.value by a rule that runs one way",
+    "the engine filled /composer",
+    "the engine filled /context/setting",
+    "the engine filled /language",
+    "the engine filled /territory"
+  ],
+  "second_leg": [
+    "the mapping problemDiagnose.coding.codeIcd10Diagnosesicherheit.extensionValueText did not run: its unidirectional marker names the other direction"
+  ],
+  "lost": [
+    "id = \"ferrobridge-kds-condition-1\"",
+    "subject.identifier.system = \"http://example.org/fhir/sid/ferrobridge-subject\"",
+    "subject.identifier.value = \"synthetic-subject-0001\""
+  ],
+  "added": [
+    "bodySite[0].text = \"Synthetic body site\"",
+    "clinicalStatus.text = \"Active\"",
+    "code.text = \"Synthetic diagnosis for the FerroBRIDGE round trip\"",
+    "onsetPeriod._start.extension[0].valueCodeableConcept.text = \"Synthetic life phase\"",
+    "recorder.display = \"FHIRconnect\""
+  ],
+  "changed": []
+}

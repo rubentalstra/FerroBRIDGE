@@ -1745,3 +1745,43 @@ async fn every_answer_carries_the_fhir_media_type() -> Result<(), Box<dyn StdErr
     }
     Ok(())
 }
+
+#[test]
+fn a_compiler_warning_reaches_the_log_once_as_the_facade_loads() -> Result<(), Box<dyn StdError>> {
+    // The KDS project context lists an extension of a model no mapping of it
+    // reaches, which the compiler accepts with `fc-unreached-extension`.
+    let directory = tempfile::tempdir()?;
+    crate::kds::write_mappings(directory.path())?;
+    let set = programs::read_set(directory.path())?;
+    let opt = openehr_its::opt14::from_xml(ferrobridge_testkit::fixtures::KDS_DIAGNOSE_OPT)?;
+    let index = openehr_mapping_core::index::WebTemplateIndex::build(
+        &openehr_mapping_core::template::TemplateSource::Opt14(Box::new(opt)),
+    )?;
+    let templates = std::collections::BTreeMap::from([(
+        String::from(ferrobridge_testkit::fixtures::KDS_DIAGNOSE_TEMPLATE_ID),
+        Arc::new(index),
+    )]);
+    let logs = support::Logs::default();
+    let capture = ferrobridge_server::telemetry::subscriber(
+        ferrobridge_server::telemetry::Rendering::Json,
+        "warn",
+        false,
+        logs.clone(),
+    );
+    let compiled =
+        tracing::subscriber::with_default(capture, || programs::compile_set(&set, &templates));
+    compiled?;
+    let text = logs.text();
+    let lines: Vec<&str> = text
+        .lines()
+        .filter(|line| line.contains("fc-unreached-extension"))
+        .collect();
+    assert_eq!(lines.len(), 1, "one line per warning: {text}");
+    let line: serde_json::Value = serde_json::from_str(lines.first().ok_or("one line")?)?;
+    assert_eq!(
+        Some("ferrobridge_kds_diagnose.context"),
+        line["context"].as_str(),
+        "{line}"
+    );
+    Ok(())
+}

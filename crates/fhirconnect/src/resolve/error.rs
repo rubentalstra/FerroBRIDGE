@@ -56,6 +56,15 @@ pub enum ResolveCode {
     UnknownFhirElement,
     /// A mapping that writes FHIR carries a read-only `with.fhir` expression.
     ReadOnlyFhirWrite,
+    /// A mapping with no `type` key names a structural node and carries no
+    /// child, so it writes nothing.
+    AnchorWithoutChildren,
+    /// A mapping with no `type` key writes a choice element that admits no
+    /// data-type pair of the node's class.
+    UnderivedAlternative,
+    /// An openEHR path names a tail below a node that no FLAT part of the
+    /// node's class carries.
+    UncarriedTail,
     /// A `with.openehr` path is outside the openEHR path grammar.
     MalformedOpenehrPath,
     /// A `with.openehr` path names no node of the operational template.
@@ -113,6 +122,9 @@ impl ResolveCode {
             Self::UnanchoredFhirPath => "fc-unanchored-fhir-path",
             Self::UnknownFhirElement => "fc-unknown-fhir-element",
             Self::ReadOnlyFhirWrite => "fc-read-only-fhir-write",
+            Self::AnchorWithoutChildren => "fc-anchor-without-children",
+            Self::UnderivedAlternative => "fc-underived-alternative",
+            Self::UncarriedTail => "fc-uncarried-tail",
             Self::MalformedOpenehrPath => "fc-malformed-openehr-path",
             Self::UnknownTemplateNode => "fc-unknown-template-node",
             Self::AmbiguousTemplateNode => "fc-ambiguous-template-node",
@@ -152,6 +164,9 @@ impl ResolveCode {
             Self::UnanchoredFhirPath,
             Self::UnknownFhirElement,
             Self::ReadOnlyFhirWrite,
+            Self::AnchorWithoutChildren,
+            Self::UnderivedAlternative,
+            Self::UncarriedTail,
             Self::MalformedOpenehrPath,
             Self::UnknownTemplateNode,
             Self::AmbiguousTemplateNode,

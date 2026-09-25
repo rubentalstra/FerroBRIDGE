@@ -62,6 +62,7 @@ const PROJECT_DIR: &str = "projects/ferrobridge/kds_diagnose";
 const PROJECT: &[&str] = &[
     "ferrobridge_kds_diagnose.context.yml",
     "ferrobridge_kds_problem_diagnose.yml",
+    "ferrobridge_kds_problem_qualifier.yml",
     "ferrobridge_lebensphase.v0.yml",
     "ferrobridge_kds_composition.Condition.yml",
 ];
@@ -83,7 +84,7 @@ fn project(file: &str) -> String {
 }
 
 /// Builds the index over the published `KDS_Diagnose` template.
-fn kds_template() -> Result<WebTemplateIndex, Box<dyn Error>> {
+pub(crate) fn kds_template() -> Result<WebTemplateIndex, Box<dyn Error>> {
     let opt = openehr_its::opt14::from_xml(ferrobridge_testkit::fixtures::KDS_DIAGNOSE_OPT)?;
     Ok(WebTemplateIndex::build(&TemplateSource::Opt14(Box::new(
         opt,
@@ -274,6 +275,10 @@ fn the_kds_chain_as_published_is_refused_exactly() -> Result<(), Box<dyn Error>>
             "    - \"KDS_problem_diagnose\"\n",
         )
         .replace(
+            "    - \"ferrobridge_kds_problem_qualifier\"\n",
+            "    - \"KDS_problem_qualifier\"\n",
+        )
+        .replace(
             "    - \"KDS_lebensphase\"\n",
             "    - \"KDS_lebensphase\"\n    - \"KDS_anatomical_location\"\n",
         );
@@ -425,14 +430,7 @@ fn the_kds_flat_fixture_builds_a_composition_the_template_admits() -> Result<(),
     Ok(())
 }
 
-// TODO(#86): run once the engine closes four gaps. G1: an untyped mapping onto
-// a primitive dateTime takes the string kind, so no DV_DATE_TIME cell reads it.
-// G2: an untyped mapping onto a structural node runs a data cell instead of
-// anchoring its children. G3: a choice element with no type filter takes no
-// kind from the instance. G4: the required-child check counts a structural
-// anchor as a missing value.
 #[test]
-#[ignore = "the engine refuses the published chain; see the TODO above"]
 fn putget_holds_on_the_kds_condition() -> Result<(), Box<dyn Error>> {
     let (program, index) = kds_program()?;
     let declared = laws::putget(&program, &index, &kds_condition()?, &laws::untouched)?;
@@ -440,14 +438,7 @@ fn putget_holds_on_the_kds_condition() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// TODO(#86): run once the engine closes four gaps. G1: an untyped mapping onto
-// a primitive dateTime takes the string kind, so no DV_DATE_TIME cell reads it.
-// G2: an untyped mapping onto a structural node runs a data cell instead of
-// anchoring its children. G3: a choice element with no type filter takes no
-// kind from the instance. G4: the required-child check counts a structural
-// anchor as a missing value.
 #[test]
-#[ignore = "the engine refuses the published chain; see the TODO above"]
 fn getput_holds_on_the_kds_composition() -> Result<(), Box<dyn Error>> {
     let (program, index) = kds_program()?;
     let declared = laws::getput(

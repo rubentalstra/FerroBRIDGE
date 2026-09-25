@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping whose asserter becomes an openEHR
+# PARTICIPATION of the composition's EVENT_CONTEXT, the participation shape of
+# types-of-mappings/concept-type/concept-mappings.adoc on the context.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_context_participation
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "participations"
+    with:
+      fhir: "$resource.asserter"
+      openehr: "$composition/context/participations"
+    participationsFunction: "asserter"

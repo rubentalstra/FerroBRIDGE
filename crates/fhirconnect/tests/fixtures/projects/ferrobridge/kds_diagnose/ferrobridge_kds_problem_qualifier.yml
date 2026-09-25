@@ -1,0 +1,211 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: Apache-2.0
+# A modified copy of projects/org.highmed/KDS/diagnose/KDS_problem_qualifier.yml,
+# a derivative of it under its licence, with an overwrite copied from
+# model/cluster/org.openehr/problem_qualifier.v2.yml.
+# Source: SevKohler/FHIRconnect-mapping-lib at commit 6bd4c19a (vendored
+# under docs/specs/fhirconnect-mapping-lib), Apache License 2.0; the source
+# files carry no copyright line to keep.
+# Changed: the metadata name and version are FerroBRIDGE's. Every manual path
+# `defining_code/terminology_id` becomes `defining_code/terminology_id/value`:
+# TERMINOLOGY_ID is an object whose `value` carries the id (openEHR RM 1.1.0,
+# OBJECT_ID), which is the path manual.adoc writes, and no FLAT part carries a
+# string written onto the object itself (#101). The published extension writes
+# it at its lines 30 and 52 and the published model at its lines 28, 55, 82,
+# 109 and 136, so the model's statusCoded is overwritten here with that one
+# change.
+grammar: FHIRConnect/v1.0.0
+type: extension
+metadata:
+  name: ferrobridge_kds_problem_qualifier
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  extends: CLUSTER.problem_qualifier.v2
+
+mappings:
+  - name: "clinicalStatus"
+    extension: "add"
+    with:
+      fhir: "$fhirRoot.clinicalStatus"
+      openehr: "$archetype/items[at0003]"
+
+  - name: "referenzPrimaerdiagnose"
+    extension: "add"
+    with:
+      openehr: "$archetype/items[at0063]"
+    fhirCondition:
+      targetRoot: "$resource"
+      targetAttribute: "extension.url"
+      operator: "not of"
+      criteria: "http://hl7.org/fhir/StructureDefinition/condition-related"
+    manual:
+      - name: "maindiagnose"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0064"
+          - path: "value"
+            value: "Hauptdiagnose"
+
+  - name: "referenzNebendiagnose"
+    extension: "add"
+    with:
+      openehr: "$archetype/items[at0063]"
+    fhirCondition:
+      targetRoot: "$resource"
+      targetAttribute: "extension.url"
+      operator: "one of"
+      criteria: "http://hl7.org/fhir/StructureDefinition/condition-related"
+    manual:
+      - name: "nebendiagnose"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0066"
+          - path: "value"
+            value: "Nebendiagnose"
+
+  - name: "statusCoded"
+    extension: "overwrite"
+    with:
+      fhir: "$resource.verificationStatus.coding"
+      openehr: "$archetype/items[at0004]"
+    fhirCondition:
+      targetRoot: "$resource.verificationStatus"
+      targetAttribute: "coding.code"
+      operator: "not of"
+      criteria: "entered-in-error"
+    manual:
+      - name: "provisional"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0017"
+          - path: "value"
+            value: "Working"
+        fhirCondition:
+          targetRoot: "$fhirRoot"
+          targetAttribute: "code"
+          operator: "one of"
+          criteria: "provisional"
+        fhir:
+          - path: "code"
+            value: "provisional"
+          - path: "display"
+            value: "Provisional"
+          - path: "system"
+            value: "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        openehrCondition:
+          targetRoot: "$archetype"
+          targetAttribute: "items[at0004]/defining_code/code_string"
+          operator: "one of"
+          criteria: "at0017"
+
+      - name: "differential"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0017"
+          - path: "value"
+            value: "Working"
+        fhirCondition:
+          targetRoot: "$fhirRoot"
+          targetAttribute: "code"
+          operator: "one of"
+          criteria: "differential"
+        fhir:
+          - path: "code"
+            value: "differential"
+          - path: "display"
+            value: "Differential"
+          - path: "system"
+            value: "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        openehrCondition:
+          targetRoot: "$archetype"
+          targetAttribute: "items[at0004]/defining_code/code_string"
+          operator: "one of"
+          criteria: "at0017"
+
+      - name: "preliminary"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0016"
+          - path: "value"
+            value: "Preliminary"
+        fhirCondition:
+          targetRoot: "$fhirRoot"
+          targetAttribute: "code"
+          operator: "one of"
+          criteria: "unconfirmed"
+        fhir:
+          - path: "code"
+            value: "unconfirmed"
+          - path: "display"
+            value: "Unconfirmed"
+          - path: "system"
+            value: "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        openehrCondition:
+          targetRoot: "$archetype"
+          targetAttribute: "items[at0004]/defining_code/code_string"
+          operator: "one of"
+          criteria: "at0016"
+
+      - name: "established"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0018"
+          - path: "value"
+            value: "Established"
+        fhirCondition:
+          targetRoot: "$fhirRoot"
+          targetAttribute: "code"
+          operator: "one of"
+          criteria: "confirmed"
+        fhir:
+          - path: "code"
+            value: "confirmed"
+          - path: "display"
+            value: "Confirmed"
+          - path: "system"
+            value: "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        openehrCondition:
+          targetRoot: "$archetype"
+          targetAttribute: "items[at0004]/defining_code/code_string"
+          operator: "one of"
+          criteria: "at0018"
+
+      - name: "refuted"
+        openehr:
+          - path: "defining_code/terminology_id/value"
+            value: "local"
+          - path: "defining_code/code_string"
+            value: "at0088"
+          - path: "value"
+            value: "Refuted"
+        fhirCondition:
+          targetRoot: "$fhirRoot"
+          targetAttribute: "code"
+          operator: "one of"
+          criteria: "refuted"
+        fhir:
+          - path: "code"
+            value: "refuted"
+          - path: "display"
+            value: "Refuted"
+          - path: "system"
+            value: "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        openehrCondition:
+          targetRoot: "$archetype"
+          targetAttribute: "items[at0004]/defining_code/code_string"
+          operator: "one of"
+          criteria: "at0088"
