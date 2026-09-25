@@ -1160,6 +1160,7 @@ published `openehr-*` crates do.
 | `omop-cdm` | CDM v5.4 row types and column metadata generated from the OHDSI field definitions; the OHDSI PostgreSQL DDL vendored verbatim and embedded; `graph`, the record graph the OMOCL engine emits and the writer commits; behind the default `database` feature, the vocabulary loader and concept resolver, the derived-table runners and the `COPY` writer, so a metadata-only consumer (`omocl`) takes the crate with `default-features = false` and builds no database client | generated plus hand-written | yes |
 | `ferrobridge-openehr` | the ITS-REST client over `reqwest`, with the `openehr-its` data types, `backon` retry, typed outcomes per status | hand-written | yes |
 | `ferrobridge-term` | the FHIR terminology client over `fhir-types` | hand-written | yes |
+| `ferrobridge-hl7v2` | the HL7 v2 face (#254): `mllp` (the MLLP Release 1 frame codec on `tokio-util` and the listener), `decode` (MSH-18 through `encoding_rs`, a byte outside the declared set refused), `parse` (positional split, escape decoding, the grouping by the `hl7v2-types` structure tree), `ack` (original-mode `AA`, `AE`, `AR`), `inbound` (one message through those steps), `map` (the interpreter of the `hl7.fhir.uv.v2mappings` ConceptMaps, read from a directory at run time, writing through `fhirconnect::tree` and translating every table value through `ferrobridge-term`; conditions and target notation on `logos` and `chumsky`) | hand-written | yes (0.0.0 reservation) |
 | `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade, the FHIRconnect operations, the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `redb` identity store; the change-feed adapter | hand-written | no |
 | `tools/fhir-codegen` | the FHIR generator moved from the sibling, with its `emit --check` drift gate and its vendored packages | hand-written | no |
 | `tools/omop-cdm-codegen` | the CDM generator with its `emit --check` drift gate | hand-written | no |
@@ -1178,6 +1179,9 @@ flowchart BT
     OM --> OC
     CL["ferrobridge-openehr<br/>(ITS-REST client)"] --> OE
     TC["ferrobridge-term<br/>(terminology client)"] --> FT
+    HL["ferrobridge-hl7v2<br/>(the HL7 v2 face)"] --> HV
+    HL --> FC
+    HL --> TC
     SV["app/ferrobridge-server<br/>(the one binary)"] --> FC
     SV --> OM
     SV --> OC
@@ -1191,7 +1195,7 @@ flowchart BT
 An arrow points at a dependency. The dotted arrows are emission and test
 support, not runtime dependencies.
 
-**Seven published crates, one per concern** (owner decision 2026-09-05, after a
+**One published crate per concern** (owner decision 2026-09-05, after a
 duplication check against both siblings): a finer split into twelve was
 scaffolded and collapsed, because each language is one thing to a consumer
 (the sibling ships each of its languages as one crate with modules), and every
@@ -1251,6 +1255,15 @@ crate offers a client-side types feature) keeps `moka` out; the transitive
 cost (`quick-xml`, `axum`) is accepted and recorded here; `openehr-am` 0.0.71
 is taken directly for the OPT2 types. `openehr-adl` (until a CDR serves ADL 2 as text alone),
 `fhir-terminology`, `fhir-model` and every FHIRPath crate stay out.
+
+The HL7 v2 face (#254), verified against crates.io on 2026-09-25, takes five
+crates the lock already carried: `tokio-util` 0.7.19 with `codec` for the MLLP
+frame codec and `bytes` 1.12.1 for its buffer, `encoding_rs` 0.8.42 for the
+MSH-18 character sets (ISO 8859-1 through `mem::decode_latin1`, because the
+WHATWG label decodes as windows-1252), and `logos` 0.16.1 with `chumsky`
+0.13.0 for the condition and target grammars of the v2-to-FHIR ConceptMaps,
+the pair `openehr-query` builds its AQL parser on. `hl7-mllp-codec` and the
+other v2 crates stay out.
 
 ## 8. What each seam carries
 

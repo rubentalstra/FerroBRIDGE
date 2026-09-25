@@ -1,0 +1,19 @@
+---
+source: crates/ferrobridge-hl7v2/tests/it/map.rs
+expression: mapped.counts()
+---
+{
+    "earlier-version": 1,
+    "narrative-condition": 19,
+    "no-datatype-map": 4,
+    "no-segment-map": 1,
+    "undecodable": 1,
+    "unknown-element": 6,
+    "unknown-segment": 1,
+    "unmapped-component": 2,
+    "unmapped-field": 10,
+    "unresolved-table": 1,
+    "unsupported-assignment": 2,
+    "unsupported-condition": 4,
+    "unsupported-target": 1,
+}

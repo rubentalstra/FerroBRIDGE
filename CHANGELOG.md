@@ -43,6 +43,33 @@ crates on crates.io.
   `2xx` with an empty body now reads as `Returned::Minimal`, so a composition
   create or update answered without a body is bound from its `ETag` instead of
   failing after the CDR stored it.
+- The `ferrobridge-hl7v2` crate, the HL7 v2 face behind the server (#254),
+  reserved on crates.io at 0.0.0. `mllp` frames `<SB> message <EB><CR>`
+  (MLLP Release 1) on the `tokio-util` codec traits and runs a listener that
+  answers each frame and drains on a shutdown signal; a frame with no start
+  block, a stray start block, a missing trailer or a size past the ceiling is
+  refused, with an `AR` when a header can still be read. `decode` reads the
+  character set MSH-18 names (ASCII, ISO 8859 parts 1 to 9 and 15, UTF-8,
+  with a per-connection default for an empty MSH-18) and refuses a byte
+  outside it, never replacing it. `parse` splits by the MSH-1 and MSH-2
+  delimiters, decodes the escape sequences, and places every segment in the
+  structure's group tree from `hl7v2-types`, counting a Z-segment, a segment
+  out of place and a field past its table, and refusing a missing required
+  segment or field. `ack` answers `AA`, `AE` with one `ERR` per refusal, or
+  `AR`, echoing MSH-10 in MSA-2, and `inbound` settles those answers for one
+  message. `map` runs the 263 ConceptMaps of the v2-to-FHIR guide
+  (`hl7.fhir.uv.v2mappings` 1.0.0, read from a directory, with a supplement
+  directory that replaces a map by its url): the message map, then the
+  segment, data type and table maps, the `Computable-ANTLR` conditions
+  (398 of the corpus's rows parse) and the `[n]` and `(Type)` target
+  notation, writing FHIR through `fhirconnect::tree` into an R4 message
+  `Bundle` with the MessageHeader first and `urn:uuid` full urls. Every table
+  value goes through `ConceptMap/$translate`. A narrative or unsupported
+  condition, an unresolved target, an unmapped segment, field or component,
+  a value a FHIR primitive cannot hold, and a resource that does not decode
+  as R4 are each a typed, counted outcome. `tokio-util`, `bytes`,
+  `encoding_rs`, `logos` and `chumsky` join the workspace dependencies; all
+  five were already in the lock.
 - The `hl7v2-types` crate, the generated HL7 v2 tables (#253), under
   Apache-2.0 beside `fhir-types` and reserved on crates.io at 0.0.0.
   `structure` holds every message structure of the HL7 v2 definitions (305,

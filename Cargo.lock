@@ -1060,6 +1060,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
 
 [[package]]
+name = "ferrobridge-hl7v2"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "chumsky",
+ "encoding_rs",
+ "ferrobridge-term",
+ "ferrobridge-testkit",
+ "fhir-types",
+ "fhirconnect",
+ "hl7v2-types",
+ "insta",
+ "logos",
+ "serde_json",
+ "sha2 0.11.0",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+ "uuid",
+ "wiremock",
+]
+
+[[package]]
 name = "ferrobridge-openehr"
 version = "0.0.0"
 dependencies = [

@@ -99,6 +99,11 @@ dependency pins below.
 | `webpki-roots` | 1.0.9 | the root `Cargo.toml` `[workspace.dependencies]` (the root set both CDM clients trust when no CA is configured) |
 | `sqlx` | 0.9.0 | the root `Cargo.toml` `[workspace.dependencies]` (the concept resolver; the `sqlx-cli` row carries the same version) |
 | `rust_decimal` | 1.43.0 | the root `Cargo.toml` `[workspace.dependencies]` (the exact decimal of the OMOCL engine; MIT) |
+| `tokio-util` | 0.7.19 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the MLLP frame codec of the HL7 v2 face) |
+| `bytes` | 1.12.1 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the MLLP codec's buffer) |
+| `encoding_rs` | 0.8.42 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the MSH-18 character sets) |
+| `logos` | 0.16.1 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the v2-to-FHIR condition and target lexers) |
+| `chumsky` | 0.13.0 | `docs/architecture.md` §7, the root `Cargo.toml` `[workspace.dependencies]` (the v2-to-FHIR condition and target parsers) |
 
 ## Container images (the end-to-end lane)
 

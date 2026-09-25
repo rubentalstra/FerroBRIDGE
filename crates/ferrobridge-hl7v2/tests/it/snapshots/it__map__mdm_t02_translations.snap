@@ -1,0 +1,26 @@
+---
+source: crates/ferrobridge-hl7v2/tests/it/map.rs
+expression: asked
+---
+[
+    (
+        "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70203-to-v2-0203",
+        "MR",
+    ),
+    (
+        "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70200-to-name-use",
+        "L",
+    ),
+    (
+        "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70001-to-administrative-gender",
+        "U",
+    ),
+    (
+        "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70004-to-v3-actcode",
+        "O",
+    ),
+    (
+        "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70004-to-encounter-status",
+        "O",
+    ),
+]

@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+[package]
+name = "ferrobridge-hl7v2"
+description = "The FerroBRIDGE HL7 v2 face: MLLP framing, MSH-18 decoding, positional parsing over the generated v2 tables, the acknowledgment, and the v2-to-FHIR ConceptMap interpreter"
+# 0.0.0 reserves the name on crates.io; the crate line is the fhir-types line (docs/VERSIONS.md).
+version = "0.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+documentation = "https://docs.rs/ferrobridge-hl7v2"
+readme = "README.md"
+keywords = ["hl7", "hl7v2", "mllp", "fhir", "healthcare"]
+categories = ["parser-implementations", "network-programming", "science"]
+# The crate line is published on crates.io; include is the packaged content.
+# The v2-to-FHIR corpus is read from a directory at run time and never packaged.
+publish = true
+include = ["src/**", "README.md", "LICENSE"]
+
+[dependencies]
+bytes.workspace = true
+# The parser of the condition and target grammars, over the logos tokens.
+chumsky.workspace = true
+encoding_rs.workspace = true
+logos.workspace = true
+# The FHIR writer: the path model over the fhir-types element table.
+fhirconnect.workspace = true
+# The R4 model the ConceptMaps decode into and the output is checked against.
+fhir-types = { workspace = true, features = ["r4", "resources"] }
+ferrobridge-term.workspace = true
+hl7v2-types.workspace = true
+serde_json.workspace = true
+# The digest a created resource's urn:uuid is derived from.
+sha2.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["net", "io-util", "rt", "sync", "macros"] }
+tokio-util.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+ferrobridge-testkit.workspace = true
+insta.workspace = true
+tempfile.workspace = true
+tokio ={ workspace = true, features = ["rt", "rt-multi-thread", "macros", "time", "net", "io-util"] }
+url.workspace = true
+wiremock.workspace = true
+
+[lints]
+workspace = true

@@ -71,6 +71,7 @@ exceptions = [
   { allow = ["BUSL-1.1"], crate = "omop-cdm" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-openehr" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-term" },
+  { allow = ["BUSL-1.1"], crate = "ferrobridge-hl7v2" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-server" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-testkit" },
   { allow = ["BUSL-1.1"], crate = "fhir-codegen" },
