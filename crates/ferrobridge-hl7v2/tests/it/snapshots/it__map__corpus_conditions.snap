@@ -1,7 +1,26 @@
 ---
 source: crates/ferrobridge-hl7v2/tests/it/map.rs
-expression: "format!(\"computable: {computable}\\nrefused: {refused}\\nnarrative: {narrative}\\n\")"
+expression: "format!(\"computable: {computable}\\nrefused: {refused}\\nnarrative: {narrative}\\n\\\n             defective (no operand):\\n{}unsupported:\\n{}\",\nlist(&defective), list(&unsupported))"
 ---
-computable: 398
-refused: 61
+computable: 415
+refused: 44
 narrative: 210
+defective (no operand):
+  2 IF IAM-15 VALUED AND NOT "SEL"
+unsupported:
+  2 IF (OBX-2 EQUALS "SN"  AND OBX-5.1  EQUALS "<>"
+  2 IF CX.4 IN http://hl7.org/implement/standards/fhir/identifier-registry.html
+  1 IF EVN-4 NOT "U"
+  1 IF IN1-17 IS 'patient'
+  1 IF IN1-17 IS NOT 'patient'
+  1 IF NOT EQUAL TO "="
+  4 IF OBX-33 COUNT=1
+  8 IF OBX-33 COUNT>1
+  1 IF PID-11 LST.COUNT EQUALS 1 AND PID-11.9 IS VALUED NOT EQUAL PID-12
+  1 IF PL.1 VALUE AND PL.2 NOT VALUED AND PL.3 NOT VALUED
+  1 IF PL.11 VALUED AND IF PL.8 VALUED AND PL.1 NOT VALUED AND PL.2 NOT VALUED AND PL3.NOT VALUED
+  1 IF PL.8 VALUED AND PL.1 NOT VALUED AND PL.2 NOT VALUED AND PL3.NOT VALUED
+  3 IF PRT-5 AND PRT-6 AREA NOT VALUED
+  13 IF PV1-20 VALUE
+  1 IF XCN.19 NOT VALUED XCN.20 NOT VALUED
+  1 h

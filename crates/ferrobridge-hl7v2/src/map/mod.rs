@@ -101,6 +101,16 @@ pub enum Outcome {
         /// The condition as written.
         text: String,
     },
+    /// A row gated by a condition whose check names no operand, as
+    /// `IF NOT VALUED` does.
+    DefectiveCondition {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The condition as written.
+        text: String,
+    },
     /// A row whose condition names an operand the scope cannot read.
     UnevaluableCondition {
         /// Where.
@@ -127,7 +137,7 @@ pub enum Outcome {
         /// The row.
         row: RowRef,
     },
-    /// A row whose `assignment` is no literal.
+    /// A row whose `assignment` is neither a literal nor a concatenation.
     UnsupportedAssignment {
         /// Where.
         at: Location,
@@ -135,6 +145,25 @@ pub enum Outcome {
         row: RowRef,
         /// The assignment as written.
         text: String,
+    },
+    /// A row whose `assignment` joins two parts with no `+`, as
+    /// `RP.3"/"RP.4` does.
+    DefectiveAssignment {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The assignment as written.
+        text: String,
+    },
+    /// A row whose concatenation names an operand the scope cannot read.
+    UnevaluableAssignment {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The operand.
+        operand: String,
     },
     /// No single segment map maps the segment to the resource the message map
     /// names.
@@ -321,10 +350,13 @@ impl Outcome {
             Self::UnmappedComponent { .. } => "unmapped-component",
             Self::NarrativeCondition { .. } => "narrative-condition",
             Self::UnsupportedCondition { .. } => "unsupported-condition",
+            Self::DefectiveCondition { .. } => "defective-condition",
             Self::UnevaluableCondition { .. } => "unevaluable-condition",
             Self::UnsupportedTarget { .. } => "unsupported-target",
             Self::UnsupportedShape { .. } => "unsupported-shape",
             Self::UnsupportedAssignment { .. } => "unsupported-assignment",
+            Self::DefectiveAssignment { .. } => "defective-assignment",
+            Self::UnevaluableAssignment { .. } => "unevaluable-assignment",
             Self::NoSegmentMap { .. } => "no-segment-map",
             Self::NoDatatypeMap { .. } => "no-datatype-map",
             Self::DatatypeConflict { .. } => "datatype-conflict",

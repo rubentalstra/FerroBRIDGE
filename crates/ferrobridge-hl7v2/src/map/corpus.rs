@@ -26,7 +26,7 @@ use fhir_types::codec::{Json, Value};
 use fhir_types::r4::concept_map::{ConceptMap, ConceptMapGroupElementTarget};
 use fhir_types::r4::extension::{Extension, ExtensionValue};
 
-use crate::map::condition::{self, Expr};
+use crate::map::condition::{self, AssignmentError, ConditionError, Expr, Part};
 use crate::map::notation::{self, NotationError, Target};
 
 /// The canonical url of the `TypeInfo` extension.
@@ -71,6 +71,13 @@ pub enum Condition {
     Computable(Expr),
     /// A `Narrative-Condition`, which no machine evaluates.
     Narrative,
+    /// A `Computable-ANTLR` condition whose check names no operand
+    /// ([`condition::ConditionError::NoOperand`]), which no machine can
+    /// evaluate.
+    Defective {
+        /// The condition as written.
+        text: String,
+    },
     /// A condition in a form the interpreter does not evaluate.
     Unsupported {
         /// The property the form came under.
@@ -85,6 +92,12 @@ pub enum Condition {
 pub enum Assignment {
     /// A double-quoted literal, written as given.
     Literal(String),
+    /// Literals and operands joined by `+` ([`condition::assignment`]), whose
+    /// texts are written joined.
+    Concat(Vec<Part>),
+    /// Parts with no `+` between two of them
+    /// ([`condition::AssignmentError::MissingOperator`]).
+    Defective(String),
     /// Any other form: an expression or a narrative instruction.
     Unsupported(String),
 }
@@ -388,7 +401,13 @@ fn row(source: &str, source_type: Option<String>, target: &ConceptMapGroupElemen
             .filter(|inner| !inner.contains('"'))
         {
             Some(literal) => Assignment::Literal(String::from(literal)),
-            None => Assignment::Unsupported(text),
+            None => match condition::assignment(&text) {
+                Ok(parts) => Assignment::Concat(parts),
+                Err(AssignmentError::MissingOperator { .. }) => Assignment::Defective(text),
+                Err(AssignmentError::Lex { .. } | AssignmentError::Syntax { .. }) => {
+                    Assignment::Unsupported(text)
+                }
+            },
         }
     });
     let mapped_via = type_info(&target.extension, "mappedVia").map(|text| {
@@ -405,7 +424,7 @@ fn row(source: &str, source_type: Option<String>, target: &ConceptMapGroupElemen
         target_type: type_info(&target.extension, "type"),
         assignment,
         mapped_via,
-        condition: condition(target),
+        condition: condition(source, target),
     }
 }
 
@@ -417,7 +436,7 @@ fn row(source: &str, source_type: Option<String>, target: &ConceptMapGroupElemen
 /// ANTLR form is the one evaluated; a `Computable-FHIRPath` alone is refused,
 /// since it is FHIRPath over the v2 message, not over a FHIR resource. No
 /// specification governs the precedence: our own design.
-fn condition(target: &ConceptMapGroupElementTarget) -> Condition {
+fn condition(source: &str, target: &ConceptMapGroupElementTarget) -> Condition {
     let property = |name: &str| {
         target.depends_on.iter().find_map(|entry| {
             (entry.property.value.as_deref() == Some(name))
@@ -428,12 +447,16 @@ fn condition(target: &ConceptMapGroupElementTarget) -> Condition {
         return Condition::Narrative;
     }
     if let Some(text) = property("Computable-ANTLR") {
-        return match condition::parse(&text) {
+        let own = condition::source_operand(source);
+        return match condition::parse_for(&text, own.as_ref()) {
             Ok(expr) => Condition::Computable(expr),
-            Err(_) => Condition::Unsupported {
-                property: String::from("Computable-ANTLR"),
-                text,
-            },
+            Err(ConditionError::NoOperand { .. }) => Condition::Defective { text },
+            Err(ConditionError::Lex { .. } | ConditionError::Syntax { .. }) => {
+                Condition::Unsupported {
+                    property: String::from("Computable-ANTLR"),
+                    text,
+                }
+            }
         };
     }
     if let Some(text) = property("Computable-FHIRPath") {
