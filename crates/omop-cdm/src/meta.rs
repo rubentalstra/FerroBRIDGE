@@ -57,6 +57,11 @@ pub struct ColumnMeta {
     /// The table and the column a foreign key references, in that order,
     /// both spelled as [`TableMeta::name`] and [`ColumnMeta::name`] are.
     pub foreign_key: Option<(&'static str, &'static str)>,
+    /// The vocabulary domain the definitions name for a concept column
+    /// (`fkDomain`), for example `Measurement` for `measurement_concept_id`.
+    ///
+    /// A column whose definition writes `NA` carries `None`.
+    pub fk_domain: Option<&'static str>,
     /// The schema of the table the column belongs to.
     pub cdm_schema: CdmSchema,
 }

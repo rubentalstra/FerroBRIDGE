@@ -29,7 +29,9 @@ const CORPORA: &[&str] = &["docs/specs/fhirconnect-mapping-lib", "docs/specs/omo
 /// separated from other tokens by white space characters".
 /// `Menstrual_diary_v1.yml` writes the key `at0005` five times inside one
 /// `conceptMap` `mapping` block, so four of its five concept mappings would be
-/// discarded silently. The other 306 files load.
+/// discarded silently. `Hand_dominance_v1.yml` indents line 22 with a tab,
+/// and YAML 1.2.2 §6.1 rules that "tab characters must not be used in
+/// indentation". The other 311 files load.
 const EXPECTED_FAILURES: &[(&str, DiagnosticCode)] = &[
     (
         "docs/specs/fhirconnect-mapping-lib/projects/org.highmed/KDS/diagnose/KDS_problem_diagnose.yml",
@@ -38,6 +40,10 @@ const EXPECTED_FAILURES: &[(&str, DiagnosticCode)] = &[
     (
         "docs/specs/fhirconnect-mapping-lib/projects/org.openehr/EEHRxF/lab/bundle/lab_composition.yml",
         DiagnosticCode::EmptyDocument,
+    ),
+    (
+        "docs/specs/omocl/medical_data/evaluation/Hand_dominance_v1.yml",
+        DiagnosticCode::YamlSyntax,
     ),
     (
         "docs/specs/omocl/medical_data/observation/Menstrual_diary_v1.yml",
@@ -108,7 +114,7 @@ fn every_corpus_file_loads_or_fails_with_the_pinned_diagnostic() -> Result<(), B
         .map(|(file, code)| ((*file).to_owned(), code.clone()))
         .collect();
     assert_eq!(failures, expected, "the corpus failure set moved");
-    assert_eq!(loaded, 306, "the corpus size moved");
+    assert_eq!(loaded, 311, "the corpus size moved");
     Ok(())
 }
 
@@ -151,6 +157,6 @@ fn every_loaded_omocl_file_names_an_archetype() -> Result<(), Box<dyn Error>> {
         );
         counted += 1;
     }
-    assert_eq!(counted, 201, "the OMOCL corpus size moved");
+    assert_eq!(counted, 206, "the OMOCL corpus size moved");
     Ok(())
 }

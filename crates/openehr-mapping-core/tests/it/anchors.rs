@@ -3,7 +3,7 @@
 
 //! Anchors, aliases and merge keys resolve before a value tree is handed on.
 //!
-//! 57 of the 202 OMOCL corpus files define an anchor, so a loader that left
+//! 57 of the 208 OMOCL corpus files define an anchor, so a loader that left
 //! aliases unresolved would carry an unusable tree into both interpreters.
 
 use std::error::Error;

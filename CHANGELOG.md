@@ -44,6 +44,31 @@ crates on crates.io.
   export is #233, which waits on #88 recording that format from an observed
   export. The `sqlx-offline` CI job fails when the committed query metadata
   no longer matches the queries.
+- `omocl::model`, the OMOCL file model (#87): the AST with positions for the
+  header, the twelve entry `type` values, column entries with `optional` and
+  ordered `alternatives` of exactly one of `path`, `code`, `conceptMap` and
+  `multiplication` (whose factors are `path` or `code`), `base_path`, `Include`
+  and `CustomMapping`; the JSON
+  Schema FerroBRIDGE authors for OMOCL (`crates/omocl/schemas/`); the
+  key-to-CDM-column projection table for all ten targets, checked against the
+  CDM v5.4 column metadata; and the load-time rules (an unknown key, two keys
+  writing one column, an unknown `CustomMapping` converter and an unresolved
+  `Include` are refusals). A literal concept id is checked against the domain
+  its CDM column takes through a hook the vocabulary resolver plugs into. 199
+  of the 208 library files load; the nine refusals are pinned with their
+  defect.
+- `openehr_mapping_core::schema`, the one projection of a positioned tree into
+  JSON and the one JSON Pointer locator that `fhirconnect` and `omocl` both
+  validate their files through.
+- `omop_cdm::meta::ColumnMeta::fk_domain`, the vocabulary domain the CDM v5.4
+  field definitions name for a concept column, emitted by
+  `tools/omop-cdm-codegen` from the `fkDomain` cell.
+
+### Changed
+
+- The vendored OMOCL corpus moves to `SevKohler/OMOCL` commit `c082db8e`
+  (#228): six new mapping files and the README acknowledgements, 208 mapping
+  files in all.
 
 ## [0.0.3] - 2026-09-25
 

@@ -85,6 +85,7 @@ pub static RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: true,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -94,6 +95,7 @@ pub static RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -103,6 +105,7 @@ pub static RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -112,6 +115,7 @@ pub static RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -121,6 +125,7 @@ pub static RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
     crate::meta::ColumnMeta {
@@ -130,6 +135,7 @@ pub static RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Vocab,
     },
 ];

@@ -77,6 +77,7 @@ pub static DOSE_ERA_COLUMNS: [crate::meta::ColumnMeta; 7] = [
         required: true,
         primary_key: true,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -86,6 +87,7 @@ pub static DOSE_ERA_COLUMNS: [crate::meta::ColumnMeta; 7] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("person", "person_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -95,6 +97,7 @@ pub static DOSE_ERA_COLUMNS: [crate::meta::ColumnMeta; 7] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: Some("Drug"),
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -104,6 +107,7 @@ pub static DOSE_ERA_COLUMNS: [crate::meta::ColumnMeta; 7] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: Some("Unit"),
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -113,6 +117,7 @@ pub static DOSE_ERA_COLUMNS: [crate::meta::ColumnMeta; 7] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -122,6 +127,7 @@ pub static DOSE_ERA_COLUMNS: [crate::meta::ColumnMeta; 7] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -131,6 +137,7 @@ pub static DOSE_ERA_COLUMNS: [crate::meta::ColumnMeta; 7] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
 ];

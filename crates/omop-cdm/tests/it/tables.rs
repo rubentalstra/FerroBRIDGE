@@ -106,6 +106,20 @@ fn the_primary_key_of_a_table_is_marked_once() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[test]
+fn a_concept_column_names_the_domain_of_its_definition() -> Result<(), Box<dyn Error>> {
+    let table = omop_cdm::meta::table("condition_occurrence").ok_or("no condition table")?;
+    let status = table
+        .column("condition_status_concept_id")
+        .ok_or("no condition_status_concept_id column")?;
+    assert_eq!(Some("Condition Status"), status.fk_domain);
+    let source = table
+        .column("condition_source_concept_id")
+        .ok_or("no condition_source_concept_id column")?;
+    assert_eq!(None, source.fk_domain, "the definitions write `NA` here");
+    Ok(())
+}
+
 /// The tables of `OMOP_CDMv5.4_Table_Level.csv`, in file order.
 ///
 /// A record starts at the beginning of a line with the table name and its

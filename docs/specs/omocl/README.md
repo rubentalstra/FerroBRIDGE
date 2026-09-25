@@ -31,3 +31,6 @@ https://github.com/SevKohler/OMOCLComparsionScript
 
 This script can be also used to get an overview how much of your local CKM is already mapped to OMOP, or the archetypes used.
 
+## Acknowledgements
+
+This work was supported partialy by TARTAGLIA: Federated AI Network to Accelerate Health Research, funded by the Ministry of Economic Affairs and Digital Transformation (grant numbers reference MIA.2021.M02.0005, TSI:100205-2021-6).

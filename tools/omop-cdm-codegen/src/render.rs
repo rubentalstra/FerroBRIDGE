@@ -242,6 +242,10 @@ fn render_columns(out: &mut String, table: &Table) -> Result<(), std::fmt::Error
             )?,
             None => writeln!(out, "        foreign_key: None,")?,
         }
+        match &column.fk_domain {
+            Some(domain) => writeln!(out, "        fk_domain: Some(\"{domain}\"),")?,
+            None => writeln!(out, "        fk_domain: None,")?,
+        }
         writeln!(
             out,
             "        cdm_schema: crate::meta::CdmSchema::{},",

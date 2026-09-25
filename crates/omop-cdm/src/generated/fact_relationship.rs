@@ -40,6 +40,7 @@ pub static FACT_RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 5] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -49,6 +50,7 @@ pub static FACT_RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 5] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -58,6 +60,7 @@ pub static FACT_RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 5] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -67,6 +70,7 @@ pub static FACT_RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 5] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -76,6 +80,7 @@ pub static FACT_RELATIONSHIP_COLUMNS: [crate::meta::ColumnMeta; 5] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
 ];

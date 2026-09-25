@@ -7,7 +7,7 @@
 //! (<https://docs.rs/serde-saphyr/1.2.0/serde_saphyr/>), which resolves
 //! anchors, aliases and merge keys and reports 1-based character positions for
 //! both values and errors. The OMOCL corpus needs the first of those: 57 of
-//! its 202 files define an anchor.
+//! its 208 files define an anchor.
 //!
 //! Four parser settings are deliberate. Duplicate keys are an error rather
 //! than a last-writer-wins overwrite, merge keys are expanded, an unrecognised

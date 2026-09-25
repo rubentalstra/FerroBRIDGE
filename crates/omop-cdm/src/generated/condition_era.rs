@@ -87,6 +87,7 @@ pub static CONDITION_ERA_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: true,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -96,6 +97,7 @@ pub static CONDITION_ERA_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("person", "person_id")),
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -105,6 +107,7 @@ pub static CONDITION_ERA_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: Some(("concept", "concept_id")),
+        fk_domain: Some("Condition"),
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -114,6 +117,7 @@ pub static CONDITION_ERA_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -123,6 +127,7 @@ pub static CONDITION_ERA_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: true,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
     crate::meta::ColumnMeta {
@@ -132,6 +137,7 @@ pub static CONDITION_ERA_COLUMNS: [crate::meta::ColumnMeta; 6] = [
         required: false,
         primary_key: false,
         foreign_key: None,
+        fk_domain: None,
         cdm_schema: crate::meta::CdmSchema::Cdm,
     },
 ];
