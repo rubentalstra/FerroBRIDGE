@@ -37,3 +37,12 @@ specification (organisational membership) is the owner's to hold, recorded in
 the provenance beside the material. The ConceptMap interpreter counts as an
 adapter over a published corpus, admitted under the one-core constraint.
 
+**Ruling 2026-09-25, vendoring:** no vendored material is ever pushed to
+crates.io, for anything; a vendored corpus is a generator input or a test
+corpus and nothing else. The v2ig definitions, whose HL7 licence allows
+copying "for internal purposes only", follow `vendored-inputs.md` §Licensing:
+the pinned script fetches them into an ignored directory at build time, only
+the provenance is committed, and the generated group table stays in an
+unpublished tool (#253). The standing exception, recorded before, is the
+OHDSI DDL and era SQL `omop-cdm` embeds at run time under Apache-2.0.
+
