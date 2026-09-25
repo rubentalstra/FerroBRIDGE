@@ -151,10 +151,6 @@ impl AppState {
                 source: Box::new(source),
             })?;
         let operations = programs.map(|programs| {
-            tracing::info!(
-                programs = programs.len(),
-                "the FHIRconnect mapping set is compiled"
-            );
             OperationsLane::new(programs, settings.operations.device_reference.as_str())
                 .with_composition_defaults(
                     settings.operations.composer.as_str(),

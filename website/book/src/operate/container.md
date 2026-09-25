@@ -116,6 +116,12 @@ configuration exits 78.
 `FERROBRIDGE_CONFIG` names a TOML file instead, for a deployment that mounts
 its configuration rather than setting variables.
 
+A container's stdout is no terminal, so the default `auto` format writes one
+JSON object per line with no colour and no banner, and you configure nothing
+for a log collector to read it. Set `FERROBRIDGE_LOG_FORMAT=pretty` to read
+the banner and human-readable lines in `docker compose logs`
+([The console](configuration.md#the-console)).
+
 ## The health probe
 
 The image declares no `HEALTHCHECK`. A distroless image has no shell and no

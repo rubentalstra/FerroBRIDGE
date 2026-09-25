@@ -15,6 +15,7 @@
 )]
 
 mod config;
+mod console;
 mod etl;
 mod etl_config;
 mod facade;
