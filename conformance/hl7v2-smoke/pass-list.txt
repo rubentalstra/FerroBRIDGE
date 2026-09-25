@@ -1,0 +1,27 @@
+nist/loi-r1/src/main/resources/Contextbased/LOI-EHR/1-GU/1-PT/2-ACK_0.0_1.1-GU/Message.txt
+nist/loi-r1/src/main/resources/Contextbased/LOI-EHR/1-GU/1-PT/4-ACK_0.0_2.1-GU/Message.txt
+nist/loi-r1/src/main/resources/Contextbased/LOI-EHR/2-NG/1-PT/2-ACK_0.0_1.1-NG/Message.txt
+nist/loi-r1/src/main/resources/Contextbased/LOI-EHR/2-NG/1-PT/4-ACK_0.0_2.1-NG/Message.txt
+nist/loi-r1/src/main/resources/Contextfree/ACK/GU/Message.txt
+nist/loi-r1/src/main/resources/Contextfree/ACK/NG/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/EHR/1-GU/1-PT_and_INR/2-ACK_0.0_3.1-GU/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/EHR/1-GU/1-PT_and_INR/3-ACK_0.0_4.1-GU/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/EHR/1-GU/1-PT_and_INR/4-ACK_0.0_5.1-GU/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/EHR/2-NG/1-PT_and_INR/2-ACK_0.0_3.1-NG/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/EHR/2-NG/1-PT_and_INR/3-ACK_0.0_4.1-NG/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/EHR/2-NG/1-PT_and_INR/4-ACK_0.0_5.1-NG/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/LIS/1-GU/1-PT_and_INR/2-ACK_0.0_3.1-GU/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/LIS/1-GU/1-PT_and_INR/3-ACK_0.0_4.1-GU/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/LIS/1-GU/1-PT_and_INR/4-ACK_0.0_5.1-GU/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/LIS/2-NG/1-PT_and_INR/2-ACK_0.0_3.1-NG/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/LIS/2-NG/1-PT_and_INR/3-ACK_0.0_4.1-NG/Message.txt
+nist/lri-r2/src/main/resources/Contextbased/LIS/2-NG/1-PT_and_INR/4-ACK_0.0_5.1-NG/Message.txt
+nist/lri-r2/src/main/resources/Contextfree/APP_ACK/GU/Message.txt
+nist/lri-r2/src/main/resources/Contextfree/APP_ACK/NG/Message.txt
+nist/lri-r2/src/main/resources/Contextfree/SYS_ACK/GU/Message.txt
+nist/lri-r2/src/main/resources/Contextfree/SYS_ACK/NG/Message.txt
+nist/ss-r2/src/main/resources/Contextfree/default/PH_SS_Ack/A01_ACK/Message.txt
+nist/ss-r2/src/main/resources/Contextfree/default/PH_SS_Ack/A03_ACK/Message.txt
+nist/ss-r2/src/main/resources/Contextfree/default/PH_SS_Ack/A04_ACK/Message.txt
+nist/ss-r2/src/main/resources/Contextfree/default/PH_SS_Ack/A08_ACK/Message.txt
+total 379

@@ -13,7 +13,9 @@
 #
 # Reads each pin from docs/VERSIONS.md and each newest release tag from the
 # upstream project's GitHub releases, which is the tag the container image and
-# the installer both carry. Needs an authenticated `gh`.
+# the installer both carry. A corpus pinned by commit on a repository with no
+# releases is read against the newest commit of the branch it follows. Needs an
+# authenticated `gh`.
 #
 # Exit 0 when every pin is current, 1 when at least one is behind (each such
 # line starts with STALE), 2 when a release could not be read, so a network
@@ -73,6 +75,55 @@ while IFS=$'\t' read -r label repo; do
     stale=1
   fi
 done <<< "$WATCHED"
+
+# One "matrix label<TAB>upstream repository<TAB>branch" record per line: a
+# corpus pinned by commit on a repository that publishes no releases, read
+# against the newest commit of the branch the pin follows.
+# TODO(#268): the other commit-pinned corpora and the FHIR packages.
+readonly WATCHED_COMMITS="\
+HL7 v2 samples: Microsoft FHIR-Converter	microsoft/FHIR-Converter	main
+HL7 v2 samples: CDC ReportStream data tests	CDCgov/prime-reportstream	main
+HL7 v2 samples: HL7 v2-to-FHIR benchmark messages	HL7/v2-to-fhir	master
+HL7 v2 samples: NIST LRI (build time, never committed)	usnistgov/hit-mu-tools-resource-bundles	lri-r2
+HL7 v2 samples: NIST LOI (build time, never committed)	usnistgov/hit-mu-tools-resource-bundles	loi-r1
+HL7 v2 samples: NIST syndromic surveillance (build time, never committed)	usnistgov/hit-mu-tools-resource-bundles	ss-r2
+HL7 v2 samples: AIRA MQE (build time, never committed)	immregistries/mqe	master"
+
+# The first 40-hex commit in the second cell of the matrix row whose first cell
+# is $1.
+matrix_commit() {
+  awk -F'|' -v want="$1" '
+    NF >= 3 {
+      label = $2; value = $3
+      gsub(/`/, "", label); gsub(/^[ \t]+|[ \t]+$/, "", label)
+      if (label == want && match(value, /[0-9a-f]{40}/)) { print substr(value, RSTART, RLENGTH); exit }
+    }' "$MATRIX"
+}
+
+while IFS=$'\t' read -r label repo branch; do
+  [ -n "$label" ] || continue
+
+  pinned="$(matrix_commit "$label")"
+  if [ -z "$pinned" ]; then
+    printf 'UNREADABLE %s: no commit pin in %s\n' "$label" "$MATRIX"
+    unreadable=1
+    continue
+  fi
+
+  if ! head="$(gh api "repos/$repo/commits/$branch" --jq '.sha' 2>&1)"; then
+    printf 'UNREADABLE %s: could not read the head of %s %s (%s)\n' "$label" "$repo" "$branch" "$head"
+    unreadable=1
+    continue
+  fi
+
+  if [ "$pinned" = "$head" ]; then
+    printf 'current    %s %s (%s %s)\n' "$label" "$pinned" "$repo" "$branch"
+  else
+    printf 'STALE      %s: pinned %s, newest commit on %s %s (https://github.com/%s/commit/%s)\n' \
+      "$label" "$pinned" "$branch" "$head" "$repo" "$head"
+    stale=1
+  fi
+done <<< "$WATCHED_COMMITS"
 
 [ "$unreadable" -eq 0 ] || exit 2
 exit "$stale"

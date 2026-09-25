@@ -806,8 +806,11 @@ fn literal(text: &str) -> Field {
 /// Why a structure could not be selected for a message.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum StructureError {
-    /// MSH-9.3 is not valued.
-    #[error("MSH-9.3 names no message structure")]
+    /// MSH-9.3 is not valued and the message index names no structure for
+    /// MSH-9.1 and MSH-9.2.
+    #[error(
+        "MSH-9.3 names no message structure and none is defined for the message type and trigger event"
+    )]
     Unnamed,
     /// MSH-9.3 names no structure of the definitions.
     #[error("MSH-9.3 names the unknown message structure {name:?}")]
@@ -840,7 +843,16 @@ pub enum StructureError {
 /// names one with variants of which the message definition for MSH-9.1 and
 /// MSH-9.2 names none.
 pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureError> {
-    let name = message.message_type(3).ok_or(StructureError::Unnamed)?;
+    let indexed = message
+        .message_type(1)
+        .zip(message.message_type(2))
+        .and_then(|(code, event)| hl7v2_types::message::find(code, event))
+        .and_then(|definition| definition.structure);
+    let Some(name) = message.message_type(3) else {
+        // NOTE: HL7 v2.5.1 chapter 2 §2.15.9.9 makes MSH-9.3 optional where table
+        // 0354 fixes the structure, so the message index answers for a header without it.
+        return indexed.ok_or(StructureError::Unnamed);
+    };
     if let Some(structure) = hl7v2_types::structure::find(name) {
         return Ok(structure);
     }
@@ -855,12 +867,7 @@ pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureE
             name: String::from(name),
         });
     }
-    let named = message
-        .message_type(1)
-        .zip(message.message_type(2))
-        .and_then(|(code, event)| hl7v2_types::message::find(code, event))
-        .and_then(|definition| definition.structure)
-        .filter(|structure| candidates.contains(&structure.id));
+    let named = indexed.filter(|structure| candidates.contains(&structure.id));
     named.ok_or_else(|| StructureError::Variant {
         name: String::from(name),
         candidates,

@@ -46,15 +46,21 @@ pub enum Corpus {
     /// The draft FHIRconnect REST API chapter, one case per FSH operation
     /// definition.
     DraftRestApi,
+    /// The vendored HL7 v2 message sets, one case per message.
+    Hl7v2,
+    /// The HL7 v2 message sets fetched at build time, one case per message.
+    Hl7v2Smoke,
 }
 
 impl Corpus {
     /// Every corpus, in the order the gate reports them.
-    pub const ALL: [Self; 4] = [
+    pub const ALL: [Self; 6] = [
         Self::FhirconnectMappingLib,
         Self::Omocl,
         Self::Roundtrip,
         Self::DraftRestApi,
+        Self::Hl7v2,
+        Self::Hl7v2Smoke,
     ];
 
     /// Returns the corpus identifier, which names its directory under
@@ -66,6 +72,8 @@ impl Corpus {
             Self::Omocl => "omocl",
             Self::Roundtrip => "roundtrip",
             Self::DraftRestApi => "draft-rest-api",
+            Self::Hl7v2 => "hl7v2",
+            Self::Hl7v2Smoke => "hl7v2-smoke",
         }
     }
 
@@ -92,6 +100,8 @@ pub struct Case {
     id: String,
     /// Why the case fails, or `None` when it passes.
     failure: Option<String>,
+    /// What the case counted beside its verdict, by kind.
+    outcomes: BTreeMap<String, usize>,
 }
 
 impl Case {
@@ -101,6 +111,7 @@ impl Case {
         Self {
             id: id.into(),
             failure: None,
+            outcomes: BTreeMap::new(),
         }
     }
 
@@ -110,7 +121,24 @@ impl Case {
         Self {
             id: id.into(),
             failure: Some(reason.into()),
+            outcomes: BTreeMap::new(),
         }
+    }
+
+    /// Returns the case with `outcomes` recorded beside its verdict.
+    ///
+    /// The counts go into the result the gate reads and never decide the
+    /// verdict, so a corpus can report what a passing case did not carry.
+    #[must_use]
+    pub fn with_outcomes(mut self, outcomes: BTreeMap<String, usize>) -> Self {
+        self.outcomes = outcomes;
+        self
+    }
+
+    /// Returns what the case counted beside its verdict.
+    #[must_use]
+    pub const fn outcomes(&self) -> &BTreeMap<String, usize> {
+        &self.outcomes
     }
 
     /// Returns the case identity.
@@ -272,6 +300,7 @@ fn write_result(corpus: Corpus, verdicts: &BTreeMap<&str, &Case>) -> Result<(), 
                 "id": case.id,
                 "passed": case.passed(),
                 "failure": case.failure,
+                "outcomes": case.outcomes,
             })
         })
         .collect();
@@ -419,6 +448,16 @@ mod tests {
             refused,
             Err(ConformanceError::MalformedTotal { line: 1, .. })
         ));
+    }
+
+    #[test]
+    fn outcomes_travel_with_a_case_and_leave_its_verdict_alone() {
+        let outcomes: BTreeMap<String, usize> = [(String::from("unmapped-field"), 3)].into();
+        let case = Case::pass("a.hl7").with_outcomes(outcomes.clone());
+        assert!(case.passed());
+        assert_eq!(case.outcomes(), &outcomes);
+        let failed = Case::fail("b.hl7", "refused").with_outcomes(outcomes);
+        assert_eq!(failed.failure(), Some("refused"));
     }
 
     #[test]
