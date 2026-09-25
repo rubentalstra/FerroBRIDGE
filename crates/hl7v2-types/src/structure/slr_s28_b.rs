@@ -10,7 +10,9 @@ use crate::segment;
 /// The `SLR_S28-B` message structure definition, `http://hl7.org/v2/StructureDefinition/SLR_S28-B`.
 pub static SLR_S28_B: Structure = Structure {
     id: "SLR_S28-B",
-    url: "http://hl7.org/v2/StructureDefinition/SLR_S28-B",
+    url: Some("http://hl7.org/v2/StructureDefinition/SLR_S28-B"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "SLR_S28-B.1-MSH",

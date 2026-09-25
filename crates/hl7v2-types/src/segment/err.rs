@@ -13,7 +13,7 @@ use crate::model::{
 /// The `ERR` segment definition, `http://hl7.org/v2/StructureDefinition/ERR`.
 pub static ERR: Segment = Segment {
     id: "ERR",
-    url: "http://hl7.org/v2/StructureDefinition/ERR",
+    url: Some("http://hl7.org/v2/StructureDefinition/ERR"),
     name: "Error",
     fields: &[
         Field {

@@ -12,7 +12,9 @@ use crate::segment;
 /// The `TCU_U10-A` message structure definition, `http://hl7.org/v2/StructureDefinition/TCU_U10-A`.
 pub static TCU_U10_A: Structure = Structure {
     id: "TCU_U10-A",
-    url: "http://hl7.org/v2/StructureDefinition/TCU_U10-A",
+    url: Some("http://hl7.org/v2/StructureDefinition/TCU_U10-A"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "TCU_U10-A.1-MSH",

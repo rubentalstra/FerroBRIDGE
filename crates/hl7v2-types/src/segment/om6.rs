@@ -10,7 +10,7 @@ use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Opti
 /// The `OM6` segment definition, `http://hl7.org/v2/StructureDefinition/OM6`.
 pub static OM6: Segment = Segment {
     id: "OM6",
-    url: "http://hl7.org/v2/StructureDefinition/OM6",
+    url: Some("http://hl7.org/v2/StructureDefinition/OM6"),
     name: "Observations that are Calculated from Other Observations",
     fields: &[
         Field {

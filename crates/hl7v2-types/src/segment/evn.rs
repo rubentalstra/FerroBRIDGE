@@ -12,7 +12,7 @@ use crate::model::{
 /// The `EVN` segment definition, `http://hl7.org/v2/StructureDefinition/EVN`.
 pub static EVN: Segment = Segment {
     id: "EVN",
-    url: "http://hl7.org/v2/StructureDefinition/EVN",
+    url: Some("http://hl7.org/v2/StructureDefinition/EVN"),
     name: "Event Type",
     fields: &[
         Field {

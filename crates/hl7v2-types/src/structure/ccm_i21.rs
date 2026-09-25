@@ -12,7 +12,9 @@ use crate::segment;
 /// The `CCM_I21` message structure definition, `http://hl7.org/v2/StructureDefinition/CCM_I21`.
 pub static CCM_I21: Structure = Structure {
     id: "CCM_I21",
-    url: "http://hl7.org/v2/StructureDefinition/CCM_I21",
+    url: Some("http://hl7.org/v2/StructureDefinition/CCM_I21"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "CCM_I21.1-MSH",

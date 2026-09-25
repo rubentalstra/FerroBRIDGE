@@ -12,7 +12,9 @@ use crate::segment;
 /// The `BTS_O31` message structure definition, `http://hl7.org/v2/StructureDefinition/BTS_O31`.
 pub static BTS_O31: Structure = Structure {
     id: "BTS_O31",
-    url: "http://hl7.org/v2/StructureDefinition/BTS_O31",
+    url: Some("http://hl7.org/v2/StructureDefinition/BTS_O31"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "BTS_O31.1-MSH",

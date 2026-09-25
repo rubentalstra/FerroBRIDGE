@@ -12,7 +12,7 @@ use crate::model::{
 /// The `CTR` segment definition, `http://hl7.org/v2/StructureDefinition/CTR`.
 pub static CTR: Segment = Segment {
     id: "CTR",
-    url: "http://hl7.org/v2/StructureDefinition/CTR",
+    url: Some("http://hl7.org/v2/StructureDefinition/CTR"),
     name: "Contract Master Outbound",
     fields: &[
         Field {

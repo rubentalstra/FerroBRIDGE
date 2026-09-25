@@ -87,7 +87,8 @@ HL7 v2 samples: HL7 v2-to-FHIR benchmark messages	HL7/v2-to-fhir	master
 HL7 v2 samples: NIST LRI (build time, never committed)	usnistgov/hit-mu-tools-resource-bundles	lri-r2
 HL7 v2 samples: NIST LOI (build time, never committed)	usnistgov/hit-mu-tools-resource-bundles	loi-r1
 HL7 v2 samples: NIST syndromic surveillance (build time, never committed)	usnistgov/hit-mu-tools-resource-bundles	ss-r2
-HL7 v2 samples: AIRA MQE (build time, never committed)	immregistries/mqe	master"
+HL7 v2 samples: AIRA MQE (build time, never committed)	immregistries/mqe	master
+HL7 v2 legacy tables (NIST IGAMT export, never committed)	usnistgov/igamt-hl7Tools-service	master"
 
 # The first 40-hex commit in the second cell of the matrix row whose first cell
 # is $1.

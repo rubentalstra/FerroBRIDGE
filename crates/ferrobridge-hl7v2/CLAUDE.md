@@ -87,7 +87,10 @@ A shape `hl7v2-types` lacks (the event-to-structure table, data type
 components, `PartialEq` on the tree types) is a generator follow-up, never a
 local table here. `parse::structure_for` refuses a structure the definitions
 carry in variants, and the caller names the variant. An MSH-9.3 naming no
-structure falls back to the message index, counted as `other-structure`.
+structure falls back to the message index, counted as `other-structure`, and
+then to a structure v2.9.1 withdrew (`ORM_O01`) from `hl7v2_types::legacy` by
+MSH-12 (#303), counted as `withdrawn-structure`; a legacy tree is never
+written here.
 
 ## Logs
 

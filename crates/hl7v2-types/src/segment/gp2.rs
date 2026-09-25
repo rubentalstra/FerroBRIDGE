@@ -12,7 +12,7 @@ use crate::model::{
 /// The `GP2` segment definition, `http://hl7.org/v2/StructureDefinition/GP2`.
 pub static GP2: Segment = Segment {
     id: "GP2",
-    url: "http://hl7.org/v2/StructureDefinition/GP2",
+    url: Some("http://hl7.org/v2/StructureDefinition/GP2"),
     name: "Grouping/Reimbursement - Procedure Line Item",
     fields: &[
         Field {

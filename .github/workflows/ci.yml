@@ -351,6 +351,16 @@ jobs:
           key: hl7-v2ig-${{ steps.v2ig.outputs.commit }}
       - name: Fetch and verify the HL7 v2 definitions
         run: bash scripts/vendor/v2ig.sh
+      - name: Read the pinned HL7 v2 legacy tables commit
+        id: v2-legacy
+        run: echo "commit=$(bash scripts/vendor/v2-legacy.sh --commit)" >> "$GITHUB_OUTPUT"
+      - name: Restore the HL7 v2 legacy tables
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/fhir-codegen/vendor/hl7-v2-legacy/src
+          key: hl7-v2-legacy-${{ steps.v2-legacy.outputs.commit }}
+      - name: Fetch and verify the HL7 v2 legacy tables
+        run: bash scripts/vendor/v2-legacy.sh
       # The hl7v2-smoke corpus test reads the NIST and AIRA message sets,
       # fetched at build time and never committed
       # (crates/ferrobridge-hl7v2/vendor/nist/PROVENANCE.md). The cache is
@@ -605,6 +615,18 @@ jobs:
           key: hl7-v2ig-${{ steps.v2ig.outputs.commit }}
       - name: Fetch and verify the HL7 v2 definitions
         run: bash scripts/vendor/v2ig.sh
+      # The HL7 v2 legacy tables are fetched and cached the same way
+      # (tools/fhir-codegen/vendor/hl7-v2-legacy/PROVENANCE.md).
+      - name: Read the pinned HL7 v2 legacy tables commit
+        id: v2-legacy
+        run: echo "commit=$(bash scripts/vendor/v2-legacy.sh --commit)" >> "$GITHUB_OUTPUT"
+      - name: Restore the HL7 v2 legacy tables
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/fhir-codegen/vendor/hl7-v2-legacy/src
+          key: hl7-v2-legacy-${{ steps.v2-legacy.outputs.commit }}
+      - name: Fetch and verify the HL7 v2 legacy tables
+        run: bash scripts/vendor/v2-legacy.sh
       - run: cargo run --locked -p fhir-codegen -- emit --check
 
   # The same gate for the OMOP side: regenerate crates/omop-cdm from the

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `RXR` segment definition, `http://hl7.org/v2/StructureDefinition/RXR`.
 pub static RXR: Segment = Segment {
     id: "RXR",
-    url: "http://hl7.org/v2/StructureDefinition/RXR",
+    url: Some("http://hl7.org/v2/StructureDefinition/RXR"),
     name: "Pharmacy/Treatment Route",
     fields: &[
         Field {

@@ -12,7 +12,9 @@ use crate::segment;
 /// The `QVR_Q17` message structure definition, `http://hl7.org/v2/StructureDefinition/QVR_Q17`.
 pub static QVR_Q17: Structure = Structure {
     id: "QVR_Q17",
-    url: "http://hl7.org/v2/StructureDefinition/QVR_Q17",
+    url: Some("http://hl7.org/v2/StructureDefinition/QVR_Q17"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "QVR_Q17.1-MSH",

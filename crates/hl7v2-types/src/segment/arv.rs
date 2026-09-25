@@ -12,7 +12,7 @@ use crate::model::{
 /// The `ARV` segment definition, `http://hl7.org/v2/StructureDefinition/ARV`.
 pub static ARV: Segment = Segment {
     id: "ARV",
-    url: "http://hl7.org/v2/StructureDefinition/ARV",
+    url: Some("http://hl7.org/v2/StructureDefinition/ARV"),
     name: "Access Restrictions",
     fields: &[
         Field {

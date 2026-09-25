@@ -12,7 +12,7 @@ use crate::model::{
 /// The `CER` segment definition, `http://hl7.org/v2/StructureDefinition/CER`.
 pub static CER: Segment = Segment {
     id: "CER",
-    url: "http://hl7.org/v2/StructureDefinition/CER",
+    url: Some("http://hl7.org/v2/StructureDefinition/CER"),
     name: "Certificate Detail",
     fields: &[
         Field {

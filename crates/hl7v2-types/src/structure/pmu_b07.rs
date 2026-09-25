@@ -12,7 +12,9 @@ use crate::segment;
 /// The `PMU_B07` message structure definition, `http://hl7.org/v2/StructureDefinition/PMU_B07`.
 pub static PMU_B07: Structure = Structure {
     id: "PMU_B07",
-    url: "http://hl7.org/v2/StructureDefinition/PMU_B07",
+    url: Some("http://hl7.org/v2/StructureDefinition/PMU_B07"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "PMU_B07.1-MSH",

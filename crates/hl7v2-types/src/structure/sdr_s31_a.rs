@@ -12,7 +12,9 @@ use crate::segment;
 /// The `SDR_S31-A` message structure definition, `http://hl7.org/v2/StructureDefinition/SDR_S31-A`.
 pub static SDR_S31_A: Structure = Structure {
     id: "SDR_S31-A",
-    url: "http://hl7.org/v2/StructureDefinition/SDR_S31-A",
+    url: Some("http://hl7.org/v2/StructureDefinition/SDR_S31-A"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "SDR_S31-A.1-MSH",

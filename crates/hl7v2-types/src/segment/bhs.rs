@@ -12,7 +12,7 @@ use crate::model::{
 /// The `BHS` segment definition, `http://hl7.org/v2/StructureDefinition/BHS`.
 pub static BHS: Segment = Segment {
     id: "BHS",
-    url: "http://hl7.org/v2/StructureDefinition/BHS",
+    url: Some("http://hl7.org/v2/StructureDefinition/BHS"),
     name: "Batch Header",
     fields: &[
         Field {

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `LOC` segment definition, `http://hl7.org/v2/StructureDefinition/LOC`.
 pub static LOC: Segment = Segment {
     id: "LOC",
-    url: "http://hl7.org/v2/StructureDefinition/LOC",
+    url: Some("http://hl7.org/v2/StructureDefinition/LOC"),
     name: "Location Identification",
     fields: &[
         Field {

@@ -453,6 +453,18 @@ pub enum Unplaced {
         /// The id of the structure the message is grouped by.
         structure: &'static str,
     },
+    /// The message is parsed against a structure the v2.9.1 definitions no
+    /// longer carry, from the tables of an earlier version.
+    WithdrawnStructure {
+        /// The structure id, for example `ORM_O01`.
+        structure: &'static str,
+        /// The version of the tables the tree comes from.
+        version: &'static str,
+        /// The first version the sources carry without the structure.
+        withdrawn_as_of: &'static str,
+        /// MSH-12.1 as the message wrote it.
+        declared: Option<String>,
+    },
 }
 
 impl Unplaced {
@@ -465,6 +477,7 @@ impl Unplaced {
             Self::ExtraField { .. } => "extra-field",
             Self::EarlierVersion { .. } => "earlier-version",
             Self::OtherStructure { .. } => "other-structure",
+            Self::WithdrawnStructure { .. } => "withdrawn-structure",
         }
     }
 }
@@ -837,6 +850,19 @@ pub enum StructureError {
         /// The variant ids.
         candidates: Vec<&'static str>,
     },
+    /// The message names a structure only the legacy tables carry, and none
+    /// of them carries it at or before the version MSH-12 declares.
+    #[error(
+        "the withdrawn message structure {name:?} has no tree at or before the version {declared:?}; the legacy tables carry it at {versions:?}"
+    )]
+    NoLegacyVersion {
+        /// The structure id, from MSH-9.3 or from MSH-9.1 and MSH-9.2.
+        name: String,
+        /// MSH-12.1 as the message wrote it.
+        declared: Option<String>,
+        /// The versions whose tables carry the structure.
+        versions: Vec<&'static str>,
+    },
 }
 
 /// Selects the message structure MSH-9.3 names.
@@ -848,23 +874,38 @@ pub enum StructureError {
 /// `ADT^A04` names `ADT_A01-B`. When MSH-9.3 names no structure of the
 /// definitions (`ADT^A08^ADT_A08`), the message definition of MSH-9.1 and
 /// MSH-9.2 selects it (`ADT_A01`), and [`group`] counts
-/// [`Unplaced::OtherStructure`].
+/// [`Unplaced::OtherStructure`]. A structure the definitions no longer carry
+/// (`ORM_O01`), which no message definition names, is selected from the
+/// legacy tables ([`hl7v2_types::legacy::versions`], and
+/// [`hl7v2_types::message::legacy`] when MSH-9.3 is empty) by the version
+/// MSH-12 declares, or the nearest earlier version that carries it.
 ///
 /// # Errors
 ///
 /// Returns [`StructureError`] when MSH-9.3 is empty or names no structure
-/// and no message definition for MSH-9.1 and MSH-9.2 names one, or when
-/// MSH-9.3 names one with variants of which that definition names none.
+/// and neither message index names one, when MSH-9.3 names one with variants
+/// of which the message definition names none, and when the legacy tables
+/// carry the structure only after the version MSH-12 declares.
 pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureError> {
-    let indexed = message
-        .message_type(1)
-        .zip(message.message_type(2))
+    let code_event = message.message_type(1).zip(message.message_type(2));
+    let indexed = code_event
         .and_then(|(code, event)| hl7v2_types::message::find(code, event))
         .and_then(|definition| definition.structure);
     let Some(name) = message.message_type(3) else {
         // NOTE: HL7 v2.5.1 chapter 2 §2.15.9.9 makes MSH-9.3 optional where table
-        // 0354 fixes the structure, so the message index answers for a header without it.
-        return indexed.ok_or(StructureError::Unnamed);
+        // 0354 fixes the structure, so the message indexes answer for a header without it.
+        if let Some(structure) = indexed {
+            return Ok(structure);
+        }
+        let Some((code, event)) = code_event else {
+            return Err(StructureError::Unnamed);
+        };
+        let entries = hl7v2_types::message::legacy(code, event);
+        let Some(first) = entries.first() else {
+            return Err(StructureError::Unnamed);
+        };
+        let trees: Vec<&'static Structure> = entries.iter().map(|entry| entry.structure).collect();
+        return legacy_tree(first.structure.id, &trees, message.version());
     };
     if let Some(structure) = hl7v2_types::structure::find(name) {
         return Ok(structure);
@@ -878,14 +919,67 @@ pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureE
     if candidates.is_empty() {
         // NOTE: HL7 v2.5.1 chapter 2 §2.15.9.9: table 0354 fixes the structure from MSH-9.1
         // and MSH-9.2, so the index answers for an MSH-9.3 naming none, counted by `group`.
-        return indexed.ok_or_else(|| StructureError::Unknown {
-            name: String::from(name),
-        });
+        if let Some(structure) = indexed {
+            return Ok(structure);
+        }
+        let trees = hl7v2_types::legacy::versions(name);
+        if trees.is_empty() {
+            return Err(StructureError::Unknown {
+                name: String::from(name),
+            });
+        }
+        return legacy_tree(name, trees, message.version());
     }
     let named = indexed.filter(|structure| candidates.contains(&structure.id));
     named.ok_or_else(|| StructureError::Variant {
         name: String::from(name),
         candidates,
+    })
+}
+
+/// Picks, from the legacy `trees` of one structure in version order, the
+/// tree of the version `declared` names, or of the nearest earlier version.
+fn legacy_tree(
+    name: &str,
+    trees: &[&'static Structure],
+    declared: Option<&str>,
+) -> Result<&'static Structure, StructureError> {
+    // NOTE: no specification governs this: our own design; a version the legacy tables do not
+    // carry is parsed against the nearest earlier version that does, and the outcome names both.
+    let chosen = declared.and_then(version_key).and_then(|declared| {
+        trees
+            .iter()
+            .copied()
+            .rev()
+            .find(|tree| version_key(tree.version).is_some_and(|key| key <= declared))
+    });
+    chosen.ok_or_else(|| StructureError::NoLegacyVersion {
+        name: String::from(name),
+        declared: declared.map(String::from),
+        versions: trees.iter().map(|tree| tree.version).collect(),
+    })
+}
+
+/// The numeric components of a dotted version (`2.5.1` is `[2, 5, 1]`);
+/// `None` for any other text.
+fn version_key(version: &str) -> Option<Vec<u32>> {
+    // NOTE: a version that is not dotted digits names no legacy tree, so the
+    // parse failure is the answer and the message is refused with the versions.
+    version
+        .split('.')
+        .map(|part| {
+            let digits = !part.is_empty() && part.bytes().all(|b| b.is_ascii_digit());
+            if digits { part.parse().ok() } else { None }
+        })
+        .collect()
+}
+
+/// Whether `nodes` place the segment `id` anywhere in their tree.
+fn places(nodes: &'static [Node], id: &str) -> bool {
+    nodes.iter().any(|node| match node {
+        Node::Segment(reference) => reference.segment.id == id,
+        Node::Group(group) => places(group.children, id),
+        Node::Placeholder(_) => false,
     })
 }
 
@@ -1011,7 +1105,14 @@ pub fn group(lexed: Lexed, structure: &'static Structure) -> Parsed {
         unplaced: Vec::new(),
         refusals,
     };
-    if let Some(declared) = parsed.message.version()
+    if let Some(withdrawn_as_of) = structure.withdrawn_as_of {
+        parsed.unplaced.push(Unplaced::WithdrawnStructure {
+            structure: structure.id,
+            version: structure.version,
+            withdrawn_as_of,
+            declared: parsed.message.version().map(String::from),
+        });
+    } else if let Some(declared) = parsed.message.version()
         && declared != crate::DEFINITIONS_VERSION
     {
         parsed.unplaced.push(Unplaced::EarlierVersion {
@@ -1033,7 +1134,9 @@ pub fn group(lexed: Lexed, structure: &'static Structure) -> Parsed {
         let Some(segment) = parsed.message.segments.get(index) else {
             continue;
         };
-        if hl7v2_types::segment::find(&segment.id).is_none() {
+        if hl7v2_types::segment::find(&segment.id).is_none()
+            && !places(structure.nodes, &segment.id)
+        {
             parsed.unplaced.push(Unplaced::UnknownSegment { location });
             continue;
         }

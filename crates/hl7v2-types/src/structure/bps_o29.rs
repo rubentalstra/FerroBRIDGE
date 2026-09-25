@@ -12,7 +12,9 @@ use crate::segment;
 /// The `BPS_O29` message structure definition, `http://hl7.org/v2/StructureDefinition/BPS_O29`.
 pub static BPS_O29: Structure = Structure {
     id: "BPS_O29",
-    url: "http://hl7.org/v2/StructureDefinition/BPS_O29",
+    url: Some("http://hl7.org/v2/StructureDefinition/BPS_O29"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "BPS_O29.1-MSH",

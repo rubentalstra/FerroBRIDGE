@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `PTH` segment definition, `http://hl7.org/v2/StructureDefinition/PTH`.
 pub static PTH: Segment = Segment {
     id: "PTH",
-    url: "http://hl7.org/v2/StructureDefinition/PTH",
+    url: Some("http://hl7.org/v2/StructureDefinition/PTH"),
     name: "Pathway",
     fields: &[
         Field {

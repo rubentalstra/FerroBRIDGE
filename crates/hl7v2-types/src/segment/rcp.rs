@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `RCP` segment definition, `http://hl7.org/v2/StructureDefinition/RCP`.
 pub static RCP: Segment = Segment {
     id: "RCP",
-    url: "http://hl7.org/v2/StructureDefinition/RCP",
+    url: Some("http://hl7.org/v2/StructureDefinition/RCP"),
     name: "Response Control Parameter",
     fields: &[
         Field {

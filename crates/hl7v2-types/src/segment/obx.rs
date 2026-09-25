@@ -13,7 +13,7 @@ use crate::model::{
 /// The `OBX` segment definition, `http://hl7.org/v2/StructureDefinition/OBX`.
 pub static OBX: Segment = Segment {
     id: "OBX",
-    url: "http://hl7.org/v2/StructureDefinition/OBX",
+    url: Some("http://hl7.org/v2/StructureDefinition/OBX"),
     name: "Observation/Result",
     fields: &[
         Field {

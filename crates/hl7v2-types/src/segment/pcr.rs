@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PCR` segment definition, `http://hl7.org/v2/StructureDefinition/PCR`.
 pub static PCR: Segment = Segment {
     id: "PCR",
-    url: "http://hl7.org/v2/StructureDefinition/PCR",
+    url: Some("http://hl7.org/v2/StructureDefinition/PCR"),
     name: "Possible Causal Relationship",
     fields: &[
         Field {

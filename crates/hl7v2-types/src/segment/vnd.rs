@@ -12,7 +12,7 @@ use crate::model::{
 /// The `VND` segment definition, `http://hl7.org/v2/StructureDefinition/VND`.
 pub static VND: Segment = Segment {
     id: "VND",
-    url: "http://hl7.org/v2/StructureDefinition/VND",
+    url: Some("http://hl7.org/v2/StructureDefinition/VND"),
     name: "Purchasing Vendor",
     fields: &[
         Field {

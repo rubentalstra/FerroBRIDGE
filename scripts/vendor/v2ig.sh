@@ -44,19 +44,13 @@ corpus_require curl tar shasum jq git
 
 dest="tools/fhir-codegen/vendor/hl7-v2ig"
 item="HL7 v2 definitions (v2ig source of truth, never committed)"
-licence_item="HL7 v2+ licence page"
-
-# The token after the word $1 in the pin cell $2.
-pin_field() {
-  awk -v key="$1" '{ for (i = 1; i < NF; i++) if ($i == key) { print $(i + 1); exit } }' <<< "$2"
-}
 
 pin="$(corpus_pin_cell "$item")"
 repo="$(corpus_pin_repo "$pin")"
 commit="$(corpus_pin_commit "$pin")"
-path="$(pin_field path "$pin")"
-want_files="$(pin_field files "$pin")"
-want_digest="$(pin_field digest "$pin")"
+path="$(corpus_pin_field path "$pin")"
+want_files="$(corpus_pin_field files "$pin")"
+want_digest="$(corpus_pin_field digest "$pin")"
 [ -n "$path" ] || die "the pin '$pin' names no path"
 
 if [ "$mode" = "--commit" ]; then
@@ -125,32 +119,13 @@ fi
 
 # --stamp: read the licence page HL7 attaches to its v2+ publication at its
 # pinned commit and quote its passages verbatim, line by line.
-lpin="$(corpus_pin_cell "$licence_item")"
+lpin="$(corpus_pin_cell "HL7 v2+ licence page")"
 lrepo="$(corpus_pin_repo "$lpin")"
 lcommit="$(corpus_pin_commit "$lpin")"
-lpath="$(pin_field path "$lpin")"
-lsha="$(pin_field sha256 "$lpin")"
-corpus_download "https://raw.githubusercontent.com/$lrepo/$lcommit/$lpath" "$tmp/licence.html" ||
-  die "download of $lpath from $lrepo failed"
-got="$(corpus_sha256 "$tmp/licence.html")"
-[ "$got" = "$lsha" ] || die "$lpath hashes to $got, the pin records $lsha"
-
-quotes=""
-for opening in \
-  "The 2019 Health Level Seven v2+ Publication is copyrighted" \
-  "HL7 licenses its standards and select IP free of charge." \
-  "A. HL7 INDIVIDUAL, STUDENT AND HEALTH PROFESSIONAL MEMBERS, who register" \
-  "INDIVIDUAL, STUDENT AND HEALTH PROFESSIONAL MEMBERS wishing to incorporate" \
-  "B. HL7 ORGANIZATION MEMBERS, who register" \
-  "C. NON-MEMBERS, who register" \
-  "NON-MEMBERS wishing to incorporate"; do
-  line="$(grep -F "$opening" "$tmp/licence.html")" || die "$lpath has no line opening '$opening'"
-  [ "$(wc -l <<< "$line" | tr -d '[:space:]')" = "1" ] || die "$lpath has more than one line opening '$opening'"
-  quotes="$quotes
-> $line
->"
-done
-quotes="${quotes%>}"
+lpath="$(corpus_pin_field path "$lpin")"
+lsha="$(corpus_pin_field sha256 "$lpin")"
+quotes="$(corpus_hl7_licence_quotes "$tmp" "$lrepo" "$lcommit" "$lpath" "$lsha")
+"
 fetched="$(corpus_fetched)"
 
 cat > "$dest/PROVENANCE.md" << PROV

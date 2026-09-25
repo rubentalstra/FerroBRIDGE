@@ -10,7 +10,9 @@ use crate::segment;
 /// The `ADT_A24` message structure definition, `http://hl7.org/v2/StructureDefinition/ADT_A24`.
 pub static ADT_A24: Structure = Structure {
     id: "ADT_A24",
-    url: "http://hl7.org/v2/StructureDefinition/ADT_A24",
+    url: Some("http://hl7.org/v2/StructureDefinition/ADT_A24"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "ADT_A24.1-MSH",

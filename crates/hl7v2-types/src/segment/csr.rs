@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `CSR` segment definition, `http://hl7.org/v2/StructureDefinition/CSR`.
 pub static CSR: Segment = Segment {
     id: "CSR",
-    url: "http://hl7.org/v2/StructureDefinition/CSR",
+    url: Some("http://hl7.org/v2/StructureDefinition/CSR"),
     name: "Clinical Study Registration",
     fields: &[
         Field {

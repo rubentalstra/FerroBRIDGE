@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RPI_I04` message structure definition, `http://hl7.org/v2/StructureDefinition/RPI_I04`.
 pub static RPI_I04: Structure = Structure {
     id: "RPI_I04",
-    url: "http://hl7.org/v2/StructureDefinition/RPI_I04",
+    url: Some("http://hl7.org/v2/StructureDefinition/RPI_I04"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RPI_I04.1-MSH",

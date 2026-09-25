@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OSU_O51` message structure definition, `http://hl7.org/v2/StructureDefinition/OSU_O51`.
 pub static OSU_O51: Structure = Structure {
     id: "OSU_O51",
-    url: "http://hl7.org/v2/StructureDefinition/OSU_O51",
+    url: Some("http://hl7.org/v2/StructureDefinition/OSU_O51"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OSU_O51.1-MSH",

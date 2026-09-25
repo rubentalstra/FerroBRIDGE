@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SHP` segment definition, `http://hl7.org/v2/StructureDefinition/SHP`.
 pub static SHP: Segment = Segment {
     id: "SHP",
-    url: "http://hl7.org/v2/StructureDefinition/SHP",
+    url: Some("http://hl7.org/v2/StructureDefinition/SHP"),
     name: "Shipment",
     fields: &[
         Field {

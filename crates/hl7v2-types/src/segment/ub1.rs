@@ -9,7 +9,7 @@ use crate::model::{Cardinality, Field, Max, Optionality, Segment, StandardsStatu
 /// The `UB1` segment definition, `http://hl7.org/v2/StructureDefinition/UB1`.
 pub static UB1: Segment = Segment {
     id: "UB1",
-    url: "http://hl7.org/v2/StructureDefinition/UB1",
+    url: Some("http://hl7.org/v2/StructureDefinition/UB1"),
     name: "Uniform Billing 1",
     fields: &[
         Field {

@@ -12,7 +12,9 @@ use crate::segment;
 /// The `VXU_V04` message structure definition, `http://hl7.org/v2/StructureDefinition/VXU_V04`.
 pub static VXU_V04: Structure = Structure {
     id: "VXU_V04",
-    url: "http://hl7.org/v2/StructureDefinition/VXU_V04",
+    url: Some("http://hl7.org/v2/StructureDefinition/VXU_V04"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "VXU_V04.1-MSH",

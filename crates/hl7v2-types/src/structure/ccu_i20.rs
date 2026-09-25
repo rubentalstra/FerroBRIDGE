@@ -12,7 +12,9 @@ use crate::segment;
 /// The `CCU_I20` message structure definition, `http://hl7.org/v2/StructureDefinition/CCU_I20`.
 pub static CCU_I20: Structure = Structure {
     id: "CCU_I20",
-    url: "http://hl7.org/v2/StructureDefinition/CCU_I20",
+    url: Some("http://hl7.org/v2/StructureDefinition/CCU_I20"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "CCU_I20.1-MSH",

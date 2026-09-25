@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RPA_I08` message structure definition, `http://hl7.org/v2/StructureDefinition/RPA_I08`.
 pub static RPA_I08: Structure = Structure {
     id: "RPA_I08",
-    url: "http://hl7.org/v2/StructureDefinition/RPA_I08",
+    url: Some("http://hl7.org/v2/StructureDefinition/RPA_I08"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RPA_I08.1-MSH",

@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OPU_R25` message structure definition, `http://hl7.org/v2/StructureDefinition/OPU_R25`.
 pub static OPU_R25: Structure = Structure {
     id: "OPU_R25",
-    url: "http://hl7.org/v2/StructureDefinition/OPU_R25",
+    url: Some("http://hl7.org/v2/StructureDefinition/OPU_R25"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OPU_R25.1-MSH",

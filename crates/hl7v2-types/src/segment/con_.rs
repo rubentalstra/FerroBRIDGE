@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `CON` segment definition, `http://hl7.org/v2/StructureDefinition/CON`.
 pub static CON: Segment = Segment {
     id: "CON",
-    url: "http://hl7.org/v2/StructureDefinition/CON",
+    url: Some("http://hl7.org/v2/StructureDefinition/CON"),
     name: "Consent",
     fields: &[
         Field {

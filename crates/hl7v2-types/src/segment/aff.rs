@@ -12,7 +12,7 @@ use crate::model::{
 /// The `AFF` segment definition, `http://hl7.org/v2/StructureDefinition/AFF`.
 pub static AFF: Segment = Segment {
     id: "AFF",
-    url: "http://hl7.org/v2/StructureDefinition/AFF",
+    url: Some("http://hl7.org/v2/StructureDefinition/AFF"),
     name: "Professional Affiliation",
     fields: &[
         Field {

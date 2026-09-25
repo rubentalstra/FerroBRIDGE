@@ -12,7 +12,9 @@ use crate::segment;
 /// The `PPG_PCG` message structure definition, `http://hl7.org/v2/StructureDefinition/PPG_PCG`.
 pub static PPG_PCG: Structure = Structure {
     id: "PPG_PCG",
-    url: "http://hl7.org/v2/StructureDefinition/PPG_PCG",
+    url: Some("http://hl7.org/v2/StructureDefinition/PPG_PCG"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "PPG_PCG.1-MSH",

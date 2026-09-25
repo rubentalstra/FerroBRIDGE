@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RDE_O11-A` message structure definition, `http://hl7.org/v2/StructureDefinition/RDE_O11-A`.
 pub static RDE_O11_A: Structure = Structure {
     id: "RDE_O11-A",
-    url: "http://hl7.org/v2/StructureDefinition/RDE_O11-A",
+    url: Some("http://hl7.org/v2/StructureDefinition/RDE_O11-A"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RDE_O11-A.1-MSH",

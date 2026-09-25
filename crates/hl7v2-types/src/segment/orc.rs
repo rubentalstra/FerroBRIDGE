@@ -12,7 +12,7 @@ use crate::model::{
 /// The `ORC` segment definition, `http://hl7.org/v2/StructureDefinition/ORC`.
 pub static ORC: Segment = Segment {
     id: "ORC",
-    url: "http://hl7.org/v2/StructureDefinition/ORC",
+    url: Some("http://hl7.org/v2/StructureDefinition/ORC"),
     name: "Common Order",
     fields: &[
         Field {

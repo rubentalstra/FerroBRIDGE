@@ -12,7 +12,7 @@ use crate::model::{
 /// The `IAM` segment definition, `http://hl7.org/v2/StructureDefinition/IAM`.
 pub static IAM: Segment = Segment {
     id: "IAM",
-    url: "http://hl7.org/v2/StructureDefinition/IAM",
+    url: Some("http://hl7.org/v2/StructureDefinition/IAM"),
     name: "Patient Adverse Reaction Information",
     fields: &[
         Field {

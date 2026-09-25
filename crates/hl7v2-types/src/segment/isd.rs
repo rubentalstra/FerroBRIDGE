@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `ISD` segment definition, `http://hl7.org/v2/StructureDefinition/ISD`.
 pub static ISD: Segment = Segment {
     id: "ISD",
-    url: "http://hl7.org/v2/StructureDefinition/ISD",
+    url: Some("http://hl7.org/v2/StructureDefinition/ISD"),
     name: "Interaction Status Detail",
     fields: &[
         Field {

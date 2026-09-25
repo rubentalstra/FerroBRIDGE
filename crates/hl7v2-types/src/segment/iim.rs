@@ -12,7 +12,7 @@ use crate::model::{
 /// The `IIM` segment definition, `http://hl7.org/v2/StructureDefinition/IIM`.
 pub static IIM: Segment = Segment {
     id: "IIM",
-    url: "http://hl7.org/v2/StructureDefinition/IIM",
+    url: Some("http://hl7.org/v2/StructureDefinition/IIM"),
     name: "Inventory Item Master",
     fields: &[
         Field {

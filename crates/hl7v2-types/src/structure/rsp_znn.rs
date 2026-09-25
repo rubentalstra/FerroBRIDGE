@@ -10,7 +10,9 @@ use crate::segment;
 /// The `RSP_Znn` message structure definition, `http://hl7.org/v2/StructureDefinition/RSP_Znn`.
 pub static RSP_ZNN: Structure = Structure {
     id: "RSP_Znn",
-    url: "http://hl7.org/v2/StructureDefinition/RSP_Znn",
+    url: Some("http://hl7.org/v2/StructureDefinition/RSP_Znn"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RSP_Znn.1-MSH",

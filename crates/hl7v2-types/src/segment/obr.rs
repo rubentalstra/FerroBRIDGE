@@ -13,7 +13,7 @@ use crate::model::{
 /// The `OBR` segment definition, `http://hl7.org/v2/StructureDefinition/OBR`.
 pub static OBR: Segment = Segment {
     id: "OBR",
-    url: "http://hl7.org/v2/StructureDefinition/OBR",
+    url: Some("http://hl7.org/v2/StructureDefinition/OBR"),
     name: "Observation Request",
     fields: &[
         Field {

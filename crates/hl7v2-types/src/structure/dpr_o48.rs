@@ -12,7 +12,9 @@ use crate::segment;
 /// The `DPR_O48` message structure definition, `http://hl7.org/v2/StructureDefinition/DPR_O48`.
 pub static DPR_O48: Structure = Structure {
     id: "DPR_O48",
-    url: "http://hl7.org/v2/StructureDefinition/DPR_O48",
+    url: Some("http://hl7.org/v2/StructureDefinition/DPR_O48"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "DPR_O48.1-MSH",

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `QPD` segment definition, `http://hl7.org/v2/StructureDefinition/QPD`.
 pub static QPD: Segment = Segment {
     id: "QPD",
-    url: "http://hl7.org/v2/StructureDefinition/QPD",
+    url: Some("http://hl7.org/v2/StructureDefinition/QPD"),
     name: "Query Parameter Definition",
     fields: &[
         Field {

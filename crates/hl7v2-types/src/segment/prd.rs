@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `PRD` segment definition, `http://hl7.org/v2/StructureDefinition/PRD`.
 pub static PRD: Segment = Segment {
     id: "PRD",
-    url: "http://hl7.org/v2/StructureDefinition/PRD",
+    url: Some("http://hl7.org/v2/StructureDefinition/PRD"),
     name: "provider data",
     fields: &[
         Field {

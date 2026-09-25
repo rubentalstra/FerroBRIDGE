@@ -12,7 +12,7 @@ use crate::model::{
 /// The `CM2` segment definition, `http://hl7.org/v2/StructureDefinition/CM2`.
 pub static CM2: Segment = Segment {
     id: "CM2",
-    url: "http://hl7.org/v2/StructureDefinition/CM2",
+    url: Some("http://hl7.org/v2/StructureDefinition/CM2"),
     name: "Clinical Study Schedule Master",
     fields: &[
         Field {

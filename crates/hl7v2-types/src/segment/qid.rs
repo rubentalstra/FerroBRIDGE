@@ -12,7 +12,7 @@ use crate::model::{
 /// The `QID` segment definition, `http://hl7.org/v2/StructureDefinition/QID`.
 pub static QID: Segment = Segment {
     id: "QID",
-    url: "http://hl7.org/v2/StructureDefinition/QID",
+    url: Some("http://hl7.org/v2/StructureDefinition/QID"),
     name: "Query Identification",
     fields: &[
         Field {

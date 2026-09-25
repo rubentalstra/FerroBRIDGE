@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `CSP` segment definition, `http://hl7.org/v2/StructureDefinition/CSP`.
 pub static CSP: Segment = Segment {
     id: "CSP",
-    url: "http://hl7.org/v2/StructureDefinition/CSP",
+    url: Some("http://hl7.org/v2/StructureDefinition/CSP"),
     name: "Clinical Study Phase",
     fields: &[
         Field {

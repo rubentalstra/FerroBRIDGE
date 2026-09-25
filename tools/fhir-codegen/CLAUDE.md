@@ -31,6 +31,15 @@ resources are the authority for what it emits (`.claude/rules/codegen.md`).
   `v2::lower::Defect::tolerated_in` lists, and a test asserts each listed
   file carries it. `emit` and `emit --check` cover both crates, and both need
   the fetched tree.
+- `v2::legacy` (#303) reads the IGAMT export of HL7's v2 database that
+  `scripts/vendor/v2-legacy.sh` fetches into the ignored
+  `vendor/hl7-v2-legacy/` (`legacy::source`, one directory of JSON tables
+  per version, and table 0354 of `hl7.terminology`) and lowers every
+  structure whose code v2.9.1 lacks, per version, into the `lower` shapes
+  (`legacy::lower`). `v2::render` emits them under `legacy/` with the
+  segments whose field table differs from v2.9.1, and links the rest to the
+  v2.9.1 statics. Its defects are tolerated only where
+  `legacy::lower::LegacyDefect::tolerated_in` lists them.
 - A primitive whose JSON form is a string carries its lexical form into the
   output: `lower` reads the `regex` extension of `<primitive>.value` from the
   version's own package and compiles it there, so an uncompilable form fails

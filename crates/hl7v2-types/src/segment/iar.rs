@@ -12,7 +12,7 @@ use crate::model::{
 /// The `IAR` segment definition, `http://hl7.org/v2/StructureDefinition/IAR`.
 pub static IAR: Segment = Segment {
     id: "IAR",
-    url: "http://hl7.org/v2/StructureDefinition/IAR",
+    url: Some("http://hl7.org/v2/StructureDefinition/IAR"),
     name: "Allergy Reaction",
     fields: &[
         Field {

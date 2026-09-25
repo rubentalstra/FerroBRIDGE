@@ -12,7 +12,9 @@ use crate::segment;
 /// The `EHC_E01` message structure definition, `http://hl7.org/v2/StructureDefinition/EHC_E01`.
 pub static EHC_E01: Structure = Structure {
     id: "EHC_E01",
-    url: "http://hl7.org/v2/StructureDefinition/EHC_E01",
+    url: Some("http://hl7.org/v2/StructureDefinition/EHC_E01"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "EHC_E01.1-MSH",

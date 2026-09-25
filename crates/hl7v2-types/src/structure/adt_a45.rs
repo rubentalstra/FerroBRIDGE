@@ -12,7 +12,9 @@ use crate::segment;
 /// The `ADT_A45` message structure definition, `http://hl7.org/v2/StructureDefinition/ADT_A45`.
 pub static ADT_A45: Structure = Structure {
     id: "ADT_A45",
-    url: "http://hl7.org/v2/StructureDefinition/ADT_A45",
+    url: Some("http://hl7.org/v2/StructureDefinition/ADT_A45"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "ADT_A45.1-MSH",

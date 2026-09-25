@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `TCD` segment definition, `http://hl7.org/v2/StructureDefinition/TCD`.
 pub static TCD: Segment = Segment {
     id: "TCD",
-    url: "http://hl7.org/v2/StructureDefinition/TCD",
+    url: Some("http://hl7.org/v2/StructureDefinition/TCD"),
     name: "Test Code Detail",
     fields: &[
         Field {

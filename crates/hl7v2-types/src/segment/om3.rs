@@ -12,7 +12,7 @@ use crate::model::{
 /// The `OM3` segment definition, `http://hl7.org/v2/StructureDefinition/OM3`.
 pub static OM3: Segment = Segment {
     id: "OM3",
-    url: "http://hl7.org/v2/StructureDefinition/OM3",
+    url: Some("http://hl7.org/v2/StructureDefinition/OM3"),
     name: "Categorical Service/Test/Observation",
     fields: &[
         Field {

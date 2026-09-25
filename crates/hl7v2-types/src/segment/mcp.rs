@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `MCP` segment definition, `http://hl7.org/v2/StructureDefinition/MCP`.
 pub static MCP: Segment = Segment {
     id: "MCP",
-    url: "http://hl7.org/v2/StructureDefinition/MCP",
+    url: Some("http://hl7.org/v2/StructureDefinition/MCP"),
     name: "Master File Coverage Policy",
     fields: &[
         Field {

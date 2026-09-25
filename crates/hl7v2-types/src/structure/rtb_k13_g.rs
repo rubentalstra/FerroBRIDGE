@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RTB_K13-G` message structure definition, `http://hl7.org/v2/StructureDefinition/RTB_K13-G`.
 pub static RTB_K13_G: Structure = Structure {
     id: "RTB_K13-G",
-    url: "http://hl7.org/v2/StructureDefinition/RTB_K13-G",
+    url: Some("http://hl7.org/v2/StructureDefinition/RTB_K13-G"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RTB_K13-G.1-MSH",

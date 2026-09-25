@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RTB_Z74` message structure definition, `http://hl7.org/v2/StructureDefinition/RTB_Z74`.
 pub static RTB_Z74: Structure = Structure {
     id: "RTB_Z74",
-    url: "http://hl7.org/v2/StructureDefinition/RTB_Z74",
+    url: Some("http://hl7.org/v2/StructureDefinition/RTB_Z74"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RTB_Z74.1-MSH",

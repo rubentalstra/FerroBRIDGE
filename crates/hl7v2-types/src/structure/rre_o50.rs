@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RRE_O50` message structure definition, `http://hl7.org/v2/StructureDefinition/RRE_O50`.
 pub static RRE_O50: Structure = Structure {
     id: "RRE_O50",
-    url: "http://hl7.org/v2/StructureDefinition/RRE_O50",
+    url: Some("http://hl7.org/v2/StructureDefinition/RRE_O50"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RRE_O50.1-MSH",

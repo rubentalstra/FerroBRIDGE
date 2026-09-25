@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `LRL` segment definition, `http://hl7.org/v2/StructureDefinition/LRL`.
 pub static LRL: Segment = Segment {
     id: "LRL",
-    url: "http://hl7.org/v2/StructureDefinition/LRL",
+    url: Some("http://hl7.org/v2/StructureDefinition/LRL"),
     name: "Location Relationship",
     fields: &[
         Field {

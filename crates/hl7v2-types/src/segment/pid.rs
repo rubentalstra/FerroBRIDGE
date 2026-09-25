@@ -13,7 +13,7 @@ use crate::model::{
 /// The `PID` segment definition, `http://hl7.org/v2/StructureDefinition/PID`.
 pub static PID: Segment = Segment {
     id: "PID",
-    url: "http://hl7.org/v2/StructureDefinition/PID",
+    url: Some("http://hl7.org/v2/StructureDefinition/PID"),
     name: "Patient Identification",
     fields: &[
         Field {

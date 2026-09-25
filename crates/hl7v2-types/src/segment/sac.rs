@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SAC` segment definition, `http://hl7.org/v2/StructureDefinition/SAC`.
 pub static SAC: Segment = Segment {
     id: "SAC",
-    url: "http://hl7.org/v2/StructureDefinition/SAC",
+    url: Some("http://hl7.org/v2/StructureDefinition/SAC"),
     name: "Specimen Container Detail",
     fields: &[
         Field {

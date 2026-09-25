@@ -12,7 +12,7 @@ use crate::model::{
 /// The `ODT` segment definition, `http://hl7.org/v2/StructureDefinition/ODT`.
 pub static ODT: Segment = Segment {
     id: "ODT",
-    url: "http://hl7.org/v2/StructureDefinition/ODT",
+    url: Some("http://hl7.org/v2/StructureDefinition/ODT"),
     name: "diet tray instructions",
     fields: &[
         Field {

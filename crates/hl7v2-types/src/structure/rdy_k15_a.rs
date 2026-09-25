@@ -10,7 +10,9 @@ use crate::segment;
 /// The `RDY_K15-A` message structure definition, `http://hl7.org/v2/StructureDefinition/RDY_K15-A`.
 pub static RDY_K15_A: Structure = Structure {
     id: "RDY_K15-A",
-    url: "http://hl7.org/v2/StructureDefinition/RDY_K15-A",
+    url: Some("http://hl7.org/v2/StructureDefinition/RDY_K15-A"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RDY_K15-A.1-MSH",

@@ -12,7 +12,9 @@ use crate::segment;
 /// The `EAR_U08` message structure definition, `http://hl7.org/v2/StructureDefinition/EAR_U08`.
 pub static EAR_U08: Structure = Structure {
     id: "EAR_U08",
-    url: "http://hl7.org/v2/StructureDefinition/EAR_U08",
+    url: Some("http://hl7.org/v2/StructureDefinition/EAR_U08"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "EAR_U08.1-MSH",

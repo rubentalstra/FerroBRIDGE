@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PKG` segment definition, `http://hl7.org/v2/StructureDefinition/PKG`.
 pub static PKG: Segment = Segment {
     id: "PKG",
-    url: "http://hl7.org/v2/StructureDefinition/PKG",
+    url: Some("http://hl7.org/v2/StructureDefinition/PKG"),
     name: "Packaging",
     fields: &[
         Field {

@@ -534,6 +534,8 @@ docs/specs/its-rest|openEHR ITS-REST OpenAPI
 tools/ferrobridge-testkit/fixtures/opt/kds|KDS Diagnose operational template (fixture)
 tools/fhir-codegen/vendor/hl7-v2ig|HL7 v2 definitions (v2ig source of truth, never committed)
 tools/fhir-codegen/vendor/hl7-v2ig|HL7 v2+ licence page
+tools/fhir-codegen/vendor/hl7-v2-legacy|HL7 v2 legacy tables (NIST IGAMT export, never committed)
+tools/fhir-codegen/vendor/hl7-v2-legacy|HL7 v2+ licence page
 crates/ferrobridge-hl7v2/vendor/fhir-converter|HL7 v2 samples: Microsoft FHIR-Converter
 crates/ferrobridge-hl7v2/vendor/reportstream|HL7 v2 samples: CDC ReportStream data tests
 crates/ferrobridge-hl7v2/vendor/v2-to-fhir|HL7 v2 samples: HL7 v2-to-FHIR benchmark messages

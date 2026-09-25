@@ -23,6 +23,12 @@ off-limits to hand edits; the only hand-maintained files are `Cargo.toml`,
   carries, so the emitter links it by name. Table contents are not emitted
   (`hl7.terminology` carries them).
   Widening the root set is a recorded decision, never a per-file addition.
+- `legacy/` is the second root set (#303): every structure whose code no
+  v2.9.1 structure carries, from each version of the IGAMT export that
+  `scripts/vendor/v2-legacy.sh` fetches into
+  `tools/fhir-codegen/vendor/hl7-v2-legacy/`, with the segments its trees
+  name (`fhir_codegen::v2::legacy`). `emit` and `emit --check` need that
+  tree too.
 - The emitter tolerates each defect of the definitions only in the files
   where it was found (`fhir_codegen::v2::lower::Defect`); the same defect
   anywhere else fails the emit.

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `OVR` segment definition, `http://hl7.org/v2/StructureDefinition/OVR`.
 pub static OVR: Segment = Segment {
     id: "OVR",
-    url: "http://hl7.org/v2/StructureDefinition/OVR",
+    url: Some("http://hl7.org/v2/StructureDefinition/OVR"),
     name: "Override",
     fields: &[
         Field {

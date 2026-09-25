@@ -12,7 +12,7 @@ use crate::model::{
 /// The `MFA` segment definition, `http://hl7.org/v2/StructureDefinition/MFA`.
 pub static MFA: Segment = Segment {
     id: "MFA",
-    url: "http://hl7.org/v2/StructureDefinition/MFA",
+    url: Some("http://hl7.org/v2/StructureDefinition/MFA"),
     name: "Master File Acknowledgment",
     fields: &[
         Field {

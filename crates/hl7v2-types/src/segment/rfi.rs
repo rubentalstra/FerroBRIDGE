@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `RFI` segment definition, `http://hl7.org/v2/StructureDefinition/RFI`.
 pub static RFI: Segment = Segment {
     id: "RFI",
-    url: "http://hl7.org/v2/StructureDefinition/RFI",
+    url: Some("http://hl7.org/v2/StructureDefinition/RFI"),
     name: "Request for Information",
     fields: &[
         Field {

@@ -10,7 +10,9 @@ use crate::segment;
 /// The `LSU_U12-A` message structure definition, `http://hl7.org/v2/StructureDefinition/LSU_U12-A`.
 pub static LSU_U12_A: Structure = Structure {
     id: "LSU_U12-A",
-    url: "http://hl7.org/v2/StructureDefinition/LSU_U12-A",
+    url: Some("http://hl7.org/v2/StructureDefinition/LSU_U12-A"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "LSU_U12-A.1-MSH",

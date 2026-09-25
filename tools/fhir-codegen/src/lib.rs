@@ -150,6 +150,8 @@ pub fn run(cli: &Cli) -> Result<Report, Error> {
             })?;
             let hl7v2 = v2::emit::emit(&v2::emit::EmitOptions {
                 definitions: vendor.join("hl7-v2ig"),
+                legacy: vendor.join("hl7-v2-legacy"),
+                vendor: vendor.clone(),
                 crate_dir: hl7v2_out.clone(),
                 check: *check,
             })?;

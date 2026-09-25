@@ -13,7 +13,7 @@ use crate::model::{
 /// The `GOL` segment definition, `http://hl7.org/v2/StructureDefinition/GOL`.
 pub static GOL: Segment = Segment {
     id: "GOL",
-    url: "http://hl7.org/v2/StructureDefinition/GOL",
+    url: Some("http://hl7.org/v2/StructureDefinition/GOL"),
     name: "Goal Detail",
     fields: &[
         Field {

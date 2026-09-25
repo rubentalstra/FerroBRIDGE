@@ -12,7 +12,9 @@ use crate::segment;
 /// The `CQU_I19` message structure definition, `http://hl7.org/v2/StructureDefinition/CQU_I19`.
 pub static CQU_I19: Structure = Structure {
     id: "CQU_I19",
-    url: "http://hl7.org/v2/StructureDefinition/CQU_I19",
+    url: Some("http://hl7.org/v2/StructureDefinition/CQU_I19"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "CQU_I19.1-MSH",

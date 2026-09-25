@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `ORG` segment definition, `http://hl7.org/v2/StructureDefinition/ORG`.
 pub static ORG: Segment = Segment {
     id: "ORG",
-    url: "http://hl7.org/v2/StructureDefinition/ORG",
+    url: Some("http://hl7.org/v2/StructureDefinition/ORG"),
     name: "Practitioner Organization Unit",
     fields: &[
         Field {

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `APR` segment definition, `http://hl7.org/v2/StructureDefinition/APR`.
 pub static APR: Segment = Segment {
     id: "APR",
-    url: "http://hl7.org/v2/StructureDefinition/APR",
+    url: Some("http://hl7.org/v2/StructureDefinition/APR"),
     name: "Appointment Preferences",
     fields: &[
         Field {

@@ -68,6 +68,7 @@ reportstream/prime-router/src/testIntegration/resources/datatests/FHIR_to_HL7/sa
 reportstream/prime-router/src/testIntegration/resources/datatests/FHIR_to_HL7/sample_truncate_CA_20230406-0001.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/FHIR_to_HL7/simple_report_with_date_aoe_question.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_FHIR/sample_oml_20240319-001.hl7
+reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_FHIR/sample_orm_20230809-001.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_FHIR/sample_oru_CDPH_NBS_20241021-001.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_FHIR_to_HL7/ORU_deidentified-expected.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_FHIR_to_HL7/ORU_deidentified.hl7

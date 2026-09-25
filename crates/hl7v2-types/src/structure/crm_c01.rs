@@ -12,7 +12,9 @@ use crate::segment;
 /// The `CRM_C01` message structure definition, `http://hl7.org/v2/StructureDefinition/CRM_C01`.
 pub static CRM_C01: Structure = Structure {
     id: "CRM_C01",
-    url: "http://hl7.org/v2/StructureDefinition/CRM_C01",
+    url: Some("http://hl7.org/v2/StructureDefinition/CRM_C01"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "CRM_C01.1-MSH",

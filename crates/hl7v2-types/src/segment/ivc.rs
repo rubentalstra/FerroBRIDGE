@@ -12,7 +12,7 @@ use crate::model::{
 /// The `IVC` segment definition, `http://hl7.org/v2/StructureDefinition/IVC`.
 pub static IVC: Segment = Segment {
     id: "IVC",
-    url: "http://hl7.org/v2/StructureDefinition/IVC",
+    url: Some("http://hl7.org/v2/StructureDefinition/IVC"),
     name: "Invoice",
     fields: &[
         Field {

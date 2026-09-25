@@ -12,7 +12,9 @@ use crate::segment;
 /// The `PEX_P07` message structure definition, `http://hl7.org/v2/StructureDefinition/PEX_P07`.
 pub static PEX_P07: Structure = Structure {
     id: "PEX_P07",
-    url: "http://hl7.org/v2/StructureDefinition/PEX_P07",
+    url: Some("http://hl7.org/v2/StructureDefinition/PEX_P07"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "PEX_P07.1-MSH",

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `CTI` segment definition, `http://hl7.org/v2/StructureDefinition/CTI`.
 pub static CTI: Segment = Segment {
     id: "CTI",
-    url: "http://hl7.org/v2/StructureDefinition/CTI",
+    url: Some("http://hl7.org/v2/StructureDefinition/CTI"),
     name: "Clinical Trial Identification",
     fields: &[
         Field {

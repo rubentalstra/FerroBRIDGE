@@ -78,6 +78,19 @@ jobs:
       - name: Fetch and verify the HL7 v2 definitions
         if: ${{ hashFiles('Cargo.toml') != '' }}
         run: bash scripts/vendor/v2ig.sh
+      - name: Read the pinned HL7 v2 legacy tables commit
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        id: v2-legacy
+        run: echo "commit=$(bash scripts/vendor/v2-legacy.sh --commit)" >> "$GITHUB_OUTPUT"
+      - name: Restore the HL7 v2 legacy tables
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/fhir-codegen/vendor/hl7-v2-legacy/src
+          key: hl7-v2-legacy-${{ steps.v2-legacy.outputs.commit }}
+      - name: Fetch and verify the HL7 v2 legacy tables
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        run: bash scripts/vendor/v2-legacy.sh
 
       # The lcov file sonar.rust.lcov.reportPaths names. One package at a time:
       # a workspace-wide instrumented build schedules the two generated giants

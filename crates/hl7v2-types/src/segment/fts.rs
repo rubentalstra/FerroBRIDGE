@@ -10,7 +10,7 @@ use crate::model::{Cardinality, ConformanceLength, DataTypeRef, Field, Max, Opti
 /// The `FTS` segment definition, `http://hl7.org/v2/StructureDefinition/FTS`.
 pub static FTS: Segment = Segment {
     id: "FTS",
-    url: "http://hl7.org/v2/StructureDefinition/FTS",
+    url: Some("http://hl7.org/v2/StructureDefinition/FTS"),
     name: "File Trailer",
     fields: &[
         Field {

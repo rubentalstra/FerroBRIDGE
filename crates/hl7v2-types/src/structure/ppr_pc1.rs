@@ -12,7 +12,9 @@ use crate::segment;
 /// The `PPR_PC1` message structure definition, `http://hl7.org/v2/StructureDefinition/PPR_PC1`.
 pub static PPR_PC1: Structure = Structure {
     id: "PPR_PC1",
-    url: "http://hl7.org/v2/StructureDefinition/PPR_PC1",
+    url: Some("http://hl7.org/v2/StructureDefinition/PPR_PC1"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "PPR_PC1.1-MSH",

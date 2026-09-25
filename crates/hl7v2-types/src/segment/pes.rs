@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PES` segment definition, `http://hl7.org/v2/StructureDefinition/PES`.
 pub static PES: Segment = Segment {
     id: "PES",
-    url: "http://hl7.org/v2/StructureDefinition/PES",
+    url: Some("http://hl7.org/v2/StructureDefinition/PES"),
     name: "Product Experience Sender",
     fields: &[
         Field {

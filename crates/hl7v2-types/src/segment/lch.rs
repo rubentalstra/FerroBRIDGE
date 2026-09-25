@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `LCH` segment definition, `http://hl7.org/v2/StructureDefinition/LCH`.
 pub static LCH: Segment = Segment {
     id: "LCH",
-    url: "http://hl7.org/v2/StructureDefinition/LCH",
+    url: Some("http://hl7.org/v2/StructureDefinition/LCH"),
     name: "Location Characteristic",
     fields: &[
         Field {

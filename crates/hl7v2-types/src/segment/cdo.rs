@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `CDO` segment definition, `http://hl7.org/v2/StructureDefinition/CDO`.
 pub static CDO: Segment = Segment {
     id: "CDO",
-    url: "http://hl7.org/v2/StructureDefinition/CDO",
+    url: Some("http://hl7.org/v2/StructureDefinition/CDO"),
     name: "Cumulative Dosage",
     fields: &[
         Field {

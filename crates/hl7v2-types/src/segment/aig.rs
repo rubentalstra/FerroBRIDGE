@@ -12,7 +12,7 @@ use crate::model::{
 /// The `AIG` segment definition, `http://hl7.org/v2/StructureDefinition/AIG`.
 pub static AIG: Segment = Segment {
     id: "AIG",
-    url: "http://hl7.org/v2/StructureDefinition/AIG",
+    url: Some("http://hl7.org/v2/StructureDefinition/AIG"),
     name: "Appointment Information - General Resource",
     fields: &[
         Field {

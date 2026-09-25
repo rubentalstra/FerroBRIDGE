@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `PDA` segment definition, `http://hl7.org/v2/StructureDefinition/PDA`.
 pub static PDA: Segment = Segment {
     id: "PDA",
-    url: "http://hl7.org/v2/StructureDefinition/PDA",
+    url: Some("http://hl7.org/v2/StructureDefinition/PDA"),
     name: "Patient Death and Autopsy",
     fields: &[
         Field {

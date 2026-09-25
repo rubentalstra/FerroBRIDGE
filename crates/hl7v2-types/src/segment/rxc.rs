@@ -12,7 +12,7 @@ use crate::model::{
 /// The `RXC` segment definition, `http://hl7.org/v2/StructureDefinition/RXC`.
 pub static RXC: Segment = Segment {
     id: "RXC",
-    url: "http://hl7.org/v2/StructureDefinition/RXC",
+    url: Some("http://hl7.org/v2/StructureDefinition/RXC"),
     name: "Pharmacy/Treatment Component Order",
     fields: &[
         Field {

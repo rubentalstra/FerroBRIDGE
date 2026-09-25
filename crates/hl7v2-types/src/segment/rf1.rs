@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `RF1` segment definition, `http://hl7.org/v2/StructureDefinition/RF1`.
 pub static RF1: Segment = Segment {
     id: "RF1",
-    url: "http://hl7.org/v2/StructureDefinition/RF1",
+    url: Some("http://hl7.org/v2/StructureDefinition/RF1"),
     name: "Referral Information",
     fields: &[
         Field {

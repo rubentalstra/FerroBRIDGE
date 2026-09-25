@@ -12,7 +12,7 @@ use crate::model::{
 /// The `AUT` segment definition, `http://hl7.org/v2/StructureDefinition/AUT`.
 pub static AUT: Segment = Segment {
     id: "AUT",
-    url: "http://hl7.org/v2/StructureDefinition/AUT",
+    url: Some("http://hl7.org/v2/StructureDefinition/AUT"),
     name: "Authorization Information",
     fields: &[
         Field {

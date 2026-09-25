@@ -12,7 +12,9 @@ use crate::segment;
 /// The `DEL_O46` message structure definition, `http://hl7.org/v2/StructureDefinition/DEL_O46`.
 pub static DEL_O46: Structure = Structure {
     id: "DEL_O46",
-    url: "http://hl7.org/v2/StructureDefinition/DEL_O46",
+    url: Some("http://hl7.org/v2/StructureDefinition/DEL_O46"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "DEL_O46.1-MSH",

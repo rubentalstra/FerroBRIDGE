@@ -12,7 +12,9 @@ use crate::segment;
 /// The `DFT_P03` message structure definition, `http://hl7.org/v2/StructureDefinition/DFT_P03`.
 pub static DFT_P03: Structure = Structure {
     id: "DFT_P03",
-    url: "http://hl7.org/v2/StructureDefinition/DFT_P03",
+    url: Some("http://hl7.org/v2/StructureDefinition/DFT_P03"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "DFT_P03.1-MSH",

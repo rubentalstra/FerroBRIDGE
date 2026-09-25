@@ -12,7 +12,7 @@ use crate::model::{
 /// The `TQ1` segment definition, `http://hl7.org/v2/StructureDefinition/TQ1`.
 pub static TQ1: Segment = Segment {
     id: "TQ1",
-    url: "http://hl7.org/v2/StructureDefinition/TQ1",
+    url: Some("http://hl7.org/v2/StructureDefinition/TQ1"),
     name: "Timing/Quantity",
     fields: &[
         Field {

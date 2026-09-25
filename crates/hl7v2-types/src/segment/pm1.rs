@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `PM1` segment definition, `http://hl7.org/v2/StructureDefinition/PM1`.
 pub static PM1: Segment = Segment {
     id: "PM1",
-    url: "http://hl7.org/v2/StructureDefinition/PM1",
+    url: Some("http://hl7.org/v2/StructureDefinition/PM1"),
     name: "Payer Master File",
     fields: &[
         Field {

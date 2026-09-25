@@ -12,7 +12,7 @@ use crate::model::{
 /// The `ECD` segment definition, `http://hl7.org/v2/StructureDefinition/ECD`.
 pub static ECD: Segment = Segment {
     id: "ECD",
-    url: "http://hl7.org/v2/StructureDefinition/ECD",
+    url: Some("http://hl7.org/v2/StructureDefinition/ECD"),
     name: "Equipment Command",
     fields: &[
         Field {

@@ -12,7 +12,7 @@ use crate::model::{
 /// The `PRB` segment definition, `http://hl7.org/v2/StructureDefinition/PRB`.
 pub static PRB: Segment = Segment {
     id: "PRB",
-    url: "http://hl7.org/v2/StructureDefinition/PRB",
+    url: Some("http://hl7.org/v2/StructureDefinition/PRB"),
     name: "Problem Detail",
     fields: &[
         Field {

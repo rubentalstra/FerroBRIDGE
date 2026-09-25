@@ -12,7 +12,7 @@ use crate::model::{
 /// The `QAK` segment definition, `http://hl7.org/v2/StructureDefinition/QAK`.
 pub static QAK: Segment = Segment {
     id: "QAK",
-    url: "http://hl7.org/v2/StructureDefinition/QAK",
+    url: Some("http://hl7.org/v2/StructureDefinition/QAK"),
     name: "Query Acknowledgment",
     fields: &[
         Field {

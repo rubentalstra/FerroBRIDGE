@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `GSR` segment definition, `http://hl7.org/v2/StructureDefinition/GSR`.
 pub static GSR: Segment = Segment {
     id: "GSR",
-    url: "http://hl7.org/v2/StructureDefinition/GSR",
+    url: Some("http://hl7.org/v2/StructureDefinition/GSR"),
     name: "Recorded Gender and Sex",
     fields: &[
         Field {

@@ -25,6 +25,24 @@ crates on crates.io.
 
 ### Added
 
+- `hl7v2-types` carries the message structures HL7 withdrew before v2.9.1
+  (#303), so `ferrobridge-hl7v2` parses the `ORM^O01` orders legacy senders
+  still send. `scripts/vendor/v2-legacy.sh` fetches the NIST IGAMT export of
+  HL7's v2 database (versions 2.1 to 2.8.2) at build time, never committed,
+  pinned in `docs/VERSIONS.md` by commit, file count and tree digest. The
+  generator emits every structure whose code no v2.9.1 structure carries
+  under `legacy::<version>`: 218 trees of 57 codes over 11 versions, each
+  with its `version` and `withdrawn_as_of` (`ORM_O01`: 2.7), each code
+  checked against table 0354 of `hl7.terminology`. The segments those trees
+  name come from the same version's tables (495 per-version segments emitted;
+  98 references linked to the v2.9.1 segment they agree with), and
+  `message::LEGACY` with `message::find_legacy` indexes them by code, event
+  and version. `parse::structure_for` falls back to it by MSH-12, taking the
+  nearest earlier version the export carries, refuses a version before the
+  first tree with `StructureError::NoLegacyVersion`, and a parse against a
+  legacy tree is the counted outcome `withdrawn-structure`. A structure's and
+  a segment's `url` is now `Option`, a field's data type can be
+  `DataTypeRef::Legacy`, and `Optionality` gains `Na`.
 - `hl7v2-types` carries the data type and message definitions (#289).
   `data_type` holds the 83 data types of the HL7 v2 definitions (12
   primitive, 71 complex with 448 components), each component with its

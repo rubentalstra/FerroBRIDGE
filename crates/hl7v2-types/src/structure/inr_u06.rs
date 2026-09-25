@@ -10,7 +10,9 @@ use crate::segment;
 /// The `INR_U06` message structure definition, `http://hl7.org/v2/StructureDefinition/INR_U06`.
 pub static INR_U06: Structure = Structure {
     id: "INR_U06",
-    url: "http://hl7.org/v2/StructureDefinition/INR_U06",
+    url: Some("http://hl7.org/v2/StructureDefinition/INR_U06"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "INR_U06.1-MSH",

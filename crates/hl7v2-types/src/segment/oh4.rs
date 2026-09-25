@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `OH4` segment definition, `http://hl7.org/v2/StructureDefinition/OH4`.
 pub static OH4: Segment = Segment {
     id: "OH4",
-    url: "http://hl7.org/v2/StructureDefinition/OH4",
+    url: Some("http://hl7.org/v2/StructureDefinition/OH4"),
     name: "Combat Zone Work",
     fields: &[
         Field {

@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `UAC` segment definition, `http://hl7.org/v2/StructureDefinition/UAC`.
 pub static UAC: Segment = Segment {
     id: "UAC",
-    url: "http://hl7.org/v2/StructureDefinition/UAC",
+    url: Some("http://hl7.org/v2/StructureDefinition/UAC"),
     name: "User Authentication Credential",
     fields: &[
         Field {

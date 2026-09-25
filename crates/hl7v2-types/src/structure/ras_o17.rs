@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RAS_O17` message structure definition, `http://hl7.org/v2/StructureDefinition/RAS_O17`.
 pub static RAS_O17: Structure = Structure {
     id: "RAS_O17",
-    url: "http://hl7.org/v2/StructureDefinition/RAS_O17",
+    url: Some("http://hl7.org/v2/StructureDefinition/RAS_O17"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RAS_O17.1-MSH",

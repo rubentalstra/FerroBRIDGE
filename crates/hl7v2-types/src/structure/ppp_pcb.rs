@@ -12,7 +12,9 @@ use crate::segment;
 /// The `PPP_PCB` message structure definition, `http://hl7.org/v2/StructureDefinition/PPP_PCB`.
 pub static PPP_PCB: Structure = Structure {
     id: "PPP_PCB",
-    url: "http://hl7.org/v2/StructureDefinition/PPP_PCB",
+    url: Some("http://hl7.org/v2/StructureDefinition/PPP_PCB"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "PPP_PCB.1-MSH",

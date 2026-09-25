@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `NST` segment definition, `http://hl7.org/v2/StructureDefinition/NST`.
 pub static NST: Segment = Segment {
     id: "NST",
-    url: "http://hl7.org/v2/StructureDefinition/NST",
+    url: Some("http://hl7.org/v2/StructureDefinition/NST"),
     name: "Application Control-Level Statistics",
     fields: &[
         Field {

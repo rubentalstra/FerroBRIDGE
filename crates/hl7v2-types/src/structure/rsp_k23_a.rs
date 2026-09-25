@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RSP_K23-A` message structure definition, `http://hl7.org/v2/StructureDefinition/RSP_K23-A`.
 pub static RSP_K23_A: Structure = Structure {
     id: "RSP_K23-A",
-    url: "http://hl7.org/v2/StructureDefinition/RSP_K23-A",
+    url: Some("http://hl7.org/v2/StructureDefinition/RSP_K23-A"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RSP_K23-A.1-MSH",

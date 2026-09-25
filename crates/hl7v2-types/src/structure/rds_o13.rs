@@ -12,7 +12,9 @@ use crate::segment;
 /// The `RDS_O13` message structure definition, `http://hl7.org/v2/StructureDefinition/RDS_O13`.
 pub static RDS_O13: Structure = Structure {
     id: "RDS_O13",
-    url: "http://hl7.org/v2/StructureDefinition/RDS_O13",
+    url: Some("http://hl7.org/v2/StructureDefinition/RDS_O13"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RDS_O13.1-MSH",

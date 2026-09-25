@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `ECR` segment definition, `http://hl7.org/v2/StructureDefinition/ECR`.
 pub static ECR: Segment = Segment {
     id: "ECR",
-    url: "http://hl7.org/v2/StructureDefinition/ECR",
+    url: Some("http://hl7.org/v2/StructureDefinition/ECR"),
     name: "Equipment Command Response",
     fields: &[
         Field {

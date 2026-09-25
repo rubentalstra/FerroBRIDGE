@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Max, Optionality, Segment, T
 /// The `STZ` segment definition, `http://hl7.org/v2/StructureDefinition/STZ`.
 pub static STZ: Segment = Segment {
     id: "STZ",
-    url: "http://hl7.org/v2/StructureDefinition/STZ",
+    url: Some("http://hl7.org/v2/StructureDefinition/STZ"),
     name: "Sterilization Parameter",
     fields: &[
         Field {

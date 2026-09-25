@@ -12,7 +12,7 @@ use crate::model::{
 /// The `SGT` segment definition, `http://hl7.org/v2/StructureDefinition/SGT`.
 pub static SGT: Segment = Segment {
     id: "SGT",
-    url: "http://hl7.org/v2/StructureDefinition/SGT",
+    url: Some("http://hl7.org/v2/StructureDefinition/SGT"),
     name: "Segment Group Trailer",
     fields: &[
         Field {

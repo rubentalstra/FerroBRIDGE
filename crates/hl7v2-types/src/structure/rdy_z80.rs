@@ -10,7 +10,9 @@ use crate::segment;
 /// The `RDY_Z80` message structure definition, `http://hl7.org/v2/StructureDefinition/RDY_Z80`.
 pub static RDY_Z80: Structure = Structure {
     id: "RDY_Z80",
-    url: "http://hl7.org/v2/StructureDefinition/RDY_Z80",
+    url: Some("http://hl7.org/v2/StructureDefinition/RDY_Z80"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RDY_Z80.1-MSH",

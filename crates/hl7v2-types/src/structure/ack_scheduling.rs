@@ -10,7 +10,9 @@ use crate::segment;
 /// The `ACK-Scheduling` message structure definition, `http://hl7.org/v2/StructureDefinition/ACK-Scheduling`.
 pub static ACK_SCHEDULING: Structure = Structure {
     id: "ACK-Scheduling",
-    url: "http://hl7.org/v2/StructureDefinition/ACK-Scheduling",
+    url: Some("http://hl7.org/v2/StructureDefinition/ACK-Scheduling"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "ACK-Scheduling.1-MSH",

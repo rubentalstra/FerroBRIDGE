@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `GSP` segment definition, `http://hl7.org/v2/StructureDefinition/GSP`.
 pub static GSP: Segment = Segment {
     id: "GSP",
-    url: "http://hl7.org/v2/StructureDefinition/GSP",
+    url: Some("http://hl7.org/v2/StructureDefinition/GSP"),
     name: "Person Gender and Sex",
     fields: &[
         Field {

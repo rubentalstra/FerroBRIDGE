@@ -10,7 +10,7 @@ use crate::model::{Cardinality, DataTypeRef, Field, Length, Max, Optionality, Se
 /// The `PAC` segment definition, `http://hl7.org/v2/StructureDefinition/PAC`.
 pub static PAC: Segment = Segment {
     id: "PAC",
-    url: "http://hl7.org/v2/StructureDefinition/PAC",
+    url: Some("http://hl7.org/v2/StructureDefinition/PAC"),
     name: "Shipment Package",
     fields: &[
         Field {

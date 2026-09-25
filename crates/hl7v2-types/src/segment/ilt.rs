@@ -12,7 +12,7 @@ use crate::model::{
 /// The `ILT` segment definition, `http://hl7.org/v2/StructureDefinition/ILT`.
 pub static ILT: Segment = Segment {
     id: "ILT",
-    url: "http://hl7.org/v2/StructureDefinition/ILT",
+    url: Some("http://hl7.org/v2/StructureDefinition/ILT"),
     name: "Material Lot",
     fields: &[
         Field {

@@ -10,7 +10,9 @@ use crate::segment;
 /// The `RTB_Knn` message structure definition, `http://hl7.org/v2/StructureDefinition/RTB_Knn`.
 pub static RTB_KNN: Structure = Structure {
     id: "RTB_Knn",
-    url: "http://hl7.org/v2/StructureDefinition/RTB_Knn",
+    url: Some("http://hl7.org/v2/StructureDefinition/RTB_Knn"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "RTB_Knn.1-MSH",

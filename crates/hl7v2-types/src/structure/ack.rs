@@ -10,7 +10,9 @@ use crate::segment;
 /// The `ACK` message structure definition, `http://hl7.org/v2/StructureDefinition/ACK`.
 pub static ACK: Structure = Structure {
     id: "ACK",
-    url: "http://hl7.org/v2/StructureDefinition/ACK",
+    url: Some("http://hl7.org/v2/StructureDefinition/ACK"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "ACK.1-MSH",

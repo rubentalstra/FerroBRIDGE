@@ -12,7 +12,7 @@ use crate::model::{
 /// The `QRI` segment definition, `http://hl7.org/v2/StructureDefinition/QRI`.
 pub static QRI: Segment = Segment {
     id: "QRI",
-    url: "http://hl7.org/v2/StructureDefinition/QRI",
+    url: Some("http://hl7.org/v2/StructureDefinition/QRI"),
     name: "Query Response Instance",
     fields: &[
         Field {

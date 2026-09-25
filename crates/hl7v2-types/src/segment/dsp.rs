@@ -12,7 +12,7 @@ use crate::model::{
 /// The `DSP` segment definition, `http://hl7.org/v2/StructureDefinition/DSP`.
 pub static DSP: Segment = Segment {
     id: "DSP",
-    url: "http://hl7.org/v2/StructureDefinition/DSP",
+    url: Some("http://hl7.org/v2/StructureDefinition/DSP"),
     name: "Display Data",
     fields: &[
         Field {

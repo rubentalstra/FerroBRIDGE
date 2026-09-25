@@ -12,7 +12,9 @@ use crate::segment;
 /// The `OMG_O19` message structure definition, `http://hl7.org/v2/StructureDefinition/OMG_O19`.
 pub static OMG_O19: Structure = Structure {
     id: "OMG_O19",
-    url: "http://hl7.org/v2/StructureDefinition/OMG_O19",
+    url: Some("http://hl7.org/v2/StructureDefinition/OMG_O19"),
+    version: "2.9.1",
+    withdrawn_as_of: None,
     nodes: &[
         Node::Segment(SegmentRef {
             id: "OMG_O19.1-MSH",
