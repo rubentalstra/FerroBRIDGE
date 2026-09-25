@@ -114,6 +114,24 @@ impl RedbStore {
         Ok(found.map(|value| value.value().to_owned()))
     }
 
+    /// Returns every key and value `table` holds in `range`, in key order.
+    fn scan(
+        &self,
+        table: TableDefinition<'static, &str, &str>,
+        range: &core::ops::Range<String>,
+    ) -> Result<Vec<(String, String)>, StoreError> {
+        let read = self.database.begin_read().map_err(transaction)?;
+        let opened = read.open_table(table).map_err(transaction)?;
+        let rows = opened
+            .range(range.start.as_str()..range.end.as_str())
+            .map_err(transaction)?;
+        rows.map(|row| {
+            let (key, value) = row.map_err(transaction)?;
+            Ok((key.value().to_owned(), value.value().to_owned()))
+        })
+        .collect()
+    }
+
     /// Writes `value` under `key` in `table` unless the key is already taken,
     /// and returns the value that stands.
     fn record(
@@ -259,6 +277,13 @@ impl Store for RedbStore {
         record_of(&key, held)
     }
 
+    fn consumed_versions(&self, source: &SourceVersion) -> Result<Vec<ConsumedSource>, StoreError> {
+        self.scan(SOURCES, &source.every_version())?
+            .into_iter()
+            .map(|(key, held)| record_of(&key, Some(held))?.ok_or(StoreError::Missing { key }))
+            .collect()
+    }
+
     fn record_consumed(
         &self,
         source: &SourceVersion,
@@ -292,7 +317,9 @@ impl Store for RedbStore {
 mod tests {
     use super::RedbStore;
     use crate::cdr::ids::EhrId;
-    use crate::facade::identity::record::{CommittedSource, CompositionBinding, SourceVersion};
+    use crate::facade::identity::record::{
+        CommittedSource, CompositionBinding, ConsumedSource, SourceVersion,
+    };
     use crate::facade::identity::store::Store;
     use crate::facade::identity::{ExternalResourceId, FhirResourceId, PersonId};
 
@@ -366,6 +393,46 @@ mod tests {
         assert_eq!(
             Some(first),
             reopened.committed(&source).expect("the read back")
+        );
+    }
+
+    #[test]
+    fn every_consumed_version_of_one_id_reads_back_from_disk_and_no_other_id() {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        let store = RedbStore::open(&directory.path().join("identity.redb")).expect("the open");
+        let source = |id: &str, version: Option<&str>| {
+            SourceVersion::new(
+                "Condition",
+                ExternalResourceId::new(id).expect("a legal external id"),
+                version.map(String::from),
+            )
+        };
+        let consumed = |uid: &str| ConsumedSource {
+            ehr_id: String::from("bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11"),
+            versioned_object_uid: String::from(uid),
+            internal_id: String::from("abc"),
+            context: String::from("ferrobridge_diagnosis.context"),
+        };
+        for (id, version, uid) in [
+            ("c-1", Some("2"), "uid-1"),
+            ("c-1", Some("1"), "uid-1"),
+            ("c-10", None, "uid-3"),
+        ] {
+            store
+                .record_consumed(&source(id, version), &consumed(uid))
+                .expect("the write");
+        }
+        assert_eq!(
+            vec![consumed("uid-1"), consumed("uid-1")],
+            store
+                .consumed_versions(&source("c-1", None))
+                .expect("the read")
+        );
+        assert_eq!(
+            Vec::<ConsumedSource>::new(),
+            store
+                .consumed_versions(&source("c-2", None))
+                .expect("the read")
         );
     }
 

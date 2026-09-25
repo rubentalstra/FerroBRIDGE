@@ -43,8 +43,9 @@ pub struct CompositionBinding {
 /// The mapping one inbound resource version was consumed by.
 ///
 /// The key is the sending system's `id` and `meta.versionId`, so a re-sent
-/// resource resolves to the composition it already produced and updates it
-/// rather than creating a second one (`docs/architecture.md` §4.6).
+/// resource resolves to the composition it already produced, and a later
+/// version of the same `id` revises that composition (no specification
+/// governs this: our own design).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ConsumedSource {
@@ -166,6 +167,29 @@ impl SourceVersion {
             self.version_id.as_deref().unwrap_or_default()
         )
     }
+
+    /// Returns the key of the source resource whatever its version: the
+    /// resource type and the `id`, joined by the unit separator.
+    ///
+    /// A [`storage_key`](Self::storage_key) carries two separators and this
+    /// key one, so the two never meet in one claim set. No specification
+    /// governs the key shape: our own design.
+    #[must_use]
+    pub fn resource_key(&self) -> String {
+        format!("{}\u{1f}{}", self.resource_type, self.id)
+    }
+
+    /// Returns the range of storage keys that holds every version of this
+    /// source's `id`, with a `meta.versionId` or without one.
+    ///
+    /// Every such key starts with the resource type, the `id` and a
+    /// separator, and `U+0020` is the character after `U+001F`, so the range
+    /// ends before the key of any other `id`.
+    #[must_use]
+    pub fn every_version(&self) -> core::ops::Range<String> {
+        let resource = self.resource_key();
+        format!("{resource}\u{1f}")..format!("{resource}\u{20}")
+    }
 }
 
 /// Returns the storage key of an internal resource id.
@@ -197,6 +221,30 @@ mod tests {
         assert_eq!("Condition\u{1f}c-1\u{1f}2", with.storage_key());
         assert_eq!("Condition\u{1f}c-1\u{1f}", without.storage_key());
         assert_ne!(with.storage_key(), without.storage_key());
+    }
+
+    #[test]
+    fn every_version_of_one_id_and_no_other_id_falls_in_its_range() {
+        let source = SourceVersion::new(
+            "Condition",
+            ExternalResourceId::new("c-1").expect("a legal external id"),
+            Some(String::from("2")),
+        );
+        let range = source.every_version();
+        let key = |id: &str, version: Option<&str>| {
+            SourceVersion::new(
+                "Condition",
+                ExternalResourceId::new(id).expect("a legal external id"),
+                version.map(String::from),
+            )
+            .storage_key()
+        };
+        assert!(range.contains(&key("c-1", Some("1"))));
+        assert!(range.contains(&key("c-1", Some("2"))));
+        assert!(range.contains(&key("c-1", None)));
+        assert!(!range.contains(&key("c-10", Some("1"))));
+        assert!(!range.contains(&key("c-", None)));
+        assert_ne!(source.resource_key(), key("c-1", None));
     }
 
     #[test]
