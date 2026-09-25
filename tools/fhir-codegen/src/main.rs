@@ -9,11 +9,18 @@ use clap::Parser;
 fn main() -> anyhow::Result<()> {
     let cli = fhir_codegen::Cli::parse();
     match fhir_codegen::run(&cli)? {
-        fhir_codegen::Report::Emit(report) => {
+        fhir_codegen::Report::Emit(report, hl7v2) => {
             for (module, types) in &report.types {
                 println!("fhir-codegen: {module}: {types} types");
             }
             println!("fhir-codegen: {} files", report.files.len());
+            println!(
+                "fhir-codegen: hl7v2-types: {} message structures, {} segments, {} fields, {} files",
+                hl7v2.structures,
+                hl7v2.segments,
+                hl7v2.fields,
+                hl7v2.files.len()
+            );
         }
         fhir_codegen::Report::Terminology(report) => {
             for (module, counts) in &report.counts {

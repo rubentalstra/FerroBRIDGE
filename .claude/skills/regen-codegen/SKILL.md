@@ -1,6 +1,6 @@
 ---
 name: regen-codegen
-description: Regenerate the generated layers, fhir-types from the vendored FHIR packages and omop-cdm from the vendored OHDSI definitions, and verify no drift. Use after changing a generator, an override, or a vendored pin.
+description: Regenerate the generated layers, fhir-types from the vendored FHIR packages, hl7v2-types from the fetched HL7 v2 definitions and omop-cdm from the vendored OHDSI definitions, and verify no drift. Use after changing a generator, an override, or a vendored pin.
 allowed-tools: Bash, Read, Grep
 ---
 
@@ -22,11 +22,14 @@ generator or its override map and regenerate here. Full discipline:
    `tools/fhir-codegen/vendor/` with a `PROVENANCE.md` each. They are fetched
    only by `scripts/vendor/fhir-packages.sh`, which reads its pins from
    `docs/VERSIONS.md`, and are never hand-edited
-   (`.claude/rules/vendored-inputs.md`).
+   (`.claude/rules/vendored-inputs.md`). The same `emit` also regenerates
+   `crates/hl7v2-types` from the HL7 v2 definitions, which are never committed:
+   fetch and verify them at the pin first with `scripts/vendor/v2ig.sh`.
 
-2. **Regenerate** the per-version modules:
+2. **Regenerate** the per-version modules and the v2 tables:
 
    ```bash
+   scripts/vendor/v2ig.sh
    cargo run -p fhir-codegen -- emit
    ```
 
@@ -34,7 +37,7 @@ generator or its override map and regenerate here. Full discipline:
    is clean afterward:
 
    ```bash
-   git diff --exit-code crates/fhir-types
+   git diff --exit-code crates/fhir-types crates/hl7v2-types
    ```
 
    A non-empty diff means the committed generated code was stale; commit the
@@ -50,6 +53,7 @@ generator or its override map and regenerate here. Full discipline:
    cargo build -p fhir-types
    cargo clippy -p fhir-types --all-targets -- -D warnings
    cargo hack check -p fhir-types --each-feature --locked
+   cargo clippy -p hl7v2-types --all-targets -- -D warnings
    cargo nextest run -p fhir-codegen
    ```
 

@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The `fhir-types` generator.
+//! The `fhir-types` and `hl7v2-types` generator.
 //!
 //! Reads the vendored, pinned HL7 FHIR packages under `vendor/` and emits the
 //! per-version Rust modules of `crates/fhir-types`: the terminology root-set
-//! types and the terminology operation contracts. The output is
-//! byte-deterministic so the CI drift check can regenerate and compare.
+//! types and the terminology operation contracts. Reads the HL7 v2 definitions
+//! fetched into `vendor/hl7-v2ig/` and emits `crates/hl7v2-types` ([`v2`]).
+//! The output is byte-deterministic so the CI drift check can regenerate and
+//! compare.
 //!
 //! The pipeline is [`package::Package`] (read a package), then
 //! [`snapshot::ResolvedStructure`] (resolve each structure's snapshot),
@@ -29,6 +31,7 @@ pub mod render_schema;
 pub mod roots;
 pub mod snapshot;
 pub mod terminology;
+pub mod v2;
 
 use std::path::{Path, PathBuf};
 
@@ -57,17 +60,21 @@ pub struct Cli {
 /// The generator's subcommands.
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    /// Regenerates `crates/fhir-types` from the vendored packages.
+    /// Regenerates `crates/fhir-types` from the vendored packages and
+    /// `crates/hl7v2-types` from the fetched HL7 v2 definitions.
     Emit {
-        /// Compare the generated crate with what the emitter produces and fail on any difference.
+        /// Compare the generated crates with what the emitter produces and fail on any difference.
         #[arg(long)]
         check: bool,
-        /// The directory holding the vendored packages.
+        /// The directory holding the vendored packages and, under `hl7-v2ig/`, the v2 definitions.
         #[arg(long, value_name = "DIR", default_value = concat!(env!("CARGO_MANIFEST_DIR"), "/vendor"))]
         vendor: PathBuf,
-        /// The generated crate directory.
+        /// The generated FHIR crate directory.
         #[arg(long, value_name = "DIR", default_value = concat!(env!("CARGO_MANIFEST_DIR"), "/../../crates/fhir-types"))]
         out: PathBuf,
+        /// The generated HL7 v2 crate directory.
+        #[arg(long, value_name = "DIR", default_value = concat!(env!("CARGO_MANIFEST_DIR"), "/../../crates/hl7v2-types"))]
+        hl7v2_out: PathBuf,
     },
     /// Regenerates the FHIR core terminology bundles a terminology server embeds.
     Terminology {
@@ -92,6 +99,9 @@ pub enum Error {
     /// The emit pipeline failed.
     #[error(transparent)]
     Emit(#[from] emit::EmitError),
+    /// The v2 emit pipeline failed.
+    #[error(transparent)]
+    V2(#[from] v2::emit::EmitError),
     /// The terminology bundles failed.
     #[error(transparent)]
     Terminology(#[from] terminology::BundleError),
@@ -100,8 +110,8 @@ pub enum Error {
 /// What one run of the generator produced.
 #[derive(Debug)]
 pub enum Report {
-    /// The generated crate.
-    Emit(emit::EmitReport),
+    /// The two generated crates, `fhir-types` first.
+    Emit(emit::EmitReport, v2::emit::EmitReport),
     /// The FHIR core terminology bundles.
     Terminology(terminology::BundleReport),
 }
@@ -122,16 +132,29 @@ pub fn version_inputs(vendor: &Path) -> Vec<emit::VersionInput> {
 ///
 /// # Errors
 ///
-/// Returns [`Error::Emit`] or [`Error::Terminology`] when the pipeline fails
-/// or, in check mode, when what is on disk differs from what the emitter
-/// produces.
+/// Returns [`Error::Emit`], [`Error::V2`] or [`Error::Terminology`] when the
+/// pipeline fails or, in check mode, when what is on disk differs from what
+/// the emitter produces.
 pub fn run(cli: &Cli) -> Result<Report, Error> {
     match &cli.command {
-        Command::Emit { check, vendor, out } => Ok(Report::Emit(emit::emit(&emit::EmitOptions {
-            versions: version_inputs(vendor),
-            crate_dir: out.clone(),
-            check: *check,
-        })?)),
+        Command::Emit {
+            check,
+            vendor,
+            out,
+            hl7v2_out,
+        } => {
+            let fhir = emit::emit(&emit::EmitOptions {
+                versions: version_inputs(vendor),
+                crate_dir: out.clone(),
+                check: *check,
+            })?;
+            let hl7v2 = v2::emit::emit(&v2::emit::EmitOptions {
+                definitions: vendor.join("hl7-v2ig"),
+                crate_dir: hl7v2_out.clone(),
+                check: *check,
+            })?;
+            Ok(Report::Emit(fhir, hl7v2))
+        }
         Command::Terminology { check, vendor, out } => Ok(Report::Terminology(
             terminology::bundle(&terminology::BundleOptions {
                 versions: version_inputs(vendor),

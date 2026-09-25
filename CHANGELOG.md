@@ -43,6 +43,24 @@ crates on crates.io.
   `2xx` with an empty body now reads as `Returned::Minimal`, so a composition
   create or update answered without a body is bound from its `ETag` instead of
   failing after the CDR stored it.
+- The `hl7v2-types` crate, the generated HL7 v2 tables (#253), under
+  Apache-2.0 beside `fhir-types` and reserved on crates.io at 0.0.0.
+  `structure` holds every message structure of the HL7 v2 definitions (305,
+  for example `ORU_R01-A`) as a static segment-group tree, with each
+  segment's and group's position, cardinality and segment status, choice
+  groups and the open `Hxx` slots. `segment` holds every segment definition
+  (190), the batch envelopes `BHS`, `BTS`, `FHS` and `FTS` included, with
+  its 2912 fields: position, name, data type
+  code, cardinality, optionality, length, conformance length, standards status
+  and the table binding by number and value set URL. A tree node points at the
+  segment's own static, and `find` looks either up by definition id. The
+  crate is emitted by a new `v2` root set in `tools/fhir-codegen`. It reads
+  the fetched v2ig definitions, which have no `package.json`. The differential
+  is read as the snapshot, and a definition carrying a snapshot is refused.
+  Each defect the definitions carry is tolerated only in the files where it
+  was found, so the same defect anywhere else fails the emit. `emit --check`
+  covers the new tree, and the CI test and coverage lanes fetch the
+  definitions the generator's tests read.
 - The HL7 v2 inputs, vendored with provenance (#252). The v2-to-FHIR
   implementation guide package `hl7.fhir.uv.v2mappings` 1.0.0 (FHIR 4.0.1,
   263 ConceptMaps) is the sixth package `scripts/vendor/fhir-packages.sh`
