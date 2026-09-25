@@ -15,6 +15,7 @@
 //! them. [`FhirResourceId`], [`ExternalResourceId`] and [`PersonId`] are the
 //! three this side owns.
 
+pub mod claims;
 pub mod derive;
 pub mod record;
 pub mod redb_store;

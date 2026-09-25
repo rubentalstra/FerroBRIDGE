@@ -38,6 +38,7 @@ use axum::routing::get;
 use axum::routing::post;
 use ferrobridge_openehr::client::Client;
 
+use crate::facade::identity::claims::Claims;
 use crate::facade::identity::store::Store;
 use crate::facade::programs::Programs;
 
@@ -81,6 +82,8 @@ pub struct Facade {
     programs: Programs,
     /// The identity map.
     store: Arc<dyn Store>,
+    /// The source keys the in-flight deliveries into that map hold.
+    claims: Claims,
     /// The CDR client.
     client: Client,
     /// What the deployment configured.
@@ -99,6 +102,7 @@ impl Facade {
         Self {
             programs,
             store,
+            claims: Claims::new(),
             client,
             settings,
         }
@@ -155,7 +159,13 @@ impl Facade {
     /// client of its own.
     #[must_use]
     pub fn ingest(&self, client: Client) -> ingest::Ingest<'_> {
-        ingest::Ingest::new(&self.programs, self.store.as_ref(), client, &self.settings)
+        ingest::Ingest::new(
+            &self.programs,
+            self.store.as_ref(),
+            &self.claims,
+            client,
+            &self.settings,
+        )
     }
 }
 

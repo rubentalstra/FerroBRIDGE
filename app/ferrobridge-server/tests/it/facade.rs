@@ -29,6 +29,7 @@ use http::StatusCode;
 use http::header;
 use std::error::Error as StdError;
 use std::sync::Arc;
+use std::time::Duration;
 use tower::ServiceExt as _;
 use wiremock::Mock;
 use wiremock::MockServer;
@@ -299,10 +300,19 @@ struct TakeContribution {
     containers: &'static [&'static str],
     /// How the answer lists the versions.
     echo: Echo,
+    /// How long the answer waits after the commit is taken.
+    delay: Duration,
 }
 
 impl wiremock::Respond for TakeContribution {
     fn respond(&self, request: &wiremock::Request) -> ResponseTemplate {
+        self.answer(request).set_delay(self.delay)
+    }
+}
+
+impl TakeContribution {
+    /// Takes the contribution `request` carries and answers it.
+    fn answer(&self, request: &wiremock::Request) -> ResponseTemplate {
         let Ok(body) = serde_json::from_slice::<serde_json::Value>(&request.body) else {
             return ResponseTemplate::new(400);
         };
@@ -398,6 +408,17 @@ impl wiremock::Respond for ReadCommitted {
 /// Mounts a stub CDR that takes contributions, handing out `containers` in
 /// order, and reads back what it committed.
 pub(crate) async fn mount_echo(cdr: &MockServer, containers: &'static [&'static str], echo: Echo) {
+    mount_echo_after(cdr, containers, echo, Duration::ZERO).await;
+}
+
+/// Mounts the echo CDR of [`mount_echo`], whose contribution answer waits
+/// `delay` after the commit is taken.
+async fn mount_echo_after(
+    cdr: &MockServer,
+    containers: &'static [&'static str],
+    echo: Echo,
+    delay: Duration,
+) {
     let committed = Arc::new(std::sync::Mutex::new(Committed::default()));
     Mock::given(matchers::method("POST"))
         .and(matchers::path(format!("/ehr/{EHR_ID}/contribution")))
@@ -405,6 +426,7 @@ pub(crate) async fn mount_echo(cdr: &MockServer, containers: &'static [&'static 
             committed: Arc::clone(&committed),
             containers,
             echo,
+            delay,
         })
         .mount(cdr)
         .await;
@@ -1455,6 +1477,124 @@ async fn a_transaction_sent_twice_commits_once_and_answers_the_same_ids()
     assert_eq!(
         Some("200 OK"),
         second["entry"][0]["response"]["status"].as_str()
+    );
+    Ok(())
+}
+
+/// How long the stub CDR holds a commit answer in the overlap cases.
+const HELD: Duration = Duration::from_millis(800);
+
+/// How long the second delivery of an overlap case waits before it starts,
+/// well inside [`HELD`].
+const STAGGER: Duration = Duration::from_millis(150);
+
+/// Returns the `location` of every issue of an `OperationOutcome` body.
+fn issue_locations(body: &serde_json::Value) -> Vec<&str> {
+    body["issue"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|issue| issue["location"][0].as_str())
+        .collect()
+}
+
+#[tokio::test]
+async fn two_overlapping_deliveries_of_one_transaction_commit_once() -> Result<(), Box<dyn StdError>>
+{
+    // No specification governs the redelivery rule: our own design. The CDR
+    // holds the first commit's answer, so the second delivery starts while the
+    // first holds its claim, and is refused with nothing committed.
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_echo_after(&harness.cdr, ECHOED, Echo::Sent, HELD).await;
+    let bundle = transaction_of(&[("urn:uuid:0000-good", condition())]);
+    let (first, second) = tokio::join!(post_transaction(&harness, &bundle), async {
+        tokio::time::sleep(STAGGER).await;
+        post_transaction(&harness, &bundle).await
+    });
+    let (first_status, first) = first?;
+    let (second_status, second) = second?;
+    assert_eq!(StatusCode::OK, first_status, "{first}");
+    assert_eq!(
+        Some("201 Created"),
+        first["entry"][0]["response"]["status"].as_str(),
+        "{first}"
+    );
+    assert_eq!(StatusCode::CONFLICT, second_status, "{second}");
+    assert_eq!(Some("duplicate"), first_issue(&second)["code"].as_str());
+    assert_eq!(
+        vec!["urn:uuid:0000-good"],
+        issue_locations(&second),
+        "{second}"
+    );
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "the overlapping delivery commits nothing"
+    );
+
+    let (third_status, third) = post_transaction(&harness, &bundle).await?;
+    assert_eq!(StatusCode::OK, third_status, "{third}");
+    assert_eq!(
+        Some("200 OK"),
+        third["entry"][0]["response"]["status"].as_str(),
+        "sent after the first delivery settled, the Bundle answers as re-sent: {third}"
+    );
+    assert_eq!(
+        first["entry"][0]["response"]["location"].as_str(),
+        third["entry"][0]["response"]["location"].as_str(),
+        "{third}"
+    );
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
+            .await,
+        "the delivery after the first settled commits nothing either"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn two_overlapping_creates_of_one_resource_commit_once() -> Result<(), Box<dyn StdError>> {
+    // No specification governs the redelivery rule: our own design. The CDR
+    // holds the first create's answer while the second create of the same
+    // `id` and `meta.versionId` arrives.
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("POST"))
+        .and(matchers::path(format!("/ehr/{EHR_ID}/composition")))
+        .respond_with(
+            ResponseTemplate::new(201)
+                .insert_header("ETag", format!("W/\"{VERSION_ONE}\""))
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(harness.composition().to_string())
+                .set_delay(HELD),
+        )
+        .mount(&harness.cdr)
+        .await;
+    let (first, second) = tokio::join!(call(harness.app(), post_condition(&condition())), async {
+        tokio::time::sleep(STAGGER).await;
+        call(harness.app(), post_condition(&condition())).await
+    });
+    let (first_status, first) = first?;
+    let (second_status, second) = second?;
+    assert_eq!(StatusCode::CREATED, first_status, "{first}");
+    assert_eq!(StatusCode::CONFLICT, second_status, "{second}");
+    assert_eq!(Some("duplicate"), first_issue(&second)["code"].as_str());
+    assert_eq!(
+        vec!["Condition/ferrobridge-synthetic-condition-1"],
+        issue_locations(&second),
+        "{second}"
+    );
+    assert_eq!(
+        1,
+        harness
+            .received("POST", &format!("/ehr/{EHR_ID}/composition"))
+            .await,
+        "the overlapping create commits nothing"
     );
     Ok(())
 }

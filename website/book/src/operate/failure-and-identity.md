@@ -104,6 +104,17 @@ facade reads the recorded contribution back, finds the version whose
 of that contribution belong to the transaction's other entries and are passed
 over.
 
+Two deliveries of one source that overlap commit once. Before a delivery reads
+the identity map, it claims the key of every entry it carries, and it holds
+those claims until it answers, whether it commits, is refused, or fails. A
+second delivery that finds any of its keys claimed commits nothing and answers
+`409 Conflict` with an `OperationOutcome` whose `duplicate` issues name each
+entry another delivery holds. The rule is the same for a transaction and for a
+single create of a resource with an `id`. Retry after the first delivery has
+answered: the retry is then recognised as a re-sent Bundle or resource, as
+described above. The claims live in the server process, one set per identity
+store, so they order deliveries that reach the same FerroBRIDGE instance.
+
 On the OMOP side every CDM v5.4 primary key is a 32-bit integer, so ids come
 from database sequences and a bridge-owned side table maps each source record
 to its row. That table is what makes a re-run replace rather than duplicate,
