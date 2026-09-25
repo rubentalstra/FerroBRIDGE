@@ -25,9 +25,9 @@ use crate::map::condition::{self, Operand, Probe, Unevaluable};
 use crate::map::constraint;
 use crate::map::convert;
 use crate::map::corpus::{Assignment, Condition, Corpus, Kind, Map, MappedVia, Row, TableGroup};
-use crate::map::notation::{Label, Step, Target};
+use crate::map::notation::{self, Label, Step, Target};
 use crate::map::{ElementError, MapError, Outcome, RowRef};
-use crate::parse::{Component, Item, Location, Parsed, Repetition, Segment};
+use crate::parse::{Component, Field, Item, Location, Parsed, Repetition, Segment};
 
 /// The v2 date and time types the mapping guidelines convert to FHIR date and
 /// time types (`mapping_guidelines.md` §Data Type Spreadsheet).
@@ -35,6 +35,19 @@ const TEMPORAL_SOURCES: [&str; 4] = ["DTM", "DT", "TS", "TM"];
 
 /// The FHIR types those conversions reach.
 const TEMPORAL_TARGETS: [&str; 4] = ["date", "dateTime", "instant", "time"];
+
+/// The `MessageHeader` endpoints an MSH facility field fills when the fields
+/// the guide's MSH map writes them from are empty: the target, those fields,
+/// and the facility field.
+///
+/// No specification governs this: our own design. The guide's MSH-3 and
+/// MSH-24 rows leave a message valuing neither to the implementer, and FHIR R4
+/// requires `MessageHeader.source` and `destination.endpoint`
+/// (<https://hl7.org/fhir/R4/messageheader.html>).
+const FACILITY_ENDPOINTS: [(&str, [usize; 2], usize); 2] = [
+    ("source[1].endpoint", [3, 24], 4),
+    ("destination[1].endpoint", [5, 25], 6),
+];
 
 /// A v2 value at some depth of a field.
 #[derive(Debug, Clone, Copy)]
@@ -451,6 +464,7 @@ impl<'a> Run<'a> {
             };
             ran = true;
             self.segment(&scope, segment_map, &base, &mut named)?;
+            self.facility_endpoints(&scope, segment_map, &base);
         }
         if ran {
             self.unmapped_fields(&scope, &named);
@@ -568,6 +582,64 @@ impl<'a> Run<'a> {
             }
         }
         Ok(())
+    }
+
+    /// Writes each `MessageHeader` endpoint of [`FACILITY_ENDPOINTS`] whose
+    /// fields are empty from the first valued repetition of its facility
+    /// field, by the rule of [`Run::endpoint`], and counts it.
+    fn facility_endpoints(&mut self, scope: &Scope<'a>, map: &'a Map, base: &Base) {
+        let Some(segment) = scope.segment() else {
+            return;
+        };
+        let header = self
+            .resources
+            .get(base.resource)
+            .is_some_and(|resource| resource.type_name == "MessageHeader");
+        if segment.id() != "MSH" || !header || !base.slots.is_empty() {
+            return;
+        }
+        for (target, fields, facility) in FACILITY_ENDPOINTS {
+            let valued = |position: usize| segment.field(position).is_some_and(Field::is_valued);
+            if fields.into_iter().any(valued) {
+                continue;
+            }
+            let Some((repetition, value)) = segment.field(facility).and_then(|field| {
+                field
+                    .repetitions()
+                    .iter()
+                    .enumerate()
+                    .find(|(_, value)| value.is_valued())
+            }) else {
+                continue;
+            };
+            let source = format!("MSH-{facility}");
+            let Some(row) = map.rows.iter().find(|row| row.source == source) else {
+                continue;
+            };
+            let Ok(Target::Path { steps, .. }) = notation::parse(target) else {
+                continue;
+            };
+            let reference = row_ref(map, row);
+            let at = Location {
+                repetition: Some(repetition.saturating_add(1)),
+                ..scope.at.clone().with_field(facility)
+            };
+            let Some(slots) = self.slots(base, &steps, 0, &at, &reference) else {
+                continue;
+            };
+            let leaf = Base {
+                resource: base.resource,
+                slots,
+            };
+            let names: Vec<&str> = leaf.slots.iter().map(|slot| slot.name.as_str()).collect();
+            let element = format!("MessageHeader.{}", names.join("."));
+            self.endpoint(Datum::Repetition(value), &leaf, &at, &reference);
+            self.outcomes.push(Outcome::FacilityEndpoint {
+                at,
+                row: reference,
+                element,
+            });
+        }
     }
 
     /// Counts the valued fields of the scope's segment no applied row names.

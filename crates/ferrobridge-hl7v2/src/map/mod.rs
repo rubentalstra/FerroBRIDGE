@@ -241,6 +241,18 @@ pub enum Outcome {
         /// The row.
         row: RowRef,
     },
+    /// A `MessageHeader` endpoint written from the facility field because
+    /// neither the application nor the network address field is valued:
+    /// MSH-4 for `source`, MSH-6 for `destination`.
+    FacilityEndpoint {
+        /// Where: the facility field.
+        at: Location,
+        /// The facility field's row of the segment map.
+        row: RowRef,
+        /// The element path from the table, for example
+        /// `MessageHeader.source.endpoint`.
+        element: String,
+    },
     /// A value outside the lexical form of the FHIR primitive its element
     /// holds (<https://hl7.org/fhir/R4/datatypes.html#primitive>), which is
     /// never written.
@@ -311,6 +323,7 @@ impl Outcome {
             Self::UnknownElement { .. } => "unknown-element",
             Self::Unwritable { .. } => "unwritable",
             Self::Superseded { .. } => "superseded",
+            Self::FacilityEndpoint { .. } => "facility-endpoint",
             Self::InvalidValue { .. } => "invalid-value",
             Self::MissingRequired { .. } => "missing-required",
             Self::Undecodable { .. } => "undecodable",

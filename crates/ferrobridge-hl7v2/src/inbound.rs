@@ -11,7 +11,7 @@
 //! v2.5.1 chapter 2 §2.9.2.2). A message that parses but carries a refusal
 //! (a missing required field or segment, an undecoded escape) is answered
 //! `AE` with an `ERR` per refusal. A message with none that names its sender
-//! in neither MSH-3 nor MSH-24 is refused with `AR`, since no
+//! in none of MSH-3, MSH-24 and MSH-4 is refused with `AR`, since no
 //! `MessageHeader.source` can be written for it. Anything else is handed to
 //! the caller to map, who answers `AA` or `AE` once the message is committed
 //! or refused.
@@ -147,7 +147,7 @@ pub fn receive(
                 location: Some(Location::segment("MSH", 1).with_field(3)),
                 code: ErrorCode::RequiredFieldMissing,
                 text: String::from(
-                    "MSH-3 names no sending application and MSH-24 no sending network address",
+                    "MSH-3, MSH-24 and MSH-4 name no sending application, network address or facility",
                 ),
             }],
         );
@@ -172,19 +172,22 @@ fn reject_bytes(message: &[u8], detail: &str, stamp: Stamp<'_>) -> Received {
 }
 
 /// Whether a message to be mapped names its sender in MSH-3 or MSH-24, the
-/// fields the guide's MSH map writes `MessageHeader.source` from.
+/// fields the guide's MSH map writes `MessageHeader.source` from, or in
+/// MSH-4, the sending facility the map falls back to.
 ///
-/// The guide leaves a message valuing neither to the implementer
-/// (`segment-msh-to-messageheader`, the MSH-3 row's comment), and FHIR R4
-/// requires `MessageHeader.source` (<https://hl7.org/fhir/R4/messageheader.html>).
-/// No specification governs the answer: our own design refuses it with `AR`.
+/// The guide leaves a message valuing neither MSH-3 nor MSH-24 to the
+/// implementer (`segment-msh-to-messageheader`, the MSH-3 row's comment), and
+/// FHIR R4 requires `MessageHeader.source`
+/// (<https://hl7.org/fhir/R4/messageheader.html>). No specification governs
+/// the answer: our own design takes MSH-4 and refuses a message valuing none
+/// of the three with `AR`.
 /// An acknowledgment is never mapped, so it owes no `MessageHeader`.
 fn identifies_sender(message: &Message) -> bool {
     if message.message_type(1) == Some("ACK") {
         return true;
     }
     message.header().is_some_and(|header| {
-        [3, 24]
+        [3, 24, 4]
             .into_iter()
             .any(|position| header.field(position).is_some_and(Field::is_valued))
     })
