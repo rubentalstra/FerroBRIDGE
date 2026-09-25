@@ -544,7 +544,7 @@ impl<'a> Ingest<'a> {
     /// - A source with no `meta.versionId` whose `id` the map consumed at any
     ///   version is compared with the composition as it stands, masking what
     ///   two mappings of one resource differ in (the `uid` the CDR assigns and
-    ///   every time the run filled from its clock, as [`pair`] masks them).
+    ///   every time the run filled from its clock, as `pair` masks them).
     ///   The same content is [`Recognised::Replayed`], other content
     ///   [`Recognised::Revised`].
     /// - A source whose key a transaction committed and left unbound, or whose
