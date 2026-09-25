@@ -490,3 +490,68 @@ async fn the_entries_of_one_message_bind_by_content_whatever_the_version_order()
     assert_eq!(1, contributions(&cdr).await);
     Ok(())
 }
+
+#[tokio::test]
+async fn the_entries_of_one_message_bind_on_retry_from_the_contribution_read_back()
+-> Result<(), Box<dyn StdError>> {
+    // The retry maps each entry again at a later instant, so the content that
+    // tells the two entries apart is compared with the clock-filled times
+    // masked.
+    let (cdr, facade) = facade_answering(Echo::Minimal).await?;
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/contribution/{CONTRIBUTION}"
+        )))
+        .respond_with(ferrobridge_testkit::stubs::its_rest::not_found(
+            "the contribution is not readable yet",
+        ))
+        .up_to_n_times(1)
+        .with_priority(1)
+        .mount(&cdr)
+        .await;
+    let early = observation();
+    let mut late = observation();
+    late["id"] = serde_json::json!("ferrobridge-synthetic-observation-2");
+    late["effectiveDateTime"] = serde_json::json!("2026-09-13T10:00:00+02:00");
+    let document = fhir_types::codec::Value::from_serde_json(serde_json::json!({
+        "resourceType": "Bundle",
+        "type": "transaction",
+        "entry": [
+            { "fullUrl": "urn:uuid:0000-early", "resource": early },
+            { "fullUrl": "urn:uuid:0000-late", "resource": late }
+        ]
+    }));
+    let ingest = facade.ingest(facade.client().clone());
+
+    let refused = ingest
+        .ingest_bundle(&document, UnmappedEntries::Refuse, &message())
+        .await
+        .err()
+        .ok_or("the first binding fails while the contribution cannot be read back")?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, refused.status());
+
+    let retried = ingest
+        .ingest_bundle(&document, UnmappedEntries::Refuse, &message())
+        .await
+        .map_err(|refused| format!("the retry was refused: {refused:?}"))?;
+    assert_eq!(&Commit::AlreadyConsumed, retried.commit());
+    let bound: Vec<(String, String)> = retried
+        .committed()
+        .map(|entry| {
+            (
+                entry.full_url.clone(),
+                ferrobridge_openehr::ids::versioned_object_uid(&entry.version)
+                    .value()
+                    .to_owned(),
+            )
+        })
+        .collect();
+    let expected: Vec<(String, String)> = ["urn:uuid:0000-early", "urn:uuid:0000-late"]
+        .iter()
+        .zip(CONTAINERS)
+        .map(|(full_url, container)| ((*full_url).to_owned(), (*container).to_owned()))
+        .collect();
+    assert_eq!(expected, bound);
+    assert_eq!(1, contributions(&cdr).await, "the retry commits nothing");
+    Ok(())
+}

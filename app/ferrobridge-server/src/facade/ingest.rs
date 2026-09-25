@@ -186,6 +186,19 @@ pub struct Written {
     pub version: ObjectVersionId,
     /// The composition as it now stands.
     pub composition: CanonicalComposition,
+    /// Whether this write committed the composition or found it committed.
+    pub delivery: Delivery,
+}
+
+/// How the composition one single write answers with reached the CDR.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Delivery {
+    /// This write committed the composition.
+    Committed,
+    /// An earlier transaction committed the composition and did not finish
+    /// binding it, so this write bound it from the contribution read back
+    /// and committed nothing.
+    Reconciled,
 }
 
 /// Why an entry of a Bundle was skipped.
@@ -341,6 +354,19 @@ struct Mapped<'p> {
     built: CanonicalComposition,
     /// The composition as the strict reader read it back.
     composition: Box<Composition>,
+    /// The instant the engine defaulted every clock-derived time from.
+    instant: String,
+}
+
+/// Which versions of a committed contribution the entries being bound
+/// account for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Scope {
+    /// Every version is the composition of one of the entries.
+    Whole,
+    /// The entries are some of the versions, as one resource of a
+    /// transaction is; a version no entry matches is passed over.
+    Part,
 }
 
 /// What mapping one Bundle entry produced.
@@ -413,14 +439,9 @@ impl<'a> Ingest<'a> {
     ///
     /// Returns a `500` [`Refused`] when the identity store cannot be read.
     pub fn consumed(&self, inbound: &Inbound) -> Result<Option<ConsumedSource>, Refused> {
-        let Some(external) = inbound.id() else {
+        let Some(source) = resource_source(inbound) else {
             return Ok(None);
         };
-        let source = SourceVersion::new(
-            inbound.resource_type(),
-            external.clone(),
-            inbound.version_id().map(str::to_owned),
-        );
         self.store
             .consumed(&source)
             .map_err(|error| store_refusal(&error))
@@ -432,12 +453,22 @@ impl<'a> Ingest<'a> {
     /// policy; the identity binding and the consumed source version are
     /// recorded once the CDR stored the composition.
     ///
+    /// A source the identity map records as committed by a transaction and
+    /// not consumed is bound as a re-sent transaction binds it: from the
+    /// CONTRIBUTION read back, with the version matched to the resource by
+    /// its `FEEDER_AUDIT`, committing nothing, and answering
+    /// [`Delivery::Reconciled`] with the composition the first delivery
+    /// produced. No specification governs the redelivery rule: our own
+    /// design.
+    ///
     /// # Errors
     ///
     /// Returns a [`Refused`] for a resource that names no usable subject, an
     /// EHR that cannot be resolved, a resource the program cannot map, a
     /// composition the strict reader refuses, every CDR refusal through the
-    /// status table, and an identity store that cannot be written.
+    /// status table, a `500` naming the recorded contribution when it cannot
+    /// be read back or none of its versions matches the resource, and an
+    /// identity store that cannot be read or written.
     pub async fn ingest_resource(
         &self,
         inbound: &Inbound,
@@ -454,6 +485,12 @@ impl<'a> Ingest<'a> {
                         .at(format!("{}.subject", inbound.resource_type())),
                 )
             })?;
+        if let Some(written) = self
+            .reconcile_resource(inbound, program, provenance)
+            .await?
+        {
+            return Ok(written);
+        }
         let ehr_id = ehr::resolve(&self.client, self.store, &subject, self.settings.ehr_policy)
             .await
             .map_err(|error| ehr_refusal(&error))?;
@@ -482,6 +519,85 @@ impl<'a> Ingest<'a> {
             _ => return Err(Refused::of_answer(&status::unread("composition_create"))),
         };
         self.record(program, inbound, &ehr_id, &version, &stored)
+    }
+
+    /// Binds `inbound` from the contribution a transaction recorded as
+    /// committing it, when the identity map holds that record and no
+    /// consumed source.
+    ///
+    /// The contribution is read back and the version whose composition the
+    /// resource maps to is found the way a re-sent transaction finds it
+    /// ([`pair`]), so the single and the transaction paths share one rule.
+    async fn reconcile_resource(
+        &self,
+        inbound: &Inbound,
+        program: &Loaded,
+        provenance: &Provenance,
+    ) -> Result<Option<Written>, Refused> {
+        let Some(source) = resource_source(inbound) else {
+            return Ok(None);
+        };
+        if self
+            .store
+            .consumed(&source)
+            .map_err(|error| store_refusal(&error))?
+            .is_some()
+        {
+            return Ok(None);
+        }
+        let Some(committed) = self
+            .store
+            .committed(&source)
+            .map_err(|error| store_refusal(&error))?
+        else {
+            return Ok(None);
+        };
+        let (ehr_id, contribution) = committed_ids(&committed)?;
+        let (built, instant) = self
+            .run(program, inbound, provenance)
+            .map_err(|error| engine_refusal(&error))?;
+        let rm = strict_read(&built)?;
+        let mapped = [Mapped {
+            full_url: format!("{}/{}", source.resource_type(), source.id()),
+            position: 0,
+            inbound: inbound.clone(),
+            program,
+            template_id: String::from(built.template_id()),
+            built,
+            composition: Box::new(rm),
+            instant,
+        }];
+        let found = self
+            .committed_versions(
+                &ehr_id,
+                &contribution,
+                Returned::Minimal,
+                &mapped,
+                Scope::Part,
+            )
+            .await?;
+        let Ok([(version, stored)]) = <[(ObjectVersionId, Composition); 1]>::try_from(found) else {
+            return Err(unbound(
+                &contribution,
+                "its versions do not bind the resource once",
+            ));
+        };
+        let placed = self.place(&mapped, &[Some(source)], &ehr_id, vec![version.clone()])?;
+        let [ref entry] = mapped;
+        let Ok([place]) = <[Placed; 1]>::try_from(placed) else {
+            return Err(unbound(
+                &contribution,
+                "the resource could not be bound once",
+            ));
+        };
+        let composition = representation(Returned::Representation(Box::new(stored)), &entry.built)?;
+        Ok(Some(Written {
+            id: place.id,
+            ehr_id,
+            version,
+            composition,
+            delivery: Delivery::Reconciled,
+        }))
     }
 
     /// Commits a later version of the composition `container` holds.
@@ -657,9 +773,15 @@ impl<'a> Ingest<'a> {
         let (contribution, returned) = self.commit_all(&ehr_id, &partition.mapped).await?;
         self.record_commitment(&sources, &ehr_id, &contribution)?;
         let versions = self
-            .committed_versions(&ehr_id, &contribution, returned, &partition.mapped)
+            .committed_versions(
+                &ehr_id,
+                &contribution,
+                returned,
+                &partition.mapped,
+                Scope::Whole,
+            )
             .await?;
-        let placed = self.place(&partition.mapped, &sources, &ehr_id, versions)?;
+        let placed = self.place(&partition.mapped, &sources, &ehr_id, versions_of(versions))?;
         Ok(Ingested {
             ehr_id,
             commit: Commit::Contribution(contribution),
@@ -680,13 +802,17 @@ impl<'a> Ingest<'a> {
         sources: &[Option<SourceVersion>],
         committed: &CommittedSource,
     ) -> Result<Ingested, Refused> {
-        let ehr_id = EhrId::new(&committed.ehr_id).map_err(|error| stored_identifier(&error))?;
-        let contribution = ContributionUid::new(&committed.contribution_uid)
-            .map_err(|error| stored_identifier(&error))?;
+        let (ehr_id, contribution) = committed_ids(committed)?;
         let versions = self
-            .committed_versions(&ehr_id, &contribution, Returned::Minimal, &partition.mapped)
+            .committed_versions(
+                &ehr_id,
+                &contribution,
+                Returned::Minimal,
+                &partition.mapped,
+                Scope::Whole,
+            )
             .await?;
-        let placed = self.place(&partition.mapped, sources, &ehr_id, versions)?;
+        let placed = self.place(&partition.mapped, sources, &ehr_id, versions_of(versions))?;
         Ok(Ingested {
             ehr_id,
             commit: Commit::AlreadyConsumed,
@@ -745,33 +871,34 @@ impl<'a> Ingest<'a> {
         Ok(placed)
     }
 
-    /// Returns the version each mapped entry produced in `contribution`, in
-    /// entry order.
+    /// Returns the version each mapped entry produced in `contribution`, with
+    /// the composition the CDR holds for it, in entry order.
     ///
     /// The versions come from the representation the commit answered, or,
     /// when it answered none, from the CONTRIBUTION read back by its uid
     /// (`ehr-codegen.openapi.yaml`, `contribution_get`). Each version is then
-    /// read and matched to its entry ([`pair`]).
+    /// read and matched to its entry ([`pair`]) under `scope`.
     async fn committed_versions(
         &self,
         ehr_id: &EhrId,
         contribution: &ContributionUid,
         returned: Returned<Contribution>,
         mapped: &[Mapped<'_>],
-    ) -> Result<Vec<ObjectVersionId>, Refused> {
+        scope: Scope,
+    ) -> Result<Vec<(ObjectVersionId, Composition)>, Refused> {
         let stored = match returned {
             Returned::Representation(stored) => *stored,
             Returned::Minimal | Returned::Identifier(_) => {
                 self.read_contribution(ehr_id, contribution).await?
             }
         };
-        let versions = listed_versions(contribution, &stored, mapped.len())?;
+        let versions = listed_versions(contribution, &stored, mapped.len(), scope)?;
         let mut read = Vec::with_capacity(versions.len());
         for version in versions {
             let composition = self.version_of(ehr_id, &version).await?;
             read.push((version, composition));
         }
-        pair(contribution, mapped, read)
+        pair(contribution, mapped, read, scope)
     }
 
     /// Reads the committed CONTRIBUTION `contribution` back from the CDR.
@@ -944,23 +1071,11 @@ impl<'a> Ingest<'a> {
                     .diagnosing(chain(&error))
                     .at(String::from(full_url))
             })?;
-        // NOTE: no specification governs this: our own design, one instant serves
-        // every defaulted time of one ingest, so each entry reads the clock once.
-        let now = jiff::Timestamp::now().to_string();
-        let built = engine::inbound_from(
-            program.program(),
-            program.index(),
-            inbound.document(),
-            &now,
-            self.settings,
-            provenance.source_for(inbound.document()),
-        )
-        .map_err(|error| {
+        let (composition, instant) = self.run(program, &inbound, provenance).map_err(|error| {
             Issue::error(IssueType::Processing)
                 .diagnosing(chain(&error))
                 .at(String::from(full_url))
         })?;
-        let composition = built.into_value();
         let text = serde_json::to_string(composition.value()).map_err(|error| {
             Issue::error(IssueType::Exception)
                 .diagnosing(format!(
@@ -984,6 +1099,7 @@ impl<'a> Ingest<'a> {
                 program,
                 built: composition,
                 composition: Box::new(rm),
+                instant,
             }),
             subject,
         ))
@@ -1052,19 +1168,31 @@ impl<'a> Ingest<'a> {
         inbound: &Inbound,
         provenance: &Provenance,
     ) -> Result<CanonicalComposition, Refused> {
+        self.run(program, inbound, provenance)
+            .map(|(composition, _instant)| composition)
+            .map_err(|error| engine_refusal(&error))
+    }
+
+    /// Runs the engine over one inbound resource, and returns the composition
+    /// with the instant it defaulted every clock-derived time from.
+    fn run(
+        &self,
+        program: &Loaded,
+        inbound: &Inbound,
+        provenance: &Provenance,
+    ) -> Result<(CanonicalComposition, String), fhirconnect::engine::traverse::EngineError> {
         // NOTE: no specification governs this: our own design, one instant serves
-        // every defaulted time of one ingest, so the clock is read once here.
+        // every defaulted time of one ingest, so each resource reads the clock once.
         let now = jiff::Timestamp::now().to_string();
-        engine::inbound_from(
+        let built = engine::inbound_from(
             program.program(),
             program.index(),
             inbound.document(),
             &now,
             self.settings,
             provenance.source_for(inbound.document()),
-        )
-        .map(fhirconnect::engine::outcome::Outcome::into_value)
-        .map_err(|error| engine_refusal(&error))
+        )?;
+        Ok((built.into_value(), now))
     }
 
     /// Returns the commit headers one composition write carries.
@@ -1094,12 +1222,7 @@ impl<'a> Ingest<'a> {
     ) -> Result<Written, Refused> {
         let resource_type = inbound.resource_type();
         let (id, stood) = self.bind(program, resource_type, ehr_id, version, composition)?;
-        if let Some(external) = inbound.id() {
-            let source = SourceVersion::new(
-                resource_type,
-                external.clone(),
-                inbound.version_id().map(str::to_owned),
-            );
+        if let Some(source) = resource_source(inbound) {
             self.consume(&source, &stood, &id)?;
         }
         Ok(Written {
@@ -1107,6 +1230,7 @@ impl<'a> Ingest<'a> {
             ehr_id: ehr_id.clone(),
             version: version.clone(),
             composition: composition.clone(),
+            delivery: Delivery::Committed,
         })
     }
 
@@ -1251,6 +1375,31 @@ impl<'a> Ingest<'a> {
     }
 }
 
+/// Returns the consumed-source key of one resource: its `resourceType`, `id`
+/// and `meta.versionId`, or nothing when it has no `id`.
+fn resource_source(inbound: &Inbound) -> Option<SourceVersion> {
+    inbound.id().map(|external| {
+        SourceVersion::new(
+            inbound.resource_type(),
+            external.clone(),
+            inbound.version_id().map(str::to_owned),
+        )
+    })
+}
+
+/// Returns the EHR and the contribution a commit record names.
+fn committed_ids(committed: &CommittedSource) -> Result<(EhrId, ContributionUid), Refused> {
+    let ehr_id = EhrId::new(&committed.ehr_id).map_err(|error| stored_identifier(&error))?;
+    let contribution = ContributionUid::new(&committed.contribution_uid)
+        .map_err(|error| stored_identifier(&error))?;
+    Ok((ehr_id, contribution))
+}
+
+/// Returns the versions of `paired`, in order.
+fn versions_of(paired: Vec<(ObjectVersionId, Composition)>) -> Vec<ObjectVersionId> {
+    paired.into_iter().map(|(version, _)| version).collect()
+}
+
 /// Returns the consumed-source key of each mapped entry, in order.
 ///
 /// An entry mapped from a resource is keyed by its `resourceType`, `id` and
@@ -1265,13 +1414,7 @@ fn sources_of(
     mapped
         .iter()
         .map(|entry| match provenance {
-            Provenance::EachResource => Ok(entry.inbound.id().map(|external| {
-                SourceVersion::new(
-                    entry.inbound.resource_type(),
-                    external.clone(),
-                    entry.inbound.version_id().map(str::to_owned),
-                )
-            })),
+            Provenance::EachResource => Ok(resource_source(&entry.inbound)),
             Provenance::Item(item) => {
                 let Some(control) = item.id() else {
                     return Ok(None);
@@ -1439,36 +1582,96 @@ impl AuditKey {
     }
 }
 
-/// Whether two compositions carry the same content, the CDR-assigned `uid`
-/// aside.
-fn same_content(sent: &Composition, stored: &Composition) -> bool {
-    let mut sent = sent.clone();
-    let mut stored = stored.clone();
-    sent.uid = None;
-    stored.uid = None;
-    sent == stored
+/// Returns the JSON pointer of every `DV_DATE_TIME` in `composition` whose
+/// value is `instant`, the clock reading the run defaulted from.
+///
+/// The engine hands its one instant to the Simplified Formats builder as the
+/// `ctx/time` default, which fills `EVENT_CONTEXT.start_time`,
+/// `HISTORY.origin`, `EVENT.time` and `ACTION.time` wherever no mapping wrote
+/// them (master06 §time), and the builder copies the instant verbatim, so a
+/// value equal to it is one the clock supplied.
+fn clock_filled(composition: &serde_json::Value, instant: &str) -> Vec<String> {
+    let mut found = Vec::new();
+    let mut pending = vec![(String::new(), composition)];
+    while let Some((pointer, node)) = pending.pop() {
+        match node {
+            serde_json::Value::Object(members) => {
+                let is_instant = members.get("_type").and_then(serde_json::Value::as_str)
+                    == Some("DV_DATE_TIME")
+                    && members.get("value").and_then(serde_json::Value::as_str) == Some(instant);
+                if is_instant {
+                    found.push(pointer);
+                    continue;
+                }
+                for (name, member) in members {
+                    let step = name.replace('~', "~0").replace('/', "~1");
+                    pending.push((format!("{pointer}/{step}"), member));
+                }
+            }
+            serde_json::Value::Array(items) => {
+                for (index, item) in items.iter().enumerate() {
+                    pending.push((format!("{pointer}/{index}"), item));
+                }
+            }
+            _ => {}
+        }
+    }
+    found.sort();
+    found
+}
+
+/// Whether the composition sent for `entry` and a stored one carry the same
+/// content.
+///
+/// The comparison masks what differs between two mappings of one entry and
+/// is no content of the source: the `uid` the CDR assigns, and every time the
+/// run of the entry filled from its clock ([`clock_filled`]), whatever the
+/// stored composition holds at that place.
+fn same_content(entry: &Mapped<'_>, stored: &Composition) -> bool {
+    let canonical = |composition: &Composition| {
+        let mut composition = composition.clone();
+        composition.uid = None;
+        openehr_its::json::to_canonical_json(&composition).parse::<serde_json::Value>()
+    };
+    // NOTE: no specification governs this: our own design; a composition that
+    // does not read back as JSON cannot be compared, so it matches no entry.
+    let (Ok(mut sent), Ok(mut held)) = (canonical(&entry.composition), canonical(stored)) else {
+        return false;
+    };
+    for pointer in clock_filled(&sent, &entry.instant) {
+        for tree in [&mut sent, &mut held] {
+            if let Some(slot) = tree.pointer_mut(&pointer) {
+                *slot = serde_json::Value::Null;
+            }
+        }
+    }
+    sent == held
 }
 
 /// Returns the entry each committed version is the composition of, one
-/// version per entry, in entry order.
+/// version per entry with its stored composition, in entry order.
 ///
 /// `stored` is each version the contribution named with the composition the
 /// CDR holds for it. A version matches an entry when its `FEEDER_AUDIT` names
 /// the entry's item ([`AuditKey`]); where several entries name one item, as
-/// the entries of one message do, it must also carry the entry's content. A
-/// version that matches no entry, or more than one, or an entry two versions
-/// match, refuses the whole answer. No specification governs the matching:
-/// our own design.
+/// the entries of one message do, it must also carry the entry's content
+/// ([`same_content`]: the CDR-assigned `uid` and every time the run filled
+/// from its clock are masked, so a re-sent Bundle mapped at another instant
+/// still matches). A version that matches more than one entry, or an entry
+/// two versions match or none, refuses the whole answer, and so does a
+/// version that matches no entry under [`Scope::Whole`]. No specification
+/// governs the matching: our own design.
 fn pair(
     contribution: &ContributionUid,
     mapped: &[Mapped<'_>],
     stored: Vec<(ObjectVersionId, Composition)>,
-) -> Result<Vec<ObjectVersionId>, Refused> {
+    scope: Scope,
+) -> Result<Vec<(ObjectVersionId, Composition)>, Refused> {
     let keys: Vec<AuditKey> = mapped
         .iter()
         .map(|entry| AuditKey::of(&entry.composition))
         .collect();
-    let mut placed: Vec<Option<ObjectVersionId>> = vec![None; mapped.len()];
+    let mut placed: Vec<Option<(ObjectVersionId, Composition)>> = vec![None; mapped.len()];
     for (version, composition) in stored {
         let key = AuditKey::of(&composition);
         let sharing = keys.iter().filter(|candidate| **candidate == key).count();
@@ -1477,11 +1680,13 @@ fn pair(
             .zip(&keys)
             .enumerate()
             .filter(|(_, (entry, candidate))| {
-                **candidate == key
-                    && (sharing == 1 || same_content(&entry.composition, &composition))
+                **candidate == key && (sharing == 1 || same_content(entry, &composition))
             })
             .map(|(index, _)| index)
             .collect();
+        if matching.is_empty() && scope == Scope::Part {
+            continue;
+        }
         let [index] = matching.as_slice() else {
             return Err(unbound(
                 contribution,
@@ -1507,7 +1712,7 @@ fn pair(
                 &format!("two of its versions match {full_url}"),
             ));
         }
-        *slot = Some(version);
+        *slot = Some((version, composition));
     }
     placed
         .into_iter()
@@ -1527,17 +1732,22 @@ fn pair(
 ///
 /// The CONTRIBUTION's `versions` reference every version it committed
 /// (`ehr-codegen.openapi.yaml`, `components.schemas.Contribution`). A version
-/// list whose length is not the entries' cannot bind the entries, and the
-/// refusal names the contribution so it can be reconciled. The list states no
+/// list shorter than the entries, or under [`Scope::Whole`] of any other
+/// length, cannot bind the entries, and the refusal names the contribution so it can be reconciled. The list states no
 /// order, so [`pair`] matches each version to its entry.
 fn listed_versions(
     contribution: &ContributionUid,
     stored: &Contribution,
     expected: usize,
+    scope: Scope,
 ) -> Result<Vec<ObjectVersionId>, Refused> {
     let unreadable = |why: String| unbound(contribution, &why);
     let references: &[ObjectRef] = stored.versions.as_ref();
-    if references.len() != expected {
+    let fits = match scope {
+        Scope::Whole => references.len() == expected,
+        Scope::Part => references.len() >= expected,
+    };
+    if !fits {
         return Err(unreadable(format!(
             "names {} versions for {expected} entries",
             references.len()
@@ -1797,6 +2007,38 @@ mod tests {
         assert_eq!(Some("2"), refused.entity_tag());
         assert_eq!(None, refused.challenge());
         assert_eq!(1, refused.issues().len());
+    }
+
+    #[test]
+    fn the_clock_mask_names_every_date_time_at_the_instant_and_nothing_else() {
+        let instant = "2026-09-25T10:00:00.123456789Z";
+        let composition = serde_json::json!({
+            "_type": "COMPOSITION",
+            "context": {
+                "_type": "EVENT_CONTEXT",
+                "start_time": { "_type": "DV_DATE_TIME", "value": instant }
+            },
+            "content": [{
+                "_type": "OBSERVATION",
+                "data": {
+                    "_type": "HISTORY",
+                    "origin": { "_type": "DV_DATE_TIME", "value": instant },
+                    "events": [{
+                        "_type": "POINT_EVENT",
+                        "time": { "_type": "DV_DATE_TIME", "value": "2026-09-13T10:00:00+02:00" }
+                    }]
+                },
+                "name": { "_type": "DV_TEXT", "value": instant }
+            }]
+        });
+        assert_eq!(
+            vec![
+                String::from("/content/0/data/origin"),
+                String::from("/context/start_time"),
+            ],
+            super::clock_filled(&composition, instant),
+            "a mapped time and a text that reads like the instant stay compared"
+        );
     }
 
     #[test]

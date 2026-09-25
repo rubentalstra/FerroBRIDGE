@@ -316,6 +316,19 @@ crates on crates.io.
 
 ### Fixed
 
+- A re-sent Bundle whose entries share one `FEEDER_AUDIT` item, as the entries
+  of one message do, binds on retry after its first binding failed (#274).
+  The content comparison that tells such entries apart now masks every
+  `DV_DATE_TIME` the engine filled from its clock (the `ctx/time` default that
+  reaches `EVENT_CONTEXT.start_time`, `HISTORY.origin`, `EVENT.time` and
+  `ACTION.time`), where a retry mapped at a later instant failed the
+  comparison with a `500` on every attempt.
+- A single create of a resource that a transaction committed and did not
+  finish binding binds from the contribution read back and answers `200 OK`
+  with the composition the first delivery produced (#275), where it committed
+  a second composition. The single and the transaction paths share the
+  read-back and the `FEEDER_AUDIT` match; the single path passes over the
+  versions of the transaction's other entries.
 - A value a FHIR resource maps into openEHR keeps every attribute the
   reference model gives it (#241). The engine writes each data value whole as
   its canonical JSON under the FLAT `|raw` suffix (ITS-REST 1.1.0 Simplified

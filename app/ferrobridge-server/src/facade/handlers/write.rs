@@ -69,7 +69,11 @@ pub(crate) async fn create(
     let written = ingest
         .ingest_resource(&inbound, program, &Provenance::EachResource)
         .await?;
-    answer(facade, program, &written, headers, StatusCode::CREATED)
+    let status = match written.delivery {
+        ingest::Delivery::Committed => StatusCode::CREATED,
+        ingest::Delivery::Reconciled => StatusCode::OK,
+    };
+    answer(facade, program, &written, headers, status)
 }
 
 /// `PUT [base]/{type}/{id}`.
