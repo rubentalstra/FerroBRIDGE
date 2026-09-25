@@ -38,9 +38,17 @@
 #                          PostgreSQL row, and the compose.yaml bridge tag
 #                          against the product version and the workspace
 #                          version.
-#   9. vendored corpora    every docs/specs/*/PROVENANCE.md names the commit or
-#                          tag the docs/VERSIONS.md corpus row pins for it.
-#  10. licence             LICENSE is the Business Source License 1.1 and no
+#   9. vendored corpora    every docs/specs/*/PROVENANCE.md, the vendored
+#                          fixtures and the build-time HL7 v2 definitions name
+#                          the commit or tag the docs/VERSIONS.md corpus row
+#                          pins for them, and every sha256 or tree digest the
+#                          row records.
+#  10. FHIR packages       every row of the docs/VERSIONS.md FHIR-packages
+#                          table against the Version line of its
+#                          tools/fhir-codegen/vendor/<package>/PROVENANCE.md,
+#                          and a package vendored with its source repository
+#                          records that repository's licence.
+#  11. licence            LICENSE is the Business Source License 1.1 and no
 #                          first-party file claims MIT or Apache-2.0 as its
 #                          own, crates/fhir-types excepted (Apache-2.0).
 #
@@ -520,7 +528,9 @@ docs/specs/fhirconnect-mapping-lib|FHIRconnect mapping library (corpus, never an
 docs/specs/omocl|OMOCL corpus
 docs/specs/omop-cdm|OMOP CDM definitions and PostgreSQL DDL
 docs/specs/its-rest|openEHR ITS-REST OpenAPI
-tools/ferrobridge-testkit/fixtures/opt/kds|KDS Diagnose operational template (fixture)"
+tools/ferrobridge-testkit/fixtures/opt/kds|KDS Diagnose operational template (fixture)
+tools/fhir-codegen/vendor/hl7-v2ig|HL7 v2 definitions (v2ig source of truth, never committed)
+tools/fhir-codegen/vendor/hl7-v2ig|HL7 v2+ licence page"
 
 if [ -f docs/VERSIONS.md ]; then
   agreed=0
@@ -541,10 +551,59 @@ if [ -f docs/VERSIONS.md ]; then
     elif ! grep -qF "$want" "$dir/PROVENANCE.md"; then
       bad "$dir/PROVENANCE.md does not name the pin $want that docs/VERSIONS.md records for '$item'"
     else
-      agreed=$((agreed + 1))
+      # A file hash or tree digest in the row is the proof of the bytes, so
+      # the provenance has to carry each one too.
+      missing=""
+      while IFS= read -r hash; do
+        [ -n "$hash" ] || continue
+        grep -qF "$hash" "$dir/PROVENANCE.md" || missing="$missing $hash"
+      done < <(grep -oE '\b[0-9a-f]{64}\b' <<< "$cell" || true)
+      if [ -n "$missing" ]; then
+        bad "$dir/PROVENANCE.md does not name the digest$missing that docs/VERSIONS.md records for '$item'"
+      else
+        agreed=$((agreed + 1))
+      fi
     fi
   done <<< "$corpora"
   [ "$agreed" -eq "$expected" ] && note "OK: all $expected corpus provenance stamps name their pin"
+else
+  note "no docs/VERSIONS.md yet, skipped"
+fi
+
+echo "== FHIR packages (tools/fhir-codegen/vendor/*/PROVENANCE.md <-> docs/VERSIONS.md)"
+if [ -f docs/VERSIONS.md ]; then
+  # The rows of the FHIR-packages table: the package is the backticked name
+  # opening the Item cell, the pin is the whole Pin cell.
+  packages="$(awk -F'|' '
+    /^## / { on = ($0 ~ /^## FHIR packages/); next }
+    on && NF >= 4 && $2 ~ /^[[:space:]]*`/ {
+      k = $2; v = $3
+      sub(/^[[:space:]]*`/, "", k); sub(/`.*/, "", k)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+      if (k != "Item") print k "|" v
+    }
+  ' docs/VERSIONS.md)"
+  agreed=0
+  expected=0
+  while IFS='|' read -r pkg ver; do
+    [ -n "$pkg" ] || continue
+    expected=$((expected + 1))
+    prov="tools/fhir-codegen/vendor/$pkg/PROVENANCE.md"
+    if [ ! -f "$prov" ]; then
+      bad "no $prov for the pinned package $pkg (run scripts/vendor/fhir-packages.sh $pkg)"
+    elif ! grep -qxF -- "- Version: $ver" "$prov"; then
+      bad "$prov does not record version $ver, which docs/VERSIONS.md pins for $pkg"
+    elif [ -d "tools/fhir-codegen/vendor/$pkg/repository" ] && ! grep -q '^- Repository licence: ' "$prov"; then
+      bad "$prov vendors its source repository and records no repository licence"
+    else
+      agreed=$((agreed + 1))
+    fi
+  done <<< "$packages"
+  if [ "$expected" -eq 0 ]; then
+    bad "docs/VERSIONS.md has no FHIR-packages rows"
+  elif [ "$agreed" -eq "$expected" ]; then
+    note "OK: all $expected FHIR package provenance stamps record their pinned version"
+  fi
 else
   note "no docs/VERSIONS.md yet, skipped"
 fi

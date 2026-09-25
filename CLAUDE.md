@@ -101,8 +101,11 @@ the testkit tool crate. Beside it:
   `ValueSet/$validate-code`, R4 and R4B over the generated `fhir-types`
   operation contracts, with the batch form and a `tx-issue-type` coding
   surfaced in every typed error.
-- `tools/fhir-codegen`: the generator, with the five vendored HL7 FHIR packages
-  under `vendor/` (380 MB, a `PROVENANCE.md` each) as its only input.
+- `tools/fhir-codegen`: the generator, with the six vendored HL7 FHIR packages
+  under `vendor/` (380 MB, a `PROVENANCE.md` each; the sixth is the v2-to-FHIR
+  guide, #252) and the HL7 v2 definitions fetched at build time into the
+  ignored `vendor/hl7-v2ig/` (only its `PROVENANCE.md` is committed) as its
+  inputs.
 - `crates/omop-cdm`: the OMOP CDM v5.4 layer. `src/generated/` and `ddl/` are
   emitted by `tools/omop-cdm-codegen` from the vendored OHDSI definitions; the
   column metadata, the three column types and the DDL schema substitution are

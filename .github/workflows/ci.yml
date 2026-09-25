@@ -545,6 +545,20 @@ jobs:
       - uses: ./.github/actions/setup-rust
         with:
           components: rustfmt
+      # The HL7 v2 definitions are fetched at build time and never committed
+      # (tools/fhir-codegen/vendor/hl7-v2ig/PROVENANCE.md). The cache is keyed
+      # on the pinned commit, and the script verifies the file count and tree
+      # digest of a restored tree as it does of a download.
+      - name: Read the pinned HL7 v2 definitions commit
+        id: v2ig
+        run: echo "commit=$(bash scripts/vendor/v2ig.sh --commit)" >> "$GITHUB_OUTPUT"
+      - name: Restore the HL7 v2 definitions
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/fhir-codegen/vendor/hl7-v2ig/input
+          key: hl7-v2ig-${{ steps.v2ig.outputs.commit }}
+      - name: Fetch and verify the HL7 v2 definitions
+        run: bash scripts/vendor/v2ig.sh
       - run: cargo run --locked -p fhir-codegen -- emit --check
 
   # The same gate for the OMOP side: regenerate crates/omop-cdm from the

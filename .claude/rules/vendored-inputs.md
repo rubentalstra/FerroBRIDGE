@@ -8,10 +8,13 @@ paths: ["scripts/vendor/*.sh", "**/vendor/**", "docs/specs/**"]
 # Vendored inputs
 
 External material enters this repository one way only: a committed fetch
-script, vendored verbatim, stamped with provenance. Two trees exist: the five
-HL7 FHIR packages under `tools/fhir-codegen/vendor/` (#72), and the
+script, vendored verbatim, stamped with provenance. Three trees exist: the six
+HL7 FHIR packages under `tools/fhir-codegen/vendor/` (#72, #252), the
 specification corpora under `docs/specs/`, one directory per corpus, fetched by
-`scripts/vendor/*.sh` from the pins in `docs/VERSIONS.md` (#71).
+`scripts/vendor/*.sh` from the pins in `docs/VERSIONS.md` (#71), and the one
+build-time tree under `tools/fhir-codegen/vendor/hl7-v2ig/`, fetched by
+`scripts/vendor/v2ig.sh` and never committed because its licence does not
+permit redistribution (§Licensing), with only its `PROVENANCE.md` tracked.
 
 ## The rule
 
