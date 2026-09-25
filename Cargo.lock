@@ -1060,11 +1060,14 @@ dependencies = [
  "ferrobridge-testkit",
  "fhir-types",
  "fhirconnect",
+ "futures-util",
  "http",
  "jiff",
+ "omop-cdm",
  "openehr-base",
  "openehr-its",
  "openehr-mapping-core",
+ "openehr-query",
  "openehr-rm",
  "redb",
  "reqwest",
@@ -1072,9 +1075,11 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.11.0",
+ "sqlx",
  "tempfile",
  "thiserror",
  "tokio",
+ "tokio-postgres",
  "toml",
  "tower",
  "tower-http 0.7.1",
@@ -2365,6 +2370,8 @@ name = "omop-cdm"
 version = "0.0.0"
 dependencies = [
  "ferrobridge-testkit",
+ "futures-util",
+ "sha2 0.11.0",
  "sqlx",
  "thiserror",
  "tokio",
@@ -2490,6 +2497,17 @@ dependencies = [
  "serde",
  "serde-saphyr",
  "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "openehr-query"
+version = "0.0.69"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c0b4f760c6ba2ac920a1c33c26db016e66a51c9a37006ca31956171e25fa5b2"
+dependencies = [
+ "chumsky",
+ "logos",
  "thiserror",
 ]
 

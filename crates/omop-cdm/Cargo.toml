@@ -18,15 +18,31 @@ categories = ["database", "science"]
 # The crate line is published on crates.io; include is the packaged content.
 publish = true
 # `ddl/` holds the four OHDSI DDL files the generated `ddl` module embeds;
-# `.sqlx/` is the query metadata the `vocabulary` queries compile against.
-include = ["src/**", "ddl/**", ".sqlx/**", "README.md", "LICENSE"]
+# `.sqlx/` is the query metadata the `vocabulary` queries compile against;
+# `sql/` holds the PostgreSQL forms of the era scripts the CDM publishes.
+include = ["src/**", "ddl/**", "sql/**", ".sqlx/**", "README.md", "LICENSE"]
+
+# `database` carries the PostgreSQL side: the schema binding, the concept
+# resolver, the CDM writer and the derived tables. A consumer that reads only
+# the metadata and the record graph takes the crate with
+# `default-features = false` and builds no database client.
+[features]
+default = ["database"]
+database = ["dep:sqlx", "dep:tokio-postgres", "dep:tokio", "dep:futures-util"]
 
 [dependencies]
-sqlx.workspace = true
+futures-util = { workspace = true, optional = true }
+sqlx = { workspace = true, optional = true }
 thiserror.workspace = true
+# The CDM writer's client: binary COPY inside one transaction per composition,
+# on a connection of its own beside the sqlx pool.
+tokio = { workspace = true, optional = true, features = ["rt"] }
+tokio-postgres = { workspace = true, optional = true }
 
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
+# The era scripts are checked against the digest of the page they follow.
+sha2.workspace = true
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "time"] }
 tokio-postgres.workspace = true
 

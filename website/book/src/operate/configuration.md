@@ -108,6 +108,37 @@ server says so once at start-up.
 | Key | Default | Secret | Meaning |
 |---|---|---|---|
 | `url` | none, required when the section is present | yes | The PostgreSQL connection URL |
+| `schema` | `cdm` | no | The schema the CDM tables live in, an unquoted lower-case identifier |
+| `bridge_schema` | `ferrobridge` | no | The schema the bridge keeps its natural-key side table, id sequences and watermarks in |
+| `person_policy` | `create_on_first_sight` | no | `create_on_first_sight` gives an EHR a `person_id` the first time a row refers to it; `existing` refuses a row whose EHR has no `PERSON` row yet |
+
+The TLS mode of the connection is not configurable yet: the writer connects
+without TLS, so a URL with `sslmode=require` is refused rather than
+downgraded.
+
+### `[etl]`
+
+The OMOP ETL job that `ferrobridge etl run` runs. Both queries are parsed and
+checked when the configuration loads, so a query the runner cannot read
+refuses every job.
+
+| Key | Default | Secret | Meaning |
+|---|---|---|---|
+| `aql` | none, required | no | The composition query. It aliases `ehr_id`, `versioned_object_uid`, `version_uid` and the whole `composition`, carries an `ORDER BY` and no `LIMIT`. It may name `$since`, which `--since` binds |
+| `page_size` | `100` | no | The `fetch` of each page of either query |
+| `type_concept_id` | none, required | no | The `*_type_concept_id` the mappings write, the provenance of the records |
+| `observation_period_type_concept_id` | none, required | no | The `period_type_concept_id` of every observation period |
+
+### `[etl.visits]`
+
+The visit derivation, off until the section is present. The rows are grouped
+by EHR and source, each visit spanning the earliest start to the latest end.
+
+| Key | Default | Secret | Meaning |
+|---|---|---|---|
+| `aql` | none, required | no | The visit query, aliasing `ehr_id`, `visit_source`, `visit_start` and `visit_end`, with an `ORDER BY` |
+| `visit_concept_id` | none, required | no | The `visit_concept_id` of every visit |
+| `visit_type_concept_id` | none, required | no | The `visit_type_concept_id` of every visit |
 
 ### `[mappings]`
 

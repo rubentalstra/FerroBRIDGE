@@ -65,8 +65,11 @@ the testkit tool crate. Beside it:
   throughout, the `tracing` console, the request log that carries the matched
   route and never a body, the health family over an indicator registry, the
   `tower-http` stack (request id, panic catch, timeout, body ceiling), and the
-  bounded drain on `SIGTERM`. `serve` runs; the batch subcommands parse and
-  name the issue that lands each. `src/facade/` is the FHIR R4 facade (#85),
+  bounded drain on `SIGTERM`. `serve` and `cdm init` run; `etl run`,
+  `vocab load` and `mapping check` parse and name the issue that lands each.
+  `src/etl/` is the OMOP ETL runner (#91): the `[etl]` queries checked at load,
+  the paged read, the `Mapper` seam the OMOCL engine fills, the visits and
+  the run report. `src/facade/` is the FHIR R4 facade (#85),
   mounted under `/fhir` behind `[facade]`: the six interactions over the CDR,
   the `redb` identity store with the derivation
   `docs/architecture.md` §9 fixes, the one status table
@@ -102,7 +105,9 @@ the testkit tool crate. Beside it:
 - `crates/omop-cdm`: the OMOP CDM v5.4 layer. `src/generated/` and `ddl/` are
   emitted by `tools/omop-cdm-codegen` from the vendored OHDSI definitions; the
   column metadata, the three column types and the DDL schema substitution are
-  hand-written beside them.
+  hand-written beside them, with `graph` (the record graph the OMOCL engine
+  emits) and, behind the default `database` feature, the concept resolver,
+  the CDM writer with its natural-key side table, and the derived tables.
 - `tools/omop-cdm-codegen`: that generator, reading
   `docs/specs/omop-cdm/inst/` and emitting the 39 table modules, the metadata
   index and the embedded DDL.

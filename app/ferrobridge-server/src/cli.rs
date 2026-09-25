@@ -61,13 +61,22 @@ pub enum Command {
 #[derive(Debug, Subcommand, PartialEq, Eq)]
 pub enum Etl {
     /// Loads compositions from the CDR into the CDM database.
-    Run,
+    Run {
+        /// Skips every composition whose watermark names the version the
+        /// query answers.
+        #[arg(long)]
+        resume: bool,
+        /// Binds the value to the composition query's `$since` parameter.
+        #[arg(long, value_name = "TIME")]
+        since: Option<String>,
+    },
 }
 
 /// The `cdm` jobs.
 #[derive(Debug, Subcommand, PartialEq, Eq)]
 pub enum Cdm {
-    /// Applies the OMOP CDM v5.4 DDL to the configured database.
+    /// Applies the OMOP CDM v5.4 DDL and the bridge schema to the configured
+    /// database.
     Init,
 }
 
@@ -75,7 +84,14 @@ pub enum Cdm {
 #[derive(Debug, Subcommand, PartialEq, Eq)]
 pub enum Vocab {
     /// Loads an OHDSI vocabulary export into the configured database.
-    Load,
+    Load {
+        /// The directory holding the export.
+        #[arg(value_name = "DIR")]
+        directory: PathBuf,
+        /// The schema the vocabulary tables live in.
+        #[arg(long, value_name = "NAME")]
+        schema: String,
+    },
 }
 
 /// The `mapping` jobs.
@@ -88,13 +104,14 @@ pub enum Mapping {
 impl Command {
     /// Returns the tracker issue that lands this job, or `None` when it runs.
     ///
-    /// Every job but `serve` parses and refuses today, naming the issue that
-    /// carries it, so an operator reads one line instead of a silent success.
+    /// A job that parses and does not run yet names the issue that carries
+    /// it, so an operator reads one line instead of a silent success.
     #[must_use]
     pub const fn pending_issue(&self) -> Option<u32> {
         match self {
-            Self::Serve => None,
-            Self::Etl { .. } | Self::Cdm { .. } | Self::Vocab { .. } => Some(91),
+            Self::Serve | Self::Cdm { .. } => None,
+            Self::Etl { .. } => Some(90),
+            Self::Vocab { .. } => Some(233),
             Self::Mapping { .. } => Some(82),
         }
     }
@@ -104,10 +121,12 @@ impl Command {
     pub const fn spelling(&self) -> &'static str {
         match self {
             Self::Serve => "serve",
-            Self::Etl { command: Etl::Run } => "etl run",
+            Self::Etl {
+                command: Etl::Run { .. },
+            } => "etl run",
             Self::Cdm { command: Cdm::Init } => "cdm init",
             Self::Vocab {
-                command: Vocab::Load,
+                command: Vocab::Load { .. },
             } => "vocab load",
             Self::Mapping {
                 command: Mapping::Check,
@@ -124,20 +143,59 @@ mod tests {
 
     #[test]
     fn every_documented_subcommand_parses() {
-        let cases: [(&[&str], Command); 5] = [
+        let cases: [(&[&str], Command); 7] = [
             (&["ferrobridge", "serve"], Command::Serve),
             (
                 &["ferrobridge", "etl", "run"],
-                Command::Etl { command: Etl::Run },
+                Command::Etl {
+                    command: Etl::Run {
+                        resume: false,
+                        since: None,
+                    },
+                },
+            ),
+            (
+                &["ferrobridge", "etl", "run", "--resume"],
+                Command::Etl {
+                    command: Etl::Run {
+                        resume: true,
+                        since: None,
+                    },
+                },
+            ),
+            (
+                &[
+                    "ferrobridge",
+                    "etl",
+                    "run",
+                    "--since",
+                    "2026-09-01T00:00:00Z",
+                ],
+                Command::Etl {
+                    command: Etl::Run {
+                        resume: false,
+                        since: Some(String::from("2026-09-01T00:00:00Z")),
+                    },
+                },
             ),
             (
                 &["ferrobridge", "cdm", "init"],
                 Command::Cdm { command: Cdm::Init },
             ),
             (
-                &["ferrobridge", "vocab", "load"],
+                &[
+                    "ferrobridge",
+                    "vocab",
+                    "load",
+                    "/srv/athena",
+                    "--schema",
+                    "cdm",
+                ],
                 Command::Vocab {
-                    command: Vocab::Load,
+                    command: Vocab::Load {
+                        directory: PathBuf::from("/srv/athena"),
+                        schema: String::from("cdm"),
+                    },
                 },
             ),
             (
@@ -175,22 +233,38 @@ mod tests {
             Cli::try_parse_from(["ferrobridge", "etl"]).is_err(),
             "a job group needs its job"
         );
+        assert!(
+            Cli::try_parse_from(["ferrobridge", "vocab", "load"]).is_err(),
+            "the loader needs a directory and a schema"
+        );
     }
 
     #[test]
-    fn every_job_but_serve_names_the_issue_that_lands_it() {
+    fn a_pending_job_names_the_issue_that_lands_it() {
         assert_eq!(None, Command::Serve.pending_issue());
-        assert_eq!(Some(91), Command::Etl { command: Etl::Run }.pending_issue());
+        assert_eq!(None, Command::Cdm { command: Cdm::Init }.pending_issue());
+        let etl = Command::Etl {
+            command: Etl::Run {
+                resume: false,
+                since: None,
+            },
+        };
         assert_eq!(
-            Some(91),
-            Command::Cdm { command: Cdm::Init }.pending_issue()
+            Some(90),
+            etl.pending_issue(),
+            "the runner waits on the OMOCL engine"
         );
+        assert_eq!("etl run", etl.spelling());
         assert_eq!(
-            Some(91),
+            Some(233),
             Command::Vocab {
-                command: Vocab::Load
+                command: Vocab::Load {
+                    directory: PathBuf::from("/srv/athena"),
+                    schema: String::from("cdm"),
+                },
             }
-            .pending_issue()
+            .pending_issue(),
+            "the loader waits on the observed export format"
         );
         assert_eq!(
             Some(82),
@@ -199,6 +273,5 @@ mod tests {
             }
             .pending_issue()
         );
-        assert_eq!("etl run", Command::Etl { command: Etl::Run }.spelling());
     }
 }

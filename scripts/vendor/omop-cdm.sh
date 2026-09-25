@@ -6,8 +6,10 @@
 # Vendors the OMOP CDM v5.4 machine-readable definitions into docs/specs/omop-cdm/
 # (.claude/rules/vendored-inputs.md): the CSV table and field definitions the
 # `omop-cdm` row types are generated from, the four rendered PostgreSQL DDL files
-# a test compares that generated column set against, and `DESCRIPTION`, the only
-# place the repository declares its licence (docs/architecture.md section 10).
+# a test compares that generated column set against, `site/sqlScripts.qmd`, the
+# source of the CDM's SQL scripts page whose era scripts the derived tables
+# follow (docs/architecture.md section 5.4), and `DESCRIPTION`, the only place
+# the repository declares its licence (docs/architecture.md section 10).
 #
 # The "OMOP CDM definitions and PostgreSQL DDL" row of docs/VERSIONS.md pins a
 # tag. A tag is mutable, so the script resolves it to a commit, fetches that
@@ -39,6 +41,7 @@ paths=(
   "$ddl/OMOPCDM_postgresql_5.4_primary_keys.sql"
   "$ddl/OMOPCDM_postgresql_5.4_indices.sql"
   "$ddl/OMOPCDM_postgresql_5.4_constraints.sql"
+  "site/sqlScripts.qmd"
   "DESCRIPTION"
 )
 
@@ -78,7 +81,7 @@ cat > "$dest/PROVENANCE.md" << PROV
 <!-- This file describes vendored third-party material; the bytes beside it
      keep their upstream licence, not the licence of this repository. -->
 
-# Provenance: the OMOP Common Data Model v5.4 definitions and PostgreSQL DDL
+# Provenance: the OMOP Common Data Model v5.4 definitions, PostgreSQL DDL and SQL scripts
 
 Vendored verbatim by \`scripts/vendor/omop-cdm.sh\`
 (.claude/rules/vendored-inputs.md). Never edit a file here: change the pin in
@@ -102,6 +105,12 @@ types are generated from. The four PostgreSQL files are OHDSI's rendered DDL:
 OHDSI renders them from the same CSVs through a dialect layer that sits outside
 them, so they are vendored rather than generated, and a test asserts the
 generated column set equals the DDL's (docs/architecture.md section 10).
+
+\`site/sqlScripts.qmd\` is the source of the CDM's SQL scripts page
+(<https://ohdsi.github.io/CommonDataModel/sqlScripts.html>). Its condition era
+and drug era scripts are OHDSI SQL for SqlRender, so the \`omop-cdm\` crate
+carries their PostgreSQL form under \`sql/\`, and a test pins the digest of
+this file so an upstream change to the scripts is noticed.
 
 | File | sha256 | git blob id |
 |---|---|---|$rows

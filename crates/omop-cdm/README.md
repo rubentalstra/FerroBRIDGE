@@ -24,7 +24,28 @@ specification, and the OMOP Common Data Model through the OMOCL specification.
   `varchar(n)`, and `CdmDate` and `CdmDatetime`, which keep the value as ISO
   8601 text and validate it at construction.
 
-The vocabulary loader and the concept resolver follow in a later increment.
+- `graph`: the record graph one openEHR composition becomes, the seam
+  between a mapping engine and a CDM writer. A row is keyed by where it came
+  from (the EHR, the versioned composition, the archetype root and the
+  occurrence), checked against the column metadata as it is built, and names
+  other rows by reference; the writer assigns the ids.
+
+With the `database` feature, on by default:
+
+- `database` and `vocabulary`: a PostgreSQL pool bound to one CDM schema, the
+  DDL applied to it, and the concept resolver over the loaded vocabulary.
+- `writer`: one record graph per transaction through binary `COPY`, with a
+  natural-key side table that keeps each row on its id across runs and a
+  watermark per composition.
+- `derived`: `OBSERVATION_PERIOD`, and `CONDITION_ERA` and `DRUG_ERA` through
+  the PostgreSQL form of the scripts the CDM publishes, under `sql/` with the
+  Apache License 2.0 of their source (`sql/PROVENANCE.md`).
+
+A consumer that reads only the metadata and the record graph depends on the
+crate with `default-features = false` and builds no database client.
+
+The loader for an Athena vocabulary export follows once its observed format is
+recorded.
 
 Version 0.0.0 reserves the crate name on crates.io; the crate line starts with
 the first release of this content.
@@ -36,4 +57,5 @@ for non-commercial production use; a commercial licence for other production
 use; Apache License 2.0 four years after each version.
 
 The files under `ddl/` are OHDSI's, copied verbatim under the Apache License
-2.0 (`ddl/PROVENANCE.md`).
+2.0 (`ddl/PROVENANCE.md`). The two SQL files under `sql/` are the PostgreSQL
+form of OHDSI's era scripts and keep that licence (`sql/PROVENANCE.md`).
