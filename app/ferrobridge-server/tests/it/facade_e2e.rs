@@ -344,6 +344,133 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
     Ok(())
 }
 
+/// Returns the synthetic `Condition` with `id`, coded `code`, for the case's
+/// subject.
+fn condition_coded(id: &str, code: &str) -> Result<serde_json::Value, Box<dyn StdError>> {
+    let mut resource: serde_json::Value = serde_json::from_str(fixtures::R4_CONDITION)?;
+    resource["id"] = serde_json::json!(id);
+    resource["meta"] = serde_json::json!({ "profile": [PROFILE] });
+    resource["subject"] = serde_json::json!({
+        "identifier": { "system": SUBJECT_NAMESPACE, "value": SUBJECT_ID }
+    });
+    resource["code"]["coding"][0]["code"] = serde_json::json!(code);
+    Ok(resource)
+}
+
+/// Returns how many compositions the CDR holds, over AQL.
+async fn compositions(client: &Client) -> Result<usize, Box<dyn StdError>> {
+    let request = openehr_its::rest::generated::query::AdhocQueryExecute {
+        q: String::from("SELECT c/uid/value AS uid FROM EHR e CONTAINS COMPOSITION c"),
+        offset: None,
+        fetch: None,
+        query_parameters: None,
+    };
+    match client.query_aql(&request).await? {
+        ferrobridge_openehr::query::QueryOutcome::Rows(rows) => Ok(rows.rows.len()),
+        other => Err(format!("the CDR refused the count: {other:?}").into()),
+    }
+}
+
+#[tokio::test]
+async fn a_transaction_commits_once_and_reads_each_entry_back_from_a_real_cdr()
+-> Result<(), Box<dyn StdError>> {
+    // A committed transaction answers a `transaction-response` Bundle
+    // (<https://hl7.org/fhir/R4/http.html#transaction-response>); the re-sent
+    // Bundle rule is FerroBRIDGE's own design.
+    if !containers::e2e_enabled() {
+        return Ok(());
+    }
+    let cdr = containers::cdr().await?;
+    upload_template(cdr.base_url()).await?;
+    let client = Client::new(Config::new(cdr.base_url().parse()?))?;
+    let set = programs::read_set(std::path::Path::new(FIXTURES))?;
+    let templates = programs::fetch_templates(&set, &client).await?;
+    let programs = programs::compile_set(&set, &templates)?;
+    let store: Arc<dyn Store> = Arc::new(MemoryStore::new());
+    let facade = Arc::new(Facade::new(
+        programs,
+        store,
+        client.clone(),
+        Settings {
+            base_url: String::from("http://ferrobridge.invalid/fhir"),
+            ehr_policy: Policy::CreateOnFirstWrite,
+            subject_namespace: String::from(SUBJECT_NAMESPACE),
+            system_id: String::from("ferrobridge.e2e"),
+            language: String::from("en"),
+            territory: String::from("GB"),
+        },
+    ));
+    let codes = ["SYN-001", "SYN-002"];
+    let bundle = serde_json::json!({
+        "resourceType": "Bundle",
+        "type": "transaction",
+        "entry": [
+            { "fullUrl": "urn:uuid:0000-first",
+              "resource": condition_coded("ferrobridge-e2e-condition-1", codes[0])?,
+              "request": { "method": "POST", "url": "Condition" } },
+            { "fullUrl": "urn:uuid:0000-second",
+              "resource": condition_coded("ferrobridge-e2e-condition-2", codes[1])?,
+              "request": { "method": "POST", "url": "Condition" } }
+        ]
+    });
+    let post = |bundle: &serde_json::Value| {
+        Request::post("/fhir")
+            .header(header::CONTENT_TYPE, "application/fhir+json")
+            .body(Body::from(bundle.to_string()))
+    };
+
+    let first = call(app(&facade), post(&bundle)?).await?;
+    assert_eq!(StatusCode::OK, first.0, "{}", first.1);
+    assert_eq!(
+        Some("transaction-response"),
+        first.1["type"].as_str(),
+        "{}",
+        first.1
+    );
+    let locations: Vec<String> = (0..2)
+        .map(|index| {
+            first.1["entry"][index]["response"]["location"]
+                .as_str()
+                .map(str::to_owned)
+                .ok_or(format!("entry {index} answers a location: {}", first.1))
+        })
+        .collect::<Result<_, _>>()?;
+    assert_ne!(locations[0], locations[1], "two entries, two resources");
+    assert_eq!(2, compositions(&client).await?);
+
+    for (location, code) in locations.iter().zip(codes) {
+        let path = location
+            .strip_prefix("http://ferrobridge.invalid")
+            .and_then(|rest| rest.split("/_history/").next())
+            .ok_or(format!("{location} is under the facade base"))?;
+        let read = call(app(&facade), Request::get(path).body(Body::empty())?).await?;
+        assert_eq!(StatusCode::OK, read.0, "{}", read.1);
+        assert_eq!(
+            Some(code),
+            read.1["code"]["coding"][0]["code"].as_str(),
+            "{path} answers the entry it came from: {}",
+            read.1
+        );
+    }
+
+    let second = call(app(&facade), post(&bundle)?).await?;
+    assert_eq!(StatusCode::OK, second.0, "{}", second.1);
+    let resent: Vec<Option<&str>> = (0..2)
+        .map(|index| second.1["entry"][index]["response"]["location"].as_str())
+        .collect();
+    let expected: Vec<Option<&str>> = locations.iter().map(|at| Some(at.as_str())).collect();
+    assert_eq!(
+        expected, resent,
+        "the re-sent Bundle names the resources its first delivery created"
+    );
+    assert_eq!(
+        2,
+        compositions(&client).await?,
+        "the re-sent Bundle commits no third composition"
+    );
+    Ok(())
+}
+
 /// Sends `request` through `app` and reads the status and the body.
 async fn call(
     app: Router,

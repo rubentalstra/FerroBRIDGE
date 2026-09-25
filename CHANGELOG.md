@@ -274,6 +274,23 @@ crates on crates.io.
   and a defective one is a refusal instead of an empty list. An EHR the
   facade creates stamps `EHR_STATUS.archetype_details.rm_version` `1.2.0`, the
   release its types come from, instead of `1.1.0`.
+- A transaction Bundle sent twice commits its compositions once (#264). The
+  transaction path records each entry's identity binding and consumed source
+  the way a single create does, asking the CDR for the committed CONTRIBUTION
+  (`Prefer: return=representation`) to learn each entry's version and reading
+  each version back to match it to its entry by the `FEEDER_AUDIT` the engine
+  wrote, since ITS-REST states no order for `CONTRIBUTION.versions`; a
+  version that matches no entry, or more than one, is a `500` naming the
+  contribution and binds nothing. A committed
+  transaction answers a `transaction-response` Bundle whose entries carry
+  `201 Created`, the `location` `[base]/[type]/[id]/_history/[vid]` and the
+  `ETag` a create answers (R4 §3.1.0.11.3), where it answered an
+  `OperationOutcome`. A Bundle whose every entry an earlier delivery consumed
+  commits nothing and answers `200 OK` per entry with the same locations; one
+  only some of whose entries were consumed is refused with `409` naming them,
+  and one carrying a resource twice is refused with `422`. The ingest service
+  keys a message's entries on its control id and entry position, so a
+  redelivered message commits once.
 
 ## [0.0.3] - 2026-09-25
 
