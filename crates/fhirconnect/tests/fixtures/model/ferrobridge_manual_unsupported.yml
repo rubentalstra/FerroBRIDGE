@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
-# A FerroBRIDGE-authored model mapping whose manual block writes
-# DV_TEXT.hyperlink below the DV_CODED_TEXT node of items[at0073]. The
-# reference model carries the attribute, and no FLAT part of the class does,
-# so the engine refuses the entry.
+# A FerroBRIDGE-authored model mapping whose manual block writes text into
+# DV_CODED_TEXT.defining_code/terminology_id below the node of items[at0073].
+# The attribute holds a TERMINOLOGY_ID, no string, so the engine refuses the
+# entry.
 grammar: FHIRConnect/v1.0.0
 type: model
 metadata:
@@ -31,5 +31,5 @@ mappings:
     manual:
       - name: "linked"
         openehr:
-          - path: "hyperlink/value"
-            value: "http://example.org/ferrobridge/certainty"
+          - path: "defining_code/terminology_id"
+            value: "local"

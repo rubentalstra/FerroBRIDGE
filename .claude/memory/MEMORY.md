@@ -63,3 +63,5 @@
 - [Upstream reports carry no milestone](upstream-reports-no-milestone.md): an upstream-report issue is never in a milestone; the in-repo decision it forces is a separate, milestoned issue
 - [Upstream reports stay here](upstream-reports-stay-here.md): the issue is the record; nothing is filed on external trackers and no owner-action issue for filing is created
 - [Dependency sweep to latest](deps-latest-sweep.md): every session compares the workspace pins with crates.io and the sibling's crate list (openehr-sdt split off openehr-its on 2026-09-24); the family lands together by hand; owner 2026-09-24
+- [openEHR crates are the model](openehr-crates-are-the-model.md): never restate RM, AM, BASE or FLAT knowledge; `|raw` writes and `openehr_rm::v1_2::model` lookups; owner flag 2026-09-25, #241
+

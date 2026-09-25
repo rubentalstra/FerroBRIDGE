@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
-# A FerroBRIDGE-authored model mapping that names DV_TEXT.hyperlink below the
-# DV_CODED_TEXT node of items[at0073]. The reference model carries the
-# attribute, and no FLAT part of the class does, so the engine refuses it.
+# A FerroBRIDGE-authored model mapping that names DV_TEXT.mappings/match below
+# the DV_CODED_TEXT node of items[at0073]. `mappings` is a list, and the engine
+# walks a tail by attribute name into one value, so it refuses the tail.
 grammar: FHIRConnect/v1.0.0
 type: model
 metadata:
@@ -26,4 +26,4 @@ mappings:
   - name: "certaintyLink"
     with:
       fhir: "$resource.verificationStatus.text"
-      openehr: "$archetype/data[at0001]/items[at0073]/value/hyperlink/value"
+      openehr: "$archetype/data[at0001]/items[at0073]/value/mappings/match"

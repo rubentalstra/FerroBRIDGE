@@ -4,25 +4,6 @@ expression: inbound.value().value()
 ---
 {
   "_type": "COMPOSITION",
-  "context": {
-    "_type": "EVENT_CONTEXT",
-    "start_time": {
-      "_type": "DV_DATE_TIME",
-      "value": "2026-09-13T08:00:00Z"
-    },
-    "setting": {
-      "_type": "DV_CODED_TEXT",
-      "value": "other care",
-      "defining_code": {
-        "_type": "CODE_PHRASE",
-        "terminology_id": {
-          "_type": "TERMINOLOGY_ID",
-          "value": "openehr"
-        },
-        "code_string": "238"
-      }
-    }
-  },
   "content": [
     {
       "_type": "EVALUATION",
@@ -157,5 +138,24 @@ expression: inbound.value().value()
   "composer": {
     "_type": "PARTY_IDENTIFIED",
     "name": "FHIRconnect"
+  },
+  "context": {
+    "_type": "EVENT_CONTEXT",
+    "start_time": {
+      "_type": "DV_DATE_TIME",
+      "value": "2026-09-13T08:00:00Z"
+    },
+    "setting": {
+      "_type": "DV_CODED_TEXT",
+      "value": "other care",
+      "defining_code": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "_type": "TERMINOLOGY_ID",
+          "value": "openehr"
+        },
+        "code_string": "238"
+      }
+    }
   }
 }

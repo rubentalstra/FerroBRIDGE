@@ -40,12 +40,6 @@ const EHR_STATUS_ARCHETYPE: &str = "openEHR-EHR-EHR_STATUS.generic.v1";
 /// The reference-model class a subject reference points at.
 const PARTY_TYPE: &str = "PERSON";
 
-/// The openEHR Reference Model release this bridge writes.
-///
-/// The RM the composition and status types come from is Release 1.1.0
-/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/>).
-const RM_VERSION: &str = "1.1.0";
-
 /// Whether the facade may create an EHR it does not find.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Policy {
@@ -199,7 +193,9 @@ pub fn status_of(person: &PersonId) -> EhrStatus {
                 value: String::from(EHR_STATUS_ARCHETYPE),
             },
             template_id: None,
-            rm_version: String::from(RM_VERSION),
+            // NOTE: RM Release-1.2.0 common.html#_archetyped_class, `rm_version` names
+            // the release the value was built from, which is the `v1_2` generation.
+            rm_version: String::from(openehr_rm::Generation::V1_2.spec_version()),
         }),
         feeder_audit: None,
         subject: PartySelf {
@@ -267,6 +263,19 @@ mod tests {
         };
         assert_eq!("p-1", id.value);
         assert_eq!("http://example.org/mrn", id.scheme);
+    }
+
+    #[test]
+    fn the_status_names_the_rm_release_its_types_come_from() {
+        let person = PersonId::new("http://example.org/mrn", "p-1").expect("a legal person id");
+        let status = status_of(&person);
+        let details = status
+            .archetype_details
+            .expect("an archetype root carries its details");
+        assert_eq!(
+            openehr_rm::Generation::V1_2.spec_version(),
+            details.rm_version
+        );
     }
 
     #[test]

@@ -2026,9 +2026,9 @@ fn an_rm_tail_the_reference_model_defines_compiles() -> Result<(), Box<dyn Error
     Ok(())
 }
 
-/// A tail the reference model defines and no FLAT part of the node's class
-/// carries is refused at load: its value would be merged into the node and
-/// then dropped on the way to the wire.
+/// A tail the reference model defines below a structural node, through a
+/// list, is refused at load: the engine writes a tail as one value of the
+/// node, so its value would never reach the wire.
 #[test]
 fn an_rm_tail_no_flat_part_carries_is_refused_at_load() -> Result<(), Box<dyn Error>> {
     let body = "mappings:\n  - name: \"provider\"\n    with:\n      fhir: \"$resource.recorder\"\n      openehr: \"$archetype/other_participations/function\"\n";
@@ -2051,11 +2051,12 @@ fn an_rm_tail_no_flat_part_carries_is_refused_at_load() -> Result<(), Box<dyn Er
     Ok(())
 }
 
-/// A `manual` path no FLAT part of the node's class carries is refused at
-/// load, as a `with.openehr` tail is.
+/// A `manual` path that ends on no string attribute is refused at load, as a
+/// `with.openehr` tail the engine cannot carry is: `merge` writes a manual
+/// value as text, and `defining_code/terminology_id` holds a `TERMINOLOGY_ID`.
 #[test]
 fn a_manual_path_no_flat_part_carries_is_refused_at_load() -> Result<(), Box<dyn Error>> {
-    let body = "mappings:\n  - name: \"certainty\"\n    with:\n      fhir: \"$resource.verificationStatus\"\n      openehr: \"$archetype/data[at0001]/items[at0073]\"\n    manual:\n      - name: \"linked\"\n        openehr:\n          - path: \"hyperlink/value\"\n            value: \"http://example.org/synthetic\"\n";
+    let body = "mappings:\n  - name: \"certainty\"\n    with:\n      fhir: \"$resource.verificationStatus\"\n      openehr: \"$archetype/data[at0001]/items[at0073]\"\n    manual:\n      - name: \"linked\"\n        openehr:\n          - path: \"defining_code/terminology_id\"\n            value: \"local\"\n";
     let files = [
         ("model.yml", start_model(body)),
         (
@@ -2067,7 +2068,8 @@ fn a_manual_path_no_flat_part_carries_is_refused_at_load() -> Result<(), Box<dyn
     assert_eq!(codes(&diagnostics), vec!["fc-uncarried-tail"]);
     let message = diagnostics.first().ok_or("one refusal")?.message();
     assert!(
-        message.contains("`certainty.linked`") && message.contains("`hyperlink/value`"),
+        message.contains("`certainty.linked`")
+            && message.contains("`defining_code/terminology_id`"),
         "{message}"
     );
     Ok(())

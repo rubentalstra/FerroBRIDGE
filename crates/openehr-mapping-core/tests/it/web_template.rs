@@ -239,6 +239,54 @@ fn an_occurrence_list_that_does_not_match_the_template_is_refused() {
     );
 }
 
+#[test]
+fn a_context_value_and_a_raw_value_build_the_same_composition() {
+    // Simplified Formats master06 §Composer, §Language and Territory: the
+    // `ctx/` keys set what the path spellings set; master04 §Raw canonical
+    // JSON: a leaf takes its whole canonical value under `|raw`.
+    let index = fixture_index();
+    let note = index.node(&AqlPath::new(NOTE_TEXT)).expect("the note node");
+    let values = vec![
+        NodeValue::context("language", "en".into()),
+        NodeValue::context("territory", "NL".into()),
+        NodeValue::context("composer_name", "FerroBRIDGE".into()),
+        NodeValue::new(
+            note,
+            serde_json::json!({"_type": "DV_TEXT", "value": MINIMAL_EVALUATION_NOTE}),
+        )
+        .with_datum("raw"),
+    ];
+    assert_eq!(values.first().and_then(NodeValue::flat_id), None);
+    let built = index
+        .build_composition(&values, NOW)
+        .expect("the context and raw values build");
+    assert_eq!(built.value(), composition_of(&index).value());
+}
+
+#[test]
+fn an_instance_index_past_the_flat_bound_is_refused() {
+    // openehr_sdt::flat::path::MAX_INSTANCE_INDEX is the largest `:i` the FLAT
+    // reader accepts, so a key past it is refused before the builder sees it.
+    let index = fixture_index();
+    let note = index.node(&AqlPath::new(NOTE_TEXT)).expect("the note node");
+    let past = openehr_sdt::flat::path::MAX_INSTANCE_INDEX + 1;
+    let values = vec![
+        NodeValue::new(note, MINIMAL_EVALUATION_NOTE.into()).under(vec![
+            openehr_sdt::flat::path::Segment {
+                name: String::from("_mapping"),
+                index: Some(past),
+            },
+        ]),
+    ];
+    let error = index
+        .build_composition(&values, NOW)
+        .expect_err("the index is past the bound");
+    assert!(
+        matches!(error, PathError::InstanceIndex { index, .. } if index == past),
+        "{error:?}"
+    );
+}
+
 /// Builds the fixture's composition.
 #[expect(clippy::expect_used, reason = "test plumbing")]
 fn composition_of(

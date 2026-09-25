@@ -5,17 +5,20 @@
 //!
 //! Each [`crate::engine::lens::Lens`] is typed in one openEHR class, and the
 //! interpreter holds whichever class the template node carries, so [`RmValue`]
-//! is the sum of the classes the FHIR round trip touches. It also carries the
-//! two wires a composition is reached through: the canonical JSON one value
-//! reads back as, and the FLAT keys a value is written under (openEHR
-//! ITS-REST 1.1.0, Simplified Formats).
+//! is the sum of the classes the FHIR round trip touches. A value crosses both
+//! wires a composition is reached through as its canonical JSON, read and
+//! written by the ITS-JSON entry points of `openehr-its`: the CDR serves it,
+//! and the FLAT builder takes it whole under the `|raw` suffix (openEHR
+//! ITS-REST 1.1.0, Simplified Formats, master04 §Raw canonical JSON).
 //!
-//! The FLAT decomposition is not a second model of a data value. It is the
-//! key spelling of the same value, one `|suffix` or sub-path per part, taken
-//! from the Simplified Formats attribute tables, and the builder of
-//! `openehr-its` rebuilds the reference-model instance from it.
+//! Which tail below a node a value carries is the reference-model attribute
+//! model `openehr-rm` generates from the RM BMM, so nothing here restates the
+//! attributes of a class.
 
 use openehr_base::containers::NonEmptyVec;
+use openehr_its::json::JsonParseError;
+use openehr_its::json::from_canonical_value;
+use openehr_its::json::to_canonical_value;
 use openehr_rm::v1_2::common::generic::party_identified::PartyIdentifiedData;
 use openehr_rm::v1_2::data_types::basic::dv_identifier::DvIdentifier;
 use openehr_rm::v1_2::data_types::quantity::date_time::dv_date_time::DvDateTime;
@@ -25,9 +28,18 @@ use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
 use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
 use openehr_rm::v1_2::data_types::text::dv_text::DvText;
 use openehr_rm::v1_2::data_types::text::dv_text::DvTextData;
-use openehr_rm::v1_2::data_types::text::term_mapping::TermMapping;
 use openehr_rm::v1_2::model;
+use openehr_rm::v1_2::model::Container;
+use openehr_sdt::flat::path::Segment;
 use serde_json::Value;
+
+use crate::resolve::derive;
+
+/// The suffix a whole canonical value travels under in a FLAT key.
+///
+/// Simplified Formats, master04 §Raw canonical JSON: the value "must include
+/// the `_type` property", which the ITS-JSON writer puts first.
+pub const RAW: &str = "raw";
 
 /// One openEHR value a data-type cell produced or consumed.
 #[derive(Debug, Clone, PartialEq)]
@@ -60,14 +72,27 @@ pub enum RmError {
         rm_type: String,
     },
     /// The canonical JSON does not decode as the class the node names.
-    #[error("the value at {node} does not read as {rm_type}: {reason}")]
+    #[error("the value at {node} does not read as {rm_type}")]
     Decode {
         /// The node the value was read from.
         node: String,
         /// The class the node names.
         rm_type: String,
-        /// What the decoder refused.
-        reason: String,
+        /// What the strict ITS-JSON reader refused, with its JSON path.
+        #[source]
+        source: JsonParseError,
+    },
+    /// A scalar attribute's text does not read as the attribute's type.
+    #[error("the {rm_type} attribute at {node} takes {expected}, and `{text}` is none")]
+    Scalar {
+        /// The node the attribute is below.
+        node: String,
+        /// The class that owns the attribute.
+        rm_type: String,
+        /// The text the FHIR element carried.
+        text: String,
+        /// What the attribute's declared type takes.
+        expected: &'static str,
     },
     /// The value has no canonical JSON form.
     #[error("the {rm_type} value has no canonical JSON form: {reason}")]
@@ -77,63 +102,6 @@ pub enum RmError {
         /// What the encoder refused.
         reason: String,
     },
-}
-
-/// One FLAT key part of a reference-model value.
-///
-/// The key is the node's own FLAT id, then [`Part::sub_path`], then `|` and
-/// [`Part::datum`] where the part is a datum suffix.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Part {
-    sub_path: Vec<String>,
-    datum: Option<&'static str>,
-    value: Value,
-}
-
-impl Part {
-    /// Returns the value-internal family the part sits under.
-    #[must_use]
-    pub fn sub_path(&self) -> &[String] {
-        &self.sub_path
-    }
-
-    /// Returns the datum suffix, `None` for the node's own value.
-    #[must_use]
-    pub const fn datum(&self) -> Option<&'static str> {
-        self.datum
-    }
-
-    /// Returns the value the part carries.
-    #[must_use]
-    pub const fn value(&self) -> &Value {
-        &self.value
-    }
-
-    /// Creates a part at the node itself, under `datum`.
-    fn datum_of(datum: &'static str, value: impl Into<Value>) -> Self {
-        Self {
-            sub_path: Vec::new(),
-            datum: Some(datum),
-            value: value.into(),
-        }
-    }
-
-    /// Creates a part at the node itself, with no datum suffix.
-    fn bare(value: impl Into<Value>) -> Self {
-        Self {
-            sub_path: Vec::new(),
-            datum: None,
-            value: value.into(),
-        }
-    }
-
-    /// Returns this part under a value-internal family.
-    fn under(mut self, segments: &[String]) -> Self {
-        let mut path = segments.to_vec();
-        path.append(&mut self.sub_path);
-        self.sub_path = path;
-        self
-    }
 }
 
 impl RmValue {
@@ -157,108 +125,88 @@ impl RmValue {
     /// A `DV_TEXT` node may hold a `DV_CODED_TEXT`, which the reference model
     /// admits as a subtype
     /// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/data_types.html#_dv_coded_text_class>),
-    /// so the discriminator in the document decides between the two.
+    /// so the discriminator in the document decides between the two. The
+    /// reader is the strict ITS-JSON one of `openehr-its`.
     ///
     /// # Errors
     ///
     /// Returns [`RmError::UnknownClass`] for a class no cell carries and
     /// [`RmError::Decode`] when the document does not decode as it.
     pub fn from_canonical(rm_type: &str, node: &str, value: &Value) -> Result<Self, RmError> {
-        let decode = |result: Result<Self, serde_json::Error>| {
-            result.map_err(|source| RmError::Decode {
-                node: String::from(node),
-                rm_type: String::from(rm_type),
-                reason: source.to_string(),
-            })
+        let refuse = |source: JsonParseError| RmError::Decode {
+            node: String::from(node),
+            rm_type: String::from(rm_type),
+            source,
         };
         match rm_type {
-            "DV_TEXT" | "DV_CODED_TEXT" => decode(
-                serde_json::from_value::<DvText>(value.clone()).map(|text| match text {
+            "DV_TEXT" | "DV_CODED_TEXT" => from_canonical_value::<DvText>(value)
+                .map(|text| match text {
                     DvText::DvCodedText(coded) => Self::CodedText(Box::new(coded)),
                     DvText::DvText(plain) => Self::Text(plain),
-                }),
-            ),
-            "CODE_PHRASE" => decode(serde_json::from_value(value.clone()).map(Self::CodePhrase)),
-            "DV_DATE_TIME" => decode(
-                serde_json::from_value(value.clone()).map(|date| Self::DateTime(Box::new(date))),
-            ),
-            "DV_INTERVAL" => decode(
-                serde_json::from_value(value.clone())
-                    .map(|interval| Self::DateTimeInterval(Box::new(interval))),
-            ),
+                })
+                .map_err(refuse),
+            "CODE_PHRASE" => from_canonical_value(value)
+                .map(Self::CodePhrase)
+                .map_err(refuse),
+            "DV_DATE_TIME" => from_canonical_value(value)
+                .map(|date| Self::DateTime(Box::new(date)))
+                .map_err(refuse),
+            "DV_INTERVAL" => from_canonical_value(value)
+                .map(|interval| Self::DateTimeInterval(Box::new(interval)))
+                .map_err(refuse),
             "PARTY_IDENTIFIED" | "PARTY_PROXY" => {
-                decode(serde_json::from_value(value.clone()).map(Self::Party))
+                from_canonical_value(value).map(Self::Party).map_err(refuse)
             }
-            "DV_IDENTIFIER" => decode(serde_json::from_value(value.clone()).map(Self::Identifier)),
-            "DV_PROPORTION" => decode(
-                serde_json::from_value(value.clone())
-                    .map(|proportion| Self::Proportion(Box::new(proportion))),
-            ),
+            "DV_IDENTIFIER" => from_canonical_value(value)
+                .map(Self::Identifier)
+                .map_err(refuse),
+            "DV_PROPORTION" => from_canonical_value(value)
+                .map(|proportion| Self::Proportion(Box::new(proportion)))
+                .map_err(refuse),
             other => Err(RmError::UnknownClass {
                 rm_type: String::from(other),
             }),
         }
     }
 
-    /// Returns the FLAT parts one value is written under.
-    ///
-    /// The suffixes are the ones the Simplified Formats attribute tables fix
-    /// per class, and a part the class leaves unset is left out.
+    /// Returns the canonical JSON of the value, `_type` first.
     ///
     /// # Errors
     ///
-    /// Returns [`RmError::Encode`] when a numeric attribute has no JSON form.
-    pub fn parts(&self) -> Result<Vec<Part>, RmError> {
-        match *self {
-            Self::Text(ref text) => Ok(text_parts(text)),
-            Self::CodedText(ref coded) => Ok(coded_parts(coded)),
-            Self::CodePhrase(ref code) => Ok(code_phrase_parts(code)),
-            Self::DateTime(ref date) => Ok(date_time_parts(date)),
-            Self::DateTimeInterval(ref interval) => Ok(interval_parts(interval)),
-            Self::Party(ref party) => Ok(party_parts(party)),
-            Self::Identifier(ref identifier) => Ok(identifier_parts(identifier, &[])),
-            Self::Proportion(ref proportion) => proportion_parts(proportion),
-        }
-    }
-
-    /// Returns the canonical JSON of the value, with its `_type`.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`RmError::Encode`] when the value has no JSON form.
+    /// Returns [`RmError::Encode`] for a `DV_PROPORTION` whose numerator or
+    /// denominator is no finite number, which JSON has no form for
+    /// (<https://www.rfc-editor.org/rfc/rfc8259#section-6>).
     pub fn to_canonical(&self) -> Result<Value, RmError> {
-        let rm_type = self.rm_type();
         let encoded = match *self {
-            Self::Text(ref text) => serde_json::to_value(text),
-            Self::CodedText(ref coded) => serde_json::to_value(coded.as_ref()),
-            Self::CodePhrase(ref code) => serde_json::to_value(code),
-            Self::DateTime(ref date) => serde_json::to_value(date.as_ref()),
-            Self::DateTimeInterval(ref interval) => serde_json::to_value(interval.as_ref()),
-            Self::Party(ref party) => serde_json::to_value(party),
-            Self::Identifier(ref identifier) => serde_json::to_value(identifier),
-            Self::Proportion(ref proportion) => serde_json::to_value(proportion.as_ref()),
-        }
-        .map_err(|source| RmError::Encode {
-            rm_type,
-            reason: source.to_string(),
-        })?;
-        let Value::Object(mut object) = encoded else {
-            return Err(RmError::Encode {
-                rm_type,
-                reason: String::from("the value does not encode as a JSON object"),
-            });
+            Self::Text(ref text) => to_canonical_value(text),
+            Self::CodedText(ref coded) => to_canonical_value(coded.as_ref()),
+            Self::CodePhrase(ref code) => to_canonical_value(code),
+            Self::DateTime(ref date) => to_canonical_value(date.as_ref()),
+            Self::DateTimeInterval(ref interval) => to_canonical_value(interval.as_ref()),
+            Self::Party(ref party) => to_canonical_value(party),
+            Self::Identifier(ref identifier) => to_canonical_value(identifier),
+            Self::Proportion(ref proportion) => {
+                for number in [proportion.numerator, proportion.denominator] {
+                    if !number.is_finite() {
+                        return Err(RmError::Encode {
+                            rm_type: "DV_PROPORTION",
+                            reason: format!("{number} is not a finite JSON number"),
+                        });
+                    }
+                }
+                to_canonical_value(proportion.as_ref())
+            }
         };
-        object.insert(String::from("_type"), Value::String(String::from(rm_type)));
-        Ok(Value::Object(object))
+        Ok(encoded)
     }
 }
 
 /// What the attribute a tail ends on holds.
 ///
 /// A tail below a template node names either one scalar attribute of the
-/// node's data value or one data value nested in it, and the FLAT parts of the
-/// node's class are what carry it onto the wire (openEHR ITS-REST 1.1.0,
-/// Simplified Formats, the per-class attribute tables).
+/// node's data value or one data value nested in it; the whole value reaches
+/// the wire under `|raw`, so every attribute the reference model gives the
+/// value is carried.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Carried {
     /// A string attribute.
@@ -273,88 +221,99 @@ pub enum Carried {
     Value,
     /// A data value of the tail's leaf class that is an attribute of a
     /// structural node, which FLAT writes as the `_`-prefixed family of the
-    /// node (`_provider` on an `ENTRY`) and the engine writes as the value's
-    /// parts under that family.
+    /// node (`_provider` on an `ENTRY`) and the engine writes through
+    /// [`crate::engine::family::provider`].
     Family,
 }
 
-/// The attribute tails each class's FLAT parts carry, with what they hold.
-///
-/// [`RmValue::parts`] writes exactly these, so a tail outside the table would
-/// be merged into the value and then dropped on the way to the wire. No
-/// specification governs the walk below a node beyond the RM attribute model:
-/// our own design.
-const CARRIED: &[(&str, &str, Carried)] = &[
-    ("DV_TEXT", "value", Carried::Text),
-    ("DV_TEXT", "formatting", Carried::Text),
-    ("DV_CODED_TEXT", "value", Carried::Text),
-    ("DV_CODED_TEXT", "formatting", Carried::Text),
-    ("DV_CODED_TEXT", "defining_code", Carried::Value),
-    ("DV_CODED_TEXT", "defining_code/code_string", Carried::Text),
-    (
-        "DV_CODED_TEXT",
-        "defining_code/terminology_id/value",
-        Carried::Text,
-    ),
-    (
-        "DV_CODED_TEXT",
-        "defining_code/preferred_term",
-        Carried::Text,
-    ),
-    ("CODE_PHRASE", "code_string", Carried::Text),
-    ("CODE_PHRASE", "terminology_id/value", Carried::Text),
-    ("CODE_PHRASE", "preferred_term", Carried::Text),
-    ("DV_DATE_TIME", "value", Carried::Text),
-    ("DV_DATE_TIME", "magnitude_status", Carried::Text),
-    ("DV_INTERVAL", "lower/value", Carried::Text),
-    ("DV_INTERVAL", "upper/value", Carried::Text),
-    ("DV_INTERVAL", "lower_unbounded", Carried::Boolean),
-    ("DV_INTERVAL", "upper_unbounded", Carried::Boolean),
-    ("DV_INTERVAL", "lower_included", Carried::Boolean),
-    ("DV_INTERVAL", "upper_included", Carried::Boolean),
-    ("PARTY_IDENTIFIED", "name", Carried::Text),
-    ("DV_IDENTIFIER", "id", Carried::Text),
-    ("DV_IDENTIFIER", "issuer", Carried::Text),
-    ("DV_IDENTIFIER", "assigner", Carried::Text),
-    ("DV_IDENTIFIER", "type", Carried::Text),
-    ("DV_PROPORTION", "numerator", Carried::Real),
-    ("DV_PROPORTION", "denominator", Carried::Real),
-    ("DV_PROPORTION", "type", Carried::Integer),
-    ("DV_PROPORTION", "precision", Carried::Integer),
-];
-
 /// Returns the class a tail below a node of `rm_type` is written as, and what
-/// the tail's attribute holds, `None` when no FLAT part carries it.
+/// the tail's attribute holds, `None` when the engine cannot carry it.
 ///
-/// A node's own class is tried first. A `DV_TEXT` node may hold a
-/// `DV_CODED_TEXT` and a `PARTY_PROXY` node a `PARTY_IDENTIFIED`, the
-/// subtypes the reference model admits, so a tail only the subtype carries
-/// writes the subtype
+/// The attributes come from `openehr_rm::v1_2::model`, looked up on the node's
+/// class and on its concrete descendants, since a `DV_TEXT` node may hold a
+/// `DV_CODED_TEXT` and a `PARTY_PROXY` node a `PARTY_IDENTIFIED`
 /// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/data_types.html#_dv_coded_text_class>).
+/// The class is the most general concrete one that declares the tail's first
+/// attribute. A tail below a structural node other than a [`FAMILIES`] entry,
+/// and a tail that steps through or ends on a container attribute, is `None`:
+/// the engine walks a tail by attribute name and writes one value into the
+/// node. No specification governs the walk: our own design.
 #[must_use]
 pub fn carried(rm_type: &str, tail: &[&str]) -> Option<(&'static str, Carried)> {
     let wanted = tail.join("/");
-    let subtype = match rm_type {
-        "DV_TEXT" => Some("DV_CODED_TEXT"),
-        "PARTY_PROXY" => Some("PARTY_IDENTIFIED"),
-        _ => None,
-    };
-    let lookup = |class: &str| {
-        CARRIED
-            .iter()
-            .find(|&&(owner, path, _)| owner == class && path == wanted)
-            .map(|&(owner, _, held)| (owner, held))
-    };
-    lookup(rm_type)
-        .or_else(|| subtype.and_then(lookup))
-        .or_else(|| {
-            FAMILIES
-                .iter()
-                .find(|&&(owner, path)| path == wanted && model::is_a(rm_type, owner))
-                .map(|&(owner, _)| (owner, Carried::Family))
-        })
+    if let Some(&(owner, _)) = FAMILIES
+        .iter()
+        .find(|&&(owner, path)| path == wanted && model::is_a(rm_type, owner))
+    {
+        return Some((owner, Carried::Family));
+    }
+    if derive::is_structural(rm_type) {
+        return None;
+    }
+    let (&first, rest) = tail.split_first()?;
+    let owner = owner_of(rm_type, first)?;
+    let mut attribute = model::attribute(owner, first)?;
+    for &segment in rest {
+        if attribute.container != Container::None {
+            return None;
+        }
+        attribute = concrete_forms(attribute.declared_type)
+            .into_iter()
+            .find_map(|form| model::attribute(form, segment))?;
+    }
+    if attribute.container != Container::None {
+        return None;
+    }
+    Some((owner, held(attribute.declared_type)?))
 }
 
+/// Returns the most general concrete class at or below `rm_type` that
+/// declares `attribute`, earliest in the model's order on a tie.
+fn owner_of(rm_type: &str, attribute: &str) -> Option<&'static str> {
+    let declaring: Vec<&'static str> = concrete_forms(rm_type)
+        .into_iter()
+        .filter(|form| model::class(form).is_some_and(|class| !class.is_abstract))
+        .filter(|form| model::attribute(form, attribute).is_some())
+        .collect();
+    declaring.iter().copied().find(|&form| {
+        !declaring
+            .iter()
+            .any(|&other| other != form && model::is_a(form, other))
+    })
+}
+
+/// Returns the reference-model class plus every concrete class below it.
+fn concrete_forms(rm_type: &str) -> Vec<&'static str> {
+    let Some(class) = model::class(rm_type) else {
+        return Vec::new();
+    };
+    let mut forms = vec![class.name];
+    for &descendant in class.descendants {
+        if !forms.contains(&descendant) {
+            forms.push(descendant);
+        }
+    }
+    forms
+}
+
+/// Returns what an attribute of `declared_type` holds, `None` for a type the
+/// engine writes no scalar or value of.
+///
+/// The primitive names are the BASE foundation types the RM BMM declares
+/// (<https://specifications.openehr.org/releases/BASE/Release-1.2.0/foundation_types.html>).
+fn held(declared_type: &str) -> Option<Carried> {
+    match declared_type {
+        "String" => Some(Carried::Text),
+        "Real" => Some(Carried::Real),
+        "Integer" | "Integer64" => Some(Carried::Integer),
+        "Boolean" => Some(Carried::Boolean),
+        other => model::class(other).map(|_| Carried::Value),
+    }
+}
+
+// TODO(#241): the `_provider` family is spelled here and in `family::provider`
+// until openehr-sdt honours `|raw` on `_`-prefixed attribute families (sibling
+// request S1).
 /// The attributes of a structural class FLAT writes as a `_`-prefixed family
 /// of the class's node.
 ///
@@ -363,162 +322,17 @@ pub fn carried(rm_type: &str, tail: &[&str]) -> Option<(&'static str, Carried)> 
 /// and Simplified Formats spells it `_provider` under the entry's node
 /// (`docs/specs/its-rest/docs/simplified_formats/master05-rm_mapping.adoc`,
 /// §OBSERVATION), the shape `family` spells `_other_participation` in.
-const FAMILIES: &[(&str, &str)] = &[("ENTRY", "provider")];
+pub const FAMILIES: &[(&str, &str)] = &[("ENTRY", "provider")];
 
 /// Returns the FLAT family a tail of [`Carried::Family`] is written under.
 #[must_use]
-pub fn family_of(tail: &[&str]) -> Vec<String> {
-    tail.iter().map(|segment| format!("_{segment}")).collect()
-}
-
-/// The parts of a `DV_TEXT` (Simplified Formats, §`DV_TEXT`).
-fn text_parts(text: &DvTextData) -> Vec<Part> {
-    let mut parts = vec![Part::datum_of("value", text.value.clone())];
-    if let Some(ref formatting) = text.formatting {
-        parts.push(Part::datum_of("formatting", formatting.clone()));
-    }
-    parts.extend(mapping_parts(text.mappings.as_deref().unwrap_or_default()));
-    parts
-}
-
-/// The parts of a `DV_CODED_TEXT` (Simplified Formats, §`DV_CODED_TEXT`).
-fn coded_parts(coded: &DvCodedText) -> Vec<Part> {
-    let mut parts = vec![
-        Part::datum_of("value", coded.value.clone()),
-        Part::datum_of("code", coded.defining_code.code_string.clone()),
-        Part::datum_of(
-            "terminology",
-            coded.defining_code.terminology_id.value.clone(),
-        ),
-    ];
-    if let Some(ref preferred) = coded.defining_code.preferred_term {
-        parts.push(Part::datum_of("preferred_term", preferred.clone()));
-    }
-    if let Some(ref formatting) = coded.formatting {
-        parts.push(Part::datum_of("formatting", formatting.clone()));
-    }
-    parts.extend(mapping_parts(coded.mappings.as_deref().unwrap_or_default()));
-    parts
-}
-
-/// The parts of a `CODE_PHRASE` (Simplified Formats, §`CODE_PHRASE`).
-fn code_phrase_parts(code: &CodePhrase) -> Vec<Part> {
-    let mut parts = vec![
-        Part::datum_of("code", code.code_string.clone()),
-        Part::datum_of("terminology", code.terminology_id.value.clone()),
-    ];
-    if let Some(ref preferred) = code.preferred_term {
-        parts.push(Part::datum_of("preferred_term", preferred.clone()));
-    }
-    parts
-}
-
-/// The parts of a `DV_DATE_TIME`.
-///
-/// The value carries no suffix of its own, so the date and time text is the
-/// node's own value and reaches the builder byte for byte.
-fn date_time_parts(date: &DvDateTime) -> Vec<Part> {
-    let mut parts = vec![Part::bare(date.value.clone())];
-    if let Some(ref status) = date.magnitude_status {
-        parts.push(Part::datum_of("magnitude_status", status.clone()));
-    }
-    parts
-}
-
-/// The parts of a `DV_INTERVAL<DV_DATE_TIME>` (Simplified Formats,
-/// §`DV_INTERVAL`).
-fn interval_parts(interval: &DvInterval<DvDateTime>) -> Vec<Part> {
-    let mut parts = Vec::new();
-    if let Some(ref lower) = interval.lower {
-        parts.push(Part::bare(lower.value.clone()).under(&[String::from("lower")]));
-    }
-    if let Some(ref upper) = interval.upper {
-        parts.push(Part::bare(upper.value.clone()).under(&[String::from("upper")]));
-    }
-    parts.push(Part::datum_of("lower_unbounded", interval.lower_unbounded));
-    parts.push(Part::datum_of("upper_unbounded", interval.upper_unbounded));
-    parts.push(Part::datum_of("lower_included", interval.lower_included));
-    parts.push(Part::datum_of("upper_included", interval.upper_included));
-    parts
-}
-
-/// The parts of a `PARTY_IDENTIFIED` (Simplified Formats,
-/// §`PARTY_IDENTIFIED`).
-fn party_parts(proxy: &PartyIdentifiedData) -> Vec<Part> {
-    let mut parts = Vec::new();
-    if let Some(ref name) = proxy.name {
-        parts.push(Part::datum_of("name", name.clone()));
-    }
-    for (index, identifier) in proxy
-        .identifiers
-        .as_deref()
-        .unwrap_or_default()
-        .iter()
-        .enumerate()
-    {
-        parts.extend(identifier_parts(
-            identifier,
-            &[format!("_identifier:{index}")],
-        ));
-    }
-    parts
-}
-
-/// The parts of a `DV_IDENTIFIER` (Simplified Formats, §`DV_IDENTIFIER`).
-fn identifier_parts(identifier: &DvIdentifier, prefix: &[String]) -> Vec<Part> {
-    let mut parts = vec![Part::datum_of("id", identifier.id.clone())];
-    if let Some(ref issuer) = identifier.issuer {
-        parts.push(Part::datum_of("issuer", issuer.clone()));
-    }
-    if let Some(ref assigner) = identifier.assigner {
-        parts.push(Part::datum_of("assigner", assigner.clone()));
-    }
-    if let Some(ref kind) = identifier.r#type {
-        parts.push(Part::datum_of("type", kind.clone()));
-    }
-    parts
-        .into_iter()
-        .map(|part| part.under(prefix))
-        .collect::<Vec<Part>>()
-}
-
-/// The parts of a `DV_PROPORTION` (Simplified Formats, §`DV_PROPORTION`).
-fn proportion_parts(proportion: &DvProportion) -> Result<Vec<Part>, RmError> {
-    let number = |value: f64| {
-        serde_json::Number::from_f64(value).ok_or_else(|| RmError::Encode {
-            rm_type: "DV_PROPORTION",
-            reason: format!("{value} is not a finite JSON number"),
+pub fn family_of(tail: &[&str]) -> Vec<Segment> {
+    tail.iter()
+        .map(|segment| Segment {
+            name: format!("_{segment}"),
+            index: None,
         })
-    };
-    let mut parts = vec![
-        Part::datum_of("numerator", Value::Number(number(proportion.numerator)?)),
-        Part::datum_of(
-            "denominator",
-            Value::Number(number(proportion.denominator)?),
-        ),
-        Part::datum_of("type", proportion.r#type),
-    ];
-    if let Some(precision) = proportion.precision {
-        parts.push(Part::datum_of("precision", precision));
-    }
-    Ok(parts)
-}
-
-/// The `_mapping:i` family of a text value (Simplified Formats,
-/// §`TERM_MAPPING`).
-fn mapping_parts(mappings: &[TermMapping]) -> Vec<Part> {
-    let mut parts = Vec::new();
-    for (index, mapping) in mappings.iter().enumerate() {
-        let family = [format!("_mapping:{index}")];
-        parts.push(Part::datum_of("match", mapping.r#match.to_string()).under(&family));
-        let target = [family.concat(), String::from("target")];
-        parts.extend(
-            code_phrase_parts(&mapping.target)
-                .into_iter()
-                .map(|part| part.under(&target)),
-        );
-    }
-    parts
+        .collect()
 }
 
 /// Returns the identifiers a party carries, as the container the model wants.
@@ -533,23 +347,14 @@ pub fn identifiers(values: Vec<DvIdentifier>) -> Option<NonEmptyVec<DvIdentifier
 
 #[cfg(test)]
 mod tests {
-    use super::Part;
+    use super::Carried;
     use super::RmValue;
+    use super::carried;
     use openehr_base::v1_3::base_types::identification::terminology_id::TerminologyId;
     use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
 
-    /// Renders one part as the key tail it writes under.
-    fn key(part: &Part) -> String {
-        let mut rendered = part.sub_path().join("/");
-        if let Some(datum) = part.datum() {
-            rendered.push('|');
-            rendered.push_str(datum);
-        }
-        rendered
-    }
-
     #[test]
-    fn a_code_phrase_writes_the_three_suffixes_its_table_names() {
+    fn a_code_phrase_writes_all_three_attributes_in_its_canonical_form() {
         let value = RmValue::CodePhrase(CodePhrase {
             terminology_id: TerminologyId {
                 value: String::from("local"),
@@ -557,26 +362,33 @@ mod tests {
             code_string: String::from("at0017"),
             preferred_term: Some(String::from("Working")),
         });
-        let parts = value.parts().expect("a code phrase has FLAT parts");
-        let keys: Vec<String> = parts.iter().map(key).collect();
-        assert_eq!(keys, ["|code", "|terminology", "|preferred_term"]);
+        let canonical = value.to_canonical().expect("a code phrase encodes");
+        assert_eq!(
+            canonical,
+            serde_json::json!({
+                "_type": "CODE_PHRASE",
+                "terminology_id": {"_type": "TERMINOLOGY_ID", "value": "local"},
+                "code_string": "at0017",
+                "preferred_term": "Working"
+            })
+        );
+        assert_eq!(
+            RmValue::from_canonical("CODE_PHRASE", "/x", &canonical).expect("it reads back"),
+            value
+        );
     }
 
     #[test]
-    fn a_date_time_writes_its_text_as_the_node_value() {
+    fn a_date_time_keeps_its_text_byte_for_byte() {
         let value = RmValue::from_canonical(
             "DV_DATE_TIME",
             "/context/start_time",
             &serde_json::json!({"_type": "DV_DATE_TIME", "value": "2026-09-12T10:00:00+02:00"}),
         )
         .expect("the canonical form reads back");
-        let parts = value.parts().expect("a date and time has one FLAT part");
-        assert_eq!(parts.len(), 1);
+        let canonical = value.to_canonical().expect("a date and time encodes");
         assert_eq!(
-            parts
-                .first()
-                .map(Part::value)
-                .and_then(serde_json::Value::as_str),
+            canonical.get("value").and_then(serde_json::Value::as_str),
             Some("2026-09-12T10:00:00+02:00"),
             "the offset survives byte for byte"
         );
@@ -593,39 +405,100 @@ mod tests {
     }
 
     #[test]
-    fn a_coded_text_writes_its_term_mappings_as_a_family() {
-        let value = RmValue::from_canonical(
-            "DV_CODED_TEXT",
-            "/x",
-            &serde_json::json!({
-                "_type": "DV_CODED_TEXT",
-                "value": "Synthetic problem one",
-                "defining_code": {
+    fn a_coded_text_keeps_its_term_mappings_and_language() {
+        let written = serde_json::json!({
+            "_type": "DV_CODED_TEXT",
+            "value": "Synthetic problem one",
+            "mappings": [{
+                "_type": "TERM_MAPPING",
+                "match": "=",
+                "target": {
                     "_type": "CODE_PHRASE",
-                    "terminology_id": {"_type": "TERMINOLOGY_ID", "value": "local"},
-                    "code_string": "at0001"
-                },
-                "mappings": [{
-                    "_type": "TERM_MAPPING",
-                    "match": "=",
-                    "target": {
-                        "_type": "CODE_PHRASE",
-                        "terminology_id": {"_type": "TERMINOLOGY_ID", "value": "SNOMED-CT"},
-                        "code_string": "73211009"
-                    }
-                }]
-            }),
+                    "terminology_id": {"_type": "TERMINOLOGY_ID", "value": "SNOMED-CT"},
+                    "code_string": "73211009"
+                }
+            }],
+            "language": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {"_type": "TERMINOLOGY_ID", "value": "ISO_639-1"},
+                "code_string": "en"
+            },
+            "defining_code": {
+                "_type": "CODE_PHRASE",
+                "terminology_id": {"_type": "TERMINOLOGY_ID", "value": "local"},
+                "code_string": "at0001"
+            }
+        });
+        let value = RmValue::from_canonical("DV_CODED_TEXT", "/x", &written)
+            .expect("the canonical form reads back");
+        let canonical = value.to_canonical().expect("a coded text encodes");
+        assert_eq!(canonical.get("mappings"), written.get("mappings"));
+        assert_eq!(canonical.get("language"), written.get("language"));
+    }
+
+    #[test]
+    fn a_defective_value_names_the_json_path_it_failed_at() {
+        let error = RmValue::from_canonical(
+            "DV_TEXT",
+            "/x",
+            &serde_json::json!({"_type": "DV_TEXT", "value": "text", "undeclared": 1}),
         )
-        .expect("the canonical form reads back");
-        let parts = value.parts().expect("a coded text has FLAT parts");
-        let keys: Vec<String> = parts.iter().map(key).collect();
+        .expect_err("the strict reader refuses an undeclared key");
         assert!(
-            keys.contains(&String::from("_mapping:0/target|code")),
-            "the mapping target is a sub-path family: {keys:?}"
+            core::error::Error::source(&error).is_some(),
+            "the reader's refusal is the source: {error}"
         );
-        assert!(
-            keys.contains(&String::from("_mapping:0|match")),
-            "the match is a suffix on the family: {keys:?}"
+    }
+
+    #[test]
+    fn a_tail_reaches_every_attribute_the_model_gives_the_class() {
+        assert_eq!(
+            carried("DV_TEXT", &["hyperlink", "value"]),
+            Some(("DV_TEXT", Carried::Text))
+        );
+        assert_eq!(
+            carried("DV_TEXT", &["language"]),
+            Some(("DV_TEXT", Carried::Value))
+        );
+        assert_eq!(
+            carried("DV_DATE_TIME", &["normal_status", "code_string"]),
+            Some(("DV_DATE_TIME", Carried::Text))
+        );
+        assert_eq!(
+            carried("DV_PROPORTION", &["numerator"]),
+            Some(("DV_PROPORTION", Carried::Real))
+        );
+        assert_eq!(
+            carried("DV_INTERVAL", &["lower_included"]),
+            Some(("DV_INTERVAL", Carried::Boolean))
+        );
+    }
+
+    #[test]
+    fn a_tail_only_a_subtype_declares_writes_the_subtype() {
+        assert_eq!(
+            carried("DV_TEXT", &["defining_code", "code_string"]),
+            Some(("DV_CODED_TEXT", Carried::Text))
+        );
+        assert_eq!(
+            carried("PARTY_PROXY", &["name"]),
+            Some(("PARTY_IDENTIFIED", Carried::Text))
+        );
+    }
+
+    #[test]
+    fn a_container_tail_and_a_structural_tail_are_not_carried() {
+        assert_eq!(carried("DV_TEXT", &["mappings", "match"]), None);
+        assert_eq!(carried("DV_TEXT", &["mappings"]), None);
+        assert_eq!(carried("EVALUATION", &["other_participations"]), None);
+        assert_eq!(carried("DV_TEXT", &["no_such_attribute"]), None);
+    }
+
+    #[test]
+    fn the_entry_provider_is_a_family() {
+        assert_eq!(
+            carried("EVALUATION", &["provider"]),
+            Some(("ENTRY", Carried::Family))
         );
     }
 }

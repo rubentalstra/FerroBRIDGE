@@ -24,14 +24,17 @@ use openehr_rm::v1_2::common::generic::party_identified::PartyIdentifiedData;
 use openehr_rm::v1_2::common::generic::party_proxy::PartyProxy;
 use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
 use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
+use openehr_rm::v1_2::support::terminology::openehr_terminology_group_identifiers::OpenehrTerminologyGroupIdentifiersData;
 
 /// The terminology the openEHR audit code sets belong to.
 ///
 /// `AUDIT_DETAILS.change_type` and `VERSION.lifecycle_state` are coded from
 /// the openEHR terminology
 /// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html>).
-const OPENEHR_TERMINOLOGY: &str = "openehr";
+const OPENEHR_TERMINOLOGY: &str = OpenehrTerminologyGroupIdentifiersData::TERMINOLOGY_ID_OPENEHR;
 
+// TODO(#241): take the three codes and their rubrics from named openehr-rm
+// constants once the crate carries them (sibling request S3).
 /// The `change_type` code of a first commit, "creation".
 const CREATION_CODE: &str = "249";
 

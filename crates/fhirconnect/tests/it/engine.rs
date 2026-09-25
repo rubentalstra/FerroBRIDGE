@@ -1137,6 +1137,99 @@ fn a_tail_below_a_node_is_written_and_read_in_both_directions() -> Result<(), Bo
     Ok(())
 }
 
+/// Returns the value the node at `path` holds in `composition`.
+fn value_at(
+    index: &WebTemplateIndex,
+    composition: &CanonicalComposition,
+    path: &str,
+) -> Result<serde_json::Value, Box<dyn Error>> {
+    let node = index.node(&AqlPath::new(path))?;
+    Ok(index
+        .read(composition, node, &[])?
+        .ok_or_else(|| format!("the run wrote nothing at {path}"))?)
+}
+
+#[test]
+fn every_attribute_the_model_gives_a_value_survives_into_openehr() -> Result<(), Box<dyn Error>> {
+    // RM 1.1.0 data_types.html §DV_TEXT gives the text a `language` and a
+    // `hyperlink`, and §DV_ORDERED gives a date and time a `normal_range`;
+    // Simplified Formats master04 §Raw canonical JSON carries each value
+    // whole, so none of the three is lost on the way to the composition.
+    let program = compiled("ferrobridge_tail_carried")?;
+    let index = template()?;
+    let mut parsed: serde_json::Value =
+        serde_json::from_str(ferrobridge_testkit::fixtures::R4_CONDITION)?;
+    let object = parsed.as_object_mut().ok_or("the Condition is an object")?;
+    object.insert(
+        String::from("verificationStatus"),
+        serde_json::json!({
+            "coding": [{"system": "local", "code": "at0074", "display": "Confirmed"}],
+            "text": "http://example.org/ferrobridge/certainty"
+        }),
+    );
+    object.insert(
+        String::from("severity"),
+        serde_json::json!({"coding": [{"system": "ISO_639-1", "code": "de"}]}),
+    );
+    object.insert(
+        String::from("onsetPeriod"),
+        serde_json::json!({
+            "start": "2026-09-01T08:00:00+02:00",
+            "end": "2026-09-02T08:00:00+02:00"
+        }),
+    );
+    let inbound = to_openehr(
+        &program,
+        &SCHEMAS,
+        &index,
+        &Value::from_serde_json(parsed),
+        &Seams::default(),
+        &defaults(),
+        &CallContext::new(),
+    )?;
+    let problem = value_at(
+        &index,
+        inbound.value(),
+        "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]/items[at0002]/value",
+    )?;
+    assert_eq!(
+        problem.pointer("/language/code_string"),
+        Some(&serde_json::json!("de")),
+        "DV_TEXT.language survives: {problem}"
+    );
+    assert_eq!(
+        problem.pointer("/language/terminology_id/value"),
+        Some(&serde_json::json!("ISO_639-1"))
+    );
+    let certainty = certainty_of(&index, inbound.value())?;
+    assert_eq!(
+        certainty.pointer("/hyperlink/value"),
+        Some(&serde_json::json!(
+            "http://example.org/ferrobridge/certainty"
+        )),
+        "DV_TEXT.hyperlink survives: {certainty}"
+    );
+    let onset = value_at(
+        &index,
+        inbound.value(),
+        "/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]/data[at0001]/items[at0077]/value",
+    )?;
+    assert_eq!(
+        onset.pointer("/value"),
+        Some(&serde_json::json!("2026-09-12T10:00:00+02:00"))
+    );
+    assert_eq!(
+        onset.pointer("/normal_range/lower/value"),
+        Some(&serde_json::json!("2026-09-01T08:00:00+02:00")),
+        "DV_ORDERED.normal_range survives: {onset}"
+    );
+    assert_eq!(
+        onset.pointer("/normal_range/upper/value"),
+        Some(&serde_json::json!("2026-09-02T08:00:00+02:00"))
+    );
+    Ok(())
+}
+
 #[test]
 fn the_tails_leaf_class_selects_the_cell() -> Result<(), Box<dyn Error>> {
     // The Coding lands on DV_CODED_TEXT.defining_code, a CODE_PHRASE, so the
@@ -1243,10 +1336,10 @@ fn uncompiled(certainty: Mapping) -> Result<Arc<Program>, Box<dyn Error>> {
 
 #[test]
 fn a_tail_no_flat_part_carries_is_refused_in_both_directions() -> Result<(), Box<dyn Error>> {
-    // DV_TEXT.hyperlink is an attribute of the reference model, and the
-    // Simplified Formats DV_TEXT table writes no part for it, so a write
-    // through it would be lost on the way to the wire. The compiler refuses
-    // it at load; this is the engine's backstop.
+    // DV_TEXT.mappings is a list of the reference model, and the engine walks
+    // a tail by attribute name into one value, so a write through it would be
+    // lost on the way to the wire. The compiler refuses it at load; this is
+    // the engine's backstop.
     let carrier = compiled("ferrobridge_tail")?;
     let node = mapping(&carrier, "certainty")
         .and_then(Mapping::openehr)
@@ -1256,7 +1349,7 @@ fn a_tail_no_flat_part_carries_is_refused_in_both_directions() -> Result<(), Box
         ..value_parts(
             "certaintyLink",
             condition_target("$resource.verificationStatus.text")?,
-            with_tail(node, "hyperlink/value")?.with_leaf_class("String"),
+            with_tail(node, "mappings/match")?.with_leaf_class("String"),
         )?
     }))?;
     let index = template()?;
@@ -1269,9 +1362,9 @@ fn a_tail_no_flat_part_carries_is_refused_in_both_directions() -> Result<(), Box
         &defaults(),
         &CallContext::new(),
     )
-    .expect_err("no FLAT part carries the hyperlink");
+    .expect_err("the engine carries no tail through a list");
     assert!(
-        matches!(error, EngineError::UnsupportedTail { ref tail, .. } if tail.contains("hyperlink")),
+        matches!(error, EngineError::UnsupportedTail { ref tail, .. } if tail.contains("mappings")),
         "the refusal names the tail: {error}"
     );
     let composition = compiled("ferrobridge_tail").and_then(|carrier| {
@@ -2196,8 +2289,8 @@ fn the_contexts_openehr_condition_gates_a_run_out_of_openehr() -> Result<(), Box
 
 #[test]
 fn a_manual_path_no_flat_part_carries_is_refused() -> Result<(), Box<dyn Error>> {
-    // DV_TEXT.hyperlink is an RM attribute the Simplified Formats DV_TEXT table
-    // writes no part for, so a manual write through it would be lost. The
+    // DV_CODED_TEXT.defining_code/terminology_id holds a TERMINOLOGY_ID, and a
+    // manual value is written as text, so the write would not decode. The
     // compiler refuses it at load; this is the engine's backstop.
     let carrier = compiled("ferrobridge_tail")?;
     let node = mapping(&carrier, "certainty")
@@ -2207,7 +2300,7 @@ fn a_manual_path_no_flat_part_carries_is_refused() -> Result<(), Box<dyn Error>>
         String::from("linked"),
         Vec::new(),
         vec![ManualPath::new(
-            Target::Openehr(Box::new(with_tail(node, "hyperlink/value")?)),
+            Target::Openehr(Box::new(with_tail(node, "defining_code/terminology_id")?)),
             ManualValue::Literal(String::from("http://example.org/ferrobridge/certainty")),
         )],
         None,
@@ -2229,12 +2322,12 @@ fn a_manual_path_no_flat_part_carries_is_refused() -> Result<(), Box<dyn Error>>
         &defaults(),
         &CallContext::new(),
     )
-    .expect_err("no FLAT part carries the hyperlink");
+    .expect_err("a manual value is no TERMINOLOGY_ID");
     assert!(
         matches!(
             error,
             EngineError::UnsupportedTail { ref mapping, ref tail, .. }
-                if mapping == "certainty.linked" && tail.contains("hyperlink")
+                if mapping == "certainty.linked" && tail.contains("terminology_id")
         ),
         "the refusal names the manual entry and the tail: {error}"
     );
