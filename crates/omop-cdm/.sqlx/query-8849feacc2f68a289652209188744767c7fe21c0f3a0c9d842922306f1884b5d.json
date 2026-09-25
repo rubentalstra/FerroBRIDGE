@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tablename::text AS \"tablename!\" FROM pg_catalog.pg_tables WHERE schemaname = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tablename!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Name"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8849feacc2f68a289652209188744767c7fe21c0f3a0c9d842922306f1884b5d"
+}

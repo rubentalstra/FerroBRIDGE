@@ -11,7 +11,7 @@
 
 use ferrobridge_testkit::containers::{self, Postgres};
 use ferrobridge_testkit::vocabulary;
-use omop_cdm::database::{self, CdmPool, InitStep};
+use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::generated::concept::Concept;
 use omop_cdm::value::CdmDate;
@@ -459,22 +459,6 @@ async fn the_loader_writes_every_fixture_row() -> Result<(), Box<dyn Error>> {
         written,
         "the loader wrote a different number of rows than the fixture holds"
     );
-    Ok(())
-}
-
-#[tokio::test]
-async fn a_second_init_is_refused_whole() -> Result<(), Box<dyn Error>> {
-    if !containers::e2e_enabled() {
-        return Ok(());
-    }
-    let postgres = containers::postgres().await?;
-    let pool = connect(&postgres, SCHEMA).await?;
-    database::init(&pool).await?;
-    let refusal = database::init(&pool)
-        .await
-        .expect_err("the tables already exist");
-    assert_eq!(InitStep::Tables, refusal.step(), "the wrong step refused");
-    assert_eq!(SCHEMA, refusal.schema().as_str(), "the wrong schema named");
     Ok(())
 }
 

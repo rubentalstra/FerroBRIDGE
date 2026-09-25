@@ -14,6 +14,7 @@
     reason = "indexing a serde_json::Value answers Null rather than panicking, and it is how a case reads a response body (<https://docs.rs/serde_json/1/serde_json/enum.Value.html#impl-Index%3CI%3E-for-Value>)"
 )]
 
+mod cdm;
 mod config;
 mod console;
 mod etl;

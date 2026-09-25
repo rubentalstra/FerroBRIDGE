@@ -76,8 +76,13 @@ pub enum Etl {
 #[derive(Debug, Subcommand, PartialEq, Eq)]
 pub enum Cdm {
     /// Applies the OMOP CDM v5.4 DDL and the bridge schema to the configured
-    /// database.
-    Init,
+    /// database, and reports a schema that already holds them.
+    Init {
+        /// Applies OHDSI's foreign keys after the tables, primary keys and
+        /// indices.
+        #[arg(long)]
+        with_constraints: bool,
+    },
 }
 
 /// The `vocab` jobs.
@@ -123,7 +128,9 @@ impl Command {
             Self::Etl {
                 command: Etl::Run { .. },
             } => "etl run",
-            Self::Cdm { command: Cdm::Init } => "cdm init",
+            Self::Cdm {
+                command: Cdm::Init { .. },
+            } => "cdm init",
             Self::Vocab {
                 command: Vocab::Load { .. },
             } => "vocab load",
@@ -142,7 +149,7 @@ mod tests {
 
     #[test]
     fn every_documented_subcommand_parses() {
-        let cases: [(&[&str], Command); 7] = [
+        let cases: [(&[&str], Command); 8] = [
             (&["ferrobridge", "serve"], Command::Serve),
             (
                 &["ferrobridge", "etl", "run"],
@@ -179,7 +186,19 @@ mod tests {
             ),
             (
                 &["ferrobridge", "cdm", "init"],
-                Command::Cdm { command: Cdm::Init },
+                Command::Cdm {
+                    command: Cdm::Init {
+                        with_constraints: false,
+                    },
+                },
+            ),
+            (
+                &["ferrobridge", "cdm", "init", "--with-constraints"],
+                Command::Cdm {
+                    command: Cdm::Init {
+                        with_constraints: true,
+                    },
+                },
             ),
             (
                 &[
@@ -241,7 +260,15 @@ mod tests {
     #[test]
     fn a_pending_job_names_the_issue_that_lands_it() {
         assert_eq!(None, Command::Serve.pending_issue());
-        assert_eq!(None, Command::Cdm { command: Cdm::Init }.pending_issue());
+        assert_eq!(
+            None,
+            Command::Cdm {
+                command: Cdm::Init {
+                    with_constraints: false
+                }
+            }
+            .pending_issue()
+        );
         let etl = Command::Etl {
             command: Etl::Run {
                 resume: false,

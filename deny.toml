@@ -103,6 +103,7 @@ skip = [
   { crate = "block-buffer@0.10.4", reason = "under the same sqlx sha2 0.10 duplicate" },
   { crate = "crypto-common@0.1.6", reason = "under the same sqlx sha2 0.10 duplicate" },
   { crate = "cpufeatures@0.2.17", reason = "under the same sqlx sha2 0.10 duplicate" },
+  { crate = "const-oid@0.9.6", reason = "x509-cert 0.2, under tokio-postgres-rustls 0.14 for the CDM writer's channel binding, requires 0.9; digest 0.11 is on 0.10" },
   { crate = "r-efi@5.3.0", reason = "a UEFI-target crate under getrandom 0.3, which is itself skipped above" },
   { crate = "syn@2.0.119", reason = "thirteen proc-macro crates still require syn 2; serde, thiserror, tokio and clap have moved to syn 3" },
   { crate = "tower-http@0.6.11", reason = "reqwest 0.13.5 requires 0.6; the server is on the pinned 0.7" },

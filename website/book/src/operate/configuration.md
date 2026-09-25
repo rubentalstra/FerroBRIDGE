@@ -170,14 +170,71 @@ server says so once at start-up.
 
 | Key | Default | Secret | Meaning |
 |---|---|---|---|
-| `url` | none, required when the section is present | yes | The PostgreSQL connection URL |
+| `url` | none, required when the section is present | yes | The PostgreSQL connection URL; it must name its `sslmode` |
+| `tls_ca` | none | no | The PEM CA the database's certificate is checked against |
+| `tls_ca_file` | none | no | A file holding that CA, read at boot |
 | `schema` | `cdm` | no | The schema the CDM tables live in, an unquoted lower-case identifier |
 | `bridge_schema` | `ferrobridge` | no | The schema the bridge keeps its natural-key side table, id sequences and watermarks in |
 | `person_policy` | `create_on_first_sight` | no | `create_on_first_sight` gives an EHR a `person_id` the first time a row refers to it; `existing` refuses a row whose EHR has no `PERSON` row yet |
 
-The TLS mode of the connection is not configurable yet: the writer connects
-without TLS, so a URL with `sslmode=require` is refused rather than
-downgraded.
+Two clients open the database: the concept resolver's pool and the CDM
+writer's own connection. Both read the `sslmode` of `url` and the CA from
+`tls_ca` or `tls_ca_file`, so they agree on whether the connection is
+encrypted and what it trusts. The modes are the libpq ones that never fall
+back to plaintext
+(<https://www.postgresql.org/docs/current/libpq-ssl.html>):
+
+| `sslmode` | What the clients do |
+|---|---|
+| `disable` | Connect without TLS. A CA with `disable` is refused |
+| `require` | Connect over TLS. With a CA, the certificate must chain to it, as libpq checks when a root certificate is present; without one, it is not checked |
+| `verify-ca` | Connect over TLS; the certificate must chain to the CA, or to the webpki root set when no CA is set |
+| `verify-full` | As `verify-ca`, and the certificate must name the host in `url` |
+
+`prefer` and `allow` are refused when the configuration is read, naming the
+mode: a client that honours them connects in plaintext when the server offers
+no TLS, and that fallback is silent. A URL that names no `sslmode` is refused
+the same way, because libpq's default is `prefer`: write `sslmode=disable`
+for a database on a trusted local network or in a test container, and one of
+the three TLS modes everywhere else. Any other `ssl` parameter in the URL
+(`sslrootcert`, `sslcert`, `sslkey` and the rest) is refused too: the CA
+comes from `tls_ca_file`, and the bridge sends no client certificate. For the
+same reason the bridge refuses to start when `PGSSLROOTCERT`, `PGSSLCERT` or
+`PGSSLKEY` is set in its environment: the pool's PostgreSQL client reads
+those variables whatever the configuration says, and the writer does not. The CA is public material, so it is
+not a secret, and `FERROBRIDGE__CDM__TLS_CA` and
+`FERROBRIDGE__CDM__TLS_CA_FILE` set the two keys from the environment; setting
+both is refused. A typical production URL, with the CA mounted beside it:
+
+```toml
+[cdm]
+url_file = "/run/secrets/cdm_url"   # postgres://bridge:...@cdm.internal:5432/omop?sslmode=verify-full
+tls_ca_file = "/run/secrets/cdm_ca.pem"
+```
+
+### What `cdm init` does
+
+`ferrobridge cdm init` reads which CDM tables `[cdm] schema` already holds
+before it applies anything:
+
+| The schema holds | `cdm init` |
+|---|---|
+| none of the 39 CDM v5.4 tables, or does not exist | Creates the schema when absent, then applies OHDSI's tables, primary keys and indices in one transaction, and exits 0 |
+| every CDM v5.4 table | Applies nothing, prints that the schema is already initialised with the `cdm_version` its `CDM_SOURCE` rows record, and exits 0 |
+| some of the tables | Applies nothing and exits 1, naming every missing table |
+
+It then creates the bridge schema, which is safe to repeat. Tables outside the
+CDM's 39 are left alone and do not count. The check reads table names only,
+so a schema whose tables exist without their keys or indices counts as
+initialised.
+
+OHDSI's fourth file, `OMOPCDM_postgresql_5.4_constraints.sql`, carries the
+foreign keys and is left out by default. `cdm init --with-constraints`
+applies it after the tables, statement by statement in one transaction of its
+own. At the pinned OHDSI tag `v5.4.3` PostgreSQL refuses line 157, a foreign
+key onto `vocabulary (vocabulary_id)` that the primary keys file gives no key
+(SQLSTATE `42830`), so the flag exits 1, prints that statement, and leaves the
+tables in place and no foreign key behind.
 
 ### `[etl]`
 
@@ -323,11 +380,14 @@ a file never shows up in `docker inspect` or a process listing.
 ## What a bad configuration does
 
 The server refuses to start and prints one line on stderr naming the key, then
-exits 78, `EX_CONFIG`. Four things are refused:
+exits 78, `EX_CONFIG`. Five things are refused:
 
 - an unknown key or an unknown section;
 - a value of the wrong type, or one that is not a socket address, a URL, or a
   release name;
+- a `[cdm] url` that names no `sslmode`, or one that falls back to plaintext
+  or is not a libpq mode, a `[cdm]` CA that holds no PEM certificate, and a
+  `PGSSLROOTCERT`, `PGSSLCERT` or `PGSSLKEY` in the environment;
 - a secret set both inline and through its `_file` sibling;
 - a section that is present and names no value for a key it needs.
 

@@ -54,7 +54,7 @@ release asset. Download it, create the secret files beside it, and start:
 ```sh
 mkdir -p secrets
 printf '%s' "$CDM_PASSWORD" > secrets/cdm_password
-printf 'postgresql://ferrobridge:%s@cdm:5432/omop' "$CDM_PASSWORD" > secrets/cdm_url
+printf 'postgresql://ferrobridge:%s@cdm:5432/omop?sslmode=disable' "$CDM_PASSWORD" > secrets/cdm_url
 : > secrets/cdr_bearer_token
 
 docker compose up
@@ -171,9 +171,13 @@ docker compose --profile cdm run --rm cdm-init
 `cdm-init` runs the bridge image with `cdm init`, which applies the OMOP CDM
 v5.4 tables, primary keys and indices to `[cdm] schema` in one transaction,
 then creates the bridge schema (`[cdm] bridge_schema`) with its side table,
-watermarks and one id sequence per CDM table. The OHDSI constraints file is
-not applied yet (#232). A second `cdm init` on the same schema is refused
-whole, because the tables already exist.
+watermarks and one id sequence per CDM table. Running it again is safe: on a
+schema that already holds every CDM table it applies nothing, says the schema
+is initialised and exits 0, and on one that holds only some of them it exits
+1 naming the missing tables. The OHDSI foreign keys are applied only with
+`cdm init --with-constraints`, which PostgreSQL refuses at the pinned OHDSI
+tag; the configuration page's `cdm init` section has the three states and the
+refused statement.
 
 The `vocab` profile loads an OHDSI Athena vocabulary export. The export is a
 licensed download you obtain yourself; it is bind-mounted read only and no

@@ -24,6 +24,7 @@
 //! No specification governs any of this: our own design (the CDM leaves keys
 //! and provenance to the ETL, <https://ohdsi.github.io/CommonDataModel/cdm54.html>).
 
+use crate::connection::{CdmConnection, ConnectionError};
 use crate::ddl::SchemaName;
 use crate::graph::{
     self, Cell, EhrId, EmptyIdentifier, RecordGraph, RecordKey, Reference, Report, Value,
@@ -35,7 +36,7 @@ use std::fmt;
 use tokio_postgres::binary_copy::BinaryCopyInWriter;
 use tokio_postgres::error::SqlState;
 use tokio_postgres::types::{ToSql, Type};
-use tokio_postgres::{Client, NoTls, Transaction};
+use tokio_postgres::{Client, Transaction};
 
 /// The identifier of one ETL run, recorded with every watermark it writes.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -165,6 +166,9 @@ impl fmt::Display for Step {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum WriteError {
+    /// The connection URL was refused before any connection was tried.
+    #[error("the CDM database URL is refused")]
+    Url(#[from] ConnectionError),
     /// The connection could not be opened.
     #[error("cannot connect to the CDM database")]
     Connect {
@@ -543,20 +547,38 @@ impl CdmWriter {
     /// Connects to the PostgreSQL database `url` names, writing the CDM
     /// tables of schema `cdm` and keeping the side table in schema `bridge`.
     ///
-    /// The connection is made without TLS; a URL whose `sslmode` requires TLS
-    /// is refused by the client rather than downgraded.
+    /// The URL's `sslmode` is honoured as [`CdmConnection::new`] reads it,
+    /// with no CA configured; [`CdmWriter::connect_with`] takes one.
     ///
     /// # Errors
     ///
-    /// Returns [`WriteError::Connect`] when the database cannot be reached or
-    /// refuses the login.
+    /// Returns [`WriteError::Url`] when the URL is refused, and
+    /// [`WriteError::Connect`] when the database cannot be reached, refuses
+    /// the login, or fails the TLS handshake.
     pub async fn connect(
         url: &str,
         cdm: SchemaName,
         bridge: SchemaName,
         policy: PersonPolicy,
     ) -> Result<Self, WriteError> {
-        let (client, connection) = tokio_postgres::connect(url, NoTls)
+        Self::connect_with(&CdmConnection::new(url, None)?, cdm, bridge, policy).await
+    }
+
+    /// Connects to the database `connection` names, over the TLS it settles.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`WriteError::Connect`] when the database cannot be reached,
+    /// refuses the login, or fails the TLS handshake.
+    pub async fn connect_with(
+        connection: &CdmConnection,
+        cdm: SchemaName,
+        bridge: SchemaName,
+        policy: PersonPolicy,
+    ) -> Result<Self, WriteError> {
+        let (config, tls) = connection.writer();
+        let (client, connection) = config
+            .connect(tls)
             .await
             .map_err(|source| WriteError::Connect { source })?;
         let connection = tokio::spawn(connection);

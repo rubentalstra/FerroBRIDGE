@@ -33,7 +33,7 @@
 # Never commit them.
 #
 #   mkdir -p secrets
-#   printf 'postgresql://ferrobridge:%s@cdm:5432/omop' "$PASSWORD" > secrets/cdm_url
+#   printf 'postgresql://ferrobridge:%s@cdm:5432/omop?sslmode=disable' "$PASSWORD" > secrets/cdm_url
 #   printf '%s' "$PASSWORD" > secrets/cdm_password
 #   : > secrets/cdr_bearer_token
 #

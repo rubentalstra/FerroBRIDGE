@@ -16,8 +16,12 @@ mod ddl;
 mod derived;
 mod eras;
 mod graph;
+#[cfg(feature = "database")]
+mod init;
 mod pins;
 mod tables;
+#[cfg(feature = "database")]
+mod tls;
 mod value;
 #[cfg(feature = "database")]
 mod vocabulary;

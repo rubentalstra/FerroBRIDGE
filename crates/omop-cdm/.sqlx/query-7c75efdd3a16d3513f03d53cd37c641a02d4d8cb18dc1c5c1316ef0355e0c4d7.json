@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT cdm_version AS \"cdm_version!\" FROM cdm_source\n               WHERE cdm_version IS NOT NULL ORDER BY 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cdm_version!",
+        "type_info": "Varchar",
+        "origin": {
+          "Table": {
+            "table": "cdm_source",
+            "name": "cdm_version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "7c75efdd3a16d3513f03d53cd37c641a02d4d8cb18dc1c5c1316ef0355e0c4d7"
+}
