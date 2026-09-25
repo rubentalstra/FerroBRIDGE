@@ -25,6 +25,43 @@ crates on crates.io.
 
 ### Added
 
+- The OMOCL engine (#90). `omocl::resolve::compile` binds a loaded mapping
+  set to one template once: every file at every archetype root of the
+  template it maps, an `Include` below its including root at its `base_path`
+  (one archetype may be included at two base paths, a cycle is refused), a
+  `CustomMapping` to its converter, and every path checked against the Web
+  Template. A part of a mapping the template carries no node for is listed as
+  unbound; a required column none of whose alternatives binds refuses the
+  compile. `omocl::engine::run` walks one composition with that program into
+  an `omop_cdm::graph::RecordGraph`, reading every value through the
+  generated `openehr-rm` types. `alternatives` are tried in order and the
+  first present value wins; a required column with no present value, a path
+  that matches several nodes where the record does not iterate, an at-code a
+  `conceptMap` does not list, a `multiplication` that overflows its exact
+  decimal product, a resolved concept outside the domain of its column or
+  its `type`, and an ambiguous code each refuse one record with a typed
+  refusal naming the record, the column and the instance path, while the
+  rest of the composition runs. A `DV_QUANTITY` projects its magnitude, its
+  units (resolved in `UCUM`), its normal range and its magnitude status; a
+  code with no standard concept writes concept 0 and keeps its source value.
+  The graph's report carries every refusal and every element no mapping
+  read. `FactRelationshipCustomConverter` links each laboratory analyte's
+  `MEASUREMENT` row to the result's `SPECIMEN` row. The vocabulary is a
+  `ConceptSource` trait asked once per distinct question in a run, and an
+  openEHR terminology id is read as an OHDSI `vocabulary_id` through a
+  configurable alias table (`SNOMED-CT` as `SNOMED` by default). A source
+  code mapped to several standard concepts writes one row per concept, as the
+  CDM conventions ask. `ferrobridge etl run` now runs: it reads the OMOCL
+  files of the new `[mappings] omocl` directory at start, compiles them
+  against each template the first time a composition of it arrives, maps every
+  composition through the engine with the `[etl] type_concept_id`, resolves
+  concepts, operators and domain concepts through the `omop-cdm` resolver,
+  and prints the run report as text and as JSON. The record key gains a
+  discriminator (the mapping, the entry and the branch), which the writer's
+  side table keys on too; `graph::Refusal` names its table and column; the
+  vocabulary's key, resolution and error types no longer need the `database`
+  feature, and the error boxes its large fields. The `rust_decimal` 1.43.0
+  crate joins the workspace for the exact product.
 - The OMOP concept resolver (#89). `omop_cdm::vocabulary::ConceptResolver`
   looks a source code up in `CONCEPT` by `(vocabulary_id, concept_code)` and
   returns it when it is standard, or every standard concept its `Maps to`

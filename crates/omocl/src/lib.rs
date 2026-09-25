@@ -11,14 +11,18 @@
 //! (<https://github.com/SevKohler/OMOCL>), read from its railroad images and
 //! syntax tables, with its mapping library as evidence.
 //!
+//! [`resolve`] compiles a loaded mapping set against one template into an
+//! immutable program, every path bound once, and [`engine`] runs a program
+//! over one composition into the record graph of `omop_cdm::graph`.
+//!
 //! openEHR is a registered trademark of the openEHR Foundation.
 #![doc(test(attr(deny(warnings))))]
 
+pub mod engine;
 pub mod model;
+pub mod resolve;
 
 /// The OMOCL grammar this crate implements.
 ///
 /// A mapping file writes it in its `grammar` header (<https://github.com/SevKohler/OMOCL>).
 pub const GRAMMAR: &str = "OMOCL/v1.0.0";
-
-// TODO(#90): the engine module, the interpreter emitting CDM record graphs.

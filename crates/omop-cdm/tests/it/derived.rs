@@ -13,8 +13,8 @@ use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::derived;
 use omop_cdm::graph::{
-    ArchetypeRootPath, EhrId, MappingName, OccurrencePath, RecordGraph, RecordKey, Reference, Row,
-    Source, Value, VersionUid, VersionedObjectUid,
+    ArchetypeRootPath, Discriminator, EhrId, MappingName, OccurrencePath, RecordGraph, RecordKey,
+    Reference, Row, Source, Value, VersionUid, VersionedObjectUid,
 };
 use omop_cdm::value::CdmDate;
 use omop_cdm::writer::{CdmWriter, PersonPolicy, RunId};
@@ -60,6 +60,7 @@ fn key(occurrence: &str) -> Result<RecordKey, Box<dyn Error>> {
         VersionedObjectUid::new(COMPOSITION)?,
         ArchetypeRootPath::new("/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]")?,
         OccurrencePath::new(occurrence)?,
+        Discriminator::new(MappingName::new("synthetic")?, 0, 0),
     ))
 }
 
@@ -71,7 +72,6 @@ fn date(text: &str) -> Result<Value, Box<dyn Error>> {
 /// Returns a graph with two conditions and two drug exposures 20 days
 /// apart, and a measurement on its own date.
 fn clinical() -> Result<RecordGraph, Box<dyn Error>> {
-    let mapping = MappingName::new("synthetic")?;
     let person =
         || -> Result<Reference, Box<dyn Error>> { Ok(Reference::Person(EhrId::new(EHR)?)) };
     let mut graph = RecordGraph::new(Source::new(
@@ -84,34 +84,26 @@ fn clinical() -> Result<RecordGraph, Box<dyn Error>> {
         .enumerate()
     {
         graph.push_row(
-            Row::builder(
-                "condition_occurrence",
-                key(&format!("/c{index}"))?,
-                mapping.clone(),
-            )?
-            .reference("person_id", person()?)?
-            .value("condition_concept_id", Value::Integer(1002))?
-            .value("condition_start_date", date(start)?)?
-            .value("condition_end_date", date(end)?)?
-            .value("condition_type_concept_id", Value::Integer(32817))?
-            .build()?,
+            Row::builder("condition_occurrence", key(&format!("/c{index}"))?)?
+                .reference("person_id", person()?)?
+                .value("condition_concept_id", Value::Integer(1002))?
+                .value("condition_start_date", date(start)?)?
+                .value("condition_end_date", date(end)?)?
+                .value("condition_type_concept_id", Value::Integer(32817))?
+                .build()?,
         )?;
         graph.push_row(
-            Row::builder(
-                "drug_exposure",
-                key(&format!("/d{index}"))?,
-                mapping.clone(),
-            )?
-            .reference("person_id", person()?)?
-            .value("drug_concept_id", Value::Integer(1010))?
-            .value("drug_exposure_start_date", date(start)?)?
-            .value("drug_exposure_end_date", date(end)?)?
-            .value("drug_type_concept_id", Value::Integer(32817))?
-            .build()?,
+            Row::builder("drug_exposure", key(&format!("/d{index}"))?)?
+                .reference("person_id", person()?)?
+                .value("drug_concept_id", Value::Integer(1010))?
+                .value("drug_exposure_start_date", date(start)?)?
+                .value("drug_exposure_end_date", date(end)?)?
+                .value("drug_type_concept_id", Value::Integer(32817))?
+                .build()?,
         )?;
     }
     graph.push_row(
-        Row::builder("measurement", key("/m")?, mapping)?
+        Row::builder("measurement", key("/m")?)?
             .reference("person_id", person()?)?
             .value("measurement_concept_id", Value::Integer(1001))?
             .value("measurement_date", date("2026-06-20")?)?

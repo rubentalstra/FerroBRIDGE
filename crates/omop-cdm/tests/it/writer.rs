@@ -14,8 +14,9 @@ use ferrobridge_testkit::containers::{self, Postgres};
 use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::graph::{
-    ArchetypeRootPath, EhrId, Link, LinkEnd, MappingName, OccurrencePath, RecordGraph, RecordKey,
-    Reference, Row, Source, Value, VersionUid, VersionedObjectUid, Visit, VisitKey, VisitSource,
+    ArchetypeRootPath, Discriminator, EhrId, Link, LinkEnd, MappingName, OccurrencePath,
+    RecordGraph, RecordKey, Reference, Row, Source, Value, VersionUid, VersionedObjectUid, Visit,
+    VisitKey, VisitSource,
 };
 use omop_cdm::value::CdmDate;
 use omop_cdm::writer::{CdmWriter, PersonPolicy, RunId, VisitConcepts, WriteError};
@@ -87,6 +88,7 @@ fn analyte(index: u32) -> Result<RecordKey, Box<dyn Error>> {
         OccurrencePath::new(format!(
             "/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1,{index}]"
         ))?,
+        Discriminator::new(MappingName::new("Laboratory_test_result_v1")?, 0, 0),
     ))
 }
 
@@ -97,23 +99,20 @@ fn result() -> Result<RecordKey, Box<dyn Error>> {
         VersionedObjectUid::new(COMPOSITION)?,
         ArchetypeRootPath::new(ROOT)?,
         OccurrencePath::new("/")?,
+        Discriminator::new(MappingName::new("Laboratory_test_result_v1")?, 0, 0),
     ))
 }
 
 /// Returns a measurement under `key` with `concept` and `value`.
 fn measurement(key: RecordKey, concept: i32, value: Option<f64>) -> Result<Row, Box<dyn Error>> {
-    Ok(Row::builder(
-        "measurement",
-        key,
-        MappingName::new("Laboratory_test_result_v1")?,
-    )?
-    .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
-    .value("measurement_concept_id", Value::Integer(concept))?
-    .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
-    .value("measurement_type_concept_id", Value::Integer(32817))?
-    .optional("value_as_number", value.map(Value::Float))?
-    .value("unit_concept_id", Value::Integer(3001))?
-    .build()?)
+    Ok(Row::builder("measurement", key)?
+        .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+        .value("measurement_concept_id", Value::Integer(concept))?
+        .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
+        .value("measurement_type_concept_id", Value::Integer(32817))?
+        .optional("value_as_number", value.map(Value::Float))?
+        .value("unit_concept_id", Value::Integer(3001))?
+        .build()?)
 }
 
 /// Returns the graph of version `version` with the result and `analytes`
@@ -278,17 +277,13 @@ async fn an_unresolved_reference_writes_nothing_of_the_composition() -> Result<(
     let mut graph = laboratory(1, 1)?;
     let visit = VisitKey::new(EhrId::new(EHR)?, VisitSource::new("encounter-1")?);
     graph.push_row(
-        Row::builder(
-            "measurement",
-            analyte(9)?,
-            MappingName::new("Laboratory_test_result_v1")?,
-        )?
-        .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
-        .value("measurement_concept_id", Value::Integer(1001))?
-        .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
-        .value("measurement_type_concept_id", Value::Integer(32817))?
-        .reference("visit_occurrence_id", Reference::Visit(visit))?
-        .build()?,
+        Row::builder("measurement", analyte(9)?)?
+            .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+            .value("measurement_concept_id", Value::Integer(1001))?
+            .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
+            .value("measurement_type_concept_id", Value::Integer(32817))?
+            .reference("visit_occurrence_id", Reference::Visit(visit))?
+            .build()?,
     )?;
     let error = database
         .writer
@@ -396,17 +391,13 @@ async fn visits_keep_their_ids_and_resolve_references() -> Result<(), Box<dyn Er
 
     let mut graph = laboratory(1, 0)?;
     graph.push_row(
-        Row::builder(
-            "measurement",
-            analyte(1)?,
-            MappingName::new("Laboratory_test_result_v1")?,
-        )?
-        .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
-        .value("measurement_concept_id", Value::Integer(1001))?
-        .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
-        .value("measurement_type_concept_id", Value::Integer(32817))?
-        .reference("visit_occurrence_id", Reference::Visit(key))?
-        .build()?,
+        Row::builder("measurement", analyte(1)?)?
+            .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+            .value("measurement_concept_id", Value::Integer(1001))?
+            .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
+            .value("measurement_type_concept_id", Value::Integer(32817))?
+            .reference("visit_occurrence_id", Reference::Visit(key))?
+            .build()?,
     )?;
     database
         .writer

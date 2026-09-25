@@ -1063,6 +1063,7 @@ dependencies = [
  "futures-util",
  "http",
  "jiff",
+ "omocl",
  "omop-cdm",
  "openehr-base",
  "openehr-its",
@@ -2359,10 +2360,15 @@ dependencies = [
  "insta",
  "jsonschema",
  "omop-cdm",
+ "openehr-base",
  "openehr-mapping-core",
+ "openehr-rm",
+ "rust_decimal",
+ "serde",
  "serde_json",
  "tempfile",
  "thiserror",
+ "tokio",
 ]
 
 [[package]]

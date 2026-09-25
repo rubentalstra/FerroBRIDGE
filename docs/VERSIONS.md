@@ -93,6 +93,7 @@ dependency pins below.
 | `testcontainers` | 0.28.0 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
 | `tokio-postgres` | 0.7.18 | the root `Cargo.toml` `[workspace.dependencies]` (tests only) |
 | `sqlx` | 0.9.0 | the root `Cargo.toml` `[workspace.dependencies]` (the concept resolver; the `sqlx-cli` row carries the same version) |
+| `rust_decimal` | 1.43.0 | the root `Cargo.toml` `[workspace.dependencies]` (the exact decimal of the OMOCL engine; MIT) |
 
 ## Container images (the end-to-end lane)
 

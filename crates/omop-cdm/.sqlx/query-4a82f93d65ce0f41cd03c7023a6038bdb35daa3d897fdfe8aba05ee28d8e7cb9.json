@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT concept_id FROM concept\n               WHERE domain_id = 'Meas Value Operator' AND concept_name = $1\n                 AND standard_concept = 'S' AND invalid_reason IS NULL\n                 AND valid_start_date <= $2::text::date AND $2::text::date <= valid_end_date\n               ORDER BY concept_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "concept_id",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "concept",
+            "name": "concept_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4a82f93d65ce0f41cd03c7023a6038bdb35daa3d897fdfe8aba05ee28d8e7cb9"
+}

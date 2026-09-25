@@ -15,7 +15,7 @@ concept name or vocabulary comes from an OHDSI vocabulary release or from any
 licensed terminology. The vocabularies are `FB-SOURCE`, `FB-STANDARD`,
 `FB-UNIT` and `FB-META`, each with the version `synthetic-1`. The domain
 identifiers are the CDM's own names (`Measurement`, `Condition`, `Unit`,
-`Drug`, `Metadata`) because the engine checks a resolved concept's domain
+`Drug`, `Specimen`, `Metadata`) because the engine checks a resolved concept's domain
 against the table a mapping writes, and the CDM field definitions name the
 domains that way. The relationship identifiers `Maps to` and `Mapped from`
 are the ones the CDM conventions name

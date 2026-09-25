@@ -6,9 +6,9 @@
 The OMOP side of FerroBRIDGE turns openEHR content into rows in an OMOP Common
 Data Model v5.4 database, driven by OMOCL mapping files. OMOP is a relational
 analytics schema rather than an API, so the deliverable is populated tables.
-The sink, the runner and `ferrobridge cdm init` are built; the OMOCL engine
-that maps a composition to its rows is #90, and `ferrobridge etl run` names
-that issue until it lands.
+The sink, the runner, the OMOCL engine and `ferrobridge cdm init` are built,
+and `ferrobridge etl run` maps each composition with the files in
+`[mappings] omocl`.
 
 <!-- toc -->
 
@@ -43,6 +43,9 @@ the resolved standard concept decides the table, so FerroBRIDGE validates the
 two against each other: a literal concept whose domain disagrees with `type`
 refuses the mapping at load, and a resolved concept whose domain disagrees
 refuses the record. A row is never moved to a table the mapping did not name.
+A source code the vocabulary maps to several standard concepts in the record's
+domain writes one row per concept, each with the same source value and source
+concept, as the CDM conventions ask.
 
 ## The row types are generated
 
@@ -77,9 +80,10 @@ duplicates.
 Every CDM v5.4 primary key is a 32-bit `integer`, so the bridge assigns ids
 from one PostgreSQL sequence per table, kept in a schema of its own beside the
 CDM (`[cdm] bridge_schema`, `ferrobridge` by default). A side table there maps
-each row's natural key (the EHR, the versioned composition, the archetype root
-and the occurrence) to its id, so a later version of a composition keeps the
-ids of the rows it still has and deletes the ones it no longer has. One
+each row's natural key (the EHR, the versioned composition, the archetype root,
+the occurrence, and the mapping entry that wrote it) to its id, so a later
+version of a composition keeps the ids of the rows it still has and deletes
+the ones it no longer has. One
 `ehr_id` is one `PERSON`; the bridge does not reconcile a person across EHRs.
 An exhausted sequence refuses the composition with a typed error.
 
@@ -111,7 +115,9 @@ ingredients of the `RxNorm` vocabulary only, as published.
 
 `VISIT_OCCURRENCE` comes from the `[etl.visits]` query, grouped by EHR and
 source, from the earliest start to the latest end. A time with an offset keeps
-its wall-clock time, because the CDM `datetime` has no zone. The visit concept
+its wall-clock time, because the CDM `datetime` has no zone. The same holds for
+every date and time a mapping reads from a composition: the offset is not
+normalised, and the row keeps the wall-clock time the source wrote. The visit concept
 and the visit type concept are configuration with no default.
 
 ## Validating OMOCL files

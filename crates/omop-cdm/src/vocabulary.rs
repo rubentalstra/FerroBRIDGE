@@ -16,6 +16,7 @@
 //! The queries are checked at compile time against a database built from the
 //! vendored DDL, through the `.sqlx/` metadata committed beside the crate.
 
+#[cfg(feature = "database")]
 use crate::database::CdmPool;
 use crate::generated::concept::Concept;
 use crate::value::{CdmDate, ValueError, Varchar};
@@ -211,15 +212,16 @@ impl Resolution {
 #[non_exhaustive]
 pub enum ResolveError {
     /// The database refused or failed a query.
+    #[cfg(feature = "database")]
     #[error("the vocabulary query for {key} on {date} failed")]
     Query {
         /// The key that was looked up.
-        key: SourceKey,
+        key: Box<SourceKey>,
         /// The record date.
         date: CdmDate,
         /// The database's error.
         #[source]
-        source: sqlx::Error,
+        source: Box<sqlx::Error>,
     },
     /// More than one valid concept carries the key, so the source concept is
     /// not determined.
@@ -230,7 +232,7 @@ pub enum ResolveError {
     )]
     Ambiguous {
         /// The key that was looked up.
-        key: SourceKey,
+        key: Box<SourceKey>,
         /// The record date.
         date: CdmDate,
         /// The concepts that carry it, ordered by `concept_id`.
@@ -240,7 +242,7 @@ pub enum ResolveError {
     #[error("concept {concept_id}, read for {key} on {date}, has a {column} the CDM refuses")]
     Row {
         /// The key that was looked up.
-        key: SourceKey,
+        key: Box<SourceKey>,
         /// The record date.
         date: CdmDate,
         /// The concept whose row is refused.
@@ -253,6 +255,30 @@ pub enum ResolveError {
     },
 }
 
+/// A vocabulary lookup other than a source code that failed.
+#[cfg(feature = "database")]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum LookupError {
+    /// The database refused or failed the query.
+    #[error("the vocabulary query for {what} failed")]
+    Query {
+        /// What was looked up.
+        what: String,
+        /// The database's error.
+        #[source]
+        source: Box<sqlx::Error>,
+    },
+    /// More than one concept answers the lookup.
+    #[error("{what} names {} concepts ({})", concept_ids.len(), join(concept_ids))]
+    Ambiguous {
+        /// What was looked up.
+        what: String,
+        /// The concepts, ordered by `concept_id`.
+        concept_ids: Vec<ConceptId>,
+    },
+}
+
 /// Renders concept ids as a comma-separated list.
 fn join(ids: &[ConceptId]) -> String {
     ids.iter()
@@ -262,16 +288,80 @@ fn join(ids: &[ConceptId]) -> String {
 }
 
 /// Resolves source codes against the vocabulary tables of one CDM schema.
+#[cfg(feature = "database")]
 #[derive(Debug, Clone)]
 pub struct ConceptResolver {
     pool: CdmPool,
 }
 
+#[cfg(feature = "database")]
 impl ConceptResolver {
     /// Resolves against the vocabulary loaded in `pool`'s schema.
     #[must_use]
     pub fn new(pool: CdmPool) -> Self {
         Self { pool }
+    }
+
+    /// Returns the standard `Meas Value Operator` concept whose name is
+    /// `symbol`, valid on `date`, `None` when the vocabulary holds none.
+    ///
+    /// The CDM names the operators `<`, `<=`, `=`, `>=` and `>` in that domain
+    /// (`OMOP_CDMv5.4_Field_Level.csv`, `measurement.operator_concept_id`).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`LookupError::Query`] when the database fails the query and
+    /// [`LookupError::Ambiguous`] when more than one concept carries the name.
+    pub async fn operator_concept(
+        &self,
+        symbol: &str,
+        date: &CdmDate,
+    ) -> Result<Option<ConceptId>, LookupError> {
+        // NOTE: no specification governs this: our own design; the operator is
+        // found by its concept name within the domain the CDM names.
+        let ids = sqlx::query_scalar!(
+            r#"SELECT concept_id FROM concept
+               WHERE domain_id = 'Meas Value Operator' AND concept_name = $1
+                 AND standard_concept = 'S' AND invalid_reason IS NULL
+                 AND valid_start_date <= $2::text::date AND $2::text::date <= valid_end_date
+               ORDER BY concept_id"#,
+            symbol,
+            date.as_str(),
+        )
+        .fetch_all(self.pool.pool())
+        .await
+        .map_err(|source| LookupError::Query {
+            what: format!("the operator `{symbol}`"),
+            source: Box::new(source),
+        })?;
+        match ids.as_slice() {
+            [] => Ok(None),
+            [only] => Ok(Some(ConceptId(*only))),
+            several => Err(LookupError::Ambiguous {
+                what: format!("the operator `{symbol}`"),
+                concept_ids: several.iter().copied().map(ConceptId).collect(),
+            }),
+        }
+    }
+
+    /// Returns the `domain_concept_id` the `DOMAIN` table holds for `domain`,
+    /// `None` when it holds no such domain.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`LookupError::Query`] when the database fails the query.
+    pub async fn domain_concept(&self, domain: &str) -> Result<Option<ConceptId>, LookupError> {
+        let id = sqlx::query_scalar!(
+            "SELECT domain_concept_id FROM domain WHERE domain_id = $1",
+            domain,
+        )
+        .fetch_optional(self.pool.pool())
+        .await
+        .map_err(|source| LookupError::Query {
+            what: format!("the domain `{domain}`"),
+            source: Box::new(source),
+        })?;
+        Ok(id.map(ConceptId))
     }
 
     /// Resolves `key` as of the record date `date`.
@@ -290,9 +380,9 @@ impl ConceptResolver {
         date: &CdmDate,
     ) -> Result<Resolution, ResolveError> {
         let query_error = |source| ResolveError::Query {
-            key: key.clone(),
+            key: Box::new(key.clone()),
             date: date.clone(),
-            source,
+            source: Box::new(source),
         };
         let mut connection = self.pool.pool().acquire().await.map_err(query_error)?;
 
@@ -329,7 +419,7 @@ impl ConceptResolver {
             [row] => row.clone().into_concept(key, date)?,
             rows => {
                 return Err(ResolveError::Ambiguous {
-                    key: key.clone(),
+                    key: Box::new(key.clone()),
                     date: date.clone(),
                     concept_ids: rows.iter().map(|row| ConceptId(row.concept_id)).collect(),
                 });
@@ -382,8 +472,10 @@ impl ConceptResolver {
 }
 
 /// The `standard_concept` flag of a standard concept.
+#[cfg(feature = "database")]
 const STANDARD: &str = "S";
 
+#[cfg(feature = "database")]
 /// One `CONCEPT` row as the queries select it, before the CDM column types
 /// check it.
 #[derive(Debug, Clone)]
@@ -400,13 +492,14 @@ struct ConceptRow {
     invalid_reason: Option<String>,
 }
 
+#[cfg(feature = "database")]
 impl ConceptRow {
     /// Checks every column against its CDM type.
     fn into_concept(self, key: &SourceKey, date: &CdmDate) -> Result<Concept, ResolveError> {
         let concept_id = ConceptId(self.concept_id);
         let refused = |column| {
             move |source| ResolveError::Row {
-                key: key.clone(),
+                key: Box::new(key.clone()),
                 date: date.clone(),
                 concept_id,
                 column,

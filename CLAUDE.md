@@ -65,11 +65,12 @@ the testkit tool crate. Beside it:
   throughout, the `tracing` console, the request log that carries the matched
   route and never a body, the health family over an indicator registry, the
   `tower-http` stack (request id, panic catch, timeout, body ceiling), and the
-  bounded drain on `SIGTERM`. `serve` and `cdm init` run; `etl run`,
+  bounded drain on `SIGTERM`. `serve`, `cdm init` and `etl run` run;
   `vocab load` and `mapping check` parse and name the issue that lands each.
   `src/etl/` is the OMOP ETL runner (#91): the `[etl]` queries checked at load,
-  the paged read, the `Mapper` seam the OMOCL engine fills, the visits and
-  the run report. `src/facade/` is the FHIR R4 facade (#85),
+  the paged read, the `Mapper` the OMOCL engine fills (#90, `etl::mapper`
+  compiles one program per template on first sight), the visits and the run
+  report. `src/facade/` is the FHIR R4 facade (#85),
   mounted under `/fhir` behind `[facade]`: the six interactions over the CDR,
   the `redb` identity store with the derivation
   `docs/architecture.md` §9 fixes, the one status table

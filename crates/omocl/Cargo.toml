@@ -25,6 +25,16 @@ jsonschema.workspace = true
 # literal-concept domain check reads (docs/architecture.md section 7).
 omop-cdm.workspace = true
 openehr-mapping-core.workspace = true
+# The BASE path segments the compiled program holds and the canonical JSON
+# step the engine walks a composition with.
+openehr-rm.workspace = true
+# The ISO 8601 date and time readers a DV_DATE_TIME value is read with.
+openehr-base.workspace = true
+# The exact decimal a DV_QUANTITY magnitude and a `multiplication` product are
+# carried in.
+rust_decimal.workspace = true
+# The decode bound for the openEHR RM types a node is read into.
+serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
@@ -32,6 +42,7 @@ thiserror.workspace = true
 ferrobridge-testkit.workspace = true
 insta.workspace = true
 tempfile.workspace = true
+tokio = { workspace = true, features = ["rt", "macros"] }
 
 [lints]
 workspace = true

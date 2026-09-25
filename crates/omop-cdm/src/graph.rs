@@ -162,7 +162,58 @@ impl Source {
     }
 }
 
-/// The natural key of one row: where in which composition it came from.
+/// Which mapping entry wrote a row, and which of its rows it is.
+///
+/// One node can feed several rows of one table: two entries of one mapping at
+/// one archetype root, or one source code the vocabulary maps to several
+/// standard concepts. The mapping, the entry index and the branch tell them
+/// apart. No specification governs this: our own design.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Discriminator {
+    mapping: MappingName,
+    entry: u16,
+    branch: u16,
+}
+
+impl Discriminator {
+    /// Names the entry at index `entry` of `mapping`, and its `branch`th row
+    /// (`0` for the one row of an entry that writes one).
+    #[must_use]
+    pub fn new(mapping: MappingName, entry: u16, branch: u16) -> Self {
+        Self {
+            mapping,
+            entry,
+            branch,
+        }
+    }
+
+    /// Returns the mapping.
+    #[must_use]
+    pub fn mapping(&self) -> &MappingName {
+        &self.mapping
+    }
+
+    /// Returns the index of the entry within the mapping.
+    #[must_use]
+    pub fn entry(&self) -> u16 {
+        self.entry
+    }
+
+    /// Returns which of the entry's rows this is.
+    #[must_use]
+    pub fn branch(&self) -> u16 {
+        self.branch
+    }
+}
+
+impl fmt::Display for Discriminator {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}#{}.{}", self.mapping, self.entry, self.branch)
+    }
+}
+
+/// The natural key of one row: where in which composition it came from, and
+/// which mapping entry wrote it.
 ///
 /// The key stays the same across the versions of a composition, so a later
 /// version's row replaces the earlier version's row under the same key.
@@ -172,24 +223,34 @@ pub struct RecordKey {
     versioned_object_uid: VersionedObjectUid,
     archetype_root_path: ArchetypeRootPath,
     occurrence_path: OccurrencePath,
+    discriminator: Discriminator,
 }
 
 impl RecordKey {
-    /// Names the node at `occurrence_path` under the archetype root at
-    /// `archetype_root_path` of the versioned composition.
+    /// Names the row `discriminator` wrote from the node at
+    /// `occurrence_path` under the archetype root at `archetype_root_path`
+    /// of the versioned composition.
     #[must_use]
     pub fn new(
         ehr_id: EhrId,
         versioned_object_uid: VersionedObjectUid,
         archetype_root_path: ArchetypeRootPath,
         occurrence_path: OccurrencePath,
+        discriminator: Discriminator,
     ) -> Self {
         Self {
             ehr_id,
             versioned_object_uid,
             archetype_root_path,
             occurrence_path,
+            discriminator,
         }
+    }
+
+    /// Returns which mapping entry wrote the row.
+    #[must_use]
+    pub fn discriminator(&self) -> &Discriminator {
+        &self.discriminator
     }
 
     /// Returns the EHR.
@@ -221,8 +282,11 @@ impl fmt::Display for RecordKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{} {}{}",
-            self.versioned_object_uid, self.archetype_root_path, self.occurrence_path
+            "{} {}{} {}",
+            self.versioned_object_uid,
+            self.archetype_root_path,
+            self.occurrence_path,
+            self.discriminator
         )
     }
 }
@@ -483,7 +547,7 @@ pub enum GraphError {
         /// The table.
         table: &'static str,
         /// The row's key.
-        key: RecordKey,
+        key: Box<RecordKey>,
     },
     /// Two rows of one table carry the same key.
     #[error("two rows of `{table}` carry the key {key}")]
@@ -491,7 +555,7 @@ pub enum GraphError {
         /// The table.
         table: &'static str,
         /// The key.
-        key: RecordKey,
+        key: Box<RecordKey>,
     },
     /// A link names a row the graph does not hold.
     #[error("a link names the row {key} of `{table}`, which the graph does not hold")]
@@ -499,7 +563,7 @@ pub enum GraphError {
         /// The table.
         table: &'static str,
         /// The key.
-        key: RecordKey,
+        key: Box<RecordKey>,
     },
 }
 
@@ -552,12 +616,12 @@ pub fn primary_key(table: &TableMeta) -> Option<&'static ColumnMeta> {
 pub struct Row {
     table: &'static TableMeta,
     key: RecordKey,
-    mapping: MappingName,
     cells: BTreeMap<&'static str, Cell>,
 }
 
 impl Row {
-    /// Starts a row of `table` under `key`, produced by `mapping`.
+    /// Starts a row of `table` under `key`, produced by the mapping its
+    /// discriminator names.
     ///
     /// # Errors
     ///
@@ -565,11 +629,7 @@ impl Row {
     /// table and [`GraphError::NotWritable`] for `fact_relationship` (a
     /// [`Link`] writes it), a derived table, or a table without a single
     /// integer primary key.
-    pub fn builder(
-        table: &str,
-        key: RecordKey,
-        mapping: MappingName,
-    ) -> Result<RowBuilder, GraphError> {
+    pub fn builder(table: &str, key: RecordKey) -> Result<RowBuilder, GraphError> {
         let table = cdm_table(table)?;
         if table.name == "fact_relationship" {
             return Err(GraphError::NotWritable {
@@ -593,7 +653,6 @@ impl Row {
             row: Self {
                 table,
                 key,
-                mapping,
                 cells: BTreeMap::new(),
             },
         })
@@ -614,7 +673,7 @@ impl Row {
     /// Returns the mapping that produced the row.
     #[must_use]
     pub fn mapping(&self) -> &MappingName {
-        &self.mapping
+        self.key.discriminator().mapping()
     }
 
     /// Returns the cells, by column name.
@@ -925,6 +984,20 @@ impl Refusal {
         self
     }
 
+    /// Names the CDM table the refused record would have written.
+    #[must_use]
+    pub fn with_table(mut self, table: &'static str) -> Self {
+        self.table = Some(table);
+        self
+    }
+
+    /// Names the column the refusal is about: an OMOCL key or a CDM column.
+    #[must_use]
+    pub fn with_column(mut self, column: &'static str) -> Self {
+        self.column = Some(column);
+        self
+    }
+
     /// Names the openEHR element, as an RM path, the refusal is about.
     #[must_use]
     pub fn with_element(mut self, element: impl Into<String>) -> Self {
@@ -1115,13 +1188,13 @@ impl RecordGraph {
         {
             return Err(GraphError::ForeignRow {
                 table: row.table().name,
-                key: key.clone(),
+                key: Box::new(key.clone()),
             });
         }
         if !self.keys.insert((row.table().name, key.clone())) {
             return Err(GraphError::DuplicateRow {
                 table: row.table().name,
-                key: key.clone(),
+                key: Box::new(key.clone()),
             });
         }
         self.rows.push(row);
@@ -1139,7 +1212,7 @@ impl RecordGraph {
             if !self.keys.contains(&(end.table().name, end.key().clone())) {
                 return Err(GraphError::DanglingLink {
                     table: end.table().name,
-                    key: end.key().clone(),
+                    key: Box::new(end.key().clone()),
                 });
             }
         }

@@ -503,3 +503,18 @@ fn a_user_without_a_password_refuses_to_boot() -> Result<(), Box<dyn StdError>> 
     }
     Ok(())
 }
+
+#[test]
+fn the_omocl_directory_is_read_from_the_mappings_section() -> Result<(), Box<dyn StdError>> {
+    let text = "[mappings]\nomocl = \"/srv/omocl\"\n";
+    let settings = Config::from_sources(Some(text), &BTreeMap::new())?.resolve()?;
+    assert_eq!(
+        Some(std::path::Path::new("/srv/omocl")),
+        settings.omocl_directory.as_deref()
+    );
+    assert!(
+        settings.mapping_directory.is_none(),
+        "the FHIRconnect tree stays unset"
+    );
+    Ok(())
+}
