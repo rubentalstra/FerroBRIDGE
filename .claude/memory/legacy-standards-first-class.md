@@ -37,3 +37,20 @@ specification (organisational membership) is the owner's to hold, recorded in
 the provenance beside the material. The ConceptMap interpreter counts as an
 adapter over a published corpus, admitted under the one-core constraint.
 
+**Ruling 2026-09-25, vendoring:** no vendored material is ever pushed to
+crates.io, for anything; a vendored corpus is a generator input or a test
+corpus and nothing else. The v2ig definitions, whose HL7 licence allows
+copying "for internal purposes only", follow `vendored-inputs.md` §Licensing:
+the pinned script fetches them into an ignored directory at build time, only
+the provenance is committed, and the generated group table stays in an
+unpublished tool (#253). The standing exception, recorded before, is the
+OHDSI DDL and era SQL `omop-cdm` embeds at run time under Apache-2.0.
+
+**Ruling 2026-09-25, generated code:** Rust generated from a vendored
+specification is the project's own code and carries the code licence
+(Apache-2.0 for a generated model crate, as `fhir-types`), so `hl7v2-types`
+is published; the specification bytes it was generated from are never
+packaged and, for v2ig, never committed. The owner, as licensor and HL7
+member, holds that the generated table does not incorporate the
+specification; the audit's contrary reading is recorded on #251.
+
