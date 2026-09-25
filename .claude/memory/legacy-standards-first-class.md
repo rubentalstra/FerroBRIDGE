@@ -28,3 +28,12 @@ the mapping foundation must not assume FHIR R4 is the only inbound shape, and
 a legacy message enters through an adapter that renders the canonical form
 the existing mapping languages consume (FHIR through HL7's v2-to-FHIR pivot,
 or an openEHR composition), never through a fourth hand-coded path.
+
+**Decided 2026-09-25 (#248):** HL7 v2.x is the first legacy face, through
+HL7's v2-to-FHIR corpus into the FHIRconnect path (#251). The owner ruled
+"you must vendor it": the v2 definitions are vendored as a generator input
+like the FHIR packages, and the HL7 licence condition on incorporating the
+specification (organisational membership) is the owner's to hold, recorded in
+the provenance beside the material. The ConceptMap interpreter counts as an
+adapter over a published corpus, admitted under the one-core constraint.
+
