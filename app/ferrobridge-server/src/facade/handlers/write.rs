@@ -6,7 +6,10 @@
 //! Create is conditional and idempotent by source identity: a resource whose
 //! `id` and `meta.versionId` the identity map already knows resolves to an
 //! update of the composition it produced, never a second one (no
-//! specification governs this: our own design). Update needs the map to know the id, because
+//! specification governs this: our own design). A create claims its source
+//! before it reads the map and holds the claim until it answers, so a second
+//! create of the same source that arrives meanwhile is a `409` and commits
+//! nothing. Update needs the map to know the id, because
 //! this milestone declares `updateCreate: false`, and it checks the CDR's
 //! current `ETag` when the client sends no `If-Match`.
 //!
@@ -57,6 +60,7 @@ pub(crate) async fn create(
     let inbound = read::parse(body, resource_type)?;
     let program = select_program(facade, &inbound, headers)?;
     let ingest = facade.ingest(facade.client_for(headers));
+    let claim = ingest.claim_resource(&inbound)?;
 
     if let Some(known) = ingest.consumed(&inbound)? {
         return resend(facade, &ingest, program, &inbound, &known, headers).await;
@@ -67,7 +71,7 @@ pub(crate) async fn create(
         return Ok(answer);
     }
     let written = ingest
-        .ingest_resource(&inbound, program, &Provenance::EachResource)
+        .ingest_resource(&claim, &inbound, program, &Provenance::EachResource)
         .await?;
     let status = match written.delivery {
         ingest::Delivery::Committed => StatusCode::CREATED,

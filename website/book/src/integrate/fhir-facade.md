@@ -158,7 +158,9 @@ again and nothing is committed: each entry answers `200 OK` with the location
 of the resource the first delivery created. A Bundle only some of whose
 entries an earlier delivery consumed is refused with `409`, naming those
 entries, and a Bundle that carries one resource twice is refused with `422`.
-The redelivery rule is on the
+A delivery that arrives while another delivery of the same Bundle or resource
+is still in flight is refused with `409` and commits nothing; retry it after
+the first one answers. The redelivery rule is on the
 [failure and identity](../operate/failure-and-identity.md) page.
 
 ## `$validate` is a dry run of this server

@@ -53,6 +53,9 @@ use crate::facade::engine;
 use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::PersonId;
+use crate::facade::identity::claims::Claim;
+use crate::facade::identity::claims::Claims;
+use crate::facade::identity::claims::Contended;
 use crate::facade::identity::derive;
 use crate::facade::identity::derive::EntryKey;
 use crate::facade::identity::record::CommittedSource;
@@ -331,6 +334,8 @@ pub struct Ingest<'a> {
     programs: &'a Programs,
     /// The identity map.
     store: &'a dyn Store,
+    /// The source keys the in-flight deliveries into that map hold.
+    claims: &'a Claims,
     /// The CDR client every call of this ingest goes through.
     client: Client,
     /// What the deployment configured.
@@ -411,16 +416,21 @@ struct Placed {
 
 impl<'a> Ingest<'a> {
     /// Returns an ingest over `programs`, `store`, `client` and `settings`.
+    ///
+    /// `claims` is the one set of in-flight source keys every ingest into
+    /// `store` shares, so two deliveries of one source cannot both commit.
     #[must_use]
     pub const fn new(
         programs: &'a Programs,
         store: &'a dyn Store,
+        claims: &'a Claims,
         client: Client,
         settings: &'a Settings,
     ) -> Self {
         Self {
             programs,
             store,
+            claims,
             client,
             settings,
         }
@@ -430,6 +440,33 @@ impl<'a> Ingest<'a> {
     #[must_use]
     pub const fn client(&self) -> &Client {
         &self.client
+    }
+
+    /// Claims the source key of `inbound` for one delivery.
+    ///
+    /// The caller takes the claim before it reads the identity map and holds
+    /// it until the delivery settles, so a second delivery of the same
+    /// `resourceType`, `id` and `meta.versionId` that arrives meanwhile
+    /// commits nothing. A resource with no `id` has no key, and its claim
+    /// holds nothing. No specification governs the redelivery rule: our own
+    /// design.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `409` [`Refused`] with a `duplicate` issue when another
+    /// in-flight delivery holds the key; the caller retries once that
+    /// delivery settles.
+    pub fn claim_resource(&self, inbound: &Inbound) -> Result<Claim<'a>, Refused> {
+        let source = resource_source(inbound);
+        self.claims
+            .claim(source.iter().map(SourceVersion::storage_key))
+            .map_err(|_contended| {
+                let at = source.map_or_else(
+                    || String::from(inbound.resource_type()),
+                    |source| format!("{}/{}", source.resource_type(), source.id()),
+                );
+                in_flight(std::iter::once(at))
+            })
     }
 
     /// Returns what the identity map recorded for this source resource
@@ -461,20 +498,36 @@ impl<'a> Ingest<'a> {
     /// produced. No specification governs the redelivery rule: our own
     /// design.
     ///
+    /// `claim` is the one [`Ingest::claim_resource`] took for `inbound`,
+    /// held by the caller from before its identity lookup until the answer,
+    /// so a concurrent delivery of the same source cannot commit beside this
+    /// one.
+    ///
     /// # Errors
     ///
     /// Returns a [`Refused`] for a resource that names no usable subject, an
     /// EHR that cannot be resolved, a resource the program cannot map, a
     /// composition the strict reader refuses, every CDR refusal through the
     /// status table, a `500` naming the recorded contribution when it cannot
-    /// be read back or none of its versions matches the resource, and an
-    /// identity store that cannot be read or written.
+    /// be read back or none of its versions matches the resource, a `500`
+    /// when `claim` does not hold the resource's source key, and an identity
+    /// store that cannot be read or written.
     pub async fn ingest_resource(
         &self,
+        claim: &Claim<'_>,
         inbound: &Inbound,
         program: &Loaded,
         provenance: &Provenance,
     ) -> Result<Written, Refused> {
+        if let Some(source) = resource_source(inbound)
+            && !claim.holds(&source.storage_key())
+        {
+            return Err(Refused::new(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Issue::error(IssueType::Exception)
+                    .diagnosing("the delivery holds no claim on the source it commits"),
+            ));
+        }
         let subject = inbound
             .subject(&self.settings.subject_namespace)
             .map_err(|error| {
@@ -691,7 +744,12 @@ impl<'a> Ingest<'a> {
     /// A Bundle whose every entry one recorded contribution committed is bound
     /// from that contribution read back, commits nothing and answers
     /// [`Commit::AlreadyConsumed`], so a retry after a failed binding is safe.
-    /// No specification governs the redelivery rule: our own design.
+    ///
+    /// Every keyed entry is claimed ([`Claims`]) before the identity map is
+    /// read and released when the Bundle settles, so of two deliveries of one
+    /// Bundle that overlap, the second commits nothing and is refused with a
+    /// `409`; sent again after the first settled, it answers as any re-sent
+    /// Bundle. No specification governs the redelivery rule: our own design.
     ///
     /// # Errors
     ///
@@ -699,6 +757,7 @@ impl<'a> Ingest<'a> {
     /// under [`UnmappedEntries::Refuse`], every entry no program maps), a
     /// second subject, two entries with one source key, a Bundle with nothing
     /// to commit, and an EHR that cannot be resolved; a `409` naming every
+    /// entry another in-flight delivery holds; a `409` naming every
     /// entry already consumed or committed when not all were; the CDR's
     /// refusal of the contribution through the status table, naming every
     /// mapped entry; a `500` naming the contribution when it cannot be read
@@ -730,6 +789,10 @@ impl<'a> Ingest<'a> {
         };
         let sources = sources_of(&partition.mapped, provenance)?;
         distinct(&partition.mapped, &sources)?;
+        let _claim = self
+            .claims
+            .claim(sources.iter().flatten().map(SourceVersion::storage_key))
+            .map_err(|contended| contended_entries(&partition.mapped, &sources, &contended))?;
         let mut known = Vec::with_capacity(sources.len());
         let mut committed = Vec::with_capacity(sources.len());
         for source in &sources {
@@ -1474,6 +1537,43 @@ fn distinct(mapped: &[Mapped<'_>], sources: &[Option<SourceVersion>]) -> Result<
     } else {
         Err(Refused::of(StatusCode::UNPROCESSABLE_ENTITY, issues))
     }
+}
+
+/// Returns the refusal of a delivery whose source another in-flight delivery
+/// holds, naming each place in `at`.
+///
+/// Nothing is committed; the caller retries once the first delivery settles
+/// (no specification governs the redelivery rule: our own design).
+fn in_flight(at: impl IntoIterator<Item = String>) -> Refused {
+    let mut issues = vec![Issue::error(IssueType::Duplicate).diagnosing(
+        "another delivery of the same source is in flight, so nothing is committed; retry once it settles",
+    )];
+    issues.extend(at.into_iter().map(|place| {
+        Issue::error(IssueType::Duplicate)
+            .diagnosing("another in-flight delivery holds this entry")
+            .at(place)
+    }));
+    Refused::of(StatusCode::CONFLICT, issues)
+}
+
+/// Returns the refusal of a Bundle whose entries `contended` names another
+/// in-flight delivery as holding.
+fn contended_entries(
+    mapped: &[Mapped<'_>],
+    sources: &[Option<SourceVersion>],
+    contended: &Contended,
+) -> Refused {
+    in_flight(
+        mapped
+            .iter()
+            .zip(sources)
+            .filter(|(_, source)| {
+                source
+                    .as_ref()
+                    .is_some_and(|source| contended.holds(&source.storage_key()))
+            })
+            .map(|(entry, _)| entry.full_url.clone()),
+    )
 }
 
 /// Returns the contribution every entry of a Bundle was committed in, when

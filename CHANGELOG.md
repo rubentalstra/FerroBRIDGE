@@ -321,6 +321,14 @@ crates on crates.io.
 
 ### Fixed
 
+- Two overlapping deliveries of one transaction Bundle, or two overlapping
+  creates of one resource, commit once (#273). Each delivery claims the source
+  key of every entry before it reads the identity map and releases the claims
+  when it answers, on every exit path including a panic. A delivery that finds
+  a key claimed commits nothing and answers `409 Conflict` with a `duplicate`
+  issue per entry; retried after the first delivery answers, it is recognised
+  as a re-sent Bundle or resource. Before this fix both deliveries could pass
+  the lookup and commit, leaving a composition no identity record named.
 - A re-sent Bundle whose entries share one `FEEDER_AUDIT` item, as the entries
   of one message do, binds on retry after its first binding failed (#274).
   The content comparison that tells such entries apart now masks every
