@@ -190,6 +190,19 @@ crates on crates.io.
 
 ### Changed
 
+- The facade's write pipeline is one transport-neutral service,
+  `facade::ingest` (#261). It maps a resource through its FHIRconnect program
+  with the origin on the engine defaults, resolves or creates the EHR by
+  subject, strict-reads the built composition, commits over ITS-REST and
+  records the identity binding and the consumed source version, taking plain
+  values and answering a typed result. `ingest_bundle` answers one outcome per
+  entry (committed, or skipped with a typed reason) under an explicit
+  `UnmappedEntries` rule: `Refuse`, which the transaction route passes, or
+  `SkipAndCount`, which skips an entry no program maps and commits the rest.
+  `Provenance::Item` names one originating item for every composition, and
+  `SourceItem::message` builds one from a message control id and type. The
+  create, update and transaction handlers keep the HTTP half and answer
+  exactly as before.
 - The vendored OMOCL corpus moves to `SevKohler/OMOCL` commit `c082db8e`
   (#228): six new mapping files and the README acknowledgements, 208 mapping
   files in all.

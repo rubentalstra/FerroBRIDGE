@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# The model mapping the ingest suite runs: an Observation's code and its
+# effective time onto the name and the date of onset of the synthetic
+# ferrobridge.diagnose.v1 template. The pairing is synthetic and exists to
+# drive the ingest pipeline; it models no clinical practice.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_ingest_observation
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Observation
+
+mappings:
+  - name: "finding"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "effective"
+    with:
+      fhir: "$resource.effective.ofType(dateTime)"
+      openehr: "$archetype/data[at0001]/items[at0077]"
+      type: "DATETIME"

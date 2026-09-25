@@ -52,10 +52,39 @@ pub fn inbound(
     now: &str,
     settings: &crate::facade::Settings,
 ) -> Result<Outcome<CanonicalComposition>, EngineError> {
+    inbound_from(
+        program,
+        index,
+        document,
+        now,
+        settings,
+        SourceItem::of(document),
+    )
+}
+
+/// Maps one FHIR document into a composition that names `source` as its
+/// origin.
+///
+/// This is [`inbound`] with the originating item given by the caller, so a
+/// face that received something other than the resource itself, such as a
+/// message, names what it received. `None` records no source item.
+///
+/// # Errors
+///
+/// Returns [`EngineError`] for any element the program cannot map, and for a
+/// set of values the template does not admit as a composition.
+pub fn inbound_from(
+    program: &Program,
+    index: &WebTemplateIndex,
+    document: &Value,
+    now: &str,
+    settings: &crate::facade::Settings,
+    source: Option<SourceItem>,
+) -> Result<Outcome<CanonicalComposition>, EngineError> {
     // TODO(#95): run the terminology calls the concept mappings need here,
     // before any value is built, once the PROGRAMMED registry lands.
     let mut origin = Origin::new(&settings.system_id);
-    if let Some(source) = SourceItem::of(document) {
+    if let Some(source) = source {
         origin = origin.with_source(source);
     }
     let defaults = Defaults::at(now)

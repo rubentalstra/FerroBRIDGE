@@ -64,6 +64,16 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   rendering, and out of `redb`.
 - **A request path never panics.** No indexing, no slicing, no `unwrap`: every
   refusal is a typed `Refusal` that renders as an `OperationOutcome`.
+- **The handlers own HTTP; `facade::ingest` owns the write.** A handler checks
+  the media types, parses the body, reads the `templateId` pin,
+  `If-None-Exist`, `If-Match` and `Prefer`, and renders the answer. Mapping,
+  EHR resolution, the commit and the identity record are the `Ingest`
+  service's, which takes plain values and answers a `Refused` (status and
+  issues, unrendered) that becomes a `Refusal` through `From`. Every face that
+  writes into the CDR calls that one service: a second map-and-commit loop is
+  the duplication it exists to prevent. The Bundle path's rule for an entry no
+  program maps is explicit on the call (`UnmappedEntries`), and the
+  transaction route passes `Refuse`.
 - **A new interaction is four changes in one edit**: the route, the
   `CapabilityStatement` it is declared in, the wire test, and the Integrate
   page. An interaction the statement does not declare answers `404`, and one it

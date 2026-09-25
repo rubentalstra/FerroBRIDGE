@@ -241,10 +241,32 @@ pub fn encoded(
     outcome(issues).to_json()
 }
 
+/// Returns `error` and every cause behind it as one line.
+///
+/// This is how a refusal's cause travels in `issue.diagnostics`: the cause
+/// chain of `Error::source`, walked to its root.
+#[must_use]
+pub fn chain(error: &dyn core::error::Error) -> String {
+    let mut line = error.to_string();
+    let mut cause = error.source();
+    while let Some(source) = cause {
+        line.push_str(": ");
+        line.push_str(&source.to_string());
+        cause = source.source();
+    }
+    line
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{Issue, IssueType, Severity, encoded, outcome};
+    use super::{Issue, IssueType, Severity, chain, encoded, outcome};
     use fhir_types::codec::Value;
+
+    #[test]
+    fn a_cause_chain_renders_as_one_line() {
+        let error = crate::facade::identity::IdError::Empty { kind: "FHIR id" };
+        assert_eq!("a FHIR id cannot be empty", chain(&error));
+    }
 
     #[test]
     fn every_issue_code_is_the_value_set_spelling() {

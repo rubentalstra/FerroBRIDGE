@@ -42,7 +42,7 @@ const FIXTURES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/it/fixtures")
 const PROFILE: &str = "http://example.org/fhir/StructureDefinition/ferrobridge-facade-diagnosis";
 
 /// The EHR every case writes into.
-const EHR_ID: &str = "bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11";
+pub(crate) const EHR_ID: &str = "bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11";
 
 /// The version container the first commit produces.
 const CONTAINER: &str = "8849182c-82ad-4088-a07f-48ead4180515";
@@ -147,19 +147,19 @@ fn server_settings() -> ferrobridge_server::config::ServerSettings {
 }
 
 /// Returns the in-memory store as the trait object the facade holds.
-fn handle(store: &Arc<MemoryStore>) -> Arc<dyn Store> {
+pub(crate) fn handle(store: &Arc<MemoryStore>) -> Arc<dyn Store> {
     let held: Arc<MemoryStore> = Arc::clone(store);
     held
 }
 
 /// Returns the CDR client one case calls through.
-fn client(cdr: &MockServer) -> Client {
+pub(crate) fn client(cdr: &MockServer) -> Client {
     let base = format!("{}/", cdr.uri()).parse().expect("a legal base URL");
     Client::new(Config::new(base)).expect("the client builds")
 }
 
 /// Returns the facade settings every case runs with.
-fn settings() -> Settings {
+pub(crate) fn settings() -> Settings {
     Settings {
         base_url: String::from(BASE_URL),
         ehr_policy: Policy::Existing,
@@ -255,7 +255,7 @@ async fn mount_update(cdr: &MockServer, response: ResponseTemplate) {
 }
 
 /// Returns the canonical JSON of an EHR whose `ehr_id` is [`EHR_ID`].
-fn ehr_body() -> String {
+pub(crate) fn ehr_body() -> String {
     serde_json::json!({
         "_type": "EHR",
         "system_id": { "_type": "HIER_OBJECT_ID", "value": "ferrobridge.test" },
@@ -1782,6 +1782,73 @@ fn a_compiler_warning_reaches_the_log_once_as_the_facade_loads() -> Result<(), B
         Some("ferrobridge_kds_diagnose.context"),
         line["context"].as_str(),
         "{line}"
+    );
+    Ok(())
+}
+
+/// An error body member no openEHR error document defines, which a rendering
+/// of the client's outcome would carry onto the wire.
+const UNDOCUMENTED_MEMBER: &str = "ferrobridge-stack-trace-0001";
+
+/// Returns a CDR error body with a `message` and a member outside the
+/// `{error, message, validationErrors}` shape.
+fn leaky_error_body(message: &str) -> String {
+    serde_json::json!({ "message": message, "trace": UNDOCUMENTED_MEMBER }).to_string()
+}
+
+#[tokio::test]
+async fn a_refused_ehr_creation_carries_only_the_documented_error_shape()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness_with(settings_with(Policy::CreateOnFirstWrite)).await;
+    mount_no_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("POST"))
+        .and(matchers::path("/ehr"))
+        .respond_with(
+            ResponseTemplate::new(409)
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(leaky_error_body("an EHR for the subject exists")),
+        )
+        .mount(&harness.cdr)
+        .await;
+    let (status, body) = call(harness.app(), post_condition(&condition())).await?;
+    assert_eq!(StatusCode::UNPROCESSABLE_ENTITY, status, "{body}");
+    let diagnostics = diagnostics_of(&body).join(" ");
+    assert!(
+        diagnostics.contains("an EHR for the subject exists"),
+        "the CDR's message travels in the diagnostics: {body}"
+    );
+    assert!(
+        !body.to_string().contains(UNDOCUMENTED_MEMBER),
+        "a member outside the openEHR error shape stays off the wire: {body}"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_refused_composition_carries_only_the_documented_error_shape()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    Mock::given(matchers::method("POST"))
+        .and(matchers::path(format!("/ehr/{EHR_ID}/composition")))
+        .respond_with(
+            ResponseTemplate::new(400)
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(leaky_error_body("the composition is malformed")),
+        )
+        .mount(&harness.cdr)
+        .await;
+    let (status, body) = call(harness.app(), post_condition(&condition())).await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    assert!(
+        diagnostics_of(&body)
+            .join(" ")
+            .contains("the composition is malformed"),
+        "{body}"
+    );
+    assert!(
+        !body.to_string().contains(UNDOCUMENTED_MEMBER),
+        "a member outside the openEHR error shape stays off the wire: {body}"
     );
     Ok(())
 }

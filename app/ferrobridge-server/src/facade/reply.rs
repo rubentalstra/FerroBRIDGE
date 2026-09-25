@@ -20,6 +20,7 @@ use http::HeaderValue;
 use http::StatusCode;
 use http::header;
 
+use crate::facade::ingest::Refused;
 use crate::facade::media::FHIR_JSON;
 use crate::facade::outcome::Issue;
 use crate::facade::outcome::IssueType;
@@ -128,6 +129,21 @@ impl Refusal {
     #[must_use]
     pub fn into_response(self) -> Response {
         *self.0
+    }
+}
+
+impl From<Refused> for Refusal {
+    /// Renders a refusal of the ingest service, its `ETag` and its
+    /// `WWW-Authenticate` challenge travelling as headers.
+    fn from(refused: Refused) -> Self {
+        let mut headers = Vec::new();
+        if let Some(tag) = refused.entity_tag() {
+            headers.push(Header::entity_tag(tag));
+        }
+        if let Some(challenge) = refused.challenge() {
+            headers.push(Header::challenge(challenge));
+        }
+        refusals(refused.status(), refused.issues(), &headers)
     }
 }
 

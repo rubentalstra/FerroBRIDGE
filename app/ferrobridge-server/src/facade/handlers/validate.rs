@@ -31,7 +31,6 @@ use crate::facade::engine;
 use crate::facade::handlers::Body;
 use crate::facade::handlers::Refusal;
 use crate::facade::handlers::read;
-use crate::facade::handlers::render;
 use crate::facade::handlers::write;
 use crate::facade::identity::PersonId;
 use crate::facade::outcome::Issue;
@@ -59,7 +58,7 @@ pub(crate) fn validate(
             return Ok(reply::issues(
                 StatusCode::OK,
                 &[Issue::error(IssueType::Required)
-                    .diagnosing(render::chain(&refusal))
+                    .diagnosing(crate::facade::outcome::chain(&refusal))
                     .detailing(VALIDATOR)
                     .at(format!("{resource_type}.subject"))],
                 &[],
@@ -78,7 +77,7 @@ pub(crate) fn validate(
         facade.settings(),
     ) {
         Ok(outcome) => outcome,
-        Err(error) => return Ok(invalid(&render::chain(&error))),
+        Err(error) => return Ok(invalid(&crate::facade::outcome::chain(&error))),
     };
     let text = serde_json::to_string(built.value().value()).map_err(|error| {
         reply::refusal(
@@ -119,7 +118,7 @@ fn disposition(facade: &Facade, person: &PersonId) -> Result<String, Refusal> {
     let known = facade.store().ehr_of(person).map_err(|error| {
         reply::refusal(
             StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(render::chain(&error)),
+            Issue::error(IssueType::Exception).diagnosing(crate::facade::outcome::chain(&error)),
         )
     })?;
     Ok(match (known, facade.settings().ehr_policy) {

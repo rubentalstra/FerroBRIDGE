@@ -23,6 +23,7 @@ pub mod ehr;
 pub mod engine;
 pub mod handlers;
 pub mod identity;
+pub mod ingest;
 pub mod media;
 pub mod outcome;
 pub mod programs;
@@ -144,6 +145,17 @@ impl Facade {
     #[must_use]
     pub const fn settings(&self) -> &Settings {
         &self.settings
+    }
+
+    /// Returns the ingest service over this facade, calling the CDR through
+    /// `client`.
+    ///
+    /// A handler passes [`Facade::client_for`] so one request's CDR calls
+    /// carry its request id; another face passes [`Facade::client`] or a
+    /// client of its own.
+    #[must_use]
+    pub fn ingest(&self, client: Client) -> ingest::Ingest<'_> {
+        ingest::Ingest::new(&self.programs, self.store.as_ref(), client, &self.settings)
     }
 }
 

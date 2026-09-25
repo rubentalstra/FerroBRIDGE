@@ -9,39 +9,33 @@
 //! specification governs this: our own design). Update needs the map to know the id, because
 //! this milestone declares `updateCreate: false`, and it checks the CDR's
 //! current `ETag` when the client sends no `If-Match`.
+//!
+//! The handlers own the HTTP half: the media types, the `templateId` pin,
+//! `If-None-Exist`, `If-Match` and `Prefer`. The map, the EHR resolution, the
+//! commit and the identity record are [`crate::facade::ingest`]'s.
 
-use ferrobridge_openehr::composition::CreateCompositionOutcome;
-use ferrobridge_openehr::composition::UpdateCompositionOutcome;
+use ferrobridge_openehr::client::Client;
 use ferrobridge_openehr::ids::EhrId;
 use ferrobridge_openehr::ids::ObjectVersionId;
 use ferrobridge_openehr::ids::VersionedObjectUid;
-use ferrobridge_openehr::prefer::Prefer;
-use ferrobridge_openehr::prefer::Returned;
 use fhirconnect::resolve::program::TemplateId;
 use http::HeaderMap;
 use http::StatusCode;
 use http::Uri;
 use http::header;
-use openehr_mapping_core::composition::CanonicalComposition;
-use openehr_rm::v1_2::composition::composition::Composition;
-
-use ferrobridge_openehr::client::Client;
 
 use crate::facade::Facade;
-use crate::facade::commit;
-use crate::facade::ehr;
-use crate::facade::engine;
 use crate::facade::handlers::Body;
 use crate::facade::handlers::Refusal;
 use crate::facade::handlers::conditional;
 use crate::facade::handlers::read;
 use crate::facade::handlers::render;
-use crate::facade::identity::FhirResourceId;
-use crate::facade::identity::derive;
-use crate::facade::identity::derive::EntryKey;
-use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
-use crate::facade::identity::record::SourceVersion;
+use crate::facade::ingest;
+use crate::facade::ingest::Ingest;
+use crate::facade::ingest::Provenance;
+use crate::facade::ingest::Refused;
+use crate::facade::ingest::Written;
 use crate::facade::media;
 use crate::facade::outcome::Issue;
 use crate::facade::outcome::IssueType;
@@ -62,17 +56,19 @@ pub(crate) async fn create(
     crate::facade::handlers::supported(facade, resource_type)?;
     let inbound = read::parse(body, resource_type)?;
     let program = select_program(facade, &inbound, headers)?;
-    let client = facade.client_for(headers);
+    let ingest = facade.ingest(facade.client_for(headers));
 
-    if let Some(known) = consumed(facade, &inbound)? {
-        return resend(facade, &client, program, &inbound, &known, headers).await;
+    if let Some(known) = ingest.consumed(&inbound)? {
+        return resend(facade, &ingest, program, &inbound, &known, headers).await;
     }
     if let Some(answer) =
-        conditional::if_none_exist(facade, &client, resource_type, headers).await?
+        conditional::if_none_exist(facade, ingest.client(), resource_type, headers).await?
     {
         return Ok(answer);
     }
-    let written = commit_first(facade, &client, program, &inbound).await?;
+    let written = ingest
+        .ingest_resource(&inbound, program, &Provenance::EachResource)
+        .await?;
     answer(facade, program, &written, headers, StatusCode::CREATED)
 }
 
@@ -107,21 +103,14 @@ pub(crate) async fn update(
         internal_id: String::from(internal.as_str()),
         context: binding.context.clone(),
     };
-    resend(
-        facade,
-        &facade.client_for(headers),
-        program,
-        &inbound,
-        &known,
-        headers,
-    )
-    .await
+    let ingest = facade.ingest(facade.client_for(headers));
+    resend(facade, &ingest, program, &inbound, &known, headers).await
 }
 
 /// Runs the update path of a resource the identity map already placed.
 async fn resend(
     facade: &Facade,
-    client: &Client,
+    ingest: &Ingest<'_>,
     program: &Loaded,
     inbound: &Inbound,
     known: &ConsumedSource,
@@ -130,228 +119,18 @@ async fn resend(
     let ehr_id = EhrId::new(&known.ehr_id).map_err(|error| store_identifier(&error))?;
     let container = VersionedObjectUid::new(&known.versioned_object_uid)
         .map_err(|error| store_identifier(&error))?;
-    let preceding = precondition(client, headers, &ehr_id, &container).await?;
-    let composition = build(facade, program, inbound)?;
-    let rm = strict_read(&composition)?;
-    let context = commit::context(
-        commit::Change::Modification,
-        &facade.settings().system_id,
-        composition.template_id(),
-    )
-    .map_err(|error| {
-        reply::refusal(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(render::chain(&error)),
-        )
-    })?;
-    let answered = client
-        .update_composition(
+    let preceding = precondition(ingest.client(), headers, &ehr_id, &container).await?;
+    let written = ingest
+        .revise_resource(
+            inbound,
+            program,
             &ehr_id,
             &container,
             &preceding,
-            &rm,
-            &context,
-            Prefer::Representation,
+            &Provenance::EachResource,
         )
-        .await
-        .map_err(|error| refuse(&status::of_client_error(&error)))?;
-    let (version, stored) = match answered {
-        UpdateCompositionOutcome::Updated {
-            version_id,
-            returned,
-        } => (version_id, representation(returned, &composition)),
-        UpdateCompositionOutcome::Unprocessable(upstream) => {
-            return Err(refuse(&status::Answer::new(
-                status::UNPROCESSABLE,
-                status::diagnostics(&upstream),
-            )));
-        }
-        UpdateCompositionOutcome::PreconditionFailed {
-            latest_version_id,
-            upstream,
-        } => {
-            let mut answer =
-                status::Answer::new(status::PRECONDITION_FAILED, status::diagnostics(&upstream));
-            if let Some(latest) = latest_version_id {
-                answer = answer.with_entity_tag(String::from(latest.version_tree_id()));
-            }
-            return Err(refuse(&answer));
-        }
-        UpdateCompositionOutcome::NotFound(upstream) => {
-            return Err(refuse(&status::Answer::new(
-                status::NOT_FOUND,
-                status::diagnostics(&upstream),
-            )));
-        }
-        UpdateCompositionOutcome::BadRequest(upstream) => {
-            return Err(refuse(&status::Answer::new(
-                status::BAD_REQUEST,
-                status::diagnostics(&upstream),
-            )));
-        }
-        other => return Err(undocumented(&format!("{other:?}"))),
-    };
-    let written = record(facade, program, inbound, &ehr_id, &version, &stored)?;
+        .await?;
     answer(facade, program, &written, headers, StatusCode::OK)
-}
-
-/// Commits the first version of a composition for `inbound`.
-async fn commit_first(
-    facade: &Facade,
-    client: &Client,
-    program: &Loaded,
-    inbound: &Inbound,
-) -> Result<Written, Refusal> {
-    let subject = inbound
-        .subject(&facade.settings().subject_namespace)
-        .map_err(|error| {
-            reply::refusal(
-                StatusCode::UNPROCESSABLE_ENTITY,
-                Issue::error(IssueType::Required)
-                    .diagnosing(render::chain(&error))
-                    .at(format!("{}.subject", inbound.resource_type())),
-            )
-        })?;
-    let ehr_id = ehr::resolve(
-        client,
-        facade.store(),
-        &subject,
-        facade.settings().ehr_policy,
-    )
-    .await
-    .map_err(|error| ehr_refusal(&error))?;
-    let composition = build(facade, program, inbound)?;
-    let rm = strict_read(&composition)?;
-    let context = commit::context(
-        commit::Change::Creation,
-        &facade.settings().system_id,
-        composition.template_id(),
-    )
-    .map_err(|error| {
-        reply::refusal(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(render::chain(&error)),
-        )
-    })?;
-    let answered = client
-        .create_composition(&ehr_id, &rm, &context, Prefer::Representation)
-        .await
-        .map_err(|error| refuse(&status::of_client_error(&error)))?;
-    let (version, stored) = match answered {
-        CreateCompositionOutcome::Created {
-            version_id,
-            returned,
-        } => (version_id, representation(returned, &composition)),
-        CreateCompositionOutcome::Unprocessable(upstream) => {
-            return Err(refuse(&status::Answer::new(
-                status::UNPROCESSABLE,
-                status::diagnostics(&upstream),
-            )));
-        }
-        CreateCompositionOutcome::UnknownEhr(upstream) => {
-            return Err(refuse(&status::Answer::new(
-                status::NOT_FOUND,
-                status::diagnostics(&upstream),
-            )));
-        }
-        CreateCompositionOutcome::BadRequest(upstream) => {
-            return Err(refuse(&status::Answer::new(
-                status::BAD_REQUEST,
-                status::diagnostics(&upstream),
-            )));
-        }
-        other => return Err(undocumented(&format!("{other:?}"))),
-    };
-    record(facade, program, inbound, &ehr_id, &version, &stored)
-}
-
-/// What one committed write produced.
-#[derive(Debug, Clone)]
-pub(crate) struct Written {
-    /// The logical id the resource now has.
-    pub(crate) id: FhirResourceId,
-    /// The EHR the composition lives in.
-    pub(crate) ehr_id: EhrId,
-    /// The version the commit produced.
-    pub(crate) version: ObjectVersionId,
-    /// The composition as it now stands.
-    pub(crate) composition: CanonicalComposition,
-}
-
-/// Records the identity of a committed write, and returns what stands.
-fn record(
-    facade: &Facade,
-    program: &Loaded,
-    inbound: &Inbound,
-    ehr_id: &EhrId,
-    version: &ObjectVersionId,
-    composition: &CanonicalComposition,
-) -> Result<Written, Refusal> {
-    let entry = engine::entry_of(program.program(), composition).ok_or_else(|| {
-        reply::refusal(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(
-                "the committed composition carries no entry of the archetype the program maps",
-            ),
-        )
-    })?;
-    // NOTE: no specification governs this: our own design, the facade serves the
-    // first resource of a split and carries every further one as contained, so
-    // the entry's identity is its first occurrence.
-    let key = EntryKey::new(version.versioned_object_uid(), entry.path(), 0);
-    let map_key = derive::map_key(&key);
-    let resource_type = inbound.resource_type();
-    let recorded = facade
-        .store()
-        .internal_of(resource_type, &map_key)
-        .map_err(|error| store_refusal(&error))?;
-    let id = if let Some(known) = recorded {
-        known
-    } else {
-        let (fresh, _source) = derive::derive(&key, entry.uid());
-        facade
-            .store()
-            .record_internal(resource_type, &map_key, &fresh)
-            .map_err(|error| store_refusal(&error))?
-    };
-    let binding = CompositionBinding {
-        ehr_id: String::from(ehr_id.as_str()),
-        versioned_object_uid: String::from(version.versioned_object_uid().as_str()),
-        template_id: String::from(composition.template_id()),
-        resource_type: String::from(resource_type),
-        entry_path: String::from(entry.path()),
-        split: key.split(),
-        context: program.program().context().to_string(),
-    };
-    let stood = facade
-        .store()
-        .record_binding(resource_type, &id, &binding)
-        .map_err(|error| store_refusal(&error))?;
-    if let Some(external) = inbound.id() {
-        let source = SourceVersion::new(
-            resource_type,
-            external.clone(),
-            inbound.version_id().map(str::to_owned),
-        );
-        facade
-            .store()
-            .record_consumed(
-                &source,
-                &ConsumedSource {
-                    ehr_id: stood.ehr_id.clone(),
-                    versioned_object_uid: stood.versioned_object_uid.clone(),
-                    internal_id: String::from(id.as_str()),
-                    context: stood.context.clone(),
-                },
-            )
-            .map_err(|error| store_refusal(&error))?;
-    }
-    Ok(Written {
-        id,
-        ehr_id: ehr_id.clone(),
-        version: version.clone(),
-        composition: composition.clone(),
-    })
 }
 
 /// Answers one committed write, honouring `Prefer`.
@@ -435,25 +214,7 @@ pub(crate) fn select_program<'a>(
     headers: &HeaderMap,
 ) -> Result<&'a Loaded, Refusal> {
     let pin = template_pin(headers);
-    facade
-        .programs()
-        .select(inbound.profiles(), pin.as_ref())
-        .map_err(|error| {
-            let candidates = facade.programs().candidates(inbound.profiles());
-            let issue = if candidates.len() > 1 {
-                Issue::error(IssueType::NotSupported).diagnosing(format!(
-                    "{}; pin the choice with the templateId parameter, whose candidates are: {}",
-                    error,
-                    candidates.join(", ")
-                ))
-            } else {
-                Issue::error(IssueType::NotSupported).diagnosing(error.to_string())
-            };
-            reply::refusal(
-                StatusCode::UNPROCESSABLE_ENTITY,
-                issue.at("Resource.meta.profile"),
-            )
-        })
+    Ok(ingest::select(facade.programs(), inbound, pin.as_ref())?)
 }
 
 /// Returns the `templateId` pin a request carries, when it carries one.
@@ -470,135 +231,14 @@ fn template_pin(headers: &HeaderMap) -> Option<TemplateId> {
         .map(TemplateId::new)
 }
 
-/// Runs the engine over one inbound resource.
-fn build(
-    facade: &Facade,
-    program: &Loaded,
-    inbound: &Inbound,
-) -> Result<CanonicalComposition, Refusal> {
-    // NOTE: no specification governs this: our own design, one instant serves
-    // every defaulted time of one ingest, so the clock is read once here.
-    let now = jiff::Timestamp::now().to_string();
-
-    engine::inbound(
-        program.program(),
-        program.index(),
-        inbound.document(),
-        &now,
-        facade.settings(),
-    )
-    .map(fhirconnect::engine::outcome::Outcome::into_value)
-    .map_err(|error| render::engine_refusal(&error))
-}
-
-/// Re-reads a built composition through the strict RM reader.
-///
-/// The built composition is re-read through the strict RM reader before it is
-/// sent, so a bad document never reaches the CDR. It already carries the
-/// `FEEDER_AUDIT` the engine wrote for the resource it was mapped from
-/// ([`engine::inbound`]), so the CDR stores where the content came from.
-fn strict_read(composition: &CanonicalComposition) -> Result<Composition, Refusal> {
-    let text = serde_json::to_string(composition.value()).map_err(|error| {
-        reply::refusal(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(format!(
-                "the built composition could not be written: {error}"
-            )),
-        )
-    })?;
-    openehr_its::json::from_canonical_json::<Composition>(&text).map_err(|error| {
-        reply::refusal(
-            StatusCode::UNPROCESSABLE_ENTITY,
-            Issue::error(IssueType::Processing).diagnosing(format!(
-                "the built composition is no valid openEHR COMPOSITION: {error}"
-            )),
-        )
-    })
-}
-
-/// Returns the composition the CDR stored, or the built one.
-///
-/// The CDR is the authority on what it stored, so its representation wins when
-/// `Prefer: return=representation` produced one.
-fn representation(
-    returned: Returned<Composition>,
-    built: &CanonicalComposition,
-) -> CanonicalComposition {
-    match returned {
-        Returned::Representation(stored) => CanonicalComposition::new(
-            openehr_its::json::to_canonical_json(stored.as_ref())
-                .parse::<serde_json::Value>()
-                .unwrap_or_else(|_unparsed| built.value().clone()),
-            built.template_id(),
-            built.generation(),
-        ),
-        Returned::Minimal | Returned::Identifier(_) => built.clone(),
-    }
-}
-
-/// Returns what the map already recorded for this source resource version.
-fn consumed(facade: &Facade, inbound: &Inbound) -> Result<Option<ConsumedSource>, Refusal> {
-    let Some(external) = inbound.id() else {
-        return Ok(None);
-    };
-    let source = SourceVersion::new(
-        inbound.resource_type(),
-        external.clone(),
-        inbound.version_id().map(str::to_owned),
-    );
-    facade
-        .store()
-        .consumed(&source)
-        .map_err(|error| store_refusal(&error))
-}
-
 /// Returns the refusal one status-table answer renders as.
 pub(crate) fn refuse(answer: &status::Answer) -> Refusal {
-    let mut headers = Vec::new();
-    if let Some(tag) = answer.entity_tag() {
-        headers.push(reply::Header::entity_tag(tag));
-    }
-    if let Some(challenge) = answer.challenge() {
-        headers.push(reply::Header::challenge(challenge));
-    }
-    reply::refusals(answer.status(), &[answer.issue().clone()], &headers)
-}
-
-/// Returns the refusal an outcome this version does not read renders as.
-fn undocumented(detail: &str) -> Refusal {
-    reply::refusal(
-        StatusCode::INTERNAL_SERVER_ERROR,
-        Issue::error(IssueType::Exception).diagnosing(format!(
-            "the openEHR client answered an outcome this version does not read ({detail})"
-        )),
-    )
-}
-
-/// Returns the refusal an EHR resolution renders as.
-fn ehr_refusal(error: &ehr::EhrError) -> Refusal {
-    match *error {
-        ehr::EhrError::Absent { .. } => reply::refusal(
-            StatusCode::UNPROCESSABLE_ENTITY,
-            Issue::error(IssueType::NotFound).diagnosing(render::chain(error)),
-        ),
-        ehr::EhrError::Refused { .. } | ehr::EhrError::Subject { .. } => reply::refusal(
-            StatusCode::UNPROCESSABLE_ENTITY,
-            Issue::error(IssueType::Processing).diagnosing(render::chain(error)),
-        ),
-        ehr::EhrError::Client { ref source } => refuse(&status::of_client_error(source)),
-        _ => reply::refusal(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(render::chain(error)),
-        ),
-    }
+    Refusal::from(Refused::of_answer(answer))
 }
 
 /// Returns the refusal an identity-store failure renders as.
 pub(crate) fn store_refusal(error: &crate::facade::identity::store::StoreError) -> Refusal {
-    reply::refusal(
-        StatusCode::INTERNAL_SERVER_ERROR,
-        Issue::error(IssueType::Exception).diagnosing(render::chain(&error)),
-    )
+    Refusal::from(ingest::store_refusal(error))
 }
 
 /// Returns the refusal a malformed stored identifier renders as.

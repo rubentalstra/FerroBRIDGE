@@ -86,7 +86,7 @@ pub(crate) fn parse(body: &[u8], resource_type: &str) -> Result<Inbound, Refusal
             }
             _ => (StatusCode::BAD_REQUEST, IssueType::Invalid, None),
         };
-        let mut issue = Issue::error(code).diagnosing(render::chain(&error));
+        let mut issue = Issue::error(code).diagnosing(crate::facade::outcome::chain(&error));
         if let Some(path) = location {
             issue = issue.at(path);
         }
@@ -103,7 +103,7 @@ pub(crate) fn internal_id(id: &str) -> Result<FhirResourceId, Refusal> {
     FhirResourceId::new(id).map_err(|error| {
         reply::refusal(
             StatusCode::NOT_FOUND,
-            Issue::error(IssueType::NotFound).diagnosing(render::chain(&error)),
+            Issue::error(IssueType::NotFound).diagnosing(crate::facade::outcome::chain(&error)),
         )
     })
 }
@@ -197,12 +197,7 @@ pub(crate) async fn fetch(
             status::NOT_FOUND,
             status::diagnostics(&upstream),
         ))),
-        other => Err(reply::refusal(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(format!(
-                "the openEHR client answered an outcome this version does not read ({other:?})"
-            )),
-        )),
+        _ => Err(write::refuse(&status::unread("composition_get"))),
     }
 }
 
@@ -236,12 +231,7 @@ pub(crate) async fn latest_version(
             status::NOT_FOUND,
             status::diagnostics(&upstream),
         ))),
-        other => Err(reply::refusal(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Issue::error(IssueType::Exception).diagnosing(format!(
-                "the openEHR client answered an outcome this version does not read ({other:?})"
-            )),
-        )),
+        _ => Err(write::refuse(&status::unread("composition_get"))),
     }
 }
 

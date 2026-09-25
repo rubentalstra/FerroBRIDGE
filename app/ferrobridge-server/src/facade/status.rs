@@ -246,6 +246,26 @@ pub fn diagnostics(upstream: &UpstreamError) -> String {
     text
 }
 
+/// Returns the diagnostics of a client outcome this version does not read.
+///
+/// The client's outcome enums are `#[non_exhaustive]`, so a variant a newer
+/// client adds reaches an arm that cannot read it. The text names the ITS-REST
+/// `operationId` (`ehr-codegen.openapi.yaml`) and nothing of the outcome, so no
+/// upstream body reaches the wire except through [`diagnostics`].
+#[must_use]
+pub fn unread_diagnostics(operation: &str) -> String {
+    format!("the openEHR client answered an outcome of {operation} this version does not read")
+}
+
+/// Returns the answer to a client outcome this version does not read.
+///
+/// The bridge cannot read what its own client answered, so the fault is the
+/// bridge's and the row is [`UNDOCUMENTED`].
+#[must_use]
+pub fn unread(operation: &str) -> Answer {
+    Answer::new(UNDOCUMENTED, unread_diagnostics(operation))
+}
+
 /// Returns the answer one client-level refusal maps to.
 ///
 /// The client returns [`Error`] only for a call that reached no documented
@@ -374,5 +394,30 @@ mod tests {
             String::from("a plain-text refusal"),
         );
         assert!(diagnostics(&upstream).contains("a plain-text refusal"));
+    }
+
+    #[test]
+    fn an_unread_outcome_is_a_five_hundred_naming_only_the_operation() {
+        let answer = super::unread("composition_create");
+        assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, answer.status());
+        assert_eq!(UNDOCUMENTED, answer.row());
+        let built = answer.issue().build();
+        assert_eq!(
+            Some(String::from(
+                "the openEHR client answered an outcome of composition_create this version does not read"
+            )),
+            built.diagnostics.and_then(|text| text.value)
+        );
+    }
+
+    #[test]
+    fn an_error_body_member_outside_the_openehr_shape_stays_out_of_the_diagnostics() {
+        let upstream = UpstreamError::new(
+            StatusCode::CONFLICT,
+            String::from(r#"{"message":"an EHR exists","trace":"ferrobridge-stack-trace-0001"}"#),
+        );
+        let text = diagnostics(&upstream);
+        assert!(text.contains("an EHR exists"), "{text}");
+        assert!(!text.contains("ferrobridge-stack-trace-0001"), "{text}");
     }
 }
