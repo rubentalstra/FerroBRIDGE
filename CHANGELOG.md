@@ -264,6 +264,11 @@ crates on crates.io.
 
 ### Changed
 
+- The nine `openehr-*` crates step from 0.0.69 to 0.0.71, and `openehr-its`
+  is taken with the new `rest` feature in place of `rest-server`, so the
+  ITS-REST DTOs come without axum. 0.0.71 also ships the `rest-client`
+  feature (FerroEHR #3485), which #285 adopts in place of the hand-written
+  client.
 - The `omop-cdm` record graph keys its rows by the `openehr-base` BASE 1.3
   identifiers (#279): the EHR and the versioned composition are a
   `HierObjectId` and the version an `ObjectVersionId`, so the ETL runner
