@@ -108,8 +108,12 @@ no clinical content is written into it, and a test greps the file for a mapped
 value to prove it.
 
 That last table is what makes create idempotent. A resource re-sent with the
-same `id` and `meta.versionId` updates the composition it already produced
-instead of creating a second one.
+same `id` and `meta.versionId` commits nothing and answers `200 OK` with the
+composition it already produced. A resource with a known `id` and a new
+`meta.versionId` commits a later version of that composition. A resource with a
+known `id` and no `meta.versionId` is a replay when it maps to the content the
+composition holds now, and a later version otherwise. The Operate page on
+failure and identity states the full rule.
 
 ## Provenance
 

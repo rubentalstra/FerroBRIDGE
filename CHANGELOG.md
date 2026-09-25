@@ -409,6 +409,19 @@ crates on crates.io.
   vendored ReportStream set) resolves its structure from MSH-9.1 and MSH-9.2
   through the generated message index instead of being refused as unnamed
   (HL7 v2.5.1 chapter 2 §2.15.9.9, table 0354).
+- A single create re-sent with the `id` and `meta.versionId` the identity map
+  already consumed commits nothing and answers `200 OK` with the `Location`,
+  `ETag` and body of the composition the first delivery produced, as a
+  re-sent transaction entry is answered (#288). Before this fix it committed a
+  new version of that composition on every delivery. A create of a known `id`
+  at another `meta.versionId` commits a later version of the same composition;
+  before, it committed a second composition. A create of a known `id` with no
+  `meta.versionId` is a replay when it maps to the content the composition
+  holds now (the `uid` and the clock-filled times masked, as the transaction
+  path masks them) and a later version otherwise. An `id` the map binds to two
+  compositions is refused with `409 Conflict`. A single create also claims its
+  `resourceType` and `id`, so two creates of one `id` at different versions
+  cannot run at once. `PUT` and the transaction path are unchanged.
 - Two overlapping deliveries of one transaction Bundle, or two overlapping
   creates of one resource, commit once (#273). Each delivery claims the source
   key of every entry before it reads the identity map and releases the claims
