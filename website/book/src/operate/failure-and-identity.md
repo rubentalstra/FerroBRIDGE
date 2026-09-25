@@ -52,7 +52,9 @@ composition versions, which FHIR requires of a logical id; `meta.versionId`
 carries the openEHR version. FerroBRIDGE also keeps a persistent id-map: the
 patient identifier to `ehr_id` relation, the external to internal resource id
 relation, and the resource id to composition relation, so a `PUT` resolves and
-a re-sent Bundle is recognised.
+a re-sent Bundle is recognised. It also records each `Resource.identifier` a
+committed resource carries against its resource id, which is what a
+conditional create's `identifier` search reads.
 
 ## A re-sent transaction commits once
 
@@ -130,8 +132,19 @@ own design.
   tell which one the create revises, so it answers `409 Conflict` with a
   `conflict` issue and commits nothing.
 
-A transaction entry keeps its own rule: it is recognised only by its exact key.
-`PUT` is unchanged.
+A transaction entry follows the same lookup. An entry whose exact key the map
+consumed, or a transaction committed, is recognised as above. An entry whose
+`id` the map consumed at another `meta.versionId` commits a later version of
+that composition inside the Bundle's contribution: its `UpdateVersion` names
+the composition's latest version as `preceding_version_uid` and its audit
+states a modification, beside the creations of the other entries. The entry
+answers `200 OK` in the `transaction-response`, keeps its resource id, and its
+`Location` names the new version. The commit is recorded before the binding
+and matched by `FEEDER_AUDIT` as for any entry, so a retry after a failed
+binding reads the contribution back and commits nothing. An entry the map
+binds to more than one composition, or to a composition in another EHR,
+refuses the Bundle with `409`, and two entries that revise one composition
+refuse it with `422`. `PUT` is unchanged.
 
 Two deliveries of one source that overlap commit once. Before a delivery reads
 the identity map, it claims the key of every entry it carries, and it holds

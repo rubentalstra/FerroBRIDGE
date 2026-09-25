@@ -4,7 +4,8 @@
 //! The identity map on disk, over `redb`.
 //!
 //! Four `redb` tables, one per row of `docs/architecture.md` §9, and a fifth
-//! from a source to the contribution that committed it. The file
+//! from a source to the contribution that committed it, and a sixth from each
+//! `Resource.identifier` of a committed resource to its logical id. The file
 //! holds identifiers, archetype paths and mapping names and nothing else: no
 //! clinical value ever reaches it, which
 //! `the_store_never_holds_clinical_content` asserts by reading the file back
@@ -29,11 +30,14 @@ use crate::facade::identity::PersonId;
 use crate::facade::identity::record::CommittedSource;
 use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
+use crate::facade::identity::record::Identifier;
+use crate::facade::identity::record::IdentifierQuery;
 use crate::facade::identity::record::SourceVersion;
 use crate::facade::identity::record::external_key;
 use crate::facade::identity::record::internal_key;
 use crate::facade::identity::store::Store;
 use crate::facade::identity::store::StoreError;
+use crate::facade::identity::store::identified_id;
 
 /// Patient identifier to `ehr_id`.
 const PATIENTS: TableDefinition<'static, &str, &str> = TableDefinition::new("patient_ehr");
@@ -52,6 +56,10 @@ const SOURCES: TableDefinition<'static, &str, &str> = TableDefinition::new("sour
 const CONTRIBUTIONS: TableDefinition<'static, &str, &str> =
     TableDefinition::new("source_contribution");
 
+/// Resource type, `Resource.identifier` and logical id to that logical id.
+const IDENTIFIERS: TableDefinition<'static, &str, &str> =
+    TableDefinition::new("identifier_internal");
+
 /// The identity map of one configured CDR, on disk.
 ///
 /// One store per configured CDR: a multi-tenant deployment runs one bridge per
@@ -67,7 +75,7 @@ pub struct RedbStore {
 impl RedbStore {
     /// Opens, or creates, the store at `path`.
     ///
-    /// The four tables are created in one transaction, so every later read
+    /// The six tables are created in one transaction, so every later read
     /// finds a table rather than a missing one.
     ///
     /// # Errors
@@ -91,6 +99,7 @@ impl RedbStore {
             let _bindings = write.open_table(BINDINGS).map_err(transaction)?;
             let _sources = write.open_table(SOURCES).map_err(transaction)?;
             let _contributions = write.open_table(CONTRIBUTIONS).map_err(transaction)?;
+            let _identifiers = write.open_table(IDENTIFIERS).map_err(transaction)?;
         }
         write.commit().map_err(transaction)?;
         Ok(store)
@@ -311,6 +320,28 @@ impl Store for RedbStore {
         let stood = self.record(CONTRIBUTIONS, &key, &offered)?;
         record_of(&key, Some(stood))?.ok_or(StoreError::Missing { key })
     }
+
+    fn identified(
+        &self,
+        resource_type: &str,
+        query: &IdentifierQuery,
+    ) -> Result<Vec<FhirResourceId>, StoreError> {
+        self.scan(IDENTIFIERS, &query.range(resource_type))?
+            .iter()
+            .map(|(key, value)| identified_id(key, value))
+            .collect()
+    }
+
+    fn record_identifier(
+        &self,
+        resource_type: &str,
+        identifier: &Identifier,
+        internal: &FhirResourceId,
+    ) -> Result<(), StoreError> {
+        let key = identifier.storage_key(resource_type, internal);
+        self.record(IDENTIFIERS, &key, internal.as_str())?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -432,6 +463,45 @@ mod tests {
             Vec::<ConsumedSource>::new(),
             store
                 .consumed_versions(&source("c-2", None))
+                .expect("the read")
+        );
+    }
+
+    #[test]
+    fn a_recorded_identifier_survives_a_restart_and_answers_its_search() {
+        use crate::facade::identity::record::{Identifier, IdentifierQuery, SystemMatch};
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        let path = directory.path().join("identity.redb");
+        let one = FhirResourceId::new("one").expect("a legal FHIR id");
+        let two = FhirResourceId::new("two").expect("a legal FHIR id");
+        {
+            let store = RedbStore::open(&path).expect("the first open");
+            for (system, internal) in [("http://a", &one), ("http://b", &two)] {
+                store
+                    .record_identifier("Condition", &Identifier::new(Some(system), "v-1"), internal)
+                    .expect("the write");
+            }
+        }
+        let reopened = RedbStore::open(&path).expect("the second open");
+        assert_eq!(
+            vec![one.clone(), two],
+            reopened
+                .identified("Condition", &IdentifierQuery::new(SystemMatch::Any, "v-1"))
+                .expect("the read")
+        );
+        assert_eq!(
+            vec![one],
+            reopened
+                .identified(
+                    "Condition",
+                    &IdentifierQuery::new(SystemMatch::Is(String::from("http://a")), "v-1")
+                )
+                .expect("the read")
+        );
+        assert_eq!(
+            Vec::<FhirResourceId>::new(),
+            reopened
+                .identified("Condition", &IdentifierQuery::new(SystemMatch::Any, "v-10"))
                 .expect("the read")
         );
     }

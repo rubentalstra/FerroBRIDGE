@@ -13,7 +13,9 @@
 //! entry no program maps refuses the Bundle. A committed Bundle answers a
 //! `transaction-response` Bundle naming each entry's resource id and version,
 //! and a Bundle an earlier delivery already committed answers the same ids
-//! without a second commit.
+//! without a second commit. An entry carrying a new `meta.versionId` of a
+//! resource the identity map knows commits a later version of its
+//! composition inside the same CONTRIBUTION.
 //!
 //! `batch` has no implementation in this milestone and the
 //! `CapabilityStatement` does not declare it, so a `batch` Bundle is refused
@@ -29,10 +31,10 @@ use http::StatusCode;
 use http::Uri;
 
 use crate::facade::Facade;
+use crate::facade::commit::Change;
 use crate::facade::handlers::Body;
 use crate::facade::handlers::Refusal;
 use crate::facade::handlers::read;
-use crate::facade::ingest::Commit;
 use crate::facade::ingest::Ingested;
 use crate::facade::ingest::Provenance;
 use crate::facade::ingest::UnmappedEntries;
@@ -107,13 +109,11 @@ pub(crate) async fn transaction(
 /// that contains one entry for each entry in the request, in the same order",
 /// each with a `response` carrying the status, `location` and `ETag`
 /// (<https://hl7.org/fhir/R4/http.html#transaction-response>). The location and
-/// the tag are the ones a single create answers. An entry an earlier delivery
-/// consumed answers `200 OK`, a fresh one `201 Created`.
+/// the tag are the ones a single create answers. An entry this delivery
+/// committed as a first version answers `201 Created`; one it committed as a
+/// later version of a known resource answers `200 OK`, as a single create of
+/// that resource does, and so does one an earlier delivery consumed.
 fn response_bundle(base_url: &str, ingested: &Ingested) -> Bundle {
-    let status = match *ingested.commit() {
-        Commit::Contribution(_) => "201 Created",
-        Commit::AlreadyConsumed => "200 OK",
-    };
     let base = base_url.trim_end_matches('/');
     Bundle {
         r#type: RESPONSE.into(),
@@ -121,7 +121,11 @@ fn response_bundle(base_url: &str, ingested: &Ingested) -> Bundle {
             .committed()
             .map(|entry| BundleEntry {
                 response: Some(BundleEntryResponse {
-                    status: status.into(),
+                    status: match entry.change {
+                        Some(Change::Creation) => "201 Created",
+                        Some(Change::Modification) | None => "200 OK",
+                    }
+                    .into(),
                     location: Some(
                         format!(
                             "{base}/{}/{}/_history/{}",

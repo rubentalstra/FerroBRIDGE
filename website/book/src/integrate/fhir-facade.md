@@ -98,11 +98,12 @@ enters the derivation, so a new version of a composition reads back under the
 same id with a new `meta.versionId`. `meta.source` names the openEHR version
 uid the answer was read from.
 
-The identity map is a `redb` file with four tables: a patient identifier to its
+The identity map is a `redb` file with six tables: a patient identifier to its
 `ehr_id`, an external resource id to the internal one, an internal id to the
 composition version container with the entry path and split occurrence, and the
 source resource `id` with its `meta.versionId` to the mapping that consumed
-them. The map wins once written, so a derivation change never renames a
+them, beside the contribution each source was committed in and each
+`Resource.identifier` of a committed resource. The map wins once written, so a derivation change never renames a
 resource a client already holds. The store keeps identifiers and nothing else:
 no clinical content is written into it, and a test greps the file for a mapped
 value to prove it.
@@ -112,8 +113,10 @@ same `id` and `meta.versionId` commits nothing and answers `200 OK` with the
 composition it already produced. A resource with a known `id` and a new
 `meta.versionId` commits a later version of that composition. A resource with a
 known `id` and no `meta.versionId` is a replay when it maps to the content the
-composition holds now, and a later version otherwise. The Operate page on
-failure and identity states the full rule.
+composition holds now, and a later version otherwise. A transaction entry with
+a known `id` and a new `meta.versionId` commits that later version inside the
+Bundle's contribution. The Operate page on failure and identity states the
+full rule.
 
 ## Provenance
 
@@ -135,9 +138,11 @@ by subject id and namespace, and only then the configured policy. With
 `If-None-Exist` behaves as R4 defines it: no match creates, one match answers
 `200` with the resource that already exists, and several matches answer `412`.
 The search it runs is over the identity map, so the parameters it answers are
-`_id` and `identifier`, each in the comma-separated OR form. Any other
-parameter is refused, because a silently narrowed search would turn a duplicate
-into a second composition.
+`_id` and `identifier`, each in the comma-separated OR form. `identifier`
+matches the `Resource.identifier` of every resource the facade committed, in
+the token forms `[code]`, `|[code]` and `[system]|[code]`; the `[system]|`
+form is refused. Any other parameter is refused, because a silently narrowed
+search would turn a duplicate into a second composition.
 
 A create answers `201` with `Location` naming the FHIR resource under the
 configured base URL and `ETag` carrying the version.

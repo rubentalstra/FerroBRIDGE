@@ -8,7 +8,10 @@
 //! resource id to the composition it lives in, and a source resource `id` with
 //! its `meta.versionId` to the mapping that consumed them. A fifth table keys
 //! the same source to the CONTRIBUTION that committed it, written before the
-//! binding so a re-sent Bundle is recognised when its first binding failed.
+//! binding so a re-sent Bundle is recognised when its first binding failed. A
+//! sixth keys each `Resource.identifier` a committed resource carries to its
+//! logical id, which is what the conditional create's `identifier` search
+//! reads.
 //!
 //! Every write is record-once. "Once assigned, this value never changes"
 //! (<https://hl7.org/fhir/R4/resource.html>), so a `record_*` call answers with
@@ -28,6 +31,8 @@ use crate::facade::identity::PersonId;
 use crate::facade::identity::record::CommittedSource;
 use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
+use crate::facade::identity::record::Identifier;
+use crate::facade::identity::record::IdentifierQuery;
 use crate::facade::identity::record::SourceVersion;
 use crate::facade::identity::record::external_key;
 use crate::facade::identity::record::internal_key;
@@ -200,6 +205,41 @@ pub trait Store: fmt::Debug + Send + Sync {
         source: &SourceVersion,
         committed: &CommittedSource,
     ) -> Result<CommittedSource, StoreError>;
+
+    /// Returns the logical id of every resource of `resource_type` that
+    /// carries an identifier `query` matches, in storage-key order.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StoreError`] when the store cannot be read or holds an id
+    /// this version cannot read.
+    fn identified(
+        &self,
+        resource_type: &str,
+        query: &IdentifierQuery,
+    ) -> Result<Vec<FhirResourceId>, StoreError>;
+
+    /// Records that the resource `internal` carries `identifier`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StoreError`] when the store cannot be written.
+    fn record_identifier(
+        &self,
+        resource_type: &str,
+        identifier: &Identifier,
+        internal: &FhirResourceId,
+    ) -> Result<(), StoreError>;
+}
+
+/// Returns the logical id one identifier row holds.
+pub(crate) fn identified_id(key: &str, value: &str) -> Result<FhirResourceId, StoreError> {
+    FhirResourceId::new(value).map_err(|source| StoreError::Identifier {
+        key: key.to_owned(),
+        kind: "FHIR id",
+        value: value.to_owned(),
+        source: Box::new(source),
+    })
 }
 
 /// The tables, as one map each.
@@ -216,12 +256,14 @@ struct Tables {
     /// Source resource `id` and `meta.versionId` to the contribution that
     /// committed them.
     contributions: BTreeMap<String, CommittedSource>,
+    /// Resource type, identifier and logical id to that logical id.
+    identifiers: BTreeMap<String, String>,
 }
 
 /// The identity map a test drives, held in memory and lost with the process.
 #[derive(Debug, Default)]
 pub struct MemoryStore {
-    /// The four tables behind one lock, so a write is atomic across them.
+    /// The six tables behind one lock, so a write is atomic across them.
     tables: Mutex<Tables>,
 }
 
@@ -375,6 +417,37 @@ impl Store for MemoryStore {
                 .entry(key)
                 .or_insert_with(|| committed.clone())
                 .clone()
+        })
+    }
+
+    fn identified(
+        &self,
+        resource_type: &str,
+        query: &IdentifierQuery,
+    ) -> Result<Vec<FhirResourceId>, StoreError> {
+        let range = query.range(resource_type);
+        let rows: Vec<(String, String)> = self.with(|tables| {
+            tables
+                .identifiers
+                .range(range)
+                .map(|(key, value)| (key.clone(), value.clone()))
+                .collect()
+        })?;
+        rows.iter()
+            .map(|(key, value)| identified_id(key, value))
+            .collect()
+    }
+
+    fn record_identifier(
+        &self,
+        resource_type: &str,
+        identifier: &Identifier,
+        internal: &FhirResourceId,
+    ) -> Result<(), StoreError> {
+        let key = identifier.storage_key(resource_type, internal);
+        let value = String::from(internal.as_str());
+        self.with(|tables| {
+            tables.identifiers.entry(key).or_insert(value);
         })
     }
 }

@@ -192,6 +192,133 @@ impl SourceVersion {
     }
 }
 
+/// One `Resource.identifier` a sender wrote: its `system`, when it names one,
+/// and its `value`.
+///
+/// The conditional create answers an `identifier` search from these
+/// (<https://hl7.org/fhir/R4/search.html#token>), so every committed resource
+/// records each identifier it carries against its logical id. An identifier
+/// is a business identifier the sender assigned, never a clinical value.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Identifier {
+    /// The `Identifier.system`, when the sender wrote one.
+    system: Option<String>,
+    /// The `Identifier.value`.
+    value: String,
+}
+
+impl Identifier {
+    /// Returns the identifier `value` in `system`.
+    ///
+    /// An empty `system` is read as no system, since the R4 `uri` type admits
+    /// no empty value (<https://hl7.org/fhir/R4/datatypes.html#uri>).
+    #[must_use]
+    pub fn new(system: Option<&str>, value: &str) -> Self {
+        Self {
+            system: system
+                .filter(|system| !system.is_empty())
+                .map(str::to_owned),
+            value: value.to_owned(),
+        }
+    }
+
+    /// Returns the `Identifier.system`, when the sender wrote one.
+    #[must_use]
+    pub fn system(&self) -> Option<&str> {
+        self.system.as_deref()
+    }
+
+    /// Returns the `Identifier.value`.
+    #[must_use]
+    pub fn value(&self) -> &str {
+        &self.value
+    }
+
+    /// Returns the key this identifier of `internal` is stored under.
+    ///
+    /// The key is the resource type, then the value and the system, each
+    /// framed by its byte length, then the logical id. So every resource that
+    /// carries one identifier has a key of its own, and a search reads them
+    /// all ([`IdentifierQuery::range`]). The framing keeps a value or a
+    /// system that carries a separator from borrowing its neighbour. No
+    /// specification governs the key shape: our own design.
+    #[must_use]
+    pub fn storage_key(&self, resource_type: &str, internal: &FhirResourceId) -> String {
+        let system = self.system.as_deref().unwrap_or_default();
+        format!(
+            "{}\u{1f}{internal}",
+            framed(resource_type, &self.value, Some(system))
+        )
+    }
+}
+
+/// Which `Identifier.system` an `identifier` search admits.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SystemMatch {
+    /// `[code]`: any system, or none.
+    Any,
+    /// `|[code]`: only an identifier that names no system.
+    Absent,
+    /// `[system]|[code]`: only this system.
+    Is(String),
+}
+
+/// One value of an `identifier` search parameter, read as an R4 token.
+///
+/// The token forms are `[code]`, `|[code]` and `[system]|[code]`
+/// (<https://hl7.org/fhir/R4/search.html#token>).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IdentifierQuery {
+    /// Which system the search admits.
+    system: SystemMatch,
+    /// The value the search matches exactly.
+    value: String,
+}
+
+impl IdentifierQuery {
+    /// Returns the query that matches `value` under `system`.
+    #[must_use]
+    pub fn new(system: SystemMatch, value: &str) -> Self {
+        Self {
+            system,
+            value: value.to_owned(),
+        }
+    }
+
+    /// Returns the range of storage keys that holds every identifier of
+    /// `resource_type` this query matches.
+    ///
+    /// Under [`SystemMatch::Any`] the range is every key that continues the
+    /// framed value, whose next character is a digit of the system's length;
+    /// `:` follows the digits, so the range ends before any other value.
+    /// Otherwise the range is every key that continues the framed system with
+    /// the separator `U+001F`, and `U+0020` is the character after it.
+    #[must_use]
+    pub fn range(&self, resource_type: &str) -> core::ops::Range<String> {
+        let system = match self.system {
+            SystemMatch::Any => {
+                let prefix = framed(resource_type, &self.value, None);
+                let end = format!("{prefix}:");
+                return prefix..end;
+            }
+            SystemMatch::Absent => "",
+            SystemMatch::Is(ref system) => system.as_str(),
+        };
+        let prefix = framed(resource_type, &self.value, Some(system));
+        format!("{prefix}\u{1f}")..format!("{prefix}\u{20}")
+    }
+}
+
+/// Returns the resource type, the length-framed value and, when given, the
+/// length-framed system, as an identifier key starts.
+fn framed(resource_type: &str, value: &str, system: Option<&str>) -> String {
+    let head = format!("{resource_type}\u{1f}{}:{value}", value.len());
+    match system {
+        Some(system) => format!("{head}{}:{system}", system.len()),
+        None => head,
+    }
+}
+
 /// Returns the storage key of an internal resource id.
 ///
 /// The type joins the id so two resource types cannot collide on one logical
@@ -260,6 +387,67 @@ mod tests {
             .expect("a legal message type");
         assert_ne!(entry.storage_key(), other.storage_key());
         assert!(SourceVersion::of_message_entry("ORU\u{1f}R01", control, 2).is_err());
+    }
+
+    #[test]
+    fn an_identifier_query_reads_exactly_the_keys_its_token_form_admits() {
+        use super::{Identifier, IdentifierQuery, SystemMatch};
+        let id = |text: &str| FhirResourceId::new(text).expect("a legal FHIR id");
+        let key = |system: Option<&str>, value: &str, internal: &str| {
+            Identifier::new(system, value).storage_key("Condition", &id(internal))
+        };
+        let held = [
+            key(Some("http://a"), "v-1", "one"),
+            key(Some("http://b"), "v-1", "two"),
+            key(None, "v-1", "three"),
+            key(Some("http://a"), "v-10", "four"),
+            key(Some("http://a"), "v-1", "five"),
+        ];
+        let matching = |query: IdentifierQuery| -> Vec<usize> {
+            let range = query.range("Condition");
+            (0..held.len())
+                .filter(|&i| range.contains(&held[i]))
+                .collect()
+        };
+        assert_eq!(
+            vec![0, 1, 2, 4],
+            matching(IdentifierQuery::new(SystemMatch::Any, "v-1"))
+        );
+        assert_eq!(
+            vec![0, 4],
+            matching(IdentifierQuery::new(
+                SystemMatch::Is(String::from("http://a")),
+                "v-1"
+            ))
+        );
+        assert_eq!(
+            vec![2],
+            matching(IdentifierQuery::new(SystemMatch::Absent, "v-1"))
+        );
+        assert!(
+            !IdentifierQuery::new(SystemMatch::Any, "v-1")
+                .range("Observation")
+                .contains(&held[0]),
+            "an identifier of one type never answers a search of another"
+        );
+    }
+
+    #[test]
+    fn a_separator_inside_an_identifier_cannot_borrow_its_neighbour() {
+        use super::{Identifier, IdentifierQuery, SystemMatch};
+        let internal = FhirResourceId::new("one").expect("a legal FHIR id");
+        let held = Identifier::new(Some("b"), "a1:").storage_key("Condition", &internal);
+        assert!(
+            !IdentifierQuery::new(SystemMatch::Any, "a")
+                .range("Condition")
+                .contains(&held)
+        );
+        assert!(
+            !IdentifierQuery::new(SystemMatch::Is(String::from("1:b")), "a")
+                .range("Condition")
+                .contains(&held)
+        );
+        assert_eq!(None, Identifier::new(Some(""), "a").system());
     }
 
     #[test]
