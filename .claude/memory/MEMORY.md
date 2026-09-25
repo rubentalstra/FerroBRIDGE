@@ -64,4 +64,5 @@
 - [Upstream reports stay here](upstream-reports-stay-here.md): the issue is the record; nothing is filed on external trackers and no owner-action issue for filing is created
 - [Dependency sweep to latest](deps-latest-sweep.md): every session compares the workspace pins with crates.io and the sibling's crate list (openehr-sdt split off openehr-its on 2026-09-24); the family lands together by hand; owner 2026-09-24
 - [openEHR crates are the model](openehr-crates-are-the-model.md): never restate RM, AM, BASE or FLAT knowledge; `|raw` writes and `openehr_rm::v1_2::model` lookups; owner flag 2026-09-25, #241
+- [Legacy standards are first class](legacy-standards-first-class.md): the bridge spans the oldest wire formats (HL7 v2.x first) to the newest; built in from the start and scheduled into the current milestone; owner 2026-09-25, research on #248
 
