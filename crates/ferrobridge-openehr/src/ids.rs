@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The identifier newtypes the CDR wire carries.
+//! The identifiers the CDR wire carries.
 //!
-//! An openEHR identifier and a target-side identifier are different things, so
-//! each one is its own type and a swapped argument is a compile error rather
-//! than a mis-addressed request.
+//! The version, version container and template identifiers are the
+//! `openehr-base` BASE 1.3 types the ITS-REST DTOs use; this module holds the
+//! thin readers the wire needs over them (an `ETag` value, the version
+//! container of a version) and the handles openEHR has no type of their own
+//! for.
 
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+use openehr_base::v1_3::base_types::identification::template_id::TemplateId;
 use std::fmt;
 
 /// A character that would change the shape of a request path or query.
@@ -30,23 +35,16 @@ pub enum IdError {
         /// The offending character.
         character: char,
     },
-    /// The text is not `object_id::creating_system_id::version_tree_id`.
-    #[error(
-        "an OBJECT_VERSION_ID is object_id::creating_system_id::version_tree_id, {found:?} has {parts} parts"
-    )]
-    VersionIdShape {
+    /// The text is not the openEHR identifier its position requires.
+    #[error("{found:?} is not a legal {kind}")]
+    Openehr {
+        /// The identifier kind that was being built.
+        kind: &'static str,
         /// The text that was parsed.
         found: String,
-        /// How many `::`-separated parts it carried.
-        parts: usize,
-    },
-    /// The text is not an ADL 2 archetype HRID.
-    #[error(
-        "an ARCHETYPE_HRID is [namespace::]publisher-package-class.concept.vN[.M[.P]], {found:?} is not"
-    )]
-    HridShape {
-        /// The text that was parsed.
-        found: String,
+        /// What the BASE 1.3 identifier grammar refused.
+        #[source]
+        source: openehr_base::v1_3::base_types::identification::lexical::IdError,
     },
 }
 
@@ -87,6 +85,8 @@ pub fn entity_tag(value: &str) -> &str {
 /// (`ehr-codegen.openapi.yaml`, `components.parameters.ehr_id`, and the
 /// `ehr_create_with_id` description: "It is strongly RECOMMENDED that an UUID
 /// always be used for this"), so the value stays opaque here.
+// NOTE: RM EHR §`ehr_id` is a HIER_OBJECT_ID, kept its own type (C-NEWTYPE) so an
+// EHR handle and a version container can never swap places in a call.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct EhrId(String);
 
@@ -113,121 +113,67 @@ impl fmt::Display for EhrId {
     }
 }
 
-/// A version container identifier, taken from `VERSIONED_OBJECT.uid.value`.
+/// Returns the version identifier an `ETag` field value names.
 ///
-/// This is the `uid_based_id` in its `HIER_OBJECT_ID` form, which addresses
-/// the latest version of a composition
-/// (`ehr-codegen.openapi.yaml`, `components.parameters.uid_based_id`).
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct VersionedObjectUid(String);
-
-impl VersionedObjectUid {
-    /// Returns the version container identifier `text` names.
-    ///
-    /// # Errors
-    /// Returns [`IdError`] when `text` is empty or carries a character that
-    /// would change the request path.
-    pub fn new(text: &str) -> Result<Self, IdError> {
-        opaque("versioned_object_uid", text).map(Self)
-    }
-
-    /// Returns the identifier as it travels on the wire.
-    #[must_use]
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
+/// The `W/` weakness indicator and the double quotes ITS-REST 1.1.0
+/// §Requests and responses/HTTP headers/ETag and Last-Modified puts around the
+/// value are stripped before BASE 1.3 parses it.
+///
+/// # Errors
+/// Returns [`IdError::Openehr`] when what the entity tag carries is not an
+/// `OBJECT_VERSION_ID`.
+pub fn version_from_etag(value: &str) -> Result<ObjectVersionId, IdError> {
+    let tag = entity_tag(value);
+    ObjectVersionId::new(tag).map_err(|source| IdError::Openehr {
+        kind: "OBJECT_VERSION_ID",
+        found: tag.to_owned(),
+        source,
+    })
 }
 
-impl fmt::Display for VersionedObjectUid {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
-
-/// A version identifier, taken from `VERSION.uid.value`.
+/// Returns the version container `version` belongs to, its `object_id` part
+/// verbatim.
 ///
 /// RM Common §`OBJECT_VERSION_ID` gives the three-part form
-/// `object_id::creating_system_id::version_tree_id`, of which only the leading
-/// `object_id` (the [`VersionedObjectUid`]) is stable across updates.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+/// `object_id::creating_system_id::version_tree_id`, of which the leading
+/// `object_id` names the version container and is stable across updates. The
+/// part is taken as written, since the typed `Uid` accessor lower-cases a UUID
+/// and the CDR addresses the container by the spelling it issued.
+///
+/// # Panics
+/// Never: `ObjectVersionId::new` refuses a value whose `object_id` part is
+/// not a legal `uid`, which is all `HierObjectId::new` checks.
+#[must_use]
 #[expect(
-    clippy::struct_field_names,
-    reason = "RM Common section OBJECT_VERSION_ID names all three parts with an id suffix"
+    clippy::expect_used,
+    reason = "ObjectVersionId::new checked the object_id part against the uid production HierObjectId::new checks"
 )]
-pub struct ObjectVersionId {
-    /// The version container identifier.
-    object_id: String,
-    /// The identifier of the system that created this version.
-    creating_system_id: String,
-    /// The position of this version in its version tree.
-    version_tree_id: String,
+pub fn versioned_object_uid(version: &ObjectVersionId) -> HierObjectId {
+    let object_id = version
+        .value()
+        .split_once("::")
+        .map_or(version.value(), |(head, _)| head);
+    HierObjectId::new(object_id)
+        .expect("the object_id of a constructed OBJECT_VERSION_ID should be a legal uid")
 }
 
-impl ObjectVersionId {
-    /// Returns the version identifier `text` names.
-    ///
-    /// # Errors
-    /// Returns [`IdError`] when `text` is not three non-empty `::`-separated
-    /// parts, or when a part carries a character that would change the request
-    /// path.
-    pub fn new(text: &str) -> Result<Self, IdError> {
-        let parts: Vec<&str> = text.split("::").collect();
-        let [object_id, creating_system_id, version_tree_id] = parts.as_slice() else {
-            return Err(IdError::VersionIdShape {
-                found: text.to_owned(),
-                parts: parts.len(),
-            });
-        };
-        Ok(Self {
-            object_id: opaque("version_uid object_id", object_id)?,
-            creating_system_id: opaque("version_uid creating_system_id", creating_system_id)?,
-            version_tree_id: opaque("version_uid version_tree_id", version_tree_id)?,
-        })
-    }
-
-    /// Returns the version identifier an `ETag` field value names.
-    ///
-    /// The `W/` weakness indicator and the double quotes ITS-REST 1.1.0
-    /// §Requests and responses/HTTP headers/ETag and Last-Modified puts around
-    /// the value are stripped before parsing.
-    ///
-    /// # Errors
-    /// Returns [`IdError`] when what the entity tag carries is not an
-    /// `OBJECT_VERSION_ID`.
-    pub fn from_etag(value: &str) -> Result<Self, IdError> {
-        Self::new(entity_tag(value))
-    }
-
-    /// Returns the version container this version belongs to.
-    #[must_use]
-    pub fn versioned_object_uid(&self) -> VersionedObjectUid {
-        VersionedObjectUid(self.object_id.clone())
-    }
-
-    /// Returns the identifier of the system that created this version.
-    #[must_use]
-    pub fn creating_system_id(&self) -> &str {
-        &self.creating_system_id
-    }
-
-    /// Returns the position of this version in its version tree.
-    #[must_use]
-    pub fn version_tree_id(&self) -> &str {
-        &self.version_tree_id
-    }
-}
-
-impl fmt::Display for ObjectVersionId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}::{}::{}",
-            self.object_id, self.creating_system_id, self.version_tree_id
-        )
-    }
+/// Returns the template identifier `text` names.
+///
+/// BASE 1.3 leaves the `TEMPLATE_ID` lexical form open and the ITS-REST 1.1.0
+/// Definition API examples range from `Vital Signs` to a full HRID
+/// (`definition-codegen.openapi.yaml`, `components.parameters.template_id`),
+/// so a space is legal and only path-structural characters are refused.
+///
+/// # Errors
+/// Returns [`IdError`] when `text` is empty or carries a character that would
+/// change the request path.
+pub fn template_id(text: &str) -> Result<TemplateId, IdError> {
+    opaque("template_id", text).map(|value| TemplateId { value })
 }
 
 /// A CONTRIBUTION identifier, taken from `CONTRIBUTION.uid.value`.
+// NOTE: RM Common §`CONTRIBUTION.uid` is a HIER_OBJECT_ID, kept its own type
+// (C-NEWTYPE) so a contribution and a version container can never swap places.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ContributionUid(String);
 
@@ -254,135 +200,10 @@ impl fmt::Display for ContributionUid {
     }
 }
 
-/// An ADL 1.4 template identifier.
-///
-/// The ITS-REST 1.1.0 Definition API leaves the value opaque and its examples
-/// range from `Vital Signs` to a full HRID
-/// (`definition-codegen.openapi.yaml`, `components.parameters.template_id`),
-/// so a space is legal and only path-structural characters are refused.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct TemplateId(String);
-
-impl TemplateId {
-    /// Returns the template identifier `text` names.
-    ///
-    /// # Errors
-    /// Returns [`IdError`] when `text` is empty or carries a character that
-    /// would change the request path.
-    pub fn new(text: &str) -> Result<Self, IdError> {
-        opaque("template_id", text).map(Self)
-    }
-
-    /// Returns the identifier as it travels on the wire.
-    #[must_use]
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-impl fmt::Display for TemplateId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
-
-/// An ADL 2 archetype HRID, the identifier of an ADL 2 template.
-///
-/// The grammar is AM 2.4 §Identification: `namespaced_hrid = namespace '::'
-/// local_hrid`, `local_hrid = hrid_root '.v' version_id`, `hrid_root =
-/// rm_publisher '-' rm_closure '-' rm_class '.' concept_id`, with
-/// `version_id = release_version [ '-' version_modifier '.' issue_number ]`.
-/// A partial version resolves server-side to the latest matching major
-/// version, so the identifier a fetch answers with is what a caller caches
-/// under.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct ArchetypeHrid(String);
-
-impl ArchetypeHrid {
-    /// Returns the archetype HRID `text` names.
-    ///
-    /// # Errors
-    /// Returns [`IdError`] when `text` does not match the AM 2.4
-    /// §Identification HRID grammar.
-    pub fn new(text: &str) -> Result<Self, IdError> {
-        let shape = || IdError::HridShape {
-            found: text.to_owned(),
-        };
-        let local = match text.split_once("::") {
-            Some((namespace, local)) => {
-                if namespace.is_empty() || local.is_empty() {
-                    return Err(shape());
-                }
-                local
-            }
-            None => text,
-        };
-        let (root, rest) = local.split_once('.').ok_or_else(shape)?;
-        let root_parts: Vec<&str> = root.split('-').collect();
-        if root_parts.len() != 3 || root_parts.iter().any(|part| part.is_empty()) {
-            return Err(shape());
-        }
-        let (concept, version) = rest.split_once('.').ok_or_else(shape)?;
-        if concept.is_empty() {
-            return Err(shape());
-        }
-        Self::check_version(version).ok_or_else(shape)?;
-        opaque("archetype HRID", text).map(Self)
-    }
-
-    /// Returns the identifier of a decoded ADL 2 operational template.
-    ///
-    /// The physical form carries the complete version, which is what a partial
-    /// request resolves to (AM 2.4 §Identification, `physical_id`).
-    ///
-    /// # Errors
-    /// Returns [`IdError`] when the template's own identifier does not render
-    /// as a well-formed HRID.
-    pub fn from_aom2(
-        hrid: &openehr_am::v2_4::aom2::archetype::archetype_hrid::ArchetypeHrid,
-    ) -> Result<Self, IdError> {
-        Self::new(&hrid.physical_id())
-    }
-
-    /// Returns `Some(())` when `version` is `vN[.M[.P]]` with an optional
-    /// `-modifier.issue` extension.
-    fn check_version(version: &str) -> Option<()> {
-        let (numbers, extension) = match version.split_once('-') {
-            Some((numbers, extension)) => (numbers, Some(extension)),
-            None => (version, None),
-        };
-        let numbers = numbers.strip_prefix('v')?;
-        let mut parts = 0_usize;
-        for part in numbers.split('.') {
-            if part.is_empty() || !part.chars().all(|c| c.is_ascii_digit()) {
-                return None;
-            }
-            parts = parts.saturating_add(1);
-        }
-        if !(1..=3).contains(&parts) {
-            return None;
-        }
-        if extension.is_some_and(str::is_empty) {
-            return None;
-        }
-        Some(())
-    }
-
-    /// Returns the identifier as it travels on the wire.
-    #[must_use]
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
-
-impl fmt::Display for ArchetypeHrid {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
-    }
-}
-
 /// The subject identifier an EHR lookup matches against
 /// `EHR_STATUS.subject.external_ref.id.value`.
+// NOTE: `PARTY_REF.id` admits any OBJECT_ID subtype and ITS-REST 1.1.0 passes it
+// as a bare query string, so no BASE 1.3 type holds the lookup value.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct SubjectId(String);
 
@@ -420,6 +241,8 @@ impl fmt::Display for SubjectId {
 
 /// The namespace a [`SubjectId`] is drawn from, matched against
 /// `EHR_STATUS.subject.external_ref.namespace`.
+// NOTE: `OBJECT_REF.namespace` is a bare String in BASE 1.3, so the lookup key is
+// its own type only to keep it apart from the subject id it travels with.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct SubjectNamespace(String);
 
@@ -462,6 +285,8 @@ impl fmt::Display for SubjectNamespace {
 /// No specification governs this: our own design. The value is restricted to
 /// printable ASCII so a caller-supplied identifier cannot inject a header line
 /// or a log line.
+// NOTE: no specification governs this: our own design, a transport correlation
+// id that is no openEHR identifier.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct RequestId(String);
 
@@ -502,8 +327,12 @@ mod tests {
     #![expect(clippy::panic_in_result_fn, reason = "test assertions")]
 
     use super::{
-        ArchetypeHrid, EhrId, IdError, ObjectVersionId, RequestId, TemplateId, entity_tag,
+        EhrId, IdError, RequestId, entity_tag, template_id, version_from_etag, versioned_object_uid,
     };
+    use openehr_base::v1_3::base_types::identification::lexical::IdError as BaseIdError;
+
+    /// A synthetic version container.
+    const CONTAINER: &str = "8849182c-82ad-4088-a07f-48ead4180515";
 
     #[test]
     fn an_ehr_id_refuses_a_path_separator() {
@@ -523,28 +352,48 @@ mod tests {
 
     #[test]
     fn a_template_id_keeps_the_legacy_spaced_form() -> Result<(), IdError> {
-        assert_eq!("Vital Signs", TemplateId::new("Vital Signs")?.as_str());
+        assert_eq!("Vital Signs", template_id("Vital Signs")?.value);
         Ok(())
     }
 
     #[test]
+    fn a_template_id_refuses_a_path_separator() {
+        assert!(template_id("Vital/Signs").is_err());
+        assert!(template_id("").is_err());
+    }
+
+    #[test]
     fn a_version_id_splits_into_its_three_parts() -> Result<(), IdError> {
-        let id = ObjectVersionId::new("8849182c::openEHRSys.example.com::2")?;
-        assert_eq!("8849182c", id.versioned_object_uid().as_str());
-        assert_eq!("openEHRSys.example.com", id.creating_system_id());
-        assert_eq!("2", id.version_tree_id());
-        assert_eq!("8849182c::openEHRSys.example.com::2", id.to_string());
+        let text = format!("{CONTAINER}::openEHRSys.example.com::2");
+        let id = version_from_etag(&text)?;
+        assert_eq!(CONTAINER, versioned_object_uid(&id).value());
+        assert_eq!("openEHRSys.example.com", id.creating_system_id_str());
+        assert_eq!("2", id.version_tree_id().value());
+        assert_eq!(text, id.value());
+        Ok(())
+    }
+
+    #[test]
+    fn the_version_container_keeps_the_spelling_the_cdr_issued() -> Result<(), IdError> {
+        let upper = "8849182C-82AD-4088-A07F-48EAD4180515";
+        let id = version_from_etag(&format!("{upper}::ferroehr::1"))?;
+        assert_eq!(upper, versioned_object_uid(&id).value());
         Ok(())
     }
 
     #[test]
     fn a_version_id_refuses_a_two_part_value() {
+        let text = format!("{CONTAINER}::2");
         assert_eq!(
-            Err(IdError::VersionIdShape {
-                found: "8849182c::2".to_owned(),
-                parts: 2
+            Err(IdError::Openehr {
+                kind: "OBJECT_VERSION_ID",
+                found: text.clone(),
+                source: BaseIdError::PartCount {
+                    expected: 3,
+                    found: 2
+                },
             }),
-            ObjectVersionId::new("8849182c::2")
+            version_from_etag(&text)
         );
     }
 
@@ -560,33 +409,9 @@ mod tests {
 
     #[test]
     fn a_version_id_parses_out_of_a_weak_entity_tag() -> Result<(), IdError> {
-        let id = ObjectVersionId::from_etag("W/\"8849182c::openEHRSys.example.com::1\"")?;
-        assert_eq!("1", id.version_tree_id());
+        let id = version_from_etag(&format!("W/\"{CONTAINER}::openEHRSys.example.com::1\""))?;
+        assert_eq!("1", id.version_tree_id().value());
         Ok(())
-    }
-
-    #[test]
-    fn an_hrid_accepts_the_namespaced_three_part_version() -> Result<(), IdError> {
-        let hrid = "org.highmed::openEHR-EHR-COMPOSITION.t_vital_signs.v1.0.0";
-        assert_eq!(hrid, ArchetypeHrid::new(hrid)?.as_str());
-        Ok(())
-    }
-
-    #[test]
-    fn an_hrid_accepts_a_partial_version_and_a_release_candidate() -> Result<(), IdError> {
-        ArchetypeHrid::new("openEHR-EHR-COMPOSITION.t_vital_signs.v1")?;
-        ArchetypeHrid::new("openEHR-EHR-COMPOSITION.t_vital_signs.v1.8.2-rc.4")?;
-        Ok(())
-    }
-
-    #[test]
-    fn an_hrid_refuses_a_missing_version_marker() {
-        assert!(ArchetypeHrid::new("openEHR-EHR-COMPOSITION.t_vital_signs.1.0.0").is_err());
-    }
-
-    #[test]
-    fn an_hrid_refuses_a_two_part_root() {
-        assert!(ArchetypeHrid::new("openEHR-COMPOSITION.t_vital_signs.v1.0.0").is_err());
     }
 
     #[test]

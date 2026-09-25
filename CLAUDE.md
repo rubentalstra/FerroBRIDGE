@@ -98,9 +98,11 @@ the testkit tool crate. Beside it:
   compiles one context into one immutable program (#83): the extensions
   applied in declaration order, the four version selectors checked, and every
   path on both sides resolved once so the interpreter parses none.
-- `crates/ferrobridge-openehr`: the hand-written ITS-REST 1.1.0 client (#76),
-  one outcome enum per call with a variant per documented status, `wiremock`
-  contract tests beside it.
+- `crates/ferrobridge-openehr`: the hand-written ITS-REST 1.1.0 client
+  transport only (#76, #276), one outcome enum per call with a variant per
+  documented status, `wiremock` contract tests beside it. The ids and the audit
+  are the `openehr-base`, `openehr-rm` and `openehr-its` types; the crate goes
+  when `openehr-its` ships its `rest-client` feature.
 - `crates/ferrobridge-term`: the FHIR terminology client (#77) for
   `CodeSystem/$lookup`, `ConceptMap/$translate` and
   `ValueSet/$validate-code`, R4 and R4B over the generated `fhir-types`

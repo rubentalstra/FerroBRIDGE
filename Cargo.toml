@@ -95,8 +95,9 @@ openehr-am = "0.0.69"
 # The AQL 1.1.0 parser: the ETL checks its configured queries at load
 # (docs/architecture.md section 5.4). Verified against crates.io on 2026-09-25.
 openehr-query = "0.0.69"
-# Test-only: the ADL 2 test fixtures are compiled from their .adls sources, so
-# the parser is a dev-dependency of openehr-mapping-core and never ships.
+# The ADL 2 parser: openehr-mapping-core compiles its ADL 2 test fixtures from
+# their .adls sources with it, and ferrobridge-openehr reads the archetype HRID
+# an adl2 template ETag carries with its `hrid::parse_hrid`.
 openehr-adl = "0.0.69"
 # The HTTP client for the CDR wire. reqwest 0.13 spells the rustls selection
 # "rustls"; it carries its own platform verifier and aws-lc-rs provider.

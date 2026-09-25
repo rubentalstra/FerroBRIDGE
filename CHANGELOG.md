@@ -264,6 +264,20 @@ crates on crates.io.
 
 ### Changed
 
+- `ferrobridge-openehr` is the ITS-REST client transport only, and takes the
+  openEHR model from the published crates (#276). The version, version
+  container, template and `uid_based_id` identifiers are the `openehr-base`
+  BASE 1.3 `ObjectVersionId`, `HierObjectId`, `TemplateId` and `UidBasedId`
+  the `openehr-its` DTOs use, so an `ETag` or a stored id now parses against
+  the BASE 1.3 `uid` grammar. `CommitContext` carries the lifecycle state as a
+  `DvCodedText` and the audit as the ITS-REST `UpdateAuditData`, and renders
+  the `openehr-version`, `openehr-audit-details` and `openehr-template-id`
+  headers byte for byte as before; the facade builds that audit once for a
+  single write and a transaction entry. The ADL 2 template fetch answers the
+  `openehr-am` `ArchetypeHrid`. The bridge's own `ObjectVersionId`,
+  `VersionedObjectUid`, `TemplateId`, `ArchetypeHrid`, `LifecycleState`,
+  `ChangeType`, `Committer` and `CommitterRef` are gone; `EhrId`,
+  `ContributionUid`, `SubjectId`, `SubjectNamespace` and `RequestId` stay.
 - The facade's write pipeline is one transport-neutral service,
   `facade::ingest` (#261). It maps a resource through its FHIRconnect program
   with the origin on the engine defaults, resolves or creates the EHR by

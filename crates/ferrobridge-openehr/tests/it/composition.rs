@@ -6,11 +6,14 @@
 
 use crate::support;
 use ferrobridge_openehr::composition::{
-    CompositionOutcome, CreateCompositionOutcome, DeleteCompositionOutcome, UidBasedId,
+    CompositionOutcome, CreateCompositionOutcome, DeleteCompositionOutcome,
     UpdateCompositionOutcome, VersionAtTime,
 };
-use ferrobridge_openehr::ids::{EhrId, ObjectVersionId, VersionedObjectUid};
+use ferrobridge_openehr::ids::{EhrId, version_from_etag};
 use ferrobridge_openehr::prefer::{Prefer, Returned};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 use std::error::Error;
 use wiremock::matchers::{method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -50,8 +53,8 @@ async fn create_composition_sends_the_three_commit_headers() -> Result<(), Box<d
             version_id,
             returned,
         } => {
-            assert_eq!(VERSION_1, version_id.to_string());
-            assert_eq!("1", version_id.version_tree_id());
+            assert_eq!(VERSION_1, version_id.value().to_owned());
+            assert_eq!("1", version_id.version_tree_id().value());
             assert!(matches!(returned, Returned::Representation(_)));
         }
         other => return Err(format!("expected a created composition, got {other:?}").into()),
@@ -109,7 +112,7 @@ async fn create_composition_reads_an_empty_201_as_minimal_whatever_was_preferred
             version_id,
             returned,
         } => {
-            assert_eq!(VERSION_1, version_id.to_string());
+            assert_eq!(VERSION_1, version_id.value().to_owned());
             assert!(matches!(returned, Returned::Minimal));
         }
         other => return Err(format!("expected a created composition, got {other:?}").into()),
@@ -208,11 +211,11 @@ async fn update_composition_sends_the_bare_quoted_if_match() -> Result<(), Box<d
         .mount(&server)
         .await;
 
-    let preceding = ObjectVersionId::from_etag(&format!("W/\"{VERSION_1}\""))?;
+    let preceding = version_from_etag(&format!("W/\"{VERSION_1}\""))?;
     let outcome = support::client(&server)?
         .update_composition(
             &EhrId::new(EHR)?,
-            &VersionedObjectUid::new(VERSIONED_OBJECT)?,
+            &HierObjectId::new(VERSIONED_OBJECT)?,
             &preceding,
             &support::composition()?,
             &support::commit_context()?,
@@ -221,7 +224,7 @@ async fn update_composition_sends_the_bare_quoted_if_match() -> Result<(), Box<d
         .await?;
     match outcome {
         UpdateCompositionOutcome::Updated { version_id, .. } => {
-            assert_eq!(VERSION_2, version_id.to_string());
+            assert_eq!(VERSION_2, version_id.value().to_owned());
         }
         other => return Err(format!("expected an updated composition, got {other:?}").into()),
     }
@@ -249,7 +252,7 @@ async fn update_composition_reports_the_412_with_the_latest_version() -> Result<
     let outcome = support::client(&server)?
         .update_composition(
             &EhrId::new(EHR)?,
-            &VersionedObjectUid::new(VERSIONED_OBJECT)?,
+            &HierObjectId::new(VERSIONED_OBJECT)?,
             &ObjectVersionId::new(VERSION_1)?,
             &support::composition()?,
             &support::commit_context()?,
@@ -264,7 +267,7 @@ async fn update_composition_reports_the_412_with_the_latest_version() -> Result<
             assert_eq!(http::StatusCode::PRECONDITION_FAILED, upstream.status());
             assert_eq!(
                 Some(VERSION_2.to_owned()),
-                latest_version_id.map(|id| id.to_string())
+                latest_version_id.map(|id| id.value().to_owned())
             );
         }
         other => return Err(format!("expected a precondition failure, got {other:?}").into()),
@@ -290,7 +293,7 @@ async fn composition_reads_the_latest_version_of_a_container() -> Result<(), Box
     let outcome = support::client(&server)?
         .composition(
             &EhrId::new(EHR)?,
-            &UidBasedId::VersionedObject(VersionedObjectUid::new(VERSIONED_OBJECT)?),
+            &UidBasedId::HierObjectId(HierObjectId::new(VERSIONED_OBJECT)?),
             None,
         )
         .await?;
@@ -301,7 +304,7 @@ async fn composition_reads_the_latest_version_of_a_container() -> Result<(), Box
         } => {
             assert_eq!(
                 Some(VERSION_2.to_owned()),
-                version_id.map(|id| id.to_string())
+                version_id.map(|id| id.value().to_owned())
             );
             assert_eq!(
                 "openEHR-EHR-COMPOSITION.encounter.v1",
@@ -328,7 +331,7 @@ async fn composition_at_a_time_answers_deleted_on_a_204() -> Result<(), Box<dyn 
     let outcome = support::client(&server)?
         .composition(
             &EhrId::new(EHR)?,
-            &UidBasedId::VersionedObject(VersionedObjectUid::new(VERSIONED_OBJECT)?),
+            &UidBasedId::HierObjectId(HierObjectId::new(VERSIONED_OBJECT)?),
             Some(&VersionAtTime::new("2026-09-12T10:00:00+02:00")?),
         )
         .await?;
@@ -348,7 +351,7 @@ async fn composition_by_exact_version_reports_the_404() -> Result<(), Box<dyn Er
     let outcome = support::client(&server)?
         .composition(
             &EhrId::new(EHR)?,
-            &UidBasedId::Version(ObjectVersionId::new(VERSION_1)?),
+            &UidBasedId::ObjectVersionId(ObjectVersionId::new(VERSION_1)?),
             None,
         )
         .await?;
@@ -374,7 +377,7 @@ async fn delete_composition_answers_deleted_on_a_204() -> Result<(), Box<dyn Err
         DeleteCompositionOutcome::Deleted { version_id } => {
             assert_eq!(
                 Some(VERSION_2.to_owned()),
-                version_id.map(|id| id.to_string())
+                version_id.map(|id| id.value().to_owned())
             );
         }
         other => return Err(format!("expected a deletion, got {other:?}").into()),
@@ -404,7 +407,7 @@ async fn delete_composition_reports_a_concurrency_failure_as_409() -> Result<(),
             assert_eq!(http::StatusCode::CONFLICT, upstream.status());
             assert_eq!(
                 Some(VERSION_2.to_owned()),
-                latest_version_id.map(|id| id.to_string())
+                latest_version_id.map(|id| id.value().to_owned())
             );
         }
         other => return Err(format!("expected a conflict, got {other:?}").into()),

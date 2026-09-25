@@ -7,12 +7,20 @@
 //! identifier.
 
 use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::commit::{
-    ChangeType, CommitContext, Committer, CommitterRef, LifecycleState,
-};
+use ferrobridge_openehr::commit::CommitContext;
 use ferrobridge_openehr::config::{Config, RetryPolicy};
-use ferrobridge_openehr::ids::TemplateId;
+use ferrobridge_openehr::ids::template_id;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
+use openehr_base::v1_3::base_types::identification::party_ref::PartyRef;
+use openehr_base::v1_3::base_types::identification::terminology_id::TerminologyId;
+use openehr_its::rest::generated::common::UpdateAuditData;
+use openehr_rm::v1_2::common::generic::party_identified::{PartyIdentified, PartyIdentifiedData};
+use openehr_rm::v1_2::common::generic::party_proxy::PartyProxy;
 use openehr_rm::v1_2::composition::composition::Composition;
+use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
+use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
+use openehr_rm::v1_2::data_types::text::dv_text::{DvText, DvTextData};
 use std::error::Error;
 use std::time::Duration;
 use wiremock::MockServer;
@@ -133,22 +141,61 @@ pub(crate) fn composition() -> Result<Composition, Box<dyn Error>> {
     )?)
 }
 
+/// Returns a code of the openEHR terminology as a `DV_CODED_TEXT`.
+pub(crate) fn coded(code: &str) -> DvCodedText {
+    DvCodedText {
+        value: "synthetic".to_owned(),
+        hyperlink: None,
+        formatting: None,
+        mappings: None,
+        language: None,
+        encoding: None,
+        defining_code: CodePhrase {
+            terminology_id: TerminologyId {
+                value: "openehr".to_owned(),
+            },
+            code_string: code.to_owned(),
+            preferred_term: None,
+        },
+    }
+}
+
+/// Returns an audit with a named committer, an optional demographic
+/// reference and a description.
+pub(crate) fn audit(change_type: &str, external_ref: Option<PartyRef>) -> UpdateAuditData {
+    UpdateAuditData {
+        _type: Some("UPDATE_AUDIT".to_owned()),
+        system_id: None,
+        change_type: coded(change_type),
+        description: Some(DvText::DvText(DvTextData {
+            value: "A synthetic commit".to_owned(),
+            hyperlink: None,
+            formatting: None,
+            mappings: None,
+            language: None,
+            encoding: None,
+        })),
+        committer: PartyProxy::PartyIdentified(PartyIdentified::PartyIdentified(
+            PartyIdentifiedData {
+                external_ref,
+                name: Some("Synthetic Committer".to_owned()),
+                identifiers: None,
+            },
+        )),
+    }
+}
+
 /// Returns a commit context with every member the 1.1.0 headers carry.
 pub(crate) fn commit_context() -> Result<CommitContext, Box<dyn Error>> {
+    let reference = PartyRef {
+        namespace: "demographic".to_owned(),
+        r#type: "PERSON".to_owned(),
+        id: ObjectId::HierObjectId(HierObjectId::new("bc8132ea-0000-4000-8000-000000000003")?),
+    };
     Ok(CommitContext {
-        lifecycle_state: Some(LifecycleState::new("532")?),
-        change_type: Some(ChangeType::new("251")?),
-        committer: Some(Committer {
-            name: "Synthetic Committer".to_owned(),
-            external_ref: Some(CommitterRef {
-                id: "bc8132ea-0000-4000-8000-000000000003".to_owned(),
-                namespace: "demographic".to_owned(),
-                party_type: "PERSON".to_owned(),
-            }),
-        }),
-        description: Some("A synthetic commit".to_owned()),
-        system_id: None,
-        template_id: Some(TemplateId::new("Synthetic vital signs")?),
+        lifecycle_state: Some(coded("532")),
+        audit: Some(audit("251", Some(reference))),
+        template_id: Some(template_id("Synthetic vital signs")?),
     })
 }
 

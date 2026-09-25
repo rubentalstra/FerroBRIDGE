@@ -18,7 +18,7 @@ use ferrobridge_openehr::commit::CommitContext;
 use ferrobridge_openehr::composition::{CreateCompositionOutcome, UpdateCompositionOutcome};
 use ferrobridge_openehr::config::Config;
 use ferrobridge_openehr::ehr::CreateEhrOutcome;
-use ferrobridge_openehr::ids::{EhrId, ObjectVersionId, TemplateId};
+use ferrobridge_openehr::ids::{EhrId, template_id, versioned_object_uid};
 use ferrobridge_openehr::prefer::Prefer;
 use ferrobridge_server::etl::RunOptions;
 use ferrobridge_server::etl::report::RunReport;
@@ -29,6 +29,7 @@ use ferrobridge_testkit::fixtures::{
 use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::writer::{CdmWriter, PersonPolicy};
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_mapping_core::index::WebTemplateIndex;
 use openehr_mapping_core::template::TemplateSource;
 use openehr_rm::v1_2::composition::composition::Composition;
@@ -294,7 +295,7 @@ fn composition(value: &Value) -> Result<Composition, Box<dyn Error>> {
 /// Returns the commit context of a laboratory composition.
 fn commit() -> Result<CommitContext, Box<dyn Error>> {
     Ok(CommitContext {
-        template_id: Some(TemplateId::new(LABORATORY_REPORT_TEMPLATE_ID)?),
+        template_id: Some(template_id(LABORATORY_REPORT_TEMPLATE_ID)?),
         ..CommitContext::default()
     })
 }
@@ -351,7 +352,7 @@ async fn update(
     match client
         .update_composition(
             ehr,
-            &preceding.versioned_object_uid(),
+            &versioned_object_uid(preceding),
             preceding,
             &composition(value)?,
             &commit()?,
@@ -567,7 +568,7 @@ async fn the_laboratory_round_trip_writes_the_reviewed_rows_and_a_rerun_changes_
         let ehr = ehrs.get(laboratory.ehr).ok_or("an EHR")?;
         let version = create(&client, ehr, &canonical(&index, laboratory)?).await?;
         names.insert(
-            version.versioned_object_uid().as_str().to_owned(),
+            versioned_object_uid(&version).value().to_owned(),
             laboratory.label.to_owned(),
         );
         versions.push(version);

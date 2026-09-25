@@ -14,9 +14,12 @@ use crate::client::{Call, Client, Idempotency, if_match_value};
 use crate::commit::CommitContext;
 use crate::decode;
 use crate::error::{Error, UpstreamError};
-use crate::ids::{EhrId, ObjectVersionId, VersionedObjectUid};
+use crate::ids::EhrId;
 use crate::prefer::{Prefer, Returned};
 use http::{Method, StatusCode};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 use openehr_rm::v1_2::composition::composition::Composition;
 
 /// A point in time a version is read at, in the extended ISO 8601 form.
@@ -52,30 +55,6 @@ impl VersionAtTime {
     #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
-    }
-}
-
-/// The `uid_based_id` of a composition read.
-///
-/// "The `uid_based_id` can take a form of an `OBJECT_VERSION_ID` identifier
-/// taken from `VERSION.uid.value` …, or a form of a `HIER_OBJECT_ID`
-/// identifier taken from `VERSIONED_OBJECT.uid.value`"
-/// (`ehr-codegen.openapi.yaml`, `composition_get`). The first addresses one
-/// exact version, the second the latest, or the one extant at a time.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum UidBasedId {
-    /// The version container, which addresses the latest version.
-    VersionedObject(VersionedObjectUid),
-    /// One exact version.
-    Version(ObjectVersionId),
-}
-
-impl std::fmt::Display for UidBasedId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::VersionedObject(uid) => write!(f, "{uid}"),
-            Self::Version(id) => write!(f, "{id}"),
-        }
     }
 }
 
@@ -216,7 +195,7 @@ impl Client {
     pub async fn update_composition(
         &self,
         ehr_id: &EhrId,
-        versioned_object_uid: &VersionedObjectUid,
+        versioned_object_uid: &HierObjectId,
         preceding: &ObjectVersionId,
         composition: &Composition,
         commit: &CommitContext,
@@ -226,7 +205,7 @@ impl Client {
             "ehr",
             ehr_id.as_str(),
             "composition",
-            versioned_object_uid.as_str(),
+            versioned_object_uid.value(),
         ])?;
         let mut call = Call::new(Method::PUT, url, Idempotency::Idempotent)
             .preferring(prefer)
@@ -258,7 +237,12 @@ impl Client {
 
     /// Retrieves a version of a composition.
     ///
-    /// `at` selects the version extant at that time and is only meaningful
+    /// "The `uid_based_id` can take a form of an `OBJECT_VERSION_ID` identifier
+    /// taken from `VERSION.uid.value` …, or a form of a `HIER_OBJECT_ID`
+    /// identifier taken from `VERSIONED_OBJECT.uid.value`"
+    /// (`ehr-codegen.openapi.yaml`, `composition_get`). The first addresses one
+    /// exact version, the second the latest, or the one extant at a time. `at`
+    /// selects the version extant at that time and is only meaningful
     /// when `uid_based_id` is a version container.
     ///
     /// # Errors
@@ -270,12 +254,7 @@ impl Client {
         uid_based_id: &UidBasedId,
         at: Option<&VersionAtTime>,
     ) -> Result<CompositionOutcome, Error> {
-        let mut url = self.url(&[
-            "ehr",
-            ehr_id.as_str(),
-            "composition",
-            &uid_based_id.to_string(),
-        ])?;
+        let mut url = self.url(&["ehr", ehr_id.as_str(), "composition", uid_based_id.value()])?;
         if let Some(at) = at {
             url.query_pairs_mut()
                 .append_pair("version_at_time", at.as_str());
@@ -308,12 +287,7 @@ impl Client {
         ehr_id: &EhrId,
         preceding: &ObjectVersionId,
     ) -> Result<DeleteCompositionOutcome, Error> {
-        let url = self.url(&[
-            "ehr",
-            ehr_id.as_str(),
-            "composition",
-            &preceding.to_string(),
-        ])?;
+        let url = self.url(&["ehr", ehr_id.as_str(), "composition", preceding.value()])?;
         let call = Call::new(Method::DELETE, url, Idempotency::Idempotent);
         let answer = self.execute(call).await?;
         match answer.status {
@@ -335,18 +309,23 @@ impl Client {
 mod tests {
     #![expect(clippy::panic_in_result_fn, reason = "test assertions")]
 
-    use super::{UidBasedId, VersionAtTime};
-    use crate::ids::{IdError, ObjectVersionId, VersionedObjectUid};
+    use super::VersionAtTime;
+    use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+    use openehr_base::v1_3::base_types::identification::lexical::IdError;
+    use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+    use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 
     #[test]
     fn a_uid_based_id_renders_either_form() -> Result<(), IdError> {
+        let container = "8849182c-82ad-4088-a07f-48ead4180515";
         assert_eq!(
-            "8849182c",
-            UidBasedId::VersionedObject(VersionedObjectUid::new("8849182c")?).to_string()
+            container,
+            UidBasedId::HierObjectId(HierObjectId::new(container)?).value()
         );
+        let version = format!("{container}::system::1");
         assert_eq!(
-            "8849182c::system::1",
-            UidBasedId::Version(ObjectVersionId::new("8849182c::system::1")?).to_string()
+            version,
+            UidBasedId::ObjectVersionId(ObjectVersionId::new(version.as_str())?).value()
         );
         Ok(())
     }

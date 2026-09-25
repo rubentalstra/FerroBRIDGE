@@ -127,11 +127,11 @@ fn response_bundle(base_url: &str, ingested: &Ingested) -> Bundle {
                             "{base}/{}/{}/_history/{}",
                             entry.resource_type,
                             entry.id,
-                            entry.version.version_tree_id()
+                            entry.version.version_tree_id().value()
                         )
                         .into(),
                     ),
-                    etag: Some(format!("W/\"{}\"", entry.version.version_tree_id()).into()),
+                    etag: Some(format!("W/\"{}\"", entry.version.version_tree_id().value()).into()),
                     ..BundleEntryResponse::default()
                 }),
                 ..BundleEntry::default()

@@ -17,7 +17,7 @@
 //! `version_tree_id` and never enters the derivation, because a hash over the
 //! full version id would change the FHIR id on every update.
 
-use ferrobridge_openehr::ids::VersionedObjectUid;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 
 use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
@@ -50,10 +50,10 @@ pub enum Derivation {
 }
 
 /// What one composition entry is addressed by, before any store lookup.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct EntryKey {
     /// The version container the entry lives in.
-    versioned_object_uid: VersionedObjectUid,
+    versioned_object_uid: HierObjectId,
     /// The archetype path of the entry inside the composition.
     entry_path: String,
     /// Which document of a `hierarchy` split this entry belongs to.
@@ -67,7 +67,7 @@ impl EntryKey {
     /// Returns the key of the entry at `entry_path` in `versioned_object_uid`.
     #[must_use]
     pub fn new(
-        versioned_object_uid: VersionedObjectUid,
+        versioned_object_uid: HierObjectId,
         entry_path: impl Into<String>,
         split: u32,
     ) -> Self {
@@ -80,7 +80,7 @@ impl EntryKey {
 
     /// Returns the version container the entry lives in.
     #[must_use]
-    pub const fn versioned_object_uid(&self) -> &VersionedObjectUid {
+    pub const fn versioned_object_uid(&self) -> &HierObjectId {
         &self.versioned_object_uid
     }
 
@@ -155,7 +155,7 @@ pub fn digest(key: &EntryKey) -> FhirResourceId {
 
     let mut hasher = sha2::Sha256::new();
     for field in [
-        key.versioned_object_uid.as_str().as_bytes(),
+        key.versioned_object_uid.value().as_bytes(),
         key.entry_path.as_bytes(),
     ] {
         hasher.update(u64::try_from(field.len()).unwrap_or(u64::MAX).to_be_bytes());
@@ -198,14 +198,14 @@ fn symbol(value: u32) -> char {
 mod tests {
     use super::{DIGEST_CHARACTERS, Derivation, EntryKey, base32, derive, digest};
     use crate::facade::identity::is_fhir_id;
-    use ferrobridge_openehr::ids::VersionedObjectUid;
+    use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 
     /// The version container the cases derive against.
     const CONTAINER: &str = "8849182c-82ad-4088-a07f-48ead4180515";
 
     /// Returns the key of one entry in [`CONTAINER`].
     fn key(path: &str, split: u32) -> EntryKey {
-        EntryKey::new(VersionedObjectUid::new(CONTAINER).unwrap(), path, split)
+        EntryKey::new(HierObjectId::new(CONTAINER).unwrap(), path, split)
     }
 
     #[test]
@@ -254,16 +254,8 @@ mod tests {
     fn the_framing_keeps_two_keys_apart_when_one_field_borrows_the_next() {
         assert_ne!(digest(&key("ab", 0)), digest(&key("b", 0)));
         assert_ne!(
-            digest(&EntryKey::new(
-                VersionedObjectUid::new("aab").unwrap(),
-                "c",
-                0
-            )),
-            digest(&EntryKey::new(
-                VersionedObjectUid::new("aa").unwrap(),
-                "bc",
-                0
-            ))
+            digest(&EntryKey::new(HierObjectId::new("aab").unwrap(), "c", 0)),
+            digest(&EntryKey::new(HierObjectId::new("aa").unwrap(), "bc", 0))
         );
     }
 

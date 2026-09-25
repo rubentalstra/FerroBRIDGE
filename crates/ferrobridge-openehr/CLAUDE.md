@@ -1,10 +1,26 @@
 # ferrobridge-openehr
 
-The hand-written ITS-REST 1.1.0 client. The oracle is the openEHR ITS-REST
-specification: the three vendored OpenAPI documents under
+The hand-written ITS-REST 1.1.0 client transport, and nothing else: the
+reqwest calls, the retry budget, credentials and TLS, `Prefer` and `ETag`
+handling, the commit headers, and one outcome enum per call. The oracle is the
+openEHR ITS-REST specification: the three vendored OpenAPI documents under
 `docs/specs/its-rest/computable/OAS/` for every path, parameter, status and
 body shape, and the published overview prose for the header rules the OpenAPI
-does not carry.
+does not carry. The crate is deleted in one step when `openehr-its` ships its
+generated `rest-client` feature (FerroEHR#3485), so the transport half is not
+reshaped in the meantime.
+
+- **The crate owns no openEHR model type.** The version, version container,
+  template and `UID_BASED_ID` identifiers are the `openehr-base` BASE 1.3
+  types the `openehr-its` DTOs use (`ObjectVersionId`, `HierObjectId`,
+  `TemplateId`, `UidBasedId`); the audit a commit states is the ITS-REST
+  `UpdateAuditData` over the RM `DvCodedText`, `DvText` and `PartyProxy`; the
+  ADL 2 HRID is the `openehr-am` `ArchetypeHrid`. `ids.rs` holds only the thin
+  readers the wire needs over them (`entity_tag`, `version_from_etag`,
+  `versioned_object_uid`, `template_id`) and the handles no BASE type fits
+  (`EhrId`, `ContributionUid`, `SubjectId`, `SubjectNamespace`, `RequestId`),
+  each with its reason beside it. Consumers import the upstream types from
+  their own crates; this crate re-exports none.
 
 - **A documented status is an outcome, never an error.** Each endpoint has one
   outcome enum with a variant per status its operation documents, and every

@@ -30,7 +30,7 @@ use crate::etl::aql::{CheckedQuery, SINCE_PARAMETER};
 use crate::etl::report::RunReport;
 use crate::etl::tie::{Tie, Windows};
 use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::ids::ObjectVersionId;
+use ferrobridge_openehr::ids::versioned_object_uid;
 use ferrobridge_openehr::query::{PageSize, QueryPageError};
 use futures_util::StreamExt;
 use omop_cdm::derived;
@@ -38,6 +38,7 @@ use omop_cdm::graph::{
     EhrId, RecordGraph, Refusal, Source, VersionUid, VersionedObjectUid, VisitKey,
 };
 use omop_cdm::writer::{CdmWriter, RunId, VisitConcepts, WriteError};
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_its::rest::generated::query::AdhocQueryExecute;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::index::WebTemplateIndex;
@@ -191,10 +192,10 @@ fn source(query: &CheckedQuery, row: &[serde_json::Value]) -> Result<Source, Ref
         .map_err(|error| Refusal::new(format!("the version_uid `{version}`: {error}")))?;
     // NOTE: openEHR RM Common 1.1.0 §OBJECT_VERSION_ID; the versioned object
     // is the `object_id` part of the version's identifier.
-    let versioned = parsed.versioned_object_uid();
+    let versioned = versioned_object_uid(&parsed);
     if query.column("versioned_object_uid").is_some() {
         let selected = text(query, row, "versioned_object_uid")?;
-        if versioned.as_str() != selected {
+        if versioned.value() != selected {
             return Err(Refusal::new(format!(
                 "the version_uid `{version}` is no version of `{selected}`"
             )));
@@ -203,7 +204,7 @@ fn source(query: &CheckedQuery, row: &[serde_json::Value]) -> Result<Source, Ref
     let refused = |error: omop_cdm::graph::EmptyIdentifier| Refusal::new(error.to_string());
     Ok(Source::new(
         EhrId::new(ehr).map_err(refused)?,
-        VersionedObjectUid::new(versioned.as_str()).map_err(refused)?,
+        VersionedObjectUid::new(versioned.value()).map_err(refused)?,
         VersionUid::new(version).map_err(refused)?,
     ))
 }

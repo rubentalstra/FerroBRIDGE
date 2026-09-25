@@ -9,13 +9,9 @@
 //! `contribution_create`). This module builds both from one description, so a
 //! single write and a transaction record the same committer and change type.
 
-use ferrobridge_openehr::commit::ChangeType;
-use ferrobridge_openehr::commit::CodeError;
 use ferrobridge_openehr::commit::CommitContext;
-use ferrobridge_openehr::commit::Committer;
-use ferrobridge_openehr::commit::LifecycleState;
 use ferrobridge_openehr::ids::IdError;
-use ferrobridge_openehr::ids::TemplateId;
+use ferrobridge_openehr::ids::template_id;
 use openehr_base::v1_3::base_types::identification::terminology_id::TerminologyId;
 use openehr_its::rest::generated::common::UpdateAudit;
 use openehr_its::rest::generated::common::UpdateAuditData;
@@ -77,13 +73,6 @@ impl Change {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum CommitError {
-    /// A code the openEHR terminology fixes was refused.
-    #[error("an openEHR audit code was refused")]
-    Code {
-        /// What the code's constructor reported.
-        #[source]
-        source: Box<CodeError>,
-    },
     /// The template identifier cannot travel in the commit header.
     #[error("{template} cannot travel as a template identifier")]
     Template {
@@ -97,26 +86,23 @@ pub enum CommitError {
 
 /// Returns the commit headers one composition write carries.
 ///
+/// The audit is the one [`audit`] puts into a CONTRIBUTION entry, so a single
+/// write and a transaction state the same committer and change type.
+///
 /// # Errors
 ///
-/// Returns [`CommitError::Code`] when an openEHR audit code is refused and
-/// [`CommitError::Template`] when the template identifier cannot travel.
+/// Returns [`CommitError::Template`] when the template identifier cannot
+/// travel.
 pub fn context(
     change: Change,
     system_id: &str,
     template: &str,
 ) -> Result<CommitContext, CommitError> {
     Ok(CommitContext {
-        lifecycle_state: Some(LifecycleState::new(COMPLETE_CODE).map_err(refused)?),
-        change_type: Some(ChangeType::new(change.code()).map_err(refused)?),
-        committer: Some(Committer {
-            name: String::from(system_id),
-            external_ref: None,
-        }),
-        description: None,
-        system_id: Some(String::from(system_id)),
+        lifecycle_state: Some(lifecycle()),
+        audit: Some(audit_data(change, system_id)),
         template_id: Some(
-            TemplateId::new(template).map_err(|source| CommitError::Template {
+            template_id(template).map_err(|source| CommitError::Template {
                 template: String::from(template),
                 source: Box::new(source),
             })?,
@@ -131,7 +117,12 @@ pub fn context(
 /// single write does.
 #[must_use]
 pub fn audit(change: Change, system_id: &str) -> UpdateAudit {
-    UpdateAudit::UpdateAudit(UpdateAuditData {
+    UpdateAudit::UpdateAudit(audit_data(change, system_id))
+}
+
+/// Returns the `UPDATE_AUDIT` members one write states.
+fn audit_data(change: Change, system_id: &str) -> UpdateAuditData {
+    UpdateAuditData {
         _type: Some(String::from("UPDATE_AUDIT")),
         system_id: Some(String::from(system_id)),
         change_type: coded(change.code(), change.rubric()),
@@ -143,20 +134,13 @@ pub fn audit(change: Change, system_id: &str) -> UpdateAudit {
                 identifiers: None,
             },
         )),
-    })
+    }
 }
 
 /// Returns the `lifecycle_state` a contribution entry carries.
 #[must_use]
 pub fn lifecycle() -> DvCodedText {
     coded(COMPLETE_CODE, "complete")
-}
-
-/// Wraps a refused openEHR audit code as a commit refusal that carries it.
-fn refused(source: CodeError) -> CommitError {
-    CommitError::Code {
-        source: Box::new(source),
-    }
 }
 
 /// Returns a `DV_CODED_TEXT` in the openEHR terminology.
@@ -194,20 +178,12 @@ mod tests {
     fn a_commit_context_carries_the_change_type_the_system_and_the_template() {
         let built = context(Change::Creation, "FerroBRIDGE", "ferrobridge.diagnose.v1")
             .expect("the context builds");
-        assert_eq!(
-            Some("249"),
-            built
-                .change_type
-                .as_ref()
-                .map(ferrobridge_openehr::commit::ChangeType::as_str)
-        );
-        assert_eq!(Some("FerroBRIDGE"), built.system_id.as_deref());
+        let audit = built.audit.as_ref().expect("the context carries an audit");
+        assert_eq!("249", audit.change_type.defining_code.code_string);
+        assert_eq!(Some("FerroBRIDGE"), audit.system_id.as_deref());
         assert_eq!(
             Some("ferrobridge.diagnose.v1"),
-            built
-                .template_id
-                .as_ref()
-                .map(ferrobridge_openehr::ids::TemplateId::as_str)
+            built.template_id.as_ref().map(|id| id.value.as_str())
         );
     }
 

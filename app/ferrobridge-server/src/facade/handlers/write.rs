@@ -16,13 +16,13 @@
 
 use ferrobridge_openehr::client::Client;
 use ferrobridge_openehr::ids::EhrId;
-use ferrobridge_openehr::ids::ObjectVersionId;
-use ferrobridge_openehr::ids::VersionedObjectUid;
 use fhirconnect::resolve::program::TemplateId;
 use http::HeaderMap;
 use http::StatusCode;
 use http::Uri;
 use http::header;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 
 use crate::facade::Facade;
 use crate::facade::handlers::Body;
@@ -117,8 +117,8 @@ async fn resend(
     headers: &HeaderMap,
 ) -> Result<axum::response::Response, Refusal> {
     let ehr_id = EhrId::new(&known.ehr_id).map_err(|error| store_identifier(&error))?;
-    let container = VersionedObjectUid::new(&known.versioned_object_uid)
-        .map_err(|error| store_identifier(&error))?;
+    let container =
+        HierObjectId::new(&known.versioned_object_uid).map_err(|error| store_identifier(&error))?;
     let preceding = precondition(ingest.client(), headers, &ehr_id, &container).await?;
     let written = ingest
         .revise_resource(
@@ -151,10 +151,10 @@ fn answer(
         facade.settings().base_url.trim_end_matches('/'),
         program.program().resource().as_str(),
         written.id,
-        written.version.version_tree_id()
+        written.version.version_tree_id().value()
     );
     let response_headers = [
-        reply::Header::entity_tag(written.version.version_tree_id()),
+        reply::Header::entity_tag(written.version.version_tree_id().value()),
         reply::Header::location(&location),
     ];
     match media::Prefer::of(headers) {
@@ -164,7 +164,7 @@ fn answer(
             &[
                 Issue::information(IssueType::Informational).diagnosing(format!(
                     "the resource is committed as version {}",
-                    written.version
+                    written.version.value()
                 )),
             ],
             &response_headers,
@@ -193,7 +193,7 @@ async fn precondition(
     client: &Client,
     headers: &HeaderMap,
     ehr_id: &EhrId,
-    container: &VersionedObjectUid,
+    container: &HierObjectId,
 ) -> Result<ObjectVersionId, Refusal> {
     if let Some(value) = headers.get(header::IF_MATCH) {
         let text = value.to_str().map_err(|_unreadable| {
@@ -242,7 +242,7 @@ pub(crate) fn store_refusal(error: &crate::facade::identity::store::StoreError) 
 }
 
 /// Returns the refusal a malformed stored identifier renders as.
-fn store_identifier(error: &ferrobridge_openehr::ids::IdError) -> Refusal {
+fn store_identifier(error: &impl std::fmt::Display) -> Refusal {
     reply::refusal(
         StatusCode::INTERNAL_SERVER_ERROR,
         Issue::error(IssueType::Exception).diagnosing(format!(
