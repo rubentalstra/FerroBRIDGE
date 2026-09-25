@@ -132,11 +132,12 @@ The FHIR model, the `fhir-types` crate, is emitted by `fhir-codegen` from the
 HL7 FHIR packages; it moves into this repository from the sibling terminology
 server, which then consumes it from crates.io. The OMOP CDM v5.4 row types are
 emitted from the OHDSI `CommonDataModel` field definitions, with the OHDSI
-PostgreSQL DDL vendored verbatim beside them. The openEHR model comes from the
-published `openehr-*` crates. Everything that makes FerroBRIDGE a bridge is
+PostgreSQL DDL vendored verbatim beside them. The openEHR model, and the
+ITS-REST client the bridge calls the CDR through, come from the published
+`openehr-*` crates. Everything that makes FerroBRIDGE a bridge is
 hand-written: the mapping foundation, both mapping languages' types, validators
-and interpreters, the FHIR path model, the ITS-REST client, the terminology
-client, the facade, and the ETL runner.
+and interpreters, the FHIR path model, the terminology client, the facade, and
+the ETL runner.
 
 ## Where the specifications are silent
 

@@ -15,6 +15,7 @@
 )]
 
 mod cdm;
+mod cdr;
 mod config;
 mod console;
 mod etl;

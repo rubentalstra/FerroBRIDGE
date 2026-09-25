@@ -59,8 +59,8 @@ confidence-threshold = 0.9
 # no first-party file derives from it.
 exceptions = [
   { allow = ["BUSL-1.1"], crate = "openehr-sdt" },
-  # openehr-adl is a dev-dependency of openehr-mapping-core alone: the ADL 2
-  # test fixtures are compiled from their .adls sources, so it never ships.
+  # openehr-adl compiles the ADL 2 test fixtures of openehr-mapping-core from
+  # their .adls sources, and the server reads an adl2 template ETag with it.
   { allow = ["BUSL-1.1"], crate = "openehr-adl" },
   # openehr-query is the AQL parser the ETL checks its configured queries with.
   { allow = ["BUSL-1.1"], crate = "openehr-query" },
@@ -69,7 +69,6 @@ exceptions = [
   { allow = ["BUSL-1.1"], crate = "fhirconnect" },
   { allow = ["BUSL-1.1"], crate = "omocl" },
   { allow = ["BUSL-1.1"], crate = "omop-cdm" },
-  { allow = ["BUSL-1.1"], crate = "ferrobridge-openehr" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-term" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-hl7v2" },
   { allow = ["BUSL-1.1"], crate = "ferrobridge-server" },

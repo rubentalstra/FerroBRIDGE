@@ -8,10 +8,13 @@
 //! `OpenAPI` documents declare none of them. The header names are the 1.1.0
 //! ones; the same section's deprecation table maps the 1.0.3 spellings
 //! (`openEHR-VERSION`, `openEHR-AUDIT_DETAILS`, `openEHR-TEMPLATE_ID`, which
-//! carried the attribute path in the header NAME) onto them, and this client
-//! sends only the 1.1.0 form.
+//! carried the attribute path in the header NAME) onto them, and the bridge
+//! sends only the 1.1.0 form. The generated `composition_create` and
+//! `composition_update` parameters carry none of them, so the bridge adds them
+//! to the request itself.
 
-use crate::error::Error;
+use http::HeaderMap;
+use http::HeaderName;
 use http::HeaderValue;
 use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
 use openehr_base::v1_3::base_types::identification::party_ref::PartyRef;
@@ -23,11 +26,37 @@ use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
 use openehr_rm::v1_2::data_types::text::dv_text::DvText;
 
 /// The `openehr-version` header name.
-pub(crate) const VERSION_HEADER: &str = "openehr-version";
+pub const VERSION_HEADER: &str = "openehr-version";
 /// The `openehr-audit-details` header name.
-pub(crate) const AUDIT_DETAILS_HEADER: &str = "openehr-audit-details";
+pub const AUDIT_DETAILS_HEADER: &str = "openehr-audit-details";
 /// The `openehr-template-id` header name.
-pub(crate) const TEMPLATE_ID_HEADER: &str = "openehr-template-id";
+pub const TEMPLATE_ID_HEADER: &str = "openehr-template-id";
+
+/// A commit header that could not be rendered.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum HeaderError {
+    /// A free-text part of a commit header carries a quote or a control
+    /// character, which the quoted `key="value"` form cannot hold without
+    /// changing the attribute list the service reads.
+    #[error("an attribute of the {header} header carries text the quoted value form cannot hold")]
+    Attribute {
+        /// The header that was being built.
+        header: &'static str,
+        /// Which attribute, and which character.
+        #[source]
+        source: CodeError,
+    },
+    /// A value cannot travel in an HTTP header.
+    #[error("the value for the {header} header is not a legal header value")]
+    Value {
+        /// The header that was being built.
+        header: &'static str,
+        /// What the HTTP stack reported.
+        #[source]
+        source: http::header::InvalidHeaderValue,
+    },
+}
 
 /// A header attribute that would not survive the quoted value grammar.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -81,23 +110,14 @@ pub struct CommitContext {
     pub template_id: Option<TemplateId>,
 }
 
-/// One rendered commit header, ready for the request.
-#[derive(Debug)]
-pub(crate) struct CommitHeader {
-    /// The header name.
-    pub(crate) name: &'static str,
-    /// The header value.
-    pub(crate) value: HeaderValue,
-}
-
 impl CommitContext {
     /// Returns the headers this context renders into, in wire order.
     ///
     /// # Errors
-    /// Returns [`Error::HeaderAttribute`] when a member carries text the
-    /// quoted attribute form cannot hold, and [`Error::HeaderValue`] when a
+    /// Returns [`HeaderError::Attribute`] when a member carries text the
+    /// quoted attribute form cannot hold, and [`HeaderError::Value`] when a
     /// member carries text no HTTP header value can hold.
-    pub(crate) fn headers(&self) -> Result<Vec<CommitHeader>, Error> {
+    pub fn headers(&self) -> Result<HeaderMap, HeaderError> {
         let mut rendered: Vec<(&'static str, String)> = Vec::new();
         if let Some(state) = self.lifecycle_state.as_ref() {
             let code = quoted(
@@ -137,7 +157,7 @@ impl CommitContext {
         }
         if let Some(template_id) = self.template_id.as_ref() {
             if template_id.value.is_empty() {
-                return Err(Error::HeaderAttribute {
+                return Err(HeaderError::Attribute {
                     header: TEMPLATE_ID_HEADER,
                     source: CodeError::Empty {
                         kind: "template_id",
@@ -146,35 +166,33 @@ impl CommitContext {
             }
             rendered.push((TEMPLATE_ID_HEADER, template_id.value.clone()));
         }
-        rendered
-            .into_iter()
-            .map(|(name, value)| {
-                HeaderValue::from_str(&value)
-                    .map(|value| CommitHeader { name, value })
-                    .map_err(|source| Error::HeaderValue {
-                        header: name,
-                        source,
-                    })
-            })
-            .collect()
+        let mut headers = HeaderMap::new();
+        for (name, value) in rendered {
+            let value = HeaderValue::from_str(&value).map_err(|source| HeaderError::Value {
+                header: name,
+                source,
+            })?;
+            headers.append(HeaderName::from_static(name), value);
+        }
+        Ok(headers)
     }
 }
 
 /// Returns `text` as a quoted attribute value of `header`, refusing a quote or
 /// a control character that would rewrite the attribute list.
-fn quoted(header: &'static str, kind: &'static str, text: &str) -> Result<String, Error> {
-    quotable(kind, text).map_err(|source| Error::HeaderAttribute { header, source })
+fn quoted(header: &'static str, kind: &'static str, text: &str) -> Result<String, HeaderError> {
+    quotable(kind, text).map_err(|source| HeaderError::Attribute { header, source })
 }
 
 /// Returns `text` as a quoted attribute value of the audit header.
-fn attribute(kind: &'static str, text: &str) -> Result<String, Error> {
+fn attribute(kind: &'static str, text: &str) -> Result<String, HeaderError> {
     quoted(AUDIT_DETAILS_HEADER, kind, text)
 }
 
 /// Returns the `committer` attribute list of an `openehr-audit-details` value,
 /// or `None` when the committer states neither a name nor an external
 /// reference.
-fn committer_value(committer: &PartyProxy) -> Result<Option<String>, Error> {
+fn committer_value(committer: &PartyProxy) -> Result<Option<String>, HeaderError> {
     let (name, external_ref) = match committer {
         PartyProxy::PartyIdentified(PartyIdentified::PartyIdentified(party)) => {
             (party.name.as_deref(), party.external_ref.as_ref())
@@ -196,7 +214,7 @@ fn committer_value(committer: &PartyProxy) -> Result<Option<String>, Error> {
 }
 
 /// Returns the `committer.external_ref` attributes of a `PARTY_REF`.
-fn external_ref_value(reference: &PartyRef) -> Result<String, Error> {
+fn external_ref_value(reference: &PartyRef) -> Result<String, HeaderError> {
     let id = attribute("committer.external_ref.id", object_id_value(&reference.id))?;
     let namespace = attribute("committer.external_ref.namespace", &reference.namespace)?;
     let party_type = attribute("committer.external_ref.type", &reference.r#type)?;
@@ -219,8 +237,9 @@ fn object_id_value(id: &ObjectId) -> &str {
 
 #[cfg(test)]
 mod tests {
-    use super::{AUDIT_DETAILS_HEADER, CommitContext, TEMPLATE_ID_HEADER, VERSION_HEADER};
-    use crate::error::Error;
+    use super::{
+        AUDIT_DETAILS_HEADER, CommitContext, HeaderError, TEMPLATE_ID_HEADER, VERSION_HEADER,
+    };
     use openehr_base::v1_3::base_types::identification::generic_id::GenericId;
     use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
     use openehr_base::v1_3::base_types::identification::party_ref::PartyRef;
@@ -236,19 +255,19 @@ mod tests {
     use openehr_rm::v1_2::data_types::text::dv_text::{DvText, DvTextData};
 
     fn rendered(context: &CommitContext) -> Vec<(&'static str, String)> {
-        context
-            .headers()
-            .expect("the context renders")
+        let headers = context.headers().expect("the context renders");
+        [VERSION_HEADER, AUDIT_DETAILS_HEADER, TEMPLATE_ID_HEADER]
             .into_iter()
-            .map(|header| {
-                (
-                    header.name,
-                    header
-                        .value
-                        .to_str()
-                        .expect("a rendered value is ASCII")
-                        .to_owned(),
-                )
+            .flat_map(|name| {
+                headers.get_all(name).iter().map(move |value| {
+                    (
+                        name,
+                        value
+                            .to_str()
+                            .expect("a rendered value is ASCII")
+                            .to_owned(),
+                    )
+                })
             })
             .collect()
     }
@@ -350,7 +369,7 @@ mod tests {
         };
         assert!(matches!(
             context.headers(),
-            Err(Error::HeaderAttribute { header, .. }) if header == AUDIT_DETAILS_HEADER
+            Err(HeaderError::Attribute { header, .. }) if header == AUDIT_DETAILS_HEADER
         ));
         let context = CommitContext {
             lifecycle_state: Some(coded("")),
@@ -358,7 +377,7 @@ mod tests {
         };
         assert!(matches!(
             context.headers(),
-            Err(Error::HeaderAttribute { header, .. }) if header == VERSION_HEADER
+            Err(HeaderError::Attribute { header, .. }) if header == VERSION_HEADER
         ));
     }
 
@@ -375,7 +394,7 @@ mod tests {
             .headers()
             .expect_err("a quote rewrites the attribute list");
         assert!(
-            matches!(error, Error::HeaderAttribute { header, .. } if header == AUDIT_DETAILS_HEADER),
+            matches!(error, HeaderError::Attribute { header, .. } if header == AUDIT_DETAILS_HEADER),
             "expected a header attribute refusal, got {error:?}"
         );
         let context = CommitContext {
@@ -384,7 +403,7 @@ mod tests {
         };
         assert!(matches!(
             context.headers(),
-            Err(Error::HeaderAttribute { .. })
+            Err(HeaderError::Attribute { .. })
         ));
     }
 
@@ -399,7 +418,7 @@ mod tests {
         };
         let error = context.headers().expect_err("a newline is refused");
         assert!(
-            matches!(error, Error::HeaderAttribute { header, .. } if header == AUDIT_DETAILS_HEADER)
+            matches!(error, HeaderError::Attribute { header, .. } if header == AUDIT_DETAILS_HEADER)
         );
     }
 

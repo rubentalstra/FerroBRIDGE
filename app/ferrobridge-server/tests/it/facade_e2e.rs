@@ -10,8 +10,8 @@
 
 use axum::Router;
 use axum::body::Body;
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::config::Config;
+use ferrobridge_server::cdr::CdrClient;
+use ferrobridge_server::cdr::config::CdrConfig;
 use ferrobridge_server::facade::Facade;
 use ferrobridge_server::facade::Settings;
 use ferrobridge_server::facade::ehr::Policy;
@@ -49,7 +49,7 @@ async fn the_facade_commits_a_condition_and_reads_it_back_from_a_real_cdr()
     }
     let cdr = containers::cdr().await?;
     upload_template(cdr.base_url()).await?;
-    let client = Client::new(Config::new(cdr.base_url().parse()?))?;
+    let client = CdrClient::new(&CdrConfig::new(cdr.base_url().parse()?))?;
 
     let set = programs::read_set(std::path::Path::new(FIXTURES))?;
     let templates = programs::fetch_templates(&set, &client).await?;
@@ -245,7 +245,7 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
     }
     let cdr = containers::cdr().await?;
     upload_kds_template(cdr.base_url()).await?;
-    let client = Client::new(Config::new(cdr.base_url().parse()?))?;
+    let client = CdrClient::new(&CdrConfig::new(cdr.base_url().parse()?))?;
     let directory = tempfile::tempdir()?;
     crate::kds::write_mappings(directory.path())?;
     let set = programs::read_set(directory.path())?;
@@ -358,15 +358,18 @@ fn condition_coded(id: &str, code: &str) -> Result<serde_json::Value, Box<dyn St
 }
 
 /// Returns how many compositions the CDR holds, over AQL.
-async fn compositions(client: &Client) -> Result<usize, Box<dyn StdError>> {
+async fn compositions(client: &CdrClient) -> Result<usize, Box<dyn StdError>> {
     let request = openehr_its::rest::generated::query::AdhocQueryExecute {
         q: String::from("SELECT c/uid/value AS uid FROM EHR e CONTAINS COMPOSITION c"),
         offset: None,
         fetch: None,
         query_parameters: None,
     };
-    match client.query_aql(&request).await? {
-        ferrobridge_openehr::query::QueryOutcome::Rows(rows) => Ok(rows.rows.len()),
+    match client.query_aql(&request).await?.outcome {
+        openehr_its::rest::generated::query::client::QueryExecuteAdhocQueryBodyOutcome::Ok {
+            body,
+            ..
+        } => Ok(body.rows.len()),
         other => Err(format!("the CDR refused the count: {other:?}").into()),
     }
 }
@@ -382,7 +385,7 @@ async fn a_transaction_commits_once_and_reads_each_entry_back_from_a_real_cdr()
     }
     let cdr = containers::cdr().await?;
     upload_template(cdr.base_url()).await?;
-    let client = Client::new(Config::new(cdr.base_url().parse()?))?;
+    let client = CdrClient::new(&CdrConfig::new(cdr.base_url().parse()?))?;
     let set = programs::read_set(std::path::Path::new(FIXTURES))?;
     let templates = programs::fetch_templates(&set, &client).await?;
     let programs = programs::compile_set(&set, &templates)?;

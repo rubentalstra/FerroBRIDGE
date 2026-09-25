@@ -141,6 +141,13 @@ server says so once at start-up, naming the section and never a value.
 | `initial_backoff_ms` | `200` | The delay before the second attempt |
 | `max_backoff_ms` | `5000` | The ceiling every later delay is clamped to |
 
+For the CDR, the bridge calls through the generated ITS-REST client of the
+`openehr-its` crate, and the three keys are that client's retry budget. Only a
+`GET`, `PUT` or `DELETE` is sent again, after a failure to connect, a
+timeout, or a `5xx` other than `501`; a `POST` is sent once. A `401`, a `403`
+and a status the operation does not document are never retried.
+`[cdr] timeout_ms` is the per-request timeout of the client's HTTP engine.
+
 ### `[cdr.credentials]` and `[terminology.credentials]`
 
 Set one scheme. A bearer token and a user together is a boot error, and so is
@@ -151,6 +158,10 @@ an inline value beside its `_file` sibling.
 | `bearer_token` | none | yes | An RFC 6750 bearer token |
 | `user` | none | | The user name of RFC 7617 basic authentication |
 | `password` | none | yes | The password of RFC 7617 basic authentication |
+
+For the CDR, the scheme becomes the `Authorization` header of every call the
+generated client sends: `Bearer <token>` for a token, and `Basic` over
+`user:password` for a user and a password.
 
 ### `[terminology]`
 

@@ -64,9 +64,10 @@ therefore changes nothing in CI; the lanes activate by themselves.
 `tools/ferrobridge-testkit` reads the environment variable `FERROBRIDGE_E2E`,
 and every container-backed test returns before it touches Docker unless that
 variable is exactly `1`. The ordinary `test` job therefore stays offline and
-fast, and `e2e` sets the variable and runs the three packages that own those
-tests: `cargo nextest run --locked -p omop-cdm -p ferrobridge-openehr -p
-ferrobridge-testkit --no-tests=pass`.
+fast, and `e2e` sets the variable and runs the four packages that own those
+tests: `cargo nextest run --locked -p omop-cdm -p ferrobridge-server -p
+ferrobridge-term -p ferrobridge-testkit --no-tests=pass`. The server's lanes
+cover the CDR client, the facade and the ETL.
 
 Three properties of the job are deliberate. It names packages rather than
 `--workspace`, because a workspace-wide compile schedules the generated crates

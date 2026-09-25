@@ -345,6 +345,24 @@ crates on crates.io.
 - The vendored OMOCL corpus moves to `SevKohler/OMOCL` commit `c082db8e`
   (#228): six new mapping files and the README acknowledgements, 208 mapping
   files in all.
+- The server calls the CDR through the generated ITS-REST 1.1.0 client of
+  `openehr-its` (`rest-client`, #285). The `[cdr]` keys keep their names and
+  their meaning: `timeout_ms` is the per-request timeout of the `reqwest`
+  engine, `retry.max_attempts`, `retry.initial_backoff_ms` and
+  `retry.max_backoff_ms` are the client's retry budget over idempotent calls,
+  and `credentials` (with its `_file` forms) are the Basic or Bearer
+  credentials sent on every call. Two answers read differently: a `501` is no
+  longer retried, since a repeat cannot change it, and a `204` to a create
+  under `return=minimal` is a committed write instead of an undocumented
+  status. The facade answers every CDR status with the same FHIR status and
+  `OperationOutcome` as before.
+
+### Removed
+
+- `crates/ferrobridge-openehr`, the hand-written ITS-REST client (#285). Its
+  identifiers, the commit-header rendering, the template fetch and the AQL
+  paging move into the server's `cdr` module; its transport, outcome enums and
+  retry are the generated client's. The 0.0.0 name was never published.
 
 ### Fixed
 

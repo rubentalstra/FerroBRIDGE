@@ -8,18 +8,19 @@
 //! map does not know is `404`; a composition the CDR reports deleted is `410`
 //! (`docs/architecture.md` §4.6).
 
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::composition::CompositionOutcome;
-use ferrobridge_openehr::ids::EhrId;
-use ferrobridge_openehr::ids::entity_tag;
 use http::HeaderMap;
 use http::StatusCode;
 use http::Uri;
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
+use openehr_its::rest::generated::ehr::client::CompositionGetOutcome;
 use openehr_mapping_core::composition::CanonicalComposition;
+use openehr_rm::v1_2::composition::composition::Composition;
 
+use crate::cdr::CdrClient;
+use crate::cdr::ids::EhrId;
+use crate::cdr::ids::entity_tag;
 use crate::facade::Facade;
 use crate::facade::handlers::Body;
 use crate::facade::handlers::Refusal;
@@ -37,7 +38,7 @@ use crate::facade::status;
 /// `GET [base]/{type}/{id}`.
 pub(crate) async fn read(
     facade: &Facade,
-    client: &Client,
+    client: &CdrClient,
     resource_type: &str,
     id: &str,
     headers: &HeaderMap,
@@ -54,7 +55,7 @@ pub(crate) async fn read(
         .map_err(|error| stored_identifier(&error))?;
     let (version, composition) =
         fetch(facade, client, &ehr_id, &container, &binding.template_id).await?;
-    let source = render::composition_url(&client.config().base_url, &ehr_id, &version)?;
+    let source = render::composition_url(client.base_url(), &ehr_id, &version)?;
     let rendered = render::render(
         program.program(),
         program.index(),
@@ -142,88 +143,79 @@ pub(crate) fn program_of<'a>(
 /// Fetches the latest version of one composition.
 pub(crate) async fn fetch(
     facade: &Facade,
-    client: &Client,
+    client: &CdrClient,
     ehr_id: &EhrId,
     container: &HierObjectId,
     template_id: &str,
 ) -> Result<(ObjectVersionId, CanonicalComposition), Refusal> {
-    let answered = client
-        .composition(ehr_id, &UidBasedId::HierObjectId(container.clone()), None)
-        .await
-        .map_err(|error| write::refuse(&status::of_client_error(&error)))?;
-    match answered {
-        CompositionOutcome::Found {
-            version_id,
-            composition,
-        } => {
-            let version = version_id.ok_or_else(|| {
-                reply::refusal(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Issue::error(IssueType::Exception)
-                        .diagnosing("the CDR answered a composition with no ETag"),
-                )
-            })?;
-            let text = openehr_its::json::to_canonical_json(composition.as_ref());
-            let value = text.parse::<serde_json::Value>().map_err(|error| {
-                reply::refusal(
-                    StatusCode::BAD_GATEWAY,
-                    Issue::error(IssueType::Exception).diagnosing(format!(
-                        "the composition the CDR served could not be read back: {error}"
-                    )),
-                )
-            })?;
-            let generation = facade
-                .programs()
-                .loaded()
-                .iter()
-                .find(|entry| entry.index().template_id() == template_id)
-                .map_or(openehr_mapping_core::template::Generation::Adl14, |entry| {
-                    entry.index().generation()
-                });
-            Ok((
-                version,
-                CanonicalComposition::new(value, template_id, generation),
-            ))
-        }
-        CompositionOutcome::Deleted => Err(write::refuse(&status::Answer::new(
-            status::GONE,
-            String::from("the CDR reports this composition deleted"),
-        ))),
-        CompositionOutcome::NotFound(upstream) => Err(write::refuse(&status::Answer::new(
-            status::NOT_FOUND,
-            status::diagnostics(&upstream),
-        ))),
-        _ => Err(write::refuse(&status::unread("composition_get"))),
-    }
+    let (version, composition) = latest(client, ehr_id, container).await?;
+    let text = openehr_its::json::to_canonical_json(&composition);
+    let value = text.parse::<serde_json::Value>().map_err(|error| {
+        reply::refusal(
+            StatusCode::BAD_GATEWAY,
+            Issue::error(IssueType::Exception).diagnosing(format!(
+                "the composition the CDR served could not be read back: {error}"
+            )),
+        )
+    })?;
+    let generation = facade
+        .programs()
+        .loaded()
+        .iter()
+        .find(|entry| entry.index().template_id() == template_id)
+        .map_or(openehr_mapping_core::template::Generation::Adl14, |entry| {
+            entry.index().generation()
+        });
+    Ok((
+        version,
+        CanonicalComposition::new(value, template_id, generation),
+    ))
 }
 
 /// Returns the latest version of one composition, for a precondition check.
 pub(crate) async fn latest_version(
-    client: &Client,
+    client: &CdrClient,
     ehr_id: &EhrId,
     container: &HierObjectId,
 ) -> Result<ObjectVersionId, Refusal> {
+    latest(client, ehr_id, container)
+        .await
+        .map(|(version, _composition)| version)
+}
+
+/// Reads the latest version of the composition `container` holds, with the
+/// version its `ETag` names.
+async fn latest(
+    client: &CdrClient,
+    ehr_id: &EhrId,
+    container: &HierObjectId,
+) -> Result<(ObjectVersionId, Composition), Refusal> {
     let answered = client
         .composition(ehr_id, &UidBasedId::HierObjectId(container.clone()), None)
         .await
         .map_err(|error| write::refuse(&status::of_client_error(&error)))?;
-    match answered {
-        CompositionOutcome::Found { version_id, .. } => version_id.ok_or_else(|| {
-            reply::refusal(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Issue::error(IssueType::Exception)
-                    .diagnosing("the CDR answered a composition with no ETag"),
-            )
-        }),
-        CompositionOutcome::Deleted => Err(write::refuse(&status::Answer::new(
+    match answered.outcome {
+        CompositionGetOutcome::Ok { body, headers } => {
+            let version =
+                crate::cdr::optional_version_from_etag("composition_get", headers.etag.as_deref())
+                    .map_err(|error| write::refuse(&status::of_client_error(&error)))?
+                    .ok_or_else(|| {
+                        reply::refusal(
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Issue::error(IssueType::Exception)
+                                .diagnosing("the CDR answered a composition with no ETag"),
+                        )
+                    })?;
+            Ok((version, body))
+        }
+        CompositionGetOutcome::NoContent => Err(write::refuse(&status::Answer::new(
             status::GONE,
             String::from("the CDR reports this composition deleted"),
         ))),
-        CompositionOutcome::NotFound(upstream) => Err(write::refuse(&status::Answer::new(
+        CompositionGetOutcome::NotFound => Err(write::refuse(&status::Answer::new(
             status::NOT_FOUND,
-            status::diagnostics(&upstream),
+            status::diagnostics(&answered.upstream),
         ))),
-        _ => Err(write::refuse(&status::unread("composition_get"))),
     }
 }
 

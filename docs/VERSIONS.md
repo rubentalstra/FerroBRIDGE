@@ -24,7 +24,7 @@ records why the value is what it is. The guard compares the first token of each
 | FHIR | R4 (4.0.1) | `docs/architecture.md`, later the facade and terminology crates |
 | OMOCL | v1.0.0 | `docs/architecture.md`, later the `omocl-*` crates |
 | OMOP CDM | v5.4 | `docs/architecture.md`, `tools/omop-cdm-codegen` and the `omop-cdm` crate constant, and its embedded DDL |
-| openEHR ITS-REST | 1.1.0 | `docs/architecture.md`, later the `ferrobridge-openehr` client |
+| openEHR ITS-REST | 1.1.0 | `docs/architecture.md`, the `ferrobridge-server` CDR module constant |
 
 ## Corpora and machine-readable inputs
 

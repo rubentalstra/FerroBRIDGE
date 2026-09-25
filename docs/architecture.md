@@ -1158,10 +1158,9 @@ published `openehr-*` crates do.
 | `fhirconnect` | the FHIRconnect language as one crate with one module per stage: `model` (the AST, FerroBRIDGE's strict schemas, the published schemas vendored and exercised, semantic validation), `resolve` (one immutable program per profile and template, the extension ordering and collision rules), `tree` (the bidirectional path model over the `fhir-types` `Value` tree guided by the element table: choice types, repeating elements, primitive extensions, the three read-side FHIRPath forms, writable versus read-only classification), `engine` (the bidirectional interpreter, the data-type lens matrix, the PROGRAMMED registry), `operations` (the `$tofhir` and `$toopenehr` contracts of section 4.7 over `fhir-types`) | hand-written | yes |
 | `omocl` | the OMOCL language as one crate: `model` (the AST, FerroBRIDGE's authored JSON schema, the key-to-column projection tables, validation) and `engine` (the one-directional interpreter emitting record graphs of typed CDM rows, the `CustomMapping` registry) | hand-written | yes |
 | `omop-cdm` | CDM v5.4 row types and column metadata generated from the OHDSI field definitions; the OHDSI PostgreSQL DDL vendored verbatim and embedded; `graph`, the record graph the OMOCL engine emits and the writer commits; behind the default `database` feature, the vocabulary loader and concept resolver, the derived-table runners and the `COPY` writer, so a metadata-only consumer (`omocl`) takes the crate with `default-features = false` and builds no database client | generated plus hand-written | yes |
-| `ferrobridge-openehr` | the ITS-REST client over `reqwest`, with the `openehr-its` data types, `backon` retry, typed outcomes per status | hand-written | yes |
 | `ferrobridge-term` | the FHIR terminology client over `fhir-types` | hand-written | yes |
 | `ferrobridge-hl7v2` | the HL7 v2 face (#254): `mllp` (the MLLP Release 1 frame codec on `tokio-util` and the listener), `decode` (MSH-18 through `encoding_rs`, a byte outside the declared set refused), `parse` (positional split, escape decoding, the grouping by the `hl7v2-types` structure tree), `ack` (original-mode `AA`, `AE`, `AR`), `inbound` (one message through those steps), `map` (the interpreter of the `hl7.fhir.uv.v2mappings` ConceptMaps, read from a directory at run time, writing through `fhirconnect::tree` and translating every table value through `ferrobridge-term`; conditions and target notation on `logos` and `chumsky`) | hand-written | yes (0.0.0 reservation) |
-| `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade, the FHIRconnect operations, the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `redb` identity store; the change-feed adapter | hand-written | no |
+| `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade, the FHIRconnect operations, the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `cdr` module over the generated ITS-REST client of `openehr-its` (the commit headers, the kept upstream answer, the ids an `ETag` names, the template fetch, the AQL paging); the `redb` identity store; the change-feed adapter | hand-written | no |
 | `tools/fhir-codegen` | the FHIR generator moved from the sibling, with its `emit --check` drift gate and its vendored packages | hand-written | no |
 | `tools/omop-cdm-codegen` | the CDM generator with its `emit --check` drift gate | hand-written | no |
 | `tools/ferrobridge-testkit` | the pin-matrix reader, fixtures, the synthetic vocabulary, the CDR and terminology stubs (`wiremock`), the container harness (`testcontainers`); a path-only dev-dependency | hand-written | no |
@@ -1177,7 +1176,6 @@ flowchart BT
     OM["omocl"] --> MC
     OC["omop-cdm<br/>(generated rows + hand-written resolver)"]
     OM --> OC
-    CL["ferrobridge-openehr<br/>(ITS-REST client)"] --> OE
     TC["ferrobridge-term<br/>(terminology client)"] --> FT
     HL["ferrobridge-hl7v2<br/>(the HL7 v2 face)"] --> HV
     HL --> FC
@@ -1185,7 +1183,7 @@ flowchart BT
     SV["app/ferrobridge-server<br/>(the one binary)"] --> FC
     SV --> OM
     SV --> OC
-    SV --> CL
+    SV -->|"generated ITS-REST client"| OE
     SV --> TC
     TK["tools/ferrobridge-testkit<br/>(path-only dev-dependency)"] -.-> SV
     CG["tools/fhir-codegen"] -.->|"emits"| FT
@@ -1280,9 +1278,11 @@ other v2 crates stay out.
   plus the same, or a typed refusal naming every failing element.
 - `omocl` to `omop-cdm`: a record graph of typed rows for one
   composition, with natural keys, plus counted outcomes.
-- `ferrobridge-openehr` to everything above it: typed results per call, with
-  every CDR status a variant carrying the upstream body; never an `Option` for
-  a failure.
+- the generated `openehr-its` ITS-REST client to the server's `cdr` module:
+  one outcome enum per call with a variant per documented status, and a typed
+  `ClientError` for every other answer; the `cdr` module keeps the upstream
+  status and body beside each outcome, so the facade's status table diagnoses
+  a refusal from what the CDR sent, and it is never an `Option` for a failure.
 - `ferrobridge-term` to `fhirconnect`: typed lookup, translate and
   validate outcomes, with a failed call a typed error.
 

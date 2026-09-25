@@ -34,12 +34,13 @@ cd "$(dirname "$0")/../.."
 # is on the index.
 readonly CRATES=(
   fhir-types
+  hl7v2-types
   openehr-mapping-core
   fhirconnect
   omocl
   omop-cdm
-  ferrobridge-openehr
   ferrobridge-term
+  ferrobridge-hl7v2
 )
 
 # The `[package]` table's own `version` in one member's manifest.

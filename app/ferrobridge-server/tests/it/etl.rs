@@ -8,8 +8,8 @@
 //! derived tables. The rules are FerroBRIDGE's own (`docs/architecture.md`
 //! §5.1). The container-backed cases run only when `FERROBRIDGE_E2E=1`.
 
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::config::Config;
+use ferrobridge_server::cdr::CdrClient;
+use ferrobridge_server::cdr::config::CdrConfig;
 use ferrobridge_server::etl::aql::CheckedQuery;
 use ferrobridge_server::etl::report::RunReport;
 use ferrobridge_server::etl::{
@@ -288,8 +288,8 @@ async fn harness_with(
 }
 
 /// Returns the CDR client over the stub.
-fn client(cdr: &MockServer) -> Result<Client, Box<dyn Error>> {
-    Ok(Client::new(Config::new(
+fn client(cdr: &MockServer) -> Result<CdrClient, Box<dyn Error>> {
+    Ok(CdrClient::new(&CdrConfig::new(
         format!("{}/", cdr.uri()).parse()?,
     ))?)
 }
@@ -298,7 +298,7 @@ fn client(cdr: &MockServer) -> Result<Client, Box<dyn Error>> {
 fn settings(visits: bool) -> Result<EtlSettings, Box<dyn Error>> {
     Ok(EtlSettings {
         compositions: CheckedQuery::compositions(COMPOSITIONS)?,
-        page_size: ferrobridge_openehr::query::PageSize::new(100)?,
+        page_size: ferrobridge_server::cdr::query::PageSize::new(100)?,
         type_concept_id: 32817,
         observation_period_type_concept_id: 32880,
         visits: if visits {

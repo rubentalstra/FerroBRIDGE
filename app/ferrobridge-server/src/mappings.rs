@@ -89,7 +89,7 @@ pub enum Error {
         template: String,
         /// What the identifier's constructor reported.
         #[source]
-        source: Box<ferrobridge_openehr::ids::IdError>,
+        source: Box<crate::cdr::ids::IdError>,
     },
     /// The template fetch did not reach a documented answer.
     #[error("the CDR did not serve the template `{template}`")]
@@ -98,7 +98,7 @@ pub enum Error {
         template: String,
         /// What the client reported, the upstream status included.
         #[source]
-        source: Box<ferrobridge_openehr::error::Error>,
+        source: Box<crate::cdr::error::CdrError>,
     },
     /// The CDR holds no template with the identifier a context names.
     #[error("the CDR holds no template `{template}`: it answered {status}")]
@@ -114,14 +114,7 @@ pub enum Error {
         /// The template identifier that was asked for.
         template: String,
         /// The upstream status and body.
-        upstream: Box<ferrobridge_openehr::error::UpstreamError>,
-    },
-    /// The CDR answered the template fetch in a form this version does not
-    /// read.
-    #[error("the CDR answered the template `{template}` in a form this version does not read")]
-    TemplateUnread {
-        /// The template identifier that was asked for.
-        template: String,
+        upstream: Box<crate::cdr::error::Upstream>,
     },
     /// The mapping files did not pass the validation layers.
     #[error("the mapping set under {} is not valid: {report}", path.display())]
@@ -178,7 +171,7 @@ pub enum Error {
 /// [`load_from_cdr`] otherwise.
 pub async fn load_configured(
     settings: &Settings,
-    cdr: Option<&ferrobridge_openehr::client::Client>,
+    cdr: Option<&crate::cdr::CdrClient>,
 ) -> Result<Option<ProgramSet>, Error> {
     if !settings.operations.enabled {
         return Ok(None);
@@ -252,12 +245,12 @@ pub fn load(settings: &MappingSettings) -> Result<ProgramSet, Error> {
 /// Returns [`Error::Read`], [`Error::Empty`] and [`Error::Mappings`] for the
 /// mapping files, [`Error::NoTemplateId`] for a context naming no template,
 /// [`Error::TemplateName`], [`Error::TemplateFetch`],
-/// [`Error::TemplateNotHeld`], [`Error::TemplateRefused`],
-/// [`Error::TemplateUnread`] and [`Error::CdrTemplate`] for a template the CDR
+/// [`Error::TemplateNotHeld`], [`Error::TemplateRefused`] and
+/// [`Error::CdrTemplate`] for a template the CDR
 /// does not serve as a Web Template, and the compile errors of [`load`].
 pub async fn load_from_cdr(
     directory: &Path,
-    client: &ferrobridge_openehr::client::Client,
+    client: &crate::cdr::CdrClient,
 ) -> Result<ProgramSet, Error> {
     let loaded = read_mappings(directory)?;
     let mut wanted: BTreeSet<String> = BTreeSet::new();
@@ -283,11 +276,10 @@ pub async fn load_from_cdr(
 /// Returns [`Error::TemplateName`] for an identifier the route cannot carry,
 /// [`Error::TemplateNotHeld`] with the status when the CDR holds no such
 /// template, [`Error::TemplateRefused`] with the upstream answer for a `400`,
-/// [`Error::TemplateFetch`] when the call reaches no documented answer,
-/// [`Error::TemplateUnread`] for an answer this version does not read, and
+/// [`Error::TemplateFetch`] when the call reaches no documented answer, and
 /// [`Error::CdrTemplate`] when the template does not build a Web Template.
 pub async fn template_index(
-    client: &ferrobridge_openehr::client::Client,
+    client: &crate::cdr::CdrClient,
     template: &str,
 ) -> Result<WebTemplateIndex, Error> {
     let source = fetch(client, template).await?;
@@ -298,15 +290,11 @@ pub async fn template_index(
 }
 
 /// Fetches the template `template` names from the CDR.
-async fn fetch(
-    client: &ferrobridge_openehr::client::Client,
-    template: &str,
-) -> Result<TemplateSource, Error> {
-    let id =
-        ferrobridge_openehr::ids::template_id(template).map_err(|source| Error::TemplateName {
-            template: template.to_owned(),
-            source: Box::new(source),
-        })?;
+async fn fetch(client: &crate::cdr::CdrClient, template: &str) -> Result<TemplateSource, Error> {
+    let id = crate::cdr::ids::template_id(template).map_err(|source| Error::TemplateName {
+        template: template.to_owned(),
+        source: Box::new(source),
+    })?;
     let outcome = client
         .template(&id)
         .await
@@ -315,11 +303,11 @@ async fn fetch(
             source: Box::new(source),
         })?;
     match outcome {
-        ferrobridge_openehr::template::TemplateOutcome::Found(
-            ferrobridge_openehr::template::TemplateSource::Opt14(opt),
+        crate::cdr::template::TemplateOutcome::Found(
+            crate::cdr::template::TemplateSource::Opt14(opt),
         ) => Ok(TemplateSource::Opt14(opt)),
-        ferrobridge_openehr::template::TemplateOutcome::Found(
-            ferrobridge_openehr::template::TemplateSource::Opt2 {
+        crate::cdr::template::TemplateOutcome::Found(
+            crate::cdr::template::TemplateSource::Opt2 {
                 template: opt,
                 resolved_id,
             },
@@ -329,21 +317,16 @@ async fn fetch(
         }),
         // NOTE: the client reports `UnknownTemplate` only for a `404` from both
         // definition routes (`definition-codegen.openapi.yaml`, ITS-REST 1.1.0).
-        ferrobridge_openehr::template::TemplateOutcome::UnknownTemplate => {
-            Err(Error::TemplateNotHeld {
-                template: template.to_owned(),
-                status: StatusCode::NOT_FOUND,
-            })
-        }
-        ferrobridge_openehr::template::TemplateOutcome::BadRequest(upstream) => {
+        crate::cdr::template::TemplateOutcome::UnknownTemplate => Err(Error::TemplateNotHeld {
+            template: template.to_owned(),
+            status: StatusCode::NOT_FOUND,
+        }),
+        crate::cdr::template::TemplateOutcome::BadRequest(upstream) => {
             Err(Error::TemplateRefused {
                 template: template.to_owned(),
                 upstream: Box::new(upstream),
             })
         }
-        _ => Err(Error::TemplateUnread {
-            template: template.to_owned(),
-        }),
     }
 }
 

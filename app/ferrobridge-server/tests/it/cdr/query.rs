@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The AQL contract: one execution, and a paged one consumed as a stream.
+//! The AQL contract over the generated client: one execution, and the
+//! bridge's paged read consumed as a stream.
 
-use crate::support;
-use ferrobridge_openehr::query::{PageSize, QueryOutcome, QueryPageError};
+use super::support;
+use ferrobridge_server::cdr::query::{PageSize, QueryPageError};
 use futures_util::StreamExt;
 use openehr_its::rest::generated::query::AdhocQueryExecute;
+use openehr_its::rest::generated::query::client::QueryExecuteAdhocQueryBodyOutcome;
 use std::error::Error;
 use wiremock::matchers::{body_string_contains, method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -35,14 +37,18 @@ async fn query_aql_reads_the_result_set() -> Result<(), Box<dyn Error>> {
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?.query_aql(&request()).await?;
-    match outcome {
-        QueryOutcome::Rows(set) => {
-            assert_eq!(1, set.rows.len());
-            assert_eq!(Some(1), set.columns.as_ref().map(Vec::len));
+    let answered = support::client(&server)?.query_aql(&request()).await?;
+    match answered.outcome {
+        QueryExecuteAdhocQueryBodyOutcome::Ok { body, .. } => {
+            assert_eq!(1, body.rows.len());
+            assert_eq!(Some(1), body.columns.as_ref().map(Vec::len));
         }
         other => return Err(format!("expected a result set, got {other:?}").into()),
     }
+    assert_eq!(
+        vec!["return=representation".to_owned()],
+        support::request_header(&server, 0, "prefer").await?
+    );
     Ok(())
 }
 
@@ -59,15 +65,17 @@ async fn query_aql_reports_the_400() -> Result<(), Box<dyn Error>> {
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?.query_aql(&request()).await?;
-    match outcome {
-        QueryOutcome::BadRequest(upstream) => {
-            assert_eq!(http::StatusCode::BAD_REQUEST, upstream.status());
-            let error = upstream.error().ok_or("the 400 body decodes as an Error")?;
-            assert_eq!(Some(90_001), error.code);
-        }
-        other => return Err(format!("expected a bad request, got {other:?}").into()),
-    }
+    let answered = support::client(&server)?.query_aql(&request()).await?;
+    assert!(matches!(
+        answered.outcome,
+        QueryExecuteAdhocQueryBodyOutcome::BadRequest
+    ));
+    assert_eq!(http::StatusCode::BAD_REQUEST, answered.upstream.status());
+    let error = answered
+        .upstream
+        .error()
+        .ok_or("the 400 body decodes as an Error")?;
+    assert_eq!(Some(90_001), error.code);
     Ok(())
 }
 
@@ -80,8 +88,11 @@ async fn query_aql_reports_the_408_execution_timeout() -> Result<(), Box<dyn Err
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?.query_aql(&request()).await?;
-    assert!(matches!(outcome, QueryOutcome::ExecutionTimeout(_)));
+    let answered = support::client(&server)?.query_aql(&request()).await?;
+    assert!(matches!(
+        answered.outcome,
+        QueryExecuteAdhocQueryBodyOutcome::RequestTimeout
+    ));
     Ok(())
 }
 

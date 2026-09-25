@@ -11,8 +11,8 @@
 use crate::support;
 use axum::Router;
 use axum::body::Body;
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::config::Config;
+use ferrobridge_server::cdr::CdrClient;
+use ferrobridge_server::cdr::config::CdrConfig;
 use ferrobridge_server::facade::Facade;
 use ferrobridge_server::facade::Settings;
 use ferrobridge_server::facade::ehr::Policy;
@@ -157,9 +157,9 @@ pub(crate) fn handle(store: &Arc<MemoryStore>) -> Arc<dyn Store> {
 }
 
 /// Returns the CDR client one case calls through.
-pub(crate) fn client(cdr: &MockServer) -> Client {
+pub(crate) fn client(cdr: &MockServer) -> CdrClient {
     let base = format!("{}/", cdr.uri()).parse().expect("a legal base URL");
-    Client::new(Config::new(base)).expect("the client builds")
+    CdrClient::new(&CdrConfig::new(base)).expect("the client builds")
 }
 
 /// Returns the facade settings every case runs with.

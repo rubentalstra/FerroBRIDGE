@@ -22,9 +22,10 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
+# The per-call engine implements the openehr-its client runtime's Transport.
+async-trait.workspace = true
 axum.workspace = true
 clap.workspace = true
-ferrobridge-openehr.workspace = true
 ferrobridge-term.workspace = true
 # The generated FHIR R4 model the facade authors its wire bodies with.
 fhir-types = { workspace = true, features = ["r4", "resources"] }
@@ -35,7 +36,13 @@ http.workspace = true
 # The one clock: the instant every composition default of one ingest is taken
 # from.
 jiff.workspace = true
+# The ADL 2 HRID parser an adl2 template ETag is read with.
+openehr-adl.workspace = true
+# The AOM2 operational template the adl2 route serves.
+openehr-am.workspace = true
 openehr-base.workspace = true
+# The ITS wire layer, the generated ITS-REST client the CDR is called through
+# included.
 openehr-its.workspace = true
 openehr-mapping-core.workspace = true
 # The ETL checks its configured AQL at load (docs/architecture.md section 5.4).
@@ -47,9 +54,12 @@ omocl.workspace = true
 # The OMOP sink: the record graph, the CDM writer and the derived tables.
 omop-cdm = { workspace = true, features = ["database"] }
 # The AQL result set arrives as a stream of pages.
+futures-core.workspace = true
 futures-util.workspace = true
 # The embedded identity store (docs/architecture.md section 9).
 redb.workspace = true
+# The HTTP engine error the CDR client's transport can refuse to build with.
+reqwest.workspace = true
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -76,6 +86,8 @@ toml.workspace = true
 ferrobridge-testkit.workspace = true
 # The OMOP round trip pins its rows as a reviewed snapshot.
 insta.workspace = true
+# The CDR end-to-end lane builds the Web Template of the template it read.
+openehr-sdt.workspace = true
 # The shutdown cases drive a real socket, so they need a real HTTP client.
 reqwest.workspace = true
 tempfile.workspace = true

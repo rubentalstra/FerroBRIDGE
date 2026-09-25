@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The two-route template fetch: ADL 1.4 first, ADL 2 on a `404` or a `406`.
+//! The two-route template fetch over the generated client: ADL 1.4 first,
+//! ADL 2 on a `404` or a `406`.
 
-use crate::support;
-use ferrobridge_openehr::error::Error as ClientError;
-use ferrobridge_openehr::ids::template_id;
-use ferrobridge_openehr::template::{TemplateOutcome, TemplateSource};
+use super::support;
+use ferrobridge_server::cdr::error::CdrError;
+use ferrobridge_server::cdr::ids::template_id;
+use ferrobridge_server::cdr::template::{TemplateOutcome, TemplateSource};
 use std::error::Error;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -163,7 +164,7 @@ async fn an_adl2_body_of_the_wrong_type_is_refused() -> Result<(), Box<dyn Error
         .await
         .expect_err("a body that is not an operational template is refused");
     match error {
-        ClientError::NotOperationalTemplate { found } => {
+        CdrError::NotOperationalTemplate { found } => {
             assert_eq!(Some("AUTHORED_ARCHETYPE".to_owned()), found);
         }
         other => return Err(format!("expected a refusal, got {other:?}").into()),

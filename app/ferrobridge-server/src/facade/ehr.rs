@@ -10,23 +10,24 @@
 //! `PARTY_SELF` over a `PARTY_REF` whose `GENERIC_ID` scheme is the namespace,
 //! which is what makes the same lookup find it again (§12).
 
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::ehr::CreateEhrOutcome;
-use ferrobridge_openehr::ehr::EhrOutcome;
-use ferrobridge_openehr::ids::EhrId;
-use ferrobridge_openehr::ids::SubjectId;
-use ferrobridge_openehr::ids::SubjectNamespace;
-use ferrobridge_openehr::prefer::Prefer;
+use http::StatusCode;
 use openehr_base::v1_3::base_types::identification::archetype_id::ArchetypeId;
 use openehr_base::v1_3::base_types::identification::generic_id::GenericId;
 use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
 use openehr_base::v1_3::base_types::identification::party_ref::PartyRef;
+use openehr_its::rest::generated::ehr::client::EhrCreateOutcome;
+use openehr_its::rest::generated::ehr::client::EhrGetBySubjectOutcome;
 use openehr_rm::v1_2::common::archetyped::archetyped::Archetyped;
 use openehr_rm::v1_2::common::generic::party_self::PartySelf;
 use openehr_rm::v1_2::data_types::text::dv_text::DvText;
 use openehr_rm::v1_2::data_types::text::dv_text::DvTextData;
 use openehr_rm::v1_2::ehr::ehr_status::EhrStatus;
 
+use crate::cdr::CdrClient;
+use crate::cdr::Prefer;
+use crate::cdr::ids::EhrId;
+use crate::cdr::ids::SubjectId;
+use crate::cdr::ids::SubjectNamespace;
 use crate::facade::identity::PersonId;
 use crate::facade::identity::store::Store;
 use crate::facade::identity::store::StoreError;
@@ -61,14 +62,14 @@ pub enum EhrError {
         subject: String,
         /// What the identifier's constructor reported.
         #[source]
-        source: Box<ferrobridge_openehr::ids::IdError>,
+        source: Box<crate::cdr::ids::IdError>,
     },
     /// The CDR call did not reach a documented answer.
     #[error("the EHR lookup did not reach a documented answer")]
     Client {
         /// What the client reported.
         #[source]
-        source: Box<ferrobridge_openehr::error::Error>,
+        source: Box<crate::cdr::error::CdrError>,
     },
     /// The CDR refused the EHR creation.
     #[error("the CDR refused to create an EHR for {subject}: {detail}")]
@@ -103,7 +104,7 @@ pub enum EhrError {
 /// [`Policy::Existing`], [`EhrError::Refused`] when the CDR refuses the
 /// creation, and the transport and store refusals of [`EhrError`].
 pub async fn resolve(
-    client: &Client,
+    client: &CdrClient,
     store: &dyn Store,
     person: &PersonId,
     policy: Policy,
@@ -124,9 +125,9 @@ pub async fn resolve(
         .ehr_by_subject(&subject_id, &namespace)
         .await
         .map_err(client_error)?;
-    let ehr_id = match found {
-        EhrOutcome::Found(ehr) => ehr_id_of(&ehr)?,
-        EhrOutcome::NotFound(..) => match policy {
+    let ehr_id = match found.outcome {
+        EhrGetBySubjectOutcome::Ok { body, .. } => ehr_id_of(&body)?,
+        EhrGetBySubjectOutcome::NotFound => match policy {
             Policy::Existing => {
                 return Err(EhrError::Absent {
                     subject: person.to_string(),
@@ -134,35 +135,36 @@ pub async fn resolve(
             }
             Policy::CreateOnFirstWrite => create(client, person).await?,
         },
-        _ => {
-            return Err(EhrError::Refused {
-                subject: person.to_string(),
-                detail: crate::facade::status::unread_diagnostics("ehr_get_by_subject"),
-            });
-        }
     };
     store.record_ehr(person, &ehr_id).map_err(store_error)
 }
 
 /// Creates an EHR whose `EHR_STATUS.subject` names `person`.
-async fn create(client: &Client, person: &PersonId) -> Result<EhrId, EhrError> {
+///
+/// Under `return=minimal` the service answers `201` or `204`, and the `ETag`
+/// of either names the new `ehr_id` (`ehr-codegen.openapi.yaml`,
+/// `ehr_create`).
+async fn create(client: &CdrClient, person: &PersonId) -> Result<EhrId, EhrError> {
     let status = status_of(person);
-    match client
+    let answered = client
         .create_ehr(Some(&status), Prefer::Minimal)
         .await
-        .map_err(client_error)?
-    {
-        CreateEhrOutcome::Created { ehr_id, .. } => Ok(ehr_id),
-        CreateEhrOutcome::BadRequest(upstream) | CreateEhrOutcome::Conflict(upstream) => {
+        .map_err(client_error)?;
+    match answered.outcome {
+        EhrCreateOutcome::Created { headers, .. } => {
+            crate::cdr::ehr_id_from_etag(StatusCode::CREATED, headers.etag.as_deref())
+                .map_err(client_error)
+        }
+        EhrCreateOutcome::NoContent { headers } => {
+            crate::cdr::ehr_id_from_etag(StatusCode::NO_CONTENT, headers.etag.as_deref())
+                .map_err(client_error)
+        }
+        EhrCreateOutcome::BadRequest { .. } | EhrCreateOutcome::Conflict => {
             Err(EhrError::Refused {
                 subject: person.to_string(),
-                detail: crate::facade::status::diagnostics(&upstream),
+                detail: crate::facade::status::diagnostics(&answered.upstream),
             })
         }
-        _ => Err(EhrError::Refused {
-            subject: person.to_string(),
-            detail: crate::facade::status::unread_diagnostics("ehr_create"),
-        }),
     }
 }
 
@@ -219,7 +221,7 @@ fn ehr_id_of(ehr: &openehr_rm::v1_2::ehr::ehr::Ehr) -> Result<EhrId, EhrError> {
 }
 
 /// Wraps a client refusal as an EHR refusal that carries it.
-fn client_error(source: ferrobridge_openehr::error::Error) -> EhrError {
+fn client_error(source: crate::cdr::error::CdrError) -> EhrError {
     EhrError::Client {
         source: Box::new(source),
     }

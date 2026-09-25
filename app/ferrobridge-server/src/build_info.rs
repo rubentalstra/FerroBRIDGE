@@ -64,7 +64,7 @@ pub fn pins() -> Vec<Pin> {
         ),
         pin("OMOCL", grammar_version(omocl::GRAMMAR)),
         pin("OMOP CDM", &format!("v{}", omop_cdm::CDM_VERSION)),
-        pin("openEHR ITS-REST", ferrobridge_openehr::ITS_REST_VERSION),
+        pin("openEHR ITS-REST", crate::cdr::ITS_REST_VERSION),
         pin("openehr-* crates", OPENEHR_CRATES),
         pin("fhir-types", FHIR_TYPES),
     ]

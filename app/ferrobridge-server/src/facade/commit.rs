@@ -9,9 +9,9 @@
 //! `contribution_create`). This module builds both from one description, so a
 //! single write and a transaction record the same committer and change type.
 
-use ferrobridge_openehr::commit::CommitContext;
-use ferrobridge_openehr::ids::IdError;
-use ferrobridge_openehr::ids::template_id;
+use crate::cdr::commit::CommitContext;
+use crate::cdr::ids::IdError;
+use crate::cdr::ids::template_id;
 use openehr_base::v1_3::base_types::identification::terminology_id::TerminologyId;
 use openehr_its::rest::generated::common::UpdateAudit;
 use openehr_its::rest::generated::common::UpdateAuditData;

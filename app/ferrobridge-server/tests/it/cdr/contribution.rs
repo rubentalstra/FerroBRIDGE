@@ -1,14 +1,19 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The CONTRIBUTION contract.
+//! The CONTRIBUTION contract over the generated client, and the bridge's
+//! reading of what a commit answered.
 
-use crate::support;
-use ferrobridge_openehr::contribution::{ContributionOutcome, CreateContributionOutcome};
-use ferrobridge_openehr::ids::{ContributionUid, EhrId};
-use ferrobridge_openehr::prefer::{Prefer, Returned};
+use super::support;
+use ferrobridge_server::cdr::error::CdrError;
+use ferrobridge_server::cdr::ids::{ContributionUid, EhrId};
+use ferrobridge_server::cdr::{Prefer, Returned};
 use ferrobridge_testkit::stubs::its_rest;
+use openehr_its::rest::client::ClientError;
 use openehr_its::rest::generated::ehr::NewContribution;
+use openehr_its::rest::generated::ehr::client::{
+    ContributionCreateOutcome, ContributionGetOutcome,
+};
 use std::error::Error;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -54,6 +59,31 @@ fn new_contribution() -> Result<NewContribution, Box<dyn Error>> {
     )?)
 }
 
+/// Returns the contribution uid and what the `201` of `outcome` carried.
+fn created(
+    outcome: ContributionCreateOutcome,
+    prefer: Prefer,
+) -> Result<
+    (
+        ContributionUid,
+        Returned<openehr_rm::v1_2::common::change_control::contribution::Contribution>,
+    ),
+    Box<dyn Error>,
+> {
+    match outcome {
+        ContributionCreateOutcome::Created { body, headers } => {
+            let uid = ferrobridge_server::cdr::contribution_uid_from_etag(
+                "contribution_create",
+                http::StatusCode::CREATED,
+                headers.etag.as_deref(),
+            )?;
+            let returned = ferrobridge_server::cdr::committed(&uid, body.as_ref(), prefer)?;
+            Ok((uid, returned))
+        }
+        other => Err(format!("expected a created contribution, got {other:?}").into()),
+    }
+}
+
 #[tokio::test]
 async fn create_contribution_reads_the_uid_out_of_the_201_etag() -> Result<(), Box<dyn Error>> {
     let server = MockServer::start().await;
@@ -65,19 +95,12 @@ async fn create_contribution_reads_the_uid_out_of_the_201_etag() -> Result<(), B
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_contribution(&EhrId::new(EHR)?, &new_contribution()?, Prefer::Minimal)
         .await?;
-    match outcome {
-        CreateContributionOutcome::Created {
-            contribution_uid,
-            returned,
-        } => {
-            assert_eq!(CONTRIBUTION, contribution_uid.as_str());
-            assert!(matches!(returned, Returned::Minimal));
-        }
-        other => return Err(format!("expected a created contribution, got {other:?}").into()),
-    }
+    let (uid, returned) = created(answered.outcome, Prefer::Minimal)?;
+    assert_eq!(CONTRIBUTION, uid.as_str());
+    assert!(matches!(returned, Returned::Minimal));
     assert_eq!(
         vec!["return=minimal".to_owned()],
         support::request_header(&server, 0, "prefer").await?
@@ -96,19 +119,25 @@ async fn create_contribution_reports_the_400() -> Result<(), Box<dyn Error>> {
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_contribution(&EhrId::new(EHR)?, &new_contribution()?, Prefer::Minimal)
         .await?;
-    match outcome {
-        CreateContributionOutcome::BadRequest(upstream) => {
-            let error = upstream.error().ok_or("the 400 body decodes as an Error")?;
-            assert_eq!(
-                Some("a first version cannot be a MODIFICATION"),
-                error.message.as_deref()
-            );
-        }
-        other => return Err(format!("expected a bad request, got {other:?}").into()),
-    }
+    assert!(
+        matches!(
+            answered.outcome,
+            ContributionCreateOutcome::BadRequest { .. }
+        ),
+        "{:?}",
+        answered.outcome
+    );
+    let error = answered
+        .upstream
+        .error()
+        .ok_or("the 400 body decodes as an Error")?;
+    assert_eq!(
+        Some("a first version cannot be a MODIFICATION"),
+        error.message.as_deref()
+    );
     Ok(())
 }
 
@@ -121,10 +150,13 @@ async fn create_contribution_reports_the_409() -> Result<(), Box<dyn Error>> {
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_contribution(&EhrId::new(EHR)?, &new_contribution()?, Prefer::Minimal)
         .await?;
-    assert!(matches!(outcome, CreateContributionOutcome::Conflict(_)));
+    assert!(matches!(
+        answered.outcome,
+        ContributionCreateOutcome::Conflict
+    ));
     Ok(())
 }
 
@@ -140,23 +172,16 @@ async fn create_contribution_reads_an_empty_201_as_minimal_whatever_it_preferred
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_contribution(
             &EhrId::new(EHR)?,
             &new_contribution()?,
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        CreateContributionOutcome::Created {
-            contribution_uid,
-            returned,
-        } => {
-            assert_eq!(CONTRIBUTION, contribution_uid.as_str());
-            assert!(matches!(returned, Returned::Minimal));
-        }
-        other => return Err(format!("expected a created contribution, got {other:?}").into()),
-    }
+    let (uid, returned) = created(answered.outcome, Prefer::Representation)?;
+    assert_eq!(CONTRIBUTION, uid.as_str());
+    assert!(matches!(returned, Returned::Minimal));
     Ok(())
 }
 
@@ -176,19 +201,16 @@ async fn create_contribution_reads_an_identifier_201_under_representation()
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_contribution(
             &EhrId::new(EHR)?,
             &new_contribution()?,
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        CreateContributionOutcome::Created {
-            returned: Returned::Identifier(identifier),
-            ..
-        } => assert_eq!(CONTRIBUTION, identifier.uid),
-        other => return Err(format!("expected an identifier, got {other:?}").into()),
+    match created(answered.outcome, Prefer::Representation)? {
+        (_, Returned::Identifier(identifier)) => assert_eq!(CONTRIBUTION, identifier.uid),
+        (_, other) => return Err(format!("expected an identifier, got {other:?}").into()),
     }
     Ok(())
 }
@@ -207,6 +229,50 @@ async fn create_contribution_names_the_committed_uid_when_the_201_body_is_neithe
         .mount(&server)
         .await;
 
+    let answered = support::client(&server)?
+        .create_contribution(
+            &EhrId::new(EHR)?,
+            &new_contribution()?,
+            Prefer::Representation,
+        )
+        .await?;
+    let ContributionCreateOutcome::Created { body, headers } = answered.outcome else {
+        return Err(format!(
+            "expected a created contribution, got {:?}",
+            answered.outcome
+        )
+        .into());
+    };
+    let uid = ferrobridge_server::cdr::contribution_uid_from_etag(
+        "contribution_create",
+        http::StatusCode::CREATED,
+        headers.etag.as_deref(),
+    )?;
+    let error = ferrobridge_server::cdr::committed(&uid, body.as_ref(), Prefer::Representation)
+        .expect_err("a body that is neither schema is refused");
+    match error {
+        CdrError::CommittedBody {
+            contribution_uid, ..
+        } => assert_eq!(CONTRIBUTION, contribution_uid.as_str()),
+        other => return Err(format!("expected a committed-body error, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn create_contribution_names_the_committed_uid_when_the_201_body_is_no_json()
+-> Result<(), Box<dyn Error>> {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path(format!("/v1/ehr/{EHR}/contribution")))
+        .respond_with(its_rest::created(
+            CONTRIBUTION,
+            &format!("{}/v1/ehr/{EHR}/contribution/{CONTRIBUTION}", server.uri()),
+            "committed, and this is no JSON",
+        ))
+        .mount(&server)
+        .await;
+
     let error = support::client(&server)?
         .create_contribution(
             &EhrId::new(EHR)?,
@@ -214,9 +280,9 @@ async fn create_contribution_names_the_committed_uid_when_the_201_body_is_neithe
             Prefer::Representation,
         )
         .await
-        .expect_err("a body that is neither schema is refused");
+        .expect_err("a body that is no JSON is refused");
     match error {
-        ferrobridge_openehr::error::Error::CommittedBody {
+        CdrError::CommittedBody {
             contribution_uid, ..
         } => assert_eq!(CONTRIBUTION, contribution_uid.as_str()),
         other => return Err(format!("expected a committed-body error, got {other:?}").into()),
@@ -243,11 +309,14 @@ async fn contribution_reads_the_200_as_the_contribution_and_its_versions()
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .contribution(&EhrId::new(EHR)?, &ContributionUid::new(CONTRIBUTION)?)
         .await?;
-    let ContributionOutcome::Found(contribution) = outcome else {
-        return Err(format!("expected the contribution, got {outcome:?}").into());
+    let ContributionGetOutcome::Ok {
+        body: contribution, ..
+    } = answered.outcome
+    else {
+        return Err(format!("expected the contribution, got {:?}", answered.outcome).into());
     };
     assert_eq!(CONTRIBUTION, contribution.uid.value());
     assert_eq!(versions.len(), contribution.versions.len());
@@ -270,16 +339,15 @@ async fn contribution_reports_the_404() -> Result<(), Box<dyn Error>> {
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .contribution(&EhrId::new(EHR)?, &ContributionUid::new(CONTRIBUTION)?)
         .await?;
-    match outcome {
-        ContributionOutcome::NotFound(upstream) => {
-            let error = upstream.error().ok_or("the 404 body decodes as an Error")?;
-            assert_eq!(Some("no such contribution"), error.message.as_deref());
-        }
-        other => return Err(format!("expected not found, got {other:?}").into()),
-    }
+    assert!(matches!(answered.outcome, ContributionGetOutcome::NotFound));
+    let error = answered
+        .upstream
+        .error()
+        .ok_or("the 404 body decodes as an Error")?;
+    assert_eq!(Some("no such contribution"), error.message.as_deref());
     Ok(())
 }
 
@@ -297,7 +365,10 @@ async fn contribution_refuses_a_200_body_that_is_no_contribution() -> Result<(),
         .await
         .expect_err("a body that is no CONTRIBUTION is refused");
     assert!(
-        matches!(error, ferrobridge_openehr::error::Error::Body { .. }),
+        matches!(
+            &error,
+            CdrError::Client { source, .. } if matches!(**source, ClientError::Body { .. })
+        ),
         "{error:?}"
     );
     Ok(())
@@ -323,10 +394,14 @@ async fn contribution_retries_a_server_failure_as_a_get() -> Result<(), Box<dyn 
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .contribution(&EhrId::new(EHR)?, &ContributionUid::new(CONTRIBUTION)?)
         .await?;
-    assert!(matches!(outcome, ContributionOutcome::Found(_)));
+    assert!(matches!(
+        answered.outcome,
+        ContributionGetOutcome::Ok { .. }
+    ));
+    assert_eq!(http::StatusCode::OK, answered.upstream.status());
     assert_eq!(
         2,
         server
@@ -353,8 +428,15 @@ async fn contribution_reports_a_status_the_operation_does_not_document()
         .await
         .expect_err("a 409 is no documented answer of contribution_get");
     match error {
-        ferrobridge_openehr::error::Error::UndocumentedStatus { upstream, .. } => {
-            assert_eq!(http::StatusCode::CONFLICT, upstream.status());
+        CdrError::Client { source, upstream } => {
+            assert!(
+                matches!(*source, ClientError::UndocumentedStatus { status, .. } if status == http::StatusCode::CONFLICT),
+                "{source:?}"
+            );
+            assert_eq!(
+                Some(http::StatusCode::CONFLICT),
+                upstream.map(|upstream| upstream.status())
+            );
         }
         other => return Err(format!("expected an undocumented status, got {other:?}").into()),
     }

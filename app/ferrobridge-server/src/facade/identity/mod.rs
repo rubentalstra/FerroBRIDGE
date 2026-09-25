@@ -10,8 +10,8 @@
 //! then on, because "once assigned, this value never changes"
 //! (<https://hl7.org/fhir/R4/resource.html>).
 //!
-//! The identifiers the openEHR side owns are the ones the ITS-REST client
-//! already validates (`ferrobridge_openehr::ids`), so nothing here restates
+//! The identifiers the openEHR side owns are the ones the CDR module
+//! already validates (`crate::cdr::ids`), so nothing here restates
 //! them. [`FhirResourceId`], [`ExternalResourceId`] and [`PersonId`] are the
 //! three this side owns.
 

@@ -49,7 +49,7 @@ Docker unless that variable is `1`, so your ordinary test run stays offline.
 To run the lane yourself, start Docker and set the variable:
 
 ```bash
-FERROBRIDGE_E2E=1 cargo nextest run --locked -p omop-cdm -p ferrobridge-openehr -p ferrobridge-testkit
+FERROBRIDGE_E2E=1 cargo nextest run --locked -p omop-cdm -p ferrobridge-server -p ferrobridge-term -p ferrobridge-testkit
 ```
 
 The first run pulls the images, which are pinned by digest in

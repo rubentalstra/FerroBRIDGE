@@ -36,8 +36,8 @@ use std::sync::Arc;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;
-use ferrobridge_openehr::client::Client;
 
+use crate::cdr::CdrClient;
 use crate::facade::identity::claims::Claims;
 use crate::facade::identity::store::Store;
 use crate::facade::programs::Programs;
@@ -85,7 +85,7 @@ pub struct Facade {
     /// The source keys the in-flight deliveries into that map hold.
     claims: Claims,
     /// The CDR client.
-    client: Client,
+    client: CdrClient,
     /// What the deployment configured.
     settings: Settings,
 }
@@ -96,7 +96,7 @@ impl Facade {
     pub const fn new(
         programs: Programs,
         store: Arc<dyn Store>,
-        client: Client,
+        client: CdrClient,
         settings: Settings,
     ) -> Self {
         Self {
@@ -128,7 +128,7 @@ impl Facade {
 
     /// Returns the CDR client.
     #[must_use]
-    pub const fn client(&self) -> &Client {
+    pub const fn client(&self) -> &CdrClient {
         &self.client
     }
 
@@ -137,11 +137,11 @@ impl Facade {
     /// The inbound `X-Request-Id` travels onto every outbound call, so one
     /// correlation identifier covers the request and the CDR calls it makes.
     #[must_use]
-    pub fn client_for(&self, headers: &http::HeaderMap) -> Client {
+    pub fn client_for(&self, headers: &http::HeaderMap) -> CdrClient {
         headers
             .get(crate::request_id::HEADER)
             .and_then(|value| value.to_str().ok())
-            .and_then(|text| ferrobridge_openehr::ids::RequestId::new(text).ok())
+            .and_then(|text| crate::cdr::ids::RequestId::new(text).ok())
             .map_or_else(|| self.client.clone(), |id| self.client.with_request_id(id))
     }
 
@@ -158,7 +158,7 @@ impl Facade {
     /// carry its request id; another face passes [`Facade::client`] or a
     /// client of its own.
     #[must_use]
-    pub fn ingest(&self, client: Client) -> ingest::Ingest<'_> {
+    pub fn ingest(&self, client: CdrClient) -> ingest::Ingest<'_> {
         ingest::Ingest::new(
             &self.programs,
             self.store.as_ref(),

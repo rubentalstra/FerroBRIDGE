@@ -37,9 +37,6 @@
       <sourceFolder url="file://$MODULE_DIR$/tools/fhir-codegen/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tools/omop-cdm-codegen/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tools/omop-cdm-codegen/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/ferrobridge-hl7v2/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/ferrobridge-hl7v2/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/crates/hl7v2-types/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

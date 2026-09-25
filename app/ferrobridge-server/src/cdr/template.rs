@@ -5,21 +5,31 @@
 //!
 //! `docs/specs/its-rest/computable/OAS/definition-codegen.openapi.yaml` serves
 //! both template generations, and a composition names its template by a string
-//! with no generation marker, so the client tries `adl1.4` first and falls
-//! back to `adl2` on a `404` or a `406`.
+//! with no generation marker, so the bridge tries `adl1.4` first and falls back
+//! to `adl2` on a `404` or a `406`. The generated operations answer the body as
+//! received, because the request `Accept` selects its form, so the decoding of
+//! each form is the bridge's.
 
-use crate::client::{Call, Client, Idempotency};
-use crate::error::{BodyError, Error, UpstreamError};
-use crate::ids::entity_tag;
-use crate::prefer::Prefer;
-use http::{Method, StatusCode};
 use openehr_am::v2_4::aom2::archetype::archetype_hrid::ArchetypeHrid;
 use openehr_am::v2_4::aom2::archetype::operational_template::OperationalTemplate;
 use openehr_base::v1_3::base_types::identification::template_id::TemplateId;
+use openehr_its::rest::generated::definition::DefinitionTemplateAdl2GetParams;
+use openehr_its::rest::generated::definition::DefinitionTemplateAdl14GetParams;
+use openehr_its::rest::generated::definition::client::DefinitionClient;
+use openehr_its::rest::generated::definition::client::DefinitionTemplateAdl2GetOutcome;
+use openehr_its::rest::generated::definition::client::DefinitionTemplateAdl14GetOutcome;
 use serde::Deserialize;
+
+use crate::cdr::CdrClient;
+use crate::cdr::error::BodyError;
+use crate::cdr::error::CdrError;
+use crate::cdr::error::Upstream;
+use crate::cdr::ids::entity_tag;
 
 /// The canonical XML media type the ADL 1.4 route answers with.
 const CANONICAL_XML: &str = "application/xml";
+/// The canonical JSON media type the ADL 2 route answers with.
+const CANONICAL_JSON: &str = "application/json";
 /// The `_type` an AOM2 operational template declares.
 const OPERATIONAL_TEMPLATE: &str = "OPERATIONAL_TEMPLATE";
 
@@ -52,7 +62,7 @@ pub enum TemplateOutcome {
     /// `404` from both routes: no template with this identifier exists.
     UnknownTemplate,
     /// `400` from the route that was tried.
-    BadRequest(UpstreamError),
+    BadRequest(Upstream),
 }
 
 /// The `_type` discriminator of a canonical JSON body.
@@ -63,7 +73,7 @@ struct TypeProbe {
     type_name: Option<String>,
 }
 
-impl Client {
+impl CdrClient {
     /// Retrieves the operational template `template_id` names.
     ///
     /// The `adl1.4` route is asked first, with `Accept: application/xml` for
@@ -74,73 +84,83 @@ impl Client {
     /// never offers `application/xml` alone.
     ///
     /// # Errors
-    /// Returns [`Error::NotOperationalTemplate`] when the `adl2` body is not
-    /// an AOM2 operational template, and [`Error`] otherwise when a route
-    /// answered a status the `OpenAPI` does not document or a body that cannot
-    /// be decoded.
-    pub async fn template(&self, template_id: &TemplateId) -> Result<TemplateOutcome, Error> {
-        let url = self.url(&["definition", "template", "adl1.4", &template_id.value])?;
-        let call = Call::new(Method::GET, url, Idempotency::Idempotent)
-            .accepting(CANONICAL_XML)
-            .preferring(Prefer::Representation);
-        let answer = self.execute(call).await?;
-        match answer.status {
-            StatusCode::OK => {
+    /// Returns [`CdrError::NotOperationalTemplate`] when the `adl2` body is
+    /// not an AOM2 operational template, [`CdrError::Body`] when a body cannot
+    /// be decoded, and [`CdrError`] otherwise when a route reached no
+    /// documented answer.
+    pub async fn template(&self, template_id: &TemplateId) -> Result<TemplateOutcome, CdrError> {
+        let client = self.call(crate::cdr::representation())?;
+        let params = DefinitionTemplateAdl14GetParams {
+            template_id: template_id.value.clone(),
+            accept: Some(String::from(CANONICAL_XML)),
+        };
+        let answered = DefinitionClient::new(&client)
+            .definition_template_adl1_4_get(&params)
+            .await;
+        let answered = crate::cdr::answered_or_bad_request(&client, answered, || {
+            DefinitionTemplateAdl14GetOutcome::BadRequest { body: None }
+        })?;
+        match answered.outcome {
+            DefinitionTemplateAdl14GetOutcome::Ok { body, .. } => {
+                let text = String::from_utf8_lossy(&body);
                 let template =
-                    openehr_its::opt14::from_xml(&answer.body).map_err(|source| Error::Body {
-                        url: answer.url.clone(),
-                        media: "canonical OPT 1.4 XML",
+                    openehr_its::opt14::from_xml(&text).map_err(|source| CdrError::Body {
+                        operation: "definition_template_adl1.4_get",
                         source: Box::new(BodyError::Xml(source)),
                     })?;
                 Ok(TemplateOutcome::Found(TemplateSource::Opt14(Box::new(
                     template,
                 ))))
             }
-            StatusCode::BAD_REQUEST => Ok(TemplateOutcome::BadRequest(answer.upstream())),
-            StatusCode::NOT_FOUND | StatusCode::NOT_ACCEPTABLE => {
+            DefinitionTemplateAdl14GetOutcome::BadRequest { .. } => {
+                Ok(TemplateOutcome::BadRequest(answered.upstream))
+            }
+            DefinitionTemplateAdl14GetOutcome::NotFound
+            | DefinitionTemplateAdl14GetOutcome::NotAcceptable => {
                 self.template_adl2(template_id).await
             }
-            _ => Err(answer.undocumented()),
         }
     }
 
     /// Retrieves the ADL 2 operational template `template_id` names.
-    async fn template_adl2(&self, template_id: &TemplateId) -> Result<TemplateOutcome, Error> {
-        let url = self.url(&["definition", "template", "adl2", &template_id.value])?;
-        let call = Call::new(Method::GET, url, Idempotency::Idempotent)
-            .accepting(crate::client::CANONICAL_JSON)
-            .preferring(Prefer::Representation);
-        let answer = self.execute(call).await?;
-        match answer.status {
-            StatusCode::OK => {
-                let probe = serde_json::from_str::<TypeProbe>(&answer.body).map_err(|source| {
-                    Error::Body {
-                        url: answer.url.clone(),
-                        media: "AOM2 canonical JSON",
-                        source: Box::new(BodyError::Json(source)),
-                    }
-                })?;
+    async fn template_adl2(&self, template_id: &TemplateId) -> Result<TemplateOutcome, CdrError> {
+        let client = self.call(crate::cdr::representation())?;
+        let params = DefinitionTemplateAdl2GetParams {
+            template_id: template_id.value.clone(),
+            accept: Some(String::from(CANONICAL_JSON)),
+        };
+        let answered = DefinitionClient::new(&client)
+            .definition_template_adl2_get(&params)
+            .await;
+        let answered = crate::cdr::answered_or_bad_request(&client, answered, || {
+            DefinitionTemplateAdl2GetOutcome::BadRequest { body: None }
+        })?;
+        match answered.outcome {
+            DefinitionTemplateAdl2GetOutcome::Ok { body, .. } => {
+                let body_error = |source: BodyError| CdrError::Body {
+                    operation: "definition_template_adl2_get",
+                    source: Box::new(source),
+                };
+                let probe = serde_json::from_slice::<TypeProbe>(&body)
+                    .map_err(|source| body_error(BodyError::Json(source)))?;
                 if probe.type_name.as_deref() != Some(OPERATIONAL_TEMPLATE) {
-                    return Err(Error::NotOperationalTemplate {
+                    return Err(CdrError::NotOperationalTemplate {
                         found: probe.type_name,
                     });
                 }
-                let template =
-                    openehr_its::json::from_canonical_json::<OperationalTemplate>(&answer.body)
-                        .map_err(|source| Error::Body {
-                            url: answer.url.clone(),
-                            media: "AOM2 canonical JSON",
-                            source: Box::new(BodyError::CanonicalJson(source)),
-                        })?;
-                let resolved_id = resolved_id(&answer, &template);
+                let text = String::from_utf8_lossy(&body);
+                let template = openehr_its::json::from_canonical_json::<OperationalTemplate>(&text)
+                    .map_err(|source| body_error(BodyError::CanonicalJson(source)))?;
+                let resolved_id = resolved_id(&answered.upstream, &template);
                 Ok(TemplateOutcome::Found(TemplateSource::Opt2 {
                     template: Box::new(template),
                     resolved_id,
                 }))
             }
-            StatusCode::BAD_REQUEST => Ok(TemplateOutcome::BadRequest(answer.upstream())),
-            StatusCode::NOT_FOUND => Ok(TemplateOutcome::UnknownTemplate),
-            _ => Err(answer.undocumented()),
+            DefinitionTemplateAdl2GetOutcome::BadRequest { .. } => {
+                Ok(TemplateOutcome::BadRequest(answered.upstream))
+            }
+            DefinitionTemplateAdl2GetOutcome::NotFound => Ok(TemplateOutcome::UnknownTemplate),
         }
     }
 }
@@ -152,10 +172,12 @@ impl Client {
 /// `components.headers.ETag_Template_adl2`), so it is read as the resolved
 /// HRID when it is one; otherwise the template's own `archetype_id`, which
 /// AM 2.4 §Identification defines as the artefact's physical identifier,
-/// answers instead.
-fn resolved_id(answer: &crate::client::Answer, template: &OperationalTemplate) -> ArchetypeHrid {
-    answer
-        .header(http::header::ETAG.as_str())
+/// answers instead. The generated `200` headers of the `adl2` route do not
+/// carry the `ETag`, so it is read from the answer itself.
+fn resolved_id(upstream: &Upstream, template: &OperationalTemplate) -> ArchetypeHrid {
+    upstream
+        .header("etag")
+        .as_deref()
         .and_then(hrid_from_etag)
         .unwrap_or_else(|| template.archetype_id.clone())
 }
