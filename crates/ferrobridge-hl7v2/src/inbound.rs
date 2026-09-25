@@ -175,12 +175,12 @@ fn reject_bytes(message: &[u8], detail: &str, stamp: Stamp<'_>) -> Received {
 /// fields the guide's MSH map writes `MessageHeader.source` from, or in
 /// MSH-4, the sending facility the map falls back to.
 ///
-/// The guide leaves a message valuing neither MSH-3 nor MSH-24 to the
-/// implementer (`segment-msh-to-messageheader`, the MSH-3 row's comment), and
-/// FHIR R4 requires `MessageHeader.source`
-/// (<https://hl7.org/fhir/R4/messageheader.html>). No specification governs
-/// the answer: our own design takes MSH-4 and refuses a message valuing none
-/// of the three with `AR`.
+/// For a message valuing neither MSH-3 nor MSH-24 the guide's MSH-24 row
+/// writes a `data-absent-reason` into the endpoint
+/// (`segment-msh-to-messageheader`), and FHIR R4 requires
+/// `MessageHeader.source` (<https://hl7.org/fhir/R4/messageheader.html>). No
+/// specification governs the rest: our own design takes MSH-4 for the endpoint
+/// and refuses a message valuing none of the three with `AR`.
 /// An acknowledgment is never mapped, so it owes no `MessageHeader`.
 fn identifies_sender(message: &Message) -> bool {
     if message.message_type(1) == Some("ACK") {

@@ -59,7 +59,10 @@ so `Run::finish` refuses it (`MapError::NoMessageHeader`) and `inbound`
 answers `AR` to a message valuing none of MSH-3, MSH-24 and MSH-4; with
 MSH-3 and MSH-24 empty, `Run::facility_endpoints` writes the source endpoint
 from MSH-4, and the destination's from MSH-6, as a `facility-endpoint`
-outcome. An `HD` written
+outcome, replacing the data-absent-reason the guide's MSH-24 and MSH-25
+rows write there. A row runs on its empty source only when it assigns a
+literal and its condition requires that source `NOT VALUED`
+(`condition::requires_absent`). An `HD` written
 into a `url` goes through `convert::endpoint`, the one place the derived
 `urn:ferrobridge:hl7v2-hd:` form is built. A refused or failed translation
 fails the run with the upstream status (`MapError::Terminology`); an absent
@@ -75,7 +78,8 @@ run time.
 A shape `hl7v2-types` lacks (the event-to-structure table, data type
 components, `PartialEq` on the tree types) is a generator follow-up, never a
 local table here. `parse::structure_for` refuses a structure the definitions
-carry in variants, and the caller names the variant.
+carry in variants, and the caller names the variant. An MSH-9.3 naming no
+structure falls back to the message index, counted as `other-structure`.
 
 ## Logs
 

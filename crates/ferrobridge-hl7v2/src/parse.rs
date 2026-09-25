@@ -444,6 +444,15 @@ pub enum Unplaced {
         /// MSH-12.1 as the message wrote it.
         declared: String,
     },
+    /// MSH-9.3 names a structure other than the one the message is grouped
+    /// by: one the definitions lack, where the message definition of MSH-9.1
+    /// and MSH-9.2 names the structure ([`structure_for`]).
+    OtherStructure {
+        /// MSH-9.3 as the message wrote it.
+        declared: String,
+        /// The id of the structure the message is grouped by.
+        structure: &'static str,
+    },
 }
 
 impl Unplaced {
@@ -455,6 +464,7 @@ impl Unplaced {
             Self::OutOfStructure { .. } => "out-of-structure",
             Self::ExtraField { .. } => "extra-field",
             Self::EarlierVersion { .. } => "earlier-version",
+            Self::OtherStructure { .. } => "other-structure",
         }
     }
 }
@@ -835,13 +845,16 @@ pub enum StructureError {
 /// its id. One they carry in variants (`ORU_R01-A` to `ORU_R01-D`) is
 /// selected by the message definition of MSH-9.1 and MSH-9.2
 /// ([`hl7v2_types::message::find`]): `ORU^R01` names `ORU_R01-A` and
-/// `ADT^A04` names `ADT_A01-B`.
+/// `ADT^A04` names `ADT_A01-B`. When MSH-9.3 names no structure of the
+/// definitions (`ADT^A08^ADT_A08`), the message definition of MSH-9.1 and
+/// MSH-9.2 selects it (`ADT_A01`), and [`group`] counts
+/// [`Unplaced::OtherStructure`].
 ///
 /// # Errors
 ///
-/// Returns [`StructureError`] when MSH-9.3 is empty, names no structure, or
-/// names one with variants of which the message definition for MSH-9.1 and
-/// MSH-9.2 names none.
+/// Returns [`StructureError`] when MSH-9.3 is empty or names no structure
+/// and no message definition for MSH-9.1 and MSH-9.2 names one, or when
+/// MSH-9.3 names one with variants of which that definition names none.
 pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureError> {
     let indexed = message
         .message_type(1)
@@ -863,7 +876,9 @@ pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureE
         .filter(|id| id.starts_with(&prefix))
         .collect();
     if candidates.is_empty() {
-        return Err(StructureError::Unknown {
+        // NOTE: HL7 v2.5.1 chapter 2 §2.15.9.9: table 0354 fixes the structure from MSH-9.1
+        // and MSH-9.2, so the index answers for an MSH-9.3 naming none, counted by `group`.
+        return indexed.ok_or_else(|| StructureError::Unknown {
             name: String::from(name),
         });
     }
@@ -1001,6 +1016,14 @@ pub fn group(lexed: Lexed, structure: &'static Structure) -> Parsed {
     {
         parsed.unplaced.push(Unplaced::EarlierVersion {
             declared: String::from(declared),
+        });
+    }
+    if let Some(declared) = parsed.message.message_type(3)
+        && declared != base_name(structure.id)
+    {
+        parsed.unplaced.push(Unplaced::OtherStructure {
+            declared: String::from(declared),
+            structure: structure.id,
         });
     }
     let mut stack = vec![Frame::root(structure.nodes)];

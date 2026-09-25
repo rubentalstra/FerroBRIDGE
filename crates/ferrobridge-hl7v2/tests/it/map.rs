@@ -617,3 +617,28 @@ async fn a_message_naming_no_sender_maps_to_no_bundle() {
         other => panic!("the map should refuse the message: {other:?}"),
     }
 }
+
+// NOTE: `segment-msh-to-messageheader`, the MSH-24 valueCode row's comment: the implementer
+// assigns a known value or the data-absent-reason, so a facility endpoint carries no extension.
+#[tokio::test]
+async fn a_facility_endpoint_carries_no_data_absent_reason() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_facilities_only()).await;
+    let (source, destination) = header_parts(&mapped);
+    assert_eq!(source.get("_endpoint"), None, "{source:?}");
+    assert_eq!(destination.get("_endpoint"), None, "{destination:?}");
+}
+
+// NOTE: `mapping_guidelines.md` §General Format/Approach: a condition decides whether the v2
+// element is mapped, so a row on an empty PID-13 writes no `telecom[1].use` without a value.
+#[tokio::test]
+async fn a_row_on_an_empty_field_whose_condition_names_another_writes_nothing() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_named_applications()).await;
+    let patient = resources(mapped.bundle(), "Patient");
+    assert_eq!(patient.len(), 1);
+    assert!(
+        patient
+            .iter()
+            .all(|patient| patient.get("telecom").is_none()),
+        "{patient:?}"
+    );
+}

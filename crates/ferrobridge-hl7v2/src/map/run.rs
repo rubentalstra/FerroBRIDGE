@@ -544,7 +544,14 @@ impl<'a> Run<'a> {
                 continue;
             };
             named.insert(position);
+            let own = Operand::Field {
+                segment: String::from(id),
+                path: path.clone(),
+            };
             let Some(field) = segment.field(position).filter(|field| field.is_valued()) else {
+                let mut empty = scope.clone();
+                empty.at = scope.at.clone().with_field(position);
+                self.absence(&empty, row, &reference, &own, base)?;
                 continue;
             };
             // NOTE: no specification governs this: our own design; a computable condition
@@ -566,15 +573,16 @@ impl<'a> Run<'a> {
             };
             for (repetition, value) in field.repetitions().iter().enumerate() {
                 let datum = Datum::Repetition(value).at(components);
-                if !datum.valued() {
-                    continue;
-                }
                 let mut inner = scope.clone();
                 inner.at = Location {
                     repetition: Some(repetition.saturating_add(1)),
                     ..once.at.clone()
                 };
                 inner.repetition = Some((position, repetition));
+                if !datum.valued() {
+                    self.absence(&inner, row, &reference, &own, base)?;
+                    continue;
+                }
                 if computable && !self.gate(&inner, row, &reference)? {
                     continue;
                 }
@@ -584,9 +592,41 @@ impl<'a> Run<'a> {
         Ok(())
     }
 
+    /// Applies a row to its empty source when the row maps that absence: it
+    /// assigns a value, and its condition requires `own`, its source, not
+    /// valued ([`condition::requires_absent`]) and holds.
+    ///
+    /// Any other row on an empty source maps nothing and is skipped
+    /// (`mapping_guidelines.md` §General Format/Approach: a condition decides
+    /// whether the v2 element is mapped).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`MapError::Stopped`] when a `NOT VALUED ERROR` check holds.
+    fn absence(
+        &mut self,
+        scope: &Scope<'a>,
+        row: &Row,
+        reference: &RowRef,
+        own: &Operand,
+        base: &Base,
+    ) -> Result<(), MapError> {
+        let maps_absence = row.assignment.is_some()
+            && matches!(&row.condition, Condition::Computable(expr)
+                if condition::requires_absent(expr, own));
+        if maps_absence && self.gate(scope, row, reference)? {
+            self.apply(scope, row, reference, Datum::Absent, 0, base)?;
+        }
+        Ok(())
+    }
+
     /// Writes each `MessageHeader` endpoint of [`FACILITY_ENDPOINTS`] whose
     /// fields are empty from the first valued repetition of its facility
     /// field, by the rule of [`Run::endpoint`], and counts it.
+    ///
+    /// The guide's own rows for those empty fields write a data-absent-reason
+    /// extension on the endpoint ([`Run::absence`]); the facility's value
+    /// replaces those writes, so an endpoint never carries both.
     fn facility_endpoints(&mut self, scope: &Scope<'a>, map: &'a Map, base: &Base) {
         let Some(segment) = scope.segment() else {
             return;
@@ -633,6 +673,24 @@ impl<'a> Run<'a> {
             };
             let names: Vec<&str> = leaf.slots.iter().map(|slot| slot.name.as_str()).collect();
             let element = format!("MessageHeader.{}", names.join("."));
+            let flags = match repeating("MessageHeader", &names) {
+                Ok(flags) => flags,
+                Err(error) => {
+                    self.outcomes.push(Outcome::UnknownElement {
+                        at,
+                        row: reference,
+                        error,
+                    });
+                    continue;
+                }
+            };
+            // NOTE: `segment-msh-to-messageheader`, the MSH-24 valueCode row's comment: the
+            // implementer assigns a known value or the data-absent-reason, so the value replaces it.
+            if let Some(resource) = self.resources.get_mut(leaf.resource) {
+                resource
+                    .writes
+                    .retain(|write| !under(&leaf.slots, &flags, &write.slots));
+            }
             self.endpoint(Datum::Repetition(value), &leaf, &at, &reference);
             self.outcomes.push(Outcome::FacilityEndpoint {
                 at,
@@ -686,6 +744,11 @@ impl<'a> Run<'a> {
             }
             let part = datum.at(&path);
             if !part.valued() {
+                let own = Operand::Component {
+                    datatype: String::from(id),
+                    path,
+                };
+                self.absence(&inner, row, &reference, &own, base)?;
                 continue;
             }
             if !self.gate(&inner, row, &reference)? {
@@ -1730,6 +1793,19 @@ fn repeating(resource_type: &str, names: &[&str]) -> Result<Vec<bool>, ElementEr
     Ok(flags)
 }
 
+/// Whether `slots` lie at or under `prefix`, whose repeating steps are
+/// `flags`; the key of a step that does not repeat names no instance.
+fn under(prefix: &[Slot], flags: &[bool], slots: &[Slot]) -> bool {
+    slots.len() >= prefix.len()
+        && prefix
+            .iter()
+            .zip(slots)
+            .zip(flags)
+            .all(|((step, slot), repeats)| {
+                step.name == slot.name && (!repeats || step.key == slot.key)
+            })
+}
+
 /// Splits a source code into its id and positions: `PID-11.9` into `PID` and
 /// `[11, 9]`, `CX.1` into `CX` and `[1]`, `MSG` into `MSG` and `[]`.
 fn split_source(source: &str, separator: char) -> (&str, Vec<usize>) {
@@ -1896,7 +1972,87 @@ const fn repeats(max: Max) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{alternatives, resolve_path};
+    use std::path::PathBuf;
+
+    use fhir_types::codec::Value;
+
+    use super::{Pending, Run, alternatives, resolve_path};
+    use crate::decode::Charset;
+    use crate::map::corpus::Corpus;
+    use crate::parse::{self, Parsed};
+
+    /// A synthetic result whose MSH carries `header` as MSH-3 to MSH-6.
+    fn parsed(header: &str) -> Parsed {
+        let text = format!(
+            "MSH|^~\\&|{header}|20260925143000+0200||ORU^R01^ORU_R01|MSG00011|P|2.5.1\r\
+             PID|1||PAT-0011^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M\r\
+             OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN\r"
+        );
+        let lexed = parse::lex(&text, Charset::Ascii).expect("it lexes");
+        let structure = parse::structure_for(&lexed.message).expect("a structure");
+        parse::group(lexed, structure)
+    }
+
+    fn corpus() -> Corpus {
+        let package = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tools/fhir-codegen/vendor/hl7.fhir.uv.v2mappings/package");
+        Corpus::load(&package).expect("the vendored package loads")
+    }
+
+    /// The `MessageHeader` writes of a run, as dotted paths and ready values.
+    fn header_writes(run: &Run<'_>) -> Vec<(String, Value)> {
+        run.resources
+            .iter()
+            .filter(|resource| resource.type_name == "MessageHeader")
+            .flat_map(|resource| &resource.writes)
+            .filter_map(|write| {
+                let path: Vec<&str> = write.slots.iter().map(|slot| slot.name.as_str()).collect();
+                match &write.value {
+                    Pending::Ready(value) => Some((path.join("."), value.clone())),
+                    Pending::Translation { .. } => None,
+                }
+            })
+            .collect()
+    }
+
+    // NOTE: `segment-msh-to-messageheader`: the MSH-24 rows gated on
+    // `IF MSH-24 NOT VALUED AND MSH-3 NOT VALUED` assign the data-absent-reason.
+    #[test]
+    fn rows_gated_on_their_own_empty_source_write_their_assignment() {
+        let corpus = corpus();
+        let parsed = parsed("||EHR|SOUTHCLINIC");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let writes = header_writes(&run);
+        let reason = String::from("http://hl7.org/fhir/R4/extension-data-absent-reason.html");
+        assert!(
+            writes.contains(&(
+                String::from("source.endpoint.extension.url"),
+                Value::String(reason)
+            )),
+            "{writes:?}"
+        );
+        assert!(
+            writes.contains(&(
+                String::from("source.endpoint.extension.valueCode"),
+                Value::String(String::from("unknown"))
+            )),
+            "{writes:?}"
+        );
+    }
+
+    #[test]
+    fn a_valued_source_takes_no_absence_row() {
+        let corpus = corpus();
+        let parsed = parsed("LAB|NORTHLAB|EHR|SOUTHCLINIC");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let writes = header_writes(&run);
+        assert!(
+            writes.iter().all(|(path, _)| !path.contains("extension")),
+            "{writes:?}"
+        );
+    }
 
     #[test]
     fn two_alternatives_of_one_extension_value_share_the_choice_instance() {
