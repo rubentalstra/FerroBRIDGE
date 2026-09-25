@@ -633,7 +633,12 @@ async fn run(
         Ok(bytes) => bytes,
         Err(reason) => return Case::fail(&message.id, reason),
     };
-    let inbound = match inbound::receive(&bytes, Charset::Ascii, support::select, support::STAMP) {
+    let inbound = match inbound::receive(
+        &bytes,
+        Charset::Ascii,
+        ferrobridge_hl7v2::parse::structure_for,
+        support::STAMP,
+    ) {
         Received::Parsed(inbound) => inbound,
         Received::Answered { code, reply } => {
             return Case::fail(&message.id, answer_reason(&format!("{code:?}"), &reply));

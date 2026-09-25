@@ -405,6 +405,10 @@ crates on crates.io.
 
 ### Fixed
 
+- A v2 message whose header carries no MSH-9.3 (the v2.3 senders in the
+  vendored ReportStream set) resolves its structure from MSH-9.1 and MSH-9.2
+  through the generated message index instead of being refused as unnamed
+  (HL7 v2.5.1 chapter 2 §2.15.9.9, table 0354).
 - Two overlapping deliveries of one transaction Bundle, or two overlapping
   creates of one resource, commit once (#273). Each delivery claims the source
   key of every entry before it reads the identity map and releases the claims
