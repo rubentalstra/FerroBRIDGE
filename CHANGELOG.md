@@ -459,6 +459,28 @@ crates on crates.io.
 
 ### Fixed
 
+- The two `datatype-eip-<half>-to-identifier` maps each fill an `Identifier`
+  of their own (#336). The guide maps SPM-2 into `Specimen.identifier[1]`
+  and `identifier[2]` and ORC-4 into `DiagnosticReport.identifier[3]` and
+  `identifier[4]`, and the placer map reads EIP.1 where the filler map reads
+  EIP.2, so the rows in map order take the halves in component order: the
+  first row the placer `Identifier` (`PGN`), the second the filler's
+  (`FGN`), each counted as `datatype-half` naming the map chosen. A value
+  valuing a component neither half reads (an EI written into ORC-4) stays a
+  `datatype-conflict`. A `(Type)` row whose one step inside the referenced
+  resource is a `Reference` no data type map fills runs the data type map
+  from its source into that resource when every row of that map writes
+  through that element, counted as `reference-root`: OBX-25 into
+  `performer(PractitionerRole.practitioner)` and ORC-12 into
+  `requester(PractitionerRole.practitioner)` run
+  `datatype-xcn-to-practitionerrole`, which gives the `PractitionerRole` its
+  `Practitioner`. A primitive a data type map writes at `$value` of a complex
+  element with a primitive `value` child lands there, counted as
+  `value-child`: TXA-16 through `datatype-st-to-identifier` gives
+  `DocumentReference.identifier.value`. Over the corpora, `datatype-conflict`
+  falls from 1226 to 155 and `no-datatype-map` from 1525 to 379; the pass
+  counts do not move (142 of 511 vendored, 189 of 379 smoke), since no
+  outcome decides a verdict.
 - A field of a legacy v2 message takes its data type from the segment
   definition of the version the parser selected (#329). Where that type
   differs from the type the guide's row names, the version's type chooses

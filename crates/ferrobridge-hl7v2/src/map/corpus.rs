@@ -19,7 +19,7 @@
 //! replaces it whole, and any other is added. No specification governs this:
 //! our own design.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use fhir_types::codec::{Json, Value};
@@ -182,6 +182,55 @@ impl Map {
                     }
             })
         })
+    }
+}
+
+impl Map {
+    /// Returns whether `other` is the other half of one value to this map:
+    /// both map a source component, with no condition, into the same child
+    /// of the target or into the target itself (`$value`), each from a
+    /// component the other maps nothing from.
+    ///
+    /// The two `datatype-eip-<half>-to-identifier` maps each write one
+    /// component of an `EIP` into `value`, `EIP.1` the placer's and `EIP.2`
+    /// the filler's (their titles name the halves), so each fills a whole
+    /// `Identifier` of its own. No specification governs this: our own
+    /// design, since no row of the guide names its data type map.
+    #[must_use]
+    pub fn half_of(&self, other: &Self) -> bool {
+        let sources = |map: &Self| -> BTreeSet<String> {
+            map.rows.iter().map(|row| row.source.clone()).collect()
+        };
+        let (mine, theirs) = (sources(self), sources(other));
+        if !mine.is_disjoint(&theirs) {
+            return false;
+        }
+        self.rows.iter().any(|row| {
+            other.rows.iter().any(|them| {
+                row.condition == Condition::Always
+                    && them.condition == Condition::Always
+                    && match (reach(row), reach(them)) {
+                        (Some(Reach::Whole), Some(Reach::Whole)) => true,
+                        (Some(Reach::Child(a)), Some(Reach::Child(b))) => a == b,
+                        _ => false,
+                    }
+            })
+        })
+    }
+
+    /// The component positions the rows of this data type map read, `EIP.1`
+    /// giving 1.
+    #[must_use]
+    pub fn components(&self) -> BTreeSet<usize> {
+        self.rows
+            .iter()
+            .filter_map(|row| {
+                // NOTE: no specification governs this: our own design; a row naming no numbered
+                // component reads none, so it adds no position.
+                let (_, path) = row.source.split_once('.')?;
+                path.split('.').next()?.parse::<usize>().ok()
+            })
+            .collect()
     }
 }
 

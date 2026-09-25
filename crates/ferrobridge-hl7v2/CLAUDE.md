@@ -44,8 +44,18 @@ with no condition into the same child or `$value`, as the four EI variants
 into `Identifier`) are narrowed to one (`Run::select`): the one whose rows
 write from the most components of the value, then among those that write
 the same the one with the fewest rows; equally specific maps that write
-differently count `datatype-ambiguous` and none runs. A row whose
-`mappedVia` names a data type map runs that map alone.
+differently count `datatype-ambiguous` and none runs. Maps that are halves
+of one value (`Map::half_of`: each maps, with no condition, into the same
+child from components the other never reads, as the EIP placer and filler
+maps) are narrowed by the row's place (`Run::halve`): the rows of its map
+from the same source into the same element modulo labels take the halves
+in component order, counted `datatype-half`; a value valuing a component no
+half reads keeps every half, so the row is a `datatype-conflict`. A row
+whose `mappedVia` names a data type map runs that map alone. A `(Type)` row
+whose one inner step is a `Reference` with no map runs the map from its
+source into the referenced resource when all its rows write through that
+step (`Run::reference_root`, `reference-root`), and a primitive at `$value`
+of a complex element lands in its `value` child (`value-child`).
 
 ## Instances are identities, allocated when a value first reaches them
 

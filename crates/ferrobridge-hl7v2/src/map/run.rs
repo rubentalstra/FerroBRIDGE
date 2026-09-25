@@ -819,7 +819,8 @@ impl<'a> Run<'a> {
         }
     }
 
-    /// Runs a data type map over `datum` into `base`.
+    /// Runs a data type map over `datum` into `base`, counting each valued
+    /// component neither its rows nor `also` name.
     fn datatype(
         &mut self,
         scope: &Scope<'a>,
@@ -827,8 +828,11 @@ impl<'a> Run<'a> {
         datatype: &str,
         datum: Datum<'a>,
         base: &Base,
+        also: &BTreeSet<usize>,
     ) -> Result<(), MapError> {
-        let covered = self.datatype_rows(scope, map, datatype, datum, base, &BTreeSet::new())?;
+        let mut covered =
+            self.datatype_rows(scope, map, datatype, datum, base, &BTreeSet::new())?;
+        covered.named.extend(also);
         self.unmapped_components(scope, &map.id, datum, &covered.named);
         Ok(())
     }
@@ -855,6 +859,7 @@ impl<'a> Run<'a> {
         datatype: &str,
         datum: Datum<'a>,
         leaf: &Base,
+        also: &BTreeSet<usize>,
     ) -> Result<(), MapError> {
         let resource_type = self
             .resources
@@ -863,7 +868,7 @@ impl<'a> Run<'a> {
             .unwrap_or_default();
         let claimed = self.claimed(row, reference, &resource_type);
         let mark = self.mark();
-        let mut named = BTreeSet::new();
+        let mut named = also.clone();
         let mut by_child: BTreeMap<String, Vec<Written>> = BTreeMap::new();
         for map in maps {
             let start = self
@@ -1164,7 +1169,10 @@ impl<'a> Run<'a> {
                     // NOTE: no specification governs this: our own design; a resource no data
                     // type map can fill is never created, so no empty resource enters the Bundle.
                     let source_type = row.source_type.clone().unwrap_or_default();
-                    let resource = target.map(|target| target.resource).unwrap_or_default();
+                    let resource = target
+                        .as_ref()
+                        .map(|target| target.resource.clone())
+                        .unwrap_or_default();
                     if self
                         .corpus
                         .find("datatype", &source_type, &resource)
@@ -1186,6 +1194,20 @@ impl<'a> Run<'a> {
                 if inner.is_empty() {
                     return self.value(scope, row, reference, datum, &created);
                 }
+                let resource = target
+                    .as_ref()
+                    .map(|target| target.resource.clone())
+                    .unwrap_or_default();
+                if let Some(map) = self.reference_root(row, &resource, &inner) {
+                    let source_type = row.source_type.clone().unwrap_or_default();
+                    self.datatype(scope, map, &source_type, datum, &created, &BTreeSet::new())?;
+                    self.outcomes.push(Outcome::ReferenceRoot {
+                        at: scope.at.clone(),
+                        row: reference.clone(),
+                        map: map.id.clone(),
+                    });
+                    return Ok(());
+                }
                 self.steps(scope, row, reference, datum, 0, &created, &inner)
             }
             Some(_) => {
@@ -1206,6 +1228,52 @@ impl<'a> Run<'a> {
                 self.value(scope, row, reference, datum, &leaf)
             }
         }
+    }
+
+    /// The data type map from a `(Type)` row's source into the referenced
+    /// `resource`, when the row's one step
+    /// inside the resource is a `Reference` no data type map fills and every
+    /// row of that map writes through a reference at that element.
+    ///
+    /// `OBX-25` into `performer(PractitionerRole.practitioner)` has no `XCN`
+    /// map into `Reference`, and `datatype-xcn-to-practitionerrole` writes
+    /// the XCN at `practitioner(Practitioner...)`, so the row runs that map at
+    /// the `PractitionerRole`. No specification governs this: our own
+    /// design, since the guide names no data type map per row.
+    fn reference_root(&self, row: &Row, resource: &str, inner: &[Step]) -> Option<&'a Map> {
+        let [step] = inner else {
+            return None;
+        };
+        if step.reference.is_some() || row.assignment.is_some() || row.mapped_via.is_some() {
+            return None;
+        }
+        let source_type = row.source_type.as_deref().filter(|name| !name.is_empty())?;
+        // NOTE: no specification governs this: our own design; an element the table does not
+        // resolve is counted by the ordinary path the row then takes.
+        let resolved = resolve_path(resource, &[step.name.as_str()]).ok()?;
+        let reference = matches!(
+            resolved.location(),
+            fhirconnect::tree::element::Location::Complex(schema) if schema.name == "Reference"
+        );
+        if !reference
+            || !self
+                .corpus
+                .qualifying("datatype", source_type, "Reference")
+                .is_empty()
+        {
+            return None;
+        }
+        let corpus = self.corpus;
+        // NOTE: no specification governs this: our own design; no single map into the resource
+        // leaves the row to the ordinary path, which counts it.
+        let map = corpus.find("datatype", source_type, resource).ok()?;
+        let through = map.rows.iter().all(|other| match &other.target {
+            Ok(Target::Path { steps, .. }) => steps
+                .first()
+                .is_some_and(|first| first.name == step.name && first.reference.is_some()),
+            _ => false,
+        });
+        (through && !map.rows.is_empty()).then_some(map)
     }
 
     /// Writes a row's `assignment` at `leaf`: a literal as given, a
@@ -1282,7 +1350,7 @@ impl<'a> Run<'a> {
                 MappedVia::Unresolved(_) => None,
             };
             if let Some(map) = named {
-                return self.datatype(scope, map, &source_type, datum, leaf);
+                return self.datatype(scope, map, &source_type, datum, leaf, &BTreeSet::new());
             }
             self.table(leaf, &resolved, mapped_via, datum, at, reference);
             return Ok(());
@@ -1309,7 +1377,7 @@ impl<'a> Run<'a> {
             && !source_type.is_empty()
             && let Ok(map) = self.corpus.find("datatype", &source_type, &target_type)
         {
-            return self.datatype(scope, map, &source_type, datum, leaf);
+            return self.datatype(scope, map, &source_type, datum, leaf, &BTreeSet::new());
         }
         if source_type == "HD" && target_type == "url" {
             self.endpoint(datum, leaf, at, reference);
@@ -1363,6 +1431,14 @@ impl<'a> Run<'a> {
             self.complex_maps(&source_type, &target_type, leaf)
         };
         if maps.is_empty() {
+            if let Some(child) = self.value_child(row, leaf) {
+                self.outcomes.push(Outcome::ValueChild {
+                    at: scope.at.clone(),
+                    row: reference.clone(),
+                    target_type,
+                });
+                return self.value(scope, row, reference, datum, &child);
+            }
             self.outcomes.push(Outcome::NoDatatypeMap {
                 at: scope.at.clone(),
                 row: reference.clone(),
@@ -1372,11 +1448,121 @@ impl<'a> Run<'a> {
             return Ok(());
         }
         let chosen = self.select(scope, reference, maps, &source_type, datum, leaf)?;
+        let (chosen, also) = self.halve(scope, row, reference, chosen, datum);
         match chosen.as_slice() {
             [] => Ok(()),
-            [map] => self.datatype(scope, map, &source_type, datum, leaf),
-            several => self.datatypes(scope, row, reference, several, &source_type, datum, leaf),
+            [map] => self.datatype(scope, map, &source_type, datum, leaf, &also),
+            several => self.datatypes(
+                scope,
+                row,
+                reference,
+                several,
+                &source_type,
+                datum,
+                leaf,
+                &also,
+            ),
         }
+    }
+
+    /// The `value` child of the complex element `leaf` a data type map row
+    /// writes at `$value`, when that child is a primitive.
+    ///
+    /// `datatype-st-to-identifier` maps `ST.1` to `$value` of an
+    /// `Identifier`, which holds its text in `value`. No specification
+    /// governs this: our own design, since the guide's notation writes the
+    /// element itself (`mapping_guidelines.md` §\[n\] Notation).
+    fn value_child(&self, row: &Row, leaf: &Base) -> Option<Base> {
+        if !matches!(row.target, Ok(Target::Value { .. })) {
+            return None;
+        }
+        let child = leaf.child("value", "");
+        let resource_type = &self.resources.get(leaf.resource)?.type_name;
+        let names: Vec<&str> = child.slots.iter().map(|slot| slot.name.as_str()).collect();
+        // NOTE: no specification governs this: our own design; a type with no `value` child has
+        // no place for the text, so the row stays `no-datatype-map`.
+        let resolved = resolve_path(resource_type, &names).ok()?;
+        matches!(
+            resolved.location(),
+            fhirconnect::tree::element::Location::Primitive(_)
+        )
+        .then_some(child)
+    }
+
+    /// Narrows each set of halves of one value among `maps`
+    /// ([`Map::half_of`]) to the one the row's place names, and returns the
+    /// maps with the components the halves left out read.
+    ///
+    /// The guide maps an `EIP` by two rows from one source into one element
+    /// with two labels (`SPM-2` into `identifier[1]` and `identifier[2]`), so
+    /// the rows in map order take the halves in component order, each
+    /// counted as [`Outcome::DatatypeHalf`]. When the row has no such
+    /// siblings, or the value holds a component no half reads (an `EI`
+    /// written where the row names an `EIP`), every half is kept and
+    /// [`Run::datatypes`] refuses the row. No specification governs this:
+    /// our own design.
+    fn halve(
+        &mut self,
+        scope: &Scope<'a>,
+        row: &Row,
+        reference: &RowRef,
+        maps: Vec<&'a Map>,
+        datum: Datum<'a>,
+    ) -> (Vec<&'a Map>, BTreeSet<usize>) {
+        let place = self.place(row, reference);
+        let valued = datum.valued_parts();
+        let mut kept = Vec::new();
+        let mut also = BTreeSet::new();
+        for mut set in group(maps, Map::half_of) {
+            if set.len() < 2 {
+                kept.extend(set);
+                continue;
+            }
+            set.sort_by_key(|map| (map.components().first().copied(), map.id.clone()));
+            let read: BTreeSet<usize> = set.iter().flat_map(|map| map.components()).collect();
+            let chosen = place
+                .filter(|(_, count)| *count == set.len())
+                .filter(|_| valued.iter().all(|component| read.contains(component)))
+                .and_then(|(index, _)| set.get(index).copied());
+            let Some(chosen) = chosen else {
+                kept.extend(set);
+                continue;
+            };
+            for other in set.iter().filter(|other| other.id != chosen.id) {
+                also.extend(other.components());
+            }
+            self.outcomes.push(Outcome::DatatypeHalf {
+                at: scope.at.clone(),
+                row: reference.clone(),
+                map: chosen.id.clone(),
+                halves: set.iter().map(|map| map.id.clone()).collect(),
+            });
+            kept.push(chosen);
+        }
+        kept.sort_by(|a, b| a.id.cmp(&b.id));
+        (kept, also)
+    }
+
+    /// The place of `row` among the rows of its map from the same source
+    /// whose targets differ from its own only in their labels, with their
+    /// count.
+    fn place(&self, row: &Row, reference: &RowRef) -> Option<(usize, usize)> {
+        let map = self.corpus.get(&reference.map)?;
+        let shape = unlabelled(&row.target_code);
+        let siblings: Vec<&Row> = map
+            .rows
+            .iter()
+            .filter(|other| {
+                other.source == row.source
+                    && other.assignment.is_none()
+                    && other.mapped_via.is_none()
+                    && unlabelled(&other.target_code) == shape
+            })
+            .collect();
+        let index = siblings
+            .iter()
+            .position(|other| other.target_code == row.target_code)?;
+        Some((index, siblings.len()))
     }
 
     /// Chooses one map from each set of alternatives among `maps`
@@ -1397,19 +1583,8 @@ impl<'a> Run<'a> {
         datum: Datum<'a>,
         leaf: &Base,
     ) -> Result<Vec<&'a Map>, MapError> {
-        let mut sets: Vec<Vec<&'a Map>> = Vec::new();
-        for map in maps {
-            let (joined, mut apart): (Vec<_>, Vec<_>) = std::mem::take(&mut sets)
-                .into_iter()
-                .partition(|set| set.iter().any(|other| other.alternative_to(map)));
-            let mut merged: Vec<&'a Map> = joined.into_iter().flatten().collect();
-            merged.push(map);
-            merged.sort_by(|a, b| a.id.cmp(&b.id));
-            apart.push(merged);
-            sets = apart;
-        }
         let mut chosen = Vec::new();
-        for set in sets {
+        for set in group(maps, Map::alternative_to) {
             match set.as_slice() {
                 [one] => chosen.push(*one),
                 several => {
@@ -2485,6 +2660,38 @@ fn resolve_varies(source_type: Option<String>, segment: &Segment) -> Option<Stri
     }
 }
 
+/// Groups `maps` into sets joined by `related`, each set by id.
+fn group<'m>(maps: Vec<&'m Map>, related: fn(&Map, &Map) -> bool) -> Vec<Vec<&'m Map>> {
+    let mut sets: Vec<Vec<&'m Map>> = Vec::new();
+    for map in maps {
+        let (joined, mut apart): (Vec<_>, Vec<_>) = std::mem::take(&mut sets)
+            .into_iter()
+            .partition(|set| set.iter().any(|other| related(other, map)));
+        let mut merged: Vec<&'m Map> = joined.into_iter().flatten().collect();
+        merged.push(map);
+        merged.sort_by(|a, b| a.id.cmp(&b.id));
+        apart.push(merged);
+        sets = apart;
+    }
+    sets
+}
+
+/// A target code with every `[..]` label removed, `identifier[2]` giving
+/// `identifier`.
+fn unlabelled(code: &str) -> String {
+    let mut text = String::with_capacity(code.len());
+    let mut depth = 0_usize;
+    for character in code.chars() {
+        match character {
+            '[' => depth = depth.saturating_add(1),
+            ']' => depth = depth.saturating_sub(1),
+            _ if depth == 0 => text.push(character),
+            _ => {}
+        }
+    }
+    text
+}
+
 /// The reference of a row, for an outcome.
 fn row_ref(map: &Map, row: &Row) -> RowRef {
     RowRef {
@@ -3301,5 +3508,256 @@ mod tests {
                 String::from("valueCodeableConcept")
             )]
         );
+    }
+
+    /// A synthetic ORU^R01 whose one order carries `orc`, one `OBX` and `spm`.
+    fn specimen(orc: &str, obx: &str, spm: &str) -> Parsed {
+        message(&[
+            "MSH|^~\\&|LAB|NORTHLAB|EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00031|P|2.5.1",
+            "PID|1||PAT-0031^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M",
+            orc,
+            "OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN",
+            obx,
+            spm,
+        ])
+    }
+
+    /// The glucose result `OBX` every specimen case carries.
+    const GLUCOSE: &str = "OBX|1|NM|2345-7^Glucose^LN||5.5|mmol/L|||||F";
+
+    /// The maps a run chose as halves, with the row source and target.
+    fn halves(run: &Run<'_>) -> Vec<(String, String, String)> {
+        run.outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::DatatypeHalf { row, map, .. } => {
+                    Some((row.source.clone(), row.target.clone(), map.clone()))
+                }
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// The conflicts and ambiguities a run counted.
+    fn refusals<'r>(run: &'r Run<'_>) -> Vec<&'r Outcome> {
+        run.outcomes
+            .iter()
+            .filter(|outcome| {
+                matches!(
+                    outcome,
+                    Outcome::DatatypeConflict { .. } | Outcome::DatatypeAmbiguous { .. }
+                )
+            })
+            .collect()
+    }
+
+    // NOTE: `ConceptMap-datatype-eip-*-to-identifier`: the placer map writes `EIP.1` into `value`
+    // and the filler map `EIP.2`, so the two fill one `Identifier` each and are no alternatives.
+    #[test]
+    fn the_eip_maps_are_halves_and_the_ei_variants_are_not() {
+        let corpus = corpus();
+        let map = |id: &str| corpus.get(id).expect("a vendored map");
+        let placer = map("datatype-eip-placerassignedidentifier-to-identifier");
+        let filler = map("datatype-eip-fillerassignedidentifier-to-identifier");
+        assert!(placer.half_of(filler));
+        assert!(!placer.alternative_to(filler));
+        assert!(
+            !map("datatype-ei-organization-to-identifier")
+                .half_of(map("datatype-ei-system-to-identifier"))
+        );
+        assert!(
+            !map("datatype-hd-endpoint-to-messageheader-source")
+                .half_of(map("datatype-hd-name-to-messageheader-source"))
+        );
+    }
+
+    // NOTE: `segment-spm-to-specimen` maps SPM-2 into `identifier[1]` and `identifier[2]`, and the
+    // EIP components are the placer's (EIP.1) then the filler's (EIP.2), in that order.
+    #[test]
+    fn a_specimen_id_gives_the_placer_and_the_filler_identifier() {
+        let corpus = corpus();
+        let parsed = specimen("ORC|RE|PLC-1|FIL-1", GLUCOSE, "SPM|1|SPC-P^SPC-F");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "Specimen", "identifier.value"),
+            vec![text("SPC-P"), text("SPC-F")],
+            "{:?}",
+            writes_of(&run, "Specimen")
+        );
+        assert_eq!(
+            values_at(&run, "Specimen", "identifier.type.coding.code"),
+            vec![text("PGN"), text("FGN")]
+        );
+        assert_eq!(
+            halves(&run),
+            vec![
+                (
+                    String::from("SPM-2"),
+                    String::from("identifier[1]"),
+                    String::from("datatype-eip-placerassignedidentifier-to-identifier")
+                ),
+                (
+                    String::from("SPM-2"),
+                    String::from("identifier[2]"),
+                    String::from("datatype-eip-fillerassignedidentifier-to-identifier")
+                ),
+            ]
+        );
+        assert_eq!(refusals(&run), Vec::<&Outcome>::new());
+    }
+
+    #[test]
+    fn a_filler_specimen_id_alone_gives_the_filler_identifier() {
+        let corpus = corpus();
+        let parsed = specimen("ORC|RE|PLC-1|FIL-1", GLUCOSE, "SPM|1|^SPC-F");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "Specimen", "identifier.value"),
+            vec![text("SPC-F")],
+            "{:?}",
+            writes_of(&run, "Specimen")
+        );
+        assert_eq!(
+            values_at(&run, "Specimen", "identifier.type.coding.code"),
+            vec![text("FGN")]
+        );
+        assert!(
+            run.outcomes.iter().all(
+                |outcome| !matches!(outcome, Outcome::UnmappedComponent { map, .. }
+                    if map.starts_with("datatype-eip-"))
+            ),
+            "{:?}",
+            run.outcomes
+        );
+        assert_eq!(refusals(&run), Vec::<&Outcome>::new());
+    }
+
+    // NOTE: `segment-orc-to-diagnosticreport` maps ORC-4 into `identifier[3]` and `identifier[4]`,
+    // so a placer group number alone gives the `PGN` identifier and no `FGN` one.
+    #[test]
+    fn a_placer_group_number_gives_the_placer_identifier() {
+        let corpus = corpus();
+        let parsed = order("ORC|RE|PLC-1|FIL-1|GRP-P");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "DiagnosticReport", "identifier.value"),
+            vec![text("PLC-1"), text("FIL-1"), text("GRP-P")],
+            "{:?}",
+            writes_of(&run, "DiagnosticReport")
+        );
+        let codes = values_at(&run, "DiagnosticReport", "identifier.type.coding.code");
+        assert!(codes.contains(&text("PGN")), "{codes:?}");
+        assert!(!codes.contains(&text("FGN")), "{codes:?}");
+        assert_eq!(refusals(&run), Vec::<&Outcome>::new());
+    }
+
+    // NOTE: no specification governs this: our own design; an ORC-4 valuing EI components 3
+    // and 4 is no EIP either half reads, so the row stays a counted conflict.
+    #[test]
+    fn an_entity_identifier_where_the_row_names_an_eip_stays_a_conflict() {
+        let corpus = corpus();
+        let parsed = order("ORC|RE|PLC-1|FIL-1|GRP-1^LAB^1.2.3^ISO");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert!(
+            !values_at(&run, "DiagnosticReport", "identifier.value").contains(&text("GRP-1")),
+            "{:?}",
+            writes_of(&run, "DiagnosticReport")
+        );
+        assert_eq!(halves(&run), Vec::new());
+        assert!(
+            refusals(&run).iter().all(|outcome| matches!(
+                outcome,
+                Outcome::DatatypeConflict { row, .. } if row.source == "ORC-4"
+            )) && !refusals(&run).is_empty(),
+            "{:?}",
+            run.outcomes
+        );
+    }
+
+    // NOTE: `segment-obx-to-observation` OBX-25 into `performer[2](PractitionerRole[1].practitioner)`,
+    // and `datatype-xcn-to-practitionerrole` writes each XCN row at `practitioner(Practitioner...)`.
+    #[test]
+    fn a_responsible_observer_gives_a_practitioner_role_and_its_practitioner() {
+        let corpus = corpus();
+        let obx = format!("{GLUCOSE}{}PRV-1^Doe^Jane", "|".repeat(14));
+        let parsed = specimen("ORC|RE|PLC-1|FIL-1", &obx, "SPM|1|SPC-P");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "Practitioner", "identifier.value"),
+            vec![text("PRV-1")],
+            "{:?}",
+            writes_of(&run, "Practitioner")
+        );
+        assert_eq!(
+            values_at(&run, "PractitionerRole", "code.coding.code"),
+            vec![text("MDIR")]
+        );
+        assert_eq!(
+            values_at(&run, "PractitionerRole", "practitioner.reference").len(),
+            1,
+            "{:?}",
+            writes_of(&run, "PractitionerRole")
+        );
+        assert!(
+            !values_at(&run, "Observation", "performer.reference").is_empty(),
+            "{:?}",
+            writes_of(&run, "Observation")
+        );
+        let roots: Vec<(&str, &str)> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::ReferenceRoot { row, map, .. } => {
+                    Some((row.source.as_str(), map.as_str()))
+                }
+                _ => None,
+            })
+            .collect();
+        assert_eq!(roots, vec![("OBX-25", "datatype-xcn-to-practitionerrole")]);
+        assert!(
+            run.outcomes.iter().all(|outcome| !matches!(
+                outcome,
+                Outcome::NoDatatypeMap { row, .. } if row.source == "OBX-25"
+            )),
+            "{:?}",
+            run.outcomes
+        );
+    }
+
+    // NOTE: `segment-txa-to-documentreference` TXA-16 into `identifier[1]`, and
+    // `datatype-st-to-identifier` writes `ST.1` at `$value`, which lands in `value`.
+    #[test]
+    fn a_unique_document_file_name_gives_an_identifier_value() {
+        let corpus = corpus();
+        let parsed = message(&[
+            "MSH|^~\\&|DOCS|NORTHHOSP|EHR|SOUTHCLINIC|20260925100000+0200||MDM^T02^MDM_T02|MSG00032|P|2.5.1",
+            "EVN||20260925095900+0200",
+            "PID|1||PAT-0032^^^NORTHHOSP^MR||Doe^Sam^^^^^L||19751111|U",
+            "PV1|1|O",
+            "TXA|1|CN|TX|20260925095000+0200||||||||DOC-0032||||FILE-0032|AU",
+        ]);
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "DocumentReference", "identifier.value"),
+            vec![text("FILE-0032")],
+            "{:?}",
+            writes_of(&run, "DocumentReference")
+        );
+        assert!(
+            run.outcomes.iter().any(|outcome| matches!(
+                outcome,
+                Outcome::ValueChild { row, target_type, .. }
+                    if row.map == "datatype-st-to-identifier" && target_type == "Identifier"
+            )),
+            "{:?}",
+            run.outcomes
+        );
+        assert_eq!(ei_refusals(&run), Vec::<&Outcome>::new());
     }
 }
