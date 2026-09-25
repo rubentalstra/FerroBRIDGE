@@ -126,7 +126,12 @@ engine writes them as the `_feeder_audit`, `_link:i` and
 `ENTRY.other_participations` and `EVENT_CONTEXT.participations`
 (`_participation:i` under `context`), the same `PARTICIPATION` list.
 `ENTRY.provider` is a tail of the entry node whose value the cell writes as
-the `_provider` family (`rm::Carried::Family`). A run whose `Defaults` carry
+the `_provider` family (`rm::Carried::Family`, `family::provider`). These
+families are the one place the engine still spells FLAT keys, because the
+builder takes no `|raw` on a `_`-prefixed family (the `TODO(#241)` in
+`engine::family`). Reading them back decodes typed `LINK` and
+`PARTICIPATION` values, and a list that does not decode refuses the run. A
+run whose `Defaults` carry
 an `engine::origin::Origin` records the originating system, the source
 resource and every defaulted field in the composition's
 `FEEDER_AUDIT`, in the same order as the `Warning::Defaulted` entries. A
@@ -134,18 +139,34 @@ resource and every defaulted field in the composition's
 the linked composition of a `link` whose FHIR side is no reference is
 refused, since one run produces one composition.
 
-## A tail below a node is carried by the FLAT parts of its class
+## A value travels whole, and the attribute model decides a tail
+
+Every data value reaches the FLAT builder as its canonical JSON under the
+`|raw` suffix (Simplified Formats master04 §Raw canonical JSON), written and
+read through `openehr_its::json`, so the engine spells no per-class suffix and
+every attribute the reference model gives a value survives. Never add a
+per-class FLAT table back: what a class carries is `openehr_rm::v1_2::model`.
 
 The resolver records the RM class of the last attribute a tail names
 (`OpenehrTarget::leaf_class`). The engine reads the tail from the node's
-canonical JSON and writes it by merging into the value the place holds, and
-`engine::rm::carried` is the table of tails the FLAT parts of each class
-write. A tail outside it would be merged and then dropped on the way to the
-wire, so the compiler refuses it at load (`fc-uncarried-tail`, naming the
-mapping, the class and the tail), for a `with.openehr` tail and for a `manual`
-path alike; `EngineError::UnsupportedTail` in both directions is only the
-backstop for a program the compiler never saw. A tail that ends on a data
-value runs the cell of the tail's class, not the node's. The FLAT spellings
+canonical JSON with `paths::item_at_path` and writes it by merging into the
+value the place holds. `engine::rm::carried` looks the tail up in the
+attribute model: it is carried when every attribute exists on the node's
+class or a concrete descendant, no step is a list, and the node is a data
+value (or the tail is a `FAMILIES` entry such as `ENTRY.provider`). A `manual`
+path must also end on a `String` attribute, because `merge` writes text. A
+tail outside that is refused at load (`fc-uncarried-tail`, naming the mapping,
+the class and the tail); `EngineError::UnsupportedTail` in both directions is
+only the backstop for a program the compiler never saw. A tail that ends on a
+data value runs the cell of the tail's class, not the node's.
+
+Three nodes are the exception: the builder routes `COMPOSITION.composer`,
+`language` and `territory` through the `ctx/` vocabulary (master06) and takes
+no `|raw` there, so the engine writes them as `ctx/composer_name`,
+`ctx/language` and `ctx/territory` and refuses the run
+(`EngineError::ContextAttribute`) when the built value differs from the one
+written. The composition defaults travel as `ctx/` keys the same way; which
+fields default stays `engine/defaults-for-fields.adoc`'s. The FLAT spellings
 are Simplified Formats, vendored at
 `docs/specs/its-rest/docs/simplified_formats/`.
 

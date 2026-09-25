@@ -37,11 +37,13 @@ use openehr_mapping_core::index::FlatId;
 use openehr_mapping_core::index::ResolvedNode;
 use openehr_mapping_core::index::WebTemplateIndex;
 use openehr_mapping_core::template::PathError;
-use openehr_rm::v1_2::common::generic::party_identified::PartyIdentifiedData;
-use openehr_rm::v1_2::data_types::quantity::date_time::dv_date_time::DvDateTime;
 use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
 use openehr_rm::v1_2::data_types::text::dv_coded_text::DvCodedText;
 use openehr_rm::v1_2::model;
+use openehr_rm::v1_2::paths::EhrUri;
+use openehr_rm::v1_2::paths::EhrUriError;
+use openehr_rm::v1_2::paths::item_at_path;
+use openehr_rm::v1_2::support::terminology::openehr_terminology_group_identifiers::OpenehrTerminologyGroupIdentifiersData;
 
 use crate::engine::cell;
 use crate::engine::condition;
@@ -49,6 +51,7 @@ use crate::engine::condition::ConditionError;
 use crate::engine::condition::Verdict;
 use crate::engine::context::CallContext;
 use crate::engine::family;
+use crate::engine::family::FamilyError;
 use crate::engine::fhir::FhirError;
 use crate::engine::fhir::FhirKind;
 use crate::engine::fhir::FhirValue;
@@ -108,11 +111,6 @@ const INSTANCE_CEILING: u32 = 1024;
 /// and the `link` key leaves it optional. No specification governs the
 /// value: our own design.
 const LINK_TYPE: &str = "reference";
-
-/// The terminology id of the openEHR terminology, which the `setting` group
-/// belongs to, as `engine/defaults-for-fields.adoc` links it
-/// (<https://github.com/openEHR/specifications-TERM/blob/master/computable/XML/en/openehr_terminology.xml#L274>).
-const OPENEHR_TERMINOLOGY: &str = "openehr";
 
 /// The `external_ref.id.scheme` of a participant a FHIR reference names.
 ///
@@ -492,6 +490,31 @@ pub enum EngineError {
         mapping: String,
         /// The reference the FHIR side carries.
         target: String,
+        /// Why the `ehr:` URI parser of `openehr-rm` refused it.
+        #[source]
+        source: EhrUriError,
+    },
+    /// A reference-model family the node carries does not decode.
+    #[error("{mapping} could not read the family its node carries")]
+    Family {
+        /// The mapping being run.
+        mapping: String,
+        /// The refusal of the typed read.
+        #[source]
+        source: Box<FamilyError>,
+    },
+    /// A composition attribute the FLAT builder sets through the `ctx/`
+    /// vocabulary carries a part that vocabulary has no key for.
+    ///
+    /// Simplified Formats master06 §Composer and §Language and Territory set
+    /// `COMPOSITION.composer`, `language` and `territory` from `ctx/` keys,
+    /// and the builder takes no `|raw` value there, so the part would be lost.
+    #[error("{mapping} writes {node}, whose value the FLAT context keys do not carry whole")]
+    ContextAttribute {
+        /// The mapping, or the node when no mapping is known.
+        mapping: String,
+        /// The `aqlPath` of the node.
+        node: String,
     },
     /// A `link` whose FHIR side is no reference, which is the linked
     /// composition the specification leaves to a second context run.
@@ -660,12 +683,13 @@ pub fn to_openehr<T: Table + ?Sized>(
         run.families
             .extend(family::feeder_audit(index.root(), origin, &defaulted));
     }
-    let values = run.node_values()?;
+    let (values, routed) = run.node_values()?;
     let built = index
         .build_composition(&values, &defaults.start_time)
         .map_err(|source| EngineError::Build {
             source: Box::new(source),
         })?;
+    run.carried_whole(&built, &routed)?;
     Ok(Outcome::new(built, run.warnings))
 }
 
@@ -737,6 +761,11 @@ struct Run<'a, T: Table + ?Sized> {
     composition: Option<&'a CanonicalComposition>,
     written: Vec<Written>,
     families: Vec<NodeValue>,
+    /// The defaults the run writes as `ctx/` keys.
+    context_keys: Vec<NodeValue>,
+    /// The values the built composition must carry at the nodes a `ctx/`
+    /// default sets, where the key holds less than the value.
+    expected: Vec<Routed>,
     counters: BTreeMap<(String, String), usize>,
     chain: Vec<String>,
     /// The references the current reference chain entered, outermost first.
@@ -778,6 +807,8 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             composition,
             written: Vec::new(),
             families: Vec::new(),
+            context_keys: Vec::new(),
+            expected: Vec::new(),
             counters: BTreeMap::new(),
             chain: Vec::new(),
             references: Vec::new(),
@@ -1922,10 +1953,11 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                         continue;
                     };
                     {
-                        if !is_ehr_uri(&literal) {
+                        if let Err(source) = literal.parse::<EhrUri>() {
                             return Err(EngineError::LinkTarget {
                                 mapping: String::from(mapping.name()),
                                 target: literal,
+                                source,
                             });
                         }
                         let positions = self.family_positions(openehr, &binding.openehr);
@@ -1950,7 +1982,13 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 let Some(node) = self.node_value(mapping.name(), openehr, &positions)? else {
                     return Ok(Vec::new());
                 };
-                let targets = family::link_targets(&node, meaning, link_type);
+                let targets =
+                    family::link_targets(&node, meaning, link_type).map_err(|source| {
+                        EngineError::Family {
+                            mapping: String::from(mapping.name()),
+                            source: Box::new(source),
+                        }
+                    })?;
                 let occurrences =
                     vec![openehr_occurrence(mapping.name(), &positions)?; targets.len()];
                 let bindings = self.bindings(mapping, parent, &occurrences)?;
@@ -2038,7 +2076,12 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 let Some(node) = self.node_value(mapping.name(), openehr, &positions)? else {
                     return Ok(Vec::new());
                 };
-                let found = family::participations(&node, list, function);
+                let found = family::participations(&node, list, function).map_err(|source| {
+                    EngineError::Family {
+                        mapping: String::from(mapping.name()),
+                        source: Box::new(source),
+                    }
+                })?;
                 let occurrences =
                     vec![openehr_occurrence(mapping.name(), &positions)?; found.len()];
                 let bindings = self.bindings(mapping, parent, &occurrences)?;
@@ -2448,18 +2491,17 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             for taken in &produced.fallbacks {
                 self.warnings.push(Warning::fallback(taken));
             }
-            let family = rm::family_of(&segments);
-            for part in produced.value.parts().map_err(refuse_rm)? {
-                let mut sub_path = family.clone();
-                sub_path.extend(part.sub_path().iter().cloned());
-                let mut value = NodeValue::new(node, part.value().clone())
-                    .with_occurrences(binding.openehr.clone())
-                    .under(sub_path);
-                if let Some(datum) = part.datum() {
-                    value = value.with_datum(datum);
-                }
-                self.families.push(value);
-            }
+            let RmValue::Party(ref party) = produced.value else {
+                return Err(refuse_rm(RmError::UnknownClass {
+                    rm_type: String::from(produced.value.rm_type()),
+                }));
+            };
+            self.families.extend(family::provider(
+                node,
+                &binding.openehr,
+                &rm::family_of(&segments),
+                party,
+            ));
             return Ok(());
         }
         let mut object = self
@@ -2472,7 +2514,8 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             // NOTE: no specification governs this: our own design, a held
             // sub-value still being written attribute by attribute is no whole
             // value yet, so it carries nothing over and the cell starts fresh.
-            let existing = sub_value(&object, &segments).and_then(|found| {
+            let held = serde_json::Value::Object(object.clone());
+            let existing = item_at_path(&held, openehr.tail()).and_then(|found| {
                 RmValue::from_canonical(leaf, node.aql_path().as_str(), found).ok()
             });
             let produced = cell::put(
@@ -2812,16 +2855,16 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 .iter()
                 .map(|segment| segment.attribute.as_str())
                 .collect();
-            // NOTE: Simplified Formats, the per-class attribute tables: a tail no
-            // FLAT part carries would be merged and then dropped, so it refuses
-            // (an empty tail writes the node's `value`, as `merge` does).
+            // NOTE: no specification governs this: our own design, `merge` writes a manual
+            // value as text, so a tail ending on no string attribute refuses (an empty
+            // tail writes the node's `value`).
             let written: &[&str] = if segments.is_empty() {
                 &["value"]
             } else {
                 &segments
             };
             if rm::carried(target.node().rm_type(), written)
-                .is_none_or(|(_, held)| held == Carried::Family)
+                .is_none_or(|(_, held)| held != Carried::Text)
             {
                 return Err(EngineError::UnsupportedTail {
                     mapping: format!("{}.{}", mapping.name(), entry.name()),
@@ -3114,8 +3157,9 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
             .iter()
             .any(|written| written.flat_id == *node || written.flat_id.as_str().starts_with(&below))
             || self.families.iter().any(|family| {
-                let flat_id = family.flat_id();
-                flat_id == node || flat_id.as_str().starts_with(&below)
+                family
+                    .flat_id()
+                    .is_some_and(|flat_id| flat_id == node || flat_id.as_str().starts_with(&below))
             })
     }
 
@@ -3123,7 +3167,13 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     ///
     /// Returns the openEHR path of every field it filled, in the order it
     /// filled them, which is the order of the [`Warning::Defaulted`] entries
-    /// it recorded.
+    /// it recorded. Which fields take a default is FHIRconnect's
+    /// (`engine/defaults-for-fields.adoc`); every default travels as the `ctx/`
+    /// key the FLAT builder resolves (Simplified Formats, master06 §Composer,
+    /// §time, §setting, §Language and Territory). `ctx/setting` carries the
+    /// code and the builder takes the rubric from the openEHR terminology's
+    /// [`OpenehrTerminologyGroupIdentifiersData::GROUP_ID_SETTING`] group, so
+    /// the project's value is checked against the built composition.
     ///
     /// # Errors
     ///
@@ -3131,69 +3181,100 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
     /// defaulted field.
     fn apply_defaults(&mut self, defaults: &Defaults) -> Result<Vec<String>, EngineError> {
         let mut filled = Vec::new();
-        let composer = defaults.composer.clone();
-        self.default_at(&mut filled, "/composer", || {
-            RmValue::Party(PartyIdentifiedData {
-                external_ref: None,
-                name: Some(composer),
-                identifiers: None,
-            })
-        })?;
-        let start_time = defaults.start_time.clone();
-        self.default_at(&mut filled, "/context/start_time", || {
-            RmValue::DateTime(Box::new(DvDateTime {
-                normal_status: None,
-                normal_range: None,
-                other_reference_ranges: None,
-                magnitude_status: None,
-                accuracy: None,
-                value: start_time,
-            }))
-        })?;
-        let setting = defaults.setting.clone();
-        self.default_at(&mut filled, "/context/setting", || {
-            RmValue::CodedText(Box::new(DvCodedText {
-                value: setting.value,
-                hyperlink: None,
-                formatting: None,
-                mappings: None,
-                language: None,
-                encoding: None,
-                defining_code: CodePhrase {
-                    terminology_id: TerminologyId {
-                        value: String::from(OPENEHR_TERMINOLOGY),
+        self.default_context(
+            &mut filled,
+            "/composer",
+            "composer_name",
+            &defaults.composer,
+        )?;
+        self.default_context(
+            &mut filled,
+            "/context/start_time",
+            "time",
+            &defaults.start_time,
+        )?;
+        if let Some(node) = self.unwritten("/context/setting")? {
+            let setting = defaults.setting.clone();
+            self.context_keys.push(NodeValue::context(
+                "setting",
+                serde_json::Value::String(setting.code.clone()),
+            ));
+            self.expected.push((
+                node.flat_id().clone(),
+                RmValue::CodedText(Box::new(DvCodedText {
+                    value: setting.value,
+                    hyperlink: None,
+                    formatting: None,
+                    mappings: None,
+                    language: None,
+                    encoding: None,
+                    defining_code: CodePhrase {
+                        terminology_id: TerminologyId {
+                            value: String::from(
+                                OpenehrTerminologyGroupIdentifiersData::TERMINOLOGY_ID_OPENEHR,
+                            ),
+                        },
+                        code_string: setting.code,
+                        preferred_term: None,
                     },
-                    code_string: setting.code,
-                    preferred_term: None,
-                },
-            }))
-        })?;
-        if let Some(code) = defaults.language.clone() {
-            self.default_at(&mut filled, "/language", || coded(&code, "ISO_639-1"))?;
+                })),
+            ));
+            self.defaulted(&mut filled, "/context/setting");
         }
-        if let Some(code) = defaults.territory.clone() {
-            self.default_at(&mut filled, "/territory", || coded(&code, "ISO_3166-1"))?;
+        if let Some(ref code) = defaults.language {
+            self.default_context(&mut filled, "/language", "language", code)?;
+        }
+        if let Some(ref code) = defaults.territory {
+            self.default_context(&mut filled, "/territory", "territory", code)?;
         }
         Ok(filled)
     }
 
-    /// Writes one default value at `path`, when nothing wrote it already.
+    /// Writes one default as the `ctx/` key `field`, when the template holds
+    /// a node at `path` and nothing wrote it already.
     ///
     /// # Errors
     ///
     /// Returns [`EngineError::Template`] when the template cannot answer for
     /// the path for any reason other than holding no node at it.
-    fn default_at(
+    fn default_context(
         &mut self,
         filled: &mut Vec<String>,
         path: &str,
-        value: impl FnOnce() -> RmValue,
+        field: &str,
+        value: &str,
     ) -> Result<(), EngineError> {
+        if self.unwritten(path)?.is_some() {
+            self.context_keys.push(NodeValue::context(
+                field,
+                serde_json::Value::String(String::from(value)),
+            ));
+            self.defaulted(filled, path);
+        }
+        Ok(())
+    }
+
+    /// Records that the engine filled the field at `path`.
+    fn defaulted(&mut self, filled: &mut Vec<String>, path: &str) {
+        self.warnings.push(Warning::Defaulted {
+            field: String::from(path),
+        });
+        filled.push(String::from(path));
+    }
+
+    /// Returns the node at `path` when the template holds one and no mapping
+    /// wrote it.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EngineError::Template`] when the template cannot answer for
+    /// the path for any reason other than holding no node at it.
+    fn unwritten(&self, path: &str) -> Result<Option<&'a ResolvedNode>, EngineError> {
         let node = match self.index.node(&AqlPath::new(path)) {
             Ok(node) => node,
             // NOTE: engine/defaults-for-fields.adoc, the context "is usually
             // populated", so a template with no node at the path takes no default.
-            Err(PathError::UnknownPath { .. }) => return Ok(()),
+            Err(PathError::UnknownPath { .. }) => return Ok(None),
             Err(source) => {
                 return Err(EngineError::Template {
                     mapping: String::from(self.program.context().as_str()),
@@ -3202,29 +3283,24 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 });
             }
         };
-        if self
+        let written = self
             .written
             .iter()
-            .any(|written| written.flat_id == *node.flat_id())
-        {
-            return Ok(());
-        }
-        self.written.push(Written {
-            flat_id: node.flat_id().clone(),
-            positions: Vec::new(),
-            value: Held::Value(value()),
-        });
-        self.warnings.push(Warning::Defaulted {
-            field: String::from(path),
-        });
-        filled.push(String::from(path));
-        Ok(())
+            .any(|written| written.flat_id == *node.flat_id());
+        Ok((!written).then_some(node))
     }
 
     /// Returns the values the run produced, as the composition builder wants
-    /// them.
-    fn node_values(&self) -> Result<Vec<NodeValue>, EngineError> {
+    /// them, with the values the builder takes through the `ctx/` keys.
+    ///
+    /// Every value travels whole as its canonical JSON under `|raw`
+    /// (Simplified Formats, master04 §Raw canonical JSON), except at a
+    /// composition attribute the builder sets from the context vocabulary
+    /// ([`context_keys`]), whose value is returned beside its node so the run
+    /// can check the built composition carries it whole.
+    fn node_values(&self) -> Result<(Vec<NodeValue>, Vec<Routed>), EngineError> {
         let mut values = Vec::new();
+        let mut routed = self.expected.clone();
         for written in &self.written {
             let node = self
                 .index
@@ -3237,8 +3313,8 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                 node: String::from(node.aql_path().as_str()),
                 source: Box::new(source),
             };
-            let parts = match written.value {
-                Held::Value(ref value) => value.parts(),
+            let value = match written.value {
+                Held::Value(ref value) => value.clone(),
                 Held::Partial(ref object) => {
                     let rm_type = object
                         .get("_type")
@@ -3249,23 +3325,100 @@ impl<'a, T: Table + ?Sized> Run<'a, T> {
                         node.aql_path().as_str(),
                         &serde_json::Value::Object(object.clone()),
                     )
-                    .and_then(|value| value.parts())
+                    .map_err(refuse)?
                 }
+            };
+            if let Some(keys) = context_keys(node, &value) {
+                values.extend(keys);
+                routed.push((written.flat_id.clone(), value));
+                continue;
             }
-            .map_err(refuse)?;
-            for part in parts {
-                let mut value = NodeValue::new(node, part.value().clone())
+            values.push(
+                NodeValue::new(node, value.to_canonical().map_err(refuse)?)
                     .with_occurrences(written.positions.clone())
-                    .under(part.sub_path().to_vec());
-                if let Some(datum) = part.datum() {
-                    value = value.with_datum(datum);
-                }
-                values.push(value);
-            }
+                    .with_datum(rm::RAW),
+            );
         }
         values.extend(self.families.iter().cloned());
-        Ok(values)
+        values.extend(self.context_keys.iter().cloned());
+        Ok((values, routed))
     }
+
+    /// Refuses a composition whose context-set attributes do not carry the
+    /// value the run wrote there whole.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`EngineError::ContextAttribute`] when the built value differs
+    /// from the written one, and [`EngineError::Build`] or
+    /// [`EngineError::Rm`] when the built value cannot be read back.
+    fn carried_whole(
+        &self,
+        built: &CanonicalComposition,
+        routed: &[Routed],
+    ) -> Result<(), EngineError> {
+        let refuse_build = |source: PathError| EngineError::Build {
+            source: Box::new(source),
+        };
+        for (flat_id, written) in routed {
+            let node = self.index.node_by_flat_id(flat_id).map_err(refuse_build)?;
+            let path = node.aql_path().as_str();
+            let back = self
+                .index
+                .read(built, node, &[])
+                .map_err(refuse_build)?
+                .map(|value| RmValue::from_canonical(node.rm_type(), path, &value))
+                .transpose()
+                .map_err(|source| EngineError::Rm {
+                    mapping: String::from(self.program.context().as_str()),
+                    node: String::from(path),
+                    source: Box::new(source),
+                })?;
+            if back.as_ref() != Some(written) {
+                return Err(EngineError::ContextAttribute {
+                    mapping: String::from(self.program.context().as_str()),
+                    node: String::from(path),
+                });
+            }
+        }
+        Ok(())
+    }
+}
+
+/// A value written at a composition attribute the FLAT builder sets from the
+/// context vocabulary, beside the node it belongs to.
+type Routed = (FlatId, RmValue);
+
+// TODO(#241): the three attributes travel as `ctx/` keys until openehr-sdt
+// honours `|raw` on the COMPOSITION `language`, `territory` and `composer`
+// nodes, which its builder routes through the context (new sibling request S6).
+/// Returns the `ctx/` keys a value at a composition attribute the FLAT
+/// builder sets from the context vocabulary travels as, `None` for any other
+/// node.
+///
+/// Simplified Formats, master06 §Composer and §Language and Territory:
+/// `ctx/composer_name` sets the composer's name and `ctx/language` and
+/// `ctx/territory` the two codes. A part the keys do not hold is left out
+/// here and refused by [`Run::carried_whole`] once the composition is built.
+fn context_keys(node: &ResolvedNode, value: &RmValue) -> Option<Vec<NodeValue>> {
+    let key = |field: &str, text: &str| {
+        NodeValue::context(field, serde_json::Value::String(String::from(text)))
+    };
+    let field = match node.aql_path().as_str() {
+        "/language" => "language",
+        "/territory" => "territory",
+        "/composer" => "composer_name",
+        _ => return None,
+    };
+    Some(match *value {
+        RmValue::CodePhrase(ref code) if field != "composer_name" => {
+            vec![key(field, &code.code_string)]
+        }
+        RmValue::Party(ref party) if field == "composer_name" => {
+            party.name.iter().map(|name| key(field, name)).collect()
+        }
+        _ => Vec::new(),
+    })
 }
 
 /// Whether a mapping ran, or its input side kept it from running.
@@ -3324,20 +3477,16 @@ fn fhir_axes(target: &FhirTarget) -> Vec<String> {
     axes
 }
 
-/// Returns the value a condition's attribute names below its node.
+/// Returns the value a target's tail names below its node.
 ///
-/// A Web Template node is as deep as the template constrains, and a condition
-/// may name an attribute below it, so the tail walks the canonical JSON of the
-/// node by attribute name.
+/// A Web Template node is as deep as the template constrains, and a target
+/// may name an attribute below it, so the tail is read from the canonical
+/// JSON of the node with `PATHABLE.item_at_path` of `openehr-rm`.
 fn attribute_at<'value>(
     value: &'value serde_json::Value,
     target: &OpenehrTarget,
 ) -> Option<&'value serde_json::Value> {
-    let mut found = value;
-    for segment in &target.tail().segments {
-        found = found.get(segment.attribute.as_str())?;
-    }
-    Some(found)
+    item_at_path(value, target.tail())
 }
 
 /// Drops each group-independent warning declared from `start` on that an
@@ -3412,18 +3561,6 @@ fn lexical(value: &Value) -> String {
     }
 }
 
-/// Returns whether a reference is a URI with the `ehr` scheme.
-///
-/// A URI scheme is case-insensitive
-/// (<https://www.rfc-editor.org/rfc/rfc3986#section-3.1>), and `DV_EHR_URI`
-/// "has the scheme name 'ehr'"
-/// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/data_types.html#_dv_ehr_uri_class>).
-fn is_ehr_uri(reference: &str) -> bool {
-    reference
-        .split_once(':')
-        .is_some_and(|(scheme, rest)| scheme.eq_ignore_ascii_case("ehr") && !rest.is_empty())
-}
-
 /// Returns the attribute names a target's tail walks, outermost first.
 fn tail_segments(target: &OpenehrTarget) -> Vec<&str> {
     target
@@ -3441,19 +3578,6 @@ fn unsupported_tail(mapping: &Mapping, target: &OpenehrTarget) -> EngineError {
         node: String::from(target.node().aql_path().as_str()),
         tail: target.tail().to_string(),
     }
-}
-
-/// Returns the value an object holds at an attribute path.
-fn sub_value<'value>(
-    object: &'value serde_json::Map<String, serde_json::Value>,
-    segments: &[&str],
-) -> Option<&'value serde_json::Value> {
-    let (first, rest) = segments.split_first()?;
-    let mut found = object.get(*first)?;
-    for segment in rest {
-        found = found.get(*segment)?;
-    }
-    Some(found)
 }
 
 /// Merges one value into an object at an attribute path.
@@ -3500,25 +3624,26 @@ fn scalar_json(
         Value::Bool(flag) => String::from(if flag { "true" } else { "false" }),
         Value::Null | Value::Array(_) | Value::Object(_) => String::new(),
     };
-    let refuse = |reason: &str| RmError::Decode {
+    let refuse = |expected: &'static str| RmError::Scalar {
         node: String::from(node.aql_path().as_str()),
         rm_type: String::from(class),
-        reason: format!("`{text}` {reason}"),
+        text: text.clone(),
+        expected,
     };
     match carried {
         Carried::Text if written.as_str().is_some() => Ok(serde_json::Value::String(text)),
-        Carried::Text | Carried::Value | Carried::Family => Err(refuse("is no text")),
+        Carried::Text | Carried::Value | Carried::Family => Err(refuse("text")),
         Carried::Real => serde_json::from_str::<serde_json::Number>(&text)
             .map(serde_json::Value::Number)
-            .map_err(|_refused| refuse("is no real number")),
+            .map_err(|_refused| refuse("a real number")),
         Carried::Integer => text
             .parse::<i64>()
             .map(|number| serde_json::Value::Number(number.into()))
-            .map_err(|_refused| refuse("is no integer")),
+            .map_err(|_refused| refuse("an integer")),
         Carried::Boolean => match text.as_str() {
             "true" => Ok(serde_json::Value::Bool(true)),
             "false" => Ok(serde_json::Value::Bool(false)),
-            _ => Err(refuse("is no boolean")),
+            _ => Err(refuse("a boolean")),
         },
     }
 }
@@ -3533,17 +3658,6 @@ fn scalar(value: &serde_json::Value) -> Option<String> {
             None
         }
     }
-}
-
-/// Returns one `CODE_PHRASE`, for a defaulted composition field.
-fn coded(code: &str, terminology: &str) -> RmValue {
-    RmValue::CodePhrase(CodePhrase {
-        terminology_id: TerminologyId {
-            value: String::from(terminology),
-        },
-        code_string: String::from(code),
-        preferred_term: None,
-    })
 }
 
 /// Renders an index prefix, for the counter that appends under it.

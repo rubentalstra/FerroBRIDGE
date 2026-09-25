@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: Vernum Projecten B.V.
+# SPDX-License-Identifier: BUSL-1.1
+# A FerroBRIDGE-authored model mapping that names data-value attributes no
+# per-class FLAT suffix spells: DV_TEXT.language on the DV_CODED_TEXT of
+# items[at0002], DV_TEXT.hyperlink on the DV_CODED_TEXT of items[at0073], and
+# DV_ORDERED.normal_range on the DV_DATE_TIME of items[at0077]. Each value
+# travels whole under the FLAT `|raw` suffix, so every attribute survives.
+grammar: FHIRConnect/v1.0.0
+type: model
+metadata:
+  name: ferrobridge_tail_carried
+  version: 1.0.0
+spec:
+  system: FHIR
+  version: R4
+  openEhrConfig:
+    archetype: openEHR-EHR-EVALUATION.problem_diagnosis.v1
+  fhirConfig:
+    structureDefinition: http://hl7.org/fhir/StructureDefinition/Condition
+
+mappings:
+  - name: "problemName"
+    with:
+      fhir: "$resource.code"
+      openehr: "$archetype/data[at0001]/items[at0002]"
+      type: "CODEABLECONCEPT"
+
+  - name: "problemLanguage"
+    with:
+      fhir: "$resource.severity.coding"
+      openehr: "$archetype/data[at0001]/items[at0002]/value/language"
+      type: "CODING"
+
+  - name: "certainty"
+    with:
+      fhir: "$resource.verificationStatus"
+      openehr: "$archetype/data[at0001]/items[at0073]"
+      type: "CODEABLECONCEPT"
+
+  - name: "certaintyLink"
+    with:
+      fhir: "$resource.verificationStatus.text"
+      openehr: "$archetype/data[at0001]/items[at0073]/value/hyperlink/value"
+
+  - name: "onset"
+    with:
+      fhir: "$resource.recordedDate"
+      openehr: "$archetype/data[at0001]/items[at0077]/value/value"
+
+  - name: "onsetRange"
+    with:
+      fhir: "$resource.onset.as(Period)"
+      openehr: "$archetype/data[at0001]/items[at0077]/value/normal_range"

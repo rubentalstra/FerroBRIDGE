@@ -29,6 +29,12 @@ openehr-base.workspace = true
 # (docs/architecture.md section 3); the foundation returns its types, so this
 # crate names the same crate rather than re-exporting them.
 openehr-rm.workspace = true
+# The canonical JSON entry points of ITS-JSON, the one codec every RM value
+# crosses (`openehr_its::json`).
+openehr-its.workspace = true
+# The FLAT key model the composition seam takes its segments and suffixes in
+# (`openehr_sdt::flat::path`).
+openehr-sdt.workspace = true
 serde_json.workspace = true
 # The digest the default identity sink derives a created resource's id from.
 sha2.workspace = true
@@ -40,10 +46,6 @@ thiserror.workspace = true
 [dev-dependencies]
 ferrobridge-testkit.workspace = true
 insta.workspace = true
-# The operational-template parser the resolve tests build their Web Template
-# with; the crate itself takes the built template from its caller.
-openehr-its.workspace = true
-openehr-sdt.workspace = true
 proptest.workspace = true
 tempfile.workspace = true
 

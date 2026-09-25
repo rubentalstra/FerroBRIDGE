@@ -18,16 +18,13 @@
 //! differently.
 
 use openehr_am::v2_4::aom2::archetype::operational_template::OperationalTemplate;
+use openehr_am::v2_4::aom2::definitions::adl_code_definitions::AdlCodeDefinitionsData;
 use openehr_sdt::flat::error::FlatError;
 use openehr_sdt::flat::webtemplate::model::WebTemplate;
 
 use crate::diagnostic::Diagnostic;
 use crate::diagnostic::DiagnosticCode;
 use crate::path::PathResolutionError;
-
-/// The leader of an ADL 2 id-code (`AM Release 2.4.0`, `adl_code_definitions`
-/// §Constants).
-const ID_CODE_LEADER: &str = "id";
 
 /// The generation of the template a Web Template was built from.
 ///
@@ -153,13 +150,12 @@ pub fn web_template(source: &TemplateSource) -> Result<WebTemplate, PathError> {
 /// conformant to the openEHR Reference Model"
 /// (<https://specifications.openehr.org/releases/AM/Release-2.4.0/ADL2.html>,
 /// §ADL 2.4). An archetype root carries an archetype id rather than a local
-/// code, and neither an at-code nor an archetype id starts with `id` followed
-/// by a digit.
+/// code, so a node id is an id-code when it carries the id-code leader and
+/// reads as a valid ADL code (AM Release 2.4.0, `ADL_CODE_DEFINITIONS`
+/// §Functions, `is_id_code` and `is_valid_code`).
 #[must_use]
 pub(crate) fn is_id_code(node_id: &str) -> bool {
-    node_id
-        .strip_prefix(ID_CODE_LEADER)
-        .is_some_and(|rest| rest.starts_with(|character: char| character.is_ascii_digit()))
+    AdlCodeDefinitionsData::is_id_code(node_id) && AdlCodeDefinitionsData::is_valid_code(node_id)
 }
 
 /// What a coded value a term binding names is.
@@ -398,6 +394,17 @@ pub enum PathError {
         /// The `aqlPath` of the node the path would lead to.
         child: String,
     },
+    /// A FLAT key carries an instance index past the bound the FLAT reader
+    /// accepts.
+    #[error("the value at `{flat_id}` carries the instance index {index}, past the bound {max}")]
+    InstanceIndex {
+        /// The flat id of the node, or `ctx` for a context value.
+        flat_id: String,
+        /// The index that is past the bound.
+        index: u32,
+        /// The largest index the FLAT reader accepts.
+        max: u32,
+    },
     /// The occurrence list does not match the repeating nodes on the way to
     /// the target.
     #[error("the node `{flat_id}` needs {expected} occurrence indices and was given {given}")]
@@ -464,6 +471,7 @@ impl PathError {
             | Self::NotADescendant { .. }
             | Self::OccurrenceCount { .. } => DiagnosticCode::UnknownTemplatePath,
             Self::CompositionBuild { .. }
+            | Self::InstanceIndex { .. }
             | Self::CompositionFlatten { .. }
             | Self::InvalidComposition { .. }
             | Self::TemplateMismatch { .. } => DiagnosticCode::InvalidComposition,

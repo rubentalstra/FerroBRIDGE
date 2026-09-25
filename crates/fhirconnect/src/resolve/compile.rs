@@ -971,14 +971,15 @@ impl<'a> Compiler<'a> {
         })
     }
 
-    /// Refuses an openEHR tail no FLAT part of the node's class carries.
+    /// Refuses an openEHR tail the engine cannot carry to the wire.
     ///
-    /// The engine writes a tail through the FLAT parts of the node's class
-    /// (`engine::rm::carried`), so a tail outside them would be merged and
-    /// then dropped on the way to the wire; the crate refuses such a mapping
-    /// at load, never on the request that first reaches it. A `manual` path
-    /// writes a scalar, so an empty one writes the node's `value` and a
-    /// family attribute is refused. No specification governs the walk below a
+    /// A value reaches the wire whole under `|raw`, so a tail is carried when
+    /// it names attributes the reference model gives the node's class, walks no
+    /// container and sits below a data value or a FLAT family
+    /// (`engine::rm::carried`); the crate refuses any other tail at load,
+    /// never on the request that first reaches it. A `manual` path writes text,
+    /// so an empty one writes the node's `value` and a tail that ends on no
+    /// string attribute is refused. No specification governs the walk below a
     /// node beyond the RM attribute model: our own design.
     fn carried_tail(
         &mut self,
@@ -1002,7 +1003,7 @@ impl<'a> Compiler<'a> {
         };
         let class = target.node().rm_type();
         let carried = crate::engine::rm::carried(class, written)
-            .is_some_and(|(_, held)| !manual || held != crate::engine::rm::Carried::Family);
+            .is_some_and(|(_, held)| !manual || held == crate::engine::rm::Carried::Text);
         if carried {
             return;
         }
@@ -1013,8 +1014,8 @@ impl<'a> Compiler<'a> {
             position,
             path,
             format!(
-                "`{mapping}` names `{}` below the {class} node `{}`, which no FLAT part of \
-                 {class} carries, so the value would never reach the wire",
+                "`{mapping}` names `{}` below the {class} node `{}`, which the engine cannot carry \
+                 as one {class} value, so the value would never reach the wire",
                 written.join("/"),
                 target.node().aql_path().as_str()
             ),

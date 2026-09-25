@@ -13,11 +13,26 @@
 //! Formats, `docs/specs/its-rest/docs/simplified_formats/master05-rm_mapping.adoc`,
 //! the sections `EVENT_CONTEXT`, the `ENTRY` classes, `LINK`, `FEEDER_AUDIT`
 //! and `PARTICIPATION`). This module writes those keys as [`NodeValue`]s and
-//! reads the same attributes back out of the canonical JSON of the node.
+//! reads the same attributes back out of the canonical JSON of the node as
+//! typed `openehr-rm` values.
 
+// TODO(#241): the write side spells the `_feeder_audit`, `_link:i`,
+// `_participation:i`, `_other_participation:i` and `_provider` families key by
+// key until openehr-sdt honours `|raw` on `_`-prefixed attribute families or
+// makes `emit_rm_attrs` public (sibling request S1).
+
+use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
+use openehr_its::json::JsonParseError;
+use openehr_its::json::from_canonical_value;
 use openehr_mapping_core::composition::NodeValue;
 use openehr_mapping_core::composition::RmPosition;
 use openehr_mapping_core::index::ResolvedNode;
+use openehr_rm::v1_2::common::archetyped::link::Link;
+use openehr_rm::v1_2::common::generic::party_identified::PartyIdentified;
+use openehr_rm::v1_2::common::generic::party_identified::PartyIdentifiedData;
+use openehr_rm::v1_2::common::generic::party_proxy::PartyProxy;
+use openehr_rm::v1_2::data_types::text::dv_text::DvText;
+use openehr_sdt::flat::path::Segment;
 
 use crate::engine::origin::Origin;
 use crate::engine::origin::UNKNOWN_SOURCE;
@@ -26,6 +41,36 @@ use crate::engine::origin::UNKNOWN_SOURCE;
 ///
 /// No specification governs the spelling: our own design.
 pub const DEFAULTED: &str = "defaulted";
+
+/// Why a family a node carries could not be read.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+#[error("the `{attribute}` of the node does not read as its reference-model class")]
+pub struct FamilyError {
+    /// The reference-model attribute that holds the family.
+    pub attribute: &'static str,
+    /// What the strict ITS-JSON reader refused, with its JSON path.
+    #[source]
+    pub source: JsonParseError,
+}
+
+/// Returns a segment with no instance index.
+fn plain(name: &str) -> Segment {
+    Segment {
+        name: String::from(name),
+        index: None,
+    }
+}
+
+/// Returns a segment with the instance index `index`.
+///
+/// NOTE: no specification governs this: our own design, an index past `u32`
+/// saturates, and the composition seam refuses it past the FLAT bound.
+fn indexed(name: &str, index: usize) -> Segment {
+    Segment {
+        name: String::from(name),
+        index: Some(u32::try_from(index).unwrap_or(u32::MAX)),
+    }
+}
 
 /// Returns the `_feeder_audit` family of the composition root.
 ///
@@ -39,34 +84,34 @@ pub const DEFAULTED: &str = "defaulted";
 /// The allocation of facts to attributes is our own design.
 #[must_use]
 pub fn feeder_audit(root: &ResolvedNode, origin: &Origin, defaulted: &[String]) -> Vec<NodeValue> {
-    let family = String::from("_feeder_audit");
-    let at = |segments: &[String], datum: &str, value: &str| {
-        let mut sub_path = vec![family.clone()];
-        sub_path.extend(segments.iter().cloned());
+    let at = |segment: Segment, datum: &str, value: &str| {
         NodeValue::new(root, serde_json::Value::String(String::from(value)))
-            .under(sub_path)
+            .under(vec![plain("_feeder_audit"), segment])
             .with_datum(datum)
     };
-    let originating = [String::from("originating_system_audit")];
-    let feeder = [String::from("feeder_system_audit")];
-    let mut values = vec![at(&originating, "system_id", origin.system_id())];
+    let originating = || plain("originating_system_audit");
+    let mut values = vec![at(originating(), "system_id", origin.system_id())];
     if let Some(source) = origin.source() {
         if let Some(version) = source.version_id() {
-            values.push(at(&originating, "version_id", version));
+            values.push(at(originating(), "version_id", version));
         }
-        let item = [String::from("originating_system_item_id:0")];
-        values.push(at(&item, "id", source.id().unwrap_or(UNKNOWN_SOURCE)));
-        values.push(at(&item, "type", source.resource_type()));
+        let item = || indexed("originating_system_item_id", 0);
+        values.push(at(item(), "id", source.id().unwrap_or(UNKNOWN_SOURCE)));
+        values.push(at(item(), "type", source.resource_type()));
     }
     if defaulted.is_empty() {
         return values;
     }
-    values.push(at(&feeder, "system_id", origin.system_id()));
+    values.push(at(
+        plain("feeder_system_audit"),
+        "system_id",
+        origin.system_id(),
+    ));
     for (index, field) in defaulted.iter().enumerate() {
-        let item = [format!("feeder_system_item_id:{index}")];
-        values.push(at(&item, "id", field));
-        values.push(at(&item, "type", DEFAULTED));
-        values.push(at(&item, "issuer", origin.system_id()));
+        let item = || indexed("feeder_system_item_id", index);
+        values.push(at(item(), "id", field));
+        values.push(at(item(), "type", DEFAULTED));
+        values.push(at(item(), "issuer", origin.system_id()));
     }
     values
 }
@@ -83,7 +128,6 @@ pub fn link(
     index: usize,
     parts: &LinkParts<'_>,
 ) -> Vec<NodeValue> {
-    let family = vec![format!("_link:{index}")];
     [
         ("meaning", parts.meaning),
         ("type", parts.link_type),
@@ -93,7 +137,7 @@ pub fn link(
     .map(|(datum, value)| {
         NodeValue::new(node, serde_json::Value::String(String::from(value)))
             .with_occurrences(positions.to_vec())
-            .under(family.clone())
+            .under(vec![indexed("_link", index)])
             .with_datum(datum)
     })
     .collect()
@@ -178,7 +222,6 @@ pub fn participation(
     index: usize,
     parts: &ParticipationParts<'_>,
 ) -> Vec<NodeValue> {
-    let family = vec![format!("{}:{index}", list.family)];
     let mut data = vec![("function", parts.function)];
     if let Some(name) = parts.name {
         data.push(("name", name));
@@ -190,10 +233,75 @@ pub fn participation(
         .map(|(datum, value)| {
             NodeValue::new(node, serde_json::Value::String(String::from(value)))
                 .with_occurrences(positions.to_vec())
-                .under(family.clone())
+                .under(vec![indexed(list.family, index)])
                 .with_datum(datum)
         })
         .collect()
+}
+
+/// Returns the family of one `PARTY_IDENTIFIED` written under `family` on
+/// `node`, the `_provider` of an `ENTRY`.
+///
+/// The party is `|name` plus one `_identifier:i` per identifier, each with
+/// `|id`, `|issuer`, `|assigner` and `|type` (Simplified Formats, the
+/// `PARTY_IDENTIFIED` and `DV_IDENTIFIER` tables).
+#[must_use]
+pub fn provider(
+    node: &ResolvedNode,
+    positions: &[RmPosition],
+    family: &[Segment],
+    party: &PartyIdentifiedData,
+) -> Vec<NodeValue> {
+    let at = |below: Vec<Segment>, datum: &str, value: &str| {
+        let mut sub_path = family.to_vec();
+        sub_path.extend(below);
+        NodeValue::new(node, serde_json::Value::String(String::from(value)))
+            .with_occurrences(positions.to_vec())
+            .under(sub_path)
+            .with_datum(datum)
+    };
+    let mut values = Vec::new();
+    if let Some(ref name) = party.name {
+        values.push(at(Vec::new(), "name", name));
+    }
+    for (index, identifier) in party
+        .identifiers
+        .as_deref()
+        .unwrap_or_default()
+        .iter()
+        .enumerate()
+    {
+        let below = || vec![indexed("_identifier", index)];
+        values.push(at(below(), "id", &identifier.id));
+        for (datum, value) in [
+            ("issuer", identifier.issuer.as_deref()),
+            ("assigner", identifier.assigner.as_deref()),
+            ("type", identifier.r#type.as_deref()),
+        ] {
+            if let Some(value) = value {
+                values.push(at(below(), datum, value));
+            }
+        }
+    }
+    values
+}
+
+/// Returns the refusal of a present list `attribute` that does not decode.
+///
+/// Both lists are optional in the reference model (`LOCATABLE.links`,
+/// `ENTRY.other_participations` and `EVENT_CONTEXT.participations` are
+/// `0..1`), so an absent attribute reads as no entries; a present one that
+/// does not decode is a defect of the document and a refusal.
+const fn undecodable(attribute: &'static str) -> impl Fn(JsonParseError) -> FamilyError {
+    move |source| FamilyError { attribute, source }
+}
+
+/// Returns the text a `DV_TEXT` or `DV_CODED_TEXT` carries.
+fn text_of(text: &DvText) -> &str {
+    match *text {
+        DvText::DvCodedText(ref coded) => &coded.value,
+        DvText::DvText(ref plain) => &plain.value,
+    }
 }
 
 /// Returns the `LINK.target` values of the links a node carries with one
@@ -202,28 +310,24 @@ pub fn participation(
 /// `value` is the canonical JSON of the node, whose `links` is the
 /// `LOCATABLE` attribute; the meaning and the type are what tell one `link`
 /// mapping's links from another's.
-#[must_use]
-pub fn link_targets(value: &serde_json::Value, meaning: &str, link_type: &str) -> Vec<String> {
-    let text = |link: &serde_json::Value, attribute: &str| {
-        link.get(attribute)
-            .and_then(|text| text.get("value"))
-            .and_then(serde_json::Value::as_str)
-            .map(String::from)
+///
+/// # Errors
+///
+/// Returns [`FamilyError`] when the node's `links` do not decode as `LINK`s.
+pub fn link_targets(
+    value: &serde_json::Value,
+    meaning: &str,
+    link_type: &str,
+) -> Result<Vec<String>, FamilyError> {
+    let Some(found) = value.get("links") else {
+        return Ok(Vec::new());
     };
-    value
-        .get("links")
-        .and_then(serde_json::Value::as_array)
-        .map(|links| {
-            links
-                .iter()
-                .filter(|link| {
-                    text(link, "meaning").as_deref() == Some(meaning)
-                        && text(link, "type").as_deref() == Some(link_type)
-                })
-                .filter_map(|link| text(link, "target"))
-                .collect()
-        })
-        .unwrap_or_default()
+    Ok(from_canonical_value::<Vec<Link>>(found)
+        .map_err(undecodable("links"))?
+        .into_iter()
+        .filter(|link| text_of(&link.meaning) == meaning && text_of(&link.r#type) == link_type)
+        .map(|link| link.target.value)
+        .collect())
 }
 
 /// One `PARTICIPATION` read back out of an `ENTRY`.
@@ -235,45 +339,54 @@ pub struct Participation {
     pub name: Option<String>,
 }
 
+/// Returns the value of an object id, whichever subtype it is.
+fn id_value(id: &ObjectId) -> String {
+    match *id {
+        ObjectId::ArchetypeId(ref id) => id.value.clone(),
+        ObjectId::GenericId(ref id) => id.value.clone(),
+        ObjectId::HierObjectId(ref id) => String::from(id.value()),
+        ObjectId::ObjectVersionId(ref id) => String::from(id.value()),
+        ObjectId::TemplateId(ref id) => id.value.clone(),
+        ObjectId::TerminologyId(ref id) => id.value.clone(),
+    }
+}
+
 /// Returns the participations of `list` whose function is `function`.
 ///
 /// `value` is the canonical JSON of the node that holds the list
 /// (<https://specifications.openehr.org/releases/RM/Release-1.1.0/common.html#_participation_class>).
-#[must_use]
+///
+/// # Errors
+///
+/// Returns [`FamilyError`] when the list does not decode as `PARTICIPATION`s.
 pub fn participations(
     value: &serde_json::Value,
     list: ParticipationList,
     function: &str,
-) -> Vec<Participation> {
-    value
-        .get(list.attribute)
-        .and_then(serde_json::Value::as_array)
-        .map(|found| {
-            found
-                .iter()
-                .filter(|entry| {
-                    entry
-                        .get("function")
-                        .and_then(|text| text.get("value"))
-                        .and_then(serde_json::Value::as_str)
-                        == Some(function)
-                })
-                .map(|entry| {
-                    let performer = entry.get("performer");
-                    Participation {
-                        id: performer
-                            .and_then(|party| party.get("external_ref"))
-                            .and_then(|reference| reference.get("id"))
-                            .and_then(|id| id.get("value"))
-                            .and_then(serde_json::Value::as_str)
-                            .map(String::from),
-                        name: performer
-                            .and_then(|party| party.get("name"))
-                            .and_then(serde_json::Value::as_str)
-                            .map(String::from),
-                    }
-                })
-                .collect()
+) -> Result<Vec<Participation>, FamilyError> {
+    let Some(found) = value.get(list.attribute) else {
+        return Ok(Vec::new());
+    };
+    Ok(from_canonical_value::<
+        Vec<openehr_rm::v1_2::common::generic::participation::Participation>,
+    >(found)
+    .map_err(undecodable(list.attribute))?
+    .into_iter()
+        .filter(|entry| text_of(&entry.function) == function)
+        .map(|entry| {
+            let (reference, name) = match entry.performer {
+                PartyProxy::PartySelf(party) => (party.external_ref, None),
+                PartyProxy::PartyIdentified(PartyIdentified::PartyIdentified(party)) => {
+                    (party.external_ref, party.name)
+                }
+                PartyProxy::PartyIdentified(PartyIdentified::PartyRelated(party)) => {
+                    (party.external_ref, party.name)
+                }
+            };
+            Participation {
+                id: reference.map(|reference| id_value(&reference.id)),
+                name,
+            }
         })
-        .unwrap_or_default()
+        .collect())
 }

@@ -16,6 +16,10 @@
 //! 0-based (Simplified Formats, §Instance Indexing).
 
 use openehr_rm::v1_2::paths::RmPath;
+use openehr_sdt::flat::path::FlatKey;
+use openehr_sdt::flat::path::MAX_INSTANCE_INDEX;
+use openehr_sdt::flat::path::Segment;
+use openehr_sdt::flat::path::Suffix;
 use serde_json::Value;
 
 use crate::index::FlatId;
@@ -129,71 +133,120 @@ pub enum PositionError {
     Overflow,
 }
 
-/// One value to write, at one node of the template.
+/// One value to write, at one node of the template or under the context.
 ///
 /// The occurrences name the instance of each repeating node on the way to the
-/// target, outermost first, and the datum part names which part of a data
-/// value the value is (Simplified Formats, §Attribute Suffixes). A node with
-/// one unsuffixed value carries no datum part.
+/// target, outermost first, and the suffixes name which part of a data value
+/// the value is (Simplified Formats, §Attribute Suffixes). A node with one
+/// unsuffixed value carries no suffix, and a whole canonical value travels
+/// under the `raw` suffix (Simplified Formats, §Raw canonical JSON). The key
+/// is spelled through [`FlatKey`], the FLAT key model of `openehr-sdt`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NodeValue {
-    /// The node the value belongs to.
-    flat_id: FlatId,
-    /// The instance of each repeating node on the way to the target.
-    occurrences: Vec<RmPosition>,
-    /// The value-internal family below the node, outermost first.
-    sub_path: Vec<String>,
-    /// The datum part of the value, when it is one part of a data value.
-    datum: Option<String>,
+    /// Where the key starts: a template node or the `ctx/` namespace.
+    place: Place,
+    /// The segments below the place, outermost first.
+    sub_path: Vec<Segment>,
+    /// The attribute suffix chain on the last segment.
+    suffixes: Vec<Suffix>,
     /// The value itself.
     value: Value,
 }
 
+/// Where the FLAT key of a [`NodeValue`] starts.
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum Place {
+    /// A node of the template, at one instance of each repeating node on the
+    /// way to it.
+    Node {
+        /// The node the value belongs to.
+        flat_id: FlatId,
+        /// The instance of each repeating node on the way to the target.
+        occurrences: Vec<RmPosition>,
+    },
+    /// The `ctx/` namespace (Simplified Formats, §Context).
+    Context,
+}
+
 impl NodeValue {
-    /// Creates a value at `node`, with no occurrences and no datum part.
+    /// Creates a value at `node`, with no occurrences and no suffix.
     #[must_use]
     pub fn new(node: &ResolvedNode, value: Value) -> Self {
         Self {
-            flat_id: node.flat_id().clone(),
-            occurrences: Vec::new(),
+            place: Place::Node {
+                flat_id: node.flat_id().clone(),
+                occurrences: Vec::new(),
+            },
             sub_path: Vec::new(),
-            datum: None,
+            suffixes: Vec::new(),
             value,
         }
     }
 
-    /// Returns this value under a value-internal family of its node.
+    /// Creates a value under the `ctx/` key `field`.
     ///
-    /// Not every part of a data value is a datum suffix: an interval writes
-    /// `lower` and `upper`, and a term mapping writes `_mapping:0/target`,
-    /// which Simplified Formats models as paths below the node (§§
-    /// `DV_INTERVAL`, `TERM_MAPPING`). Each segment is written as it stands,
-    /// so an indexed family carries its own `:i`.
+    /// The context vocabulary sets defaults the builder resolves into the
+    /// reference-model tree (Simplified Formats, master06 §Context
+    /// Information); the builder refuses a field outside it.
     #[must_use]
-    pub fn under(mut self, sub_path: Vec<String>) -> Self {
-        self.sub_path = sub_path;
+    pub fn context(field: impl Into<String>, value: Value) -> Self {
+        Self {
+            place: Place::Context,
+            sub_path: vec![Segment {
+                name: field.into(),
+                index: None,
+            }],
+            suffixes: Vec::new(),
+            value,
+        }
+    }
+
+    /// Returns this value under a family of segments below its place.
+    ///
+    /// A reference-model attribute the template does not carry is a
+    /// `_`-prefixed segment below the node (Simplified Formats, §RM
+    /// Attributes prefix), and an indexed family carries its own instance
+    /// index.
+    #[must_use]
+    pub fn under(mut self, sub_path: Vec<Segment>) -> Self {
+        self.sub_path.extend(sub_path);
         self
     }
 
     /// Returns this value with the instance of each repeating node on the way
     /// to its own, outermost first.
+    ///
+    /// A context value belongs to no node, so it takes no occurrences.
     #[must_use]
     pub fn with_occurrences(mut self, occurrences: Vec<RmPosition>) -> Self {
-        self.occurrences = occurrences;
+        if let Place::Node {
+            occurrences: ref mut held,
+            ..
+        } = self.place
+        {
+            *held = occurrences;
+        }
         self
     }
 
-    /// Returns this value as the named part of a data value.
+    /// Returns this value as the named part of a data value, the one suffix
+    /// of its key.
     #[must_use]
     pub fn with_datum(mut self, datum: impl Into<String>) -> Self {
-        self.datum = Some(datum.into());
+        self.suffixes = vec![Suffix {
+            name: datum.into(),
+            index: None,
+        }];
         self
     }
 
-    /// Returns the node the value belongs to.
+    /// Returns the node the value belongs to, `None` for a context value.
     #[must_use]
-    pub const fn flat_id(&self) -> &FlatId {
-        &self.flat_id
+    pub const fn flat_id(&self) -> Option<&FlatId> {
+        match self.place {
+            Place::Node { ref flat_id, .. } => Some(flat_id),
+            Place::Context => None,
+        }
     }
 
     /// Returns the value itself.
@@ -279,7 +332,7 @@ impl WebTemplateIndex {
     ) -> Result<CanonicalComposition, PathError> {
         let mut flat = serde_json::Map::new();
         for value in values {
-            flat.insert(self.flat_key(value)?, value.value.clone());
+            flat.insert(self.flat_key(value)?.to_string(), value.value.clone());
         }
         let document = openehr_sdt::flat::sim::flat::parse_flat(&flat).map_err(|source| {
             PathError::CompositionBuild {
@@ -467,39 +520,68 @@ impl WebTemplateIndex {
     }
 
     /// Returns the FLAT key one value is written under.
-    fn flat_key(&self, value: &NodeValue) -> Result<String, PathError> {
-        let chain = self.chain(&value.flat_id)?;
-        let repeating = chain.iter().filter(|entry| entry.node().repeats()).count();
-        if repeating != value.occurrences.len() {
-            return Err(PathError::OccurrenceCount {
-                flat_id: value.flat_id.as_str().to_owned(),
-                expected: repeating,
-                given: value.occurrences.len(),
+    fn flat_key(&self, value: &NodeValue) -> Result<FlatKey, PathError> {
+        let mut segments = Vec::new();
+        let flat_id = match value.place {
+            // NOTE: Simplified Formats master04 §Context, a context field is
+            // spelled under the `ctx/` prefix.
+            Place::Context => {
+                segments.push(Segment {
+                    name: String::from("ctx"),
+                    index: None,
+                });
+                "ctx"
+            }
+            Place::Node {
+                ref flat_id,
+                ref occurrences,
+            } => {
+                let chain = self.chain(flat_id)?;
+                let repeating = chain.iter().filter(|entry| entry.node().repeats()).count();
+                if repeating != occurrences.len() {
+                    return Err(PathError::OccurrenceCount {
+                        flat_id: flat_id.as_str().to_owned(),
+                        expected: repeating,
+                        given: occurrences.len(),
+                    });
+                }
+                let mut positions = occurrences.iter();
+                for entry in chain {
+                    // NOTE: the FLAT instance index is 0-based (Simplified
+                    // Formats, §Instance Indexing), so the position converts.
+                    let index = if entry.node().repeats() {
+                        positions
+                            .next()
+                            .map(|&position| FlatIndex::from(position).get())
+                    } else {
+                        None
+                    };
+                    segments.push(Segment {
+                        name: entry.id().to_owned(),
+                        index,
+                    });
+                }
+                flat_id.as_str()
+            }
+        };
+        segments.extend(value.sub_path.iter().cloned());
+        let key = FlatKey {
+            segments,
+            suffixes: value.suffixes.clone(),
+        };
+        let past = key
+            .segments
+            .iter()
+            .map(|segment| segment.index)
+            .chain(key.suffixes.iter().map(|suffix| suffix.index))
+            .flatten()
+            .find(|&index| index > MAX_INSTANCE_INDEX);
+        if let Some(index) = past {
+            return Err(PathError::InstanceIndex {
+                flat_id: flat_id.to_owned(),
+                index,
+                max: MAX_INSTANCE_INDEX,
             });
-        }
-        let mut positions = value.occurrences.iter();
-        let mut key = String::new();
-        for entry in chain {
-            if !key.is_empty() {
-                key.push('/');
-            }
-            key.push_str(entry.id());
-            if entry.node().repeats()
-                && let Some(&position) = positions.next()
-            {
-                // NOTE: the FLAT instance index is 0-based (Simplified
-                // Formats, §Instance Indexing), so the position converts.
-                key.push(':');
-                key.push_str(&FlatIndex::from(position).get().to_string());
-            }
-        }
-        for segment in &value.sub_path {
-            key.push('/');
-            key.push_str(segment);
-        }
-        if let Some(ref datum) = value.datum {
-            key.push('|');
-            key.push_str(datum);
         }
         Ok(key)
     }

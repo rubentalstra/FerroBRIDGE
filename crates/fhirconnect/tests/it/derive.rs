@@ -322,11 +322,37 @@ fn the_event_context_setting_is_a_declared_default() -> Result<(), Box<dyn Error
         &program,
         &index,
         &resource,
-        &defaults().with_setting("229", "primary medical care"),
+        // NOTE: openehr_terminology.xml, the `setting` group names 229 "primary
+        // nursing care" (228 is "primary medical care"), so the pair is one concept.
+        &defaults().with_setting("229", "primary nursing care"),
     )?;
     assert_eq!(
         flat_value(&index, &chosen, "ctx/setting")?,
         Some(serde_json::json!("229"))
+    );
+    Ok(())
+}
+
+#[test]
+fn a_setting_whose_code_and_value_are_two_concepts_is_refused() -> Result<(), Box<dyn Error>> {
+    // engine/defaults-for-fields.adoc links the openEHR `setting` group, in
+    // which 229 is "primary nursing care"; the FLAT builder takes the rubric
+    // of the code (Simplified Formats master06 §setting), so a pair naming two
+    // concepts would store a value the project did not give.
+    let program = compiled("ferrobridge_derived")?;
+    let index = template()?;
+    let resource = condition(&serde_json::json!({}));
+    let error = inbound(
+        &program,
+        &index,
+        &resource,
+        &defaults().with_setting("229", "primary medical care"),
+    )
+    .err()
+    .ok_or("a setting of two concepts was accepted")?;
+    assert!(
+        error.to_string().contains("/context/setting"),
+        "the refusal names the node: {error}"
     );
     Ok(())
 }

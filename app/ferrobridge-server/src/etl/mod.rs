@@ -35,6 +35,7 @@ use omop_cdm::writer::{CdmWriter, RunId, VisitConcepts, WriteError};
 use openehr_its::rest::generated::query::AdhocQueryExecute;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::index::WebTemplateIndex;
+use openehr_rm::v1_2::common::archetyped::archetyped::Archetyped;
 use std::collections::BTreeMap;
 use std::future::Future;
 use std::sync::Arc;
@@ -201,10 +202,20 @@ async fn template_of(
     templates: &mut Templates,
     composition: &serde_json::Value,
 ) -> Result<Result<Arc<WebTemplateIndex>, Refusal>, RunError> {
-    let Some(template) = composition
-        .pointer("/archetype_details/template_id/value")
-        .and_then(serde_json::Value::as_str)
-    else {
+    let Some(details) = composition.get("archetype_details") else {
+        return Ok(Err(Refusal::new(
+            "the composition names no archetype_details.template_id",
+        )));
+    };
+    let details = match openehr_its::json::from_canonical_value::<Archetyped>(details) {
+        Ok(details) => details,
+        Err(error) => {
+            return Ok(Err(Refusal::new(format!(
+                "the composition's archetype_details do not read as ARCHETYPED: {error}"
+            ))));
+        }
+    };
+    let Some(template) = details.template_id.as_ref().map(|id| id.value.as_str()) else {
         return Ok(Err(Refusal::new(
             "the composition names no archetype_details.template_id",
         )));

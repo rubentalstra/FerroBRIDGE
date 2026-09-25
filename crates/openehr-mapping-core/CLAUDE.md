@@ -30,6 +30,13 @@ the language crate applies its own grammar to them.
   it: the leading `../` run and the `$name` head variable, both resolved
   against an anchor before a path is emitted.
 
+- **FLAT keys go through `openehr-sdt`.** A `NodeValue` carries its
+  segments and suffixes as `openehr_sdt::flat::path::{Segment, Suffix}` and
+  its key is a `FlatKey`, so this crate prints no `/`, `:i` or `|` of its own.
+  An index past `MAX_INSTANCE_INDEX` is `PathError::InstanceIndex` before the
+  builder runs. A `ctx/` value is `NodeValue::context`; a whole value is the
+  `raw` suffix (Simplified Formats master04 §Raw canonical JSON).
+
 The Web Template index, relative path derivation, and composition build and
 read (the other half of this crate's role in `docs/architecture.md` §7) are
 #75.

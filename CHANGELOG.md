@@ -142,6 +142,28 @@ crates on crates.io.
   (#228): six new mapping files and the README acknowledgements, 208 mapping
   files in all.
 
+### Fixed
+
+- A value a FHIR resource maps into openEHR keeps every attribute the
+  reference model gives it (#241). The engine writes each data value whole as
+  its canonical JSON under the FLAT `|raw` suffix (ITS-REST 1.1.0 Simplified
+  Formats, master04 §Raw canonical JSON) instead of through per-class suffix
+  tables, which dropped `hyperlink`, `language` and `encoding` on a
+  `DV_TEXT` or `DV_CODED_TEXT` and `normal_status`, `normal_range` and
+  `accuracy` on a `DV_DATE_TIME` with no error. A tail below a node is now
+  admitted when the `openehr-rm` attribute model defines it, and refused at
+  load (`fc-uncarried-tail`) when it runs through a list or sits below a
+  structural node other than `ENTRY.provider`; a `manual` path must end on a
+  string attribute. The composition defaults travel as the `ctx/` keys of
+  master06, and a default setting whose code and value name two concepts of
+  the openEHR `setting` group is refused. A value at `COMPOSITION.composer`,
+  `language` or `territory` that the `ctx/` keys cannot carry whole is
+  refused instead of losing its identifiers or its terminology. The `LINK`
+  and `PARTICIPATION` lists a composition carries are read as typed values,
+  and a defective one is a refusal instead of an empty list. An EHR the
+  facade creates stamps `EHR_STATUS.archetype_details.rm_version` `1.2.0`, the
+  release its types come from, instead of `1.1.0`.
+
 ## [0.0.3] - 2026-09-25
 
 The FHIR round-trip release. The `fhirconnect` crate runs every FHIRconnect

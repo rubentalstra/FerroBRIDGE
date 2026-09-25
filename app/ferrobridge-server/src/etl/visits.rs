@@ -34,6 +34,10 @@ struct Moment {
 }
 
 /// Returns `text` without a trailing `Z` or `±hh:mm` offset on its time.
+///
+/// The cut is lexical so the fraction of a second keeps the digits the source
+/// wrote: `openehr_base::v1_3::foundation_types::time::iso8601_date_time`
+/// yields the fraction as an `f64`, which cannot carry them.
 fn without_offset(text: &str) -> &str {
     let Some((date, time)) = text.split_once('T') else {
         return text;
