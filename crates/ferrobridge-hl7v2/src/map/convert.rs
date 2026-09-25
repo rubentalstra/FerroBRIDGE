@@ -15,6 +15,9 @@
 //!
 //! A value the target cannot hold is refused, never approximated: a time with
 //! no offset is no FHIR `dateTime`.
+//!
+//! A v2 `HD` written into a FHIR `url` is converted by [`endpoint`]: the
+//! guide's url form of a typed universal ID, else a derived `urn:` form.
 
 use fhir_types::codec::{Number, Value};
 
@@ -59,6 +62,108 @@ pub fn primitive(fhir_type: &str, text: &str) -> Result<Value, ConvertError> {
         "integer" | "positiveInt" | "unsignedInt" => integer(fhir_type, text).map(Value::Number),
         "boolean" => Err(ConvertError::Boolean),
         _ => Ok(Value::String(String::from(text))),
+    }
+}
+
+/// The prefix of an endpoint derived from an `HD` that names no url of its
+/// own.
+///
+/// No specification governs this: our own design. The guide leaves an `HD`
+/// without a universal ID of a url-yielding type to the implementer, and the
+/// derived endpoint names the product so it is never read as an identifier
+/// the sender assigned.
+pub const DERIVED_ENDPOINT: &str = "urn:ferrobridge:hl7v2-hd:";
+
+/// The endpoints a v2 `HD` yields for a FHIR `url` element, in the order they
+/// are tried.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Endpoint {
+    /// The url the guide's `HD` map builds from a universal ID of type `ISO`,
+    /// `UUID`, `DNS` or `URI`, when the `HD` carries one.
+    pub universal: Option<String>,
+    /// The url derived from every component: [`DERIVED_ENDPOINT`], the
+    /// namespace ID and, when either is valued, the universal ID and its
+    /// type, each percent-encoded and joined by `:`.
+    pub derived: String,
+}
+
+/// Builds the endpoints of a v2 `HD` from its namespace ID (`HD.1`),
+/// universal ID (`HD.2`) and universal ID type (`HD.3`).
+///
+/// The universal forms are the assignments of the guide's
+/// `datatype-hd-endpoint-to-messageheader-source` map: `urn:oid:`,
+/// `urn:uuid:`, `urn:dns:` or `urn:uri:` before the universal ID.
+///
+/// # Errors
+///
+/// Returns [`ConvertError::Form`] when no component is valued.
+pub fn endpoint(
+    namespace: Option<&str>,
+    universal: Option<&str>,
+    universal_type: Option<&str>,
+) -> Result<Endpoint, ConvertError> {
+    if namespace.is_none() && universal.is_none() && universal_type.is_none() {
+        return Err(ConvertError::Form { expected: "HD" });
+    }
+    let scheme = match universal_type {
+        Some("ISO") => Some("urn:oid:"),
+        Some("UUID") => Some("urn:uuid:"),
+        Some("DNS") => Some("urn:dns:"),
+        Some("URI") => Some("urn:uri:"),
+        _ => None,
+    };
+    let universal_url = scheme
+        .zip(universal)
+        .map(|(scheme, universal)| format!("{scheme}{universal}"));
+    let mut derived = String::from(DERIVED_ENDPOINT);
+    percent_encode(namespace.unwrap_or_default(), &mut derived);
+    if universal.is_some() || universal_type.is_some() {
+        derived.push(':');
+        percent_encode(universal.unwrap_or_default(), &mut derived);
+        derived.push(':');
+        percent_encode(universal_type.unwrap_or_default(), &mut derived);
+    }
+    Ok(Endpoint {
+        universal: universal_url,
+        derived,
+    })
+}
+
+/// Appends `text` to `out` with every byte outside the RFC 3986 §3.3 `pchar`
+/// set percent-encoded, and `:` too, which the derived endpoint uses as its
+/// separator.
+fn percent_encode(text: &str, out: &mut String) {
+    const HEX: &[u8; 16] = b"0123456789ABCDEF";
+    for byte in text.bytes() {
+        let kept = byte.is_ascii_alphanumeric()
+            || matches!(
+                byte,
+                b'-' | b'.'
+                    | b'_'
+                    | b'~'
+                    | b'!'
+                    | b'$'
+                    | b'&'
+                    | b'\''
+                    | b'('
+                    | b')'
+                    | b'*'
+                    | b'+'
+                    | b','
+                    | b';'
+                    | b'='
+                    | b'@'
+            );
+        if kept {
+            out.push(char::from(byte));
+        } else {
+            out.push('%');
+            for nibble in [byte >> 4, byte & 0x0F] {
+                if let Some(digit) = HEX.get(usize::from(nibble)) {
+                    out.push(char::from(*digit));
+                }
+            }
+        }
     }
 }
 
@@ -253,7 +358,7 @@ fn integer(fhir_type: &str, text: &str) -> Result<Number, ConvertError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{ConvertError, primitive};
+    use super::{ConvertError, DERIVED_ENDPOINT, Endpoint, endpoint, primitive};
     use fhir_types::codec::Value;
 
     fn text(value: &str) -> Value {
@@ -315,5 +420,68 @@ mod tests {
     fn a_time_is_written_with_seconds() {
         assert_eq!(primitive("time", "0930"), Ok(text("09:30:00")));
         assert!(primitive("time", "0930+0100").is_err());
+    }
+
+    #[test]
+    fn a_universal_id_of_a_url_yielding_type_is_the_endpoint() {
+        assert_eq!(
+            endpoint(Some("LAB"), Some("1.2.3.4"), Some("ISO")),
+            Ok(Endpoint {
+                universal: Some(String::from("urn:oid:1.2.3.4")),
+                derived: format!("{DERIVED_ENDPOINT}LAB:1.2.3.4:ISO"),
+            })
+        );
+        let uuid = "2b3c4d5e-0000-4000-8000-000000000001";
+        assert_eq!(
+            endpoint(None, Some(uuid), Some("UUID")).map(|found| found.universal),
+            Ok(Some(format!("urn:uuid:{uuid}")))
+        );
+        assert_eq!(
+            endpoint(None, Some("lab.example.org"), Some("DNS")).map(|found| found.universal),
+            Ok(Some(String::from("urn:dns:lab.example.org")))
+        );
+        assert_eq!(
+            endpoint(None, Some("http://lab.example.org/v2"), Some("URI"))
+                .map(|found| found.universal),
+            Ok(Some(String::from("urn:uri:http://lab.example.org/v2")))
+        );
+    }
+
+    #[test]
+    fn a_namespace_id_alone_is_derived_with_every_non_pchar_byte_encoded() {
+        assert_eq!(
+            endpoint(Some("North Lab App"), None, None),
+            Ok(Endpoint {
+                universal: None,
+                derived: format!("{DERIVED_ENDPOINT}North%20Lab%20App"),
+            })
+        );
+        assert_eq!(
+            endpoint(Some("Lab:M\u{FC}ller/1%"), None, None).map(|found| found.derived),
+            Ok(format!("{DERIVED_ENDPOINT}Lab%3AM%C3%BCller%2F1%25"))
+        );
+    }
+
+    #[test]
+    fn a_universal_id_of_another_type_is_kept_in_the_derived_endpoint() {
+        assert_eq!(
+            endpoint(None, Some("LAB-7"), Some("L")),
+            Ok(Endpoint {
+                universal: None,
+                derived: format!("{DERIVED_ENDPOINT}:LAB-7:L"),
+            })
+        );
+        assert_eq!(
+            endpoint(Some("LAB"), Some("1.2.3"), None).map(|found| found.derived),
+            Ok(format!("{DERIVED_ENDPOINT}LAB:1.2.3:"))
+        );
+    }
+
+    #[test]
+    fn an_empty_hd_yields_no_endpoint() {
+        assert_eq!(
+            endpoint(None, None, None),
+            Err(ConvertError::Form { expected: "HD" })
+        );
     }
 }

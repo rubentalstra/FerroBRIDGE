@@ -815,6 +815,10 @@ impl<'a> Run<'a> {
             });
             return Ok(());
         }
+        if source_type == "HD" && target_type == "url" {
+            self.endpoint(datum, leaf, at, reference);
+            return Ok(());
+        }
         let text = if source_type == "TS" {
             datum.child(1).text()
         } else {
@@ -838,6 +842,56 @@ impl<'a> Run<'a> {
             }),
         }
         Ok(())
+    }
+
+    /// Writes a v2 `HD` into a FHIR `url` element, with its namespace ID in
+    /// the `name` element beside it when there is one.
+    ///
+    /// The url is the guide's universal form when the `HD` carries one the
+    /// `url` type admits (<https://hl7.org/fhir/R4/datatypes.html#url>), else
+    /// the derived form of [`convert::endpoint`].
+    fn endpoint(&mut self, datum: Datum<'a>, leaf: &Base, at: &Location, reference: &RowRef) {
+        let component = |position| datum.child(position).text();
+        let found = match convert::endpoint(component(1), component(2), component(3)) {
+            Ok(found) => found,
+            Err(error) => {
+                self.outcomes.push(Outcome::Unconvertible {
+                    at: at.clone(),
+                    row: reference.clone(),
+                    error,
+                });
+                return;
+            }
+        };
+        let url = found
+            .universal
+            .filter(|url| constraint::lexical("url", &Value::String(url.clone())).is_ok())
+            .unwrap_or(found.derived);
+        self.record(leaf, Pending::Ready(Value::String(url)), at, reference);
+        let Some(namespace) = component(1) else {
+            return;
+        };
+        let mut slots = leaf.slots.clone();
+        slots.pop();
+        let name = Base {
+            resource: leaf.resource,
+            slots,
+        }
+        .child("name", "");
+        let resource_type = self
+            .resources
+            .get(leaf.resource)
+            .map(|resource| resource.type_name.clone())
+            .unwrap_or_default();
+        let names: Vec<&str> = name.slots.iter().map(|slot| slot.name.as_str()).collect();
+        // NOTE: no specification governs this: our own design; both HD endpoint maps of the
+        // guide write HD.1 into the `name` beside the endpoint, so the namespace ID stays.
+        let holds_name = resolve_path(&resource_type, &names)
+            .is_ok_and(|resolved| resolved.type_code() == Some("string"));
+        if holds_name {
+            let value = Value::String(String::from(namespace));
+            self.record(&name, Pending::Ready(value), at, reference);
+        }
     }
 
     /// Records the translation of a table value, written as the code, the
@@ -1183,7 +1237,12 @@ impl<'a> Run<'a> {
     }
 
     /// Applies every write and assembles the Bundle.
-    pub(super) fn finish(mut self) -> (Value, Vec<Outcome>) {
+    ///
+    /// # Errors
+    ///
+    /// Returns [`MapError::NoMessageHeader`] when the Bundle is a `message`
+    /// and no complete `MessageHeader` enters it.
+    pub(super) fn finish(mut self) -> Result<(Value, Vec<Outcome>), MapError> {
         let mut documents = Vec::new();
         let resources = core::mem::take(&mut self.resources);
         for resource in &resources {
@@ -1219,6 +1278,28 @@ impl<'a> Run<'a> {
         }
         entries.sort_by_key(|(resource, _)| resource.type_name != "MessageHeader");
         let mut bundle = envelope.unwrap_or_else(|| document_of("Bundle"));
+        let message = bundle.get("type").and_then(Value::as_str) == Some("message");
+        let headed = entries
+            .first()
+            .is_some_and(|(resource, _)| resource.type_name == "MessageHeader");
+        // NOTE: HL7 R4 Bundle invariant bdl-12: a `message` Bundle's first resource is a
+        // MessageHeader, so a run that could not complete one refuses the message.
+        if message && !headed {
+            let dropped = self
+                .outcomes
+                .iter()
+                .rev()
+                .find(|outcome| match outcome {
+                    Outcome::MissingRequired {
+                        resource, element, ..
+                    } => resource == "MessageHeader" && element == "MessageHeader",
+                    Outcome::Undecodable { resource, .. } => resource == "MessageHeader",
+                    _ => false,
+                })
+                .cloned()
+                .map(Box::new);
+            return Err(MapError::NoMessageHeader { dropped });
+        }
         for (index, (resource, document)) in entries.into_iter().enumerate() {
             let occurrence = Occurrence::new([index]);
             for (path, value) in [
@@ -1237,7 +1318,7 @@ impl<'a> Run<'a> {
                 }
             }
         }
-        (bundle, self.outcomes)
+        Ok((bundle, self.outcomes))
     }
 
     /// Drops from `document` every element that lacks one its definition

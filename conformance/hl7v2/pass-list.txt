@@ -1,5 +1,3 @@
-fhir-converter/data/SampleData/Hl7v2/ADT-A01-02.hl7
-fhir-converter/data/SampleData/Hl7v2/ADT-A02-02.hl7
 fhir-converter/data/SampleData/Hl7v2/ADT01-23.hl7
 fhir-converter/data/SampleData/Hl7v2/ADT01-28.hl7
 fhir-converter/data/SampleData/Hl7v2/LAB-ORU-1.hl7
@@ -9,11 +7,7 @@ fhir-converter/data/SampleData/Hl7v2/MDHHS-OML-O21-2.hl7
 fhir-converter/data/SampleData/Hl7v2/MDM-T02-01.hl7
 fhir-converter/data/SampleData/Hl7v2/MDM-T02-02.hl7
 fhir-converter/data/SampleData/Hl7v2/MDM-T02-03.hl7
-fhir-converter/data/SampleData/Hl7v2/MDM_01.hl7
-fhir-converter/data/SampleData/Hl7v2/OML-O21-01.hl7
 fhir-converter/data/SampleData/Hl7v2/ORU-R01-RMGEAD.hl7
-fhir-converter/data/SampleData/Hl7v2/SIU-S12-01.hl7
-fhir-converter/data/SampleData/Hl7v2/SIU-S12-02.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/CSV_to_HL7/sample-single-pdi-20210608-0002.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/FHIR_to_HL7/mars_unwanted_condition_to_notes.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/FHIR_to_HL7/sample_AK_20240220-0001.hl7
@@ -108,9 +102,7 @@ reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_INTERNA
 reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_INTERNAL/FLFHospital-SARSCOV2-20200317-0001.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_INTERNAL/LP-covid-19-20220124002222.hl7
 reportstream/prime-router/src/testIntegration/resources/datatests/HL7_to_INTERNAL/monkeypox-20221110.hl7
-reportstream/prime-router/src/testIntegration/resources/datatests/mappinginventory/catchall/omlo21/oml_o21-full.hl7
 v2-to-fhir/derived/MDM_T02.hl7
 v2-to-fhir/derived/ORU_R01.hl7
-v2-to-fhir/derived/SIU_S12.hl7
 v2-to-fhir/samples/messages/Message.hl7_MDM_T02.txt
 total 511

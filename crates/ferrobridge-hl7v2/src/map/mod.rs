@@ -28,7 +28,8 @@
 //! result. A value outside its primitive's lexical form is never written, an
 //! element or resource lacking a required element is left out, and a
 //! resource that still does not decode as R4 is left out too, each counted,
-//! so the Bundle decodes.
+//! so the Bundle decodes. A message whose `MessageHeader` is left out is
+//! refused, since a `message` Bundle opens with one (`bdl-12`).
 
 pub mod condition;
 mod constraint;
@@ -345,6 +346,28 @@ pub enum MapError {
         #[source]
         source: Box<ferrobridge_term::error::Error>,
     },
+    /// The run completed no `MessageHeader`, which a `message` Bundle holds
+    /// as its first resource (<https://hl7.org/fhir/R4/bundle.html#invs>,
+    /// `bdl-12`).
+    #[error(
+        "the message Bundle would carry no MessageHeader (FHIR R4 bdl-12){}",
+        lacking(dropped.as_deref())
+    )]
+    NoMessageHeader {
+        /// The outcome that left the `MessageHeader` out, `None` when the run
+        /// created none.
+        dropped: Option<Box<Outcome>>,
+    },
+}
+
+/// The required element whose absence left the `MessageHeader` out, as a
+/// clause of [`MapError::NoMessageHeader`]'s message.
+fn lacking(dropped: Option<&Outcome>) -> String {
+    match dropped {
+        Some(Outcome::MissingRequired { required, .. }) => format!(": it lacks {required}"),
+        Some(Outcome::Undecodable { .. }) => String::from(": it does not decode as R4"),
+        _ => String::new(),
+    }
 }
 
 /// Why a target path names no element.
@@ -414,8 +437,9 @@ impl Mapped {
 ///
 /// Returns [`MapError::NoMessageMap`] when the corpus has no message map for
 /// the structure, [`MapError::Stopped`] when a `NOT VALUED ERROR` condition
-/// holds, and [`MapError::Terminology`] when the terminology server refuses a
-/// translation or cannot be reached.
+/// holds, [`MapError::Terminology`] when the terminology server refuses a
+/// translation or cannot be reached, and [`MapError::NoMessageHeader`] when
+/// the message Bundle would carry no `MessageHeader`.
 pub async fn map(
     parsed: &Parsed,
     corpus: &Corpus,
@@ -424,7 +448,7 @@ pub async fn map(
     let mut run = run::Run::new(corpus, parsed);
     run.message()?;
     let translations = run.translate(terminology).await?;
-    let (bundle, outcomes) = run.finish();
+    let (bundle, outcomes) = run.finish()?;
     Ok(Mapped {
         bundle,
         outcomes,

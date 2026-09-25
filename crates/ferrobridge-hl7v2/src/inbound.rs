@@ -10,14 +10,17 @@
 //! with `AR`, since the refusal is "for reasons unrelated to content" (HL7
 //! v2.5.1 chapter 2 §2.9.2.2). A message that parses but carries a refusal
 //! (a missing required field or segment, an undecoded escape) is answered
-//! `AE` with an `ERR` per refusal. Anything else is handed to the caller to
-//! map, who answers `AA` or `AE` once the message is committed or refused.
+//! `AE` with an `ERR` per refusal. A message with none that names its sender
+//! in neither MSH-3 nor MSH-24 is refused with `AR`, since no
+//! `MessageHeader.source` can be written for it. Anything else is handed to
+//! the caller to map, who answers `AA` or `AE` once the message is committed
+//! or refused.
 
 use hl7v2_types::model::Structure;
 
 use crate::ack::{self, Code, Error, Header, Stamp};
 use crate::decode::{self, Charset, DecodeError};
-use crate::parse::{self, ErrorCode, Message, Parsed, StructureError};
+use crate::parse::{self, ErrorCode, Field, Location, Message, Parsed, StructureError};
 
 /// A parsed message and what its answer is built from.
 #[derive(Debug, Clone)]
@@ -137,6 +140,18 @@ pub fn receive(
         let errors: Vec<Error> = parsed.refusals().iter().map(Error::from).collect();
         return answer(Code::Error, &errors);
     }
+    if !identifies_sender(parsed.message()) {
+        return answer(
+            Code::Reject,
+            &[Error {
+                location: Some(Location::segment("MSH", 1).with_field(3)),
+                code: ErrorCode::RequiredFieldMissing,
+                text: String::from(
+                    "MSH-3 names no sending application and MSH-24 no sending network address",
+                ),
+            }],
+        );
+    }
     Received::Parsed(Box::new(Inbound {
         parsed,
         header,
@@ -154,6 +169,25 @@ fn reject_bytes(message: &[u8], detail: &str, stamp: Stamp<'_>) -> Received {
         },
         None => Received::Unanswerable,
     }
+}
+
+/// Whether a message to be mapped names its sender in MSH-3 or MSH-24, the
+/// fields the guide's MSH map writes `MessageHeader.source` from.
+///
+/// The guide leaves a message valuing neither to the implementer
+/// (`segment-msh-to-messageheader`, the MSH-3 row's comment), and FHIR R4
+/// requires `MessageHeader.source` (<https://hl7.org/fhir/R4/messageheader.html>).
+/// No specification governs the answer: our own design refuses it with `AR`.
+/// An acknowledgment is never mapped, so it owes no `MessageHeader`.
+fn identifies_sender(message: &Message) -> bool {
+    if message.message_type(1) == Some("ACK") {
+        return true;
+    }
+    message.header().is_some_and(|header| {
+        [3, 24]
+            .into_iter()
+            .any(|position| header.field(position).is_some_and(Field::is_valued))
+    })
 }
 
 /// An `ERR` with no location.

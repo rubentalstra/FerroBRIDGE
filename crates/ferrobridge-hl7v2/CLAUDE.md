@@ -54,7 +54,11 @@ a typed `Outcome`, counted and never dropped. Before a value is written,
 `fhir-types` decoder; after the writes, it drops every element and resource
 lacking an element the element table marks required. Both read the
 constraints from `fhir-types` and name no resource or element, so the Bundle
-decodes. A refused or failed translation
+decodes. A `message` Bundle without its `MessageHeader` breaks `bdl-12`,
+so `Run::finish` refuses it (`MapError::NoMessageHeader`) and `inbound`
+answers `AR` to a message valuing neither MSH-3 nor MSH-24. An `HD` written
+into a `url` goes through `convert::endpoint`, the one place the derived
+`urn:ferrobridge:hl7v2-hd:` form is built. A refused or failed translation
 fails the run with the upstream status (`MapError::Terminology`); an absent
 terminology server is `no-terminology`, never a code passed through.
 
