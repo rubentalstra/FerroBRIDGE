@@ -147,6 +147,7 @@ impl<'m> Datum<'m> {
 struct Scope<'p> {
     parsed: &'p Parsed,
     index: usize,
+    definition: &'static hl7v2_types::model::Segment,
     chain: Vec<&'p [Item]>,
     at: Location,
     repetition: Option<(usize, usize)>,
@@ -436,6 +437,7 @@ impl<'a> Run<'a> {
         let scope = Scope {
             parsed: self.parsed,
             index: visit.index,
+            definition: visit.definition,
             chain: visit.chain.clone(),
             at: at.clone(),
             repetition: None,
@@ -618,10 +620,22 @@ impl<'a> Run<'a> {
             if !computable && !self.gate(&once, row, &reference)? {
                 continue;
             }
-            let source_type = row
-                .source_type
-                .clone()
-                .or_else(|| definition_type(segment.id(), position));
+            let legacy = self.parsed.structure().withdrawn_as_of.is_some() && components.is_empty();
+            let (source_type, replaced) = field_type(
+                row.source_type.clone(),
+                definition_type(scope.definition, position),
+                legacy,
+            );
+            if let (Some(row_type), Some(version_type)) = (replaced, source_type.clone()) {
+                self.outcomes.push(Outcome::VersionTyped {
+                    at: once.at.clone(),
+                    row: reference.clone(),
+                    field: format!("{id}-{position}"),
+                    row_type,
+                    version_type,
+                    version: self.parsed.structure().version,
+                });
+            }
             let typed = Row {
                 source_type: resolve_varies(source_type, segment),
                 ..row.clone()
@@ -2256,15 +2270,40 @@ fn split_source(source: &str, separator: char) -> (&str, Vec<usize>) {
     }
 }
 
-/// The data type the definitions give a field, when its `TypeInfo` names
-/// none.
-fn definition_type(segment: &str, position: usize) -> Option<String> {
-    hl7v2_types::segment::find(segment)?
+/// The data type the placed segment's definition gives a field, when its
+/// `TypeInfo` names none: the definition of the version the parser selected
+/// the structure from, so a legacy field keeps its own version's code.
+fn definition_type(
+    definition: &'static hl7v2_types::model::Segment,
+    position: usize,
+) -> Option<String> {
+    definition
         .fields
         .iter()
         .find(|field| usize::from(field.position) == position)?
         .data_type
         .map(|data_type| String::from(data_type.code()))
+}
+
+/// The data type a field row maps its value by, with the type the row names
+/// when the field's own definition replaces it.
+///
+/// The row's `TypeInfo` type comes first. For a field of a legacy structure
+/// (`legacy`), the placed definition's type decides where it differs from
+/// the row's, compared without case, since the guide's rows name the types
+/// of the v2.9.1 definitions. No specification governs this: our own design,
+/// `mapping_guidelines.md` names no v2 version for its type columns.
+fn field_type(
+    named: Option<String>,
+    own: Option<String>,
+    legacy: bool,
+) -> (Option<String>, Option<String>) {
+    match (named, own) {
+        (Some(named), Some(own)) if legacy && !named.eq_ignore_ascii_case(&own) => {
+            (Some(own), Some(named))
+        }
+        (named, own) => (named.or(own), None),
+    }
 }
 
 /// The type a `varies` field holds: OBX-5 is of the type OBX-2 names.
@@ -2291,6 +2330,7 @@ fn row_ref(map: &Map, row: &Row) -> RowRef {
 #[derive(Debug, Clone)]
 struct Visit<'p> {
     index: usize,
+    definition: &'static hl7v2_types::model::Segment,
     code: String,
     top_follow: Vec<&'static str>,
     key: Vec<usize>,
@@ -2351,6 +2391,7 @@ fn collect<'p>(
                 };
                 visits.push(Visit {
                     index: placed.index,
+                    definition: placed.node.segment,
                     code,
                     top_follow,
                     key: segment_key,
@@ -2412,7 +2453,9 @@ mod tests {
 
     use fhir_types::codec::{Json, Path, Value};
 
-    use super::{Outcome, Pending, Run, alternatives, resolve_path};
+    use super::{
+        Outcome, Pending, Run, alternatives, collect, definition_type, field_type, resolve_path,
+    };
     use crate::decode::Charset;
     use crate::map::corpus::Corpus;
     use crate::parse::{self, Parsed};
@@ -2480,6 +2523,104 @@ mod tests {
             )),
             "{writes:?}"
         );
+    }
+
+    // NOTE: the HL7 v2.3 tables type OBR-4 `CE` where the guide's row names `CWE`, so the
+    // placed 2.3 definition chooses the guide's `CE` map, counted as `version-typed`.
+    #[test]
+    fn a_legacy_field_is_typed_by_its_own_versions_definition() {
+        let text = "MSH|^~\\&|NORTHLAB|NORTHHOSP|EHR|SOUTHCLINIC|20260925143000+0200||ORM^O01|MSG00012|P|2.3\r\
+             PID|1||PAT-0012^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M\r\
+             ORC|NW|PLC-2\r\
+             OBR|1|PLC-2||2345-7^Glucose^LN\r";
+        let lexed = parse::lex(text, Charset::Ascii).expect("it lexes");
+        let structure = parse::structure_for(&lexed.message).expect("a structure");
+        assert_eq!((structure.id, structure.version), ("ORM_O01", "2.3"));
+        let parsed = parse::group(lexed, structure);
+        let mut visits = Vec::new();
+        collect(
+            parsed.items(),
+            parsed.structure_name(),
+            &mut Vec::new(),
+            &mut Vec::new(),
+            &mut Vec::new(),
+            parsed.structure().nodes,
+            &mut visits,
+        );
+        let obr = visits
+            .iter()
+            .find(|visit| visit.code == "ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR")
+            .expect("the OBR is placed");
+        let legacy = definition_type(obr.definition, 4).expect("OBR-4 is typed at 2.3");
+        assert_eq!(legacy, "CE");
+        assert_eq!(
+            definition_type(&hl7v2_types::segment::obr::OBR, 4).as_deref(),
+            Some("CWE")
+        );
+        let corpus = corpus();
+        let chosen = corpus
+            .find("datatype", &legacy, "CodeableConcept")
+            .expect("one map");
+        assert_eq!(chosen.id, "datatype-ce-to-codeableconcept");
+        assert_eq!(
+            field_type(Some(String::from("CWE")), Some(legacy.clone()), true),
+            (Some(legacy), Some(String::from("CWE")))
+        );
+        // NOTE: the guide's ORM_O01 message map names `ORM_O01.ORDER_DETAIL.CHOICE.OBR`, outside
+        // the ORDER group the 2.3 tree places OBR in, so the walk is shown on PID-8 (2.3 `IS`).
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let typed: Vec<(&str, &str, &str, &str)> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::VersionTyped {
+                    field,
+                    row_type,
+                    version_type,
+                    version,
+                    ..
+                } => Some((
+                    field.as_str(),
+                    row_type.as_str(),
+                    version_type.as_str(),
+                    *version,
+                )),
+                _ => None,
+            })
+            .collect();
+        assert!(typed.contains(&("PID-8", "CWE", "IS", "2.3")), "{typed:?}");
+    }
+
+    // NOTE: the guide's ORC-4 rows name `EIP` and the v2.9.1 definitions `EI`; a
+    // v2.9.1 structure keeps the row's type and counts no substitution.
+    #[test]
+    fn a_current_field_keeps_the_type_its_row_names() {
+        let text = "MSH|^~\\&|NORTHLAB|NORTHHOSP|EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00013|P|2.5.1\r\
+             PID|1||PAT-0013^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M\r\
+             ORC|RE|PLC-3|FIL-3|GRP-3^NORTHLAB\r\
+             OBR|1|PLC-3|FIL-3|2345-7^Glucose^LN\r";
+        let lexed = parse::lex(text, Charset::Ascii).expect("it lexes");
+        let structure = parse::structure_for(&lexed.message).expect("a structure");
+        assert_eq!(structure.withdrawn_as_of, None);
+        let parsed = parse::group(lexed, structure);
+        assert_eq!(
+            definition_type(&hl7v2_types::segment::orc::ORC, 4).as_deref(),
+            Some("EI")
+        );
+        assert_eq!(
+            field_type(Some(String::from("EIP")), Some(String::from("EI")), false),
+            (Some(String::from("EIP")), None)
+        );
+        let corpus = corpus();
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let substituted = run
+            .outcomes
+            .iter()
+            .filter(|outcome| matches!(outcome, Outcome::VersionTyped { .. }))
+            .count();
+        assert_eq!(substituted, 0, "{:?}", run.outcomes);
     }
 
     /// MSH-24 alone valued, as `NORTHNET^1.2.3.9^ISO`.

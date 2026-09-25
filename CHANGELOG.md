@@ -459,6 +459,16 @@ crates on crates.io.
 
 ### Fixed
 
+- A field of a legacy v2 message takes its data type from the segment
+  definition of the version the parser selected (#329). Where that type
+  differs from the type the guide's row names, the version's type chooses
+  the data type map and the run counts a `version-typed` outcome naming the
+  field, both types and the version: an `ORM^O01` at 2.3 maps OBR-4 by `CE`
+  (`datatype-ce-to-codeableconcept`) where the row names `CWE`. A code
+  v2.9.1 dropped resolves by code through the same map lookup, and a message
+  of a structure v2.9.1 still carries keeps the row's type. The corpus pass
+  counts are unchanged: 112 of 511 vendored messages and 189 of 379 fetched
+  ones.
 - A v2-to-FHIR row into a complex element runs every data type map the
   guide names for it (#324). The maps are found by the element's type, else
   by its element path, the form the guide's map titles use for a backbone

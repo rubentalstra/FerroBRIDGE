@@ -296,6 +296,23 @@ pub enum Outcome {
         /// `MessageHeader.source.endpoint`.
         element: String,
     },
+    /// A field of a legacy structure whose own version's data type differs
+    /// from the type the segment map's row names; the version's type chooses
+    /// the data type map.
+    VersionTyped {
+        /// Where: the field.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The field, for example `OBR-4`.
+        field: String,
+        /// The type the row names, for example `CWE`.
+        row_type: String,
+        /// The type the version's segment definition gives, for example `CE`.
+        version_type: String,
+        /// The HL7 version of the structure, for example `2.3`.
+        version: &'static str,
+    },
     /// A value outside the lexical form of the FHIR primitive its element
     /// holds (<https://hl7.org/fhir/R4/datatypes.html#primitive>), which is
     /// never written.
@@ -371,6 +388,7 @@ impl Outcome {
             Self::Unwritable { .. } => "unwritable",
             Self::Superseded { .. } => "superseded",
             Self::FacilityEndpoint { .. } => "facility-endpoint",
+            Self::VersionTyped { .. } => "version-typed",
             Self::InvalidValue { .. } => "invalid-value",
             Self::MissingRequired { .. } => "missing-required",
             Self::Undecodable { .. } => "undecodable",
