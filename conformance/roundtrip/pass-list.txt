@@ -1,0 +1,3 @@
+ferrobridge_diagnose_minimal
+kds_diagnose
+total 2

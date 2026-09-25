@@ -251,6 +251,15 @@ pub(crate) fn start_context(extensions: &[&str]) -> String {
     )
 }
 
+/// Compiles the diagnosis chain and returns it with the published files it
+/// loads, relative to the vendored library.
+pub(crate) fn diagnosis_chain() -> Result<crate::support::Chain, Box<dyn Error>> {
+    let set = chain(&[CONTEXT, EXTENSION]).map_err(|diagnostics| render(&diagnostics))?;
+    let program = program_of(&set, "ferrobridge_diagnose.context")
+        .map_err(|diagnostics| render(&diagnostics))?;
+    Ok((PUBLISHED, program))
+}
+
 #[test]
 fn the_diagnosis_chain_compiles_into_one_program() -> Result<(), Box<dyn Error>> {
     let set = chain(&[CONTEXT, EXTENSION]).map_err(|diagnostics| render(&diagnostics))?;

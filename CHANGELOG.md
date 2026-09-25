@@ -25,6 +25,18 @@ crates on crates.io.
 
 ### Added
 
+- The conformance pass lists and their badges (#24). The corpus tests give
+  every case of four corpora a verdict: each file of the FHIRconnect mapping
+  library (2 of 107 pass: parse, published schemas or the pinned rejection
+  set, strict schemas, a clean load, and a compiled program reaching it),
+  each file of the OMOCL library (199 of 208), the two FHIR round-trip chains
+  (both lens laws hold on both) and the two FSH operation definitions of the
+  draft REST API chapter (both). The verdicts are ratcheted against committed
+  lists under `conformance/`, and a listed case that stops passing fails the
+  test. `scripts/checks/conformance.sh` compares, `--update` rewrites the
+  lists and the shields.io endpoint badges under `conformance/badges/`, and
+  `--check` runs as the new `conformance` CI job. The README shows the four
+  badges.
 - The boot banner and the console (#245). `ferrobridge serve` under the
   `pretty` format prints the FerroBRIDGE wordmark, the version, the pins it
   serves (FHIRconnect, FHIR, OMOCL, OMOP CDM, openEHR ITS-REST, the

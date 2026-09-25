@@ -16,6 +16,9 @@ use core::error::Error;
 use std::path::Path;
 use std::sync::Arc;
 
+use ferrobridge_testkit::conformance::Case;
+use ferrobridge_testkit::conformance::Corpus;
+use ferrobridge_testkit::conformance::record;
 use fhir_types::r4::schema::SCHEMAS;
 use fhirconnect::model::load::MappingSet;
 use fhirconnect::model::load::load_set;
@@ -115,6 +118,13 @@ fn kds_program() -> Result<(Arc<Program>, WebTemplateIndex), Box<dyn Error>> {
     )
     .map_err(|diagnostics| render(&diagnostics))?;
     Ok((program, index))
+}
+
+/// Compiles the project context and returns it with the published files it
+/// loads, relative to the vendored library.
+pub(crate) fn kds_chain() -> Result<crate::support::Chain, Box<dyn Error>> {
+    let (program, _) = kds_program()?;
+    Ok((PUBLISHED, program))
 }
 
 /// Returns the refusals a load of `files` raises, as `file:line code` rows.
@@ -448,5 +458,90 @@ fn getput_holds_on_the_kds_composition() -> Result<(), Box<dyn Error>> {
         &laws::untouched,
     )?;
     insta::assert_json_snapshot!("kds_getput", declared);
+    Ok(())
+}
+
+/// Returns the declared set a reviewed snapshot of this file pins.
+fn reviewed(name: &str) -> Result<serde_json::Value, Box<dyn Error>> {
+    let text = std::fs::read_to_string(format!(
+        "{}/tests/it/snapshots/it__roundtrip__{name}.snap",
+        env!("CARGO_MANIFEST_DIR")
+    ))?;
+    let body = text
+        .splitn(3, "---\n")
+        .nth(2)
+        .ok_or_else(|| format!("the {name} snapshot has no body"))?;
+    Ok(serde_json::from_str(body)?)
+}
+
+/// Returns the verdict on one law run: it holds when the run completes and
+/// its declared set is the reviewed one.
+fn holds(
+    law: &str,
+    snapshot: &str,
+    run: Result<serde_json::Value, Box<dyn Error>>,
+) -> Result<Option<String>, Box<dyn Error>> {
+    let expected = reviewed(snapshot)?;
+    Ok(match run {
+        Err(error) => Some(format!("{law} did not run: {error}")),
+        Ok(declared) if declared == expected => None,
+        Ok(declared) => Some(format!(
+            "{law} declared another set than the reviewed one: {declared}"
+        )),
+    })
+}
+
+/// Returns the verdict on one chain from its two laws.
+fn chain_case(id: &str, putget: Option<String>, getput: Option<String>) -> Case {
+    match putget.or(getput) {
+        Some(reason) => Case::fail(id, reason),
+        None => Case::pass(id),
+    }
+}
+
+/// The conformance verdict on every round-trip chain.
+///
+/// A chain passes when both lens laws hold on it: `PutGet` over its FHIR
+/// resource and `GetPut` over its composition, each equal to its input modulo
+/// the reviewed declared set. No specification governs this: our own design.
+#[test]
+fn conformance_the_round_trip_chains_hold_their_pass_list() -> Result<(), Box<dyn Error>> {
+    let synthetic = {
+        let program = compiled("ferrobridge_diagnose_minimal")?;
+        let index = template()?;
+        let putget = laws::putget(&program, &index, &synthetic_condition()?, &laws::untouched);
+        let getput = laws::getput(
+            &program,
+            &index,
+            &synthetic_composition(&index)?,
+            &laws::untouched,
+        );
+        chain_case(
+            "ferrobridge_diagnose_minimal",
+            holds("PutGet", "synthetic_putget", putget)?,
+            holds("GetPut", "synthetic_getput", getput)?,
+        )
+    };
+    let kds = {
+        let (program, index) = kds_program()?;
+        let putget = laws::putget(&program, &index, &kds_condition()?, &laws::untouched);
+        let getput = laws::getput(
+            &program,
+            &index,
+            &kds_composition(&index)?,
+            &laws::untouched,
+        );
+        chain_case(
+            "kds_diagnose",
+            holds("PutGet", "kds_putget", putget)?,
+            holds("GetPut", "kds_getput", getput)?,
+        )
+    };
+    let outcome = record(Corpus::Roundtrip, &[synthetic, kds])?;
+    assert!(
+        outcome.regressed.is_empty(),
+        "cases the pass list records no longer pass: {:?}",
+        outcome.regressed
+    );
     Ok(())
 }

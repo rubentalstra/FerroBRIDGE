@@ -362,3 +362,66 @@ fn every_library_attested_key_is_one_the_corpus_writes() -> Result<(), Box<dyn E
     }
     Ok(())
 }
+
+/// Returns the verdict on one corpus file, given the refusals the whole
+/// corpus loaded as one set raised.
+///
+/// A file passes when it parses, validates against the authored schema,
+/// passes the rules of one file, and loads into the set with every `Include`
+/// it writes resolved: the layers OMOCL's syntax tables and railroad images
+/// define, in the order the loader applies them.
+fn verdict(
+    relative: &str,
+    schema: &omocl::model::schema::Schema,
+    set_refusals: &[openehr_mapping_core::diagnostic::Diagnostic],
+) -> ferrobridge_testkit::conformance::Case {
+    use ferrobridge_testkit::conformance::Case;
+    let path = corpus_path(relative);
+    let document = match loader::load_file(&path) {
+        Ok(document) => document,
+        Err(error) => return Case::fail(relative, format!("does not parse: {error}")),
+    };
+    if let Some(first) = schema.validate_document(&document).first() {
+        return Case::fail(relative, format!("the authored schema refuses it: {first}"));
+    }
+    if let Err(diagnostics) = load_file(&path, &FirstPartyConverters) {
+        let first = diagnostics
+            .first()
+            .map_or_else(String::new, ToString::to_string);
+        return Case::fail(relative, format!("the rules refuse it: {first}"));
+    }
+    match set_refusals
+        .iter()
+        .find(|diagnostic| diagnostic.file() == path)
+    {
+        Some(first) => Case::fail(relative, format!("the set refuses it: {first}")),
+        None => Case::pass(relative),
+    }
+}
+
+#[test]
+fn conformance_the_omocl_corpus_holds_its_pass_list() -> Result<(), Box<dyn Error>> {
+    let schema = omocl::model::schema::schema().map_err(ToString::to_string)?;
+    let files = corpus_files()?;
+    let set_refusals = match load_set(
+        files.iter().map(|relative| corpus_path(relative)),
+        &FirstPartyConverters,
+    ) {
+        Ok(_) => Vec::new(),
+        Err(diagnostics) => diagnostics,
+    };
+    let cases: Vec<_> = files
+        .iter()
+        .map(|relative| verdict(relative, schema, &set_refusals))
+        .collect();
+    let outcome = ferrobridge_testkit::conformance::record(
+        ferrobridge_testkit::conformance::Corpus::Omocl,
+        &cases,
+    )?;
+    assert!(
+        outcome.regressed.is_empty(),
+        "cases the pass list records no longer pass: {:?}",
+        outcome.regressed
+    );
+    Ok(())
+}

@@ -10,17 +10,22 @@
 //! the test fails and the disagreement is re-adjudicated rather than absorbed.
 
 use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
+use ferrobridge_testkit::conformance::Case;
+use ferrobridge_testkit::conformance::Corpus;
+use ferrobridge_testkit::conformance::record;
 use fhirconnect::model::error::SchemaKind;
 use fhirconnect::model::load::load_set;
 use fhirconnect::model::schema::Schemas;
 use fhirconnect::model::schema::published;
 use fhirconnect::model::schema::strict;
 use fhirconnect::model::semantic::StaticMappingCodes;
+use openehr_mapping_core::header::MappingName;
 use openehr_mapping_core::loader::load_str;
 
 /// The vendored mapping library, relative to this crate's manifest.
@@ -447,5 +452,105 @@ fn the_corpus_mapping_codes_pass_once_the_engine_registers_them() -> Result<(), 
     assert!(unknown.is_empty(), "{unknown:?}");
     let baseline = corpus_diagnostics(&StaticMappingCodes::default())?;
     assert_eq!(baseline.len() - diagnostics.len(), 9);
+    Ok(())
+}
+
+/// Returns every corpus file a program the suites compile reaches.
+///
+/// A program reaches a model mapping it compiled and every extension it
+/// applied to one. The two programs are the diagnosis chain against the
+/// synthetic template and the KDS project context against the published
+/// `KDS_Diagnose` template, and each template carries the archetypes the
+/// files it reaches map.
+fn compiled_reach() -> Result<BTreeSet<String>, Box<dyn Error>> {
+    let mut reached = BTreeSet::new();
+    for (files, program) in [
+        crate::resolve::diagnosis_chain()?,
+        crate::roundtrip::kds_chain()?,
+    ] {
+        let mut names: Vec<&str> = vec![program.context().as_str()];
+        for model in program.models() {
+            names.push(model.name().as_str());
+            names.extend(model.extensions().iter().map(MappingName::as_str));
+        }
+        for file in files {
+            let source = fs::read_to_string(PathBuf::from(CORPUS).join(file))?;
+            let document = load_str(*file, &source)?;
+            if names.contains(&document.header().name().value().as_str()) {
+                reached.insert((*file).to_owned());
+            }
+        }
+    }
+    Ok(reached)
+}
+
+/// Returns the first refusal the whole corpus loaded as one set raises
+/// against each file, keyed by relative path.
+fn set_refusals() -> Result<BTreeMap<String, String>, Box<dyn Error>> {
+    let mut first = BTreeMap::new();
+    if let Err(diagnostics) = load_set(corpus_paths()?, &StaticMappingCodes::default()) {
+        for diagnostic in diagnostics {
+            let file = diagnostic
+                .file()
+                .strip_prefix(CORPUS)
+                .unwrap_or_else(|_| diagnostic.file())
+                .to_string_lossy()
+                .replace('\\', "/");
+            first
+                .entry(file)
+                .or_insert_with(|| format!("{}: {}", diagnostic.code(), diagnostic.message()));
+        }
+    }
+    Ok(first)
+}
+
+/// The conformance verdict on every corpus file.
+///
+/// A file passes when it parses, validates against the published schemas or
+/// is in the pinned rejection set, validates against the strict schemas,
+/// loads into the corpus set with no refusal naming it, and is reached by a
+/// program compiled against a template that carries its archetype
+/// (`docs/specs/fhirconnect/modules/ROOT/pages/schema/schema.adoc`,
+/// `docs/specs/fhirconnect/modules/ROOT/pages/types-of-mapping-files/context-mappings.adoc`).
+#[test]
+fn conformance_the_fhirconnect_corpus_holds_its_pass_list() -> Result<(), Box<dyn Error>> {
+    let published_refusals = validate_corpus(&schemas_from("modules/ROOT/attachments")?)?;
+    let strict_refusals = validate_corpus(strict_schemas()?)?;
+    let pinned: BTreeMap<&str, usize> = PUBLISHED_REJECTIONS.iter().copied().collect();
+    let loaded = set_refusals()?;
+    let reached = compiled_reach()?;
+    let mut cases = Vec::new();
+    for relative in corpus_files()? {
+        let source = fs::read_to_string(PathBuf::from(CORPUS).join(&relative))?;
+        let case = if let Err(error) = load_str(relative.clone(), &source) {
+            Case::fail(&relative, format!("does not parse: {error}"))
+        } else if let Some(errors) = published_refusals
+            .get(&relative)
+            .filter(|errors| pinned.get(relative.as_str()) != Some(&errors.len()))
+        {
+            Case::fail(
+                &relative,
+                format!("the published schemas refuse it: {errors:?}"),
+            )
+        } else if let Some(errors) = strict_refusals.get(&relative) {
+            Case::fail(
+                &relative,
+                format!("the strict schemas refuse it: {errors:?}"),
+            )
+        } else if let Some(refusal) = loaded.get(&relative) {
+            Case::fail(&relative, format!("the corpus set refuses it: {refusal}"))
+        } else if reached.contains(&relative) {
+            Case::pass(&relative)
+        } else {
+            Case::fail(&relative, "no program the suites compile reaches it")
+        };
+        cases.push(case);
+    }
+    let outcome = record(Corpus::FhirconnectMappingLib, &cases)?;
+    assert!(
+        outcome.regressed.is_empty(),
+        "cases the pass list records no longer pass: {:?}",
+        outcome.regressed
+    );
     Ok(())
 }

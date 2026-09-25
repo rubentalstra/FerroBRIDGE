@@ -56,6 +56,34 @@ The first run pulls the images, which are pinned by digest in
 `docs/VERSIONS.md`; later runs start in a few seconds. Each test owns its
 containers and stops them when it ends.
 
+## The conformance pass lists
+
+Neither FHIRconnect nor OMOCL has an external conformance suite, so the corpus
+tests are the instrument. Four corpora are measured, and each keeps a committed
+pass list under `conformance/<corpus>/pass-list.txt`: one passing case id per
+line, then a `total` line with the corpus size. The README badges read the
+counts from `conformance/badges/`.
+
+| Corpus | A case passes when |
+|---|---|
+| FHIRconnect mapping library | the file parses; it validates against the published schemas (`modules/ROOT/attachments/`, `schema/schema.adoc`) or is in the pinned rejection set; it validates against FerroBRIDGE's strict schemas; it loads into the library set with no refusal naming it; and a program the suites compile against a template carrying its archetype reaches it (`types-of-mapping-files/context-mappings.adoc`) |
+| OMOCL mapping library | the file parses, validates against the authored schema, passes the rules of one file, and loads into the library set with every `Include` resolved |
+| FHIR round-trip laws | `PutGet` and `GetPut` both run on the chain and each declares exactly the set its reviewed snapshot pins |
+| FHIRconnect REST API (draft) | the wire contract reads every `in` parameter and part the FSH operation definition declares, and the operation answers only the `out` parameters it declares, each `min = 1` one present (`rest-api.adoc`, draft) |
+
+A case the list records that no longer passes fails the corpus test itself, so
+a regression fails CI. When your change makes a case pass, or the corpus
+changes size, the `conformance` job fails until you record it:
+
+```bash
+scripts/checks/conformance.sh --update
+```
+
+Commit the rewritten lists and badges with the change. Without a flag the
+script compares and reports without failing on new passes; `--check` is what
+CI runs. It needs `cargo-nextest` and `jq`. Never edit a list by hand, and
+never remove a case from one to make CI green.
+
 ## The sqlx query metadata
 
 `omop-cdm` checks its SQL at compile time from the metadata committed under

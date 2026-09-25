@@ -5,7 +5,8 @@
 //! dev-dependency so `cargo package` strips it.
 //!
 //! [`matrix_pin`] reads the pin matrix, so a crate's version constant can be
-//! asserted against the single source of truth; [`containers`] starts the
+//! asserted against the single source of truth; [`conformance`] records the
+//! corpus verdicts the conformance gate reads; [`containers`] starts the
 //! PostgreSQL and the reference CDR the end-to-end lane runs against;
 //! [`fixtures`] holds the synthetic documents the suites commit and map;
 //! [`laws`] compares the two ends of a round trip;
@@ -16,6 +17,7 @@
 // TODO(#88): the synthetic vocabulary takes the observed Athena export shape
 // once it is recorded, so the production loader is what the tests exercise.
 
+pub mod conformance;
 pub mod containers;
 pub mod fixtures;
 pub mod laws;
