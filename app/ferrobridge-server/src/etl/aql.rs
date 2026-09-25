@@ -18,12 +18,15 @@ use openehr_query::parser::{self, ParseError};
 use std::collections::BTreeMap;
 
 /// The projections the composition query must alias, in no particular order.
-pub const COMPOSITION_PROJECTIONS: [&str; 4] = [
-    "ehr_id",
-    "versioned_object_uid",
-    "version_uid",
-    "composition",
-];
+pub const COMPOSITION_PROJECTIONS: [&str; 3] = ["ehr_id", "version_uid", "composition"];
+
+/// The projections the composition query may alias.
+///
+/// A `versioned_object_uid` the query selects is checked against the
+/// `version_uid`; one it does not select is read from the `version_uid`,
+/// whose `object_id` part names the versioned object (openEHR RM Common 1.1.0,
+/// `OBJECT_VERSION_ID`).
+pub const OPTIONAL_COMPOSITION_PROJECTIONS: [&str; 1] = ["versioned_object_uid"];
 
 /// The projections the visit query must alias, in no particular order.
 pub const VISIT_PROJECTIONS: [&str; 4] = ["ehr_id", "visit_source", "visit_start", "visit_end"];
@@ -83,14 +86,20 @@ pub struct CheckedQuery {
 }
 
 impl CheckedQuery {
-    /// Checks `text` as the composition query: `ehr_id`,
-    /// `versioned_object_uid`, `version_uid` and the whole `composition`.
+    /// Checks `text` as the composition query: `ehr_id`, `version_uid` and
+    /// the whole `composition`, with `versioned_object_uid` when it selects
+    /// one.
     ///
     /// # Errors
     ///
     /// Returns [`AqlError`] naming the first fault.
     pub fn compositions(text: &str) -> Result<Self, AqlError> {
-        Self::check("composition query", text, &COMPOSITION_PROJECTIONS)
+        Self::check(
+            "composition query",
+            text,
+            &COMPOSITION_PROJECTIONS,
+            &OPTIONAL_COMPOSITION_PROJECTIONS,
+        )
     }
 
     /// Checks `text` as the visit query: `ehr_id`, `visit_source`,
@@ -100,14 +109,16 @@ impl CheckedQuery {
     ///
     /// Returns [`AqlError`] naming the first fault.
     pub fn visits(text: &str) -> Result<Self, AqlError> {
-        Self::check("visit query", text, &VISIT_PROJECTIONS)
+        Self::check("visit query", text, &VISIT_PROJECTIONS, &[])
     }
 
-    /// Parses `text` and finds each of `projections` in its `SELECT` list.
+    /// Parses `text` and finds each of `projections`, and each of `optional`
+    /// it selects, in its `SELECT` list.
     fn check(
         query: &'static str,
         text: &str,
         projections: &[&'static str],
+        optional: &[&'static str],
     ) -> Result<Self, AqlError> {
         let parsed = parser::parse_str(text).map_err(|source| AqlError::Parse { query, source })?;
         if parsed.order_by.is_empty() {
@@ -134,6 +145,11 @@ impl CheckedQuery {
                 .copied()
                 .ok_or(AqlError::Missing { query, projection })?;
             columns.insert(*projection, position);
+        }
+        for projection in optional {
+            if let Some(position) = aliases.get(projection).copied() {
+                columns.insert(*projection, position);
+            }
         }
         let parameters = lexer::lex(text)
             .map_err(|source| AqlError::Parse {
@@ -204,16 +220,27 @@ mod tests {
         let error = CheckedQuery::compositions(
             "SELECT e/ehr_id/value AS ehr_id, c AS composition FROM EHR e CONTAINS COMPOSITION c ORDER BY e/ehr_id/value",
         )
-        .expect_err("two projections are missing");
+        .expect_err("the version_uid is missing");
         assert!(
             matches!(
                 error,
                 AqlError::Missing {
-                    projection: "versioned_object_uid",
+                    projection: "version_uid",
                     ..
                 }
             ),
             "{error:?}"
         );
+    }
+
+    #[test]
+    fn a_query_without_the_versioned_object_uid_checks_and_reads_none() {
+        let query = CheckedQuery::compositions(
+            "SELECT e/ehr_id/value AS ehr_id, v/uid/value AS version_uid, c AS composition \
+             FROM EHR e CONTAINS VERSION v CONTAINS COMPOSITION c ORDER BY v/uid/value",
+        )
+        .expect("the query checks");
+        assert_eq!(Some(1), query.column("version_uid"));
+        assert_eq!(None, query.column("versioned_object_uid"));
     }
 }

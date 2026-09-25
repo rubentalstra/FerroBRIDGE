@@ -120,6 +120,89 @@ every date and time a mapping reads from a composition: the offset is not
 normalised, and the row keeps the wall-clock time the source wrote. The visit concept
 and the visit type concept are configuration with no default.
 
+## Tying a composition to its visit
+
+The CDM asks every clinical event to carry its visit where one exists, and
+leaves the tie to the ETL. No specification governs the rule below: it is
+FerroBRIDGE's own design.
+
+- A composition belongs to the visit of its own EHR whose window, from the
+  visit's start to its end, contains the composition's `context/start_time`.
+  Both bounds are inclusive.
+- A composition without a context, a persistent one, is tied by the first date
+  its mapping resolved on its first row, with that row's time when it has one.
+- When several visits contain the moment, the visit whose source (the
+  `visit_source` the `[etl.visits]` query selects) equals the name of the
+  composition's `context/health_care_facility` wins. When no source matches,
+  or no facility is recorded, the bridge does not guess: the composition's
+  rows carry no visit.
+- A composition inside no visit window carries no visit either.
+- Times are compared as wall-clock times to the second, with the offset
+  dropped, the same reading the visits get. Where one side carries a date
+  and no time, the two dates are compared.
+
+The run report counts the committed compositions tied to a visit, those
+inside no visit, and those inside several that the facility did not decide.
+A run without `[etl.visits]` ties nothing and counts nothing.
+
+## The composition query
+
+The `[etl] aql` query selects each composition whole beside its `ehr_id` and
+`version_uid`, aliased by those names, with an `ORDER BY` and no `LIMIT`. It
+may also select the `versioned_object_uid`; when it does, the bridge checks it
+against the version, and when it does not, the bridge reads it from the
+`version_uid`, whose first part names the versioned object (openEHR RM
+Common 1.1.0, `OBJECT_VERSION_ID`). A query that reads only each composition's
+latest version, such as one over `VERSION v[LATEST_VERSION]`, keeps a changed
+composition from being written twice.
+
+## Checking a populated database with the Data Quality Dashboard
+
+The OHDSI Data Quality Dashboard runs its checks against a populated CDM
+outside CI; the round trip test in CI does not run it. It is an R package
+(<https://ohdsi.github.io/DataQualityDashboard/>), with no container image of
+its own, so you run it from any R session that can reach the database:
+
+1. Populate the database: `ferrobridge cdm init`, load the vocabulary, then
+   `ferrobridge etl run`. The CDM tables are in `[cdm] schema` (`cdm` by
+   default); the bridge's own tables are in `[cdm] bridge_schema` and are not
+   part of the CDM, so the dashboard is never pointed at them.
+2. Create a schema for the results, for example `CREATE SCHEMA dqd_results;`.
+3. In R, install the package and the PostgreSQL driver:
+
+   ```r
+   install.packages("DataQualityDashboard")
+   DatabaseConnector::downloadJdbcDrivers("postgresql", pathToDriver = "~/jdbc")
+   ```
+
+4. Connect and run the checks against CDM v5.4:
+
+   ```r
+   connectionDetails <- DatabaseConnector::createConnectionDetails(
+     dbms = "postgresql",
+     server = "localhost/ferrobridge",
+     port = 5432,
+     user = "ferrobridge",
+     password = Sys.getenv("CDM_PASSWORD"),
+     pathToDriver = "~/jdbc"
+   )
+   DataQualityDashboard::executeDqChecks(
+     connectionDetails = connectionDetails,
+     cdmDatabaseSchema = "cdm",
+     resultsDatabaseSchema = "dqd_results",
+     cdmSourceName = "FerroBRIDGE",
+     cdmVersion = "5.4",
+     outputFolder = "dqd-output",
+     writeToTable = TRUE
+   )
+   ```
+
+   The `server` argument is `host/database`, as `DatabaseConnector` documents
+   for PostgreSQL.
+5. Open the result with `DataQualityDashboard::viewDqDashboard()` on the JSON
+   file the run writes into `dqd-output`, and record every failing check with
+   its adjudication.
+
 ## Validating OMOCL files
 
 OMOCL publishes no JSON schema, so FerroBRIDGE authors one from the grammar

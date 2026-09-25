@@ -187,7 +187,7 @@ refuses every job.
 
 | Key | Default | Secret | Meaning |
 |---|---|---|---|
-| `aql` | none, required | no | The composition query. It aliases `ehr_id`, `versioned_object_uid`, `version_uid` and the whole `composition`, carries an `ORDER BY` and no `LIMIT`. It may name `$since`, which `--since` binds |
+| `aql` | none, required | no | The composition query. It aliases `ehr_id`, `version_uid` and the whole `composition`, carries an `ORDER BY` and no `LIMIT`. It may name `$since`, which `--since` binds. It may also alias `versioned_object_uid`, which the runner then checks against the version; when it does not, the runner reads it from the `version_uid`, whose `object_id` part names the versioned object (openEHR RM Common 1.1.0, `OBJECT_VERSION_ID`) |
 | `page_size` | `100` | no | The `fetch` of each page of either query |
 | `type_concept_id` | none, required | no | The `*_type_concept_id` the mappings write, the provenance of the records |
 | `observation_period_type_concept_id` | none, required | no | The `period_type_concept_id` of every observation period |

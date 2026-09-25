@@ -1062,6 +1062,7 @@ dependencies = [
  "fhirconnect",
  "futures-util",
  "http",
+ "insta",
  "jiff",
  "omocl",
  "omop-cdm",

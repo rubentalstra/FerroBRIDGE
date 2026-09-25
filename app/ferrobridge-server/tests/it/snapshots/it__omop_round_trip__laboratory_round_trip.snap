@@ -1,0 +1,26 @@
+---
+source: app/ferrobridge-server/tests/it/omop_round_trip.rs
+expression: "projection(&postgres, &names).await?"
+---
+MEASUREMENT
+lab-1 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1] | / | Laboratory_test_analyte_v1 | 0 | 0 | ehr-1 | synthetic-ward-a | 1101 | SYN-LAB-1 | 1101 | 2026-09-20 | 2026-09-20 09:15:00 | 7.25 | 7.25 | 3101 | mmol/L | 3101 | 3.5 | 6.5 | NULL | 5101
+lab-1 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 2] | / | Laboratory_test_analyte_v1 | 0 | 0 | ehr-1 | synthetic-ward-a | 1102 | SYN-LAB-2 | 2101 | 2026-09-20 | 2026-09-20 08:00:00 | 140 | 140 | 3102 | g/L | 3102 | 120 | 160 | 4201 | 5101
+lab-2 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1] | / | Laboratory_test_analyte_v1 | 0 | 0 | ehr-1 | synthetic-ward-a | 1101 | SYN-LAB-1 | 1101 | 2026-09-21 | 2026-09-21 08:10:00 | 5.1 | 5.1 | 3101 | mmol/L | 3101 | NULL | NULL | NULL | 5101
+lab-2 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 2] | / | Laboratory_test_analyte_v1 | 0 | 0 | ehr-1 | synthetic-ward-a | 0 | SYN-LAB-9 | NULL | 2026-09-21 | 2026-09-21 08:10:00 | 2.2 | 2.2 | 3101 | mmol/L | 3101 | NULL | NULL | 4204 | 5101
+lab-3 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1] | / | Laboratory_test_analyte_v1 | 0 | 0 | ehr-2 | synthetic-ward-b | 1102 | SYN-LAB-2 | 2101 | 2026-09-22 | 2026-09-22 10:05:00 | 150 | 150 | 3102 | g/L | 3102 | NULL | NULL | NULL | 5101
+lab-3 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 2] | / | Laboratory_test_analyte_v1 | 0 | 0 | ehr-2 | synthetic-ward-b | 1101 | SYN-LAB-1 | 1101 | 2026-09-22 | 2026-09-22 10:30:00 | 6 | 6 | 3101 | mmol/L | 3101 | 3.5 | 6.5 | NULL | 5101
+
+SPECIMEN
+lab-1 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1] | / | ehr-1 | 4101 | SYN-SPEC-1 | 2026-09-20 | 2026-09-20 08:30:00 | 5101
+
+FACT_RELATIONSHIP
+9011 | measurement | lab-1 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1] | / | 9016 | specimen | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1] | / | 0
+9011 | measurement | lab-1 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 2] | / | 9016 | specimen | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1] | / | 0
+9016 | specimen | lab-1 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1] | / | 9011 | measurement | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1] | / | 0
+9016 | specimen | lab-1 | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.specimen.v1 and 1] | / | 9011 | measurement | /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 2] | / | 0
+
+VISIT_OCCURRENCE and OBSERVATION_PERIOD
+observation_period | ehr-1 | NULL | NULL | 2026-09-20 | NULL | 2026-09-21 | NULL | 5102
+observation_period | ehr-2 | NULL | NULL | 2026-09-22 | NULL | 2026-09-22 | NULL | 5102
+visit | ehr-1 | synthetic-ward-a | 5001 | 2026-09-20 | 2026-09-20 07:30:00 | 2026-09-21 | 2026-09-21 09:00:00 | 5101
+visit | ehr-2 | synthetic-ward-b | 5001 | 2026-09-22 | 2026-09-22 10:00:00 | 2026-09-22 | 2026-09-22 11:00:00 | 5101

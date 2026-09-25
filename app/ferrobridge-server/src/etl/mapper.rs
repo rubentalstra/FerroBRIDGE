@@ -240,9 +240,7 @@ impl<S: ConceptSource> OmoclMapper<S> {
             composition.composition,
             composition.template,
             &composition.source,
-            // TODO(#244): hand the engine the derived visit the composition
-            // falls into; nothing ties a composition to a visit yet.
-            None,
+            composition.visit,
             &seams,
         )
         .await

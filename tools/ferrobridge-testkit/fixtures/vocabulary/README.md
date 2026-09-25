@@ -13,9 +13,11 @@ the vendored OHDSI DDL.
 Every row was written by hand for the tests on 2026-09-25. No concept code,
 concept name or vocabulary comes from an OHDSI vocabulary release or from any
 licensed terminology. The vocabularies are `FB-SOURCE`, `FB-STANDARD`,
-`FB-UNIT` and `FB-META`, each with the version `synthetic-1`. The domain
+`FB-UNIT` and `FB-META`, plus the stand-ins `LOINC`, `UCUM` and `SNOMED`
+described below, each with the version `synthetic-1`. The domain
 identifiers are the CDM's own names (`Measurement`, `Condition`, `Unit`,
-`Drug`, `Specimen`, `Metadata`) because the engine checks a resolved concept's domain
+`Drug`, `Specimen`, `Meas Value Operator`, `Visit`, `Type Concept`,
+`Metadata`) because the engine checks a resolved concept's domain
 against the table a mapping writes, and the CDM field definitions name the
 domains that way. The relationship identifiers `Maps to` and `Mapped from`
 are the ones the CDM conventions name
@@ -52,6 +54,22 @@ default end date, for example).
 | `FB-SOURCE` `SRC-SUCCEEDED` | two concepts under one key where only one is valid on the date |
 | `FB-SOURCE` `SRC-NOMAP` | a valid source concept with no `Maps to` row |
 | `FB-UNIT` `U-SYNTH` | a standard unit concept, with a multi-byte name |
+| `LOINC` `SYN-LAB-1` | a standard laboratory measurement, as the laboratory compositions code it |
+| `LOINC` `SYN-LAB-2` | a non-standard laboratory code with one `Maps to` hop to `STD-LAB-2` |
+| `UCUM` `mmol/L`, `g/L` | the standard units of the laboratory quantities |
+| `SNOMED` `SYN-SPEC-1` | a standard specimen type |
+| `Meas Value Operator` `<`, `<=`, `=`, `>=`, `>` | the operator concepts the resolver finds by name |
+| `FB-STANDARD` `STD-VISIT` | the `visit_concept_id` the round trip configures |
+| `FB-STANDARD` `STD-TYPE-RECORD`, `STD-TYPE-PERIOD` | the record and observation period type concepts the round trip configures |
+
+The laboratory rows sit under the vocabulary identifiers `LOINC`, `UCUM` and
+`SNOMED`, because the OMOCL engine looks a code up under the vocabulary its
+terminology names. Every concept id, name and code there is invented, except
+the two unit codes, which are the UCUM unit expressions the synthetic
+compositions write; the `vocabulary` rows name each one a FerroBRIDGE
+stand-in with the version `synthetic-1`. The vocabulary lists no `LOINC`
+`SYN-LAB-9`, the code one synthetic laboratory composition carries, so that
+analyte lands as concept `0`.
 
 The remaining tables carry a few rows each so the loader reads every one of
 them: the `FB-META` concepts give the vocabularies, domains, classes and

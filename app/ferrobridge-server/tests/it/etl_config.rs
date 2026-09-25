@@ -75,23 +75,33 @@ fn an_etl_section_resolves_with_its_query_checked() -> Result<(), Box<dyn StdErr
 
 #[test]
 fn a_composition_query_without_its_projections_refuses_to_boot() -> Result<(), Box<dyn StdError>> {
-    let error = refusal(&ETL.replace("AS versioned_object_uid", "AS object"))?;
-    match &error {
-        Error::Aql { key, source } => {
-            assert_eq!("etl.aql", key);
-            assert!(
-                matches!(
-                    **source,
-                    AqlError::Missing {
-                        projection: "versioned_object_uid",
-                        ..
-                    }
-                ),
-                "{source:?}"
-            );
+    for (alias, projection) in [
+        ("AS ehr_id", "ehr_id"),
+        ("AS version_uid", "version_uid"),
+        ("AS composition", "composition"),
+    ] {
+        let error = refusal(&ETL.replace(alias, "AS other"))?;
+        match &error {
+            Error::Aql { key, source } => {
+                assert_eq!("etl.aql", key);
+                assert!(
+                    matches!(**source, AqlError::Missing { projection: missing, .. } if missing == projection),
+                    "{projection}: {source:?}"
+                );
+            }
+            other => return Err(format!("expected an AQL refusal, got {other:?}").into()),
         }
-        other => return Err(format!("expected an AQL refusal, got {other:?}").into()),
     }
+    Ok(())
+}
+
+#[test]
+fn a_composition_query_without_the_versioned_object_uid_boots() -> Result<(), Box<dyn StdError>> {
+    let text = ETL.replace("vo/uid/value AS versioned_object_uid, ", "");
+    let settings = Config::from_sources(Some(&text), &BTreeMap::new())?.resolve()?;
+    let etl = settings.etl.as_ref().ok_or("the ETL is configured")?;
+    assert_eq!(None, etl.compositions.column("versioned_object_uid"));
+    assert_eq!(Some(1), etl.compositions.column("version_uid"));
     Ok(())
 }
 

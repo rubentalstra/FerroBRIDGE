@@ -10,6 +10,7 @@
 //! person and as JSON for a machine. No specification governs its shape: our
 //! own design.
 
+use crate::etl::tie::Tie;
 use omop_cdm::graph::{Refusal, Report, Source};
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -69,6 +70,13 @@ pub struct Compositions {
     pub skipped: u64,
     /// Compositions refused whole.
     pub refused: u64,
+    /// Committed compositions tied to a derived visit.
+    pub with_visit: u64,
+    /// Committed compositions inside no derived visit of their EHR.
+    pub without_visit: u64,
+    /// Committed compositions inside several derived visits that the
+    /// facility did not decide between, written with no visit.
+    pub ambiguous_visit: u64,
 }
 
 /// The rows each derived table holds after the run.
@@ -182,6 +190,18 @@ impl RunReport {
         });
     }
 
+    /// Counts the visit tie of one committed composition; a run that derives
+    /// no visits ties nothing and counts nothing.
+    pub fn tied(&mut self, tie: Option<&Tie>) {
+        let count = match tie {
+            Some(Tie::Visit(_)) => &mut self.compositions.with_visit,
+            Some(Tie::Outside) => &mut self.compositions.without_visit,
+            Some(Tie::Ambiguous) => &mut self.compositions.ambiguous_visit,
+            None => return,
+        };
+        *count = count.saturating_add(1);
+    }
+
     /// Adds a composition refused whole.
     pub fn composition_refused(&mut self, source: Option<&Source>, refusal: &Refusal) {
         self.compositions.refused = self.compositions.refused.saturating_add(1);
@@ -202,6 +222,11 @@ impl fmt::Display for RunReport {
             f,
             "compositions: {} read, {} committed, {} skipped, {} refused",
             compositions.read, compositions.committed, compositions.skipped, compositions.refused
+        )?;
+        writeln!(
+            f,
+            "visits: {} compositions tied, {} inside no visit, {} inside several",
+            compositions.with_visit, compositions.without_visit, compositions.ambiguous_visit
         )?;
         for (table, rows) in &self.rows {
             writeln!(f, "rows {table}: {rows}")?;

@@ -3,3 +3,6 @@ FB-SOURCE,FerroBRIDGE synthetic source vocabulary,https://example.org/ferrobridg
 FB-STANDARD,FerroBRIDGE synthetic standard vocabulary,https://example.org/ferrobridge/vocabulary/standard,synthetic-1,9002
 FB-UNIT,FerroBRIDGE synthetic unit vocabulary,https://example.org/ferrobridge/vocabulary/unit,synthetic-1,9003
 FB-META,FerroBRIDGE synthetic metadata vocabulary,https://example.org/ferrobridge/vocabulary/meta,synthetic-1,9004
+LOINC,FerroBRIDGE synthetic stand-in for LOINC,https://example.org/ferrobridge/vocabulary/loinc,synthetic-1,9005
+UCUM,FerroBRIDGE synthetic stand-in for UCUM,https://example.org/ferrobridge/vocabulary/ucum,synthetic-1,9006
+SNOMED,FerroBRIDGE synthetic stand-in for SNOMED,https://example.org/ferrobridge/vocabulary/snomed,synthetic-1,9007
