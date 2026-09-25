@@ -59,6 +59,69 @@ Nothing else about a request is logged. Add a name to
 `logged_query_parameters` only for a parameter you know carries no identifying
 content.
 
+### The console
+
+Two more variables set the console for one run, and they win over the file
+and over `FERROBRIDGE__TELEMETRY__FORMAT` and `FERROBRIDGE__TELEMETRY__FILTER`:
+
+| Variable | Sets | Values |
+|---|---|---|
+| `FERROBRIDGE_LOG_FORMAT` | `[telemetry] format` | `auto`, `json` or `pretty`; any other value refuses the start with exit 78 |
+| `RUST_LOG` | `[telemetry] filter` | A `tracing` filter directive such as `debug,hyper=warn` |
+
+```sh
+FERROBRIDGE_LOG_FORMAT=pretty RUST_LOG=debug ferrobridge serve
+```
+
+`auto` writes `pretty` with colour on a terminal and `json` without colour
+anywhere else, so a container or a log pipeline gets one JSON object per line
+with no configuration. An explicit `pretty` keeps its colour into a pipe.
+Colour only wraps text, so a line reads the same once a collector strips the
+escapes. In `pretty`, a carriage return or line feed inside a logged value is
+written as the two characters `\r` or `\n`, so no value can start a second
+line; `json` escapes it inside the string.
+
+Under `pretty`, `ferrobridge serve` prints a banner to stdout before the first
+log line: the wordmark, the version, the pins this build serves, the commit and
+build instant, and each lane with the hosts it reaches. A host is the URL's
+host and port and never its user information. Under `json` nothing but log
+lines reaches stdout.
+
+The first boot events describe the process:
+
+| Event | Fields |
+|---|---|
+| `console` | `format`, `rendering`, `filter` (the one in effect, after a fallback), `colour` |
+| `build` | `version`, `commit`, `built_at`, `rustc`, `openehr_crates`, `fhir_types` |
+| `lane` | `lane` (`facade`, `operations`, `etl` or `terminology`), `enabled`, `identifiable`, and where set `cdr_host`, `terminology_host`, `cdm_host`, `cdm_schema`, `bridge_schema`, `contexts`, `programs`, `templates` |
+
+`listening` is the last boot event. The `etl` lane reports what
+`ferrobridge etl run` would reach; `serve` never runs it.
+
+`GET /health/info` answers the same build facts and pins as JSON, so a scraper
+reads what the banner shows:
+
+```json
+{
+  "product": "FerroBRIDGE",
+  "version": "0.0.3",
+  "build": {
+    "commit": "0123456789abcdef0123456789abcdef01234567",
+    "commit_short": "0123456789ab",
+    "built_at": "2026-01-01T00:00:00Z",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+  },
+  "pins": [
+    { "name": "FHIRconnect", "version": "v1.0.0" },
+    { "name": "FHIR", "version": "R4 (4.0.1)" }
+  ]
+}
+```
+
+The pin list is shortened here; the route lists every pin the banner prints.
+`built_at` is the `SOURCE_DATE_EPOCH` instant when the build sets one, and the
+commit is `unknown` for a build outside a git checkout.
+
 ### `[cdr]`
 
 The openEHR CDR lane. Absent, the bridge holds no CDR client and readiness

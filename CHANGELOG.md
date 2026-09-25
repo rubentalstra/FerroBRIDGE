@@ -25,6 +25,19 @@ crates on crates.io.
 
 ### Added
 
+- The boot banner and the console (#245). `ferrobridge serve` under the
+  `pretty` format prints the FerroBRIDGE wordmark, the version, the pins it
+  serves (FHIRconnect, FHIR, OMOCL, OMOP CDM, openEHR ITS-REST, the
+  `openehr-*` crates and `fhir-types`, each read from its crate or from
+  `Cargo.lock`) and the four lanes with the hosts they reach; under `json` it
+  prints none of it. The boot logs one `console` event (the format, the filter
+  and whether colour is on), one `build` event (the git commit, the build
+  instant, honouring `SOURCE_DATE_EPOCH`, and the `rustc` version) and one
+  `lane` event per lane with its hosts and what its mapping set loaded, before
+  `listening`. `GET /health/info` answers the same build facts and pins as
+  JSON. A carriage return or line feed inside a `pretty` record is written as
+  `\r` or `\n`, so a value cannot forge a second line. `FERROBRIDGE_LOG_FORMAT`
+  and `RUST_LOG` override `[telemetry] format` and `filter`.
 - The OMOCL engine (#90). `omocl::resolve::compile` binds a loaded mapping
   set to one template once: every file at every archetype root of the
   template it maps, an `Include` below its including root at its `base_path`
