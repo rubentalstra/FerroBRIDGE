@@ -594,11 +594,42 @@ async fn a_valued_application_takes_no_facility_fallback() {
     );
 }
 
-// NOTE: HL7 R4 Bundle bdl-12: a message Bundle opens with a MessageHeader, and
-// MessageHeader.source is 1..1, so a message naming no sender maps to no Bundle.
+// NOTE: HL7 R4 JSON §Primitive Types: the guide's MSH-24 row writes the data-absent-reason as
+// `_endpoint` alone, which is the required endpoint, so a message naming no sender maps.
 #[tokio::test]
-async fn a_message_naming_no_sender_maps_to_no_bundle() {
-    let parsed = support::parsed(&fixtures::oru_r01_without_sender());
+async fn a_message_naming_no_sender_keeps_the_data_absent_reason_endpoint() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_without_sender()).await;
+    let (source, _) = header_parts(&mapped);
+    assert_eq!(source.get("endpoint"), None, "{source:?}");
+    let extension = source
+        .get("_endpoint")
+        .and_then(|endpoint| endpoint.get("extension"))
+        .and_then(Value::as_array)
+        .and_then(<[Value]>::first)
+        .cloned()
+        .expect("a data-absent-reason extension");
+    assert_eq!(
+        extension.get("valueCode").and_then(Value::as_str),
+        Some("unknown"),
+        "{extension:?}"
+    );
+    assert!(
+        lines_of(&mapped, "facility-endpoint")
+            .iter()
+            .all(|line| !line.contains("MSH-4")),
+        "{:#?}",
+        summary(&mapped)
+    );
+    let object = mapped.bundle().as_object().expect("a Bundle object");
+    fhir_types::r4::bundle::Bundle::from_json(object, &mut Path::root("Bundle"))
+        .expect("the Bundle decodes as R4");
+}
+
+// NOTE: HL7 R4 Bundle bdl-12: a message Bundle opens with a MessageHeader, and
+// MessageHeader.source is 1..1, so a message whose source no row completes maps to no Bundle.
+#[tokio::test]
+async fn a_message_whose_source_no_row_completes_maps_to_no_bundle() {
+    let parsed = support::parsed(&fixtures::oru_r01_network_address_only());
     let corpus = support::corpus();
     let tables = tables();
     let (_server, client) = tables.serve().await;

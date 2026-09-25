@@ -416,6 +416,19 @@ crates on crates.io.
 
 ### Fixed
 
+- A required FHIR primitive carried only by its `_name` sibling with an
+  extension counts as present, as FHIR R4 JSON represents a primitive with
+  extensions and no value (<https://hl7.org/fhir/R4/json.html#primitive>)
+  (#321). The `data-absent-reason` the guide's MSH-24 row writes into
+  `_endpoint` now completes `MessageHeader.source`, so a v2 message valuing
+  none of MSH-3, MSH-24 and MSH-4 is mapped with that endpoint instead of
+  answered `AR`; a `_name` with an empty extension list is still missing.
+  Where MSH-4 is valued its endpoint still replaces the extension. A message
+  whose `MessageHeader.source` no row completes, such as one valuing MSH-24,
+  whose row into `source` has no single data type map, is still refused as
+  `MapError::NoMessageHeader`. The smoke corpus passes 189 of 379 messages
+  (187 before, the 2 AIRA messages that name no sender); the vendored corpora
+  stay at 111 of 511.
 - The v2-to-FHIR interpreter emits only Bundles that decode as FHIR R4
   (#302). A value outside the lexical form of its target primitive, such as
   an application name with spaces written into the `url`

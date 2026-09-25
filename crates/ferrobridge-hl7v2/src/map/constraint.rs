@@ -101,14 +101,39 @@ pub(super) fn prune(
         .map(|field| field.path)
 }
 
-/// Whether `object` carries a value for `field`: its member, or for a choice
-/// the member of any alternative.
+/// Whether `object` carries `field`: its member, for a choice the member of
+/// any alternative, and for a primitive also its `_` sibling with an
+/// extension.
+///
+/// A primitive with extensions and no value is represented by the `_name`
+/// property alone (<https://hl7.org/fhir/R4/json.html#primitive>), and it is
+/// present for the element's cardinality.
 fn present(object: &Object, field: &FieldSchema) -> bool {
+    let carried = |key: &str, kind: Kind| {
+        object.contains_key(key)
+            || (matches!(kind, Kind::Primitive(_)) && extended(object.get(&format!("_{key}"))))
+    };
     match field.kind {
         Kind::Choice(variants) => variants
             .iter()
-            .any(|(suffix, _)| object.contains_key(&format!("{}{suffix}", field.name))),
-        _ => object.contains_key(field.name),
+            .any(|(suffix, kind)| carried(&format!("{}{suffix}", field.name), *kind)),
+        kind => carried(field.name, kind),
+    }
+}
+
+/// Whether a primitive's `_` sibling, one object or an array of them, holds
+/// at least one extension.
+fn extended(sibling: Option<&Value>) -> bool {
+    let holds = |value: &Value| {
+        value
+            .get("extension")
+            .and_then(Value::as_array)
+            .is_some_and(|extensions| !extensions.is_empty())
+    };
+    match sibling {
+        Some(Value::Array(items)) => items.iter().any(holds),
+        Some(value) => holds(value),
+        None => false,
     }
 }
 
@@ -296,6 +321,47 @@ mod tests {
             "resourceType": "MessageHeader",
             "eventCoding": {"code": "R01"},
             "source": {"name": "North Lab App"},
+        }));
+        assert_eq!(
+            dropped,
+            vec![Dropped {
+                element: String::from("MessageHeader.source"),
+                required: "MessageHeader.source.endpoint",
+            }]
+        );
+        assert_eq!(incomplete, Some("MessageHeader.source"));
+    }
+
+    // NOTE: HL7 R4 JSON §Primitive Types: a primitive with extensions and no value is the
+    // `_name` property alone, so `_endpoint` holding a data-absent-reason is the endpoint.
+    #[test]
+    fn an_endpoint_carried_only_by_its_extension_is_present() {
+        let (document, dropped, incomplete) = pruned(&serde_json::json!({
+            "resourceType": "MessageHeader",
+            "eventCoding": {"code": "R01"},
+            "source": {"_endpoint": {"extension": [{
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "unknown",
+            }]}},
+        }));
+        assert_eq!(incomplete, None);
+        assert_eq!(dropped, Vec::new());
+        assert!(
+            document
+                .get("source")
+                .and_then(|source| source.get("_endpoint"))
+                .is_some(),
+            "{document:?}"
+        );
+        assert!(decodes(&document));
+    }
+
+    #[test]
+    fn an_endpoint_sibling_with_no_extension_is_missing() {
+        let (_, dropped, incomplete) = pruned(&serde_json::json!({
+            "resourceType": "MessageHeader",
+            "eventCoding": {"code": "R01"},
+            "source": {"name": "North Lab App", "_endpoint": {"extension": []}},
         }));
         assert_eq!(
             dropped,

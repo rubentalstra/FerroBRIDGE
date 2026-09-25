@@ -52,11 +52,14 @@ offset is no `dateTime`), and a resource that does not decode as R4 are each
 a typed `Outcome`, counted and never dropped. Before a value is written,
 `map::constraint` checks it against its primitive's lexical form through the
 `fhir-types` decoder; after the writes, it drops every element and resource
-lacking an element the element table marks required. Both read the
+lacking an element the element table marks required, where a primitive
+counts as present by its value or by its `_name` sibling holding an
+extension (R4 JSON §Primitive Types). Both read the
 constraints from `fhir-types` and name no resource or element, so the Bundle
 decodes. A `message` Bundle without its `MessageHeader` breaks `bdl-12`,
-so `Run::finish` refuses it (`MapError::NoMessageHeader`) and `inbound`
-answers `AR` to a message valuing none of MSH-3, MSH-24 and MSH-4; with
+so `Run::finish` refuses it (`MapError::NoMessageHeader`); `inbound` refuses
+no message for its sender, since the guide's MSH-24 row writes a
+data-absent-reason endpoint when MSH-3 and MSH-24 are empty. With
 MSH-3 and MSH-24 empty, `Run::facility_endpoints` writes the source endpoint
 from MSH-4, and the destination's from MSH-6, as a `facility-endpoint`
 outcome, replacing the data-absent-reason the guide's MSH-24 and MSH-25
