@@ -207,11 +207,15 @@ filled. The guide's MSH-3 and MSH-24 rows leave a message valuing neither to
 the implementer, so the fallback is FerroBRIDGE's own design.
 
 A message that names its sender in none of MSH-3, MSH-24 and MSH-4 is
-answered `AR` with an `ERR` at MSH-3 and is not mapped: no
-`MessageHeader.source` can be written for it. Refusing it is FerroBRIDGE's
-decision. A run that
-still completes no `MessageHeader` is refused with an error naming the element
-it lacks, so no header-less message Bundle is ever produced.
+mapped. The guide's MSH-24 row writes the `data-absent-reason` extension with
+the code `unknown` into `source.endpoint` for it, and FHIR R4 JSON carries a
+primitive with an extension and no value as the `_endpoint` property alone
+(<https://hl7.org/fhir/R4/json.html#primitive>), which satisfies the required
+endpoint. When MSH-4 is valued, its endpoint replaces the extension as above.
+A run that still completes no `MessageHeader` is refused with an error naming
+the element it lacks, so no header-less message Bundle is ever produced. A
+message valuing MSH-24 is one: the guide's row into `source` has two
+qualified `HD` data type maps and no single one to run.
 
 ## Version mismatch is refused at load time
 

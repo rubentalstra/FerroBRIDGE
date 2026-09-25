@@ -102,6 +102,17 @@ pub(crate) fn oru_r01_facilities_only() -> Vec<u8> {
     ])
 }
 
+/// A result that names its sender only by network address, in MSH-24.
+pub(crate) fn oru_r01_network_address_only() -> Vec<u8> {
+    message(&[
+        b"MSH|^~\\&|||EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00009|P|2.5.1||||||||||||NORTHNET^1.2.3.9^ISO",
+        b"PID|1||PAT-0009^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M",
+        b"ORC|RE|PLC-1|FIL-1",
+        b"OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN",
+        b"OBX|1|NM|2345-7^Glucose^LN||5.4|mmol/L^mmol/L^UCUM|||||F",
+    ])
+}
+
 /// A result from a sending and to a receiving application named with spaces
 /// in MSH-3 and MSH-5, which the guide writes into FHIR `url` elements.
 pub(crate) fn oru_r01_named_applications() -> Vec<u8> {

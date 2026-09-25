@@ -252,10 +252,10 @@ async fn a_message_type_the_definitions_do_not_carry_is_answered_ar() {
     listener.stop().await;
 }
 
-// NOTE: HL7 R4 MessageHeader.source is 1..1, written from MSH-3, MSH-24 or the sending
-// facility MSH-4, so a message valuing none is refused naming MSH-3.
+// NOTE: `segment-msh-to-messageheader`: with MSH-3 and MSH-24 empty the guide's MSH-24 row
+// writes the data-absent-reason endpoint, so a message naming no sender is handed on to map.
 #[tokio::test]
-async fn a_message_naming_no_sender_is_answered_ar_at_msh_3() {
+async fn a_message_naming_no_sender_is_handed_on_to_map() {
     let listener = Listener::start(Codec::default()).await;
     let mut stream = TcpStream::connect(listener.address)
         .await
@@ -265,11 +265,8 @@ async fn a_message_naming_no_sender_is_answered_ar_at_msh_3() {
         .await
         .expect("the frame is sent");
     let ack = read_ack(&mut stream).await;
-    assert_eq!(msa(&ack), "MSA|AR|MSG00007");
-    assert!(
-        ack.contains("|MSH^1^3|101^Required field missing^HL70357|E|"),
-        "{ack}"
-    );
+    assert_eq!(msa(&ack), "MSA|AA|MSG00007");
+    assert!(!ack.contains("\rERR|"), "{ack}");
     drop(stream);
     listener.stop().await;
 }
