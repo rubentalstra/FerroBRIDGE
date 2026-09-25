@@ -22,10 +22,7 @@ use omocl::model::load::MappingSet;
 use omocl::model::semantic::FirstPartyConverters;
 use omocl::resolve::program::Program;
 use omop_cdm::generated::concept::Concept;
-use omop_cdm::graph::EhrId;
 use omop_cdm::graph::Source;
-use omop_cdm::graph::VersionUid;
-use omop_cdm::graph::VersionedObjectUid;
 use omop_cdm::graph::VisitKey;
 use omop_cdm::graph::VisitSource;
 use omop_cdm::value::CdmDate;
@@ -34,6 +31,8 @@ use omop_cdm::vocabulary::Resolution;
 use omop_cdm::vocabulary::ResolveError;
 use omop_cdm::vocabulary::SourceKey;
 use omop_cdm::vocabulary::VocabularyId;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::index::WebTemplateIndex;
 use openehr_mapping_core::template::TemplateSource;
@@ -148,16 +147,15 @@ pub(crate) fn compiled(
 /// The composition every run reads.
 pub(crate) fn source() -> Result<Source, Box<dyn Error>> {
     Ok(Source::new(
-        EhrId::new("ehr-synthetic-1")?,
-        VersionedObjectUid::new("composition-synthetic-1")?,
-        VersionUid::new("composition-synthetic-1::ferrobridge.test::1")?,
+        HierObjectId::new("ehr-synthetic-1")?,
+        ObjectVersionId::new("composition-synthetic-1::ferrobridge.test::1")?,
     ))
 }
 
 /// The visit every run's rows belong to.
 pub(crate) fn visit() -> Result<VisitKey, Box<dyn Error>> {
     Ok(VisitKey::new(
-        EhrId::new("ehr-synthetic-1")?,
+        HierObjectId::new("ehr-synthetic-1")?,
         VisitSource::new("visit-synthetic-1")?,
     ))
 }

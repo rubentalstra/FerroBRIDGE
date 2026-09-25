@@ -14,12 +14,13 @@ use ferrobridge_testkit::containers::{self, Postgres};
 use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::graph::{
-    ArchetypeRootPath, Discriminator, EhrId, Link, LinkEnd, MappingName, OccurrencePath,
-    RecordGraph, RecordKey, Reference, Row, Source, Value, VersionUid, VersionedObjectUid, Visit,
-    VisitKey, VisitSource,
+    ArchetypeRootPath, Discriminator, Link, LinkEnd, MappingName, OccurrencePath, RecordGraph,
+    RecordKey, Reference, Row, Source, Value, Visit, VisitKey, VisitSource,
 };
 use omop_cdm::value::CdmDate;
 use omop_cdm::writer::{CdmWriter, PersonPolicy, RunId, VisitConcepts, WriteError};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::error::Error;
 
@@ -79,11 +80,18 @@ async fn reader(postgres: &Postgres) -> Result<tokio_postgres::Client, Box<dyn E
     Ok(client)
 }
 
+/// Returns version `version` of the synthetic composition.
+fn source(version: u32) -> Result<Source, Box<dyn Error>> {
+    Ok(Source::new(
+        HierObjectId::new(EHR)?,
+        ObjectVersionId::new(format!("{COMPOSITION}::ferrobridge.test::{version}"))?,
+    ))
+}
+
 /// Returns the key of an analyte at `index` of the synthetic result.
 fn analyte(index: u32) -> Result<RecordKey, Box<dyn Error>> {
     Ok(RecordKey::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new(COMPOSITION)?,
+        &source(1)?,
         ArchetypeRootPath::new(ROOT)?,
         OccurrencePath::new(format!(
             "/data[at0001]/events[at0002]/data[at0003]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1,{index}]"
@@ -95,8 +103,7 @@ fn analyte(index: u32) -> Result<RecordKey, Box<dyn Error>> {
 /// Returns the key of the synthetic result itself.
 fn result() -> Result<RecordKey, Box<dyn Error>> {
     Ok(RecordKey::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new(COMPOSITION)?,
+        &source(1)?,
         ArchetypeRootPath::new(ROOT)?,
         OccurrencePath::new("/")?,
         Discriminator::new(MappingName::new("Laboratory_test_result_v1")?, 0, 0),
@@ -106,7 +113,7 @@ fn result() -> Result<RecordKey, Box<dyn Error>> {
 /// Returns a measurement under `key` with `concept` and `value`.
 fn measurement(key: RecordKey, concept: i32, value: Option<f64>) -> Result<Row, Box<dyn Error>> {
     Ok(Row::builder("measurement", key)?
-        .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+        .reference("person_id", Reference::Person(HierObjectId::new(EHR)?))?
         .value("measurement_concept_id", Value::Integer(concept))?
         .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
         .value("measurement_type_concept_id", Value::Integer(32817))?
@@ -118,11 +125,7 @@ fn measurement(key: RecordKey, concept: i32, value: Option<f64>) -> Result<Row, 
 /// Returns the graph of version `version` with the result and `analytes`
 /// analytes, each linked to the result.
 fn laboratory(version: u32, analytes: u32) -> Result<RecordGraph, Box<dyn Error>> {
-    let mut graph = RecordGraph::new(Source::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new(COMPOSITION)?,
-        VersionUid::new(format!("{COMPOSITION}::ferrobridge.test::{version}"))?,
-    ));
+    let mut graph = RecordGraph::new(source(version)?);
     graph.push_row(measurement(result()?, 1001, None)?)?;
     for index in 1..=analytes {
         let concept = if index == 1 { 1001 } else { 0 };
@@ -210,12 +213,12 @@ async fn a_graph_commits_its_rows_links_and_watermark() -> Result<(), Box<dyn Er
     assert_eq!(4, report.zero_relationship_links());
     let watermark = database
         .writer
-        .watermark(&VersionedObjectUid::new(COMPOSITION)?)
+        .watermark(&HierObjectId::new(COMPOSITION)?)
         .await?
         .ok_or("the commit advanced no watermark")?;
     assert_eq!(
         format!("{COMPOSITION}::ferrobridge.test::1"),
-        watermark.version_uid().as_str()
+        watermark.version_uid().value()
     );
     assert_eq!("run-1", watermark.run_id().as_str());
     Ok(())
@@ -275,10 +278,10 @@ async fn an_unresolved_reference_writes_nothing_of_the_composition() -> Result<(
     }
     let mut database = database(PersonPolicy::CreateOnFirstSight).await?;
     let mut graph = laboratory(1, 1)?;
-    let visit = VisitKey::new(EhrId::new(EHR)?, VisitSource::new("encounter-1")?);
+    let visit = VisitKey::new(HierObjectId::new(EHR)?, VisitSource::new("encounter-1")?);
     graph.push_row(
         Row::builder("measurement", analyte(9)?)?
-            .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+            .reference("person_id", Reference::Person(HierObjectId::new(EHR)?))?
             .value("measurement_concept_id", Value::Integer(1001))?
             .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
             .value("measurement_type_concept_id", Value::Integer(32817))?
@@ -359,7 +362,7 @@ async fn visits_keep_their_ids_and_resolve_references() -> Result<(), Box<dyn Er
         return Ok(());
     }
     let mut database = database(PersonPolicy::CreateOnFirstSight).await?;
-    let key = VisitKey::new(EhrId::new(EHR)?, VisitSource::new("encounter-1")?);
+    let key = VisitKey::new(HierObjectId::new(EHR)?, VisitSource::new("encounter-1")?);
     let visit = Visit::new(
         key.clone(),
         (CdmDate::new("2026-06-14")?, None),
@@ -392,7 +395,7 @@ async fn visits_keep_their_ids_and_resolve_references() -> Result<(), Box<dyn Er
     let mut graph = laboratory(1, 0)?;
     graph.push_row(
         Row::builder("measurement", analyte(1)?)?
-            .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+            .reference("person_id", Reference::Person(HierObjectId::new(EHR)?))?
             .value("measurement_concept_id", Value::Integer(1001))?
             .value("measurement_date", Value::Date(CdmDate::new("2026-06-15")?))?
             .value("measurement_type_concept_id", Value::Integer(32817))?

@@ -232,8 +232,7 @@ fn key_of_draft(draft: &Draft<'_>, source: &Source, branch: u16) -> Result<Recor
     })?;
     let empty = |error: omop_cdm::graph::EmptyIdentifier| invalid(error.to_string());
     Ok(RecordKey::new(
-        source.ehr_id().clone(),
-        source.versioned_object_uid().clone(),
+        source,
         ArchetypeRootPath::new(draft.root_path.clone()).map_err(empty)?,
         OccurrencePath::new(below).map_err(empty)?,
         Discriminator::new(

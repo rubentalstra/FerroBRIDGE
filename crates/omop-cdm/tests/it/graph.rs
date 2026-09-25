@@ -6,11 +6,13 @@
 //! required column, and a graph holds only its own composition's rows.
 
 use omop_cdm::graph::{
-    ArchetypeRootPath, Discriminator, EhrId, GraphError, Link, LinkEnd, MappingName,
-    OccurrencePath, RecordGraph, RecordKey, Reference, Refusal, Row, RowBuilder, Source, Value,
-    VersionUid, VersionedObjectUid, Visit, VisitKey, VisitSource,
+    ArchetypeRootPath, Discriminator, GraphError, Link, LinkEnd, MappingName, OccurrencePath,
+    RecordGraph, RecordKey, Reference, Refusal, Row, RowBuilder, Source, Value, Visit, VisitKey,
+    VisitSource,
 };
 use omop_cdm::value::CdmDate;
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use std::error::Error;
 
 /// The synthetic EHR every case uses.
@@ -19,11 +21,18 @@ const EHR: &str = "7d44b88c-4199-4bad-97dc-d78268e01398";
 /// The synthetic versioned composition every case uses.
 const COMPOSITION: &str = "8849182c-82ad-4088-a07f-48ead4180515";
 
+/// Returns the first version of the synthetic composition.
+fn source() -> Result<Source, Box<dyn Error>> {
+    Ok(Source::new(
+        HierObjectId::new(EHR)?,
+        ObjectVersionId::new(format!("{COMPOSITION}::ferrobridge.test::1"))?,
+    ))
+}
+
 /// Returns the key of the node at `occurrence` in the synthetic composition.
 fn key(occurrence: &str) -> Result<RecordKey, Box<dyn Error>> {
     Ok(RecordKey::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new(COMPOSITION)?,
+        &source()?,
         ArchetypeRootPath::new("/content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]")?,
         OccurrencePath::new(occurrence)?,
         Discriminator::new(MappingName::new("Laboratory_test_analyte_v1")?, 0, 0),
@@ -33,18 +42,14 @@ fn key(occurrence: &str) -> Result<RecordKey, Box<dyn Error>> {
 /// Returns a measurement builder with every required column but the date.
 fn measurement(occurrence: &str) -> Result<RowBuilder, Box<dyn Error>> {
     Ok(Row::builder("measurement", key(occurrence)?)?
-        .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+        .reference("person_id", Reference::Person(HierObjectId::new(EHR)?))?
         .value("measurement_concept_id", Value::Integer(1001))?
         .value("measurement_type_concept_id", Value::Integer(32817))?)
 }
 
 /// Returns the graph of the synthetic composition.
 fn graph() -> Result<RecordGraph, Box<dyn Error>> {
-    Ok(RecordGraph::new(Source::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new(COMPOSITION)?,
-        VersionUid::new(format!("{COMPOSITION}::ferrobridge.test::1"))?,
-    )))
+    Ok(RecordGraph::new(source()?))
 }
 
 /// Returns a date.
@@ -189,12 +194,12 @@ fn a_float_that_is_not_finite_is_refused() -> Result<(), Box<dyn Error>> {
 #[test]
 fn a_reference_must_fit_the_columns_foreign_key() -> Result<(), Box<dyn Error>> {
     let visit = Reference::Visit(VisitKey::new(
-        EhrId::new(EHR)?,
+        HierObjectId::new(EHR)?,
         VisitSource::new("encounter-1")?,
     ));
     measurement("/")?.reference("visit_occurrence_id", visit.clone())?;
     let refused = [
-        ("provider_id", Reference::Person(EhrId::new(EHR)?)),
+        ("provider_id", Reference::Person(HierObjectId::new(EHR)?)),
         ("measurement_concept_id", Reference::Row(key("/")?)),
         ("measurement_source_value", visit.clone()),
         ("visit_occurrence_id", Reference::Row(key("/")?)),
@@ -217,14 +222,16 @@ fn a_reference_must_fit_the_columns_foreign_key() -> Result<(), Box<dyn Error>> 
 fn a_graph_refuses_a_row_of_another_composition() -> Result<(), Box<dyn Error>> {
     let mut graph = graph()?;
     let other = RecordKey::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new("another-composition")?,
+        &Source::new(
+            HierObjectId::new(EHR)?,
+            ObjectVersionId::new("another-composition::ferrobridge.test::1")?,
+        ),
         ArchetypeRootPath::new("/content[x]")?,
         OccurrencePath::new("/")?,
         Discriminator::new(MappingName::new("Laboratory_test_analyte_v1")?, 0, 0),
     );
     let row = Row::builder("measurement", other)?
-        .reference("person_id", Reference::Person(EhrId::new(EHR)?))?
+        .reference("person_id", Reference::Person(HierObjectId::new(EHR)?))?
         .value("measurement_concept_id", Value::Integer(1001))?
         .value("measurement_date", date("2026-06-15")?)?
         .value("measurement_type_concept_id", Value::Integer(32817))?
@@ -279,7 +286,7 @@ fn a_link_must_name_rows_the_graph_holds() -> Result<(), Box<dyn Error>> {
 #[test]
 fn a_visit_source_is_bounded_by_visit_source_value() -> Result<(), Box<dyn Error>> {
     let day = CdmDate::new("2026-06-15")?;
-    let long = VisitKey::new(EhrId::new(EHR)?, VisitSource::new("s".repeat(51))?);
+    let long = VisitKey::new(HierObjectId::new(EHR)?, VisitSource::new("s".repeat(51))?);
     let error = Visit::new(long, (day.clone(), None), (day, None))
         .expect_err("visit_source_value is varchar(50)");
     assert!(matches!(error, GraphError::TooLong { .. }), "{error:?}");
@@ -288,9 +295,28 @@ fn a_visit_source_is_bounded_by_visit_source_value() -> Result<(), Box<dyn Error
 
 #[test]
 fn an_empty_identifier_is_refused() {
-    assert!(EhrId::new("").is_err(), "an empty ehr_id names nothing");
+    assert!(
+        HierObjectId::new("").is_err(),
+        "an empty ehr_id names nothing"
+    );
     assert!(
         MappingName::new("").is_err(),
         "an empty mapping name names nothing"
     );
+}
+
+#[test]
+fn a_source_takes_its_versioned_composition_from_the_version_as_written()
+-> Result<(), Box<dyn Error>> {
+    let upper = COMPOSITION.to_uppercase();
+    let source = Source::new(
+        HierObjectId::new(EHR)?,
+        ObjectVersionId::new(format!("{upper}::ferrobridge.test::2"))?,
+    );
+    assert_eq!(upper, source.versioned_object_uid().value());
+    assert_eq!(
+        format!("{upper}::ferrobridge.test::2"),
+        source.version_uid().value()
+    );
+    Ok(())
 }

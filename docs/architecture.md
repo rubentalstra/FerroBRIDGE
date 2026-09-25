@@ -1275,7 +1275,9 @@ is taken directly for the OPT2 types. `openehr-adl` (until a CDR serves ADL 2 as
 Identifiers cross every seam as distinct types: an `EhrId`, a version
 container `HierObjectId`, an `ObjectVersionId`, a `FhirResourceId`, a
 `PersonId` are five types, and the derivation functions in section 9 are the only places
-they meet.
+they meet. The `EhrId` newtype is the CDR handle of the client and the FHIR
+facade; the OMOP record graph, which a metadata-only consumer takes without
+the HTTP stack, carries the EHR as the BASE `HierObjectId` it is on the wire.
 
 ## 9. Identity, failure and the specification's recommendations
 

@@ -2427,6 +2427,7 @@ version = "0.0.0"
 dependencies = [
  "ferrobridge-testkit",
  "futures-util",
+ "openehr-base",
  "rustls",
  "sha2 0.11.0",
  "sqlx",

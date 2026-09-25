@@ -40,6 +40,8 @@ database = [
 
 [dependencies]
 futures-util = { workspace = true, optional = true }
+# The BASE 1.3 identifiers the record graph keys its rows by.
+openehr-base.workspace = true
 sqlx = { workspace = true, optional = true }
 thiserror.workspace = true
 # The CDM writer's client: binary COPY inside one transaction per composition,

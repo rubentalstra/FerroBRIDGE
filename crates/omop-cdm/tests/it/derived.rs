@@ -13,11 +13,13 @@ use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::derived;
 use omop_cdm::graph::{
-    ArchetypeRootPath, Discriminator, EhrId, MappingName, OccurrencePath, RecordGraph, RecordKey,
-    Reference, Row, Source, Value, VersionUid, VersionedObjectUid,
+    ArchetypeRootPath, Discriminator, MappingName, OccurrencePath, RecordGraph, RecordKey,
+    Reference, Row, Source, Value,
 };
 use omop_cdm::value::CdmDate;
 use omop_cdm::writer::{CdmWriter, PersonPolicy, RunId};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
+use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use std::error::Error;
 
@@ -53,11 +55,18 @@ async fn database() -> Result<(Postgres, CdmWriter), Box<dyn Error>> {
     Ok((postgres, writer))
 }
 
+/// Returns the first version of the synthetic composition.
+fn source() -> Result<Source, Box<dyn Error>> {
+    Ok(Source::new(
+        HierObjectId::new(EHR)?,
+        ObjectVersionId::new(format!("{COMPOSITION}::ferrobridge.test::1"))?,
+    ))
+}
+
 /// Returns the key of the node at `occurrence`.
 fn key(occurrence: &str) -> Result<RecordKey, Box<dyn Error>> {
     Ok(RecordKey::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new(COMPOSITION)?,
+        &source()?,
         ArchetypeRootPath::new("/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]")?,
         OccurrencePath::new(occurrence)?,
         Discriminator::new(MappingName::new("synthetic")?, 0, 0),
@@ -73,12 +82,8 @@ fn date(text: &str) -> Result<Value, Box<dyn Error>> {
 /// apart, and a measurement on its own date.
 fn clinical() -> Result<RecordGraph, Box<dyn Error>> {
     let person =
-        || -> Result<Reference, Box<dyn Error>> { Ok(Reference::Person(EhrId::new(EHR)?)) };
-    let mut graph = RecordGraph::new(Source::new(
-        EhrId::new(EHR)?,
-        VersionedObjectUid::new(COMPOSITION)?,
-        VersionUid::new(format!("{COMPOSITION}::ferrobridge.test::1"))?,
-    ));
+        || -> Result<Reference, Box<dyn Error>> { Ok(Reference::Person(HierObjectId::new(EHR)?)) };
+    let mut graph = RecordGraph::new(source()?);
     for (index, (start, end)) in [("2026-05-01", "2026-05-10"), ("2026-05-30", "2026-06-02")]
         .into_iter()
         .enumerate()

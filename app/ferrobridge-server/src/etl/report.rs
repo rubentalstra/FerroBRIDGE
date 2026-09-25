@@ -161,7 +161,7 @@ impl RunReport {
             totals.unmapped_fields = totals.unmapped_fields.saturating_add(1);
             self.unmapped_fields.push(UnmappedEntry {
                 composition: source.map_or_else(String::new, |source| {
-                    source.versioned_object_uid().to_string()
+                    source.versioned_object_uid().value().to_owned()
                 }),
                 mapping: field.mapping().to_string(),
                 element: field.element().to_owned(),
@@ -180,8 +180,8 @@ impl RunReport {
             totals.refusals = totals.refusals.saturating_add(1);
         }
         self.refusals.push(RefusalEntry {
-            composition: source.map(|source| source.versioned_object_uid().to_string()),
-            version: source.map(|source| source.version_uid().to_string()),
+            composition: source.map(|source| source.versioned_object_uid().value().to_owned()),
+            version: source.map(|source| source.version_uid().value().to_owned()),
             mapping: refusal.mapping().map(ToString::to_string),
             table: refusal.table().map(str::to_owned),
             column: refusal.column().map(str::to_owned),

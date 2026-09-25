@@ -14,8 +14,9 @@
 //! <https://ohdsi.github.io/CommonDataModel/cdm54.html#visit_occurrence>).
 
 use crate::etl::aql::CheckedQuery;
-use omop_cdm::graph::{EhrId, MappingName, Refusal, Visit, VisitKey, VisitSource};
+use omop_cdm::graph::{MappingName, Refusal, Visit, VisitKey, VisitSource};
 use omop_cdm::value::{CdmDate, CdmDatetime};
+use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use std::collections::BTreeMap;
 
 /// The mapping name the report files visit refusals under.
@@ -104,7 +105,7 @@ pub fn group(query: &CheckedQuery, rows: &[Vec<serde_json::Value>]) -> Visits {
     let mut refusals = Vec::new();
     for row in rows {
         let read = || -> Result<(VisitKey, Moment, Moment), Refusal> {
-            let ehr = EhrId::new(text(query, row, "ehr_id")?)
+            let ehr = HierObjectId::new(text(query, row, "ehr_id")?)
                 .map_err(|error| refused(format!("the visit row's ehr_id: {error}")))?;
             let source = VisitSource::new(text(query, row, "visit_source")?)
                 .map_err(|error| refused(format!("the visit row's visit_source: {error}")))?;
