@@ -55,5 +55,5 @@ expression: summary(&mapped)
     "unknown-element: OBX[2]-6(1) datatype-cwe-to-quantity CWE.3 -> Quantity.system [the element table does not resolve the target path]",
     "unmapped-field: OBX[2]-1",
     "unmapped-field: OBX[2]-2",
-    "undecodable: DiagnosticReport DiagnosticReport.status: required property is missing",
+    "missing-required: DiagnosticReport lacks DiagnosticReport.status",
 ]

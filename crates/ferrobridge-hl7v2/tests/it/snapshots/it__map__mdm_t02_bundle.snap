@@ -72,13 +72,6 @@ expression: pretty(mapped.bundle())
       }
     },
     {
-      "fullUrl": "urn:uuid:e11517c5-2bbc-8967-a468-f18a084c0f66",
-      "resource": {
-        "recorded": "2026-09-25T09:59:00+02:00",
-        "resourceType": "Provenance"
-      }
-    },
-    {
       "fullUrl": "urn:uuid:98e69842-9c10-8f97-830e-eb3a4330d1c4",
       "resource": {
         "birthDate": "1975-11-11",
@@ -108,20 +101,6 @@ expression: pretty(mapped.bundle())
       }
     },
     {
-      "fullUrl": "urn:uuid:010cd9ef-f76b-8a8a-acee-5df407636f7b",
-      "resource": {
-        "activity": {
-          "coding": [
-            {
-              "code": "UPDATE",
-              "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation"
-            }
-          ]
-        },
-        "resourceType": "Provenance"
-      }
-    },
-    {
       "fullUrl": "urn:uuid:a18685f3-8d30-85fb-a6b4-cf915623dbd8",
       "resource": {
         "class": {
@@ -131,20 +110,6 @@ expression: pretty(mapped.bundle())
         },
         "resourceType": "Encounter",
         "status": "in-progress"
-      }
-    },
-    {
-      "fullUrl": "urn:uuid:56728277-53da-87c2-a4a3-204aac4376dc",
-      "resource": {
-        "content": [
-          {
-            "attachment": {
-              "contentType": "TX"
-            }
-          }
-        ],
-        "docStatus": "AU",
-        "resourceType": "DocumentReference"
       }
     }
   ],

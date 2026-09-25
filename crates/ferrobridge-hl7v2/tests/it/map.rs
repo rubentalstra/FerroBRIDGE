@@ -162,6 +162,9 @@ fn line(outcome: &Outcome) -> String {
         Outcome::Undecodable {
             resource, error, ..
         } => format!("{kind}: {resource} {error}"),
+        Outcome::MissingRequired {
+            element, required, ..
+        } => format!("{kind}: {element} lacks {required}"),
         other => row_line(kind, other),
     }
 }
@@ -189,6 +192,13 @@ fn row_line(kind: &str, outcome: &Outcome) -> String {
         Outcome::Unconvertible { at, row, error } => (at, row, error.to_string()),
         Outcome::UnknownElement { at, row, error } => (at, row, error.to_string()),
         Outcome::Unwritable { at, row, error } => (at, row, error.to_string()),
+        Outcome::InvalidValue {
+            at,
+            row,
+            element,
+            fhir_type,
+            error,
+        } => (at, row, format!("{element} is no {fhir_type}: {error}")),
         Outcome::NoDatatypeMap {
             at,
             row,
@@ -425,4 +435,67 @@ async fn a_supplement_map_replaces_the_package_map_with_its_url() {
         "the supplement's map took the package map's place"
     );
     assert_eq!(corpus.maps().count(), 263);
+}
+
+/// The outcomes of `mapped` of the kind `kind`, as summary lines.
+fn lines_of(mapped: &Mapped, kind: &str) -> Vec<String> {
+    mapped
+        .outcomes()
+        .iter()
+        .filter(|outcome| outcome.kind() == kind)
+        .map(line)
+        .collect()
+}
+
+// NOTE: HL7 R4 datatypes §url admits no whitespace, and MessageHeader.source and
+// MessageHeader.destination.endpoint are 1..1, so the MessageHeader is left out.
+#[tokio::test]
+async fn an_application_name_with_spaces_is_no_url_and_its_element_is_dropped() {
+    let (mapped, _) = mapped(&fixtures::oru_r01_named_applications()).await;
+    let invalid: Vec<(String, String)> = mapped
+        .outcomes()
+        .iter()
+        .filter_map(|outcome| match outcome {
+            Outcome::InvalidValue {
+                element,
+                fhir_type,
+                error: fhir_types::codec::DecodeErrorKind::BadValue,
+                ..
+            } => Some((element.clone(), fhir_type.clone())),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(
+        invalid,
+        vec![
+            (
+                String::from("MessageHeader.source.endpoint"),
+                String::from("url")
+            ),
+            (
+                String::from("MessageHeader.destination.endpoint"),
+                String::from("url")
+            ),
+        ],
+        "{:#?}",
+        summary(&mapped)
+    );
+    let header: Vec<String> = lines_of(&mapped, "missing-required")
+        .into_iter()
+        .filter(|line| line.contains("MessageHeader"))
+        .collect();
+    assert_eq!(
+        header,
+        vec![
+            String::from(
+                "missing-required: MessageHeader.destination[0] lacks MessageHeader.destination.endpoint"
+            ),
+            String::from("missing-required: MessageHeader lacks MessageHeader.source"),
+        ]
+    );
+    assert!(lines_of(&mapped, "undecodable").is_empty());
+    assert!(resources(mapped.bundle(), "MessageHeader").is_empty());
+    let object = mapped.bundle().as_object().expect("a Bundle object");
+    fhir_types::r4::bundle::Bundle::from_json(object, &mut Path::root("Bundle"))
+        .expect("the Bundle decodes as R4");
 }

@@ -72,13 +72,6 @@ expression: pretty(mapped.bundle())
       }
     },
     {
-      "fullUrl": "urn:uuid:75cbdc0d-daaf-8290-8c73-1e19bbb51259",
-      "resource": {
-        "recorded": "2026-09-25T08:59:00+02:00",
-        "resourceType": "Provenance"
-      }
-    },
-    {
       "fullUrl": "urn:uuid:78c72ab1-5c8f-820f-acf2-c364ba4942e6",
       "resource": {
         "birthDate": "1992-03-04",

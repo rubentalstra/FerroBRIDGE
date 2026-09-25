@@ -25,9 +25,13 @@
 //! (<https://hl7.org/fhir/R4/bundle.html>, `Bundle.type` `message`). Every
 //! segment, field and component no row maps, and every condition, target or
 //! assignment the interpreter cannot evaluate, is an [`Outcome`] on the
-//! result; a resource that does not decode as R4 is one too.
+//! result. A value outside its primitive's lexical form is never written, an
+//! element or resource lacking a required element is left out, and a
+//! resource that still does not decode as R4 is left out too, each counted,
+//! so the Bundle decodes.
 
 pub mod condition;
+mod constraint;
 pub mod convert;
 pub mod corpus;
 pub mod notation;
@@ -35,7 +39,7 @@ mod run;
 
 use std::collections::BTreeMap;
 
-use fhir_types::codec::{DecodeError, Value};
+use fhir_types::codec::{DecodeError, DecodeErrorKind, Value};
 use fhirconnect::tree::error::{ParseError, ResolveError, WriteError};
 
 use crate::map::convert::ConvertError;
@@ -228,14 +232,47 @@ pub enum Outcome {
         error: WriteError,
     },
     /// A value for an element an earlier row already wrote, which keeps the
-    /// earlier value.
+    /// earlier value; a choice element holding one alternative counts as
+    /// written for every other.
     Superseded {
         /// Where.
         at: Location,
         /// The row.
         row: RowRef,
     },
-    /// A resource that does not decode as R4.
+    /// A value outside the lexical form of the FHIR primitive its element
+    /// holds (<https://hl7.org/fhir/R4/datatypes.html#primitive>), which is
+    /// never written.
+    InvalidValue {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The element path from the table, for example
+        /// `MessageHeader.source.endpoint`.
+        element: String,
+        /// The FHIR primitive type, for example `url`.
+        fhir_type: String,
+        /// The decoder's refusal.
+        error: DecodeErrorKind,
+    },
+    /// An element dropped from a resource, or a resource dropped from the
+    /// Bundle, because it lacks an element its definition requires
+    /// (<https://hl7.org/fhir/R4/elementdefinition.html>,
+    /// `ElementDefinition.min`).
+    MissingRequired {
+        /// The resource type.
+        resource: String,
+        /// The entry's full url.
+        full_url: String,
+        /// The instance path of what was dropped, the resource type when the
+        /// resource itself was.
+        element: String,
+        /// The definition path of the required element it lacks.
+        required: String,
+    },
+    /// A resource that does not decode as R4, which is left out of the
+    /// Bundle.
     Undecodable {
         /// The resource type.
         resource: String,
@@ -273,6 +310,8 @@ impl Outcome {
             Self::UnknownElement { .. } => "unknown-element",
             Self::Unwritable { .. } => "unwritable",
             Self::Superseded { .. } => "superseded",
+            Self::InvalidValue { .. } => "invalid-value",
+            Self::MissingRequired { .. } => "missing-required",
             Self::Undecodable { .. } => "undecodable",
         }
     }
