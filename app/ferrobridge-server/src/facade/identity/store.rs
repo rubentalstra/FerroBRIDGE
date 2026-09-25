@@ -20,7 +20,7 @@ use core::fmt;
 use std::collections::BTreeMap;
 use std::sync::Mutex;
 
-use ferrobridge_openehr::ids::EhrId;
+use crate::cdr::ids::EhrId;
 
 use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
@@ -363,9 +363,9 @@ impl Store for MemoryStore {
 #[cfg(test)]
 mod tests {
     use super::{MemoryStore, Store};
+    use crate::cdr::ids::EhrId;
     use crate::facade::identity::record::{CompositionBinding, ConsumedSource, SourceVersion};
     use crate::facade::identity::{ExternalResourceId, FhirResourceId, PersonId};
-    use ferrobridge_openehr::ids::EhrId;
 
     /// Returns a binding naming `uid` as its version container.
     fn binding(uid: &str) -> CompositionBinding {

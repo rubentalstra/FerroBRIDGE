@@ -538,7 +538,7 @@ pub enum Error {
         key: String,
         /// What the page size reported.
         #[source]
-        source: ferrobridge_openehr::query::PageSizeError,
+        source: crate::cdr::query::PageSizeError,
     },
     /// A configured AQL the runner cannot read.
     #[error("{key} is refused")]
@@ -770,7 +770,7 @@ pub struct Settings {
     /// The console.
     pub telemetry: TelemetrySettings,
     /// The CDR client configuration, when the lane is on.
-    pub cdr: Option<ferrobridge_openehr::config::Config>,
+    pub cdr: Option<crate::cdr::config::CdrConfig>,
     /// The terminology client configuration, when the lane is on.
     pub terminology: Option<ferrobridge_term::config::Config>,
     /// The OMOP CDM database, when the lane is on.
@@ -932,20 +932,22 @@ fn env_value(raw: &str) -> toml::Value {
 }
 
 /// Returns the CDR client configuration `cdr` describes.
-fn resolve_cdr(cdr: &Cdr) -> Result<ferrobridge_openehr::config::Config, Error> {
+fn resolve_cdr(cdr: &Cdr) -> Result<crate::cdr::config::CdrConfig, Error> {
     let base_url = url_of("cdr.base_url", &cdr.base_url)?;
-    let mut config = ferrobridge_openehr::config::Config::new(base_url)
+    let mut config = crate::cdr::config::CdrConfig::new(base_url)
         .with_timeout(Duration::from_millis(cdr.timeout_ms))
-        .with_retry(ferrobridge_openehr::config::RetryPolicy {
-            max_attempts: cdr.retry.max_attempts,
+        .with_retry(openehr_its::rest::client::RetryPolicy {
+            // NOTE: no specification governs this: our own design; a u32 fits a
+            // usize on every target the server builds for, so the clamp never bites.
+            max_attempts: usize::try_from(cdr.retry.max_attempts).unwrap_or(usize::MAX),
             initial_backoff: Duration::from_millis(cdr.retry.initial_backoff_ms),
             max_backoff: Duration::from_millis(cdr.retry.max_backoff_ms),
         });
     if let Some(scheme) = resolve_credentials("cdr.credentials", &cdr.credentials)? {
         config = config.with_credentials(match scheme {
-            Scheme::Bearer(token) => ferrobridge_openehr::config::Credentials::Bearer(token),
+            Scheme::Bearer(token) => crate::cdr::config::Credentials::Bearer(token),
             Scheme::Basic { user, password } => {
-                ferrobridge_openehr::config::Credentials::Basic { user, password }
+                crate::cdr::config::Credentials::Basic { user, password }
             }
         });
     }
@@ -1067,12 +1069,11 @@ fn resolve_etl(etl: &Etl) -> Result<crate::etl::EtlSettings, Error> {
         &etl.aql,
         crate::etl::aql::CheckedQuery::compositions,
     )?;
-    let page_size = ferrobridge_openehr::query::PageSize::new(etl.page_size).map_err(|source| {
-        Error::PageSize {
+    let page_size =
+        crate::cdr::query::PageSize::new(etl.page_size).map_err(|source| Error::PageSize {
             key: String::from("etl.page_size"),
             source,
-        }
-    })?;
+        })?;
     let visits = etl
         .visits
         .as_ref()

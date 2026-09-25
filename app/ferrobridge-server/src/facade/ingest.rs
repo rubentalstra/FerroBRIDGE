@@ -18,17 +18,6 @@
 
 use std::collections::BTreeSet;
 
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::composition::CompositionOutcome;
-use ferrobridge_openehr::composition::CreateCompositionOutcome;
-use ferrobridge_openehr::composition::UpdateCompositionOutcome;
-use ferrobridge_openehr::contribution::ContributionOutcome;
-use ferrobridge_openehr::contribution::CreateContributionOutcome;
-use ferrobridge_openehr::ids::ContributionUid;
-use ferrobridge_openehr::ids::EhrId;
-use ferrobridge_openehr::ids::versioned_object_uid;
-use ferrobridge_openehr::prefer::Prefer;
-use ferrobridge_openehr::prefer::Returned;
 use fhir_types::codec::Value;
 use fhirconnect::engine::origin::SourceItem;
 use fhirconnect::resolve::program::TemplateId;
@@ -42,10 +31,23 @@ use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 use openehr_its::rest::generated::common::UpdateVersion;
 use openehr_its::rest::generated::ehr::NewContribution;
 use openehr_its::rest::generated::ehr::Versionable;
+use openehr_its::rest::generated::ehr::client::CompositionCreateOutcome;
+use openehr_its::rest::generated::ehr::client::CompositionGetOutcome;
+use openehr_its::rest::generated::ehr::client::CompositionUpdateOutcome;
+use openehr_its::rest::generated::ehr::client::ContributionCreateOutcome;
+use openehr_its::rest::generated::ehr::client::ContributionGetOutcome;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_rm::v1_2::common::change_control::contribution::Contribution;
 use openehr_rm::v1_2::composition::composition::Composition;
 
+use crate::cdr::CdrClient;
+use crate::cdr::Prefer;
+use crate::cdr::Returned;
+use crate::cdr::error::CdrError;
+use crate::cdr::error::Upstream;
+use crate::cdr::ids::ContributionUid;
+use crate::cdr::ids::EhrId;
+use crate::cdr::ids::versioned_object_uid;
 use crate::facade::Settings;
 use crate::facade::commit;
 use crate::facade::ehr;
@@ -337,7 +339,7 @@ pub struct Ingest<'a> {
     /// The source keys the in-flight deliveries into that map hold.
     claims: &'a Claims,
     /// The CDR client every call of this ingest goes through.
-    client: Client,
+    client: CdrClient,
     /// What the deployment configured.
     settings: &'a Settings,
 }
@@ -424,7 +426,7 @@ impl<'a> Ingest<'a> {
         programs: &'a Programs,
         store: &'a dyn Store,
         claims: &'a Claims,
-        client: Client,
+        client: CdrClient,
         settings: &'a Settings,
     ) -> Self {
         Self {
@@ -438,7 +440,7 @@ impl<'a> Ingest<'a> {
 
     /// Returns the CDR client this ingest calls through.
     #[must_use]
-    pub const fn client(&self) -> &Client {
+    pub const fn client(&self) -> &CdrClient {
         &self.client
     }
 
@@ -554,22 +556,41 @@ impl<'a> Ingest<'a> {
             .client
             .create_composition(&ehr_id, &rm, &context, Prefer::Representation)
             .await
-            .map_err(|error| Refused::of_answer(&status::of_client_error(&error)))?;
-        let (version, stored) = match answered {
-            CreateCompositionOutcome::Created {
-                version_id,
-                returned,
-            } => (version_id, representation(returned, &composition)?),
-            CreateCompositionOutcome::Unprocessable(upstream) => {
-                return Err(upstream_refusal(status::UNPROCESSABLE, &upstream));
+            .map_err(|error| cdr_refusal(&error))?;
+        let (version, stored) = match answered.outcome {
+            CompositionCreateOutcome::Created { body, headers } => {
+                let version = crate::cdr::version_from_etag(
+                    "composition_create",
+                    StatusCode::CREATED,
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                let returned = crate::cdr::returned::<Composition>(
+                    "composition_create",
+                    body.as_ref(),
+                    Prefer::Representation,
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                (version, representation(returned, &composition)?)
             }
-            CreateCompositionOutcome::UnknownEhr(upstream) => {
-                return Err(upstream_refusal(status::NOT_FOUND, &upstream));
+            CompositionCreateOutcome::NoContent { headers } => {
+                let version = crate::cdr::version_from_etag(
+                    "composition_create",
+                    StatusCode::NO_CONTENT,
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                (version, composition.clone())
             }
-            CreateCompositionOutcome::BadRequest(upstream) => {
-                return Err(upstream_refusal(status::BAD_REQUEST, &upstream));
+            CompositionCreateOutcome::UnprocessableEntity => {
+                return Err(upstream_refusal(status::UNPROCESSABLE, &answered.upstream));
             }
-            _ => return Err(Refused::of_answer(&status::unread("composition_create"))),
+            CompositionCreateOutcome::NotFound => {
+                return Err(upstream_refusal(status::NOT_FOUND, &answered.upstream));
+            }
+            CompositionCreateOutcome::BadRequest { .. } => {
+                return Err(upstream_refusal(status::BAD_REQUEST, &answered.upstream));
+            }
         };
         self.record(program, inbound, &ehr_id, &version, &stored)
     }
@@ -687,35 +708,56 @@ impl<'a> Ingest<'a> {
                 Prefer::Representation,
             )
             .await
-            .map_err(|error| Refused::of_answer(&status::of_client_error(&error)))?;
-        let (version, stored) = match answered {
-            UpdateCompositionOutcome::Updated {
-                version_id,
-                returned,
-            } => (version_id, representation(returned, &composition)?),
-            UpdateCompositionOutcome::Unprocessable(upstream) => {
-                return Err(upstream_refusal(status::UNPROCESSABLE, &upstream));
+            .map_err(|error| cdr_refusal(&error))?;
+        let (version, stored) = match answered.outcome {
+            CompositionUpdateOutcome::Ok { body, headers } => {
+                let version = crate::cdr::version_from_etag(
+                    "composition_update",
+                    StatusCode::OK,
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                let returned = crate::cdr::returned::<Composition>(
+                    "composition_update",
+                    Some(&body),
+                    Prefer::Representation,
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                (version, representation(returned, &composition)?)
             }
-            UpdateCompositionOutcome::PreconditionFailed {
-                latest_version_id,
-                upstream,
-            } => {
+            CompositionUpdateOutcome::NoContent { headers } => {
+                let version = crate::cdr::version_from_etag(
+                    "composition_update",
+                    StatusCode::NO_CONTENT,
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                (version, composition.clone())
+            }
+            CompositionUpdateOutcome::UnprocessableEntity => {
+                return Err(upstream_refusal(status::UNPROCESSABLE, &answered.upstream));
+            }
+            CompositionUpdateOutcome::PreconditionFailed { headers } => {
+                let latest = crate::cdr::optional_version_from_etag(
+                    "composition_update",
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
                 let mut answer = status::Answer::new(
                     status::PRECONDITION_FAILED,
-                    status::diagnostics(&upstream),
+                    status::diagnostics(&answered.upstream),
                 );
-                if let Some(latest) = latest_version_id {
+                if let Some(latest) = latest {
                     answer = answer.with_entity_tag(String::from(latest.version_tree_id().value()));
                 }
                 return Err(Refused::of_answer(&answer));
             }
-            UpdateCompositionOutcome::NotFound(upstream) => {
-                return Err(upstream_refusal(status::NOT_FOUND, &upstream));
+            CompositionUpdateOutcome::NotFound => {
+                return Err(upstream_refusal(status::NOT_FOUND, &answered.upstream));
             }
-            UpdateCompositionOutcome::BadRequest(upstream) => {
-                return Err(upstream_refusal(status::BAD_REQUEST, &upstream));
+            CompositionUpdateOutcome::BadRequest { .. } => {
+                return Err(upstream_refusal(status::BAD_REQUEST, &answered.upstream));
             }
-            _ => return Err(Refused::of_answer(&status::unread("composition_update"))),
         };
         self.record(program, inbound, ehr_id, &version, &stored)
     }
@@ -980,18 +1022,14 @@ impl<'a> Ingest<'a> {
                     &format!("reading it back failed: {}", chain(&error)),
                 )
             })?;
-        match answered {
-            ContributionOutcome::Found(stored) => Ok(*stored),
-            ContributionOutcome::NotFound(upstream) => Err(unbound(
+        match answered.outcome {
+            ContributionGetOutcome::Ok { body, .. } => Ok(body),
+            ContributionGetOutcome::NotFound => Err(unbound(
                 contribution,
                 &format!(
                     "reading it back found nothing: {}",
-                    status::diagnostics(&upstream)
+                    status::diagnostics(&answered.upstream)
                 ),
-            )),
-            _ => Err(unbound(
-                contribution,
-                "reading it back answered what this version cannot read",
             )),
         }
     }
@@ -1201,26 +1239,52 @@ impl<'a> Ingest<'a> {
             .await
         {
             Ok(answered) => answered,
-            Err(ferrobridge_openehr::error::Error::CommittedBody {
+            Err(CdrError::CommittedBody {
                 contribution_uid, ..
             }) => return Ok((contribution_uid, Returned::Minimal)),
-            Err(error) => return Err(Refused::of_answer(&status::of_client_error(&error))),
+            Err(error) => return Err(cdr_refusal(&error)),
         };
-        match answered {
-            CreateContributionOutcome::Created {
-                contribution_uid,
-                returned,
-            } => Ok((contribution_uid, returned)),
-            CreateContributionOutcome::BadRequest(upstream) => {
-                Err(refuse_all(mapped, &status::BAD_REQUEST, &upstream))
+        match answered.outcome {
+            ContributionCreateOutcome::Created { body, headers } => {
+                let contribution_uid = crate::cdr::contribution_uid_from_etag(
+                    "contribution_create",
+                    StatusCode::CREATED,
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                let returned = match crate::cdr::committed(
+                    &contribution_uid,
+                    body.as_ref(),
+                    Prefer::Representation,
+                ) {
+                    Ok(returned) => returned,
+                    // NOTE: no specification governs this: our own design; the
+                    // commit happened, so its versions are read back by the uid.
+                    Err(CdrError::CommittedBody { .. }) => Returned::Minimal,
+                    Err(error) => return Err(cdr_refusal(&error)),
+                };
+                Ok((contribution_uid, returned))
             }
-            CreateContributionOutcome::UnknownEhr(upstream) => {
-                Err(refuse_all(mapped, &status::NOT_FOUND, &upstream))
+            ContributionCreateOutcome::NoContent { headers } => {
+                let contribution_uid = crate::cdr::contribution_uid_from_etag(
+                    "contribution_create",
+                    StatusCode::NO_CONTENT,
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                Ok((contribution_uid, Returned::Minimal))
             }
-            CreateContributionOutcome::Conflict(upstream) => {
-                Err(refuse_all(mapped, &status::PRECONDITION_FAILED, &upstream))
+            ContributionCreateOutcome::BadRequest { .. } => {
+                Err(refuse_all(mapped, &status::BAD_REQUEST, &answered.upstream))
             }
-            _ => Err(Refused::of_answer(&status::unread("contribution_create"))),
+            ContributionCreateOutcome::NotFound => {
+                Err(refuse_all(mapped, &status::NOT_FOUND, &answered.upstream))
+            }
+            ContributionCreateOutcome::Conflict => Err(refuse_all(
+                mapped,
+                &status::PRECONDITION_FAILED,
+                &answered.upstream,
+            )),
         }
     }
 
@@ -1263,7 +1327,7 @@ impl<'a> Ingest<'a> {
         &self,
         change: commit::Change,
         composition: &CanonicalComposition,
-    ) -> Result<ferrobridge_openehr::commit::CommitContext, Refused> {
+    ) -> Result<crate::cdr::commit::CommitContext, Refused> {
         commit::context(change, &self.settings.system_id, composition.template_id()).map_err(
             |error| {
                 Refused::new(
@@ -1420,20 +1484,23 @@ impl<'a> Ingest<'a> {
             .client
             .composition(ehr_id, uid, None)
             .await
-            .map_err(|error| Refused::of_answer(&status::of_client_error(&error)))?;
-        match answered {
-            CompositionOutcome::Found {
-                version_id,
-                composition,
-            } => Ok((version_id, *composition)),
-            CompositionOutcome::Deleted => Err(Refused::of_answer(&status::Answer::new(
+            .map_err(|error| cdr_refusal(&error))?;
+        match answered.outcome {
+            CompositionGetOutcome::Ok { body, headers } => {
+                let version = crate::cdr::optional_version_from_etag(
+                    "composition_get",
+                    headers.etag.as_deref(),
+                )
+                .map_err(|error| cdr_refusal(&error))?;
+                Ok((version, body))
+            }
+            CompositionGetOutcome::NoContent => Err(Refused::of_answer(&status::Answer::new(
                 status::GONE,
                 String::from("the CDR reports this composition deleted"),
             ))),
-            CompositionOutcome::NotFound(upstream) => {
-                Err(upstream_refusal(status::NOT_FOUND, &upstream))
+            CompositionGetOutcome::NotFound => {
+                Err(upstream_refusal(status::NOT_FOUND, &answered.upstream))
             }
-            _ => Err(Refused::of_answer(&status::unread("composition_get"))),
         }
     }
 }
@@ -1997,11 +2064,14 @@ pub fn engine_refusal(error: &fhirconnect::engine::traverse::EngineError) -> Ref
     )
 }
 
+/// Returns the refusal a CDR call that reached no usable documented answer
+/// renders as, through the status table.
+fn cdr_refusal(error: &CdrError) -> Refused {
+    Refused::of_answer(&status::of_client_error(error))
+}
+
 /// Returns the refusal a documented CDR refusal decides through `row`.
-fn upstream_refusal(
-    row: status::Row,
-    upstream: &ferrobridge_openehr::error::UpstreamError,
-) -> Refused {
+fn upstream_refusal(row: status::Row, upstream: &Upstream) -> Refused {
     Refused::of_answer(&status::Answer::new(row, status::diagnostics(upstream)))
 }
 
@@ -2009,11 +2079,7 @@ fn upstream_refusal(
 ///
 /// Nothing was committed, so the answer names every entry the Bundle mapped:
 /// a caller cannot tell from a partial list which entries still stand.
-fn refuse_all(
-    mapped: &[Mapped<'_>],
-    row: &status::Row,
-    upstream: &ferrobridge_openehr::error::UpstreamError,
-) -> Refused {
+fn refuse_all(mapped: &[Mapped<'_>], row: &status::Row, upstream: &Upstream) -> Refused {
     let detail = status::diagnostics(upstream);
     let mut issues = vec![
         Issue::error(row.issue())

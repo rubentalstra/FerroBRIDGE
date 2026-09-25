@@ -17,8 +17,8 @@
 //! `If-None-Exist`, `If-Match` and `Prefer`. The map, the EHR resolution, the
 //! commit and the identity record are [`crate::facade::ingest`]'s.
 
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::ids::EhrId;
+use crate::cdr::CdrClient;
+use crate::cdr::ids::EhrId;
 use fhirconnect::resolve::program::TemplateId;
 use http::HeaderMap;
 use http::StatusCode;
@@ -150,7 +150,7 @@ fn answer(
     status: StatusCode,
 ) -> Result<axum::response::Response, Refusal> {
     let source = render::composition_url(
-        &facade.client().config().base_url,
+        facade.client().base_url(),
         &written.ehr_id,
         &written.version,
     )?;
@@ -198,7 +198,7 @@ fn answer(
 /// governs this: our own design): the facade reads the latest version and uses
 /// it, so a concurrent writer still produces the `412` the CDR answers.
 async fn precondition(
-    client: &Client,
+    client: &CdrClient,
     headers: &HeaderMap,
     ehr_id: &EhrId,
     container: &HierObjectId,

@@ -1,19 +1,21 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The COMPOSITION contract: one case per documented status, plus the wire
-//! form of `Prefer`, `If-Match` and the three committal metadata headers.
+//! The COMPOSITION contract over the generated client: one case per
+//! documented status, plus the wire form of `Prefer`, `If-Match` and the three
+//! committal metadata headers the bridge adds.
 
-use crate::support;
-use ferrobridge_openehr::composition::{
-    CompositionOutcome, CreateCompositionOutcome, DeleteCompositionOutcome,
-    UpdateCompositionOutcome, VersionAtTime,
-};
-use ferrobridge_openehr::ids::{EhrId, version_from_etag};
-use ferrobridge_openehr::prefer::{Prefer, Returned};
+use super::support;
+use ferrobridge_server::cdr::ids::{EhrId, version_from_etag};
+use ferrobridge_server::cdr::{Prefer, Returned, VersionAtTime};
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
+use openehr_its::rest::generated::ehr::client::{
+    CompositionCreateOutcome, CompositionDeleteOutcome, CompositionGetOutcome,
+    CompositionUpdateOutcome,
+};
+use openehr_rm::v1_2::composition::composition::Composition;
 use std::error::Error;
 use wiremock::matchers::{method, path, query_param};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -40,7 +42,7 @@ async fn create_composition_sends_the_three_commit_headers() -> Result<(), Box<d
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_composition(
             &EhrId::new(EHR)?,
             &support::composition()?,
@@ -48,13 +50,20 @@ async fn create_composition_sends_the_three_commit_headers() -> Result<(), Box<d
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        CreateCompositionOutcome::Created {
-            version_id,
-            returned,
-        } => {
+    match answered.outcome {
+        CompositionCreateOutcome::Created { body, headers } => {
+            let version_id = ferrobridge_server::cdr::version_from_etag(
+                "composition_create",
+                http::StatusCode::CREATED,
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(VERSION_1, version_id.value().to_owned());
             assert_eq!("1", version_id.version_tree_id().value());
+            let returned = ferrobridge_server::cdr::returned::<Composition>(
+                "composition_create",
+                body.as_ref(),
+                Prefer::Representation,
+            )?;
             assert!(matches!(returned, Returned::Representation(_)));
         }
         other => return Err(format!("expected a created composition, got {other:?}").into()),
@@ -99,7 +108,7 @@ async fn create_composition_reads_an_empty_201_as_minimal_whatever_was_preferred
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_composition(
             &EhrId::new(EHR)?,
             &support::composition()?,
@@ -107,12 +116,19 @@ async fn create_composition_reads_an_empty_201_as_minimal_whatever_was_preferred
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        CreateCompositionOutcome::Created {
-            version_id,
-            returned,
-        } => {
+    match answered.outcome {
+        CompositionCreateOutcome::Created { body, headers } => {
+            let version_id = ferrobridge_server::cdr::version_from_etag(
+                "composition_create",
+                http::StatusCode::CREATED,
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(VERSION_1, version_id.value().to_owned());
+            let returned = ferrobridge_server::cdr::returned::<Composition>(
+                "composition_create",
+                body.as_ref(),
+                Prefer::Representation,
+            )?;
             assert!(matches!(returned, Returned::Minimal));
         }
         other => return Err(format!("expected a created composition, got {other:?}").into()),
@@ -132,7 +148,7 @@ async fn create_composition_reports_the_422_validation_errors() -> Result<(), Bo
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_composition(
             &EhrId::new(EHR)?,
             &support::composition()?,
@@ -140,17 +156,26 @@ async fn create_composition_reports_the_422_validation_errors() -> Result<(), Bo
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        CreateCompositionOutcome::Unprocessable(upstream) => {
-            assert_eq!(http::StatusCode::UNPROCESSABLE_ENTITY, upstream.status());
-            let error = upstream.error().ok_or("the 422 body decodes as an Error")?;
-            assert_eq!(
-                vec!["/content[0]: unknown node".to_owned()],
-                error.validation_errors
-            );
-        }
-        other => return Err(format!("expected an unprocessable entity, got {other:?}").into()),
-    }
+    assert!(
+        matches!(
+            answered.outcome,
+            CompositionCreateOutcome::UnprocessableEntity
+        ),
+        "{:?}",
+        answered.outcome
+    );
+    assert_eq!(
+        http::StatusCode::UNPROCESSABLE_ENTITY,
+        answered.upstream.status()
+    );
+    let error = answered
+        .upstream
+        .error()
+        .ok_or("the 422 body decodes as an Error")?;
+    assert_eq!(
+        vec!["/content[0]: unknown node".to_owned()],
+        error.validation_errors
+    );
     Ok(())
 }
 
@@ -163,7 +188,7 @@ async fn create_composition_reports_the_400() -> Result<(), Box<dyn Error>> {
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_composition(
             &EhrId::new(EHR)?,
             &support::composition()?,
@@ -171,7 +196,10 @@ async fn create_composition_reports_the_400() -> Result<(), Box<dyn Error>> {
             Prefer::Representation,
         )
         .await?;
-    assert!(matches!(outcome, CreateCompositionOutcome::BadRequest(_)));
+    assert!(matches!(
+        answered.outcome,
+        CompositionCreateOutcome::BadRequest { .. }
+    ));
     Ok(())
 }
 
@@ -184,7 +212,7 @@ async fn create_composition_reports_the_unknown_ehr() -> Result<(), Box<dyn Erro
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .create_composition(
             &EhrId::new(EHR)?,
             &support::composition()?,
@@ -192,7 +220,10 @@ async fn create_composition_reports_the_unknown_ehr() -> Result<(), Box<dyn Erro
             Prefer::Representation,
         )
         .await?;
-    assert!(matches!(outcome, CreateCompositionOutcome::UnknownEhr(_)));
+    assert!(matches!(
+        answered.outcome,
+        CompositionCreateOutcome::NotFound
+    ));
     Ok(())
 }
 
@@ -212,7 +243,7 @@ async fn update_composition_sends_the_bare_quoted_if_match() -> Result<(), Box<d
         .await;
 
     let preceding = version_from_etag(&format!("W/\"{VERSION_1}\""))?;
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .update_composition(
             &EhrId::new(EHR)?,
             &HierObjectId::new(VERSIONED_OBJECT)?,
@@ -222,8 +253,13 @@ async fn update_composition_sends_the_bare_quoted_if_match() -> Result<(), Box<d
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        UpdateCompositionOutcome::Updated { version_id, .. } => {
+    match answered.outcome {
+        CompositionUpdateOutcome::Ok { headers, .. } => {
+            let version_id = ferrobridge_server::cdr::version_from_etag(
+                "composition_update",
+                http::StatusCode::OK,
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(VERSION_2, version_id.value().to_owned());
         }
         other => return Err(format!("expected an updated composition, got {other:?}").into()),
@@ -231,6 +267,10 @@ async fn update_composition_sends_the_bare_quoted_if_match() -> Result<(), Box<d
     assert_eq!(
         vec![format!("\"{VERSION_1}\"")],
         support::request_header(&server, 0, "if-match").await?
+    );
+    assert_eq!(
+        vec!["Synthetic vital signs".to_owned()],
+        support::request_header(&server, 0, "openehr-template-id").await?
     );
     Ok(())
 }
@@ -249,7 +289,7 @@ async fn update_composition_reports_the_412_with_the_latest_version() -> Result<
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .update_composition(
             &EhrId::new(EHR)?,
             &HierObjectId::new(VERSIONED_OBJECT)?,
@@ -259,15 +299,19 @@ async fn update_composition_reports_the_412_with_the_latest_version() -> Result<
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        UpdateCompositionOutcome::PreconditionFailed {
-            latest_version_id,
-            upstream,
-        } => {
-            assert_eq!(http::StatusCode::PRECONDITION_FAILED, upstream.status());
+    match answered.outcome {
+        CompositionUpdateOutcome::PreconditionFailed { headers } => {
+            assert_eq!(
+                http::StatusCode::PRECONDITION_FAILED,
+                answered.upstream.status()
+            );
+            let latest = ferrobridge_server::cdr::optional_version_from_etag(
+                "composition_update",
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(
                 Some(VERSION_2.to_owned()),
-                latest_version_id.map(|id| id.value().to_owned())
+                latest.map(|id| id.value().to_owned())
             );
         }
         other => return Err(format!("expected a precondition failure, got {other:?}").into()),
@@ -290,29 +334,34 @@ async fn composition_reads_the_latest_version_of_a_container() -> Result<(), Box
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .composition(
             &EhrId::new(EHR)?,
             &UidBasedId::HierObjectId(HierObjectId::new(VERSIONED_OBJECT)?),
             None,
         )
         .await?;
-    match outcome {
-        CompositionOutcome::Found {
-            version_id,
-            composition,
-        } => {
+    match answered.outcome {
+        CompositionGetOutcome::Ok { body, headers } => {
+            let version_id = ferrobridge_server::cdr::optional_version_from_etag(
+                "composition_get",
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(
                 Some(VERSION_2.to_owned()),
                 version_id.map(|id| id.value().to_owned())
             );
             assert_eq!(
                 "openEHR-EHR-COMPOSITION.encounter.v1",
-                composition.archetype_node_id
+                body.archetype_node_id
             );
         }
         other => return Err(format!("expected a composition, got {other:?}").into()),
     }
+    assert_eq!(
+        vec!["return=representation".to_owned()],
+        support::request_header(&server, 0, "prefer").await?
+    );
     Ok(())
 }
 
@@ -328,14 +377,14 @@ async fn composition_at_a_time_answers_deleted_on_a_204() -> Result<(), Box<dyn 
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .composition(
             &EhrId::new(EHR)?,
             &UidBasedId::HierObjectId(HierObjectId::new(VERSIONED_OBJECT)?),
             Some(&VersionAtTime::new("2026-09-12T10:00:00+02:00")?),
         )
         .await?;
-    assert!(matches!(outcome, CompositionOutcome::Deleted));
+    assert!(matches!(answered.outcome, CompositionGetOutcome::NoContent));
     Ok(())
 }
 
@@ -348,14 +397,14 @@ async fn composition_by_exact_version_reports_the_404() -> Result<(), Box<dyn Er
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .composition(
             &EhrId::new(EHR)?,
             &UidBasedId::ObjectVersionId(ObjectVersionId::new(VERSION_1)?),
             None,
         )
         .await?;
-    assert!(matches!(outcome, CompositionOutcome::NotFound(_)));
+    assert!(matches!(answered.outcome, CompositionGetOutcome::NotFound));
     Ok(())
 }
 
@@ -370,11 +419,15 @@ async fn delete_composition_answers_deleted_on_a_204() -> Result<(), Box<dyn Err
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .delete_composition(&EhrId::new(EHR)?, &ObjectVersionId::new(VERSION_1)?)
         .await?;
-    match outcome {
-        DeleteCompositionOutcome::Deleted { version_id } => {
+    match answered.outcome {
+        CompositionDeleteOutcome::NoContent { headers } => {
+            let version_id = ferrobridge_server::cdr::optional_version_from_etag(
+                "composition_delete",
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(
                 Some(VERSION_2.to_owned()),
                 version_id.map(|id| id.value().to_owned())
@@ -396,18 +449,19 @@ async fn delete_composition_reports_a_concurrency_failure_as_409() -> Result<(),
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .delete_composition(&EhrId::new(EHR)?, &ObjectVersionId::new(VERSION_1)?)
         .await?;
-    match outcome {
-        DeleteCompositionOutcome::Conflict {
-            latest_version_id,
-            upstream,
-        } => {
-            assert_eq!(http::StatusCode::CONFLICT, upstream.status());
+    match answered.outcome {
+        CompositionDeleteOutcome::Conflict { headers } => {
+            assert_eq!(http::StatusCode::CONFLICT, answered.upstream.status());
+            let latest = ferrobridge_server::cdr::optional_version_from_etag(
+                "composition_delete",
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(
                 Some(VERSION_2.to_owned()),
-                latest_version_id.map(|id| id.value().to_owned())
+                latest.map(|id| id.value().to_owned())
             );
         }
         other => return Err(format!("expected a conflict, got {other:?}").into()),
@@ -424,9 +478,12 @@ async fn delete_composition_reports_an_already_deleted_400() -> Result<(), Box<d
         .mount(&server)
         .await;
 
-    let outcome = support::client(&server)?
+    let answered = support::client(&server)?
         .delete_composition(&EhrId::new(EHR)?, &ObjectVersionId::new(VERSION_1)?)
         .await?;
-    assert!(matches!(outcome, DeleteCompositionOutcome::BadRequest(_)));
+    assert!(matches!(
+        answered.outcome,
+        CompositionDeleteOutcome::BadRequest
+    ));
     Ok(())
 }

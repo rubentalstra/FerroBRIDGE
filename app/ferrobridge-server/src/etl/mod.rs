@@ -26,11 +26,11 @@ pub mod report;
 pub mod tie;
 pub mod visits;
 
+use crate::cdr::CdrClient;
+use crate::cdr::query::{PageSize, QueryPageError};
 use crate::etl::aql::{CheckedQuery, SINCE_PARAMETER};
 use crate::etl::report::RunReport;
 use crate::etl::tie::{Tie, Windows};
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::query::{PageSize, QueryPageError};
 use futures_util::StreamExt;
 use omop_cdm::derived;
 use omop_cdm::graph::{RecordGraph, Refusal, Source, VisitKey};
@@ -208,7 +208,7 @@ type Templates = BTreeMap<String, Arc<WebTemplateIndex>>;
 /// Returns the index of the template `composition` names, reading it from
 /// the CDR on first use.
 async fn template_of(
-    cdr: &Client,
+    cdr: &CdrClient,
     templates: &mut Templates,
     composition: &serde_json::Value,
 ) -> Result<Result<Arc<WebTemplateIndex>, Refusal>, RunError> {
@@ -248,7 +248,7 @@ async fn template_of(
 
 /// Reads every row of `query` from the CDR.
 async fn rows(
-    cdr: &Client,
+    cdr: &CdrClient,
     query: &CheckedQuery,
     page: PageSize,
 ) -> Result<Vec<Vec<serde_json::Value>>, Box<QueryPageError>> {
@@ -275,7 +275,7 @@ async fn rows(
 pub async fn run<M: Mapper>(
     settings: &EtlSettings,
     options: &RunOptions,
-    cdr: &Client,
+    cdr: &CdrClient,
     writer: &mut CdmWriter,
     mapper: &M,
     run_id: &RunId,
@@ -397,7 +397,7 @@ struct Read<'r> {
 /// Reads, validates and maps the composition of one row, tied to its visit
 /// when the run derives visits.
 async fn composition<M: Mapper>(
-    cdr: &Client,
+    cdr: &CdrClient,
     templates: &mut Templates,
     read: &Read<'_>,
     mapper: &M,

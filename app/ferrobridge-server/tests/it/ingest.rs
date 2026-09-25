@@ -14,7 +14,7 @@ use crate::facade::ehr_body;
 use crate::facade::handle;
 use crate::facade::mount_echo;
 use crate::facade::settings;
-use ferrobridge_openehr::ids::ContributionUid;
+use ferrobridge_server::cdr::ids::ContributionUid;
 use ferrobridge_server::facade::Facade;
 use ferrobridge_server::facade::identity::store::MemoryStore;
 use ferrobridge_server::facade::ingest::Commit;
@@ -475,7 +475,7 @@ async fn the_entries_of_one_message_bind_by_content_whatever_the_version_order()
         .map(|entry| {
             (
                 entry.full_url.clone(),
-                ferrobridge_openehr::ids::versioned_object_uid(&entry.version)
+                ferrobridge_server::cdr::ids::versioned_object_uid(&entry.version)
                     .value()
                     .to_owned(),
             )
@@ -540,7 +540,7 @@ async fn the_entries_of_one_message_bind_on_retry_from_the_contribution_read_bac
         .map(|entry| {
             (
                 entry.full_url.clone(),
-                ferrobridge_openehr::ids::versioned_object_uid(&entry.version)
+                ferrobridge_server::cdr::ids::versioned_object_uid(&entry.version)
                     .value()
                     .to_owned(),
             )

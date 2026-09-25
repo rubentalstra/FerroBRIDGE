@@ -3,30 +3,22 @@
 
 //! The AQL query endpoint and its paging.
 //!
-//! The `POST` form is the one the client uses:
+//! The `POST` form is the one the bridge uses:
 //! `docs/specs/its-rest/computable/OAS/query-codegen.openapi.yaml` recommends
 //! it over `GET`, because "Requests based on the `GET` method have URI length
 //! restriction".
 
-use crate::client::{Call, Client, Idempotency};
-use crate::decode;
-use crate::error::{Error, UpstreamError};
-use crate::prefer::Prefer;
 use futures_core::Stream;
-use http::{Method, StatusCode};
-use openehr_its::rest::generated::query::{AdhocQueryExecute, ResultSet, ResultSetRow};
+use openehr_its::rest::generated::query::AdhocQueryExecute;
+use openehr_its::rest::generated::query::QueryExecuteAdhocQueryBodyParams;
+use openehr_its::rest::generated::query::ResultSetRow;
+use openehr_its::rest::generated::query::client::QueryClient;
+use openehr_its::rest::generated::query::client::QueryExecuteAdhocQueryBodyOutcome;
 
-/// What `POST /query/aql` answered.
-#[derive(Debug)]
-#[non_exhaustive]
-pub enum QueryOutcome {
-    /// `200`: the result set.
-    Rows(Box<ResultSet>),
-    /// `400`: the server could not execute the query.
-    BadRequest(UpstreamError),
-    /// `408`: the query ran past the server's execution limit.
-    ExecutionTimeout(UpstreamError),
-}
+use crate::cdr::Answered;
+use crate::cdr::CdrClient;
+use crate::cdr::error::CdrError;
+use crate::cdr::error::Upstream;
 
 /// What went wrong while a page of a paged query was fetched.
 #[derive(Debug, thiserror::Error)]
@@ -34,17 +26,17 @@ pub enum QueryOutcome {
 pub enum QueryPageError {
     /// The service refused a page with a status the operation documents.
     #[error("the openEHR service refused the AQL query with {0}")]
-    Refused(UpstreamError),
+    Refused(Upstream),
     /// The call did not reach a documented answer.
     #[error(transparent)]
-    Call(#[from] Error),
+    Call(#[from] CdrError),
 }
 
 /// How many rows one page of a paged query asks for.
 ///
 /// `fetch` is "the number of rows to fetch (i.e. limit)"
 /// (`query-codegen.openapi.yaml`, `components.parameters.fetch`), and the
-/// paging helper needs it to know when a short page ends the result set.
+/// paging needs it to know when a short page ends the result set.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PageSize(u32);
 
@@ -54,7 +46,7 @@ impl PageSize {
     /// # Errors
     /// Returns [`PageSizeError`] when `rows` is zero, which would page
     /// forever.
-    pub fn new(rows: u32) -> Result<Self, PageSizeError> {
+    pub const fn new(rows: u32) -> Result<Self, PageSizeError> {
         if rows == 0 {
             return Err(PageSizeError::Zero);
         }
@@ -91,33 +83,27 @@ struct Paging {
     exhausted: bool,
 }
 
-impl Client {
-    /// Executes one ad-hoc AQL query.
+impl CdrClient {
+    /// Executes one ad-hoc AQL query (`query-codegen.openapi.yaml`,
+    /// `query_execute_adhoc_query_body`).
     ///
     /// The call is a `POST`, so it is never retried.
     ///
     /// # Errors
-    /// Returns [`Error`] when the call did not reach one of the documented
-    /// answers, or when the result set cannot be decoded.
-    pub async fn query_aql(&self, request: &AdhocQueryExecute) -> Result<QueryOutcome, Error> {
-        let url = self.url(&["query", "aql"])?;
-        let body = serde_json::to_string(request).map_err(|source| Error::Body {
-            url: url.clone(),
-            media: "JSON",
-            source: Box::new(crate::error::BodyError::Json(source)),
-        })?;
-        let call = Call::new(Method::POST, url, Idempotency::NonIdempotent)
-            .preferring(Prefer::Representation)
-            .with_json_body(body);
-        let answer = self.execute(call).await?;
-        match answer.status {
-            StatusCode::OK => {
-                decode::schema::<ResultSet>(&answer).map(|set| QueryOutcome::Rows(Box::new(set)))
-            }
-            StatusCode::BAD_REQUEST => Ok(QueryOutcome::BadRequest(answer.upstream())),
-            StatusCode::REQUEST_TIMEOUT => Ok(QueryOutcome::ExecutionTimeout(answer.upstream())),
-            _ => Err(answer.undocumented()),
-        }
+    /// Returns [`CdrError`] when the call did not reach a documented answer.
+    pub async fn query_aql(
+        &self,
+        request: &AdhocQueryExecute,
+    ) -> Result<Answered<QueryExecuteAdhocQueryBodyOutcome>, CdrError> {
+        let client = self.call(crate::cdr::representation())?;
+        let params = QueryExecuteAdhocQueryBodyParams {
+            accept: None,
+            content_type: None,
+        };
+        let answered = QueryClient::new(&client)
+            .query_execute_adhoc_query_body(&params, request)
+            .await;
+        crate::cdr::answered_by(&client, answered)
     }
 
     /// Returns the rows of `request`, one page at a time.
@@ -125,7 +111,7 @@ impl Client {
     /// Each page is one `POST /query/aql` with `offset` advanced by `page`,
     /// the paging ITS-REST 1.1.0 defines for `offset` and `fetch`. The stream
     /// ends when a page comes back shorter than `page`, and a refusal of any
-    /// page ends it with [`QueryPageError`] rather than an empty tail. The
+    /// page ends it with [`QueryPageError`] instead of an empty tail. The
     /// `offset` of `request` is where the first page starts.
     pub fn query_aql_rows(
         &self,
@@ -150,11 +136,12 @@ impl Client {
                 let mut request = state.request.clone();
                 request.offset = Some(state.offset);
                 request.fetch = Some(state.page.rows());
-                let rows = match self.query_aql(&request).await? {
-                    QueryOutcome::Rows(set) => set.rows,
-                    QueryOutcome::BadRequest(upstream)
-                    | QueryOutcome::ExecutionTimeout(upstream) => {
-                        return Err(QueryPageError::Refused(upstream));
+                let answered = self.query_aql(&request).await?;
+                let rows = match answered.outcome {
+                    QueryExecuteAdhocQueryBodyOutcome::Ok { body, .. } => body.rows,
+                    QueryExecuteAdhocQueryBodyOutcome::BadRequest
+                    | QueryExecuteAdhocQueryBodyOutcome::RequestTimeout => {
+                        return Err(QueryPageError::Refused(answered.upstream));
                     }
                 };
                 let fetched = i64::try_from(rows.len()).unwrap_or(i64::MAX);

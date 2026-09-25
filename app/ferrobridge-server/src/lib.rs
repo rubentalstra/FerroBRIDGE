@@ -13,6 +13,7 @@
 
 pub mod banner;
 pub mod build_info;
+pub mod cdr;
 pub mod cli;
 pub mod config;
 pub mod etl;
@@ -384,8 +385,8 @@ async fn build_facade(
         .cdr
         .as_ref()
         .context("the facade needs a [cdr] section: it maps every request onto CDR operations")?;
-    let client = ferrobridge_openehr::client::Client::new(cdr.clone())
-        .context("building the CDR client the facade calls through")?;
+    let client =
+        cdr::CdrClient::new(cdr).context("building the CDR client the facade calls through")?;
     let directory = settings
         .mapping_directory
         .as_ref()

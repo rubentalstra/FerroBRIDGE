@@ -9,7 +9,7 @@
 //! `meta.source` that points at the composition version the content came from
 //! (no specification governs the identity: our own design).
 
-use ferrobridge_openehr::ids::EhrId;
+use crate::cdr::ids::EhrId;
 use fhir_types::codec::Object;
 use fhir_types::codec::Value;
 use fhirconnect::engine::outcome::Warning;
@@ -207,7 +207,7 @@ pub(crate) fn composition_url(
 #[cfg(test)]
 mod tests {
     use super::{composition_url, contain, resource_object};
-    use ferrobridge_openehr::ids::EhrId;
+    use crate::cdr::ids::EhrId;
     use fhir_types::codec::Value;
     use http::StatusCode;
     use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;

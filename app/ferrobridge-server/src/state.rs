@@ -125,13 +125,12 @@ impl AppState {
         let mut indicators: Vec<Arc<dyn crate::health::HealthIndicator>> = Vec::new();
         let mut cdr = None;
         if let Some(config) = settings.cdr.as_ref() {
-            let client =
-                ferrobridge_openehr::client::Client::new(config.clone()).map_err(|source| {
-                    crate::config::Error::Client {
-                        upstream: "cdr",
-                        source: Box::new(source),
-                    }
-                })?;
+            let client = crate::cdr::CdrClient::new(config).map_err(|source| {
+                crate::config::Error::Client {
+                    upstream: "cdr",
+                    source: Box::new(source),
+                }
+            })?;
             indicators.push(Arc::new(indicators::Cdr::new(client.clone())));
             cdr = Some(client);
         }

@@ -1,21 +1,24 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! How a client is pointed at one CDR: its base URL, its budget, and its
-//! credentials.
+//! How the CDR client is pointed at one CDR: its base URL, its budget, and its
+//! credentials, as `[cdr]` resolves them.
 //!
 //! No specification governs the timeout, the retry budget or the credential
 //! form: our own design. ITS-REST 1.1.0 declares `security: []` on every
 //! document and leaves authentication to the deployment.
 
-use secrecy::SecretString;
 use std::time::Duration;
+
+use openehr_its::rest::client::RetryPolicy;
+use secrecy::ExposeSecret;
+use secrecy::SecretString;
 use url::Url;
 
 /// The credentials the client presents on every request.
 ///
-/// The secret half is a [`SecretString`], so neither a `Debug` rendering nor a
-/// log line can carry it.
+/// The secret half stays a [`SecretString`] until the client is built, so
+/// neither a `Debug` rendering of the settings nor a log line can carry it.
 #[derive(Debug, Clone)]
 #[non_exhaustive]
 pub enum Credentials {
@@ -30,37 +33,30 @@ pub enum Credentials {
     },
 }
 
-/// How often, and how far apart, an idempotent call is retried.
-///
-/// The delay grows exponentially from `initial_backoff` and is capped at
-/// `max_backoff`; `max_attempts` counts the first try, so `1` disables retry.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RetryPolicy {
-    /// How many times the request is sent at most, the first try included.
-    pub max_attempts: u32,
-    /// The delay before the second attempt.
-    pub initial_backoff: Duration,
-    /// The ceiling every later delay is clamped to.
-    pub max_backoff: Duration,
-}
-
-impl Default for RetryPolicy {
-    fn default() -> Self {
-        Self {
-            max_attempts: 3,
-            initial_backoff: Duration::from_millis(200),
-            max_backoff: Duration::from_secs(5),
+impl Credentials {
+    /// Returns the credentials the generated-client runtime sends.
+    // TODO(#293): hand the secret over as a `SecretString` once the runtime's
+    // `Credentials` holds one (openehr-its sibling request).
+    pub(crate) fn runtime(&self) -> openehr_its::rest::client::Credentials {
+        match self {
+            Self::Bearer(token) => {
+                openehr_its::rest::client::Credentials::Bearer(token.expose_secret().to_owned())
+            }
+            Self::Basic { user, password } => openehr_its::rest::client::Credentials::Basic {
+                user: user.clone(),
+                password: password.expose_secret().to_owned(),
+            },
         }
     }
 }
 
-/// Everything one [`Client`](crate::client::Client) needs about one CDR.
+/// Everything one [`CdrClient`](crate::cdr::CdrClient) needs about one CDR.
 ///
 /// `base_url` is the openEHR REST API root, the path under which `/ehr`,
 /// `/query` and `/definition` live; the ITS-REST 1.1.0 server template is
 /// `https://{baseUrl}/v1`, so a deployment URL normally ends in `/v1`.
 #[derive(Debug, Clone)]
-pub struct Config {
+pub struct CdrConfig {
     /// The openEHR REST API root.
     pub base_url: Url,
     /// How long one request may take, connection included.
@@ -71,11 +67,11 @@ pub struct Config {
     pub credentials: Option<Credentials>,
 }
 
-impl Config {
+impl CdrConfig {
     /// Returns a configuration for the CDR whose REST API root is `base_url`.
     ///
-    /// The timeout and the retry budget take their defaults, and no
-    /// credentials are set.
+    /// The timeout is 30 seconds, the retry budget is the runtime's default,
+    /// and no credentials are set.
     #[must_use]
     pub fn new(base_url: Url) -> Self {
         Self {
@@ -88,14 +84,14 @@ impl Config {
 
     /// Returns this configuration with `timeout` as its per-request budget.
     #[must_use]
-    pub fn with_timeout(mut self, timeout: Duration) -> Self {
+    pub const fn with_timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
     }
 
     /// Returns this configuration with `retry` as its retry budget.
     #[must_use]
-    pub fn with_retry(mut self, retry: RetryPolicy) -> Self {
+    pub const fn with_retry(mut self, retry: RetryPolicy) -> Self {
         self.retry = retry;
         self
     }
@@ -110,20 +106,26 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
-    use super::{Config, Credentials, RetryPolicy};
+    use super::{CdrConfig, Credentials};
     use secrecy::SecretString;
     use std::time::Duration;
 
     #[test]
     fn a_bearer_token_is_not_in_the_debug_rendering() {
-        let config = Config::new("http://cdr.invalid/v1".parse().expect("a valid URL"))
+        let config = CdrConfig::new("http://cdr.invalid/v1".parse().expect("a valid URL"))
             .with_credentials(Credentials::Bearer(SecretString::from("s3cr3t-token")));
         assert!(!format!("{config:?}").contains("s3cr3t-token"));
+        let runtime = config
+            .credentials
+            .as_ref()
+            .expect("the credentials are set")
+            .runtime();
+        assert!(!format!("{runtime:?}").contains("s3cr3t-token"));
     }
 
     #[test]
     fn a_basic_password_is_not_in_the_debug_rendering() {
-        let config = Config::new("http://cdr.invalid/v1".parse().expect("a valid URL"))
+        let config = CdrConfig::new("http://cdr.invalid/v1".parse().expect("a valid URL"))
             .with_credentials(Credentials::Basic {
                 user: "bridge".to_owned(),
                 password: SecretString::from("s3cr3t-password"),
@@ -134,10 +136,9 @@ mod tests {
     }
 
     #[test]
-    fn the_defaults_are_three_attempts_and_thirty_seconds() {
-        let config = Config::new("http://cdr.invalid/v1".parse().expect("a valid URL"));
+    fn the_default_timeout_is_thirty_seconds() {
+        let config = CdrConfig::new("http://cdr.invalid/v1".parse().expect("a valid URL"));
         assert_eq!(Duration::from_secs(30), config.timeout);
-        assert_eq!(RetryPolicy::default(), config.retry);
         assert_eq!(3, config.retry.max_attempts);
     }
 }

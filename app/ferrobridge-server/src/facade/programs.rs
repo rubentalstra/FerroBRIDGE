@@ -359,7 +359,7 @@ fn template_of(context: &fhirconnect::model::ast::ContextMappingFile) -> Result<
 /// not yield a Web Template.
 pub async fn fetch_templates(
     set: &MappingSet,
-    client: &ferrobridge_openehr::client::Client,
+    client: &crate::cdr::CdrClient,
 ) -> Result<BTreeMap<String, Arc<WebTemplateIndex>>, LoadError> {
     let mut wanted: BTreeMap<String, String> = BTreeMap::new();
     for context in set.contexts() {

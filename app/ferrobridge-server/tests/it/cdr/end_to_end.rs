@@ -1,35 +1,35 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The client against a real openEHR CDR in a container.
+//! The bridge's CDR client against a real openEHR CDR in a container.
 //!
 //! One EHR, one template, one composition and one query travel the whole
-//! ITS-REST 1.1.0 surface the client implements, so the contract suites beside
-//! this file are joined by a run against a server that answers for itself. The
-//! test runs only when `FERROBRIDGE_E2E=1` admits the container harness.
+//! ITS-REST 1.1.0 surface the bridge calls through the generated client, so
+//! the contract suites beside this file are joined by a run against a server
+//! that answers for itself. The test runs only when `FERROBRIDGE_E2E=1` admits
+//! the container harness.
 
-use crate::support;
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::commit::CommitContext;
-use ferrobridge_openehr::composition::{
-    CompositionOutcome, CreateCompositionOutcome, DeleteCompositionOutcome,
-    UpdateCompositionOutcome,
-};
-use ferrobridge_openehr::config::Config;
-use ferrobridge_openehr::ehr::{CreateEhrOutcome, EhrOutcome};
-use ferrobridge_openehr::ids::{
+use super::support;
+use ferrobridge_server::cdr::commit::CommitContext;
+use ferrobridge_server::cdr::config::CdrConfig;
+use ferrobridge_server::cdr::ids::{
     EhrId, SubjectId, SubjectNamespace, template_id, versioned_object_uid,
 };
-use ferrobridge_openehr::prefer::{Prefer, Returned};
-use ferrobridge_openehr::query::QueryOutcome;
-use ferrobridge_openehr::template::{TemplateOutcome, TemplateSource};
+use ferrobridge_server::cdr::template::{TemplateOutcome, TemplateSource};
+use ferrobridge_server::cdr::{CdrClient, Prefer, Returned};
 use ferrobridge_testkit::containers;
 use ferrobridge_testkit::fixtures;
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_base::v1_3::base_types::identification::template_id::TemplateId;
 use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
+use openehr_its::rest::generated::ehr::client::{
+    CompositionCreateOutcome, CompositionDeleteOutcome, CompositionGetOutcome,
+    CompositionUpdateOutcome, EhrCreateOutcome, EhrGetBySubjectOutcome,
+};
 use openehr_its::rest::generated::query::AdhocQueryExecute;
+use openehr_its::rest::generated::query::client::QueryExecuteAdhocQueryBodyOutcome;
 use openehr_rm::v1_2::composition::composition::Composition;
+use openehr_rm::v1_2::ehr::ehr::Ehr;
 use openehr_rm::v1_2::ehr::ehr_status::EhrStatus;
 use std::error::Error;
 
@@ -81,7 +81,7 @@ async fn the_client_commits_reads_updates_queries_and_deletes_against_a_real_cdr
         return Ok(());
     }
     let cdr = containers::cdr().await?;
-    let client = Client::new(Config::new(cdr.base_url().parse()?))?;
+    let client = CdrClient::new(&CdrConfig::new(cdr.base_url().parse()?))?;
     let template_id = template_id(fixtures::MINIMAL_EVALUATION_TEMPLATE_ID)?;
 
     // The fixture parses locally before the CDR is asked to accept it, so a
@@ -109,9 +109,8 @@ async fn the_client_commits_reads_updates_queries_and_deletes_against_a_real_cdr
 
 /// Uploads the synthetic operational template through the CDR's own route.
 ///
-/// The client has no template upload (`ferrobridge-openehr` reads templates
-/// and never writes them), so this is a plain `POST` of the canonical OPT 1.4
-/// XML to `/definition/template/adl1.4`
+/// The bridge reads templates and never writes them, so this is a plain
+/// `POST` of the canonical OPT 1.4 XML to `/definition/template/adl1.4`
 /// (<https://specifications.openehr.org/releases/ITS-REST/Release-1.1.0/definition.html>).
 async fn upload_template(base_url: &str) -> Result<(), Box<dyn Error>> {
     let response = reqwest::Client::new()
@@ -130,46 +129,56 @@ async fn upload_template(base_url: &str) -> Result<(), Box<dyn Error>> {
 }
 
 /// Creates the EHR of the synthetic subject and returns its identifier.
-async fn create_ehr(client: &Client) -> Result<EhrId, Box<dyn Error>> {
+async fn create_ehr(client: &CdrClient) -> Result<EhrId, Box<dyn Error>> {
     let status = openehr_its::json::from_canonical_json::<EhrStatus>(EHR_STATUS_JSON)?;
-    let outcome = client
+    let answered = client
         .create_ehr(Some(&status), Prefer::Representation)
         .await?;
-    match outcome {
-        CreateEhrOutcome::Created { ehr_id, returned } => {
+    match answered.outcome {
+        EhrCreateOutcome::Created { body, headers } => {
+            let returned = ferrobridge_server::cdr::returned::<Ehr>(
+                "ehr_create",
+                body.as_ref(),
+                Prefer::Representation,
+            )?;
             assert!(
                 matches!(returned, Returned::Representation(_)),
                 "the representation was asked for and not returned"
             );
-            Ok(ehr_id)
+            Ok(ferrobridge_server::cdr::ehr_id_from_etag(
+                http::StatusCode::CREATED,
+                headers.etag.as_deref(),
+            )?)
         }
         other => Err(format!("expected a created EHR, got {other:?}").into()),
     }
 }
 
 /// Finds the same EHR through its subject.
-async fn find_by_subject(client: &Client, ehr_id: &EhrId) -> Result<(), Box<dyn Error>> {
-    let outcome = client
+async fn find_by_subject(client: &CdrClient, ehr_id: &EhrId) -> Result<(), Box<dyn Error>> {
+    let answered = client
         .ehr_by_subject(
             &SubjectId::new(SUBJECT_ID)?,
             &SubjectNamespace::new(SUBJECT_NAMESPACE)?,
         )
         .await?;
-    match outcome {
-        EhrOutcome::Found(ehr) => {
+    match answered.outcome {
+        EhrGetBySubjectOutcome::Ok { body, .. } => {
             assert_eq!(
                 ehr_id.as_str(),
-                ehr.ehr_id.value(),
+                body.ehr_id.value(),
                 "the subject found a different EHR"
             );
             Ok(())
         }
-        other => Err(format!("the subject did not find its EHR: {other:?}").into()),
+        other @ EhrGetBySubjectOutcome::NotFound => {
+            Err(format!("the subject did not find its EHR: {other:?}").into())
+        }
     }
 }
 
 /// Reads the uploaded template back and builds its Web Template.
-async fn read_template(client: &Client, template_id: &TemplateId) -> Result<(), Box<dyn Error>> {
+async fn read_template(client: &CdrClient, template_id: &TemplateId) -> Result<(), Box<dyn Error>> {
     let outcome = client.template(template_id).await?;
     let TemplateOutcome::Found(TemplateSource::Opt14(template)) = outcome else {
         return Err(format!("expected the adl1.4 route to answer, got {outcome:?}").into());
@@ -190,11 +199,11 @@ async fn read_template(client: &Client, template_id: &TemplateId) -> Result<(), 
 
 /// Commits the synthetic composition and returns the version it became.
 async fn commit(
-    client: &Client,
+    client: &CdrClient,
     ehr_id: &EhrId,
     template_id: &TemplateId,
 ) -> Result<ObjectVersionId, Box<dyn Error>> {
-    let outcome = client
+    let answered = client
         .create_composition(
             ehr_id,
             &composition()?,
@@ -202,11 +211,18 @@ async fn commit(
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        CreateCompositionOutcome::Created {
-            version_id,
-            returned,
-        } => {
+    match answered.outcome {
+        CompositionCreateOutcome::Created { body, headers } => {
+            let version_id = ferrobridge_server::cdr::version_from_etag(
+                "composition_create",
+                http::StatusCode::CREATED,
+                headers.etag.as_deref(),
+            )?;
+            let returned = ferrobridge_server::cdr::returned::<Composition>(
+                "composition_create",
+                body.as_ref(),
+                Prefer::Representation,
+            )?;
             let Returned::Representation(committed) = returned else {
                 return Err("the representation was asked for and not returned".into());
             };
@@ -226,28 +242,31 @@ async fn commit(
 /// The server assigns `uid`, which the request has none of, so the comparison
 /// is of the composition with that one server-assigned member removed.
 async fn read_back(
-    client: &Client,
+    client: &CdrClient,
     ehr_id: &EhrId,
     version_id: &ObjectVersionId,
 ) -> Result<(), Box<dyn Error>> {
-    let outcome = client
+    let answered = client
         .composition(
             ehr_id,
             &UidBasedId::ObjectVersionId(version_id.clone()),
             None,
         )
         .await?;
-    match outcome {
-        CompositionOutcome::Found {
-            version_id: read_version,
-            composition: read,
+    match answered.outcome {
+        CompositionGetOutcome::Ok {
+            body: mut read,
+            headers,
         } => {
+            let read_version = ferrobridge_server::cdr::optional_version_from_etag(
+                "composition_get",
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(
                 Some(version_id.clone()),
                 read_version,
                 "the read answered with a different version in its ETag"
             );
-            let mut read = *read;
             assert_eq!(
                 Some(version_id.value().to_owned()),
                 read.uid.as_ref().map(|uid| uid.value().to_owned()),
@@ -267,12 +286,12 @@ async fn read_back(
 
 /// Commits a second version under the `ETag` of the first.
 async fn update(
-    client: &Client,
+    client: &CdrClient,
     ehr_id: &EhrId,
     preceding: &ObjectVersionId,
     template_id: &TemplateId,
 ) -> Result<ObjectVersionId, Box<dyn Error>> {
-    let outcome = client
+    let answered = client
         .update_composition(
             ehr_id,
             &versioned_object_uid(preceding),
@@ -282,27 +301,31 @@ async fn update(
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        UpdateCompositionOutcome::Updated { version_id, .. } => {
-            assert_eq!(
-                "2",
-                version_id.version_tree_id().value(),
-                "the update did not become the second version"
-            );
-            Ok(version_id)
+    let (status, etag) = match answered.outcome {
+        CompositionUpdateOutcome::Ok { headers, .. } => (http::StatusCode::OK, headers.etag),
+        CompositionUpdateOutcome::NoContent { headers } => {
+            (http::StatusCode::NO_CONTENT, headers.etag)
         }
-        other => Err(format!("expected an updated composition, got {other:?}").into()),
-    }
+        other => return Err(format!("expected an updated composition, got {other:?}").into()),
+    };
+    let version_id =
+        ferrobridge_server::cdr::version_from_etag("composition_update", status, etag.as_deref())?;
+    assert_eq!(
+        "2",
+        version_id.version_tree_id().value(),
+        "the update did not become the second version"
+    );
+    Ok(version_id)
 }
 
 /// Commits under the version that is no longer the latest.
 async fn refuse_a_stale_if_match(
-    client: &Client,
+    client: &CdrClient,
     ehr_id: &EhrId,
     stale: &ObjectVersionId,
     template_id: &TemplateId,
 ) -> Result<(), Box<dyn Error>> {
-    let outcome = client
+    let answered = client
         .update_composition(
             ehr_id,
             &versioned_object_uid(stale),
@@ -312,13 +335,15 @@ async fn refuse_a_stale_if_match(
             Prefer::Representation,
         )
         .await?;
-    match outcome {
-        UpdateCompositionOutcome::PreconditionFailed {
-            latest_version_id, ..
-        } => {
+    match answered.outcome {
+        CompositionUpdateOutcome::PreconditionFailed { headers } => {
+            let latest = ferrobridge_server::cdr::optional_version_from_etag(
+                "composition_update",
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(
                 Some("2".to_owned()),
-                latest_version_id
+                latest
                     .as_ref()
                     .map(|id| id.version_tree_id().value().to_owned()),
                 "the 412 did not name the latest version in its ETag"
@@ -331,7 +356,7 @@ async fn refuse_a_stale_if_match(
 
 /// Finds the committed composition through AQL.
 async fn query_finds_the_composition(
-    client: &Client,
+    client: &CdrClient,
     version_id: &ObjectVersionId,
 ) -> Result<(), Box<dyn Error>> {
     let request = AdhocQueryExecute {
@@ -340,14 +365,14 @@ async fn query_finds_the_composition(
         fetch: None,
         query_parameters: None,
     };
-    let outcome = client.query_aql(&request).await?;
-    match outcome {
-        QueryOutcome::Rows(set) => {
+    let answered = client.query_aql(&request).await?;
+    match answered.outcome {
+        QueryExecuteAdhocQueryBodyOutcome::Ok { body, .. } => {
             let wanted = serde_json::Value::String(version_id.value().to_owned());
             assert!(
-                set.rows.iter().any(|row| row.contains(&wanted)),
+                body.rows.iter().any(|row| row.contains(&wanted)),
                 "the query did not return the committed composition: {:?}",
-                set.rows
+                body.rows
             );
             Ok(())
         }
@@ -359,16 +384,20 @@ async fn query_finds_the_composition(
 ///
 /// "A `GET` … with `version_at_time` … returns `204 No Content` if the
 /// composition has been deleted" (ITS-REST 1.1.0, `composition_get`), which
-/// the client answers as [`CompositionOutcome::Deleted`] rather than as an
+/// the generated client answers as its own `NoContent` outcome and never as an
 /// absent value.
 async fn delete_and_read_the_deleted_outcome(
-    client: &Client,
+    client: &CdrClient,
     ehr_id: &EhrId,
     latest: &ObjectVersionId,
 ) -> Result<(), Box<dyn Error>> {
-    let outcome = client.delete_composition(ehr_id, latest).await?;
-    match outcome {
-        DeleteCompositionOutcome::Deleted { version_id } => {
+    let answered = client.delete_composition(ehr_id, latest).await?;
+    match answered.outcome {
+        CompositionDeleteOutcome::NoContent { headers } => {
+            let version_id = ferrobridge_server::cdr::optional_version_from_etag(
+                "composition_delete",
+                headers.etag.as_deref(),
+            )?;
             assert_eq!(
                 Some("3".to_owned()),
                 version_id
@@ -379,15 +408,15 @@ async fn delete_and_read_the_deleted_outcome(
         }
         other => return Err(format!("expected a deleted composition, got {other:?}").into()),
     }
-    let outcome = client
+    let answered = client
         .composition(
             ehr_id,
             &UidBasedId::HierObjectId(versioned_object_uid(latest)),
             None,
         )
         .await?;
-    match outcome {
-        CompositionOutcome::Deleted => Ok(()),
+    match answered.outcome {
+        CompositionGetOutcome::NoContent => Ok(()),
         other => Err(format!("expected the deleted outcome, got {other:?}").into()),
     }
 }

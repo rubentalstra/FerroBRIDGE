@@ -13,13 +13,11 @@
 //! reviewed snapshot over a projection that drops the surrogate ids and the
 //! run's own identifiers.
 
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::commit::CommitContext;
-use ferrobridge_openehr::composition::{CreateCompositionOutcome, UpdateCompositionOutcome};
-use ferrobridge_openehr::config::Config;
-use ferrobridge_openehr::ehr::CreateEhrOutcome;
-use ferrobridge_openehr::ids::{EhrId, template_id, versioned_object_uid};
-use ferrobridge_openehr::prefer::Prefer;
+use ferrobridge_server::cdr::CdrClient;
+use ferrobridge_server::cdr::Prefer;
+use ferrobridge_server::cdr::commit::CommitContext;
+use ferrobridge_server::cdr::config::CdrConfig;
+use ferrobridge_server::cdr::ids::{EhrId, template_id, versioned_object_uid};
 use ferrobridge_server::etl::RunOptions;
 use ferrobridge_server::etl::report::RunReport;
 use ferrobridge_testkit::containers::{self, Cdr, Postgres};
@@ -30,6 +28,10 @@ use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::writer::{CdmWriter, PersonPolicy};
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
+use openehr_its::rest::generated::ehr::client::EhrCreateOutcome;
+use openehr_its::rest::generated::ehr::client::{
+    CompositionCreateOutcome, CompositionUpdateOutcome,
+};
 use openehr_mapping_core::index::WebTemplateIndex;
 use openehr_mapping_core::template::TemplateSource;
 use openehr_rm::v1_2::composition::composition::Composition;
@@ -320,31 +322,52 @@ async fn upload_template(cdr: &Cdr) -> Result<(), Box<dyn Error>> {
 }
 
 /// Creates an EHR and returns its identifier.
-async fn create_ehr(client: &Client) -> Result<EhrId, Box<dyn Error>> {
-    match client.create_ehr(None, Prefer::Minimal).await? {
-        CreateEhrOutcome::Created { ehr_id, .. } => Ok(ehr_id),
+async fn create_ehr(client: &CdrClient) -> Result<EhrId, Box<dyn Error>> {
+    match client.create_ehr(None, Prefer::Minimal).await?.outcome {
+        EhrCreateOutcome::Created { headers, .. } => Ok(ferrobridge_server::cdr::ehr_id_from_etag(
+            http::StatusCode::CREATED,
+            headers.etag.as_deref(),
+        )?),
+        EhrCreateOutcome::NoContent { headers } => Ok(ferrobridge_server::cdr::ehr_id_from_etag(
+            http::StatusCode::NO_CONTENT,
+            headers.etag.as_deref(),
+        )?),
         other => Err(format!("the CDR refused the EHR: {other:?}").into()),
     }
 }
 
 /// Commits the first version of `value` into `ehr`.
 async fn create(
-    client: &Client,
+    client: &CdrClient,
     ehr: &EhrId,
     value: &Value,
 ) -> Result<ObjectVersionId, Box<dyn Error>> {
     match client
         .create_composition(ehr, &composition(value)?, &commit()?, Prefer::Minimal)
         .await?
+        .outcome
     {
-        CreateCompositionOutcome::Created { version_id, .. } => Ok(version_id),
+        CompositionCreateOutcome::Created { headers, .. } => {
+            Ok(ferrobridge_server::cdr::version_from_etag(
+                "composition_create",
+                http::StatusCode::CREATED,
+                headers.etag.as_deref(),
+            )?)
+        }
+        CompositionCreateOutcome::NoContent { headers } => {
+            Ok(ferrobridge_server::cdr::version_from_etag(
+                "composition_create",
+                http::StatusCode::NO_CONTENT,
+                headers.etag.as_deref(),
+            )?)
+        }
         other => Err(format!("the CDR refused the composition: {other:?}").into()),
     }
 }
 
 /// Commits `value` as the next version after `preceding`.
 async fn update(
-    client: &Client,
+    client: &CdrClient,
     ehr: &EhrId,
     preceding: &ObjectVersionId,
     value: &Value,
@@ -359,8 +382,22 @@ async fn update(
             Prefer::Minimal,
         )
         .await?
+        .outcome
     {
-        UpdateCompositionOutcome::Updated { version_id, .. } => Ok(version_id),
+        CompositionUpdateOutcome::Ok { headers, .. } => {
+            Ok(ferrobridge_server::cdr::version_from_etag(
+                "composition_update",
+                http::StatusCode::OK,
+                headers.etag.as_deref(),
+            )?)
+        }
+        CompositionUpdateOutcome::NoContent { headers } => {
+            Ok(ferrobridge_server::cdr::version_from_etag(
+                "composition_update",
+                http::StatusCode::NO_CONTENT,
+                headers.etag.as_deref(),
+            )?)
+        }
         other => Err(format!("the CDR refused the new version: {other:?}").into()),
     }
 }
@@ -555,7 +592,7 @@ async fn the_laboratory_round_trip_writes_the_reviewed_rows_and_a_rerun_changes_
     let postgres = containers::postgres().await?;
     build_cdm(&postgres).await?;
     upload_template(&cdr).await?;
-    let client = Client::new(Config::new(format!("{}/", cdr.base_url()).parse()?))?;
+    let client = CdrClient::new(&CdrConfig::new(format!("{}/", cdr.base_url()).parse()?))?;
     let ehrs = [create_ehr(&client).await?, create_ehr(&client).await?];
 
     let index = WebTemplateIndex::build(&TemplateSource::opt14(LABORATORY_REPORT_OPT)?)?;

@@ -17,7 +17,7 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use ferrobridge_openehr::ids::EhrId;
+use crate::cdr::ids::EhrId;
 use redb::Database;
 use redb::ReadableDatabase;
 use redb::ReadableTable;
@@ -291,10 +291,10 @@ impl Store for RedbStore {
 #[cfg(test)]
 mod tests {
     use super::RedbStore;
+    use crate::cdr::ids::EhrId;
     use crate::facade::identity::record::{CommittedSource, CompositionBinding, SourceVersion};
     use crate::facade::identity::store::Store;
     use crate::facade::identity::{ExternalResourceId, FhirResourceId, PersonId};
-    use ferrobridge_openehr::ids::EhrId;
 
     /// A synthetic clinical value, to prove it never reaches the file.
     const MARKER: &str = "a synthetic finding the identity store must never hold";

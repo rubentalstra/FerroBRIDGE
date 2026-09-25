@@ -31,7 +31,7 @@ pub enum JobError {
     Mappings(#[source] MapperError),
     /// The CDR client could not be built.
     #[error("building the CDR client the run reads through")]
-    Client(#[source] ferrobridge_openehr::error::Error),
+    Client(#[source] crate::cdr::error::CdrError),
     /// The concept resolver could not connect to the CDM database.
     #[error("connecting the concept resolver to the CDM database")]
     Resolver(#[source] ConnectError),
@@ -87,7 +87,7 @@ pub async fn run(settings: &Settings, options: &RunOptions) -> Result<RunReport,
         return Err(missing());
     };
     let set = read_set(directory).map_err(JobError::Mappings)?;
-    let client = ferrobridge_openehr::client::Client::new(cdr.clone()).map_err(JobError::Client)?;
+    let client = crate::cdr::CdrClient::new(cdr).map_err(JobError::Client)?;
     let pool = CdmPool::connect(
         sqlx::postgres::PgPoolOptions::new().max_connections(2),
         cdm.connection.pool_options(),

@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! Shared helpers and synthetic bodies for the contract suites.
+//! Shared helpers and synthetic bodies for the CDR contract suites.
 //!
 //! Every body here is invented for the test: no clinical content, no real
 //! identifier.
 
-use ferrobridge_openehr::client::Client;
-use ferrobridge_openehr::commit::CommitContext;
-use ferrobridge_openehr::config::{Config, RetryPolicy};
-use ferrobridge_openehr::ids::template_id;
+use ferrobridge_server::cdr::CdrClient;
+use ferrobridge_server::cdr::commit::CommitContext;
+use ferrobridge_server::cdr::config::CdrConfig;
+use ferrobridge_server::cdr::ids::template_id;
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_id::ObjectId;
 use openehr_base::v1_3::base_types::identification::party_ref::PartyRef;
 use openehr_base::v1_3::base_types::identification::terminology_id::TerminologyId;
+use openehr_its::rest::client::RetryPolicy;
 use openehr_its::rest::generated::common::UpdateAuditData;
 use openehr_rm::v1_2::common::generic::party_identified::{PartyIdentified, PartyIdentifiedData};
 use openehr_rm::v1_2::common::generic::party_proxy::PartyProxy;
@@ -123,15 +124,15 @@ pub(crate) const OPT2_JSON: &str = r#"{
 pub(crate) const OPT2_HRID: &str = "org.example::openEHR-EHR-COMPOSITION.t_vital_signs.v1.0.0";
 
 /// Returns a client for `server`, with a retry budget short enough for a test.
-pub(crate) fn client(server: &MockServer) -> Result<Client, Box<dyn Error>> {
-    let config = Config::new(format!("{}/v1", server.uri()).parse()?)
+pub(crate) fn client(server: &MockServer) -> Result<CdrClient, Box<dyn Error>> {
+    let config = CdrConfig::new(format!("{}/v1", server.uri()).parse()?)
         .with_timeout(Duration::from_secs(5))
         .with_retry(RetryPolicy {
             max_attempts: 3,
             initial_backoff: Duration::from_millis(1),
             max_backoff: Duration::from_millis(5),
         });
-    Ok(Client::new(config)?)
+    Ok(CdrClient::new(&config)?)
 }
 
 /// Returns the synthetic composition as an RM value.

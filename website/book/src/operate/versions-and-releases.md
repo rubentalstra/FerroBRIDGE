@@ -31,9 +31,10 @@ Where to read it:
 ## The crate line
 
 The library crates are published on crates.io under plain names so other Rust
-projects can depend on them: `fhir-types`, `openehr-mapping-core`,
-`fhirconnect`, `omocl`, `omop-cdm`, `ferrobridge-openehr`, and
-`ferrobridge-term`. Each carries the `version` in its own
+projects can depend on them: `fhir-types`, `hl7v2-types`,
+`openehr-mapping-core`, `fhirconnect`, `omocl`, `omop-cdm`, `ferrobridge-term`
+and `ferrobridge-hl7v2`. Each carries the
+`version` in its own
 `crates/*/Cargo.toml`, and that number never adopts the product version or a
 specification version.
 

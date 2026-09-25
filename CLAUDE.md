@@ -55,7 +55,7 @@ v0.0.4 (OMOP). Nothing is scaffolded before its issues are filed.
 ## Repo map
 
 The Cargo workspace (#107) holds the root manifests with the full lint set,
-nine library crates (eight at 0.0.0, the version that holds their crates.io
+eight library crates (seven at 0.0.0, the version that holds their crates.io
 names until a first publish, and `fhir-types` on its own published line), and
 the testkit tool crate. Beside it:
 
@@ -67,6 +67,12 @@ the testkit tool crate. Beside it:
   `tower-http` stack (request id, panic catch, timeout, body ceiling), and the
   bounded drain on `SIGTERM`. `serve`, `cdm init` and `etl run` run;
   `vocab load` and `mapping check` parse and name the issue that lands each.
+  `src/cdr/` reaches the CDR through the generated ITS-REST 1.1.0 client of
+  `openehr-its` (`rest-client`, #285): the handle built from `[cdr]`, the
+  commit headers the generated parameters do not carry, the `X-Request-Id`
+  echo, the upstream answer kept for a refusal's diagnostics, the typed ids an
+  `ETag` names, the two-route template fetch and the AQL paging, with the
+  `wiremock` contract tests under `tests/it/cdr/`.
   `src/etl/` is the OMOP ETL runner (#91): the `[etl]` queries checked at load,
   the paged read, the `Mapper` the OMOCL engine fills (#90, `etl::mapper`
   compiles one program per template on first sight), the visits and the run
@@ -98,11 +104,6 @@ the testkit tool crate. Beside it:
   compiles one context into one immutable program (#83): the extensions
   applied in declaration order, the four version selectors checked, and every
   path on both sides resolved once so the interpreter parses none.
-- `crates/ferrobridge-openehr`: the hand-written ITS-REST 1.1.0 client
-  transport only (#76, #276), one outcome enum per call with a variant per
-  documented status, `wiremock` contract tests beside it. The ids and the audit
-  are the `openehr-base`, `openehr-rm` and `openehr-its` types; the crate goes
-  when `openehr-its` ships its `rest-client` feature.
 - `crates/ferrobridge-term`: the FHIR terminology client (#77) for
   `CodeSystem/$lookup`, `ConceptMap/$translate` and
   `ValueSet/$validate-code`, R4 and R4B over the generated `fhir-types`

@@ -19,7 +19,8 @@ Shipped in openehr-its 0.0.71 on 2026-09-25 (FerroEHR #3486): features
 (`rest::generated::<group>::client` over `rest::client::{Transport,
 ReqwestTransport, Credentials, RetryPolicy, ClientError}`).
 
-**How to apply:** #276 cut the restated types; #285 deletes
-`ferrobridge-openehr` and takes the generated client. Take `openehr-its` with
+**How to apply:** #276 cut the restated types; #285 deleted
+`ferrobridge-openehr`; the generated client lives behind
+`app/ferrobridge-server/src/cdr/`, whose workarounds go with FerroEHR#3487. Take `openehr-its` with
 `rest` for DTOs and `rest-client` for calls, never `rest-server`. Watch the openehr-its changelog on every dependency
 sweep ([[deps-latest-sweep]], [[openehr-crates-are-the-model]]).

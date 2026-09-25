@@ -18,13 +18,13 @@ use crate::health::{Check, HealthIndicator, IndicatorState};
 #[derive(Debug, Clone)]
 pub struct Cdr {
     /// The client the probe calls through, with its configured credentials.
-    client: ferrobridge_openehr::client::Client,
+    client: crate::cdr::CdrClient,
 }
 
 impl Cdr {
     /// Returns a probe over `client`.
     #[must_use]
-    pub const fn new(client: ferrobridge_openehr::client::Client) -> Self {
+    pub const fn new(client: crate::cdr::CdrClient) -> Self {
         Self { client }
     }
 }

@@ -39,6 +39,26 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   stack.
 - The upstream stubs are `wiremock`; every fixture is synthetic.
 
+## The CDR client (`src/cdr/`)
+
+- **The generated client owns every operation.** The paths, the parameters,
+  `Prefer`, `If-Match`, the outcome enum per call and the retry are the
+  `openehr_its::rest::generated::<group>::client` operations over one
+  `openehr_its::rest::client::Client<ReqwestTransport>`. The module adds only
+  what they lack: the commit headers (absent from the three `OpenAPI`
+  documents), the `X-Request-Id` echo, the upstream answer kept beside each
+  outcome, the ids an `ETag` names, the two-route template fetch and the AQL
+  paging. A gap in the generated client is a request to `openehr-its`, never a
+  hand-written copy of the operation here.
+- **A documented status is an outcome, never an error**, and a refusal keeps
+  the status and body the CDR sent (`Answered::upstream`,
+  `CdrError::Client::upstream`), so the facade's status table diagnoses it.
+- **The commit headers carry the 1.1.0 value form** (`openehr-version`,
+  `openehr-audit-details`, `openehr-template-id`) and never the deprecated
+  1.0.3 spelling.
+- **Tests are `wiremock` contract tests under `tests/it/cdr/`**, one case per
+  documented status plus the request-side assertions; every body is synthetic.
+
 ## The facade (`src/facade/`)
 
 - **The facade never stores.** The CDR holds the clinical record; the facade
@@ -51,7 +71,7 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   facade authors is an `OperationOutcome` with an `issue.code` from the R4
   value set; the openEHR body travels verbatim inside `issue.diagnostics` and
   never reaches the wire as its own document.
-- **Ids are newtypes.** `EhrId` comes from the ITS-REST client, the version
+- **Ids are newtypes.** `EhrId` comes from the `cdr` module, the version
   container and the version are the `openehr-base` `HierObjectId` and
   `ObjectVersionId`; `FhirResourceId`, `ExternalResourceId` and
   `PersonId` are this side's. A function never takes a bare `String` where one
