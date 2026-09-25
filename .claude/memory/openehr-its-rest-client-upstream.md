@@ -14,7 +14,12 @@ behind `rest-server`, so FerroBRIDGE keeps a hand-written reqwest client in
 `crates/ferrobridge-openehr`. That client restates id and audit types the
 openEHR crates publish (FerroBRIDGE #276).
 
-**How to apply:** cut the restated types now (#276), never reshape the
-transport half, and delete `ferrobridge-openehr` in one step when the upstream
-feature is on crates.io. Watch the openehr-its changelog on every dependency
+Shipped in openehr-its 0.0.71 on 2026-09-25 (FerroEHR #3486): features
+`rest` (DTOs over serde and http, no axum), `rest-server`, `rest-client`
+(`rest::generated::<group>::client` over `rest::client::{Transport,
+ReqwestTransport, Credentials, RetryPolicy, ClientError}`).
+
+**How to apply:** #276 cut the restated types; #285 deletes
+`ferrobridge-openehr` and takes the generated client. Take `openehr-its` with
+`rest` for DTOs and `rest-client` for calls, never `rest-server`. Watch the openehr-its changelog on every dependency
 sweep ([[deps-latest-sweep]], [[openehr-crates-are-the-model]]).

@@ -56,13 +56,13 @@ carries the exact patch.
 
 | Item | Pin | Repeated in |
 |---|---|---|
-| `openehr-base` | 0.0.69 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-rm` | 0.0.69 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-its` | 0.0.69 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-sdt` | 0.0.69 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` (the Simplified Data Template engines, split out of `openehr-its` at 0.0.68) |
-| `openehr-query` | 0.0.69 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
-| `openehr-am` | 0.0.69 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` (the AOM2 OPT2 types an ADL 2 template decodes into) |
-| `openehr-adl` | 0.0.69 | the root `Cargo.toml` `[workspace.dependencies]`, test-only: the ADL 2 test fixtures of `openehr-mapping-core` are compiled from their `.adls` sources |
+| `openehr-base` | 0.0.71 | `docs/architecture.md`, later the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-rm` | 0.0.71 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-its` | 0.0.71 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-sdt` | 0.0.71 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` (the Simplified Data Template engines, split out of `openehr-its` at 0.0.68) |
+| `openehr-query` | 0.0.71 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` |
+| `openehr-am` | 0.0.71 | `docs/architecture.md`, the root `Cargo.toml` `[workspace.dependencies]` (the AOM2 OPT2 types an ADL 2 template decodes into) |
+| `openehr-adl` | 0.0.71 | the root `Cargo.toml` `[workspace.dependencies]`, test-only: the ADL 2 test fixtures of `openehr-mapping-core` are compiled from their `.adls` sources |
 
 ## Third-party crates
 
