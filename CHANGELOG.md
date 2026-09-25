@@ -25,6 +25,24 @@ crates on crates.io.
 
 ### Added
 
+- The HL7 v2 inputs, vendored with provenance (#252). The v2-to-FHIR
+  implementation guide package `hl7.fhir.uv.v2mappings` 1.0.0 (FHIR 4.0.1,
+  263 ConceptMaps) is the sixth package `scripts/vendor/fhir-packages.sh`
+  vendors under `tools/fhir-codegen/vendor/`. It carries the `LICENSE` and the
+  mapping guidelines page of its source repository `HL7/v2-to-fhir` at the
+  `1.0.0` tag, and its `PROVENANCE.md` records both licences, the package's
+  CC0-1.0 and the repository's Apache-2.0. The HL7 v2 definitions
+  (`HL7/v2ig` `input/sourceOfTruth`, 1,694 files, pinned by commit) have
+  terms that do not permit redistribution, so the new `scripts/vendor/v2ig.sh`
+  fetches them at build time into the ignored
+  `tools/fhir-codegen/vendor/hl7-v2ig/` and checks the file count and tree
+  digest on every run. The one committed file there is the `PROVENANCE.md`
+  that quotes the licence text HL7 attaches and records the owner's decision
+  to use the material as a generator input. The `codegen-drift` CI job
+  restores the tree from a cache keyed on the commit and runs the fetch
+  before the drift check. `scripts/checks/versions.sh` reads every FHIR
+  package provenance and the new corpus rows, digests included, back against
+  `docs/VERSIONS.md`.
 - The conformance pass lists and their badges (#24). The corpus tests give
   every case of four corpora a verdict: each file of the FHIRconnect mapping
   library (2 of 107 pass: parse, published schemas or the pinned rejection

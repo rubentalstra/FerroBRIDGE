@@ -1,0 +1,30 @@
+{
+  "name" : "hl7.fhir.uv.v2mappings",
+  "version" : "1.0.0",
+  "tools-version" : 3,
+  "type" : "IG",
+  "date" : "20251007192841",
+  "license" : "CC0-1.0",
+  "canonical" : "http://hl7.org/fhir/uv/v2mappings",
+  "url" : "http://hl7.org/fhir/uv/v2mappings/STU1",
+  "title" : "HL7 Version 2 to FHIR",
+  "description" : "The HL7 V2 to FHIR Implementation Guide supports the mapping of HL7 Version 2 messages segments, datatypes and vocabulary to HL7 FHIR Release 4.0 Bundles, Resources, Data Types and Coding Systems. (built Tue, Oct 7, 2025 19:28+0000+00:00)",
+  "fhirVersions" : ["4.0.1"],
+  "dependencies" : {
+    "hl7.fhir.r4.core" : "4.0.1",
+    "hl7.terminology.r4" : "6.5.0",
+    "hl7.fhir.uv.extensions.r4" : "5.2.0"
+  },
+  "author" : "HL7 International / Orders and Observations",
+  "maintainers" : [
+    {
+      "name" : "HL7 Orders and Observations Workgroup",
+      "url" : "http://www.hl7.org/Special/committees/orders"
+    }
+  ],
+  "directories" : {
+    "lib" : "package",
+    "example" : "example"
+  },
+  "jurisdiction" : "http://unstats.un.org/unsd/methods/m49/m49.htm#001"
+}

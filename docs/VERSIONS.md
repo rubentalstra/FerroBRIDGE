@@ -43,6 +43,8 @@ its pin from this table, and `scripts/checks/versions.sh` reads each vendored
 | OMOP CDM definitions and PostgreSQL DDL | `OHDSI/CommonDataModel` tag `v5.4.3` | `docs/architecture.md` §2, `scripts/vendor/omop-cdm.sh`, `docs/specs/omop-cdm/PROVENANCE.md`, `tools/omop-cdm-codegen` and the banner of every file it emits |
 | openEHR ITS-REST OpenAPI | `openEHR/specifications-ITS-REST` tag `Release-1.1.0`, modules EHR, Query, Definition, and the Simplified Formats and Simplified Data Template sources | `docs/architecture.md` §2, `scripts/vendor/its-rest.sh`, `docs/specs/its-rest/PROVENANCE.md` |
 | KDS Diagnose operational template (fixture) | `openFHIR/openfhir` commit `5e4d68007518fcddae1907b333a86f495791aa53` path `core/src/test/resources/kds/diagnose/KDS_Diagnose.opt` sha256 `752483d90c4ba0f0d1e67baacceb67c1f6f698607823f2eebaa876f4f32bd870` | `scripts/vendor/kds-diagnose-opt.sh`, `tools/ferrobridge-testkit/fixtures/opt/kds/PROVENANCE.md` |
+| HL7 v2 definitions (v2ig source of truth, never committed) | `HL7/v2ig` commit `3adcdbfff654ccbff5cd33aa34bd909a087e8e19` path `input/sourceOfTruth` files `1694` digest `9a1fb2b974b69f575bcd9b30fa66d2ff7f13ef7869c1350eca7462067e974f93` | `scripts/vendor/v2ig.sh`, `tools/fhir-codegen/vendor/hl7-v2ig/PROVENANCE.md`, the `codegen-drift` job of `.github/workflows/ci.yml` (its cache key) |
+| HL7 v2+ licence page | `HL7/v2plus` commit `1a8fbb7e198047d71b9b13ceb582aaded4fa19f3` path `license.html` sha256 `48e2d1108ab38faafb9993342a9626b52d673ce2e683ef123716950564d76efd` | `scripts/vendor/v2ig.sh` (quoted verbatim in `tools/fhir-codegen/vendor/hl7-v2ig/PROVENANCE.md`) |
 
 ## openEHR model crates (crates.io)
 
@@ -152,6 +154,11 @@ decision 2026-09-05: the crate and its generator move here from the sibling
 terminology server, which then consumes the crate from crates.io. The first
 increment of #72 landed both trees, so the `PROVENANCE.md` paths below exist
 and the `codegen-drift` CI job reads the packages on every run.
+`hl7.fhir.uv.v2mappings` is no input of `fhir-types`: it carries the
+v2-to-FHIR ConceptMaps for the HL7 v2 face (#251), and the script takes the
+`LICENSE` of its source repository beside it because that licence differs
+from the package's own. `scripts/checks/versions.sh` reads the `Version` line
+of every `PROVENANCE.md` below back against its row.
 
 | Item | Pin | Repeated in |
 |---|---|---|
@@ -160,6 +167,7 @@ and the `codegen-drift` CI job reads the packages on every run.
 | `hl7.fhir.r5.core` | 5.0.0 | `tools/fhir-codegen/vendor/hl7.fhir.r5.core/PROVENANCE.md` |
 | `hl7.fhir.r6.core` | 6.0.0-ballot5 | `tools/fhir-codegen/vendor/hl7.fhir.r6.core/PROVENANCE.md` |
 | `hl7.terminology` (THO) | 7.3.0 | `tools/fhir-codegen/vendor/hl7.terminology/PROVENANCE.md` |
+| `hl7.fhir.uv.v2mappings` (the v2-to-FHIR IG) | 1.0.0 | `tools/fhir-codegen/vendor/hl7.fhir.uv.v2mappings/PROVENANCE.md` (FHIR 4.0.1; the package declares CC0-1.0, its source repository `HL7/v2-to-fhir` Apache-2.0) |
 
 ## Profile packages (the mapping targets)
 

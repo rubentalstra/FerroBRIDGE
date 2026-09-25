@@ -84,6 +84,32 @@ script compares and reports without failing on new passes; `--check` is what
 CI runs. It needs `cargo-nextest` and `jq`. Never edit a list by hand, and
 never remove a case from one to make CI green.
 
+## Vendored inputs and the build-time fetch
+
+Every external corpus enters through a committed script under
+`scripts/vendor/`, which reads its pin from `docs/VERSIONS.md` and writes a
+`PROVENANCE.md` beside what it fetches. The HL7 FHIR packages, the v2-to-FHIR
+implementation guide among them, go to `tools/fhir-codegen/vendor/<package>/`
+through `scripts/vendor/fhir-packages.sh`, and the specification corpora go to
+`docs/specs/`. `scripts/checks/versions.sh` reads every provenance file back
+against its pin.
+
+The HL7 v2 definitions are the one input whose terms do not permit
+redistribution, so they are never committed. `scripts/vendor/v2ig.sh` fetches
+them at build time into `tools/fhir-codegen/vendor/hl7-v2ig/`, which
+`.gitignore` refuses except for its committed `PROVENANCE.md`. The script
+checks the file count and tree digest the pin records on every run. Run it
+before the codegen drift check, as the `codegen-drift` job does:
+
+```bash
+scripts/vendor/v2ig.sh
+cargo run --locked -p fhir-codegen -- emit --check
+```
+
+To move the pin, change the commit in `docs/VERSIONS.md`, run
+`scripts/vendor/v2ig.sh --stamp`, and copy the file count and digest it prints
+into the same row.
+
 ## The sqlx query metadata
 
 `omop-cdm` checks its SQL at compile time from the metadata committed under

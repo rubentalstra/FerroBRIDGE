@@ -152,12 +152,13 @@ corpus_blob_id() {
 
 # One digest over a whole vendored tree: sha256 of the sorted per-file
 # `sha256  path` listing, with the provenance stamps themselves left out so the
-# digest covers only upstream bytes.
+# digest covers only upstream bytes. One shasum over the sorted list gives the
+# same listing as one shasum per file, without a process per file.
 corpus_tree_digest() {
   (
     cd "$1" || exit 1
-    find . -type f ! -name PROVENANCE.md | LC_ALL=C sort |
-      while IFS= read -r f; do shasum -a 256 "$f"; done |
+    find . -type f ! -name PROVENANCE.md -print0 | LC_ALL=C sort -z |
+      xargs -0 -r shasum -a 256 |
       shasum -a 256 | cut -d' ' -f1
   )
 }

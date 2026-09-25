@@ -31,7 +31,6 @@
 /website/book/book/
 /_site/
 
-<<<<<<< HEAD
 # The container build context: the release lane stages one static binary per
 # platform under dist/<os>_<arch>/ and docker/Dockerfile copies it
 # (docs/release.md). Built artefacts, never committed.
@@ -42,12 +41,11 @@
 # profile bind-mounts. Neither ever enters this repository.
 /secrets/
 /vocabulary/
-=======
+
 # The CycloneDX documents cargo-cyclonedx writes beside each member's
 # Cargo.toml. The release lane renames the one it ships and uploads it as a
 # release asset (docs/release.md); a local rehearsal leaves the rest behind.
 *.cdx.json
->>>>>>> 5811bcb5 (ci(release): the asset set, the pins and the verification record (#23))
 
 # The fuzz crate builds outside the workspace; its build tree, corpora and
 # crash artifacts never enter the repository (#155).
@@ -55,3 +53,10 @@ fuzz/target/
 fuzz/corpus/
 fuzz/artifacts/
 fuzz/coverage/
+
+# The HL7 v2 definitions scripts/vendor/v2ig.sh fetches at build time. Their
+# terms do not permit redistribution, so nothing in the directory is ever
+# committed except the PROVENANCE.md that records them
+# (.claude/rules/vendored-inputs.md).
+/tools/fhir-codegen/vendor/hl7-v2ig/*
+!/tools/fhir-codegen/vendor/hl7-v2ig/PROVENANCE.md

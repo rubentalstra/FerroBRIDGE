@@ -1,0 +1,1881 @@
+{
+  "index-version" : 2,
+  "files" : [
+    {
+      "filename" : "ImplementationGuide-hl7.fhir.uv.v2mappings.json",
+      "resourceType" : "ImplementationGuide",
+      "id" : "hl7.fhir.uv.v2mappings",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ImplementationGuide/hl7.fhir.uv.v2mappings",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "CodeSystem-provenance-activity-type-v2-to-fhir.json",
+      "resourceType" : "CodeSystem",
+      "id" : "provenance-activity-type-v2-to-fhir",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/CodeSystem/provenance-activity-type-v2-to-fhir",
+      "version" : "1.0.0",
+      "content" : "complete"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ce-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ce-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ce-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cf-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cf-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cf-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cne-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cne-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cne-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cnn-to-practitioner.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cnn-to-practitioner",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cnn-to-practitioner",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cq-to-code.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cq-to-code",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cq-to-code",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cq-to-decimal.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cq-to-decimal",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cq-to-decimal",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cq-to-quantity.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cq-to-quantity",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cq-to-quantity",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cq-to-unsignedint.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cq-to-unsignedint",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cq-to-unsignedint",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-durationunit-to-timing.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-durationunit-to-timing",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-durationunit-to-timing",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-supportinginfo-to-observation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-supportinginfo-to-observation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-supportinginfo-to-observation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-annotation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-annotation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-annotation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-code.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-code",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-code",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-coding.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-coding",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-coding",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-device.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-device",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-device",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-duration.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-duration",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-duration",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-organization.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-organization",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-organization",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-practitionerrole.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-practitionerrole",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-practitionerrole",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-quantity.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-quantity",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-quantity",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-string.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-string",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-string",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cwe-to-uri.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cwe-to-uri",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-uri",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cx-mother-to-relatedperson.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cx-mother-to-relatedperson",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cx-mother-to-relatedperson",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cx-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cx-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cx-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-cx-to-string.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-cx-to-string",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cx-to-string",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-dld-discharge-to-location.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-dld-discharge-to-location",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-dld-discharge-to-location",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-dln-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-dln-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-dln-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-dr-to-datetime.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-dr-to-datetime",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-dr-to-datetime",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-dr-to-period.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-dr-to-period",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-dr-to-period",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-dtm-time-to-annotation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-dtm-time-to-annotation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-dtm-time-to-annotation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-dtm-to-datetime.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-dtm-to-datetime",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-dtm-to-datetime",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ed-to-attachment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ed-to-attachment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ed-to-attachment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ed-to-documentreference.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ed-to-documentreference",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ed-to-documentreference",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-defaultassigner-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-defaultassigner-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-defaultassigner-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-extension-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-extension-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-extension-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-organization-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-organization-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-organization-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-system-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-system-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-system-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-to-coding.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-to-coding",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-to-coding",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-to-condition.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-to-condition",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-to-condition",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-to-procedure.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-to-procedure",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-to-procedure",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ei-udicarrier-to-device.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ei-udicarrier-to-device",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ei-udicarrier-to-device",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-eip-fillerassignedidentifier-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-eip-fillerassignedidentifier-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-eip-fillerassignedidentifier-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-eip-placerassignedidentifier-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-eip-placerassignedidentifier-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-eip-placerassignedidentifier-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-fn-to-humanname.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-fn-to-humanname",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-fn-to-humanname",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ft-comment-to-annotation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ft-comment-to-annotation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ft-comment-to-annotation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-endpoint-to-messageheader-destination.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-endpoint-to-messageheader-destination",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-endpoint-to-messageheader-destination",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-endpoint-to-messageheader-source.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-endpoint-to-messageheader-source",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-endpoint-to-messageheader-source",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-name-to-messageheader-destination.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-name-to-messageheader-destination",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-name-to-messageheader-destination",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-name-to-messageheader-source.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-name-to-messageheader-source",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-name-to-messageheader-source",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-to-device.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-to-device",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-to-device",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-to-location.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-to-location",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-to-location",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-to-organization.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-to-organization",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-to-organization",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-hd-to-uri.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-hd-to-uri",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-to-uri",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-id-to-boolean.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-id-to-boolean",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-id-to-boolean",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-id-to-code.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-id-to-code",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-id-to-code",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-id-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-id-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-id-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-id-to-coding.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-id-to-coding",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-id-to-coding",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-id-to-string.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-id-to-string",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-id-to-string",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-id-universalid-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-id-universalid-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-id-universalid-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-is-to-code.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-is-to-code",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-is-to-code",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-is-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-is-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-is-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-is-to-string.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-is-to-string",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-is-to-string",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-msg-to-code.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-msg-to-code",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-msg-to-code",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-msg-to-coding.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-msg-to-coding",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-msg-to-coding",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-msg-to-messageheader.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-msg-to-messageheader",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-msg-to-messageheader",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-na-to-sampleddata.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-na-to-sampleddata",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-na-to-sampleddata",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ndl-to-practitionerrole.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ndl-to-practitionerrole",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ndl-to-practitionerrole",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-nm-lengthofstay-to-quantity.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-nm-lengthofstay-to-quantity",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-nm-lengthofstay-to-quantity",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-nm-to-positiveint.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-nm-to-positiveint",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-nm-to-positiveint",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-nm-to-quantity.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-nm-to-quantity",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-nm-to-quantity",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-nr-to-range.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-nr-to-range",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-nr-to-range",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-og-subidentifier-to-extension.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-og-subidentifier-to-extension",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-og-subidentifier-to-extension",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-pl-to-location.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-pl-to-location",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-pl-to-location",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-pln-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-pln-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-pln-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-pt-to-meta.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-pt-to-meta",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-pt-to-meta",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ri-to-timing.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ri-to-timing",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ri-to-timing",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-rp-to-attachment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-rp-to-attachment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-rp-to-attachment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-rp-to-documentreference.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-rp-to-documentreference",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-rp-to-documentreference",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-rpt-to-timing.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-rpt-to-timing",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-rpt-to-timing",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-sad-to-address.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-sad-to-address",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-sad-to-address",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-sn-to-quantity.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-sn-to-quantity",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-sn-to-quantity",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-sn-to-range.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-sn-to-range",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-sn-to-range",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-sn-to-ratio.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-sn-to-ratio",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-sn-to-ratio",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-sps-source-to-specimen.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-sps-source-to-specimen",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-sps-source-to-specimen",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-st-to-codeableconcept.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-st-to-codeableconcept",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-st-to-codeableconcept",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-st-to-identifier.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-st-to-identifier",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-st-to-identifier",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-tq-executionperiod-to-task.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-tq-executionperiod-to-task",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-tq-executionperiod-to-task",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-tq-priority-to-task.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-tq-priority-to-task",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-tq-priority-to-task",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-tq-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-tq-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-tq-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-tq-to-medicationrequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-tq-to-medicationrequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-tq-to-medicationrequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-tq-to-servicerequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-tq-to-servicerequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-tq-to-servicerequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-ts-to-datetime.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-ts-to-datetime",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-ts-to-datetime",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xad-to-address.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xad-to-address",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xad-to-address",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xcn-author-to-annotation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xcn-author-to-annotation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xcn-author-to-annotation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xcn-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xcn-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xcn-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xcn-to-practitioner.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xcn-to-practitioner",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xcn-to-practitioner",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xcn-to-practitionerrole.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xcn-to-practitionerrole",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xcn-to-practitionerrole",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xcn-to-relatedperson.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xcn-to-relatedperson",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xcn-to-relatedperson",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xon-to-location.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xon-to-location",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xon-to-location",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xon-to-organization.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xon-to-organization",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xon-to-organization",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xon-to-string.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xon-to-string",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xon-to-string",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xpn-to-humanname.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xpn-to-humanname",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xpn-to-humanname",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xpn-to-string.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xpn-to-string",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xpn-to-string",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-datatype-xtn-to-contactpoint.json",
+      "resourceType" : "ConceptMap",
+      "id" : "datatype-xtn-to-contactpoint",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-xtn-to-contactpoint",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-adt-a01-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-adt-a01-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-adt-a01-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-adt-a02-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-adt-a02-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-adt-a02-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-adt-a05-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-adt-a05-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-adt-a05-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-adt-a06-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-adt-a06-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-adt-a06-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-adt-a09-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-adt-a09-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-adt-a09-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-adt-a11-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-adt-a11-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-adt-a11-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-adt-a17-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-adt-a17-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-adt-a17-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-mdm-t02-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-mdm-t02-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-mdm-t02-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-oml-o21-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-oml-o21-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-oml-o21-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-orm-o01-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-orm-o01-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-orm-o01-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-oru-r01-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-oru-r01-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-oru-r01-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-siu-s12-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-siu-s12-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-siu-s12-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-message-vxu-v04-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "message-vxu-v04-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/message-vxu-v04-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-aig-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-aig-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-aig-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-ail-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-ail-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-ail-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-aip-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-aip-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-aip-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-ais-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-ais-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-ais-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-ais-to-servicerequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-ais-to-servicerequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-ais-to-servicerequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-al1-to-allergyintolerance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-al1-to-allergyintolerance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-al1-to-allergyintolerance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-dg1-to-condition.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-dg1-to-condition",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-dg1-to-condition",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-dg1-to-encounter.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-dg1-to-encounter",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-dg1-to-encounter",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-dg1-to-episodeofcare.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-dg1-to-episodeofcare",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-dg1-to-episodeofcare",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-evn-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-evn-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-evn-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-iam-to-allergyintolerance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-iam-to-allergyintolerance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-iam-to-allergyintolerance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-in1-to-coverage.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-in1-to-coverage",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-in1-to-coverage",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-in3-to-careteam.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-in3-to-careteam",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-in3-to-careteam",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-mrg-to-account.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-mrg-to-account",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-mrg-to-account",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-msa-to-messageheader.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-msa-to-messageheader",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-msa-to-messageheader",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-msh-operator-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-msh-operator-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-msh-operator-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-msh-source-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-msh-source-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-msh-source-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-msh-to-bundle.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-msh-to-bundle",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-msh-to-bundle",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-msh-to-encounter.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-msh-to-encounter",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-msh-to-encounter",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-msh-to-messageheader.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-msh-to-messageheader",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-msh-to-messageheader",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-msh-transformation-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-msh-transformation-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-msh-transformation-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-nk1-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-nk1-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-nk1-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-nk1-to-relatedperson.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-nk1-to-relatedperson",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-nk1-to-relatedperson",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-nte-comment-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-nte-comment-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-nte-comment-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-nte-to-documentreference.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-nte-to-documentreference",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-nte-to-documentreference",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-nte-to-observation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-nte-to-observation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-nte-to-observation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-nte-to-servicerequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-nte-to-servicerequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-nte-to-servicerequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-obr-to-diagnosticreport.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-obr-to-diagnosticreport",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-obr-to-diagnosticreport",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-obr-to-servicerequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-obr-to-servicerequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-obr-to-servicerequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-obr-to-specimen.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-obr-to-specimen",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-obr-to-specimen",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-obx-component-to-observation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-obx-component-to-observation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-obx-component-to-observation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-obx-to-documentreference.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-obx-to-documentreference",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-obx-to-documentreference",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-obx-to-observation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-obx-to-observation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-obx-to-observation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-orc-to-diagnosticreport.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-orc-to-diagnosticreport",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-orc-to-diagnosticreport",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-orc-to-immunization.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-orc-to-immunization",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-orc-to-immunization",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-orc-to-medicationadministration.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-orc-to-medicationadministration",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-orc-to-medicationadministration",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-orc-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-orc-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-orc-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-orc-to-servicerequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-orc-to-servicerequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-orc-to-servicerequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pd1-livingwill-to-observation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pd1-livingwill-to-observation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pd1-livingwill-to-observation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pd1-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pd1-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pd1-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pid-patient-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pid-patient-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pid-patient-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pid-to-account.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pid-to-account",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pid-to-account",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pid-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pid-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pid-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pid-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pid-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pid-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pr1-to-procedure.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pr1-to-procedure",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pr1-to-procedure",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-prt-generalpractitioner-practitioner-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-prt-generalpractitioner-practitioner-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-prt-generalpractitioner-practitioner-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-prt-generalpractitioner-practitionerrole-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-prt-generalpractitioner-practitionerrole-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-prt-generalpractitioner-practitionerrole-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-prt-location-to-observation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-prt-location-to-observation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-prt-location-to-observation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-prt-to-careteam.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-prt-to-careteam",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-prt-to-careteam",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-prt-to-device.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-prt-to-device",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-prt-to-device",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-prt-to-practitionerrole.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-prt-to-practitionerrole",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-prt-to-practitionerrole",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-prt-to-relatedperson.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-prt-to-relatedperson",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-prt-to-relatedperson",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pv1-encounterhistory-to-basic.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pv1-encounterhistory-to-basic",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pv1-encounterhistory-to-basic",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pv1-to-coverage.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pv1-to-coverage",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pv1-to-coverage",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pv1-to-encounter.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pv1-to-encounter",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pv1-to-encounter",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pv1-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pv1-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pv1-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-pv2-to-encounter.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-pv2-to-encounter",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pv2-to-encounter",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rol-generalpractitioner-to-patient.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rol-generalpractitioner-to-patient",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rol-generalpractitioner-to-patient",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rol-practitionerrole-to-encounter.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rol-practitionerrole-to-encounter",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rol-practitionerrole-to-encounter",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rol-to-careteam.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rol-to-careteam",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rol-to-careteam",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rol-to-relatedperson.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rol-to-relatedperson",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rol-to-relatedperson",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rxa-to-immunization.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rxa-to-immunization",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rxa-to-immunization",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rxo-to-medicationrequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rxo-to-medicationrequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rxo-to-medicationrequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rxr-to-immunization.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rxr-to-immunization",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rxr-to-immunization",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-rxr-to-medicationrequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-rxr-to-medicationrequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-rxr-to-medicationrequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-sch-to-appointment.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-sch-to-appointment",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-sch-to-appointment",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-sch-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-sch-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-sch-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-sch-to-servicerequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-sch-to-servicerequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-sch-to-servicerequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-sft-to-device.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-sft-to-device",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-sft-to-device",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-sft-to-messageheader.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-sft-to-messageheader",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-sft-to-messageheader",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-spm-to-specimen.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-spm-to-specimen",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-spm-to-specimen",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-tq1-to-medicationrequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-tq1-to-medicationrequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-tq1-to-medicationrequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-tq1-to-servicerequest.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-tq1-to-servicerequest",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-tq1-to-servicerequest",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-txa-to-documentreference.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-txa-to-documentreference",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-txa-to-documentreference",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-segment-txa-to-provenance.json",
+      "resourceType" : "ConceptMap",
+      "id" : "segment-txa-to-provenance",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-txa-to-provenance",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70001-to-administrative-gender.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70001-to-administrative-gender",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70001-to-administrative-gender",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70002-to-v3-maritalstatus.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70002-to-v3-maritalstatus",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70002-to-v3-maritalstatus",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70003-to-encounter-status.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70003-to-encounter-status",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70003-to-encounter-status",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70003-to-v2-0003.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70003-to-v2-0003",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70003-to-v2-0003",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70004-to-encounter-status.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70004-to-encounter-status",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70004-to-encounter-status",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70004-to-v3-actcode.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70004-to-v3-actcode",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70004-to-v3-actcode",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70006-to-v3-religiousaffiliation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70006-to-v3-religiousaffiliation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70006-to-v3-religiousaffiliation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70007-to-v2-0007.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70007-to-v2-0007",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70007-to-v2-0007",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70052-to-diagnosis-role.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70052-to-diagnosis-role",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70052-to-diagnosis-role",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70062-to-v3-actreason.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70062-to-v3-actreason",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70062-to-v3-actreason",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70063-to-v3-rolecode.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70063-to-v3-rolecode",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70063-to-v3-rolecode",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70069-to-service-type.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70069-to-service-type",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70069-to-service-type",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70074-to-v2-0074.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70074-to-v2-0074",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70074-to-v2-0074",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70078-to-v3-observationinterpretation.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70078-to-v3-observationinterpretation",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70078-to-v3-observationinterpretation",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70080-to-v2-0080.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70080-to-v2-0080",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70080-to-v2-0080",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70085-to-observation-status.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70085-to-observation-status",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70085-to-observation-status",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70092-to-v2-0092.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70092-to-v2-0092",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70092-to-v2-0092",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70116-to-v2-0116.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70116-to-v2-0116",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70116-to-v2-0116",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70119-to-request-status.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70119-to-request-status",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70119-to-request-status",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70123-queries-to-diagnostic-report-status.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70123-queries-to-diagnostic-report-status",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70123-queries-to-diagnostic-report-status",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70127-to-allergy-intolerance-category.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70127-to-allergy-intolerance-category",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70127-to-allergy-intolerance-category",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70127-to-allergy-intolerance-type.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70127-to-allergy-intolerance-type",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70127-to-allergy-intolerance-type",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70127-to-v2-0127.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70127-to-v2-0127",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70127-to-v2-0127",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70128-original-to-v2-0128.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70128-original-to-v2-0128",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70128-original-to-v2-0128",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70128-to-allergy-intolerance-criticality.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70128-to-allergy-intolerance-criticality",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70128-to-allergy-intolerance-criticality",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70128-to-reaction-event-severity.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70128-to-reaction-event-severity",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70128-to-reaction-event-severity",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70130-to-v2-0130.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70130-to-v2-0130",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70130-to-v2-0130",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70131-to-v2-0131.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70131-to-v2-0131",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70131-to-v2-0131",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70136-to-special-values.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70136-to-special-values",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70136-to-special-values",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70136-to-specimen-status.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70136-to-specimen-status",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70136-to-specimen-status",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70161-to-v2-0161.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70161-to-v2-0161",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70161-to-v2-0161",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70162-to-v2-0162.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70162-to-v2-0162",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70162-to-v2-0162",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70163-to-v2-0163.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70163-to-v2-0163",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70163-to-v2-0163",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70165-to-sct.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70165-to-sct",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70165-to-sct",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70177-to-v3-confidentiality.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70177-to-v3-confidentiality",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70177-to-v3-confidentiality",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70185-to-v2-0185.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70185-to-v2-0185",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70185-to-v2-0185",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70190-to-address-type.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70190-to-address-type",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70190-to-address-type",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70190-to-address-use.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70190-to-address-use",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70190-to-address-use",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70200-to-name-use.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70200-to-name-use",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70200-to-name-use",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70201-to-contact-point-use.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70201-to-contact-point-use",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70201-to-contact-point-use",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70202-to-contact-point-system.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70202-to-contact-point-system",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70202-to-contact-point-system",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70203-to-v2-0203.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70203-to-v2-0203",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70203-to-v2-0203",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70204-to-v2-0204.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70204-to-v2-0204",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70204-to-v2-0204",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70215-to-v2-0215.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70215-to-v2-0215",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70215-to-v2-0215",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70217-to-v3-actpriority.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70217-to-v3-actpriority",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70217-to-v3-actpriority",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70272-to-v2-0272.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70272-to-v2-0272",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70272-to-v2-0272",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70276-to-sct.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70276-to-sct",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70276-to-sct",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70277-to-v2-0277.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70277-to-v2-0277",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70277-to-v2-0277",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70278-to-appointmentstatus.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70278-to-appointmentstatus",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70278-to-appointmentstatus",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70301-to-v2-0301.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70301-to-v2-0301",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70301-to-v2-0301",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70315-to-v2-0315.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70315-to-v2-0315",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70315-to-v2-0315",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70322-to-event-status.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70322-to-event-status",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70322-to-event-status",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70335-to-v2-0335.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70335-to-v2-0335",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70335-to-v2-0335",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70360-to-v2-0360.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70360-to-v2-0360",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70360-to-v2-0360",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70364-to-v2-0364.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70364-to-v2-0364",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70364-to-v2-0364",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70371-to-v2-0371.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70371-to-v2-0371",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70371-to-v2-0371",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70399-to-iso-3166-1.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70399-to-iso-3166-1",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70399-to-iso-3166-1",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70430-to-v2-0430.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70430-to-v2-0430",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70430-to-v2-0430",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70432-to-v2-0432.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70432-to-v2-0432",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70432-to-v2-0432",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70443-to-v3-participationtype.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70443-to-v3-participationtype",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70443-to-v3-participationtype",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70444-to-v2-0444.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70444-to-v2-0444",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70444-to-v2-0444",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70482-to-v3-rolecode.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70482-to-v3-rolecode",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70482-to-v3-rolecode",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70485-to-request-priority.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70485-to-request-priority",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70485-to-request-priority",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70487-to-v2-0487.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70487-to-v2-0487",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70487-to-v2-0487",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70488-to-v2-0488.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70488-to-v2-0488",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70488-to-v2-0488",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70490-to-v2-0490.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70490-to-v2-0490",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70490-to-v2-0490",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70493-to-v2-0493.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70493-to-v2-0493",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70493-to-v2-0493",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70528-to-v3-timingevent.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70528-to-v3-timingevent",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70528-to-v3-timingevent",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70550-to-v2-0550.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70550-to-v2-0550",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70550-to-v2-0550",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "ConceptMap-table-hl70912-to-practitioner-role.json",
+      "resourceType" : "ConceptMap",
+      "id" : "table-hl70912-to-practitioner-role",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/ConceptMap/table-hl70912-to-practitioner-role",
+      "version" : "1.0.0"
+    },
+    {
+      "filename" : "StructureDefinition-RelatedArtifact.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "RelatedArtifact",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/RelatedArtifact",
+      "version" : "1.0.0",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    },
+    {
+      "filename" : "StructureDefinition-TypeInfo.json",
+      "resourceType" : "StructureDefinition",
+      "id" : "TypeInfo",
+      "url" : "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+      "version" : "1.0.0",
+      "kind" : "complex-type",
+      "type" : "Extension",
+      "derivation" : "constraint"
+    }
+  ]
+}
