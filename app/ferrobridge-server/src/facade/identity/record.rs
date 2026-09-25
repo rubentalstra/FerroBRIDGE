@@ -58,6 +58,23 @@ pub struct ConsumedSource {
     pub context: String,
 }
 
+/// The contribution one inbound source version was committed in, recorded
+/// before its composition is bound.
+///
+/// A CONTRIBUTION is committed before the service can bind its versions to
+/// the entries it carried, so this record is what a re-sent Bundle meets when
+/// the binding of its first delivery failed: the bridge reads the contribution
+/// back by this uid and commits nothing a second time. No specification
+/// governs this record: our own design.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CommittedSource {
+    /// The EHR the contribution was committed into.
+    pub ehr_id: String,
+    /// The `contribution_uid` the CDR named in its answer.
+    pub contribution_uid: String,
+}
+
 /// The key of one inbound resource version.
 ///
 /// A resource that arrives without a `meta.versionId` still has an identity,

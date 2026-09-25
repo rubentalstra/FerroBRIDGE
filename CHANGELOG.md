@@ -25,6 +25,24 @@ crates on crates.io.
 
 ### Added
 
+- The ITS-REST client reads a contribution back, and a transaction survives a
+  retry after its binding failed (#270). `ferrobridge-openehr` gains
+  `Client::contribution` for `GET /ehr/{ehr_id}/contribution/{contribution_uid}`
+  (`contribution_get`), with one outcome per documented status (`200` the
+  CONTRIBUTION, `404` not found) over the generated parameters and the RM
+  `Contribution`. `create_contribution` reads an empty `201` as
+  `Returned::Minimal` whatever the preference, reads the `Identifier` the
+  `201` schema also admits, and reports any other `201` body as
+  `Error::CommittedBody` naming the committed contribution. The facade's
+  transaction records the contribution uid against every keyed entry before
+  it binds any of them (a fifth identity table, `source_contribution`), binds
+  from the contribution read back when the commit answer lists no versions,
+  and answers a re-sent Bundle whose first binding failed by reading that
+  contribution back, committing nothing. The testkit carries the empty `201`,
+  the `200` read and the CONTRIBUTION body as ITS-REST stub shapes. Every
+  `2xx` with an empty body now reads as `Returned::Minimal`, so a composition
+  create or update answered without a body is bound from its `ETag` instead of
+  failing after the CDR stored it.
 - The HL7 v2 inputs, vendored with provenance (#252). The v2-to-FHIR
   implementation guide package `hl7.fhir.uv.v2mappings` 1.0.0 (FHIR 4.0.1,
   263 ConceptMaps) is the sixth package `scripts/vendor/fhir-packages.sh`

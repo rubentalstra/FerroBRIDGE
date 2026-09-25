@@ -85,6 +85,39 @@ async fn create_composition_sends_the_three_commit_headers() -> Result<(), Box<d
 }
 
 #[tokio::test]
+async fn create_composition_reads_an_empty_201_as_minimal_whatever_was_preferred()
+-> Result<(), Box<dyn Error>> {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path(format!("/v1/ehr/{EHR}/composition")))
+        .respond_with(
+            ResponseTemplate::new(201).insert_header("ETag", format!("W/\"{VERSION_1}\"")),
+        )
+        .mount(&server)
+        .await;
+
+    let outcome = support::client(&server)?
+        .create_composition(
+            &EhrId::new(EHR)?,
+            &support::composition()?,
+            &support::commit_context()?,
+            Prefer::Representation,
+        )
+        .await?;
+    match outcome {
+        CreateCompositionOutcome::Created {
+            version_id,
+            returned,
+        } => {
+            assert_eq!(VERSION_1, version_id.to_string());
+            assert!(matches!(returned, Returned::Minimal));
+        }
+        other => return Err(format!("expected a created composition, got {other:?}").into()),
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn create_composition_reports_the_422_validation_errors() -> Result<(), Box<dyn Error>> {
     let server = MockServer::start().await;
     Mock::given(method("POST"))

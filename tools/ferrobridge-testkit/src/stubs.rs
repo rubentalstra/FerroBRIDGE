@@ -30,6 +30,67 @@ pub mod its_rest {
             .set_body_string(body.to_owned())
     }
 
+    /// Returns the empty `201` of a contribution commit.
+    ///
+    /// It is the `return=minimal` answer, whose `ETag` is the
+    /// `contribution_uid` (`ehr-codegen.openapi.yaml`, `201_CONTRIBUTION` and
+    /// `components.headers.ETag_CONTRIBUTION`).
+    #[must_use]
+    pub fn contribution_created_minimal(contribution_uid: &str) -> ResponseTemplate {
+        ResponseTemplate::new(201).insert_header("ETag", format!("W/\"{contribution_uid}\""))
+    }
+
+    /// Returns the `200` of a read, carrying `body` as canonical JSON.
+    #[must_use]
+    pub fn retrieved(body: &str) -> ResponseTemplate {
+        ResponseTemplate::new(200)
+            .insert_header("Content-Type", CANONICAL_JSON)
+            .set_body_string(body.to_owned())
+    }
+
+    /// Returns a canonical CONTRIBUTION whose `versions` reference each of
+    /// `versions` as a COMPOSITION.
+    ///
+    /// The `Contribution` schema requires `uid`, at least one `versions`
+    /// member of `ObjectRefOfObjectVersionId`, and `audit`
+    /// (`ehr-codegen.openapi.yaml`, `components.schemas.Contribution`). The
+    /// audit is synthetic.
+    #[must_use]
+    pub fn contribution_body(contribution_uid: &str, versions: &[&str]) -> String {
+        let references: Vec<serde_json::Value> = versions
+            .iter()
+            .map(|version| {
+                serde_json::json!({
+                    "_type": "OBJECT_REF",
+                    "namespace": "local",
+                    "type": "COMPOSITION",
+                    "id": { "_type": "OBJECT_VERSION_ID", "value": version }
+                })
+            })
+            .collect();
+        serde_json::json!({
+            "_type": "CONTRIBUTION",
+            "uid": { "_type": "HIER_OBJECT_ID", "value": contribution_uid },
+            "versions": references,
+            "audit": {
+                "_type": "AUDIT_DETAILS",
+                "system_id": "ferrobridge.test",
+                "time_committed": { "_type": "DV_DATE_TIME", "value": "2026-09-25T09:00:00Z" },
+                "change_type": {
+                    "_type": "DV_CODED_TEXT",
+                    "value": "creation",
+                    "defining_code": {
+                        "_type": "CODE_PHRASE",
+                        "terminology_id": { "_type": "TERMINOLOGY_ID", "value": "openehr" },
+                        "code_string": "249"
+                    }
+                },
+                "committer": { "_type": "PARTY_SELF" }
+            }
+        })
+        .to_string()
+    }
+
     /// Returns the `422` of content that is well formed and fails semantic
     /// validation, with the `Error` body of the `OpenAPI` schema.
     ///

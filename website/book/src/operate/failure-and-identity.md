@@ -74,11 +74,18 @@ entries of one message do, the composition content decides. A version that
 matches no entry or more than one refuses the answer with a `500` that names
 the contribution, and no binding is recorded.
 
-The facade asks the CDR for the committed contribution with
-`Prefer: return=representation`. A CDR that ignores the header and answers
-without the contribution is a typed `500` after the commit, naming the
-contribution, and nothing is recorded, so a retry commits again. Issue #270
-tracks reading the contribution back in that case.
+The commit is two steps. First the facade commits the contribution with
+`Prefer: return=representation` and records the contribution uid the CDR
+answers against every keyed entry of the Bundle, before it binds any of them.
+Then it binds each entry from the versions the answer lists. A CDR that
+ignores the header answers an empty `201` that still names the contribution,
+and the facade then reads the contribution back with
+`GET /ehr/{ehr_id}/contribution/{contribution_uid}` and binds from its
+versions, with the same `FEEDER_AUDIT` check. A contribution that cannot be
+read back or bound is a `500` naming the contribution, and the recorded uid
+stays. When you send the same Bundle again, the facade finds that uid,
+commits nothing, reads the contribution back and binds from it, and answers
+`200 OK` for each entry as for any re-sent Bundle.
 
 On the OMOP side every CDM v5.4 primary key is a 32-bit integer, so ids come
 from database sequences and a bridge-owned side table maps each source record

@@ -36,11 +36,18 @@ pub(crate) fn schema<T: DeserializeOwned>(answer: &Answer) -> Result<T, Error> {
 ///
 /// ITS-REST 1.1.0 pairs each preference with a body: no body for
 /// `return=minimal`, the `Identifier` schema for `return=identifier`, and the
-/// resource itself for `return=representation`.
+/// resource itself for `return=representation`. An empty body answers
+/// [`Returned::Minimal`] whatever was asked, because the answer's status and
+/// headers already name what the service stored.
 pub(crate) fn returned<T: DeserializeOwned>(
     answer: &Answer,
     prefer: Prefer,
 ) -> Result<Returned<T>, Error> {
+    // NOTE: RFC 7240 §2 lets a server ignore a preference it cannot honour, so
+    // an empty body is the minimal answer and never a decoding failure.
+    if answer.body.trim().is_empty() {
+        return Ok(Returned::Minimal);
+    }
     match prefer {
         Prefer::Minimal => Ok(Returned::Minimal),
         Prefer::Identifier => schema::<Identifier>(answer).map(Returned::Identifier),

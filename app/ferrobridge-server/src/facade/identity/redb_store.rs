@@ -3,7 +3,8 @@
 
 //! The identity map on disk, over `redb`.
 //!
-//! Four `redb` tables, one per row of `docs/architecture.md` §9. The file
+//! Four `redb` tables, one per row of `docs/architecture.md` §9, and a fifth
+//! from a source to the contribution that committed it. The file
 //! holds identifiers, archetype paths and mapping names and nothing else: no
 //! clinical value ever reaches it, which
 //! `the_store_never_holds_clinical_content` asserts by reading the file back
@@ -25,6 +26,7 @@ use redb::TableDefinition;
 use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::identity::PersonId;
+use crate::facade::identity::record::CommittedSource;
 use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
 use crate::facade::identity::record::SourceVersion;
@@ -44,6 +46,11 @@ const BINDINGS: TableDefinition<'static, &str, &str> = TableDefinition::new("int
 
 /// Source resource `id` and `meta.versionId` to what consumed them, as JSON.
 const SOURCES: TableDefinition<'static, &str, &str> = TableDefinition::new("source_mapping");
+
+/// Source resource `id` and `meta.versionId` to the contribution that
+/// committed them, as JSON.
+const CONTRIBUTIONS: TableDefinition<'static, &str, &str> =
+    TableDefinition::new("source_contribution");
 
 /// The identity map of one configured CDR, on disk.
 ///
@@ -83,6 +90,7 @@ impl RedbStore {
             let _external = write.open_table(EXTERNAL).map_err(transaction)?;
             let _bindings = write.open_table(BINDINGS).map_err(transaction)?;
             let _sources = write.open_table(SOURCES).map_err(transaction)?;
+            let _contributions = write.open_table(CONTRIBUTIONS).map_err(transaction)?;
         }
         write.commit().map_err(transaction)?;
         Ok(store)
@@ -261,14 +269,31 @@ impl Store for RedbStore {
         let stood = self.record(SOURCES, &key, &offered)?;
         record_of(&key, Some(stood))?.ok_or(StoreError::Missing { key })
     }
+
+    fn committed(&self, source: &SourceVersion) -> Result<Option<CommittedSource>, StoreError> {
+        let key = source.storage_key();
+        let held = self.get(CONTRIBUTIONS, &key)?;
+        record_of(&key, held)
+    }
+
+    fn record_committed(
+        &self,
+        source: &SourceVersion,
+        committed: &CommittedSource,
+    ) -> Result<CommittedSource, StoreError> {
+        let key = source.storage_key();
+        let offered = rendered(&key, committed)?;
+        let stood = self.record(CONTRIBUTIONS, &key, &offered)?;
+        record_of(&key, Some(stood))?.ok_or(StoreError::Missing { key })
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::RedbStore;
-    use crate::facade::identity::record::CompositionBinding;
+    use crate::facade::identity::record::{CommittedSource, CompositionBinding, SourceVersion};
     use crate::facade::identity::store::Store;
-    use crate::facade::identity::{FhirResourceId, PersonId};
+    use crate::facade::identity::{ExternalResourceId, FhirResourceId, PersonId};
     use ferrobridge_openehr::ids::EhrId;
 
     /// A synthetic clinical value, to prove it never reaches the file.
@@ -304,6 +329,44 @@ mod tests {
             .expect("the read")
             .expect("the binding survives");
         assert_eq!("uid-1", held.versioned_object_uid);
+    }
+
+    #[test]
+    fn a_committed_source_survives_a_restart_and_is_recorded_once() {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        let path = directory.path().join("identity.redb");
+        let source = SourceVersion::new(
+            "Condition",
+            ExternalResourceId::new("sender-1").expect("a legal external id"),
+            None,
+        );
+        let first = CommittedSource {
+            ehr_id: String::from("bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11"),
+            contribution_uid: String::from("7b0a4c2e-0000-4000-8000-00000000000c"),
+        };
+        {
+            let store = RedbStore::open(&path).expect("the first open");
+            assert_eq!(None, store.committed(&source).expect("an empty read"));
+            store
+                .record_committed(&source, &first)
+                .expect("the first write");
+            let second = CommittedSource {
+                contribution_uid: String::from("another"),
+                ..first.clone()
+            };
+            assert_eq!(
+                first,
+                store
+                    .record_committed(&source, &second)
+                    .expect("the second write"),
+                "a second write does not move the record"
+            );
+        }
+        let reopened = RedbStore::open(&path).expect("the second open");
+        assert_eq!(
+            Some(first),
+            reopened.committed(&source).expect("the read back")
+        );
     }
 
     #[test]

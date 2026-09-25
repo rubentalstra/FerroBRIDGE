@@ -181,6 +181,18 @@ pub enum Error {
         #[source]
         source: Box<BodyError>,
     },
+    /// The service committed a contribution and its `201` body is neither
+    /// schema the operation admits, so the uid is all the answer carries.
+    #[error(
+        "the openEHR service committed contribution {contribution_uid} and its answer body could not be decoded"
+    )]
+    CommittedBody {
+        /// The contribution the `ETag` named.
+        contribution_uid: crate::ids::ContributionUid,
+        /// What the decoder reported.
+        #[source]
+        source: Box<BodyError>,
+    },
     /// A response header the operation's answer relies on was absent.
     #[error("the {status} answer from {url} carries no {header} header")]
     MissingHeader {
@@ -247,6 +259,7 @@ impl Error {
             Self::Unauthorized { .. } => "unauthorized",
             Self::UndocumentedStatus { .. } => "undocumented-status",
             Self::Body { .. } => "body",
+            Self::CommittedBody { .. } => "committed-body",
             Self::MissingHeader { .. } => "missing-header",
             Self::MalformedHeader { .. } => "malformed-header",
             Self::HeaderAttribute { .. } => "header-attribute",
