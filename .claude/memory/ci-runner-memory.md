@@ -33,3 +33,10 @@ lcov file, so the coverage Sonar imported was nothing. The lane now runs
 `cargo llvm-cov nextest --no-report -p <package>` per workspace member and
 merges with `cargo llvm-cov report`; the step fails when the report has zero
 line records, so a silent empty import cannot come back.
+
+The `test` job met the same kill on 2026-09-25 (#235) once `omocl` took
+`omop-cdm` with `sqlx`: `cargo nextest run --workspace` died at exit 143 after
+five minutes with no diagnostic. It now runs `cargo hack nextest run
+--workspace` and `cargo hack test --doc --workspace`, one package at a time,
+like the clippy and msrv lanes.
+

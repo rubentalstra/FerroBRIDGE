@@ -32,7 +32,9 @@ rather than a CI round trip.
 
 `cargo fmt --all --check`, `cargo clippy --workspace --all-targets
 --all-features -- -D warnings`, `cargo nextest run --workspace --locked` with
-`cargo test --doc --locked`, `cargo doc` under `RUSTDOCFLAGS=-D warnings`,
+`cargo test --doc --locked` (CI runs both one package at a time through
+`cargo hack`, so the generated giants never compile side by side on the
+hosted runner), `cargo doc` under `RUSTDOCFLAGS=-D warnings`,
 `cargo deny check`, an MSRV check, and dependency review on pull requests.
 Every cargo lane runs `--locked`, so CI fails on lockfile drift rather than on
 registry drift.
