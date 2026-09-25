@@ -5,7 +5,7 @@ expression: summary(&mapped)
 [
     "earlier-version: EarlierVersion { declared: \"2.5.1\" }",
     "unsupported-assignment: MSH[1]-10(1) segment-msh-to-bundle MSH-10 -> identifier.system [/to be determined by the implementer/]",
-    "no-datatype-map: MSH[1]-3(1) segment-msh-to-messageheader MSH-3 -> source[1] [HD to MessageHeaderSource]",
+    "unsupported-condition: MSH[1]-3(1) datatype-hd-endpoint-to-messageheader-source HD.1 -> name [IF HD.2 NOT VALUED AND (HD-3 NOT IN (\"ISO\", \"UUID\", \"DNS\", \"URI\"))]",
     "unsupported-assignment: MSH[1]-9(1) datatype-msg-to-coding MSG -> display [MSG.1+\"^\"+MSG.2+\"^\"+MSG.3]",
     "unmapped-component: MSH[1]-9(1) datatype-msg-to-coding component 1",
     "unmapped-component: MSH[1]-9(1) datatype-msg-to-coding component 3",
@@ -33,6 +33,7 @@ expression: summary(&mapped)
     "unknown-element: PV1[1]-3(1) datatype-pl-to-location PL.3 -> [1].partOf.reference(Location[2]) [the element table does not resolve the target path]",
     "unsupported-condition: PV1[1] message-adt-a01-to-bundle ADT_A01.PV1 -> Coverage[1] [IF PV1-20 VALUE]",
     "unmapped-field: PV1[1]-1",
+    "superseded: MSH[1]-3(1) segment-msh-to-messageheader MSH-3 -> source[1].endpoint []",
     "superseded: EVN[1]-2(1) segment-evn-to-provenance EVN-2 -> recorded []",
     "missing-required: Provenance lacks Provenance.target",
 ]

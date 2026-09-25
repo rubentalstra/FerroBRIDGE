@@ -206,6 +206,12 @@ fn row_line(kind: &str, outcome: &Outcome) -> String {
             source_type,
             target_type,
         } => (at, row, format!("{source_type} to {target_type}")),
+        Outcome::DatatypeConflict {
+            at,
+            row,
+            element,
+            maps,
+        } => (at, row, format!("{element} from {}", maps.join(" "))),
         other => return format!("{kind}: {other:?}"),
     };
     format!(

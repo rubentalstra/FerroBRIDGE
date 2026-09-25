@@ -157,6 +157,19 @@ pub enum Outcome {
         /// The FHIR type.
         target_type: String,
     },
+    /// A child of a complex target that two of the data type maps a row runs
+    /// wrote for one value, which refuses the row: none of the maps' writes
+    /// are kept.
+    DatatypeConflict {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The child element, for example `name`.
+        element: String,
+        /// The ids of the maps that wrote it.
+        maps: Vec<String>,
+    },
     /// A `mappedVia` that names no loaded table map.
     UnresolvedTable {
         /// Where.
@@ -314,6 +327,7 @@ impl Outcome {
             Self::UnsupportedAssignment { .. } => "unsupported-assignment",
             Self::NoSegmentMap { .. } => "no-segment-map",
             Self::NoDatatypeMap { .. } => "no-datatype-map",
+            Self::DatatypeConflict { .. } => "datatype-conflict",
             Self::UnresolvedTable { .. } => "unresolved-table",
             Self::NoTerminology { .. } => "no-terminology",
             Self::Untranslated { .. } => "untranslated",

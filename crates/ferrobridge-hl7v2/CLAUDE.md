@@ -31,7 +31,12 @@ map a field row runs. The interpreter selects `segment-<seg>-to-<resource>`
 and `datatype-<source>-to-<target>`, else the single qualified map
 `<kind>-<source>-<qualifier>-to-<target>`, and counts `no-segment-map` or
 `no-datatype-map` when there is none or several (`Corpus::find`). Keep that
-rule in one place.
+rule in one place. A row into a complex element is the one exception: it
+runs every qualified map (`Corpus::qualifying`), named for the element's type
+or else its element path (`messageheader-source`), each into its own
+children (`Run::datatypes`). A child another row of the same source targets
+directly is left to that row (`Run::claimed`), and two maps writing one child
+for a value roll the row back as `datatype-conflict`.
 
 ## Instances are identities, allocated when a value first reaches them
 

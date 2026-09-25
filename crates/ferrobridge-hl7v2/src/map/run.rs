@@ -319,6 +319,15 @@ struct Request {
     answer: Option<ferrobridge_term::concept::Concept>,
 }
 
+/// The lengths of a run's records at one point: the writes per resource,
+/// whose count is the resource count, the requests and the outcomes.
+#[derive(Debug)]
+struct Mark {
+    writes: Vec<usize>,
+    requests: usize,
+    outcomes: usize,
+}
+
 /// A run in progress.
 #[derive(Debug)]
 pub(super) struct Run<'a> {
@@ -725,6 +734,167 @@ impl<'a> Run<'a> {
         datum: Datum<'a>,
         base: &Base,
     ) -> Result<(), MapError> {
+        let named = self.datatype_rows(scope, map, datatype, datum, base, &BTreeSet::new())?;
+        self.unmapped_components(scope, &map.id, datum, &named);
+        Ok(())
+    }
+
+    /// Runs every data type map of `maps` over `datum` into the complex
+    /// element `leaf`, each writing its own children of it.
+    ///
+    /// A child another row of the same source targets directly is that row's
+    /// ([`Run::claimed`]), so no map writes it. When two maps write one child
+    /// for this value, the row is refused whole: everything the maps recorded
+    /// is rolled back and each such child counted as
+    /// [`Outcome::DatatypeConflict`]. No specification governs this: our own
+    /// design, since the guide names no data type map per row.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "one row's full context; a struct for it would only rename the parameters"
+    )]
+    fn datatypes(
+        &mut self,
+        scope: &Scope<'a>,
+        row: &Row,
+        reference: &RowRef,
+        maps: &[&'a Map],
+        datatype: &str,
+        datum: Datum<'a>,
+        leaf: &Base,
+    ) -> Result<(), MapError> {
+        let claimed = self.claimed(row, reference);
+        let mark = self.mark();
+        let mut named = BTreeSet::new();
+        let mut writers: BTreeMap<String, Vec<String>> = BTreeMap::new();
+        for map in maps {
+            let start = self
+                .resources
+                .get(leaf.resource)
+                .map_or(0, |resource| resource.writes.len());
+            named.extend(self.datatype_rows(scope, map, datatype, datum, leaf, &claimed)?);
+            let children: BTreeSet<String> = self
+                .resources
+                .get(leaf.resource)
+                .and_then(|resource| resource.writes.get(start..))
+                .into_iter()
+                .flatten()
+                .filter_map(|write| child_of(&leaf.slots, &write.slots))
+                .collect();
+            for child in children {
+                writers.entry(child).or_default().push(map.id.clone());
+            }
+        }
+        writers.retain(|_, ids| ids.len() > 1);
+        if writers.is_empty() {
+            let ids: Vec<&str> = maps.iter().map(|map| map.id.as_str()).collect();
+            self.unmapped_components(scope, &ids.join(" "), datum, &named);
+            return Ok(());
+        }
+        self.rollback(&mark);
+        for (element, maps) in writers {
+            self.outcomes.push(Outcome::DatatypeConflict {
+                at: scope.at.clone(),
+                row: reference.clone(),
+                element,
+                maps,
+            });
+        }
+        Ok(())
+    }
+
+    /// The lengths of what the run has recorded so far, for [`Run::rollback`].
+    fn mark(&self) -> Mark {
+        Mark {
+            writes: self
+                .resources
+                .iter()
+                .map(|resource| resource.writes.len())
+                .collect(),
+            requests: self.requests.len(),
+            outcomes: self.outcomes.len(),
+        }
+    }
+
+    /// Drops every resource, write, translation request and outcome recorded
+    /// since `mark`.
+    fn rollback(&mut self, mark: &Mark) {
+        self.resources.truncate(mark.writes.len());
+        for (resource, length) in self.resources.iter_mut().zip(&mark.writes) {
+            resource.writes.truncate(*length);
+        }
+        self.requests.truncate(mark.requests);
+        self.outcomes.truncate(mark.outcomes);
+    }
+
+    /// The children of a row's complex target that another row of its map,
+    /// from the same source, targets directly.
+    ///
+    /// A row that maps only the absence of that source
+    /// ([`condition::requires_absent`]) never meets a valued one, so it claims
+    /// nothing.
+    fn claimed(&self, row: &Row, reference: &RowRef) -> BTreeSet<String> {
+        let Ok(Target::Path { steps: own, .. }) = &row.target else {
+            return BTreeSet::new();
+        };
+        let Some(map) = self.corpus.get(&reference.map) else {
+            return BTreeSet::new();
+        };
+        let operand = source_operand(&row.source);
+        map.rows
+            .iter()
+            .filter(|other| other.source == row.source && other.target_code != row.target_code)
+            .filter(|other| {
+                !matches!(&other.condition, Condition::Computable(expr)
+                    if condition::requires_absent(expr, &operand))
+            })
+            .filter_map(|other| match &other.target {
+                Ok(Target::Path { steps, .. }) => {
+                    let under = steps.len() > own.len()
+                        && steps
+                            .iter()
+                            .zip(own)
+                            .all(|(step, mine)| step.name == mine.name);
+                    under
+                        .then(|| steps.get(own.len()).map(|step| step.name.clone()))
+                        .flatten()
+                }
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// Counts each valued component of `datum` that no row of the data type
+    /// maps named.
+    fn unmapped_components(
+        &mut self,
+        scope: &Scope<'a>,
+        map: &str,
+        datum: Datum<'a>,
+        named: &BTreeSet<usize>,
+    ) {
+        for component in datum.valued_parts() {
+            if !named.contains(&component) {
+                self.outcomes.push(Outcome::UnmappedComponent {
+                    at: scope.at.clone(),
+                    map: String::from(map),
+                    component,
+                });
+            }
+        }
+    }
+
+    /// Runs the rows of a data type map over `datum` into `base`, skipping
+    /// each row whose target starts at a child in `claimed`, and returns the
+    /// components the rows name.
+    fn datatype_rows(
+        &mut self,
+        scope: &Scope<'a>,
+        map: &'a Map,
+        datatype: &str,
+        datum: Datum<'a>,
+        base: &Base,
+        claimed: &BTreeSet<String>,
+    ) -> Result<BTreeSet<usize>, MapError> {
         let mut inner = scope.clone();
         inner.datatype = Some((String::from(datatype), datum));
         inner.repetition = None;
@@ -742,6 +912,15 @@ impl<'a> Run<'a> {
             if let Some(first) = path.first() {
                 named.insert(*first);
             }
+            let owned = match &row.target {
+                Ok(Target::Path { steps, .. }) => steps
+                    .first()
+                    .is_some_and(|step| claimed.contains(&step.name)),
+                _ => false,
+            };
+            if owned {
+                continue;
+            }
             let part = datum.at(&path);
             if !part.valued() {
                 let own = Operand::Component {
@@ -756,16 +935,7 @@ impl<'a> Run<'a> {
             }
             self.apply(&inner, row, &reference, part, 0, base)?;
         }
-        for component in datum.valued_parts() {
-            if !named.contains(&component) {
-                self.outcomes.push(Outcome::UnmappedComponent {
-                    at: scope.at.clone(),
-                    map: map.id.clone(),
-                    component,
-                });
-            }
-        }
-        Ok(())
+        Ok(named)
     }
 
     /// Applies one row whose condition holds to a valued `datum`.
@@ -926,29 +1096,14 @@ impl<'a> Run<'a> {
         );
         let temporal = TEMPORAL_SOURCES.contains(&source_type.as_str())
             && TEMPORAL_TARGETS.contains(&target_type.as_str());
-        if !temporal && !source_type.is_empty() {
-            match self.corpus.find("datatype", &source_type, &target_type) {
-                Ok(map) => return self.datatype(scope, map, &source_type, datum, leaf),
-                Err(_) if complex => {
-                    self.outcomes.push(Outcome::NoDatatypeMap {
-                        at: at.clone(),
-                        row: reference.clone(),
-                        source_type,
-                        target_type,
-                    });
-                    return Ok(());
-                }
-                Err(_) => {}
-            }
-        }
         if complex {
-            self.outcomes.push(Outcome::NoDatatypeMap {
-                at: at.clone(),
-                row: reference.clone(),
-                source_type,
-                target_type,
-            });
-            return Ok(());
+            return self.complex(scope, row, reference, source_type, target_type, datum, leaf);
+        }
+        if !temporal
+            && !source_type.is_empty()
+            && let Ok(map) = self.corpus.find("datatype", &source_type, &target_type)
+        {
+            return self.datatype(scope, map, &source_type, datum, leaf);
         }
         if source_type == "HD" && target_type == "url" {
             self.endpoint(datum, leaf, at, reference);
@@ -977,6 +1132,68 @@ impl<'a> Run<'a> {
             }),
         }
         Ok(())
+    }
+
+    /// Writes `datum` into the complex element `leaf` through the data type
+    /// maps of [`Run::complex_maps`], counting `no-datatype-map` when there is
+    /// none.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "one row's full context; a struct for it would only rename the parameters"
+    )]
+    fn complex(
+        &mut self,
+        scope: &Scope<'a>,
+        row: &Row,
+        reference: &RowRef,
+        source_type: String,
+        target_type: String,
+        datum: Datum<'a>,
+        leaf: &Base,
+    ) -> Result<(), MapError> {
+        let maps = if source_type.is_empty() {
+            Vec::new()
+        } else {
+            self.complex_maps(&source_type, &target_type, leaf)
+        };
+        match maps.as_slice() {
+            [] => {
+                self.outcomes.push(Outcome::NoDatatypeMap {
+                    at: scope.at.clone(),
+                    row: reference.clone(),
+                    source_type,
+                    target_type,
+                });
+                Ok(())
+            }
+            [map] => self.datatype(scope, map, &source_type, datum, leaf),
+            several => self.datatypes(scope, row, reference, several, &source_type, datum, leaf),
+        }
+    }
+
+    /// The data type maps from `source_type` into the complex element `leaf`:
+    /// those named for its type, else those named for its element path.
+    ///
+    /// The guide's map titles name a target by type or by element path
+    /// (`mapping_guidelines.md`, the `CQ[ServiceRequest.duration]` title
+    /// form), and a backbone element such as `MessageHeader.source` has no
+    /// type name, so its maps carry the path, as
+    /// `datatype-hd-endpoint-to-messageheader-source`.
+    fn complex_maps(&self, source_type: &str, target_type: &str, leaf: &Base) -> Vec<&'a Map> {
+        let corpus = self.corpus;
+        let named = corpus.qualifying("datatype", source_type, target_type);
+        if !named.is_empty() {
+            return named;
+        }
+        let Some(resource) = self.resources.get(leaf.resource) else {
+            return Vec::new();
+        };
+        let mut path = resource.type_name.clone();
+        for slot in &leaf.slots {
+            path.push('-');
+            path.push_str(&slot.name);
+        }
+        corpus.qualifying("datatype", source_type, &path)
     }
 
     /// Writes a v2 `HD` into a FHIR `url` element, with its namespace ID in
@@ -1806,6 +2023,37 @@ fn under(prefix: &[Slot], flags: &[bool], slots: &[Slot]) -> bool {
             })
 }
 
+/// The name of the child of `prefix` a write at `slots` lies under, when it
+/// lies under `prefix` at all.
+fn child_of(prefix: &[Slot], slots: &[Slot]) -> Option<String> {
+    let under = slots.len() > prefix.len()
+        && prefix
+            .iter()
+            .zip(slots)
+            .all(|(outer, slot)| outer.name == slot.name);
+    under
+        .then(|| slots.get(prefix.len()).map(|slot| slot.name.clone()))
+        .flatten()
+}
+
+/// The operand a row's source code reads: a field for `MSH-24`, a component
+/// for `HD.1`.
+fn source_operand(source: &str) -> Operand {
+    if source.contains('-') {
+        let (segment, path) = split_source(source, '-');
+        Operand::Field {
+            segment: String::from(segment),
+            path,
+        }
+    } else {
+        let (datatype, path) = split_source(source, '.');
+        Operand::Component {
+            datatype: String::from(datatype),
+            path,
+        }
+    }
+}
+
 /// Splits a source code into its id and positions: `PID-11.9` into `PID` and
 /// `[11, 9]`, `CX.1` into `CX` and `[1]`, `MSG` into `MSG` and `[]`.
 fn split_source(source: &str, separator: char) -> (&str, Vec<usize>) {
@@ -1974,17 +2222,22 @@ const fn repeats(max: Max) -> bool {
 mod tests {
     use std::path::PathBuf;
 
-    use fhir_types::codec::Value;
+    use fhir_types::codec::{Json, Path, Value};
 
-    use super::{Pending, Run, alternatives, resolve_path};
+    use super::{Outcome, Pending, Run, alternatives, resolve_path};
     use crate::decode::Charset;
     use crate::map::corpus::Corpus;
     use crate::parse::{self, Parsed};
 
     /// A synthetic result whose MSH carries `header` as MSH-3 to MSH-6.
     fn parsed(header: &str) -> Parsed {
+        parsed_with(header, "")
+    }
+
+    /// A synthetic result as [`parsed`], with `tail` after MSH-12.
+    fn parsed_with(header: &str, tail: &str) -> Parsed {
         let text = format!(
-            "MSH|^~\\&|{header}|20260925143000+0200||ORU^R01^ORU_R01|MSG00011|P|2.5.1\r\
+            "MSH|^~\\&|{header}|20260925143000+0200||ORU^R01^ORU_R01|MSG00011|P|2.5.1{tail}\r\
              PID|1||PAT-0011^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M\r\
              OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN\r"
         );
@@ -2038,6 +2291,181 @@ mod tests {
                 Value::String(String::from("unknown"))
             )),
             "{writes:?}"
+        );
+    }
+
+    /// MSH-24 alone valued, as `NORTHNET^1.2.3.9^ISO`.
+    const NETWORK_ONLY: (&str, &str) = (
+        "|NORTHLAB|EHR|SOUTHCLINIC",
+        "||||||||||||NORTHNET^1.2.3.9^ISO",
+    );
+
+    /// A data type map from `HD` into `MessageHeader.source` with one row per
+    /// `(component, child)` pair, at the canonical url `url`.
+    fn hd_source_map(id: &str, url: &str, rows: &[(&str, &str, &str)]) -> Value {
+        let elements: Vec<serde_json::Value> = rows
+            .iter()
+            .map(|(component, child, fhir_type)| {
+                serde_json::json!({
+                    "code": component,
+                    "target": [{
+                        "code": child,
+                        "equivalence": "equivalent",
+                        "extension": [{
+                            "url": crate::map::corpus::TYPE_INFO,
+                            "extension": [{ "url": "type", "valueCode": fhir_type }]
+                        }]
+                    }]
+                })
+            })
+            .collect();
+        serde_json::from_value(serde_json::json!({
+            "resourceType": "ConceptMap",
+            "id": id,
+            "url": url,
+            "status": "active",
+            "group": [{ "element": elements }]
+        }))
+        .expect("a JSON value")
+    }
+
+    /// The vendored package with `maps` loaded over it as a supplement.
+    fn supplemented(maps: &[Value]) -> Corpus {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        for (index, map) in maps.iter().enumerate() {
+            let path = directory.path().join(format!("ConceptMap-{index}.json"));
+            std::fs::write(path, serde_json::to_vec(map).expect("it serializes")).expect("written");
+        }
+        corpus()
+            .supplement(directory.path())
+            .expect("the supplement loads")
+    }
+
+    fn header_write<'w>(writes: &'w [(String, Value)], path: &str) -> Option<&'w Value> {
+        writes
+            .iter()
+            .find(|(written, _)| written == path)
+            .map(|(_, value)| value)
+    }
+
+    // NOTE: `ConceptMap-datatype-hd-endpoint-to-messageheader-source` and `-hd-name-`: both
+    // name `MessageHeader.source` as their target, so a valued MSH-24 runs both into it.
+    #[test]
+    fn a_row_into_a_complex_target_runs_every_map_named_for_its_element_path() {
+        let corpus = corpus();
+        let parsed = parsed_with(NETWORK_ONLY.0, NETWORK_ONLY.1);
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let writes = header_writes(&run);
+        assert_eq!(
+            header_write(&writes, "source.name"),
+            Some(&Value::String(String::from("NORTHNET"))),
+            "{writes:?}"
+        );
+        assert_eq!(
+            header_write(&writes, "source.software"),
+            Some(&Value::String(String::from("1.2.3.9"))),
+            "{writes:?}"
+        );
+        let endpoint_map_ran = run.outcomes.iter().any(|outcome| {
+            matches!(outcome, Outcome::UnsupportedCondition { row, .. }
+                if row.map == "datatype-hd-endpoint-to-messageheader-source")
+        });
+        assert!(endpoint_map_ran, "{:?}", run.outcomes);
+        assert!(
+            run.outcomes.iter().all(|outcome| !matches!(
+                outcome,
+                Outcome::NoDatatypeMap { .. } | Outcome::DatatypeConflict { .. }
+            )),
+            "{:?}",
+            run.outcomes
+        );
+    }
+
+    // NOTE: HL7 R4 Bundle bdl-12: with an endpoint map whose rows run, MSH-24 alone gives
+    // `source.endpoint` and `source.name` from two maps, and the message Bundle keeps its header.
+    #[test]
+    fn two_maps_into_distinct_children_complete_the_message_header() {
+        let url = "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-endpoint-to-messageheader-source";
+        let endpoint = hd_source_map(
+            "datatype-hd-endpoint-to-messageheader-source",
+            url,
+            &[("HD.2", "endpoint", "url")],
+        );
+        let corpus = supplemented(&[endpoint]);
+        let parsed = parsed_with(NETWORK_ONLY.0, NETWORK_ONLY.1);
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let (bundle, outcomes) = run.finish().expect("the Bundle keeps its MessageHeader");
+        let object = bundle.as_object().expect("a Bundle object");
+        fhir_types::r4::bundle::Bundle::from_json(object, &mut Path::root("Bundle"))
+            .expect("the Bundle decodes as R4");
+        let header = bundle
+            .get("entry")
+            .and_then(Value::as_array)
+            .and_then(<[Value]>::first)
+            .and_then(|entry| entry.get("resource"))
+            .expect("a first entry");
+        assert_eq!(
+            header.get("resourceType").and_then(Value::as_str),
+            Some("MessageHeader")
+        );
+        let source = header.get("source").expect("a source");
+        assert_eq!(
+            source.get("endpoint").and_then(Value::as_str),
+            Some("1.2.3.9"),
+            "{source:?}"
+        );
+        assert_eq!(
+            source.get("name").and_then(Value::as_str),
+            Some("NORTHNET"),
+            "{source:?}"
+        );
+        assert!(
+            outcomes
+                .iter()
+                .all(|outcome| !matches!(outcome, Outcome::DatatypeConflict { .. })),
+            "{outcomes:?}"
+        );
+    }
+
+    // NOTE: no specification governs this: our own design; two maps writing one child of the
+    // target refuse the row, counted once per child, and neither value reaches the element.
+    #[test]
+    fn two_maps_into_one_child_refuse_the_row_as_a_counted_conflict() {
+        let conflicting = hd_source_map(
+            "datatype-hd-label-to-messageheader-source",
+            "http://example.org/fhir/ConceptMap/datatype-hd-label-to-messageheader-source",
+            &[("HD.1", "name", "string")],
+        );
+        let corpus = supplemented(&[conflicting]);
+        let parsed = parsed_with(NETWORK_ONLY.0, NETWORK_ONLY.1);
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let writes = header_writes(&run);
+        assert!(
+            writes.iter().all(|(path, _)| !path.starts_with("source")),
+            "{writes:?}"
+        );
+        let conflicts: Vec<(&str, &[String])> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::DatatypeConflict { element, maps, .. } => {
+                    Some((element.as_str(), maps.as_slice()))
+                }
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            conflicts,
+            vec![(
+                "name",
+                &[
+                    String::from("datatype-hd-label-to-messageheader-source"),
+                    String::from("datatype-hd-name-to-messageheader-source"),
+                ][..]
+            )]
         );
     }
 
