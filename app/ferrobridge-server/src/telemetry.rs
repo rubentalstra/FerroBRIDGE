@@ -23,7 +23,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 /// The filter the server runs with when the configuration names none.
 ///
 /// The HTTP stack's own crates are quiet, so the log carries this server's
-/// lines. Both [`crate::config::Telemetry`] and the fallback below read it.
+/// lines. Both [`crate::config::section::Telemetry`] and the fallback below read it.
 pub const DEFAULT_FILTER: &str = "info,hyper=warn,tower=warn,h2=warn";
 
 /// The environment variable that overrides `[telemetry] format`.

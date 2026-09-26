@@ -459,6 +459,10 @@ crates on crates.io.
   (#352), with no change in behaviour; a caller imports a moved public type
   from its child module (`engine::traverse::error::EngineError`,
   `resolve::program::mapping::Mapping`, `model::ast::keyword::Direction`).
+- `ferrobridge-server` splits its seven files over 750 lines into module
+  folders (#354), with no change in behaviour; the configuration file tree
+  moves to `config::section` (`config::section::Telemetry`), and every other
+  public item keeps its path.
 - The nine `openehr-*` crates step from 0.0.71 to 0.0.72, whose generated
   ITS-REST client carries what the bridge's CDR client added around it
   (#293, FerroEHR #3487). The composition commit headers travel through the

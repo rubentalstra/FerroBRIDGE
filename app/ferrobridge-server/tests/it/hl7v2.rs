@@ -13,12 +13,12 @@
 //! same message goes into the reference CDR.
 
 use crate::facade::EHR_ID;
-use crate::facade::Echo;
 use crate::facade::client;
 use crate::facade::ehr_body;
 use crate::facade::handle;
-use crate::facade::mount_echo;
 use crate::facade::settings;
+use crate::facade::stub::Echo;
+use crate::facade::stub::mount_echo;
 use ferrobridge_hl7v2::decode::Charset;
 use ferrobridge_hl7v2::mllp::Timeouts;
 use ferrobridge_server::config::Hl7v2Settings;

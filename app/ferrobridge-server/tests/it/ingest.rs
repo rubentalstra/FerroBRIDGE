@@ -8,12 +8,12 @@
 //! an entry no program maps are asserted at the seam a non-HTTP face calls.
 
 use crate::facade::EHR_ID;
-use crate::facade::Echo;
 use crate::facade::client;
 use crate::facade::ehr_body;
 use crate::facade::handle;
-use crate::facade::mount_echo;
 use crate::facade::settings;
+use crate::facade::stub::Echo;
+use crate::facade::stub::mount_echo;
 use ferrobridge_server::cdr::ids::ContributionUid;
 use ferrobridge_server::facade::Facade;
 use ferrobridge_server::facade::identity::store::MemoryStore;
