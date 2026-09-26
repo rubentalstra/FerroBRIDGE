@@ -7,9 +7,9 @@ use hl7v2_types::model::{Node, SegmentRef, Structure};
 
 use crate::parse::lex::Lexed;
 use crate::parse::place::close;
-use crate::parse::place::place;
+use crate::parse::place::{Missing, place};
 use crate::parse::required::check_fields;
-use crate::parse::{ErrorCode, Frame, Item, Location, Parsed, Refusal, Unplaced, base_name};
+use crate::parse::{ErrorCode, Frame, Item, Parsed, Refusal, Unplaced, base_name};
 
 /// Whether `nodes` place the segment `id` anywhere in their tree.
 fn places(nodes: &'static [Node], id: &str) -> bool {
@@ -78,18 +78,28 @@ pub fn group(lexed: Lexed, structure: &'static Structure) -> Parsed {
     }
     let mut stack = vec![Frame::root(structure.nodes)];
     let mut missing = Vec::new();
+    let routed: Vec<(usize, &str)> = parsed
+        .message
+        .segments
+        .iter()
+        .enumerate()
+        .filter(|(_, segment)| {
+            hl7v2_types::segment::find(&segment.id).is_some()
+                || places(structure.nodes, &segment.id)
+        })
+        .map(|(index, segment)| (index, segment.id.as_str()))
+        .collect();
+    let ids: Vec<&str> = routed.iter().map(|(_, id)| *id).collect();
+    let mut next = 0;
     for index in 0..parsed.message.segments.len() {
         let location = parsed.location(index);
-        let Some(segment) = parsed.message.segments.get(index) else {
-            continue;
-        };
-        if hl7v2_types::segment::find(&segment.id).is_none()
-            && !places(structure.nodes, &segment.id)
-        {
+        let Some(&(_, id)) = routed.get(next).filter(|(at, _)| *at == index) else {
             parsed.unplaced.push(Unplaced::UnknownSegment { location });
             continue;
-        }
-        if !place(&mut stack, &segment.id, index, &mut missing) {
+        };
+        next = next.saturating_add(1);
+        let rest = ids.get(next..).unwrap_or_default();
+        if !place(&mut stack, id, index, rest, &mut missing) {
             parsed.unplaced.push(Unplaced::OutOfStructure { location });
         }
     }
@@ -100,11 +110,11 @@ pub fn group(lexed: Lexed, structure: &'static Structure) -> Parsed {
         root.check(&mut missing);
         parsed.items = root.items;
     }
-    for name in missing {
+    for Missing { detail, at } in missing {
         parsed.refusals.push(Refusal {
-            location: Location::default(),
+            location: at.map(|index| parsed.location(index)).unwrap_or_default(),
             code: ErrorCode::SegmentSequence,
-            detail: format!("the required {name} is missing"),
+            detail: format!("the required {detail} is missing"),
         });
     }
     let placed = placed_segments(&parsed.items);
