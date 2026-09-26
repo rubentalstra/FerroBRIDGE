@@ -164,13 +164,18 @@ async fn an_update_following_the_read_etag_commits_the_next_version_on_a_real_cd
     assert_eq!(StatusCode::OK, read.status, "{}", read.body);
     let tag = read.etag.ok_or("a read carries an ETag")?;
     assert_eq!("W/\"1\"", tag);
+    // R4 condition.html: Condition.subject is 1..1, so the read names the
+    // person the identity map binds to the EHR although the mapping has no
+    // outbound row for it.
+    assert_eq!(
+        Some(SUBJECT_ID),
+        read.body["subject"]["identifier"]["value"].as_str(),
+        "{}",
+        read.body
+    );
 
-    let code = created.1["code"]["coding"][0]["code"]
-        .as_str()
-        .ok_or("the created resource carries its code")?;
-    let mut revised = condition_coded(&id, code)?;
-    revised["code"]["text"] = serde_json::json!("Synthetic problem one, revised");
-    let updated = send(app(&facade), put_condition(&id, &revised, &tag)?).await?;
+    // The read body goes back unchanged: what a client reads it can send.
+    let updated = send(app(&facade), put_condition(&id, &read.body, &tag)?).await?;
     assert_eq!(StatusCode::OK, updated.status, "{}", updated.body);
     assert_eq!(Some("W/\"2\""), updated.etag.as_deref());
     assert!(
@@ -182,6 +187,8 @@ async fn an_update_following_the_read_etag_commits_the_next_version_on_a_real_cd
         updated.location
     );
 
+    let mut revised = read.body.clone();
+    revised["code"]["text"] = serde_json::json!("Synthetic problem one, revised");
     let stale = send(app(&facade), put_condition(&id, &revised, &tag)?).await?;
     assert_eq!(
         StatusCode::PRECONDITION_FAILED,
@@ -441,18 +448,15 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
     .await?;
     assert_eq!(StatusCode::OK, read.0, "{}", read.1);
     let mut output = read.1;
-    // NOTE: no specification governs this: our own design, the identity the
-    // facade assigns and the version it reports are the facade's, not the
-    // mapping's, so they leave the comparison with the engine's declared set.
-    if let Some(object) = output.as_object_mut() {
-        object.remove("id");
-        object.remove("meta");
-    }
+    // R4 condition.html: Condition.subject is 1..1, and the KDS context has no
+    // outbound row for it, so the facade names the person the EHR is bound to.
+    assert_eq!(
+        input["subject"]["identifier"], output["subject"]["identifier"],
+        "the read names the subject the create was written for: {output}"
+    );
+    strip_facade_owned(&mut output);
     let mut compared = input.clone();
-    if let Some(object) = compared.as_object_mut() {
-        object.remove("id");
-        object.remove("meta");
-    }
+    strip_facade_owned(&mut compared);
     let set = ferrobridge_testkit::laws::declared(&[], &[], &compared, &output);
     let pinned = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
@@ -476,8 +480,11 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
             .ok_or("the snapshot carries the list")?
             .iter()
             .filter(|row| {
-                row.as_str()
-                    .is_some_and(|row| !row.starts_with("id ") && !row.starts_with("meta."))
+                row.as_str().is_some_and(|row| {
+                    !row.starts_with("id ")
+                        && !row.starts_with("meta.")
+                        && !row.starts_with("subject.")
+                })
             })
             .map(|row| {
                 if *row == defaulted {
@@ -494,6 +501,17 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
         );
     }
     Ok(())
+}
+
+/// Removes what the facade writes of its own from `document`.
+fn strip_facade_owned(document: &mut serde_json::Value) {
+    // NOTE: no specification governs this: our own design, the identity, the
+    // version and the subject are the facade's, so they leave the comparison.
+    if let Some(object) = document.as_object_mut() {
+        object.remove("id");
+        object.remove("meta");
+        object.remove("subject");
+    }
 }
 
 /// Returns the synthetic `Condition` with `id`, coded `code`, for the case's

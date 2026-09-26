@@ -965,6 +965,82 @@ async fn the_same_composition_read_twice_yields_the_same_id() -> Result<(), Box<
 }
 
 #[tokio::test]
+async fn a_read_names_the_subject_the_identity_map_binds_to_the_ehr()
+-> Result<(), Box<dyn StdError>> {
+    // R4 condition.html: Condition.subject is 1..1, and the fixture mapping
+    // has no outbound row for it, so the facade writes it from the binding.
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, body) = call(
+        harness.app(),
+        Request::get(format!("/fhir/Condition/{id}")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert_eq!(
+        serde_json::json!({
+            "type": "Patient",
+            "identifier": {
+                "system": "http://example.org/fhir/sid/ferrobridge-subject",
+                "value": "synthetic-subject-0001"
+            }
+        }),
+        body["subject"],
+        "{body}"
+    );
+    let vread = call(
+        harness.app(),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, vread.0, "{}", vread.1);
+    assert_eq!(body["subject"], vread.1["subject"]);
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_read_whose_ehr_has_no_recorded_person_is_refused_naming_the_element()
+-> Result<(), Box<dyn StdError>> {
+    // A read never answers an instance R4 does not admit: without a person
+    // bound to the EHR, Condition.subject (1..1) stays absent.
+    let harness = harness().await;
+    let id = ferrobridge_server::facade::identity::FhirResourceId::new("unboundsubject")?;
+    harness.store.record_binding(
+        "Condition",
+        &id,
+        &ferrobridge_server::facade::identity::record::CompositionBinding {
+            ehr_id: String::from(EHR_ID),
+            versioned_object_uid: String::from(CONTAINER),
+            template_id: String::from("ferrobridge.diagnose.v1"),
+            resource_type: String::from("Condition"),
+            entry_path: String::from("/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]"),
+            split: 0,
+            context: String::from("ferrobridge_facade.context"),
+        },
+    )?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, body) = call(
+        harness.app(),
+        Request::get("/fhir/Condition/unboundsubject").body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    let issue = first_issue(&body);
+    assert_eq!(Some("exception"), issue["code"].as_str());
+    assert_eq!(
+        Some("Condition.subject"),
+        issue["location"][0].as_str(),
+        "{body}"
+    );
+    assert!(
+        !body.to_string().contains("Synthetic problem one"),
+        "the refusal carries clinical content: {body}"
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn a_new_version_keeps_the_id_and_moves_the_version_id() -> Result<(), Box<dyn StdError>> {
     let harness = harness().await;
     let id = create_one(&harness).await?;

@@ -99,8 +99,9 @@ enters the derivation, so a new version of a composition reads back under the
 same id with a new `meta.versionId`. `meta.source` names the openEHR version
 uid the answer was read from.
 
-The identity map is a `redb` file with six tables: a patient identifier to its
-`ehr_id`, an external resource id to the internal one, an internal id to the
+The identity map is a `redb` file with seven tables: a patient identifier to its
+`ehr_id` and each `ehr_id` back to the first person recorded for it, an
+external resource id to the internal one, an internal id to the
 composition version container with the entry path and split occurrence, and the
 source resource `id` with its `meta.versionId` to the mapping that consumed
 them, beside the contribution each source was committed in and each
@@ -118,6 +119,26 @@ composition holds now, and a later version otherwise. A transaction entry with
 a known `id` and a new `meta.versionId` commits that later version inside the
 Bundle's contribution. The Operate page on failure and identity states the
 full rule.
+
+## A read is a valid instance
+
+Every resource the facade answers, on a read, a vread or a write under
+`Prefer: return=representation`, is a valid R4 instance: each element the R4
+element table marks `min 1` is present, at the top of the resource and inside
+every element and contained resource it carries. A mapping often has no
+outbound row for the subject, because the ingest reads the subject to find the
+EHR and the composition does not hold it. When the rendered resource has no
+`subject` (or `patient`, on a type that names its subject so), the facade
+writes it from the identity map: the person the map recorded for the
+composition's EHR, as a literal reference when the person was keyed by one in
+`subject_namespace`, and otherwise as a logical reference with `type: Patient`
+and the person's `identifier`. That is the form a create reads back into the
+same EHR, so you can send a read body back as an update unchanged. A subject
+the mapping wrote is kept. The log line of the request counts the elements the
+facade filled and names their paths, never a value. When a required element
+stays absent, the facade answers `500 exception` with the element path in
+`issue.location` rather than an invalid resource. No specification governs the
+fill: it is FerroBRIDGE's own design.
 
 ## Provenance
 

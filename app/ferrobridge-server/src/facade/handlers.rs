@@ -12,6 +12,7 @@
 //! at a call site. Create, update and transaction write through
 //! [`crate::facade::ingest`], so the handlers keep only the HTTP half.
 
+mod complete;
 mod conditional;
 mod read;
 mod render;

@@ -59,15 +59,19 @@ pub(crate) async fn read(
     let (version, composition) =
         fetch(facade, client, &ehr_id, &container, &binding.template_id).await?;
     let source = render::composition_url(client.base_url(), &ehr_id, &version)?;
+    let subject = render::subject_of(facade, &ehr_id)?;
     let rendered = render::render(
         program.program(),
         program.index(),
         &composition,
-        &internal,
-        &version,
-        &source,
+        render::Origin {
+            id: &internal,
+            version: &version,
+            source: &source,
+            subject: subject.as_ref(),
+        },
     )?;
-    render::log_warnings(&rendered);
+    render::log_outcome(&rendered);
     Ok(reply::resource(
         StatusCode::OK,
         &rendered.body,
@@ -142,15 +146,19 @@ pub(crate) async fn vread(
     };
     let composition = canonical(facade, &body, &binding.template_id)?;
     let source = render::composition_url(client.base_url(), &ehr_id, &version)?;
+    let subject = render::subject_of(facade, &ehr_id)?;
     let rendered = render::render(
         program.program(),
         program.index(),
         &composition,
-        &internal,
-        &version,
-        &source,
+        render::Origin {
+            id: &internal,
+            version: &version,
+            source: &source,
+            subject: subject.as_ref(),
+        },
     )?;
-    render::log_warnings(&rendered);
+    render::log_outcome(&rendered);
     Ok(reply::resource(
         StatusCode::OK,
         &rendered.body,

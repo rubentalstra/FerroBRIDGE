@@ -4,10 +4,13 @@
 //! Turning a stored composition into the resource the facade answers with.
 //!
 //! The engine maps the composition back to FHIR, and this module adds the
-//! three facts the engine has no way to know: the logical id the identity map
-//! holds, the `meta.versionId` the CDR's version tree names, and the
-//! `meta.source` that points at the composition version the content came from
-//! (no specification governs the identity: our own design).
+//! facts the engine has no way to know: the logical id the identity map
+//! holds, the `meta.versionId` the CDR's version tree names, the
+//! `meta.source` that points at the composition version the content came
+//! from, and the subject the identity map binds to the composition's EHR when
+//! the mapping wrote none (no specification governs the identity: our own
+//! design). The answer is then checked against the required elements of the
+//! element table, so no interaction answers an invalid instance.
 
 use crate::cdr::ids::EhrId;
 use fhir_types::codec::Object;
@@ -20,8 +23,10 @@ use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::index::WebTemplateIndex;
 use url::Url;
 
+use crate::facade::Facade;
 use crate::facade::engine;
 use crate::facade::handlers::Refusal;
+use crate::facade::handlers::complete;
 use crate::facade::identity::FhirResourceId;
 use crate::facade::ingest::Refused;
 use crate::facade::outcome::Issue;
@@ -36,23 +41,67 @@ pub(crate) struct Rendered {
     pub(crate) body: Object,
     /// The losses the run declared, as issues a caller may report.
     pub(crate) warnings: Vec<Warning>,
+    /// The element paths the facade filled from the identity binding.
+    pub(crate) filled: Vec<&'static str>,
 }
 
-/// Returns the resource `composition` maps to, decorated with its identity.
+/// Returns the subject the identity map binds to `ehr_id`, as the reference
+/// a rendered resource names it by, when the map knows one.
+///
+/// # Errors
+///
+/// The refusal an identity-store failure renders as.
+pub(crate) fn subject_of(facade: &Facade, ehr_id: &EhrId) -> Result<Option<Value>, Refusal> {
+    let person = facade
+        .store()
+        .person_of(ehr_id)
+        .map_err(|error| crate::facade::handlers::write::store_refusal(&error))?;
+    Ok(person.map(|person| complete::reference_to(&person, &facade.settings().subject_namespace)))
+}
+
+/// Where one rendered resource comes from: the composition version, the
+/// logical id the map holds, and the subject the map binds to its EHR.
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Origin<'a> {
+    /// The logical id the identity map holds.
+    pub(crate) id: &'a FhirResourceId,
+    /// The composition version the content came from.
+    pub(crate) version: &'a ObjectVersionId,
+    /// The ITS-REST URL of that version.
+    pub(crate) source: &'a Url,
+    /// The subject reference [`subject_of`] answered, when the map knows one.
+    pub(crate) subject: Option<&'a Value>,
+}
+
+/// Returns the resource `composition` maps to, decorated with its identity
+/// and checked against the required elements R4 gives its type.
+///
+/// # Errors
+///
+/// The engine's refusal, and the `500` of [`complete::refusal`] naming every
+/// required element neither the mapping nor the binding supplies.
 pub(crate) fn render(
     program: &Program,
     index: &WebTemplateIndex,
     composition: &CanonicalComposition,
-    id: &FhirResourceId,
-    version: &ObjectVersionId,
-    source: &Url,
+    origin: Origin<'_>,
 ) -> Result<Rendered, Refusal> {
+    let Origin {
+        id,
+        version,
+        source,
+        subject,
+    } = origin;
+    let resource_type = program.resource().as_str();
     let produced = engine::outbound(program, index, composition)
         .map_err(|error| Refusal::from(crate::facade::ingest::engine_refusal(&error)))?;
     let warnings = produced.warnings().to_vec();
     let (value, created) = produced.into_parts();
-    let mut body = resource_object(value, program.resource().as_str())?;
+    let mut body = resource_object(value, resource_type)?;
     contain(&mut body, created);
+    let filled: Vec<&'static str> = complete::fill_subject(&mut body, resource_type, subject)
+        .into_iter()
+        .collect();
     body.insert(String::from("id"), Value::String(String::from(id.as_str())));
     let mut meta = body
         .get("meta")
@@ -74,7 +123,20 @@ pub(crate) fn render(
         ))]),
     );
     body.insert(String::from("meta"), Value::Object(meta));
-    Ok(Rendered { body, warnings })
+    let absent = complete::absent_required(&body, resource_type);
+    if !absent.is_empty() {
+        tracing::error!(
+            resource_type,
+            absent = absent.join(", "),
+            "the rendered resource lacks elements R4 requires"
+        );
+        return Err(Refusal::from(complete::refusal(resource_type, &absent)));
+    }
+    Ok(Rendered {
+        body,
+        warnings,
+        filled,
+    })
 }
 
 /// Returns the resource object an outbound run produced.
@@ -162,12 +224,21 @@ fn relocate(value: &mut Value, local: &[(String, String)]) {
     }
 }
 
-/// Records the declared set of losses one outbound run took.
+/// Records what the facade filled on one rendered resource and the declared
+/// set of losses its outbound run took.
 ///
-/// A warning is a loss the specification itself declares, never a swallowed
-/// failure, and it carries a mapping name and an element path rather than a
-/// value, so the line holds no clinical content.
-pub(crate) fn log_warnings(rendered: &Rendered) {
+/// A fill is counted with the element paths it wrote, and a warning is a loss
+/// the specification itself declares, never a swallowed failure, carrying a
+/// mapping name and an element path rather than a value, so neither line
+/// holds clinical content.
+pub(crate) fn log_outcome(rendered: &Rendered) {
+    if !rendered.filled.is_empty() {
+        tracing::info!(
+            filled = rendered.filled.len(),
+            elements = rendered.filled.join(", "),
+            "the facade filled required elements from the identity binding"
+        );
+    }
     if rendered.warnings.is_empty() {
         return;
     }
