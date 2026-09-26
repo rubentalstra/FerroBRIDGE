@@ -389,6 +389,23 @@ pub enum Outcome {
         /// `ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`.
         tree_path: String,
     },
+    /// A group of a row's path paired with a tree group of another name at
+    /// the same position, whose segments hold the row's segment and every
+    /// segment the guide's rows place in the row's group.
+    GroupRenamed {
+        /// Where: the segment.
+        at: Location,
+        /// The row's source, for example `ORM_O01.PATIENT.VISIT.PV1`.
+        row_path: String,
+        /// The segment's path in the parsed tree, for example
+        /// `ORM_O01.PATIENT.PATIENT_VISIT.PV1`.
+        tree_path: String,
+        /// The group the row names, for example `VISIT`.
+        row_group: String,
+        /// The group the tree names at its position, for example
+        /// `PATIENT_VISIT`.
+        tree_group: String,
+    },
     /// A value outside the lexical form of the FHIR primitive its element
     /// holds (<https://hl7.org/fhir/R4/datatypes.html#primitive>), which is
     /// never written.
@@ -471,6 +488,7 @@ impl Outcome {
             Self::VersionTyped { .. } => "version-typed",
             Self::BaseTyped { .. } => "base-typed",
             Self::GroupPath { .. } => "group-path",
+            Self::GroupRenamed { .. } => "group-renamed",
             Self::InvalidValue { .. } => "invalid-value",
             Self::MissingRequired { .. } => "missing-required",
             Self::Undecodable { .. } => "undecodable",

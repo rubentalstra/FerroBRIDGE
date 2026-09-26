@@ -134,9 +134,15 @@ takes the rows of the one source whose groups differ from its own by one
 group, not the group holding the segment (`run::regrouped`), counted as
 `group-path`: the guide's `ORM_O01.ORDER_DETAIL.CHOICE.OBR` reaches the 2.3
 `ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`; a source that reaches two tree
-paths, or a path two sources reach, stays `unmapped-segment`. The rule
-holds for v2.9.1 trees too, since the guide's paths disagree with the
-v2.9.1 definitions as well (`OML_O21`).
+paths, or a path two sources reach, stays `unmapped-segment`. A group the
+row names that the tree names otherwise at its position pairs with that
+tree group when the tree group holds every segment the guide's rows place
+in the row's group (`run::pairing`), counted as `group-renamed` naming
+both: the guide's `ORM_O01.PATIENT.VISIT.PV1` reaches the 2.3
+`ORM_O01.PATIENT.PATIENT_VISIT.PV1`. The pairing with the fewest renames
+counts, and two at the fewest stay unmapped. The rule holds for v2.9.1
+trees too, since the guide's paths disagree with the v2.9.1 definitions as
+well (`OML_O21`, and `MDM_T02`, whose observation group is `FIXME`).
 
 ## Logs
 
