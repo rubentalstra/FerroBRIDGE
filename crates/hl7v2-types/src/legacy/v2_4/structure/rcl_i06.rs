@@ -6,154 +6,157 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`RCL_I06`], one `static` so a structure with the same tree links to it.
+pub static RCL_I06_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "RCL_I06.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RCL_I06.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RCL_I06.3-QRD",
+        position: 3,
+        segment: &crate::legacy::v2_4::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RCL_I06.4-QRF",
+        position: 4,
+        segment: &crate::legacy::v2_4::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "RCL_I06.5-PROVIDER",
+        position: 5,
+        name: "PROVIDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.1-PRD",
+                position: 1,
+                segment: &crate::legacy::v2_4::segment::prd::PRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.2-CTD",
+                position: 2,
+                segment: &crate::legacy::v2_4::segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.3-PID",
+                position: 3,
+                segment: &crate::legacy::v2_4::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.4-DG1",
+                position: 4,
+                segment: &crate::legacy::v2_4::segment::dg1::DG1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.5-DRG",
+                position: 5,
+                segment: &crate::legacy::v2_4::segment::drg::DRG,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.6-AL1",
+                position: 6,
+                segment: &crate::legacy::v2_4::segment::al1::AL1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.7-NTE",
+                position: 7,
+                segment: &crate::legacy::v2_4::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.8-DSP",
+                position: 8,
+                segment: &crate::segment::dsp::DSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCL_I06.5-PROVIDER.9-DSC",
+                position: 9,
+                segment: &crate::segment::dsc::DSC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `RCL_I06` message structure of the 2.4 tables, withdrawn as of 2.8.
 pub static RCL_I06: Structure = Structure {
     id: "RCL_I06",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.8"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RCL_I06.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RCL_I06.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RCL_I06.3-QRD",
-            position: 3,
-            segment: &crate::legacy::v2_4::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RCL_I06.4-QRF",
-            position: 4,
-            segment: &crate::legacy::v2_4::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "RCL_I06.5-PROVIDER",
-            position: 5,
-            name: "PROVIDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.1-PRD",
-                    position: 1,
-                    segment: &crate::legacy::v2_4::segment::prd::PRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.2-CTD",
-                    position: 2,
-                    segment: &crate::legacy::v2_4::segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.3-PID",
-                    position: 3,
-                    segment: &crate::legacy::v2_4::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.4-DG1",
-                    position: 4,
-                    segment: &crate::legacy::v2_4::segment::dg1::DG1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.5-DRG",
-                    position: 5,
-                    segment: &crate::legacy::v2_4::segment::drg::DRG,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.6-AL1",
-                    position: 6,
-                    segment: &crate::legacy::v2_4::segment::al1::AL1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.7-NTE",
-                    position: 7,
-                    segment: &crate::legacy::v2_4::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.8-DSP",
-                    position: 8,
-                    segment: &crate::segment::dsp::DSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCL_I06.5-PROVIDER.9-DSC",
-                    position: 9,
-                    segment: &crate::segment::dsc::DSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &RCL_I06_NODES,
 };

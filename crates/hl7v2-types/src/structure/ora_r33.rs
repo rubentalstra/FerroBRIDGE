@@ -9,94 +9,97 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`ORA_R33`], one `static` so a structure with the same tree links to it.
+pub static ORA_R33_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "ORA_R33.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORA_R33.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORA_R33.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORA_R33.4-MSA",
+        position: 4,
+        segment: &segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORA_R33.5-ERR",
+        position: 5,
+        segment: &segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ORA_R33.6-ORDER",
+        position: 6,
+        name: "ORDER",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ORA_R33.6-ORDER.1-ORC",
+                position: 1,
+                segment: &segment::orc::ORC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ORA_R33.6-ORDER.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `ORA_R33` message structure definition, `http://hl7.org/v2/StructureDefinition/ORA_R33`.
 pub static ORA_R33: Structure = Structure {
     id: "ORA_R33",
     url: Some("http://hl7.org/v2/StructureDefinition/ORA_R33"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ORA_R33.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORA_R33.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORA_R33.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORA_R33.4-MSA",
-            position: 4,
-            segment: &segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORA_R33.5-ERR",
-            position: 5,
-            segment: &segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ORA_R33.6-ORDER",
-            position: 6,
-            name: "ORDER",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ORA_R33.6-ORDER.1-ORC",
-                    position: 1,
-                    segment: &segment::orc::ORC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ORA_R33.6-ORDER.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &ORA_R33_NODES,
 };

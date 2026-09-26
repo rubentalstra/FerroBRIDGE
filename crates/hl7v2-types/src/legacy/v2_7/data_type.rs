@@ -7,6 +7,14 @@
 
 use crate::model::LegacyDataType;
 
+/// The `AUI` data type code of the 2.7 tables.
+pub static AUI: LegacyDataType = LegacyDataType {
+    code: "AUI",
+    version: "2.7",
+    name: "Authorization Information",
+    base: None,
+};
+
 /// The `CNE` data type code of the 2.7 tables.
 pub static CNE: LegacyDataType = LegacyDataType {
     code: "CNE",
@@ -47,11 +55,51 @@ pub static CX: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `DDI` data type code of the 2.7 tables.
+pub static DDI: LegacyDataType = LegacyDataType {
+    code: "DDI",
+    version: "2.7",
+    name: "Daily Deductible Information",
+    base: None,
+};
+
+/// The `DIN` data type code of the 2.7 tables.
+pub static DIN: LegacyDataType = LegacyDataType {
+    code: "DIN",
+    version: "2.7",
+    name: "Date and Institution Name",
+    base: None,
+};
+
 /// The `DLD` data type code of the 2.7 tables.
 pub static DLD: LegacyDataType = LegacyDataType {
     code: "DLD",
     version: "2.7",
     name: "Discharge to Location and Date",
+    base: None,
+};
+
+/// The `DLN` data type code of the 2.7 tables.
+pub static DLN: LegacyDataType = LegacyDataType {
+    code: "DLN",
+    version: "2.7",
+    name: "Driver's License Number",
+    base: None,
+};
+
+/// The `DLT` data type code of the 2.7 tables.
+pub static DLT: LegacyDataType = LegacyDataType {
+    code: "DLT",
+    version: "2.7",
+    name: "Delta",
+    base: None,
+};
+
+/// The `DR` data type code of the 2.7 tables.
+pub static DR: LegacyDataType = LegacyDataType {
+    code: "DR",
+    version: "2.7",
+    name: "Date/Time Range",
     base: None,
 };
 
@@ -68,6 +116,22 @@ pub static DTM: LegacyDataType = LegacyDataType {
     code: "DTM",
     version: "2.7",
     name: "Date/Time",
+    base: None,
+};
+
+/// The `DTN` data type code of the 2.7 tables.
+pub static DTN: LegacyDataType = LegacyDataType {
+    code: "DTN",
+    version: "2.7",
+    name: "Day Type and Number",
+    base: None,
+};
+
+/// The `ED` data type code of the 2.7 tables.
+pub static ED: LegacyDataType = LegacyDataType {
+    code: "ED",
+    version: "2.7",
+    name: "Encapsulated Data",
     base: None,
 };
 
@@ -119,11 +183,27 @@ pub static HD: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `ICD` data type code of the 2.7 tables.
+pub static ICD: LegacyDataType = LegacyDataType {
+    code: "ICD",
+    version: "2.7",
+    name: "Insurance Certification Definition",
+    base: None,
+};
+
 /// The `ID` data type code of the 2.7 tables.
 pub static ID: LegacyDataType = LegacyDataType {
     code: "ID",
     version: "2.7",
     name: "Coded Value for HL7 Defined Tables",
+    base: None,
+};
+
+/// The `IS` data type code of the 2.7 tables.
+pub static IS: LegacyDataType = LegacyDataType {
+    code: "IS",
+    version: "2.7",
+    name: "Coded Value for User-Defined Tables",
     base: None,
 };
 
@@ -151,6 +231,14 @@ pub static LA2: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `MO` data type code of the 2.7 tables.
+pub static MO: LegacyDataType = LegacyDataType {
+    code: "MO",
+    version: "2.7",
+    name: "Money",
+    base: None,
+};
+
 /// The `MOC` data type code of the 2.7 tables.
 pub static MOC: LegacyDataType = LegacyDataType {
     code: "MOC",
@@ -159,11 +247,27 @@ pub static MOC: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `MOP` data type code of the 2.7 tables.
+pub static MOP: LegacyDataType = LegacyDataType {
+    code: "MOP",
+    version: "2.7",
+    name: "Money or Percentage",
+    base: None,
+};
+
 /// The `MSG` data type code of the 2.7 tables.
 pub static MSG: LegacyDataType = LegacyDataType {
     code: "MSG",
     version: "2.7",
     name: "Message Type",
+    base: None,
+};
+
+/// The `NA` data type code of the 2.7 tables.
+pub static NA: LegacyDataType = LegacyDataType {
+    code: "NA",
+    version: "2.7",
+    name: "Numeric Array",
     base: None,
 };
 
@@ -183,11 +287,35 @@ pub static NM: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `PIP` data type code of the 2.7 tables.
+pub static PIP: LegacyDataType = LegacyDataType {
+    code: "PIP",
+    version: "2.7",
+    name: "Practitioner Institutional Privileges",
+    base: None,
+};
+
 /// The `PL` data type code of the 2.7 tables.
 pub static PL: LegacyDataType = LegacyDataType {
     code: "PL",
     version: "2.7",
     name: "Person Location",
+    base: None,
+};
+
+/// The `PLN` data type code of the 2.7 tables.
+pub static PLN: LegacyDataType = LegacyDataType {
+    code: "PLN",
+    version: "2.7",
+    name: "Practitioner License or Other ID Number",
+    base: None,
+};
+
+/// The `PPN` data type code of the 2.7 tables.
+pub static PPN: LegacyDataType = LegacyDataType {
+    code: "PPN",
+    version: "2.7",
+    name: "Performing Person Time Stamp",
     base: None,
 };
 
@@ -207,11 +335,59 @@ pub static PT: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `PTA` data type code of the 2.7 tables.
+pub static PTA: LegacyDataType = LegacyDataType {
+    code: "PTA",
+    version: "2.7",
+    name: "Policy Type and Amount",
+    base: None,
+};
+
+/// The `RFR` data type code of the 2.7 tables.
+pub static RFR: LegacyDataType = LegacyDataType {
+    code: "RFR",
+    version: "2.7",
+    name: "Reference Range",
+    base: None,
+};
+
+/// The `RI` data type code of the 2.7 tables.
+pub static RI: LegacyDataType = LegacyDataType {
+    code: "RI",
+    version: "2.7",
+    name: "Repeat Interval",
+    base: None,
+};
+
+/// The `RMC` data type code of the 2.7 tables.
+pub static RMC: LegacyDataType = LegacyDataType {
+    code: "RMC",
+    version: "2.7",
+    name: "Room Coverage",
+    base: None,
+};
+
 /// The `SI` data type code of the 2.7 tables.
 pub static SI: LegacyDataType = LegacyDataType {
     code: "SI",
     version: "2.7",
     name: "Sequence ID",
+    base: None,
+};
+
+/// The `SN` data type code of the 2.7 tables.
+pub static SN: LegacyDataType = LegacyDataType {
+    code: "SN",
+    version: "2.7",
+    name: "Structured Numeric",
+    base: None,
+};
+
+/// The `SPD` data type code of the 2.7 tables.
+pub static SPD: LegacyDataType = LegacyDataType {
+    code: "SPD",
+    version: "2.7",
+    name: "Specialty Description",
     base: None,
 };
 

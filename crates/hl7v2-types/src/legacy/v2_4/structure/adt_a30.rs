@@ -6,62 +6,65 @@
 
 use crate::model::{Cardinality, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`ADT_A30`], one `static` so a structure with the same tree links to it.
+pub static ADT_A30_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "ADT_A30.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A30.2-EVN",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::evn::EVN,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A30.3-PID",
+        position: 3,
+        segment: &crate::legacy::v2_4::segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A30.4-PD1",
+        position: 4,
+        segment: &crate::legacy::v2_4::segment::pd1::PD1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A30.5-MRG",
+        position: 5,
+        segment: &crate::legacy::v2_4::segment::mrg::MRG,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `ADT_A30` message structure of the 2.4 tables, withdrawn as of 2.7.
 pub static ADT_A30: Structure = Structure {
     id: "ADT_A30",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ADT_A30.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A30.2-EVN",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::evn::EVN,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A30.3-PID",
-            position: 3,
-            segment: &crate::legacy::v2_4::segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A30.4-PD1",
-            position: 4,
-            segment: &crate::legacy::v2_4::segment::pd1::PD1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A30.5-MRG",
-            position: 5,
-            segment: &crate::legacy::v2_4::segment::mrg::MRG,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &ADT_A30_NODES,
 };

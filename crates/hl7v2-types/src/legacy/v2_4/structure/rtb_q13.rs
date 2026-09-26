@@ -6,104 +6,107 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`RTB_Q13`], one `static` so a structure with the same tree links to it.
+pub static RTB_Q13_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "RTB_Q13.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Q13.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Q13.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_4::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Q13.4-QAK",
+        position: 4,
+        segment: &crate::legacy::v2_4::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Q13.5-QPD",
+        position: 5,
+        segment: &crate::legacy::v2_4::segment::qpd::QPD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "RTB_Q13.6-ROW_DEFINITION",
+        position: 6,
+        name: "ROW_DEFINITION",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RTB_Q13.6-ROW_DEFINITION.1-RDF",
+                position: 1,
+                segment: &crate::segment::rdf::RDF,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RTB_Q13.6-ROW_DEFINITION.2-RDT",
+                position: 2,
+                segment: &crate::legacy::v2_4::segment::rdt::RDT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RTB_Q13.6-ROW_DEFINITION.3-DSC",
+                position: 3,
+                segment: &crate::segment::dsc::DSC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `RTB_Q13` message structure of the 2.4 tables, withdrawn as of 2.5.
 pub static RTB_Q13: Structure = Structure {
     id: "RTB_Q13",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.5"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RTB_Q13.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Q13.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Q13.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_4::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Q13.4-QAK",
-            position: 4,
-            segment: &crate::legacy::v2_4::segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Q13.5-QPD",
-            position: 5,
-            segment: &crate::legacy::v2_4::segment::qpd::QPD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "RTB_Q13.6-ROW_DEFINITION",
-            position: 6,
-            name: "ROW_DEFINITION",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RTB_Q13.6-ROW_DEFINITION.1-RDF",
-                    position: 1,
-                    segment: &crate::segment::rdf::RDF,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RTB_Q13.6-ROW_DEFINITION.2-RDT",
-                    position: 2,
-                    segment: &crate::legacy::v2_4::segment::rdt::RDT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RTB_Q13.6-ROW_DEFINITION.3-DSC",
-                    position: 3,
-                    segment: &crate::segment::dsc::DSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &RTB_Q13_NODES,
 };

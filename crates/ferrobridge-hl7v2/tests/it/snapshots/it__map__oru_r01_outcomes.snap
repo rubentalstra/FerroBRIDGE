@@ -3,7 +3,7 @@ source: crates/ferrobridge-hl7v2/tests/it/map.rs
 expression: summary(&mapped)
 ---
 [
-    "earlier-version: EarlierVersion { declared: \"2.5.1\" }",
+    "version-selected: VersionSelected { structure: \"ORU_R01\", version: \"2.5.1\", declared: Some(\"2.5.1\") }",
     "unknown-segment: UnknownSegment { location: Location { segment: \"ZXX\", sequence: 1, field: None, repetition: None, component: None, subcomponent: None } }",
     "unsupported-assignment: MSH[1]-10(1) segment-msh-to-bundle MSH-10 -> identifier.system [/to be determined by the implementer/]",
     "unmapped-component: MSH[1]-9(1) datatype-msg-to-coding component 1",
@@ -20,6 +20,7 @@ expression: summary(&mapped)
     "unmapped-field: PID[1]-1",
     "unsupported-condition: PV1[1] message-oru-r01-to-bundle ORU_R01.PATIENT_RESULT.PATIENT.VISIT.PV1 -> Coverage[1] [IF PV1-20 VALUE]",
     "unmapped-field: PV1[1]-1",
+    "group-path: GroupPath { at: Location { segment: \"ORC\", sequence: 1, field: None, repetition: None, component: None, subcomponent: None }, row_path: \"ORU_R01.PATIENT_RESULT.ORDER_OBSERVATION.COMMON_ORDER.ORC\", tree_path: \"ORU_R01.PATIENT_RESULT.ORDER_OBSERVATION.ORC\" }",
     "no-datatype-map: ORC[1]-2(1) segment-orc-to-diagnosticreport ORC-2 -> basedOn(ServiceRequest) [EI to ServiceRequest]",
     "narrative-condition: ORC[1] message-oru-r01-to-bundle ORU_R01.PATIENT_RESULT.ORDER_OBSERVATION.COMMON_ORDER.ORC -> ServiceRequest[1] []",
     "unmapped-field: ORC[1]-1",

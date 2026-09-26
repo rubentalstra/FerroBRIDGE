@@ -9,178 +9,181 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`EAC_U07`], one `static` so a structure with the same tree links to it.
+pub static EAC_U07_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "EAC_U07.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAC_U07.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAC_U07.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAC_U07.4-EQU",
+        position: 4,
+        segment: &segment::equ::EQU,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "EAC_U07.5-COMMAND",
+        position: 5,
+        name: "COMMAND",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "EAC_U07.5-COMMAND.1-ECD",
+                position: 1,
+                segment: &segment::ecd::ECD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EAC_U07.5-COMMAND.2-TQ1",
+                position: 2,
+                segment: &segment::tq1::TQ1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER",
+                position: 3,
+                name: "SPECIMEN_CONTAINER",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.1-SAC",
+                        position: 1,
+                        segment: &segment::sac::SAC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.2-ORDER_FOR_SPECIMEN_CONTAINER",
+                        position: 2,
+                        name: "ORDER_FOR_SPECIMEN_CONTAINER",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.2-ORDER_FOR_SPECIMEN_CONTAINER.1-OBR",
+                                position: 1,
+                                segment: &segment::obr::OBR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.2-ORDER_FOR_SPECIMEN_CONTAINER.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.3-SPM",
+                        position: 3,
+                        segment: &segment::spm::SPM,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.4-DST",
+                        position: 4,
+                        segment: &segment::dst::DST,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "EAC_U07.5-COMMAND.4-CNS",
+                position: 4,
+                segment: &segment::cns::CNS,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAC_U07.6-ROL",
+        position: 6,
+        segment: &segment::rol::ROL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::B),
+    }),
+];
+
 /// The `EAC_U07` message structure definition, `http://hl7.org/v2/StructureDefinition/EAC_U07`.
 pub static EAC_U07: Structure = Structure {
     id: "EAC_U07",
     url: Some("http://hl7.org/v2/StructureDefinition/EAC_U07"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "EAC_U07.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAC_U07.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAC_U07.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAC_U07.4-EQU",
-            position: 4,
-            segment: &segment::equ::EQU,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "EAC_U07.5-COMMAND",
-            position: 5,
-            name: "COMMAND",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "EAC_U07.5-COMMAND.1-ECD",
-                    position: 1,
-                    segment: &segment::ecd::ECD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EAC_U07.5-COMMAND.2-TQ1",
-                    position: 2,
-                    segment: &segment::tq1::TQ1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER",
-                    position: 3,
-                    name: "SPECIMEN_CONTAINER",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.1-SAC",
-                            position: 1,
-                            segment: &segment::sac::SAC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.2-ORDER_FOR_SPECIMEN_CONTAINER",
-                            position: 2,
-                            name: "ORDER_FOR_SPECIMEN_CONTAINER",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.2-ORDER_FOR_SPECIMEN_CONTAINER.1-OBR",
-                                    position: 1,
-                                    segment: &segment::obr::OBR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.2-ORDER_FOR_SPECIMEN_CONTAINER.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.3-SPM",
-                            position: 3,
-                            segment: &segment::spm::SPM,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "EAC_U07.5-COMMAND.3-SPECIMEN_CONTAINER.4-DST",
-                            position: 4,
-                            segment: &segment::dst::DST,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EAC_U07.5-COMMAND.4-CNS",
-                    position: 4,
-                    segment: &segment::cns::CNS,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAC_U07.6-ROL",
-            position: 6,
-            segment: &segment::rol::ROL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::B),
-        }),
-    ],
+    nodes: &EAC_U07_NODES,
 };

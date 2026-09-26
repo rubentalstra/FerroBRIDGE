@@ -15,7 +15,7 @@ use std::fmt::{self, Write};
 
 use crate::naming::is_keyword;
 use crate::render::SPDX;
-use crate::v2::legacy::lower::{LegacyModel, LegacyVersion};
+use crate::v2::legacy::lower::{LegacyModel, LegacyVersion, Owner};
 use crate::v2::legacy::source::{REPOSITORY, TABLES_DIR};
 use crate::v2::lower::{
     Cardinality, Component, ConditionalCode, ConformanceLength, DataType, Field, GroupKind, Length,
@@ -233,7 +233,7 @@ fn module_names<'a>(
 fn render_lib(banner: &str, model: &Model, legacy: &LegacyModel) -> Result<String, RenderError> {
     let mut out = String::from(banner);
     out.push_str(
-        "//! The HL7 v2 message structures, segment fields, data types and message definitions, generated from the HL7 v2 definitions.\n//!\n//! `structure` holds every message structure of the definitions as a\n//! segment-group tree, `segment` every segment definition with its\n//! field table, the batch envelopes included, `data_type` every primitive and\n//! complex data type with its component table, and `message` every message\n//! definition with the structure its trigger event selects. `legacy` holds\n//! the message structures the definitions no longer carry, from the tables\n//! of each earlier version that did, and `message` indexes them by code,\n//! event and version. The shapes are in `model`. Every file is `@generated`\n//! by `fhir-codegen`; change the emitter and regenerate, never the output.\n",
+        "//! The HL7 v2 message structures, segment fields, data types and message definitions, generated from the HL7 v2 definitions.\n//!\n//! `structure` holds every message structure of the definitions as a\n//! segment-group tree, `segment` every segment definition with its\n//! field table, the batch envelopes included, `data_type` every primitive and\n//! complex data type with its component table, and `message` every message\n//! definition with the structure its trigger event selects. `legacy` holds\n//! the message structures of each earlier version's tables, those the\n//! definitions no longer carry among them, and `message` indexes them by\n//! code, event and version. The shapes are in `model`. Every file is `@generated`\n//! by `fhir-codegen`; change the emitter and regenerate, never the output.\n",
     );
     writeln!(
         out,
@@ -250,14 +250,20 @@ fn render_lib(banner: &str, model: &Model, legacy: &LegacyModel) -> Result<Strin
     )?;
     writeln!(
         out,
-        "//!\n//! The legacy tables are the NIST IGAMT export of HL7's v2 database,\n//! `{REPOSITORY}` at commit `{}`, path `{TABLES_DIR}`:\n//! {} message structures of {} structure codes over {} versions, naming {} segments\n//! whose field table differs from the v2.9.1 one ({} fields) and {} that agree with it,\n//! indexed by {} legacy message entries.\n",
+        "//!\n//! The legacy tables are the NIST IGAMT export of HL7's v2 database,\n//! `{REPOSITORY}` at commit `{}`, path `{TABLES_DIR}`:\n//! {} message structures of {} structure codes over {} versions ({} of {} codes the\n//! definitions no longer carry), with {} trees of their own, {} linked to the identical\n//! v2.9.1 tree and {} to an earlier version's. The trees name {} segments of their own\n//! ({} fields), {} references linked to the agreeing v2.9.1 segment and {} to an earlier\n//! version's identical one, and {} legacy message entries index them.\n",
         legacy.commit,
         legacy.structure_count(),
         legacy.code_count(),
         legacy.versions.len(),
+        legacy.withdrawn_count(),
+        legacy.withdrawn_code_count(),
+        legacy.tree_count(),
+        legacy.current_tree_count(),
+        legacy.inherited_tree_count(),
         legacy.segment_count(),
         legacy.field_count(),
         legacy.shared_count(),
+        legacy.inherited_count(),
         legacy.messages.len(),
     )?;
     out.push_str(
@@ -277,7 +283,7 @@ fn render_legacy_segments(
 ) -> Result<(), RenderError> {
     if !version.segments.is_empty() {
         let segment_doc = format!(
-            "The segments of the {} tables whose field table differs from the v2.9.1 one, one module each.",
+            "The segments of the {} tables that no v2.9.1 or earlier `static` carries, one module each.",
             version.version
         );
         files.insert(
@@ -344,25 +350,28 @@ fn render_legacy(
             )?,
         );
         render_legacy_segments(&banner, version, &module, &segment_names, data_types, files)?;
-        let resolve = |id: &str| {
-            if version.segments.contains_key(id) {
-                segment_names
-                    .get(id)
-                    .map(|(file, name)| format!("crate::legacy::{module}::segment::{file}::{name}"))
-            } else if version.shared.contains(id) {
-                current_segments
-                    .get(id)
-                    .map(|(file, name)| format!("crate::segment::{file}::{name}"))
-            } else {
-                None
+        let resolve = |id: &str| match version.links.get(id) {
+            Some(Owner::Current) => current_segments
+                .get(id)
+                .map(|(file, name)| format!("crate::segment::{file}::{name}")),
+            Some(Owner::Version(owner)) => {
+                let (file, name) = names(id);
+                Some(format!(
+                    "crate::legacy::{}::segment::{file}::{name}",
+                    version_module(owner)
+                ))
             }
+            None => segment_names
+                .get(id)
+                .map(|(file, name)| format!("crate::legacy::{module}::segment::{file}::{name}")),
         };
         for (id, structure) in &version.structures {
             let (file, name) = names(id);
-            files.insert(
-                format!("legacy/{module}/structure/{file}.rs"),
-                render_structure(&banner, &name, structure, &resolve, false)?,
-            );
+            let text = match version.trees.get(id) {
+                None => render_structure(&banner, &name, structure, &resolve, false)?,
+                Some(owner) => render_linked_structure(&banner, &name, structure, owner)?,
+            };
+            files.insert(format!("legacy/{module}/structure/{file}.rs"), text);
             index.push((
                 id.as_str(),
                 order,
@@ -373,7 +382,7 @@ fn render_legacy(
     index.sort_by(|left, right| (left.0, left.1).cmp(&(right.0, right.1)));
     let mut out = banner;
     out.push_str(
-        "//! The message structures the v2.9.1 definitions no longer carry, from the\n//! tables of each earlier HL7 v2 version that did, one module per version.\n//!\n//! A version module holds `structure`, one module per structure with its\n//! tree, and `segment` for each segment whose field table differs from the\n//! v2.9.1 one; a tree links a segment that agrees to the v2.9.1 `static`.\n//! `data_type` holds the data type codes those segments' fields name, each\n//! with the base type a version-specific code stands for.\n//! Each [`crate::model::Structure`] here carries its version and the version\n//! it is withdrawn as of.\n\n",
+        "//! The message structures of the tables of each earlier HL7 v2 version, one\n//! module per version, those the v2.9.1 definitions no longer carry among them.\n//!\n//! A version module holds `structure`, one module per structure with its\n//! tree, and `segment` for each segment no other `static` carries. A tree\n//! links a segment whose field table agrees with the v2.9.1 one to the v2.9.1\n//! `static`, and one identical to an earlier version's to that version's; a\n//! structure whose tree is identical to the v2.9.1 tree or to an earlier\n//! version's links its nodes to that tree. `data_type` holds the data type\n//! codes the version's own segments name, each with the base type a\n//! version-specific code stands for. Each [`crate::model::Structure`] here\n//! carries its version and, for a structure the v2.9.1 definitions no longer\n//! carry, the version it is withdrawn as of.\n\n",
     );
     for version in &legacy.versions {
         writeln!(out, "pub mod {};", version_module(&version.version))?;
@@ -397,7 +406,7 @@ fn render_version_module(banner: &str, version: &LegacyVersion) -> Result<String
     let mut out = String::from(banner);
     write!(
         out,
-        "//! The legacy message structures of the {} tables, and the segments they\n//! name whose field table differs from the v2.9.1 one.\n\n",
+        "//! The message structures of the {} tables, and the segments they name\n//! that no v2.9.1 or earlier `static` carries.\n\n",
         version.version
     )?;
     if !version.data_types.is_empty() {
@@ -911,18 +920,16 @@ fn render_structure(
     let mut writer = TreeWriter {
         structure: &structure.id,
         segments,
-        uses: ["Structure"].into(),
+        uses: ["Node", "Structure"].into(),
     };
-    let mut tree = String::new();
-    writer.nodes(&structure.nodes, &mut tree)?;
+    let mut tree = String::from("[");
+    for node in &structure.nodes {
+        writer.node(node, &mut tree)?;
+        tree.push(',');
+    }
+    tree.push(']');
     let mut out = String::from(banner);
-    let heading = match &structure.withdrawn_as_of {
-        Some(withdrawn) => format!(
-            "The `{}` message structure of the {} tables, withdrawn as of {withdrawn}",
-            structure.id, structure.version
-        ),
-        None => format!("The `{}` message structure", structure.id),
-    };
+    let heading = structure_heading(structure);
     writeln!(out, "//! {heading}.\n")?;
     out.push_str(&uses_line(&writer.uses));
     if import_segment && writer.uses.contains("SegmentRef") {
@@ -944,7 +951,60 @@ fn render_structure(
     );
     writeln!(
         out,
-        "\n/// {doc}\npub static {name}: Structure = Structure {{\n    id: {:?},\n    url: {url},\n    version: {:?},\n    withdrawn_as_of: {withdrawn},\n    nodes: {tree},\n}};",
+        "\n/// The top-level nodes of [`{name}`], one `static` so a structure with the same tree links to it.\npub static {name}_NODES: [Node; {}] = {tree};\n\n/// {doc}\npub static {name}: Structure = Structure {{\n    id: {:?},\n    url: {url},\n    version: {:?},\n    withdrawn_as_of: {withdrawn},\n    nodes: &{name}_NODES,\n}};",
+        structure.nodes.len(),
+        structure.id,
+        structure.version
+    )?;
+    Ok(out)
+}
+
+/// The heading of a structure's module and `static`.
+fn structure_heading(structure: &Structure) -> String {
+    match (&structure.withdrawn_as_of, &structure.url) {
+        (Some(withdrawn), _) => format!(
+            "The `{}` message structure of the {} tables, withdrawn as of {withdrawn}",
+            structure.id, structure.version
+        ),
+        (None, None) => format!(
+            "The `{}` message structure of the {} tables",
+            structure.id, structure.version
+        ),
+        (None, Some(_)) => format!("The `{}` message structure", structure.id),
+    }
+}
+
+/// A structure of a version whose tree is identical to the tree `owner`
+/// holds, and links to it.
+fn render_linked_structure(
+    banner: &str,
+    name: &str,
+    structure: &Structure,
+    owner: &Owner,
+) -> Result<String, RenderError> {
+    let (file, _) = names(&structure.id);
+    let (owner, from) = match owner {
+        Owner::Current => (
+            format!("crate::structure::{file}::{name}"),
+            String::from("v2.9.1 definitions"),
+        ),
+        Owner::Version(version) => (
+            format!(
+                "crate::legacy::{}::structure::{file}::{name}",
+                version_module(version)
+            ),
+            format!("{version} tables"),
+        ),
+    };
+    let heading = structure_heading(structure);
+    let withdrawn = structure.withdrawn_as_of.as_ref().map_or_else(
+        || String::from("None"),
+        |version| format!("Some({version:?})"),
+    );
+    let mut out = String::from(banner);
+    writeln!(
+        out,
+        "//! {heading}.\n//!\n//! The tables give it the tree of the {from}, which it links to.\n\nuse crate::model::Structure;\n\n/// {heading}.\npub static {name}: Structure = Structure {{\n    id: {:?},\n    url: None,\n    version: {:?},\n    withdrawn_as_of: {withdrawn},\n    nodes: &{owner}_NODES,\n}};",
         structure.id, structure.version
     )?;
     Ok(out)

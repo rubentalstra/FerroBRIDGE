@@ -152,6 +152,17 @@ pub static CE_0066: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0069` data type code of the 2.4 tables.
+pub static CE_0069: LegacyDataType = LegacyDataType {
+    code: "CE_0069",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0069"),
+    }),
+};
+
 /// The `CE_0072` data type code of the 2.4 tables.
 pub static CE_0072: LegacyDataType = LegacyDataType {
     code: "CE_0072",
@@ -262,6 +273,17 @@ pub static CE_0132: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0136` data type code of the 2.4 tables.
+pub static CE_0136: LegacyDataType = LegacyDataType {
+    code: "CE_0136",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0136"),
+    }),
+};
+
 /// The `CE_0160` data type code of the 2.4 tables.
 pub static CE_0160: LegacyDataType = LegacyDataType {
     code: "CE_0160",
@@ -347,6 +369,28 @@ pub static CE_0175: LegacyDataType = LegacyDataType {
     base: Some(LegacyBase {
         code: "CE",
         table: Some("0175"),
+    }),
+};
+
+/// The `CE_0181` data type code of the 2.4 tables.
+pub static CE_0181: LegacyDataType = LegacyDataType {
+    code: "CE_0181",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0181"),
+    }),
+};
+
+/// The `CE_0184` data type code of the 2.4 tables.
+pub static CE_0184: LegacyDataType = LegacyDataType {
+    code: "CE_0184",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0184"),
     }),
 };
 
@@ -438,6 +482,17 @@ pub static CE_0233: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0247` data type code of the 2.4 tables.
+pub static CE_0247: LegacyDataType = LegacyDataType {
+    code: "CE_0247",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0247"),
+    }),
+};
+
 /// The `CE_0254` data type code of the 2.4 tables.
 pub static CE_0254: LegacyDataType = LegacyDataType {
     code: "CE_0254",
@@ -482,6 +537,127 @@ pub static CE_0259: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0264` data type code of the 2.4 tables.
+pub static CE_0264: LegacyDataType = LegacyDataType {
+    code: "CE_0264",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0264"),
+    }),
+};
+
+/// The `CE_0265` data type code of the 2.4 tables.
+pub static CE_0265: LegacyDataType = LegacyDataType {
+    code: "CE_0265",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0265"),
+    }),
+};
+
+/// The `CE_0276` data type code of the 2.4 tables.
+pub static CE_0276: LegacyDataType = LegacyDataType {
+    code: "CE_0276",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0276"),
+    }),
+};
+
+/// The `CE_0277` data type code of the 2.4 tables.
+pub static CE_0277: LegacyDataType = LegacyDataType {
+    code: "CE_0277",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0277"),
+    }),
+};
+
+/// The `CE_0278` data type code of the 2.4 tables.
+pub static CE_0278: LegacyDataType = LegacyDataType {
+    code: "CE_0278",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0278"),
+    }),
+};
+
+/// The `CE_0280` data type code of the 2.4 tables.
+pub static CE_0280: LegacyDataType = LegacyDataType {
+    code: "CE_0280",
+    version: "2.4",
+    name: "CE_NORM mit Tab. 0280",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0280"),
+    }),
+};
+
+/// The `CE_0281` data type code of the 2.4 tables.
+pub static CE_0281: LegacyDataType = LegacyDataType {
+    code: "CE_0281",
+    version: "2.4",
+    name: "CE_NORM mit Tab. 0281",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0281"),
+    }),
+};
+
+/// The `CE_0282` data type code of the 2.4 tables.
+pub static CE_0282: LegacyDataType = LegacyDataType {
+    code: "CE_0282",
+    version: "2.4",
+    name: "CE_NORM mit Tab. 0282",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0282"),
+    }),
+};
+
+/// The `CE_0283` data type code of the 2.4 tables.
+pub static CE_0283: LegacyDataType = LegacyDataType {
+    code: "CE_0283",
+    version: "2.4",
+    name: "CE_NORM mit Tab. 0283",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0283"),
+    }),
+};
+
+/// The `CE_0284` data type code of the 2.4 tables.
+pub static CE_0284: LegacyDataType = LegacyDataType {
+    code: "CE_0284",
+    version: "2.4",
+    name: "CE_NORM mit Tab. 0284",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0284"),
+    }),
+};
+
+/// The `CE_0285` data type code of the 2.4 tables.
+pub static CE_0285: LegacyDataType = LegacyDataType {
+    code: "CE_0285",
+    version: "2.4",
+    name: "CE_NORM mit Tab. 0285",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0285"),
+    }),
+};
+
 /// The `CE_0286` data type code of the 2.4 tables.
 pub static CE_0286: LegacyDataType = LegacyDataType {
     code: "CE_0286",
@@ -504,6 +680,17 @@ pub static CE_0292: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0293` data type code of the 2.4 tables.
+pub static CE_0293: LegacyDataType = LegacyDataType {
+    code: "CE_0293",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0293"),
+    }),
+};
+
 /// The `CE_0296` data type code of the 2.4 tables.
 pub static CE_0296: LegacyDataType = LegacyDataType {
     code: "CE_0296",
@@ -512,6 +699,39 @@ pub static CE_0296: LegacyDataType = LegacyDataType {
     base: Some(LegacyBase {
         code: "CE",
         table: Some("0296"),
+    }),
+};
+
+/// The `CE_0324` data type code of the 2.4 tables.
+pub static CE_0324: LegacyDataType = LegacyDataType {
+    code: "CE_0324",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0324"),
+    }),
+};
+
+/// The `CE_0325` data type code of the 2.4 tables.
+pub static CE_0325: LegacyDataType = LegacyDataType {
+    code: "CE_0325",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0325"),
+    }),
+};
+
+/// The `CE_0336` data type code of the 2.4 tables.
+pub static CE_0336: LegacyDataType = LegacyDataType {
+    code: "CE_0336",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0336"),
     }),
 };
 
@@ -658,6 +878,17 @@ pub static CE_0357: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0358` data type code of the 2.4 tables.
+pub static CE_0358: LegacyDataType = LegacyDataType {
+    code: "CE_0358",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0358"),
+    }),
+};
+
 /// The `CE_0364` data type code of the 2.4 tables.
 pub static CE_0364: LegacyDataType = LegacyDataType {
     code: "CE_0364",
@@ -666,6 +897,50 @@ pub static CE_0364: LegacyDataType = LegacyDataType {
     base: Some(LegacyBase {
         code: "CE",
         table: Some("0364"),
+    }),
+};
+
+/// The `CE_0365` data type code of the 2.4 tables.
+pub static CE_0365: LegacyDataType = LegacyDataType {
+    code: "CE_0365",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0365"),
+    }),
+};
+
+/// The `CE_0366` data type code of the 2.4 tables.
+pub static CE_0366: LegacyDataType = LegacyDataType {
+    code: "CE_0366",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0366"),
+    }),
+};
+
+/// The `CE_0367` data type code of the 2.4 tables.
+pub static CE_0367: LegacyDataType = LegacyDataType {
+    code: "CE_0367",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0367"),
+    }),
+};
+
+/// The `CE_0368` data type code of the 2.4 tables.
+pub static CE_0368: LegacyDataType = LegacyDataType {
+    code: "CE_0368",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0368"),
     }),
 };
 
@@ -801,6 +1076,28 @@ pub static CE_0382: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0383` data type code of the 2.4 tables.
+pub static CE_0383: LegacyDataType = LegacyDataType {
+    code: "CE_0383",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0383"),
+    }),
+};
+
+/// The `CE_0384` data type code of the 2.4 tables.
+pub static CE_0384: LegacyDataType = LegacyDataType {
+    code: "CE_0384",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0384"),
+    }),
+};
+
 /// The `CE_0385` data type code of the 2.4 tables.
 pub static CE_0385: LegacyDataType = LegacyDataType {
     code: "CE_0385",
@@ -812,6 +1109,39 @@ pub static CE_0385: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0386` data type code of the 2.4 tables.
+pub static CE_0386: LegacyDataType = LegacyDataType {
+    code: "CE_0386",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0386"),
+    }),
+};
+
+/// The `CE_0387` data type code of the 2.4 tables.
+pub static CE_0387: LegacyDataType = LegacyDataType {
+    code: "CE_0387",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0387"),
+    }),
+};
+
+/// The `CE_0388` data type code of the 2.4 tables.
+pub static CE_0388: LegacyDataType = LegacyDataType {
+    code: "CE_0388",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0388"),
+    }),
+};
+
 /// The `CE_0389` data type code of the 2.4 tables.
 pub static CE_0389: LegacyDataType = LegacyDataType {
     code: "CE_0389",
@@ -820,6 +1150,83 @@ pub static CE_0389: LegacyDataType = LegacyDataType {
     base: Some(LegacyBase {
         code: "CE",
         table: Some("0389"),
+    }),
+};
+
+/// The `CE_0393` data type code of the 2.4 tables.
+pub static CE_0393: LegacyDataType = LegacyDataType {
+    code: "CE_0393",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0393"),
+    }),
+};
+
+/// The `CE_0394` data type code of the 2.4 tables.
+pub static CE_0394: LegacyDataType = LegacyDataType {
+    code: "CE_0394",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0394"),
+    }),
+};
+
+/// The `CE_0401` data type code of the 2.4 tables.
+pub static CE_0401: LegacyDataType = LegacyDataType {
+    code: "CE_0401",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0401"),
+    }),
+};
+
+/// The `CE_0402` data type code of the 2.4 tables.
+pub static CE_0402: LegacyDataType = LegacyDataType {
+    code: "CE_0402",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0402"),
+    }),
+};
+
+/// The `CE_0403` data type code of the 2.4 tables.
+pub static CE_0403: LegacyDataType = LegacyDataType {
+    code: "CE_0403",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0403"),
+    }),
+};
+
+/// The `CE_0404` data type code of the 2.4 tables.
+pub static CE_0404: LegacyDataType = LegacyDataType {
+    code: "CE_0404",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0404"),
+    }),
+};
+
+/// The `CE_0405` data type code of the 2.4 tables.
+pub static CE_0405: LegacyDataType = LegacyDataType {
+    code: "CE_0405",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0405"),
     }),
 };
 
@@ -845,6 +1252,39 @@ pub static CE_0411: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0412` data type code of the 2.4 tables.
+pub static CE_0412: LegacyDataType = LegacyDataType {
+    code: "CE_0412",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0412"),
+    }),
+};
+
+/// The `CE_0413` data type code of the 2.4 tables.
+pub static CE_0413: LegacyDataType = LegacyDataType {
+    code: "CE_0413",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0413"),
+    }),
+};
+
+/// The `CE_0414` data type code of the 2.4 tables.
+pub static CE_0414: LegacyDataType = LegacyDataType {
+    code: "CE_0414",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0414"),
+    }),
+};
+
 /// The `CE_0417` data type code of the 2.4 tables.
 pub static CE_0417: LegacyDataType = LegacyDataType {
     code: "CE_0417",
@@ -853,6 +1293,94 @@ pub static CE_0417: LegacyDataType = LegacyDataType {
     base: Some(LegacyBase {
         code: "CE",
         table: Some("0417"),
+    }),
+};
+
+/// The `CE_0421` data type code of the 2.4 tables.
+pub static CE_0421: LegacyDataType = LegacyDataType {
+    code: "CE_0421",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0421"),
+    }),
+};
+
+/// The `CE_0422` data type code of the 2.4 tables.
+pub static CE_0422: LegacyDataType = LegacyDataType {
+    code: "CE_0422",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0422"),
+    }),
+};
+
+/// The `CE_0423` data type code of the 2.4 tables.
+pub static CE_0423: LegacyDataType = LegacyDataType {
+    code: "CE_0423",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0423"),
+    }),
+};
+
+/// The `CE_0424` data type code of the 2.4 tables.
+pub static CE_0424: LegacyDataType = LegacyDataType {
+    code: "CE_0424",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0424"),
+    }),
+};
+
+/// The `CE_0425` data type code of the 2.4 tables.
+pub static CE_0425: LegacyDataType = LegacyDataType {
+    code: "CE_0425",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0425"),
+    }),
+};
+
+/// The `CE_0426` data type code of the 2.4 tables.
+pub static CE_0426: LegacyDataType = LegacyDataType {
+    code: "CE_0426",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0426"),
+    }),
+};
+
+/// The `CE_0427` data type code of the 2.4 tables.
+pub static CE_0427: LegacyDataType = LegacyDataType {
+    code: "CE_0427",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0427"),
+    }),
+};
+
+/// The `CE_0428` data type code of the 2.4 tables.
+pub static CE_0428: LegacyDataType = LegacyDataType {
+    code: "CE_0428",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0428"),
     }),
 };
 
@@ -933,6 +1461,39 @@ pub static CE_0435: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0436` data type code of the 2.4 tables.
+pub static CE_0436: LegacyDataType = LegacyDataType {
+    code: "CE_0436",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0436"),
+    }),
+};
+
+/// The `CE_0437` data type code of the 2.4 tables.
+pub static CE_0437: LegacyDataType = LegacyDataType {
+    code: "CE_0437",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0437"),
+    }),
+};
+
+/// The `CE_0438` data type code of the 2.4 tables.
+pub static CE_0438: LegacyDataType = LegacyDataType {
+    code: "CE_0438",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0438"),
+    }),
+};
+
 /// The `CE_0443` data type code of the 2.4 tables.
 pub static CE_0443: LegacyDataType = LegacyDataType {
     code: "CE_0443",
@@ -966,6 +1527,116 @@ pub static CE_0447: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0450` data type code of the 2.4 tables.
+pub static CE_0450: LegacyDataType = LegacyDataType {
+    code: "CE_0450",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0450"),
+    }),
+};
+
+/// The `CE_0451` data type code of the 2.4 tables.
+pub static CE_0451: LegacyDataType = LegacyDataType {
+    code: "CE_0451",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0451"),
+    }),
+};
+
+/// The `CE_0452` data type code of the 2.4 tables.
+pub static CE_0452: LegacyDataType = LegacyDataType {
+    code: "CE_0452",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0452"),
+    }),
+};
+
+/// The `CE_0453` data type code of the 2.4 tables.
+pub static CE_0453: LegacyDataType = LegacyDataType {
+    code: "CE_0453",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0453"),
+    }),
+};
+
+/// The `CE_0454` data type code of the 2.4 tables.
+pub static CE_0454: LegacyDataType = LegacyDataType {
+    code: "CE_0454",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0454"),
+    }),
+};
+
+/// The `CE_0461` data type code of the 2.4 tables.
+pub static CE_0461: LegacyDataType = LegacyDataType {
+    code: "CE_0461",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0461"),
+    }),
+};
+
+/// The `CE_0462` data type code of the 2.4 tables.
+pub static CE_0462: LegacyDataType = LegacyDataType {
+    code: "CE_0462",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0462"),
+    }),
+};
+
+/// The `CE_0463` data type code of the 2.4 tables.
+pub static CE_0463: LegacyDataType = LegacyDataType {
+    code: "CE_0463",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0463"),
+    }),
+};
+
+/// The `CE_0464` data type code of the 2.4 tables.
+pub static CE_0464: LegacyDataType = LegacyDataType {
+    code: "CE_0464",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0464"),
+    }),
+};
+
+/// The `CE_0466` data type code of the 2.4 tables.
+pub static CE_0466: LegacyDataType = LegacyDataType {
+    code: "CE_0466",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0466"),
+    }),
+};
+
 /// The `CE_0471` data type code of the 2.4 tables.
 pub static CE_0471: LegacyDataType = LegacyDataType {
     code: "CE_0471",
@@ -975,6 +1646,33 @@ pub static CE_0471: LegacyDataType = LegacyDataType {
         code: "CE",
         table: Some("0471"),
     }),
+};
+
+/// The `CE_0474` data type code of the 2.4 tables.
+pub static CE_0474: LegacyDataType = LegacyDataType {
+    code: "CE_0474",
+    version: "2.4",
+    name: "",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0474"),
+    }),
+};
+
+/// The `CK` data type code of the 2.4 tables.
+pub static CK: LegacyDataType = LegacyDataType {
+    code: "CK",
+    version: "2.4",
+    name: "composite ID with check digit",
+    base: None,
+};
+
+/// The `CNE` data type code of the 2.4 tables.
+pub static CNE: LegacyDataType = LegacyDataType {
+    code: "CNE",
+    version: "2.4",
+    name: "coded with no exceptions",
+    base: None,
 };
 
 /// The `CP` data type code of the 2.4 tables.
@@ -1017,6 +1715,14 @@ pub static DDI: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `DIN` data type code of the 2.4 tables.
+pub static DIN: LegacyDataType = LegacyDataType {
+    code: "DIN",
+    version: "2.4",
+    name: "activation date",
+    base: None,
+};
+
 /// The `DLD` data type code of the 2.4 tables.
 pub static DLD: LegacyDataType = LegacyDataType {
     code: "DLD",
@@ -1030,6 +1736,22 @@ pub static DLN: LegacyDataType = LegacyDataType {
     code: "DLN",
     version: "2.4",
     name: "driver's license number",
+    base: None,
+};
+
+/// The `DLT` data type code of the 2.4 tables.
+pub static DLT: LegacyDataType = LegacyDataType {
+    code: "DLT",
+    version: "2.4",
+    name: "delta check",
+    base: None,
+};
+
+/// The `DR` data type code of the 2.4 tables.
+pub static DR: LegacyDataType = LegacyDataType {
+    code: "DR",
+    version: "2.4",
+    name: "date/time range",
     base: None,
 };
 
@@ -1137,6 +1859,14 @@ pub static LA2: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `MO` data type code of the 2.4 tables.
+pub static MO: LegacyDataType = LegacyDataType {
+    code: "MO",
+    version: "2.4",
+    name: "money",
+    base: None,
+};
+
 /// The `MOC` data type code of the 2.4 tables.
 pub static MOC: LegacyDataType = LegacyDataType {
     code: "MOC",
@@ -1185,6 +1915,14 @@ pub static NM: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `NR` data type code of the 2.4 tables.
+pub static NR: LegacyDataType = LegacyDataType {
+    code: "NR",
+    version: "2.4",
+    name: "Numeric Range",
+    base: None,
+};
+
 /// The `OCD` data type code of the 2.4 tables.
 pub static OCD: LegacyDataType = LegacyDataType {
     code: "OCD",
@@ -1217,11 +1955,35 @@ pub static PI: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `PIP` data type code of the 2.4 tables.
+pub static PIP: LegacyDataType = LegacyDataType {
+    code: "PIP",
+    version: "2.4",
+    name: "Privileges",
+    base: None,
+};
+
 /// The `PL` data type code of the 2.4 tables.
 pub static PL: LegacyDataType = LegacyDataType {
     code: "PL",
     version: "2.4",
     name: "person location",
+    base: None,
+};
+
+/// The `PLN` data type code of the 2.4 tables.
+pub static PLN: LegacyDataType = LegacyDataType {
+    code: "PLN",
+    version: "2.4",
+    name: "Practitioner ID Numbers",
+    base: None,
+};
+
+/// The `PPN` data type code of the 2.4 tables.
+pub static PPN: LegacyDataType = LegacyDataType {
+    code: "PPN",
+    version: "2.4",
+    name: "performing person time stamp",
     base: None,
 };
 
@@ -1249,6 +2011,22 @@ pub static PTA: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `RFR` data type code of the 2.4 tables.
+pub static RFR: LegacyDataType = LegacyDataType {
+    code: "RFR",
+    version: "2.4",
+    name: "reference range",
+    base: None,
+};
+
+/// The `RI` data type code of the 2.4 tables.
+pub static RI: LegacyDataType = LegacyDataType {
+    code: "RI",
+    version: "2.4",
+    name: "repeat interval",
+    base: None,
+};
+
 /// The `RMC` data type code of the 2.4 tables.
 pub static RMC: LegacyDataType = LegacyDataType {
     code: "RMC",
@@ -1273,11 +2051,27 @@ pub static SN: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `SPD` data type code of the 2.4 tables.
+pub static SPD: LegacyDataType = LegacyDataType {
+    code: "SPD",
+    version: "2.4",
+    name: "Specialty",
+    base: None,
+};
+
 /// The `SPS` data type code of the 2.4 tables.
 pub static SPS: LegacyDataType = LegacyDataType {
     code: "SPS",
     version: "2.4",
     name: "specimen source",
+    base: None,
+};
+
+/// The `SRT` data type code of the 2.4 tables.
+pub static SRT: LegacyDataType = LegacyDataType {
+    code: "SRT",
+    version: "2.4",
+    name: "sort order",
     base: None,
 };
 
@@ -1329,6 +2123,14 @@ pub static VARIES: LegacyDataType = LegacyDataType {
     code: "VARIES",
     version: "2.4",
     name: "variable data type",
+    base: None,
+};
+
+/// The `VH` data type code of the 2.4 tables.
+pub static VH: LegacyDataType = LegacyDataType {
+    code: "VH",
+    version: "2.4",
+    name: "visiting hours",
     base: None,
 };
 

@@ -6,72 +6,75 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, Placeholder, SegmentRef, Structure};
 
+/// The top-level nodes of [`MFN_M03`], one `static` so a structure with the same tree links to it.
+pub static MFN_M03_NODES: [Node; 3] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M03.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M03.2-MFI",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "MFN_M03.3-MF_TEST",
+        position: 3,
+        name: "MF_TEST",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M03.3-MF_TEST.1-MFE",
+                position: 1,
+                segment: &crate::legacy::v2_4::segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M03.3-MF_TEST.2-OM1",
+                position: 2,
+                segment: &crate::legacy::v2_4::segment::om1::OM1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Placeholder(Placeholder {
+                id: "MFN_M03.3-MF_TEST.3-Hxx",
+                position: 3,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M03` message structure of the 2.4 tables, withdrawn as of 2.7.
 pub static MFN_M03: Structure = Structure {
     id: "MFN_M03",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M03.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M03.2-MFI",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "MFN_M03.3-MF_TEST",
-            position: 3,
-            name: "MF_TEST",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M03.3-MF_TEST.1-MFE",
-                    position: 1,
-                    segment: &crate::legacy::v2_4::segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M03.3-MF_TEST.2-OM1",
-                    position: 2,
-                    segment: &crate::legacy::v2_4::segment::om1::OM1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Placeholder(Placeholder {
-                    id: "MFN_M03.3-MF_TEST.3-Hxx",
-                    position: 3,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M03_NODES,
 };

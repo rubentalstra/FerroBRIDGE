@@ -1149,7 +1149,7 @@ fn emitting_twice_is_byte_identical_and_check_passes() {
     // per legacy version, and one module per legacy structure and segment.
     assert_eq!(
         report.files.len(),
-        6 + 305 + 190 + 83 + 696 + 1 + 11 * 4 + 218 + 495
+        6 + 305 + 190 + 83 + 696 + 1 + 11 * 4 + 1713 + 720
     );
     assert_eq!(
         tree(&first.path().join("src")),

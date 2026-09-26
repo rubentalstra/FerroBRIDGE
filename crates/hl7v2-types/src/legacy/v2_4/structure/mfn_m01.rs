@@ -6,62 +6,65 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, Placeholder, SegmentRef, Structure};
 
+/// The top-level nodes of [`MFN_M01`], one `static` so a structure with the same tree links to it.
+pub static MFN_M01_NODES: [Node; 3] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M01.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M01.2-MFI",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "MFN_M01.3-MF",
+        position: 3,
+        name: "MF",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M01.3-MF.1-MFE",
+                position: 1,
+                segment: &crate::legacy::v2_4::segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Placeholder(Placeholder {
+                id: "MFN_M01.3-MF.2-Zxx",
+                position: 2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M01` message structure of the 2.4 tables, withdrawn as of 2.7.
 pub static MFN_M01: Structure = Structure {
     id: "MFN_M01",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M01.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M01.2-MFI",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "MFN_M01.3-MF",
-            position: 3,
-            name: "MF",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M01.3-MF.1-MFE",
-                    position: 1,
-                    segment: &crate::legacy::v2_4::segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Placeholder(Placeholder {
-                    id: "MFN_M01.3-MF.2-Zxx",
-                    position: 2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M01_NODES,
 };

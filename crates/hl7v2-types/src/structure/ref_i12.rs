@@ -9,470 +9,473 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`REF_I12`], one `static` so a structure with the same tree links to it.
+pub static REF_I12_NODES: [Node; 21] = [
+    Node::Segment(SegmentRef {
+        id: "REF_I12.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.4-RF1",
+        position: 4,
+        segment: &segment::rf1::RF1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "REF_I12.5-AUTHORIZATION_CONTACT2",
+        position: 5,
+        name: "AUTHORIZATION_CONTACT2",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "REF_I12.5-AUTHORIZATION_CONTACT2.1-AUT",
+                position: 1,
+                segment: &segment::aut::AUT,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.5-AUTHORIZATION_CONTACT2.2-CTD",
+                position: 2,
+                segment: &segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "REF_I12.6-PROVIDER_CONTACT",
+        position: 6,
+        name: "PROVIDER_CONTACT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "REF_I12.6-PROVIDER_CONTACT.1-PRD",
+                position: 1,
+                segment: &segment::prd::PRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.6-PROVIDER_CONTACT.2-CTD",
+                position: 2,
+                segment: &segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.7-PID",
+        position: 7,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.8-GSP",
+        position: 8,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.9-GSR",
+        position: 9,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.10-GSC",
+        position: 10,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "REF_I12.11-NEXT_OF_KIN",
+        position: 11,
+        name: "NEXT_OF_KIN",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "REF_I12.11-NEXT_OF_KIN.1-NK1",
+                position: 1,
+                segment: &segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.11-NEXT_OF_KIN.2-GSP",
+                position: 2,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.11-NEXT_OF_KIN.3-GSR",
+                position: 3,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.12-GT1",
+        position: 12,
+        segment: &segment::gt1::GT1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "REF_I12.13-INSURANCE",
+        position: 13,
+        name: "INSURANCE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "REF_I12.13-INSURANCE.1-IN1",
+                position: 1,
+                segment: &segment::in1::IN1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.13-INSURANCE.2-IN2",
+                position: 2,
+                segment: &segment::in2::IN2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.13-INSURANCE.3-IN3",
+                position: 3,
+                segment: &segment::in3::IN3,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.14-ACC",
+        position: 14,
+        segment: &segment::acc::ACC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.15-DG1",
+        position: 15,
+        segment: &segment::dg1::DG1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.16-DRG",
+        position: 16,
+        segment: &segment::drg::DRG,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.17-AL1",
+        position: 17,
+        segment: &segment::al1::AL1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "REF_I12.18-PROCEDURE",
+        position: 18,
+        name: "PROCEDURE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "REF_I12.18-PROCEDURE.1-PR1",
+                position: 1,
+                segment: &segment::pr1::PR1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "REF_I12.18-PROCEDURE.2-AUTHORIZATION_CONTACT2",
+                position: 2,
+                name: "AUTHORIZATION_CONTACT2",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "REF_I12.18-PROCEDURE.2-AUTHORIZATION_CONTACT2.1-AUT",
+                        position: 1,
+                        segment: &segment::aut::AUT,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "REF_I12.18-PROCEDURE.2-AUTHORIZATION_CONTACT2.2-CTD",
+                        position: 2,
+                        segment: &segment::ctd::CTD,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "REF_I12.19-OBSERVATION",
+        position: 19,
+        name: "OBSERVATION",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "REF_I12.19-OBSERVATION.1-OBR",
+                position: 1,
+                segment: &segment::obr::OBR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.19-OBSERVATION.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.19-OBSERVATION.3-NTE",
+                position: 3,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES",
+                position: 4,
+                name: "RESULTS_NOTES",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES.3-NTE",
+                        position: 3,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "REF_I12.20-PATIENT_VISIT",
+        position: 20,
+        name: "PATIENT_VISIT",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "REF_I12.20-PATIENT_VISIT.1-PV1",
+                position: 1,
+                segment: &segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "REF_I12.20-PATIENT_VISIT.2-PV2",
+                position: 2,
+                segment: &segment::pv2::PV2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "REF_I12.21-NTE",
+        position: 21,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `REF_I12` message structure definition, `http://hl7.org/v2/StructureDefinition/REF_I12`.
 pub static REF_I12: Structure = Structure {
     id: "REF_I12",
     url: Some("http://hl7.org/v2/StructureDefinition/REF_I12"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "REF_I12.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.4-RF1",
-            position: 4,
-            segment: &segment::rf1::RF1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "REF_I12.5-AUTHORIZATION_CONTACT2",
-            position: 5,
-            name: "AUTHORIZATION_CONTACT2",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.5-AUTHORIZATION_CONTACT2.1-AUT",
-                    position: 1,
-                    segment: &segment::aut::AUT,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.5-AUTHORIZATION_CONTACT2.2-CTD",
-                    position: 2,
-                    segment: &segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "REF_I12.6-PROVIDER_CONTACT",
-            position: 6,
-            name: "PROVIDER_CONTACT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.6-PROVIDER_CONTACT.1-PRD",
-                    position: 1,
-                    segment: &segment::prd::PRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.6-PROVIDER_CONTACT.2-CTD",
-                    position: 2,
-                    segment: &segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.7-PID",
-            position: 7,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.8-GSP",
-            position: 8,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.9-GSR",
-            position: 9,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.10-GSC",
-            position: 10,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "REF_I12.11-NEXT_OF_KIN",
-            position: 11,
-            name: "NEXT_OF_KIN",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.11-NEXT_OF_KIN.1-NK1",
-                    position: 1,
-                    segment: &segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.11-NEXT_OF_KIN.2-GSP",
-                    position: 2,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.11-NEXT_OF_KIN.3-GSR",
-                    position: 3,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.12-GT1",
-            position: 12,
-            segment: &segment::gt1::GT1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "REF_I12.13-INSURANCE",
-            position: 13,
-            name: "INSURANCE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.13-INSURANCE.1-IN1",
-                    position: 1,
-                    segment: &segment::in1::IN1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.13-INSURANCE.2-IN2",
-                    position: 2,
-                    segment: &segment::in2::IN2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.13-INSURANCE.3-IN3",
-                    position: 3,
-                    segment: &segment::in3::IN3,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.14-ACC",
-            position: 14,
-            segment: &segment::acc::ACC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.15-DG1",
-            position: 15,
-            segment: &segment::dg1::DG1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.16-DRG",
-            position: 16,
-            segment: &segment::drg::DRG,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.17-AL1",
-            position: 17,
-            segment: &segment::al1::AL1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "REF_I12.18-PROCEDURE",
-            position: 18,
-            name: "PROCEDURE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.18-PROCEDURE.1-PR1",
-                    position: 1,
-                    segment: &segment::pr1::PR1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "REF_I12.18-PROCEDURE.2-AUTHORIZATION_CONTACT2",
-                    position: 2,
-                    name: "AUTHORIZATION_CONTACT2",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "REF_I12.18-PROCEDURE.2-AUTHORIZATION_CONTACT2.1-AUT",
-                            position: 1,
-                            segment: &segment::aut::AUT,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "REF_I12.18-PROCEDURE.2-AUTHORIZATION_CONTACT2.2-CTD",
-                            position: 2,
-                            segment: &segment::ctd::CTD,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "REF_I12.19-OBSERVATION",
-            position: 19,
-            name: "OBSERVATION",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.19-OBSERVATION.1-OBR",
-                    position: 1,
-                    segment: &segment::obr::OBR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.19-OBSERVATION.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.19-OBSERVATION.3-NTE",
-                    position: 3,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES",
-                    position: 4,
-                    name: "RESULTS_NOTES",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "REF_I12.19-OBSERVATION.4-RESULTS_NOTES.3-NTE",
-                            position: 3,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "REF_I12.20-PATIENT_VISIT",
-            position: 20,
-            name: "PATIENT_VISIT",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.20-PATIENT_VISIT.1-PV1",
-                    position: 1,
-                    segment: &segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "REF_I12.20-PATIENT_VISIT.2-PV2",
-                    position: 2,
-                    segment: &segment::pv2::PV2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "REF_I12.21-NTE",
-            position: 21,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &REF_I12_NODES,
 };

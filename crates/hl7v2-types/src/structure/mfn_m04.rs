@@ -9,124 +9,127 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`MFN_M04`], one `static` so a structure with the same tree links to it.
+pub static MFN_M04_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M04.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M04.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M04.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M04.4-MFI",
+        position: 4,
+        segment: &segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M04.5-NTE",
+        position: 5,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "MFN_M04.6-MF_CDM",
+        position: 6,
+        name: "MF_CDM",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M04.6-MF_CDM.1-MFE",
+                position: 1,
+                segment: &segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M04.6-MF_CDM.2-NTE",
+                position: 2,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M04.6-MF_CDM.3-CDM",
+                position: 3,
+                segment: &segment::cdm::CDM,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M04.6-MF_CDM.4-NTE",
+                position: 4,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M04.6-MF_CDM.5-PRC",
+                position: 5,
+                segment: &segment::prc::PRC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M04` message structure definition, `http://hl7.org/v2/StructureDefinition/MFN_M04`.
 pub static MFN_M04: Structure = Structure {
     id: "MFN_M04",
     url: Some("http://hl7.org/v2/StructureDefinition/MFN_M04"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M04.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M04.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M04.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M04.4-MFI",
-            position: 4,
-            segment: &segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M04.5-NTE",
-            position: 5,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "MFN_M04.6-MF_CDM",
-            position: 6,
-            name: "MF_CDM",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M04.6-MF_CDM.1-MFE",
-                    position: 1,
-                    segment: &segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M04.6-MF_CDM.2-NTE",
-                    position: 2,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M04.6-MF_CDM.3-CDM",
-                    position: 3,
-                    segment: &segment::cdm::CDM,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M04.6-MF_CDM.4-NTE",
-                    position: 4,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M04.6-MF_CDM.5-PRC",
-                    position: 5,
-                    segment: &segment::prc::PRC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M04_NODES,
 };

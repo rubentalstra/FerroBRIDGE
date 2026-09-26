@@ -2,59 +2,195 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The segments of the 2.7.1 tables whose field table differs from the v2.9.1 one, one module each.
+//! The segments of the 2.7.1 tables that no v2.9.1 or earlier `static` carries, one module each.
 
+pub mod acc;
+pub mod adj;
 pub mod al1;
+pub mod arq;
+pub mod arv;
+pub mod aut;
+pub mod bpo;
+pub mod bpx;
+pub mod btx;
+pub mod cm1;
+pub mod cns;
+pub mod csp;
+pub mod csr;
+pub mod css;
+pub mod cti;
 pub mod dg1;
+pub mod ecd;
+pub mod ecr;
+pub mod equ;
 pub mod err;
+pub mod evn;
+pub mod ft1;
 pub mod gol;
 pub mod gt1;
+pub mod ilt;
+pub mod in1;
+pub mod in2;
+pub mod in3;
+pub mod inv;
+pub mod ipc;
+pub mod itm;
+pub mod mfe;
+pub mod mfi;
+pub mod mrg;
 pub mod msa;
 pub mod msh;
+pub mod nds;
 pub mod nk1;
 pub mod nte;
 pub mod obr;
 pub mod obx;
+pub mod ods;
+pub mod odt;
+pub mod om1;
+pub mod om2;
+pub mod om3;
+pub mod om4;
+pub mod om5;
+pub mod om7;
 pub mod orc;
+pub mod pac;
+pub mod pcr;
+pub mod pd1;
+pub mod peo;
 pub mod pid;
+pub mod pkg;
+pub mod pr1;
+pub mod pra;
+pub mod prt;
+pub mod psl;
 pub mod pv1;
 pub mod pv2;
+pub mod pye;
+pub mod qpd;
 pub mod qrd;
 pub mod qrf;
+pub mod rdt;
+pub mod rel;
+pub mod rf1;
 pub mod rol;
+pub mod rq1;
+pub mod rqd;
+pub mod rxa;
 pub mod rxc;
 pub mod rxd;
 pub mod rxe;
+pub mod rxg;
+pub mod rxo;
 pub mod rxr;
+pub mod sac;
+pub mod sch;
+pub mod shp;
+pub mod sid;
+pub mod spm;
+pub mod stf;
+pub mod tcc;
+pub mod tcd;
+pub mod txa;
+pub mod ub1;
 pub mod urd;
 pub mod urs;
+pub mod vnd;
 
 /// Every segment, in definition id order.
-pub static SEGMENTS: [&crate::model::Segment; 24] = [
+pub static SEGMENTS: [&crate::model::Segment; 92] = [
+    &acc::ACC,
+    &adj::ADJ,
     &al1::AL1,
+    &arq::ARQ,
+    &arv::ARV,
+    &aut::AUT,
+    &bpo::BPO,
+    &bpx::BPX,
+    &btx::BTX,
+    &cm1::CM1,
+    &cns::CNS,
+    &csp::CSP,
+    &csr::CSR,
+    &css::CSS,
+    &cti::CTI,
     &dg1::DG1,
+    &ecd::ECD,
+    &ecr::ECR,
+    &equ::EQU,
     &err::ERR,
+    &evn::EVN,
+    &ft1::FT1,
     &gol::GOL,
     &gt1::GT1,
+    &ilt::ILT,
+    &in1::IN1,
+    &in2::IN2,
+    &in3::IN3,
+    &inv::INV,
+    &ipc::IPC,
+    &itm::ITM,
+    &mfe::MFE,
+    &mfi::MFI,
+    &mrg::MRG,
     &msa::MSA,
     &msh::MSH,
+    &nds::NDS,
     &nk1::NK1,
     &nte::NTE,
     &obr::OBR,
     &obx::OBX,
+    &ods::ODS,
+    &odt::ODT,
+    &om1::OM1,
+    &om2::OM2,
+    &om3::OM3,
+    &om4::OM4,
+    &om5::OM5,
+    &om7::OM7,
     &orc::ORC,
+    &pac::PAC,
+    &pcr::PCR,
+    &pd1::PD1,
+    &peo::PEO,
     &pid::PID,
+    &pkg::PKG,
+    &pr1::PR1,
+    &pra::PRA,
+    &prt::PRT,
+    &psl::PSL,
     &pv1::PV1,
     &pv2::PV2,
+    &pye::PYE,
+    &qpd::QPD,
     &qrd::QRD,
     &qrf::QRF,
+    &rdt::RDT,
+    &rel::REL,
+    &rf1::RF1,
     &rol::ROL,
+    &rq1::RQ1,
+    &rqd::RQD,
+    &rxa::RXA,
     &rxc::RXC,
     &rxd::RXD,
     &rxe::RXE,
+    &rxg::RXG,
+    &rxo::RXO,
     &rxr::RXR,
+    &sac::SAC,
+    &sch::SCH,
+    &shp::SHP,
+    &sid::SID,
+    &spm::SPM,
+    &stf::STF,
+    &tcc::TCC,
+    &tcd::TCD,
+    &txa::TXA,
+    &ub1::UB1,
     &urd::URD,
     &urs::URS,
+    &vnd::VND,
 ];
 
 /// Returns the segment whose definition id is `id`, for example `ORC`.

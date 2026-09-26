@@ -6,198 +6,201 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`RCI_I05`], one `static` so a structure with the same tree links to it.
+pub static RCI_I05_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "RCI_I05.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RCI_I05.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RCI_I05.3-QRD",
+        position: 3,
+        segment: &crate::legacy::v2_4::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RCI_I05.4-QRF",
+        position: 4,
+        segment: &crate::legacy::v2_4::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "RCI_I05.5-PROVIDER",
+        position: 5,
+        name: "PROVIDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RCI_I05.5-PROVIDER.1-PRD",
+                position: 1,
+                segment: &crate::legacy::v2_4::segment::prd::PRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCI_I05.5-PROVIDER.2-CTD",
+                position: 2,
+                segment: &crate::legacy::v2_4::segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCI_I05.5-PROVIDER.3-PID",
+                position: 3,
+                segment: &crate::legacy::v2_4::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCI_I05.5-PROVIDER.4-DG1",
+                position: 4,
+                segment: &crate::legacy::v2_4::segment::dg1::DG1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCI_I05.5-PROVIDER.5-DRG",
+                position: 5,
+                segment: &crate::legacy::v2_4::segment::drg::DRG,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RCI_I05.5-PROVIDER.6-AL1",
+                position: 6,
+                segment: &crate::legacy::v2_4::segment::al1::AL1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "RCI_I05.5-PROVIDER.7-OBSERVATION",
+                position: 7,
+                name: "OBSERVATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RCI_I05.5-PROVIDER.7-OBSERVATION.1-OBR",
+                        position: 1,
+                        segment: &crate::legacy::v2_4::segment::obr::OBR,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RCI_I05.5-PROVIDER.7-OBSERVATION.2-NTE",
+                        position: 2,
+                        segment: &crate::legacy::v2_4::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS",
+                        position: 3,
+                        name: "RESULTS",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS.1-OBX",
+                                position: 1,
+                                segment: &crate::legacy::v2_4::segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_4::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS.3-NTE",
+                                position: 3,
+                                segment: &crate::legacy::v2_4::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `RCI_I05` message structure of the 2.4 tables, withdrawn as of 2.8.
 pub static RCI_I05: Structure = Structure {
     id: "RCI_I05",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.8"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RCI_I05.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RCI_I05.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RCI_I05.3-QRD",
-            position: 3,
-            segment: &crate::legacy::v2_4::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RCI_I05.4-QRF",
-            position: 4,
-            segment: &crate::legacy::v2_4::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "RCI_I05.5-PROVIDER",
-            position: 5,
-            name: "PROVIDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RCI_I05.5-PROVIDER.1-PRD",
-                    position: 1,
-                    segment: &crate::legacy::v2_4::segment::prd::PRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCI_I05.5-PROVIDER.2-CTD",
-                    position: 2,
-                    segment: &crate::legacy::v2_4::segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCI_I05.5-PROVIDER.3-PID",
-                    position: 3,
-                    segment: &crate::legacy::v2_4::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCI_I05.5-PROVIDER.4-DG1",
-                    position: 4,
-                    segment: &crate::legacy::v2_4::segment::dg1::DG1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCI_I05.5-PROVIDER.5-DRG",
-                    position: 5,
-                    segment: &crate::legacy::v2_4::segment::drg::DRG,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RCI_I05.5-PROVIDER.6-AL1",
-                    position: 6,
-                    segment: &crate::legacy::v2_4::segment::al1::AL1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "RCI_I05.5-PROVIDER.7-OBSERVATION",
-                    position: 7,
-                    name: "OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RCI_I05.5-PROVIDER.7-OBSERVATION.1-OBR",
-                            position: 1,
-                            segment: &crate::legacy::v2_4::segment::obr::OBR,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RCI_I05.5-PROVIDER.7-OBSERVATION.2-NTE",
-                            position: 2,
-                            segment: &crate::legacy::v2_4::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                        Node::Group(Group {
-                            id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS",
-                            position: 3,
-                            name: "RESULTS",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS.1-OBX",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_4::segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS.2-NTE",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_4::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RCI_I05.5-PROVIDER.7-OBSERVATION.3-RESULTS.3-NTE",
-                                    position: 3,
-                                    segment: &crate::legacy::v2_4::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &RCI_I05_NODES,
 };

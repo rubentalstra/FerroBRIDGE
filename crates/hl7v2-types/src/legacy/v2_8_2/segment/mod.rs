@@ -2,79 +2,23 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The segments of the 2.8.2 tables whose field table differs from the v2.9.1 one, one module each.
+//! The segments of the 2.8.2 tables that no v2.9.1 or earlier `static` carries, one module each.
 
-pub mod al1;
-pub mod arv;
-pub mod cti;
-pub mod dg1;
-pub mod err;
-pub mod ft1;
-pub mod in1;
-pub mod in2;
-pub mod in3;
-pub mod msa;
-pub mod msh;
-pub mod nk1;
-pub mod nte;
 pub mod obr;
 pub mod obx;
-pub mod orc;
-pub mod pac;
-pub mod pd1;
-pub mod pid;
+pub mod om1;
+pub mod omc;
 pub mod prt;
-pub mod pv1;
-pub mod pv2;
-pub mod qrd;
-pub mod qrf;
-pub mod rxc;
-pub mod rxd;
-pub mod rxe;
-pub mod rxr;
-pub mod sac;
-pub mod shp;
 pub mod spm;
-pub mod txa;
-pub mod urd;
-pub mod urs;
 
 /// Every segment, in definition id order.
-pub static SEGMENTS: [&crate::model::Segment; 34] = [
-    &al1::AL1,
-    &arv::ARV,
-    &cti::CTI,
-    &dg1::DG1,
-    &err::ERR,
-    &ft1::FT1,
-    &in1::IN1,
-    &in2::IN2,
-    &in3::IN3,
-    &msa::MSA,
-    &msh::MSH,
-    &nk1::NK1,
-    &nte::NTE,
+pub static SEGMENTS: [&crate::model::Segment; 6] = [
     &obr::OBR,
     &obx::OBX,
-    &orc::ORC,
-    &pac::PAC,
-    &pd1::PD1,
-    &pid::PID,
+    &om1::OM1,
+    &omc::OMC,
     &prt::PRT,
-    &pv1::PV1,
-    &pv2::PV2,
-    &qrd::QRD,
-    &qrf::QRF,
-    &rxc::RXC,
-    &rxd::RXD,
-    &rxe::RXE,
-    &rxr::RXR,
-    &sac::SAC,
-    &shp::SHP,
     &spm::SPM,
-    &txa::TXA,
-    &urd::URD,
-    &urs::URS,
 ];
 
 /// Returns the segment whose definition id is `id`, for example `ORC`.

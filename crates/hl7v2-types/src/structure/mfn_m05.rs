@@ -9,146 +9,149 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`MFN_M05`], one `static` so a structure with the same tree links to it.
+pub static MFN_M05_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M05.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M05.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M05.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M05.4-MFI",
+        position: 4,
+        segment: &segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "MFN_M05.5-MF_LOCATION",
+        position: 5,
+        name: "MF_LOCATION",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M05.5-MF_LOCATION.1-MFE",
+                position: 1,
+                segment: &segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M05.5-MF_LOCATION.2-LOC",
+                position: 2,
+                segment: &segment::loc::LOC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M05.5-MF_LOCATION.3-LCH",
+                position: 3,
+                segment: &segment::lch::LCH,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M05.5-MF_LOCATION.4-LRL",
+                position: 4,
+                segment: &segment::lrl::LRL,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT",
+                position: 5,
+                name: "MF_LOC_DEPT",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT.1-LDP",
+                        position: 1,
+                        segment: &segment::ldp::LDP,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT.2-LCH",
+                        position: 2,
+                        segment: &segment::lch::LCH,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT.3-LCC",
+                        position: 3,
+                        segment: &segment::lcc::LCC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M05` message structure definition, `http://hl7.org/v2/StructureDefinition/MFN_M05`.
 pub static MFN_M05: Structure = Structure {
     id: "MFN_M05",
     url: Some("http://hl7.org/v2/StructureDefinition/MFN_M05"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M05.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M05.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M05.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M05.4-MFI",
-            position: 4,
-            segment: &segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "MFN_M05.5-MF_LOCATION",
-            position: 5,
-            name: "MF_LOCATION",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M05.5-MF_LOCATION.1-MFE",
-                    position: 1,
-                    segment: &segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M05.5-MF_LOCATION.2-LOC",
-                    position: 2,
-                    segment: &segment::loc::LOC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M05.5-MF_LOCATION.3-LCH",
-                    position: 3,
-                    segment: &segment::lch::LCH,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M05.5-MF_LOCATION.4-LRL",
-                    position: 4,
-                    segment: &segment::lrl::LRL,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT",
-                    position: 5,
-                    name: "MF_LOC_DEPT",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT.1-LDP",
-                            position: 1,
-                            segment: &segment::ldp::LDP,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT.2-LCH",
-                            position: 2,
-                            segment: &segment::lch::LCH,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "MFN_M05.5-MF_LOCATION.5-MF_LOC_DEPT.3-LCC",
-                            position: 3,
-                            segment: &segment::lcc::LCC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M05_NODES,
 };

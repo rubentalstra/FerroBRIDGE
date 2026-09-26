@@ -6,138 +6,141 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`SUR_P09`], one `static` so a structure with the same tree links to it.
+pub static SUR_P09_NODES: [Node; 2] = [
+    Node::Segment(SegmentRef {
+        id: "SUR_P09.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "SUR_P09.2-FACILITY",
+        position: 2,
+        name: "FACILITY",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "SUR_P09.2-FACILITY.1-FAC",
+                position: 1,
+                segment: &crate::segment::fac::FAC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "SUR_P09.2-FACILITY.2-PRODUCT",
+                position: 2,
+                name: "PRODUCT",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SUR_P09.2-FACILITY.2-PRODUCT.1-PSH",
+                        position: 1,
+                        segment: &crate::legacy::v2_5_1::segment::psh::PSH,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SUR_P09.2-FACILITY.2-PRODUCT.2-PDC",
+                        position: 2,
+                        segment: &crate::legacy::v2_5::segment::pdc::PDC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "SUR_P09.2-FACILITY.3-PSH",
+                position: 3,
+                segment: &crate::legacy::v2_5_1::segment::psh::PSH,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL",
+                position: 4,
+                name: "FACILITY_DETAIL",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL.1-FAC",
+                        position: 1,
+                        segment: &crate::segment::fac::FAC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL.2-PDC",
+                        position: 2,
+                        segment: &crate::legacy::v2_5::segment::pdc::PDC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL.3-NTE",
+                        position: 3,
+                        segment: &crate::legacy::v2_5::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "SUR_P09.2-FACILITY.5-ED",
+                position: 5,
+                segment: &crate::legacy::v2_5::segment::ed::ED,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `SUR_P09` message structure of the 2.5.1 tables, withdrawn as of 2.7.
 pub static SUR_P09: Structure = Structure {
     id: "SUR_P09",
     url: None,
     version: "2.5.1",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "SUR_P09.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "SUR_P09.2-FACILITY",
-            position: 2,
-            name: "FACILITY",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "SUR_P09.2-FACILITY.1-FAC",
-                    position: 1,
-                    segment: &crate::segment::fac::FAC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "SUR_P09.2-FACILITY.2-PRODUCT",
-                    position: 2,
-                    name: "PRODUCT",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SUR_P09.2-FACILITY.2-PRODUCT.1-PSH",
-                            position: 1,
-                            segment: &crate::legacy::v2_5_1::segment::psh::PSH,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SUR_P09.2-FACILITY.2-PRODUCT.2-PDC",
-                            position: 2,
-                            segment: &crate::legacy::v2_5_1::segment::pdc::PDC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SUR_P09.2-FACILITY.3-PSH",
-                    position: 3,
-                    segment: &crate::legacy::v2_5_1::segment::psh::PSH,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL",
-                    position: 4,
-                    name: "FACILITY_DETAIL",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL.1-FAC",
-                            position: 1,
-                            segment: &crate::segment::fac::FAC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL.2-PDC",
-                            position: 2,
-                            segment: &crate::legacy::v2_5_1::segment::pdc::PDC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SUR_P09.2-FACILITY.4-FACILITY_DETAIL.3-NTE",
-                            position: 3,
-                            segment: &crate::legacy::v2_5_1::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SUR_P09.2-FACILITY.5-ED",
-                    position: 5,
-                    segment: &crate::legacy::v2_5_1::segment::ed::ED,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &SUR_P09_NODES,
 };

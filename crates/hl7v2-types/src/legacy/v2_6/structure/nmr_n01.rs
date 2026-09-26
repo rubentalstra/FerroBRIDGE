@@ -6,144 +6,147 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`NMR_N01`], one `static` so a structure with the same tree links to it.
+pub static NMR_N01_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "NMR_N01.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_6::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "NMR_N01.2-SFT",
+        position: 2,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "NMR_N01.3-UAC",
+        position: 3,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "NMR_N01.4-MSA",
+        position: 4,
+        segment: &crate::legacy::v2_6::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "NMR_N01.5-ERR",
+        position: 5,
+        segment: &crate::legacy::v2_6::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "NMR_N01.6-QRD",
+        position: 6,
+        segment: &crate::legacy::v2_6::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT",
+        position: 7,
+        name: "CLOCK_AND_STATS_WITH_NOTES_ALT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.1-NCK",
+                position: 1,
+                segment: &crate::segment::nck::NCK,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.2-NTE",
+                position: 2,
+                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.3-NST",
+                position: 3,
+                segment: &crate::segment::nst::NST,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.4-NTE",
+                position: 4,
+                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.5-NSC",
+                position: 5,
+                segment: &crate::legacy::v2_5::segment::nsc::NSC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.6-NTE",
+                position: 6,
+                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `NMR_N01` message structure of the 2.6 tables, withdrawn as of 2.7.
 pub static NMR_N01: Structure = Structure {
     id: "NMR_N01",
     url: None,
     version: "2.6",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "NMR_N01.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_6::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "NMR_N01.2-SFT",
-            position: 2,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "NMR_N01.3-UAC",
-            position: 3,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "NMR_N01.4-MSA",
-            position: 4,
-            segment: &crate::legacy::v2_6::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "NMR_N01.5-ERR",
-            position: 5,
-            segment: &crate::legacy::v2_6::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "NMR_N01.6-QRD",
-            position: 6,
-            segment: &crate::legacy::v2_6::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT",
-            position: 7,
-            name: "CLOCK_AND_STATS_WITH_NOTES_ALT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.1-NCK",
-                    position: 1,
-                    segment: &crate::segment::nck::NCK,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.2-NTE",
-                    position: 2,
-                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.3-NST",
-                    position: 3,
-                    segment: &crate::segment::nst::NST,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.4-NTE",
-                    position: 4,
-                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.5-NSC",
-                    position: 5,
-                    segment: &crate::legacy::v2_6::segment::nsc::NSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMR_N01.7-CLOCK_AND_STATS_WITH_NOTES_ALT.6-NTE",
-                    position: 6,
-                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &NMR_N01_NODES,
 };

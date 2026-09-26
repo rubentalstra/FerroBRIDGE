@@ -9,336 +9,339 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`SRR_S01`], one `static` so a structure with the same tree links to it.
+pub static SRR_S01_NODES: [Node; 4] = [
+    Node::Segment(SegmentRef {
+        id: "SRR_S01.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SRR_S01.2-MSA",
+        position: 2,
+        segment: &segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SRR_S01.3-ERR",
+        position: 3,
+        segment: &segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "SRR_S01.4-SCHEDULE",
+        position: 4,
+        name: "SCHEDULE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "SRR_S01.4-SCHEDULE.1-SCH",
+                position: 1,
+                segment: &segment::sch::SCH,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SRR_S01.4-SCHEDULE.2-TQ1",
+                position: 2,
+                segment: &segment::tq1::TQ1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SRR_S01.4-SCHEDULE.3-NTE",
+                position: 3,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "SRR_S01.4-SCHEDULE.4-PATIENT",
+                position: 4,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.1-PID",
+                        position: 1,
+                        segment: &segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.2-GSP",
+                        position: 2,
+                        segment: &segment::gsp::GSP,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.3-GSR",
+                        position: 3,
+                        segment: &segment::gsr::GSR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.4-GSC",
+                        position: 4,
+                        segment: &segment::gsc::GSC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.5-PRT",
+                        position: 5,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.6-PV1",
+                        position: 6,
+                        segment: &segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.7-PV2",
+                        position: 7,
+                        segment: &segment::pv2::PV2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.8-PRT",
+                        position: 8,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.4-PATIENT.9-DG1",
+                        position: 9,
+                        segment: &segment::dg1::DG1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "SRR_S01.4-SCHEDULE.5-RESOURCES",
+                position: 5,
+                name: "RESOURCES",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SRR_S01.4-SCHEDULE.5-RESOURCES.1-RGS",
+                        position: 1,
+                        segment: &segment::rgs::RGS,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "SRR_S01.4-SCHEDULE.5-RESOURCES.2-SERVICE",
+                        position: 2,
+                        name: "SERVICE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.2-SERVICE.1-AIS",
+                                position: 1,
+                                segment: &segment::ais::AIS,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.2-SERVICE.2-NTE",
+                                position: 2,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SRR_S01.4-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE",
+                        position: 3,
+                        name: "GENERAL_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
+                                position: 1,
+                                segment: &segment::aig::AIG,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.2-NTE",
+                                position: 2,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SRR_S01.4-SCHEDULE.5-RESOURCES.4-LOCATION_RESOURCE",
+                        position: 4,
+                        name: "LOCATION_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.4-LOCATION_RESOURCE.1-AIL",
+                                position: 1,
+                                segment: &segment::ail::AIL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.4-LOCATION_RESOURCE.2-NTE",
+                                position: 2,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SRR_S01.4-SCHEDULE.5-RESOURCES.5-PERSONNEL_RESOURCE",
+                        position: 5,
+                        name: "PERSONNEL_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.5-PERSONNEL_RESOURCE.1-AIP",
+                                position: 1,
+                                segment: &segment::aip::AIP,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SRR_S01.4-SCHEDULE.5-RESOURCES.5-PERSONNEL_RESOURCE.2-NTE",
+                                position: 2,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `SRR_S01` message structure definition, `http://hl7.org/v2/StructureDefinition/SRR_S01`.
 pub static SRR_S01: Structure = Structure {
     id: "SRR_S01",
     url: Some("http://hl7.org/v2/StructureDefinition/SRR_S01"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "SRR_S01.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SRR_S01.2-MSA",
-            position: 2,
-            segment: &segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SRR_S01.3-ERR",
-            position: 3,
-            segment: &segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "SRR_S01.4-SCHEDULE",
-            position: 4,
-            name: "SCHEDULE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "SRR_S01.4-SCHEDULE.1-SCH",
-                    position: 1,
-                    segment: &segment::sch::SCH,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SRR_S01.4-SCHEDULE.2-TQ1",
-                    position: 2,
-                    segment: &segment::tq1::TQ1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SRR_S01.4-SCHEDULE.3-NTE",
-                    position: 3,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "SRR_S01.4-SCHEDULE.4-PATIENT",
-                    position: 4,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.1-PID",
-                            position: 1,
-                            segment: &segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.2-GSP",
-                            position: 2,
-                            segment: &segment::gsp::GSP,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.3-GSR",
-                            position: 3,
-                            segment: &segment::gsr::GSR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.4-GSC",
-                            position: 4,
-                            segment: &segment::gsc::GSC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.5-PRT",
-                            position: 5,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.6-PV1",
-                            position: 6,
-                            segment: &segment::pv1::PV1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.7-PV2",
-                            position: 7,
-                            segment: &segment::pv2::PV2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.8-PRT",
-                            position: 8,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.4-PATIENT.9-DG1",
-                            position: 9,
-                            segment: &segment::dg1::DG1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES",
-                    position: 5,
-                    name: "RESOURCES",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SRR_S01.4-SCHEDULE.5-RESOURCES.1-RGS",
-                            position: 1,
-                            segment: &segment::rgs::RGS,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "SRR_S01.4-SCHEDULE.5-RESOURCES.2-SERVICE",
-                            position: 2,
-                            name: "SERVICE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.2-SERVICE.1-AIS",
-                                    position: 1,
-                                    segment: &segment::ais::AIS,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.2-SERVICE.2-NTE",
-                                    position: 2,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SRR_S01.4-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE",
-                            position: 3,
-                            name: "GENERAL_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
-                                    position: 1,
-                                    segment: &segment::aig::AIG,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.2-NTE",
-                                    position: 2,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SRR_S01.4-SCHEDULE.5-RESOURCES.4-LOCATION_RESOURCE",
-                            position: 4,
-                            name: "LOCATION_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.4-LOCATION_RESOURCE.1-AIL",
-                                    position: 1,
-                                    segment: &segment::ail::AIL,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.4-LOCATION_RESOURCE.2-NTE",
-                                    position: 2,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SRR_S01.4-SCHEDULE.5-RESOURCES.5-PERSONNEL_RESOURCE",
-                            position: 5,
-                            name: "PERSONNEL_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.5-PERSONNEL_RESOURCE.1-AIP",
-                                    position: 1,
-                                    segment: &segment::aip::AIP,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SRR_S01.4-SCHEDULE.5-RESOURCES.5-PERSONNEL_RESOURCE.2-NTE",
-                                    position: 2,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &SRR_S01_NODES,
 };

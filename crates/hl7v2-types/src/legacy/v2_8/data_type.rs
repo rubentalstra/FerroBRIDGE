@@ -63,11 +63,27 @@ pub static DDI: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `DIN` data type code of the 2.8 tables.
+pub static DIN: LegacyDataType = LegacyDataType {
+    code: "DIN",
+    version: "2.8",
+    name: "Date and Institution Name",
+    base: None,
+};
+
 /// The `DLD` data type code of the 2.8 tables.
 pub static DLD: LegacyDataType = LegacyDataType {
     code: "DLD",
     version: "2.8",
     name: "Discharge to Location and Date",
+    base: None,
+};
+
+/// The `DLN` data type code of the 2.8 tables.
+pub static DLN: LegacyDataType = LegacyDataType {
+    code: "DLN",
+    version: "2.8",
+    name: "Driver's License Number",
     base: None,
 };
 
@@ -103,6 +119,14 @@ pub static DTN: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `ED` data type code of the 2.8 tables.
+pub static ED: LegacyDataType = LegacyDataType {
+    code: "ED",
+    version: "2.8",
+    name: "Encapsulated Data",
+    base: None,
+};
+
 /// The `EI` data type code of the 2.8 tables.
 pub static EI: LegacyDataType = LegacyDataType {
     code: "EI",
@@ -119,27 +143,11 @@ pub static EIP: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `ERL` data type code of the 2.8 tables.
-pub static ERL: LegacyDataType = LegacyDataType {
-    code: "ERL",
-    version: "2.8",
-    name: "Error Location",
-    base: None,
-};
-
 /// The `FC` data type code of the 2.8 tables.
 pub static FC: LegacyDataType = LegacyDataType {
     code: "FC",
     version: "2.8",
     name: "Financial Class",
-    base: None,
-};
-
-/// The `FT` data type code of the 2.8 tables.
-pub static FT: LegacyDataType = LegacyDataType {
-    code: "FT",
-    version: "2.8",
-    name: "Formatted Text Data",
     base: None,
 };
 
@@ -175,6 +183,14 @@ pub static JCC: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `MO` data type code of the 2.8 tables.
+pub static MO: LegacyDataType = LegacyDataType {
+    code: "MO",
+    version: "2.8",
+    name: "Money",
+    base: None,
+};
+
 /// The `MOC` data type code of the 2.8 tables.
 pub static MOC: LegacyDataType = LegacyDataType {
     code: "MOC",
@@ -188,14 +204,6 @@ pub static MOP: LegacyDataType = LegacyDataType {
     code: "MOP",
     version: "2.8",
     name: "Money or Percentage",
-    base: None,
-};
-
-/// The `MSG` data type code of the 2.8 tables.
-pub static MSG: LegacyDataType = LegacyDataType {
-    code: "MSG",
-    version: "2.8",
-    name: "Message Type",
     base: None,
 };
 
@@ -215,19 +223,19 @@ pub static NM: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `NR` data type code of the 2.8 tables.
+pub static NR: LegacyDataType = LegacyDataType {
+    code: "NR",
+    version: "2.8",
+    name: "Numeric Range",
+    base: None,
+};
+
 /// The `PL` data type code of the 2.8 tables.
 pub static PL: LegacyDataType = LegacyDataType {
     code: "PL",
     version: "2.8",
     name: "Person Location",
-    base: None,
-};
-
-/// The `PPN` data type code of the 2.8 tables.
-pub static PPN: LegacyDataType = LegacyDataType {
-    code: "PPN",
-    version: "2.8",
-    name: "Performing Person Time Stamp",
     base: None,
 };
 
@@ -239,19 +247,19 @@ pub static PRL: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `PT` data type code of the 2.8 tables.
-pub static PT: LegacyDataType = LegacyDataType {
-    code: "PT",
-    version: "2.8",
-    name: "Processing Type",
-    base: None,
-};
-
 /// The `PTA` data type code of the 2.8 tables.
 pub static PTA: LegacyDataType = LegacyDataType {
     code: "PTA",
     version: "2.8",
     name: "Policy Type and Amount",
+    base: None,
+};
+
+/// The `RI` data type code of the 2.8 tables.
+pub static RI: LegacyDataType = LegacyDataType {
+    code: "RI",
+    version: "2.8",
+    name: "Repeat Interval",
     base: None,
 };
 
@@ -268,6 +276,14 @@ pub static SI: LegacyDataType = LegacyDataType {
     code: "SI",
     version: "2.8",
     name: "Sequence ID",
+    base: None,
+};
+
+/// The `SN` data type code of the 2.8 tables.
+pub static SN: LegacyDataType = LegacyDataType {
+    code: "SN",
+    version: "2.8",
+    name: "Structured Numeric",
     base: None,
 };
 
@@ -292,14 +308,6 @@ pub static VARIES: LegacyDataType = LegacyDataType {
     code: "VARIES",
     version: "2.8",
     name: "varies",
-    base: None,
-};
-
-/// The `VID` data type code of the 2.8 tables.
-pub static VID: LegacyDataType = LegacyDataType {
-    code: "VID",
-    version: "2.8",
-    name: "Version Identifier",
     base: None,
 };
 

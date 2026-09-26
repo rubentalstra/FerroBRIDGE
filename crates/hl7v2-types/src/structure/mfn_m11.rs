@@ -9,136 +9,139 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`MFN_M11`], one `static` so a structure with the same tree links to it.
+pub static MFN_M11_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M11.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M11.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M11.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M11.4-MFI",
+        position: 4,
+        segment: &segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "MFN_M11.5-MF_TEST_CALCULATED",
+        position: 5,
+        name: "MF_TEST_CALCULATED",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M11.5-MF_TEST_CALCULATED.1-MFE",
+                position: 1,
+                segment: &segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M11.5-MF_TEST_CALCULATED.2-OM1",
+                position: 2,
+                segment: &segment::om1::OM1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M11.5-MF_TEST_CALCULATED.3-OMC",
+                position: 3,
+                segment: &segment::omc::OMC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M11.5-MF_TEST_CALCULATED.4-PRT",
+                position: 4,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "MFN_M11.5-MF_TEST_CALCULATED.5-MF_TEST_CALC_DETAIL",
+                position: 5,
+                name: "MF_TEST_CALC_DETAIL",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "MFN_M11.5-MF_TEST_CALCULATED.5-MF_TEST_CALC_DETAIL.1-OM6",
+                        position: 1,
+                        segment: &segment::om6::OM6,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "MFN_M11.5-MF_TEST_CALCULATED.5-MF_TEST_CALC_DETAIL.2-OM2",
+                        position: 2,
+                        segment: &segment::om2::OM2,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M11` message structure definition, `http://hl7.org/v2/StructureDefinition/MFN_M11`.
 pub static MFN_M11: Structure = Structure {
     id: "MFN_M11",
     url: Some("http://hl7.org/v2/StructureDefinition/MFN_M11"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M11.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M11.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M11.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M11.4-MFI",
-            position: 4,
-            segment: &segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "MFN_M11.5-MF_TEST_CALCULATED",
-            position: 5,
-            name: "MF_TEST_CALCULATED",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M11.5-MF_TEST_CALCULATED.1-MFE",
-                    position: 1,
-                    segment: &segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M11.5-MF_TEST_CALCULATED.2-OM1",
-                    position: 2,
-                    segment: &segment::om1::OM1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M11.5-MF_TEST_CALCULATED.3-OMC",
-                    position: 3,
-                    segment: &segment::omc::OMC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M11.5-MF_TEST_CALCULATED.4-PRT",
-                    position: 4,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "MFN_M11.5-MF_TEST_CALCULATED.5-MF_TEST_CALC_DETAIL",
-                    position: 5,
-                    name: "MF_TEST_CALC_DETAIL",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "MFN_M11.5-MF_TEST_CALCULATED.5-MF_TEST_CALC_DETAIL.1-OM6",
-                            position: 1,
-                            segment: &segment::om6::OM6,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "MFN_M11.5-MF_TEST_CALCULATED.5-MF_TEST_CALC_DETAIL.2-OM2",
-                            position: 2,
-                            segment: &segment::om2::OM2,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M11_NODES,
 };

@@ -2,23 +2,39 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The segments of the 2.3.1 tables whose field table differs from the v2.9.1 one, one module each.
+//! The segments of the 2.3.1 tables that no v2.9.1 or earlier `static` carries, one module each.
 
+pub mod acc;
+pub mod aig;
+pub mod ail;
+pub mod aip;
+pub mod ais;
 pub mod al1;
+pub mod arq;
+pub mod aut;
 pub mod blg;
+pub mod csp;
+pub mod csr;
+pub mod css;
+pub mod ctd;
 pub mod cti;
 pub mod dg1;
+pub mod drg;
 pub mod dsc;
 pub mod err;
+pub mod evn;
+pub mod gol;
 pub mod gt1;
 pub mod in1;
 pub mod in2;
 pub mod in3;
+pub mod mfa;
 pub mod mfe;
 pub mod mfi;
 pub mod msa;
 pub mod msh;
 pub mod nck;
+pub mod nk1;
 pub mod nsc;
 pub mod nst;
 pub mod nte;
@@ -27,34 +43,67 @@ pub mod obx;
 pub mod ods;
 pub mod odt;
 pub mod orc;
+pub mod pcr;
 pub mod pd1;
+pub mod peo;
+pub mod pes;
 pub mod pid;
+pub mod pr1;
+pub mod pra;
+pub mod prb;
+pub mod prd;
+pub mod pth;
 pub mod pv1;
 pub mod pv2;
 pub mod qak;
 pub mod qrd;
 pub mod qrf;
+pub mod rf1;
+pub mod rgs;
+pub mod rol;
 pub mod rq1;
 pub mod rqd;
+pub mod rxa;
+pub mod rxe;
 pub mod rxo;
+pub mod rxr;
+pub mod sch;
+pub mod stf;
+pub mod var;
 
 /// Every segment, in definition id order.
-pub static SEGMENTS: [&crate::model::Segment; 33] = [
+pub static SEGMENTS: [&crate::model::Segment; 66] = [
+    &acc::ACC,
+    &aig::AIG,
+    &ail::AIL,
+    &aip::AIP,
+    &ais::AIS,
     &al1::AL1,
+    &arq::ARQ,
+    &aut::AUT,
     &blg::BLG,
+    &csp::CSP,
+    &csr::CSR,
+    &css::CSS,
+    &ctd::CTD,
     &cti::CTI,
     &dg1::DG1,
+    &drg::DRG,
     &dsc::DSC,
     &err::ERR,
+    &evn::EVN,
+    &gol::GOL,
     &gt1::GT1,
     &in1::IN1,
     &in2::IN2,
     &in3::IN3,
+    &mfa::MFA,
     &mfe::MFE,
     &mfi::MFI,
     &msa::MSA,
     &msh::MSH,
     &nck::NCK,
+    &nk1::NK1,
     &nsc::NSC,
     &nst::NST,
     &nte::NTE,
@@ -63,16 +112,33 @@ pub static SEGMENTS: [&crate::model::Segment; 33] = [
     &ods::ODS,
     &odt::ODT,
     &orc::ORC,
+    &pcr::PCR,
     &pd1::PD1,
+    &peo::PEO,
+    &pes::PES,
     &pid::PID,
+    &pr1::PR1,
+    &pra::PRA,
+    &prb::PRB,
+    &prd::PRD,
+    &pth::PTH,
     &pv1::PV1,
     &pv2::PV2,
     &qak::QAK,
     &qrd::QRD,
     &qrf::QRF,
+    &rf1::RF1,
+    &rgs::RGS,
+    &rol::ROL,
     &rq1::RQ1,
     &rqd::RQD,
+    &rxa::RXA,
+    &rxe::RXE,
     &rxo::RXO,
+    &rxr::RXR,
+    &sch::SCH,
+    &stf::STF,
+    &var::VAR,
 ];
 
 /// Returns the segment whose definition id is `id`, for example `ORC`.

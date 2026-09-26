@@ -6,509 +6,509 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, Placeholder, SegmentRef, Structure};
 
+/// The top-level nodes of [`PRR_PC5`], one `static` so a structure with the same tree links to it.
+pub static PRR_PC5_NODES: [Node; 8] = [
+    Node::Segment(SegmentRef {
+        id: "PRR_PC5.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_7::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PRR_PC5.2-SFT",
+        position: 2,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PRR_PC5.3-UAC",
+        position: 3,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PRR_PC5.4-MSA",
+        position: 4,
+        segment: &crate::legacy::v2_7::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PRR_PC5.5-ERR",
+        position: 5,
+        segment: &crate::legacy::v2_7::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PRR_PC5.6-QAK",
+        position: 6,
+        segment: &crate::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PRR_PC5.7-QRD",
+        position: 7,
+        segment: &crate::legacy::v2_7::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "PRR_PC5.8-PATIENT",
+        position: 8,
+        name: "PATIENT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "PRR_PC5.8-PATIENT.1-PID",
+                position: 1,
+                segment: &crate::legacy::v2_7::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "PRR_PC5.8-PATIENT.2-PATIENT_VISIT",
+                position: 2,
+                name: "PATIENT_VISIT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "PRR_PC5.8-PATIENT.2-PATIENT_VISIT.1-PV1",
+                        position: 1,
+                        segment: &crate::legacy::v2_7::segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PRR_PC5.8-PATIENT.2-PATIENT_VISIT.2-PV2",
+                        position: 2,
+                        segment: &crate::legacy::v2_7::segment::pv2::PV2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "PRR_PC5.8-PATIENT.3-PROBLEM",
+                position: 3,
+                name: "PROBLEM",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.1-PRB",
+                        position: 1,
+                        segment: &crate::segment::prb::PRB,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.2-NTE",
+                        position: 2,
+                        segment: &crate::legacy::v2_7::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.3-VAR",
+                        position: 3,
+                        segment: &crate::segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.4-PROBLEM_ROLE",
+                        position: 4,
+                        name: "PROBLEM_ROLE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.4-PROBLEM_ROLE.1-ROL",
+                                position: 1,
+                                segment: &crate::legacy::v2_7::segment::rol::ROL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.4-PROBLEM_ROLE.2-VAR",
+                                position: 2,
+                                segment: &crate::segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.5-PROBLEM_PATHWAY",
+                        position: 5,
+                        name: "PROBLEM_PATHWAY",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.5-PROBLEM_PATHWAY.1-PTH",
+                                position: 1,
+                                segment: &crate::segment::pth::PTH,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.5-PROBLEM_PATHWAY.2-VAR",
+                                position: 2,
+                                segment: &crate::segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.6-PROBLEM_OBSERVATION",
+                        position: 6,
+                        name: "PROBLEM_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.6-PROBLEM_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &crate::legacy::v2_7::segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.6-PROBLEM_OBSERVATION.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_7::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL",
+                        position: 7,
+                        name: "GOAL",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.1-GOL",
+                                position: 1,
+                                segment: &crate::legacy::v2_7::segment::gol::GOL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_7::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.3-VAR",
+                                position: 3,
+                                segment: &crate::segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Group(Group {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.4-GOAL_ROLE",
+                                position: 4,
+                                name: "GOAL_ROLE",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.4-GOAL_ROLE.1-ROL",
+                                        position: 1,
+                                        segment: &crate::legacy::v2_7::segment::rol::ROL,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: None,
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.4-GOAL_ROLE.2-VAR",
+                                        position: 2,
+                                        segment: &crate::segment::var::VAR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: None,
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.5-GOAL_OBSERVATION",
+                                position: 5,
+                                name: "GOAL_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.5-GOAL_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &crate::legacy::v2_7::segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: None,
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.5-GOAL_OBSERVATION.2-NTE",
+                                        position: 2,
+                                        segment: &crate::legacy::v2_7::segment::nte::NTE,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: None,
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER",
+                        position: 8,
+                        name: "ORDER",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.1-ORC",
+                                position: 1,
+                                segment: &crate::legacy::v2_7::segment::orc::ORC,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Group(Group {
+                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL",
+                                position: 2,
+                                name: "ORDER_DETAIL",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Group(Group {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.1-CHOICE",
+                                        position: 1,
+                                        name: "CHOICE",
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        kind: GroupKind::Choice,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-1-OBR",
+                                                position: 1,
+                                                segment: &crate::legacy::v2_7::segment::obr::OBR,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: None,
+                                            }),
+                                            Node::Placeholder(Placeholder {
+                                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-2-Hxx",
+                                                position: 2,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                            }),
+                                        ],
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.2-NTE",
+                                        position: 2,
+                                        segment: &crate::legacy::v2_7::segment::nte::NTE,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: None,
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.3-VAR",
+                                        position: 3,
+                                        segment: &crate::segment::var::VAR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: None,
+                                    }),
+                                    Node::Group(Group {
+                                        id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION",
+                                        position: 4,
+                                        name: "ORDER_OBSERVATION",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.1-OBX",
+                                                position: 1,
+                                                segment: &crate::legacy::v2_7::segment::obx::OBX,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: None,
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.2-NTE",
+                                                position: 2,
+                                                segment: &crate::legacy::v2_7::segment::nte::NTE,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: None,
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.3-VAR",
+                                                position: 3,
+                                                segment: &crate::segment::var::VAR,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: None,
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `PRR_PC5` message structure of the 2.7 tables, withdrawn as of 2.8.
 pub static PRR_PC5: Structure = Structure {
     id: "PRR_PC5",
     url: None,
     version: "2.7",
     withdrawn_as_of: Some("2.8"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "PRR_PC5.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_7::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "PRR_PC5.2-SFT",
-            position: 2,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "PRR_PC5.3-UAC",
-            position: 3,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "PRR_PC5.4-MSA",
-            position: 4,
-            segment: &crate::legacy::v2_7::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "PRR_PC5.5-ERR",
-            position: 5,
-            segment: &crate::legacy::v2_7::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "PRR_PC5.6-QAK",
-            position: 6,
-            segment: &crate::segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "PRR_PC5.7-QRD",
-            position: 7,
-            segment: &crate::legacy::v2_7::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "PRR_PC5.8-PATIENT",
-            position: 8,
-            name: "PATIENT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "PRR_PC5.8-PATIENT.1-PID",
-                    position: 1,
-                    segment: &crate::legacy::v2_7::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "PRR_PC5.8-PATIENT.2-PATIENT_VISIT",
-                    position: 2,
-                    name: "PATIENT_VISIT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "PRR_PC5.8-PATIENT.2-PATIENT_VISIT.1-PV1",
-                            position: 1,
-                            segment: &crate::legacy::v2_7::segment::pv1::PV1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "PRR_PC5.8-PATIENT.2-PATIENT_VISIT.2-PV2",
-                            position: 2,
-                            segment: &crate::legacy::v2_7::segment::pv2::PV2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "PRR_PC5.8-PATIENT.3-PROBLEM",
-                    position: 3,
-                    name: "PROBLEM",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.1-PRB",
-                            position: 1,
-                            segment: &crate::segment::prb::PRB,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.2-NTE",
-                            position: 2,
-                            segment: &crate::legacy::v2_7::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.3-VAR",
-                            position: 3,
-                            segment: &crate::segment::var::VAR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                        Node::Group(Group {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.4-PROBLEM_ROLE",
-                            position: 4,
-                            name: "PROBLEM_ROLE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.4-PROBLEM_ROLE.1-ROL",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_7::segment::rol::ROL,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.4-PROBLEM_ROLE.2-VAR",
-                                    position: 2,
-                                    segment: &crate::segment::var::VAR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.5-PROBLEM_PATHWAY",
-                            position: 5,
-                            name: "PROBLEM_PATHWAY",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.5-PROBLEM_PATHWAY.1-PTH",
-                                    position: 1,
-                                    segment: &crate::segment::pth::PTH,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.5-PROBLEM_PATHWAY.2-VAR",
-                                    position: 2,
-                                    segment: &crate::segment::var::VAR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.6-PROBLEM_OBSERVATION",
-                            position: 6,
-                            name: "PROBLEM_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.6-PROBLEM_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_7::segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.6-PROBLEM_OBSERVATION.2-NTE",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_7::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL",
-                            position: 7,
-                            name: "GOAL",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.1-GOL",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_7::segment::gol::GOL,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.2-NTE",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_7::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.3-VAR",
-                                    position: 3,
-                                    segment: &crate::segment::var::VAR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                                Node::Group(Group {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.4-GOAL_ROLE",
-                                    position: 4,
-                                    name: "GOAL_ROLE",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.4-GOAL_ROLE.1-ROL",
-                                            position: 1,
-                                            segment: &crate::legacy::v2_7::segment::rol::ROL,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: None,
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.4-GOAL_ROLE.2-VAR",
-                                            position: 2,
-                                            segment: &crate::segment::var::VAR,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: None,
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.5-GOAL_OBSERVATION",
-                                    position: 5,
-                                    name: "GOAL_OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.5-GOAL_OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &crate::legacy::v2_7::segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: None,
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.7-GOAL.5-GOAL_OBSERVATION.2-NTE",
-                                            position: 2,
-                                            segment: &crate::legacy::v2_7::segment::nte::NTE,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: None,
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER",
-                            position: 8,
-                            name: "ORDER",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.1-ORC",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_7::segment::orc::ORC,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Group(Group {
-                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL",
-                                    position: 2,
-                                    name: "ORDER_DETAIL",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Group(Group {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.1-CHOICE",
-                                            position: 1,
-                                            name: "CHOICE",
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            kind: GroupKind::Choice,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-1-OBR",
-                                                    position: 1,
-                                                    segment:
-                                                        &crate::legacy::v2_7::segment::obr::OBR,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: None,
-                                                }),
-                                                Node::Placeholder(Placeholder {
-                                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-2-Hxx",
-                                                    position: 2,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                }),
-                                            ],
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.2-NTE",
-                                            position: 2,
-                                            segment: &crate::legacy::v2_7::segment::nte::NTE,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: None,
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.3-VAR",
-                                            position: 3,
-                                            segment: &crate::segment::var::VAR,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: None,
-                                        }),
-                                        Node::Group(Group {
-                                            id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION",
-                                            position: 4,
-                                            name: "ORDER_OBSERVATION",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.1-OBX",
-                                                    position: 1,
-                                                    segment:
-                                                        &crate::legacy::v2_7::segment::obx::OBX,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: None,
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.2-NTE",
-                                                    position: 2,
-                                                    segment:
-                                                        &crate::legacy::v2_7::segment::nte::NTE,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: None,
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PRR_PC5.8-PATIENT.3-PROBLEM.8-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.3-VAR",
-                                                    position: 3,
-                                                    segment: &crate::segment::var::VAR,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: None,
-                                                }),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &PRR_PC5_NODES,
 };

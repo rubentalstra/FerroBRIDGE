@@ -3,7 +3,7 @@ source: crates/ferrobridge-hl7v2/tests/it/supplement.rs
 expression: summary(&mapped)
 ---
 [
-    "earlier-version: EarlierVersion { declared: \"2.5.1\" }",
+    "version-selected: VersionSelected { structure: \"OUL_R22\", version: \"2.5.1\", declared: Some(\"2.5.1\") }",
     "supplemented: Supplemented { at: Location { segment: \"MSH\", sequence: 1, field: None, repetition: None, component: None, subcomponent: None }, map: \"message-oul-r22-to-bundle\", overrides: false }",
     "unsupported-assignment: MSH[1]-10(1) segment-msh-to-bundle MSH-10 -> identifier.system [/to be determined by the implementer/]",
     "supplemented: Supplemented { at: Location { segment: \"MSH\", sequence: 1, field: None, repetition: None, component: None, subcomponent: None }, map: \"segment-msh-to-messageheader\", overrides: true }",

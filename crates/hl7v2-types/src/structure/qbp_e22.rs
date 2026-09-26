@@ -9,84 +9,87 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`QBP_E22`], one `static` so a structure with the same tree links to it.
+pub static QBP_E22_NODES: [Node; 4] = [
+    Node::Segment(SegmentRef {
+        id: "QBP_E22.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_E22.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_E22.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "QBP_E22.4-QUERY",
+        position: 4,
+        name: "QUERY",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Choice,
+        children: &[Node::Group(Group {
+            id: "QBP_E22.4-QUERY.choice-1-Group",
+            position: 1,
+            name: "Group",
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+            kind: GroupKind::Sequence,
+            children: &[
+                Node::Segment(SegmentRef {
+                    id: "QBP_E22.4-QUERY.choice-1-Group.1-QPD",
+                    position: 1,
+                    segment: &segment::qpd::QPD,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "QBP_E22.4-QUERY.choice-1-Group.2-RCP",
+                    position: 2,
+                    segment: &segment::rcp::RCP,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+            ],
+        })],
+    }),
+];
+
 /// The `QBP_E22` message structure definition, `http://hl7.org/v2/StructureDefinition/QBP_E22`.
 pub static QBP_E22: Structure = Structure {
     id: "QBP_E22",
     url: Some("http://hl7.org/v2/StructureDefinition/QBP_E22"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "QBP_E22.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_E22.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_E22.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "QBP_E22.4-QUERY",
-            position: 4,
-            name: "QUERY",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Choice,
-            children: &[Node::Group(Group {
-                id: "QBP_E22.4-QUERY.choice-1-Group",
-                position: 1,
-                name: "Group",
-                cardinality: Cardinality {
-                    min: 0,
-                    max: Max::Bounded(1),
-                },
-                kind: GroupKind::Sequence,
-                children: &[
-                    Node::Segment(SegmentRef {
-                        id: "QBP_E22.4-QUERY.choice-1-Group.1-QPD",
-                        position: 1,
-                        segment: &segment::qpd::QPD,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "QBP_E22.4-QUERY.choice-1-Group.2-RCP",
-                        position: 2,
-                        segment: &segment::rcp::RCP,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                ],
-            })],
-        }),
-    ],
+    nodes: &QBP_E22_NODES,
 };

@@ -6,124 +6,127 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`OSU_O41`], one `static` so a structure with the same tree links to it.
+pub static OSU_O41_NODES: [Node; 9] = [
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_7_1::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_7_1::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_7_1::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.4-SFT",
+        position: 4,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.5-UAC",
+        position: 5,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.6-NTE",
+        position: 6,
+        segment: &crate::legacy::v2_7_1::segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.7-PID",
+        position: 7,
+        segment: &crate::legacy::v2_8::segment::pid::PID,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSU_O41.8-ARV",
+        position: 8,
+        segment: &crate::legacy::v2_7_1::segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "OSU_O41.9-ORDER_STATUS",
+        position: 9,
+        name: "ORDER_STATUS",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "OSU_O41.9-ORDER_STATUS.1-ORC",
+                position: 1,
+                segment: &crate::legacy::v2_8_1::segment::orc::ORC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "OSU_O41.9-ORDER_STATUS.2-PRT",
+                position: 2,
+                segment: &crate::legacy::v2_8_1::segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `OSU_O41` message structure of the 2.8.1 tables, withdrawn as of 2.9.1.
 pub static OSU_O41: Structure = Structure {
     id: "OSU_O41",
     url: None,
     version: "2.8.1",
     withdrawn_as_of: Some("2.9.1"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_8_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_8_1::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_8_1::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.4-SFT",
-            position: 4,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.5-UAC",
-            position: 5,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.6-NTE",
-            position: 6,
-            segment: &crate::legacy::v2_8_1::segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.7-PID",
-            position: 7,
-            segment: &crate::legacy::v2_8_1::segment::pid::PID,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSU_O41.8-ARV",
-            position: 8,
-            segment: &crate::legacy::v2_8_1::segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "OSU_O41.9-ORDER_STATUS",
-            position: 9,
-            name: "ORDER_STATUS",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "OSU_O41.9-ORDER_STATUS.1-ORC",
-                    position: 1,
-                    segment: &crate::legacy::v2_8_1::segment::orc::ORC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OSU_O41.9-ORDER_STATUS.2-PRT",
-                    position: 2,
-                    segment: &crate::legacy::v2_8_1::segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &OSU_O41_NODES,
 };

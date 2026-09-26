@@ -7,102 +7,105 @@
 use crate::model::{Cardinality, Max, Node, SegmentRef, SegmentStatus, Structure};
 use crate::segment;
 
+/// The top-level nodes of [`QBP_Q13`], one `static` so a structure with the same tree links to it.
+pub static QBP_Q13_NODES: [Node; 9] = [
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.4-QPD",
+        position: 4,
+        segment: &segment::qpd::QPD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.5-PID",
+        position: 5,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.6-RDF",
+        position: 6,
+        segment: &segment::rdf::RDF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.7-RCP",
+        position: 7,
+        segment: &segment::rcp::RCP,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.8-RDF",
+        position: 8,
+        segment: &segment::rdf::RDF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QBP_Q13.9-DSC",
+        position: 9,
+        segment: &segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `QBP_Q13` message structure definition, `http://hl7.org/v2/StructureDefinition/QBP_Q13`.
 pub static QBP_Q13: Structure = Structure {
     id: "QBP_Q13",
     url: Some("http://hl7.org/v2/StructureDefinition/QBP_Q13"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.4-QPD",
-            position: 4,
-            segment: &segment::qpd::QPD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.5-PID",
-            position: 5,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.6-RDF",
-            position: 6,
-            segment: &segment::rdf::RDF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.7-RCP",
-            position: 7,
-            segment: &segment::rcp::RCP,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.8-RDF",
-            position: 8,
-            segment: &segment::rdf::RDF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QBP_Q13.9-DSC",
-            position: 9,
-            segment: &segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &QBP_Q13_NODES,
 };

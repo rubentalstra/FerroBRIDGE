@@ -6,206 +6,209 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`MFR_M05`], one `static` so a structure with the same tree links to it.
+pub static MFR_M05_NODES: [Node; 11] = [
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_6::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.2-SFT",
+        position: 2,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.3-UAC",
+        position: 3,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.4-MSA",
+        position: 4,
+        segment: &crate::legacy::v2_6::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.5-ERR",
+        position: 5,
+        segment: &crate::legacy::v2_6::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.6-QAK",
+        position: 6,
+        segment: &crate::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.7-QRD",
+        position: 7,
+        segment: &crate::legacy::v2_6::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.8-QRF",
+        position: 8,
+        segment: &crate::legacy::v2_6::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.9-MFI",
+        position: 9,
+        segment: &crate::legacy::v2_6::segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "MFR_M05.10-MF_QUERY",
+        position: 10,
+        name: "MF_QUERY",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFR_M05.10-MF_QUERY.1-MFE",
+                position: 1,
+                segment: &crate::legacy::v2_6::segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFR_M05.10-MF_QUERY.2-LOC",
+                position: 2,
+                segment: &crate::legacy::v2_6::segment::loc::LOC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFR_M05.10-MF_QUERY.3-LCH",
+                position: 3,
+                segment: &crate::segment::lch::LCH,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFR_M05.10-MF_QUERY.4-LRL",
+                position: 4,
+                segment: &crate::segment::lrl::LRL,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "MFR_M05.10-MF_QUERY.5-MF_LOC_DEPT",
+                position: 5,
+                name: "MF_LOC_DEPT",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "MFR_M05.10-MF_QUERY.5-MF_LOC_DEPT.1-LDP",
+                        position: 1,
+                        segment: &crate::legacy::v2_6::segment::ldp::LDP,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "MFR_M05.10-MF_QUERY.5-MF_LOC_DEPT.2-LCH",
+                        position: 2,
+                        segment: &crate::segment::lch::LCH,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "MFR_M05.10-MF_QUERY.5-MF_LOC_DEPT.3-LCC",
+                        position: 3,
+                        segment: &crate::segment::lcc::LCC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFR_M05.11-DSC",
+        position: 11,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `MFR_M05` message structure of the 2.6 tables, withdrawn as of 2.7.
 pub static MFR_M05: Structure = Structure {
     id: "MFR_M05",
     url: None,
     version: "2.6",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_6::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.2-SFT",
-            position: 2,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.3-UAC",
-            position: 3,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.4-MSA",
-            position: 4,
-            segment: &crate::legacy::v2_6::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.5-ERR",
-            position: 5,
-            segment: &crate::legacy::v2_6::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.6-QAK",
-            position: 6,
-            segment: &crate::segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.7-QRD",
-            position: 7,
-            segment: &crate::legacy::v2_6::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.8-QRF",
-            position: 8,
-            segment: &crate::legacy::v2_6::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.9-MFI",
-            position: 9,
-            segment: &crate::legacy::v2_6::segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFR_M05.10-DSC",
-            position: 10,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "MFR_M05.11-MF_QUERY",
-            position: 11,
-            name: "MF_QUERY",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFR_M05.11-MF_QUERY.1-MFE",
-                    position: 1,
-                    segment: &crate::legacy::v2_6::segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFR_M05.11-MF_QUERY.2-LOC",
-                    position: 2,
-                    segment: &crate::legacy::v2_6::segment::loc::LOC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFR_M05.11-MF_QUERY.3-LCH",
-                    position: 3,
-                    segment: &crate::segment::lch::LCH,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFR_M05.11-MF_QUERY.4-LRL",
-                    position: 4,
-                    segment: &crate::segment::lrl::LRL,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "MFR_M05.11-MF_QUERY.5-MF_LOC_DEPT",
-                    position: 5,
-                    name: "MF_LOC_DEPT",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "MFR_M05.11-MF_QUERY.5-MF_LOC_DEPT.1-LDP",
-                            position: 1,
-                            segment: &crate::legacy::v2_6::segment::ldp::LDP,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "MFR_M05.11-MF_QUERY.5-MF_LOC_DEPT.2-LCH",
-                            position: 2,
-                            segment: &crate::segment::lch::LCH,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "MFR_M05.11-MF_QUERY.5-MF_LOC_DEPT.3-LCC",
-                            position: 3,
-                            segment: &crate::segment::lcc::LCC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFR_M05_NODES,
 };

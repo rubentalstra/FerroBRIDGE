@@ -9,334 +9,337 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`SIU_S12`], one `static` so a structure with the same tree links to it.
+pub static SIU_S12_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "SIU_S12.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SIU_S12.2-SCH",
+        position: 2,
+        segment: &segment::sch::SCH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SIU_S12.3-TQ1",
+        position: 3,
+        segment: &segment::tq1::TQ1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SIU_S12.4-NTE",
+        position: 4,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "SIU_S12.5-PATIENT",
+        position: 5,
+        name: "PATIENT",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.1-PID",
+                position: 1,
+                segment: &segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.2-PD1",
+                position: 2,
+                segment: &segment::pd1::PD1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.3-GSP",
+                position: 3,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.4-GSR",
+                position: 4,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.5-GSC",
+                position: 5,
+                segment: &segment::gsc::GSC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.6-PRT",
+                position: 6,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.7-PV1",
+                position: 7,
+                segment: &segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.8-PV2",
+                position: 8,
+                segment: &segment::pv2::PV2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.9-PRT",
+                position: 9,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.10-OBX",
+                position: 10,
+                segment: &segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.11-PRT",
+                position: 11,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.5-PATIENT.12-DG1",
+                position: 12,
+                segment: &segment::dg1::DG1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "SIU_S12.6-RESOURCES",
+        position: 6,
+        name: "RESOURCES",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "SIU_S12.6-RESOURCES.1-RGS",
+                position: 1,
+                segment: &segment::rgs::RGS,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "SIU_S12.6-RESOURCES.2-SERVICE",
+                position: 2,
+                name: "SERVICE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.2-SERVICE.1-AIS",
+                        position: 1,
+                        segment: &segment::ais::AIS,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.2-SERVICE.2-NTE",
+                        position: 2,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "SIU_S12.6-RESOURCES.3-GENERAL_RESOURCE",
+                position: 3,
+                name: "GENERAL_RESOURCE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
+                        position: 1,
+                        segment: &segment::aig::AIG,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.3-GENERAL_RESOURCE.2-NTE",
+                        position: 2,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "SIU_S12.6-RESOURCES.4-LOCATION_RESOURCE",
+                position: 4,
+                name: "LOCATION_RESOURCE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.4-LOCATION_RESOURCE.1-AIL",
+                        position: 1,
+                        segment: &segment::ail::AIL,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.4-LOCATION_RESOURCE.2-NTE",
+                        position: 2,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "SIU_S12.6-RESOURCES.5-PERSONNEL_RESOURCE",
+                position: 5,
+                name: "PERSONNEL_RESOURCE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.5-PERSONNEL_RESOURCE.1-AIP",
+                        position: 1,
+                        segment: &segment::aip::AIP,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SIU_S12.6-RESOURCES.5-PERSONNEL_RESOURCE.2-NTE",
+                        position: 2,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `SIU_S12` message structure definition, `http://hl7.org/v2/StructureDefinition/SIU_S12`.
 pub static SIU_S12: Structure = Structure {
     id: "SIU_S12",
     url: Some("http://hl7.org/v2/StructureDefinition/SIU_S12"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "SIU_S12.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SIU_S12.2-SCH",
-            position: 2,
-            segment: &segment::sch::SCH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SIU_S12.3-TQ1",
-            position: 3,
-            segment: &segment::tq1::TQ1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SIU_S12.4-NTE",
-            position: 4,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "SIU_S12.5-PATIENT",
-            position: 5,
-            name: "PATIENT",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.1-PID",
-                    position: 1,
-                    segment: &segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.2-PD1",
-                    position: 2,
-                    segment: &segment::pd1::PD1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.3-GSP",
-                    position: 3,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.4-GSR",
-                    position: 4,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.5-GSC",
-                    position: 5,
-                    segment: &segment::gsc::GSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.6-PRT",
-                    position: 6,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.7-PV1",
-                    position: 7,
-                    segment: &segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.8-PV2",
-                    position: 8,
-                    segment: &segment::pv2::PV2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.9-PRT",
-                    position: 9,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.10-OBX",
-                    position: 10,
-                    segment: &segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.11-PRT",
-                    position: 11,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.5-PATIENT.12-DG1",
-                    position: 12,
-                    segment: &segment::dg1::DG1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "SIU_S12.6-RESOURCES",
-            position: 6,
-            name: "RESOURCES",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "SIU_S12.6-RESOURCES.1-RGS",
-                    position: 1,
-                    segment: &segment::rgs::RGS,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "SIU_S12.6-RESOURCES.2-SERVICE",
-                    position: 2,
-                    name: "SERVICE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.2-SERVICE.1-AIS",
-                            position: 1,
-                            segment: &segment::ais::AIS,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.2-SERVICE.2-NTE",
-                            position: 2,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "SIU_S12.6-RESOURCES.3-GENERAL_RESOURCE",
-                    position: 3,
-                    name: "GENERAL_RESOURCE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
-                            position: 1,
-                            segment: &segment::aig::AIG,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.3-GENERAL_RESOURCE.2-NTE",
-                            position: 2,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "SIU_S12.6-RESOURCES.4-LOCATION_RESOURCE",
-                    position: 4,
-                    name: "LOCATION_RESOURCE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.4-LOCATION_RESOURCE.1-AIL",
-                            position: 1,
-                            segment: &segment::ail::AIL,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.4-LOCATION_RESOURCE.2-NTE",
-                            position: 2,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "SIU_S12.6-RESOURCES.5-PERSONNEL_RESOURCE",
-                    position: 5,
-                    name: "PERSONNEL_RESOURCE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.5-PERSONNEL_RESOURCE.1-AIP",
-                            position: 1,
-                            segment: &segment::aip::AIP,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SIU_S12.6-RESOURCES.5-PERSONNEL_RESOURCE.2-NTE",
-                            position: 2,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &SIU_S12_NODES,
 };

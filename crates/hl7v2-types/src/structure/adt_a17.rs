@@ -9,256 +9,259 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`ADT_A17`], one `static` so a structure with the same tree links to it.
+pub static ADT_A17_NODES: [Node; 20] = [
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.5-EVN",
+        position: 5,
+        segment: &segment::evn::EVN,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.6-PID",
+        position: 6,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.7-GSP",
+        position: 7,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.8-GSR",
+        position: 8,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.9-GSC",
+        position: 9,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.10-PD1",
+        position: 10,
+        segment: &segment::pd1::PD1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.11-PV1",
+        position: 11,
+        segment: &segment::pv1::PV1,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.12-PV2",
+        position: 12,
+        segment: &segment::pv2::PV2,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.13-DB1",
+        position: 13,
+        segment: &segment::db1::DB1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ADT_A17.14-OBSERVATION_RESULT_1",
+        position: 14,
+        name: "OBSERVATION_RESULT_1",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ADT_A17.14-OBSERVATION_RESULT_1.1-OBX",
+                position: 1,
+                segment: &segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A17.14-OBSERVATION_RESULT_1.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.15-PID",
+        position: 15,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.16-PD1",
+        position: 16,
+        segment: &segment::pd1::PD1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.17-PV1",
+        position: 17,
+        segment: &segment::pv1::PV1,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.18-PV2",
+        position: 18,
+        segment: &segment::pv2::PV2,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A17.19-DB1",
+        position: 19,
+        segment: &segment::db1::DB1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ADT_A17.20-OBSERVATION_RESULT_2",
+        position: 20,
+        name: "OBSERVATION_RESULT_2",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ADT_A17.20-OBSERVATION_RESULT_2.1-OBX",
+                position: 1,
+                segment: &segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A17.20-OBSERVATION_RESULT_2.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `ADT_A17` message structure definition, `http://hl7.org/v2/StructureDefinition/ADT_A17`.
 pub static ADT_A17: Structure = Structure {
     id: "ADT_A17",
     url: Some("http://hl7.org/v2/StructureDefinition/ADT_A17"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.5-EVN",
-            position: 5,
-            segment: &segment::evn::EVN,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.6-PID",
-            position: 6,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.7-GSP",
-            position: 7,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.8-GSR",
-            position: 8,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.9-GSC",
-            position: 9,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.10-PD1",
-            position: 10,
-            segment: &segment::pd1::PD1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.11-PV1",
-            position: 11,
-            segment: &segment::pv1::PV1,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.12-PV2",
-            position: 12,
-            segment: &segment::pv2::PV2,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.13-DB1",
-            position: 13,
-            segment: &segment::db1::DB1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ADT_A17.14-OBSERVATION_RESULT_1",
-            position: 14,
-            name: "OBSERVATION_RESULT_1",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ADT_A17.14-OBSERVATION_RESULT_1.1-OBX",
-                    position: 1,
-                    segment: &segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A17.14-OBSERVATION_RESULT_1.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.15-PID",
-            position: 15,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.16-PD1",
-            position: 16,
-            segment: &segment::pd1::PD1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.17-PV1",
-            position: 17,
-            segment: &segment::pv1::PV1,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.18-PV2",
-            position: 18,
-            segment: &segment::pv2::PV2,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A17.19-DB1",
-            position: 19,
-            segment: &segment::db1::DB1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ADT_A17.20-OBSERVATION_RESULT_2",
-            position: 20,
-            name: "OBSERVATION_RESULT_2",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ADT_A17.20-OBSERVATION_RESULT_2.1-OBX",
-                    position: 1,
-                    segment: &segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A17.20-OBSERVATION_RESULT_2.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &ADT_A17_NODES,
 };

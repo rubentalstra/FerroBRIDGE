@@ -9,240 +9,243 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`RPI_I01`], one `static` so a structure with the same tree links to it.
+pub static RPI_I01_NODES: [Node; 12] = [
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.4-MSA",
+        position: 4,
+        segment: &segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "RPI_I01.5-PROVIDER",
+        position: 5,
+        name: "PROVIDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RPI_I01.5-PROVIDER.1-PRD",
+                position: 1,
+                segment: &segment::prd::PRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "RPI_I01.5-PROVIDER.2-CTD",
+                position: 2,
+                segment: &segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.6-PID",
+        position: 6,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.7-GSP",
+        position: 7,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.8-GSR",
+        position: 8,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.9-GSC",
+        position: 9,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "RPI_I01.10-NEXT_OF_KIN",
+        position: 10,
+        name: "NEXT_OF_KIN",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RPI_I01.10-NEXT_OF_KIN.1-NK1",
+                position: 1,
+                segment: &segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "RPI_I01.10-NEXT_OF_KIN.2-GSP",
+                position: 2,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "RPI_I01.10-NEXT_OF_KIN.3-GSR",
+                position: 3,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "RPI_I01.11-GUARANTOR_INSURANCE",
+        position: 11,
+        name: "GUARANTOR_INSURANCE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RPI_I01.11-GUARANTOR_INSURANCE.1-GT1",
+                position: 1,
+                segment: &segment::gt1::GT1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE",
+                position: 2,
+                name: "INSURANCE",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE.1-IN1",
+                        position: 1,
+                        segment: &segment::in1::IN1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE.2-IN2",
+                        position: 2,
+                        segment: &segment::in2::IN2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE.3-IN3",
+                        position: 3,
+                        segment: &segment::in3::IN3,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RPI_I01.12-NTE",
+        position: 12,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `RPI_I01` message structure definition, `http://hl7.org/v2/StructureDefinition/RPI_I01`.
 pub static RPI_I01: Structure = Structure {
     id: "RPI_I01",
     url: Some("http://hl7.org/v2/StructureDefinition/RPI_I01"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.4-MSA",
-            position: 4,
-            segment: &segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "RPI_I01.5-PROVIDER",
-            position: 5,
-            name: "PROVIDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RPI_I01.5-PROVIDER.1-PRD",
-                    position: 1,
-                    segment: &segment::prd::PRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RPI_I01.5-PROVIDER.2-CTD",
-                    position: 2,
-                    segment: &segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.6-PID",
-            position: 6,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.7-GSP",
-            position: 7,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.8-GSR",
-            position: 8,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.9-GSC",
-            position: 9,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "RPI_I01.10-NEXT_OF_KIN",
-            position: 10,
-            name: "NEXT_OF_KIN",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RPI_I01.10-NEXT_OF_KIN.1-NK1",
-                    position: 1,
-                    segment: &segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RPI_I01.10-NEXT_OF_KIN.2-GSP",
-                    position: 2,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RPI_I01.10-NEXT_OF_KIN.3-GSR",
-                    position: 3,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "RPI_I01.11-GUARANTOR_INSURANCE",
-            position: 11,
-            name: "GUARANTOR_INSURANCE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RPI_I01.11-GUARANTOR_INSURANCE.1-GT1",
-                    position: 1,
-                    segment: &segment::gt1::GT1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE",
-                    position: 2,
-                    name: "INSURANCE",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE.1-IN1",
-                            position: 1,
-                            segment: &segment::in1::IN1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE.2-IN2",
-                            position: 2,
-                            segment: &segment::in2::IN2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RPI_I01.11-GUARANTOR_INSURANCE.2-INSURANCE.3-IN3",
-                            position: 3,
-                            segment: &segment::in3::IN3,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "RPI_I01.12-NTE",
-            position: 12,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &RPI_I01_NODES,
 };

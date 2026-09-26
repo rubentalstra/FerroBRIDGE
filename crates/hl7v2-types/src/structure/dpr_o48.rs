@@ -9,336 +9,339 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`DPR_O48`], one `static` so a structure with the same tree links to it.
+pub static DPR_O48_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "DPR_O48.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "DPR_O48.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "DPR_O48.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "DPR_O48.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "DPR_O48.5-DONOR",
+        position: 5,
+        name: "DONOR",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.5-DONOR.1-PID",
+                position: 1,
+                segment: &segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.5-DONOR.2-PD1",
+                position: 2,
+                segment: &segment::pd1::PD1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.5-DONOR.3-PRT",
+                position: 3,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "DPR_O48.5-DONOR.4-DONOR_OBSERVATIONS",
+                position: 4,
+                name: "DONOR_OBSERVATIONS",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.5-DONOR.4-DONOR_OBSERVATIONS.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.5-DONOR.4-DONOR_OBSERVATIONS.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.5-DONOR.5-NTE",
+                position: 5,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.5-DONOR.6-AL1",
+                position: 6,
+                segment: &segment::al1::AL1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.5-DONOR.7-ARV",
+                position: 7,
+                segment: &segment::arv::ARV,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::B),
+            }),
+            Node::Group(Group {
+                id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION",
+                position: 8,
+                name: "DONOR_REGISTRATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION.1-PV1",
+                        position: 1,
+                        segment: &segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION.3-NTE",
+                        position: 3,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "DPR_O48.6-DONATION_ORDER",
+        position: 6,
+        name: "DONATION_ORDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.6-DONATION_ORDER.1-OBR",
+                position: 1,
+                segment: &segment::obr::OBR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.6-DONATION_ORDER.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.6-DONATION_ORDER.3-NTE",
+                position: 3,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "DPR_O48.7-DONATION",
+        position: 7,
+        name: "DONATION",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.7-DONATION.1-DON",
+                position: 1,
+                segment: &segment::don::DON,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "DPR_O48.7-DONATION.2-DONATION_OBSERVATIONS",
+                position: 2,
+                name: "DONATION_OBSERVATIONS",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.7-DONATION.2-DONATION_OBSERVATIONS.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.7-DONATION.2-DONATION_OBSERVATIONS.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "DPR_O48.7-DONATION.3-NTE",
+                position: 3,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "DPR_O48.7-DONATION.4-BLOOD_UNIT",
+                position: 4,
+                name: "BLOOD_UNIT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.7-DONATION.4-BLOOD_UNIT.1-BUI",
+                        position: 1,
+                        segment: &segment::bui::BUI,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "DPR_O48.7-DONATION.4-BLOOD_UNIT.2-NTE",
+                        position: 2,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `DPR_O48` message structure definition, `http://hl7.org/v2/StructureDefinition/DPR_O48`.
 pub static DPR_O48: Structure = Structure {
     id: "DPR_O48",
     url: Some("http://hl7.org/v2/StructureDefinition/DPR_O48"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "DPR_O48.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "DPR_O48.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "DPR_O48.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "DPR_O48.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "DPR_O48.5-DONOR",
-            position: 5,
-            name: "DONOR",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.5-DONOR.1-PID",
-                    position: 1,
-                    segment: &segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.5-DONOR.2-PD1",
-                    position: 2,
-                    segment: &segment::pd1::PD1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.5-DONOR.3-PRT",
-                    position: 3,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "DPR_O48.5-DONOR.4-DONOR_OBSERVATIONS",
-                    position: 4,
-                    name: "DONOR_OBSERVATIONS",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.5-DONOR.4-DONOR_OBSERVATIONS.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.5-DONOR.4-DONOR_OBSERVATIONS.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.5-DONOR.5-NTE",
-                    position: 5,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.5-DONOR.6-AL1",
-                    position: 6,
-                    segment: &segment::al1::AL1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.5-DONOR.7-ARV",
-                    position: 7,
-                    segment: &segment::arv::ARV,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::B),
-                }),
-                Node::Group(Group {
-                    id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION",
-                    position: 8,
-                    name: "DONOR_REGISTRATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION.1-PV1",
-                            position: 1,
-                            segment: &segment::pv1::PV1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.5-DONOR.8-DONOR_REGISTRATION.3-NTE",
-                            position: 3,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "DPR_O48.6-DONATION_ORDER",
-            position: 6,
-            name: "DONATION_ORDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.6-DONATION_ORDER.1-OBR",
-                    position: 1,
-                    segment: &segment::obr::OBR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.6-DONATION_ORDER.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.6-DONATION_ORDER.3-NTE",
-                    position: 3,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "DPR_O48.7-DONATION",
-            position: 7,
-            name: "DONATION",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.7-DONATION.1-DON",
-                    position: 1,
-                    segment: &segment::don::DON,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "DPR_O48.7-DONATION.2-DONATION_OBSERVATIONS",
-                    position: 2,
-                    name: "DONATION_OBSERVATIONS",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.7-DONATION.2-DONATION_OBSERVATIONS.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.7-DONATION.2-DONATION_OBSERVATIONS.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DPR_O48.7-DONATION.3-NTE",
-                    position: 3,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "DPR_O48.7-DONATION.4-BLOOD_UNIT",
-                    position: 4,
-                    name: "BLOOD_UNIT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.7-DONATION.4-BLOOD_UNIT.1-BUI",
-                            position: 1,
-                            segment: &segment::bui::BUI,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "DPR_O48.7-DONATION.4-BLOOD_UNIT.2-NTE",
-                            position: 2,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &DPR_O48_NODES,
 };

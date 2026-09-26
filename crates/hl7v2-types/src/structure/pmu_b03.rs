@@ -7,62 +7,65 @@
 use crate::model::{Cardinality, Max, Node, SegmentRef, SegmentStatus, Structure};
 use crate::segment;
 
+/// The top-level nodes of [`PMU_B03`], one `static` so a structure with the same tree links to it.
+pub static PMU_B03_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "PMU_B03.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PMU_B03.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PMU_B03.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PMU_B03.4-EVN",
+        position: 4,
+        segment: &segment::evn::EVN,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PMU_B03.5-STF",
+        position: 5,
+        segment: &segment::stf::STF,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `PMU_B03` message structure definition, `http://hl7.org/v2/StructureDefinition/PMU_B03`.
 pub static PMU_B03: Structure = Structure {
     id: "PMU_B03",
     url: Some("http://hl7.org/v2/StructureDefinition/PMU_B03"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "PMU_B03.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PMU_B03.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PMU_B03.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PMU_B03.4-EVN",
-            position: 4,
-            segment: &segment::evn::EVN,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PMU_B03.5-STF",
-            position: 5,
-            segment: &segment::stf::STF,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &PMU_B03_NODES,
 };

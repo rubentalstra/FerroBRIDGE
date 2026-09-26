@@ -9,94 +9,97 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`EAN_U09`], one `static` so a structure with the same tree links to it.
+pub static EAN_U09_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "EAN_U09.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAN_U09.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAN_U09.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAN_U09.4-EQU",
+        position: 4,
+        segment: &segment::equ::EQU,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "EAN_U09.5-NOTIFICATION",
+        position: 5,
+        name: "NOTIFICATION",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "EAN_U09.5-NOTIFICATION.1-NDS",
+                position: 1,
+                segment: &segment::nds::NDS,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EAN_U09.5-NOTIFICATION.2-NTE",
+                position: 2,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAN_U09.6-ROL",
+        position: 6,
+        segment: &segment::rol::ROL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::B),
+    }),
+];
+
 /// The `EAN_U09` message structure definition, `http://hl7.org/v2/StructureDefinition/EAN_U09`.
 pub static EAN_U09: Structure = Structure {
     id: "EAN_U09",
     url: Some("http://hl7.org/v2/StructureDefinition/EAN_U09"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "EAN_U09.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAN_U09.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAN_U09.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAN_U09.4-EQU",
-            position: 4,
-            segment: &segment::equ::EQU,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "EAN_U09.5-NOTIFICATION",
-            position: 5,
-            name: "NOTIFICATION",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "EAN_U09.5-NOTIFICATION.1-NDS",
-                    position: 1,
-                    segment: &segment::nds::NDS,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EAN_U09.5-NOTIFICATION.2-NTE",
-                    position: 2,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAN_U09.6-ROL",
-            position: 6,
-            segment: &segment::rol::ROL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::B),
-        }),
-    ],
+    nodes: &EAN_U09_NODES,
 };

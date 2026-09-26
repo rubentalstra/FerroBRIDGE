@@ -9,176 +9,179 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`RQP_I04`], one `static` so a structure with the same tree links to it.
+pub static RQP_I04_NODES: [Node; 11] = [
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "RQP_I04.4-PROVIDER",
+        position: 4,
+        name: "PROVIDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RQP_I04.4-PROVIDER.1-PRD",
+                position: 1,
+                segment: &segment::prd::PRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQP_I04.4-PROVIDER.2-CTD",
+                position: 2,
+                segment: &segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.5-PID",
+        position: 5,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.6-GSP",
+        position: 6,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.7-GSR",
+        position: 7,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.8-GSC",
+        position: 8,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "RQP_I04.9-NEXT_OF_KIN",
+        position: 9,
+        name: "NEXT_OF_KIN",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RQP_I04.9-NEXT_OF_KIN.1-NK1",
+                position: 1,
+                segment: &segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQP_I04.9-NEXT_OF_KIN.2-GSP",
+                position: 2,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQP_I04.9-NEXT_OF_KIN.3-GSR",
+                position: 3,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.10-GT1",
+        position: 10,
+        segment: &segment::gt1::GT1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQP_I04.11-NTE",
+        position: 11,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `RQP_I04` message structure definition, `http://hl7.org/v2/StructureDefinition/RQP_I04`.
 pub static RQP_I04: Structure = Structure {
     id: "RQP_I04",
     url: Some("http://hl7.org/v2/StructureDefinition/RQP_I04"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "RQP_I04.4-PROVIDER",
-            position: 4,
-            name: "PROVIDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RQP_I04.4-PROVIDER.1-PRD",
-                    position: 1,
-                    segment: &segment::prd::PRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQP_I04.4-PROVIDER.2-CTD",
-                    position: 2,
-                    segment: &segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.5-PID",
-            position: 5,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.6-GSP",
-            position: 6,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.7-GSR",
-            position: 7,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.8-GSC",
-            position: 8,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "RQP_I04.9-NEXT_OF_KIN",
-            position: 9,
-            name: "NEXT_OF_KIN",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RQP_I04.9-NEXT_OF_KIN.1-NK1",
-                    position: 1,
-                    segment: &segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQP_I04.9-NEXT_OF_KIN.2-GSP",
-                    position: 2,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQP_I04.9-NEXT_OF_KIN.3-GSR",
-                    position: 3,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.10-GT1",
-            position: 10,
-            segment: &segment::gt1::GT1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQP_I04.11-NTE",
-            position: 11,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &RQP_I04_NODES,
 };

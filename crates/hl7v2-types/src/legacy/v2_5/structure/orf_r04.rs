@@ -6,260 +6,263 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`ORF_R04`], one `static` so a structure with the same tree links to it.
+pub static ORF_R04_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "ORF_R04.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORF_R04.2-SFT",
+        position: 2,
+        segment: &crate::legacy::v2_5::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORF_R04.3-MSA",
+        position: 3,
+        segment: &crate::legacy::v2_5::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORF_R04.4-QRD",
+        position: 4,
+        segment: &crate::legacy::v2_5::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORF_R04.5-QRF",
+        position: 5,
+        segment: &crate::legacy::v2_5::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "ORF_R04.6-QUERY_RESPONSE",
+        position: 6,
+        name: "QUERY_RESPONSE",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[Node::Group(Group {
+            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT",
+            position: 1,
+            name: "PATIENT",
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+            kind: GroupKind::Sequence,
+            children: &[
+                Node::Segment(SegmentRef {
+                    id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.1-PID",
+                    position: 1,
+                    segment: &crate::legacy::v2_5::segment::pid::PID,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: None,
+                }),
+                Node::Segment(SegmentRef {
+                    id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.2-NTE",
+                    position: 2,
+                    segment: &crate::legacy::v2_5::segment::nte::NTE,
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    status: None,
+                }),
+                Node::Group(Group {
+                    id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER",
+                    position: 3,
+                    name: "ORDER",
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Unbounded,
+                    },
+                    kind: GroupKind::Sequence,
+                    children: &[
+                        Node::Segment(SegmentRef {
+                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.1-ORC",
+                            position: 1,
+                            segment: &crate::legacy::v2_5::segment::orc::ORC,
+                            cardinality: Cardinality {
+                                min: 0,
+                                max: Max::Bounded(1),
+                            },
+                            status: None,
+                        }),
+                        Node::Segment(SegmentRef {
+                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.2-OBR",
+                            position: 2,
+                            segment: &crate::legacy::v2_5::segment::obr::OBR,
+                            cardinality: Cardinality {
+                                min: 1,
+                                max: Max::Bounded(1),
+                            },
+                            status: None,
+                        }),
+                        Node::Segment(SegmentRef {
+                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.3-NTE",
+                            position: 3,
+                            segment: &crate::legacy::v2_5::segment::nte::NTE,
+                            cardinality: Cardinality {
+                                min: 0,
+                                max: Max::Unbounded,
+                            },
+                            status: None,
+                        }),
+                        Node::Group(Group {
+                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY",
+                            position: 4,
+                            name: "TIMING_QTY",
+                            cardinality: Cardinality {
+                                min: 0,
+                                max: Max::Unbounded,
+                            },
+                            kind: GroupKind::Sequence,
+                            children: &[
+                                Node::Segment(SegmentRef {
+                                    id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.1-TQ1",
+                                    position: 1,
+                                    segment: &crate::legacy::v2_5::segment::tq1::TQ1,
+                                    cardinality: Cardinality {
+                                        min: 1,
+                                        max: Max::Bounded(1),
+                                    },
+                                    status: None,
+                                }),
+                                Node::Segment(SegmentRef {
+                                    id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.2-TQ2",
+                                    position: 2,
+                                    segment: &crate::segment::tq2::TQ2,
+                                    cardinality: Cardinality {
+                                        min: 0,
+                                        max: Max::Unbounded,
+                                    },
+                                    status: None,
+                                }),
+                                Node::Segment(SegmentRef {
+                                    id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.3-CTD",
+                                    position: 3,
+                                    segment: &crate::legacy::v2_5::segment::ctd::CTD,
+                                    cardinality: Cardinality {
+                                        min: 0,
+                                        max: Max::Bounded(1),
+                                    },
+                                    status: None,
+                                }),
+                                Node::Group(Group {
+                                    id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION",
+                                    position: 4,
+                                    name: "OBSERVATION",
+                                    cardinality: Cardinality {
+                                        min: 1,
+                                        max: Max::Unbounded,
+                                    },
+                                    kind: GroupKind::Sequence,
+                                    children: &[
+                                        Node::Segment(SegmentRef {
+                                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.1-OBX",
+                                            position: 1,
+                                            segment: &crate::legacy::v2_5::segment::obx::OBX,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Bounded(1),
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Segment(SegmentRef {
+                                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.2-NTE",
+                                            position: 2,
+                                            segment: &crate::legacy::v2_5::segment::nte::NTE,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Unbounded,
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Segment(SegmentRef {
+                                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.3-CTI",
+                                            position: 3,
+                                            segment: &crate::legacy::v2_5::segment::cti::CTI,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Unbounded,
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Segment(SegmentRef {
+                                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.4-ERR",
+                                            position: 4,
+                                            segment: &crate::legacy::v2_5::segment::err::ERR,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Unbounded,
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Segment(SegmentRef {
+                                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.5-QAK",
+                                            position: 5,
+                                            segment: &crate::legacy::v2_5::segment::qak::QAK,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Bounded(1),
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Segment(SegmentRef {
+                                            id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.6-DSC",
+                                            position: 6,
+                                            segment: &crate::segment::dsc::DSC,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Bounded(1),
+                                            },
+                                            status: None,
+                                        }),
+                                    ],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
+        })],
+    }),
+];
+
 /// The `ORF_R04` message structure of the 2.5 tables, withdrawn as of 2.7.
 pub static ORF_R04: Structure = Structure {
     id: "ORF_R04",
     url: None,
     version: "2.5",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ORF_R04.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORF_R04.2-SFT",
-            position: 2,
-            segment: &crate::legacy::v2_5::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORF_R04.3-MSA",
-            position: 3,
-            segment: &crate::legacy::v2_5::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORF_R04.4-QRD",
-            position: 4,
-            segment: &crate::legacy::v2_5::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORF_R04.5-QRF",
-            position: 5,
-            segment: &crate::legacy::v2_5::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "ORF_R04.6-QUERY_RESPONSE",
-            position: 6,
-            name: "QUERY_RESPONSE",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[Node::Group(Group {
-                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT",
-                position: 1,
-                name: "PATIENT",
-                cardinality: Cardinality {
-                    min: 0,
-                    max: Max::Bounded(1),
-                },
-                kind: GroupKind::Sequence,
-                children: &[
-                    Node::Segment(SegmentRef {
-                        id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.1-PID",
-                        position: 1,
-                        segment: &crate::legacy::v2_5::segment::pid::PID,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: None,
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.2-NTE",
-                        position: 2,
-                        segment: &crate::legacy::v2_5::segment::nte::NTE,
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        status: None,
-                    }),
-                    Node::Group(Group {
-                        id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER",
-                        position: 3,
-                        name: "ORDER",
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Unbounded,
-                        },
-                        kind: GroupKind::Sequence,
-                        children: &[
-                            Node::Segment(SegmentRef {
-                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.1-ORC",
-                                position: 1,
-                                segment: &crate::legacy::v2_5::segment::orc::ORC,
-                                cardinality: Cardinality {
-                                    min: 0,
-                                    max: Max::Bounded(1),
-                                },
-                                status: None,
-                            }),
-                            Node::Segment(SegmentRef {
-                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.2-OBR",
-                                position: 2,
-                                segment: &crate::legacy::v2_5::segment::obr::OBR,
-                                cardinality: Cardinality {
-                                    min: 1,
-                                    max: Max::Bounded(1),
-                                },
-                                status: None,
-                            }),
-                            Node::Segment(SegmentRef {
-                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.3-NTE",
-                                position: 3,
-                                segment: &crate::legacy::v2_5::segment::nte::NTE,
-                                cardinality: Cardinality {
-                                    min: 0,
-                                    max: Max::Unbounded,
-                                },
-                                status: None,
-                            }),
-                            Node::Group(Group {
-                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY",
-                                position: 4,
-                                name: "TIMING_QTY",
-                                cardinality: Cardinality {
-                                    min: 0,
-                                    max: Max::Unbounded,
-                                },
-                                kind: GroupKind::Sequence,
-                                children: &[
-                                    Node::Segment(SegmentRef {
-                                        id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.1-TQ1",
-                                        position: 1,
-                                        segment: &crate::legacy::v2_5::segment::tq1::TQ1,
-                                        cardinality: Cardinality {
-                                            min: 1,
-                                            max: Max::Bounded(1),
-                                        },
-                                        status: None,
-                                    }),
-                                    Node::Segment(SegmentRef {
-                                        id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.2-TQ2",
-                                        position: 2,
-                                        segment: &crate::segment::tq2::TQ2,
-                                        cardinality: Cardinality {
-                                            min: 0,
-                                            max: Max::Unbounded,
-                                        },
-                                        status: None,
-                                    }),
-                                    Node::Segment(SegmentRef {
-                                        id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.3-CTD",
-                                        position: 3,
-                                        segment: &crate::legacy::v2_5::segment::ctd::CTD,
-                                        cardinality: Cardinality {
-                                            min: 0,
-                                            max: Max::Bounded(1),
-                                        },
-                                        status: None,
-                                    }),
-                                    Node::Group(Group {
-                                        id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION",
-                                        position: 4,
-                                        name: "OBSERVATION",
-                                        cardinality: Cardinality {
-                                            min: 1,
-                                            max: Max::Unbounded,
-                                        },
-                                        kind: GroupKind::Sequence,
-                                        children: &[
-                                            Node::Segment(SegmentRef {
-                                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.1-OBX",
-                                                position: 1,
-                                                segment: &crate::legacy::v2_5::segment::obx::OBX,
-                                                cardinality: Cardinality {
-                                                    min: 0,
-                                                    max: Max::Bounded(1),
-                                                },
-                                                status: None,
-                                            }),
-                                            Node::Segment(SegmentRef {
-                                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.2-NTE",
-                                                position: 2,
-                                                segment: &crate::legacy::v2_5::segment::nte::NTE,
-                                                cardinality: Cardinality {
-                                                    min: 0,
-                                                    max: Max::Unbounded,
-                                                },
-                                                status: None,
-                                            }),
-                                            Node::Segment(SegmentRef {
-                                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.3-CTI",
-                                                position: 3,
-                                                segment: &crate::legacy::v2_5::segment::cti::CTI,
-                                                cardinality: Cardinality {
-                                                    min: 0,
-                                                    max: Max::Unbounded,
-                                                },
-                                                status: None,
-                                            }),
-                                            Node::Segment(SegmentRef {
-                                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.4-ERR",
-                                                position: 4,
-                                                segment: &crate::legacy::v2_5::segment::err::ERR,
-                                                cardinality: Cardinality {
-                                                    min: 0,
-                                                    max: Max::Unbounded,
-                                                },
-                                                status: None,
-                                            }),
-                                            Node::Segment(SegmentRef {
-                                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.5-QAK",
-                                                position: 5,
-                                                segment: &crate::legacy::v2_5::segment::qak::QAK,
-                                                cardinality: Cardinality {
-                                                    min: 0,
-                                                    max: Max::Bounded(1),
-                                                },
-                                                status: None,
-                                            }),
-                                            Node::Segment(SegmentRef {
-                                                id: "ORF_R04.6-QUERY_RESPONSE.1-PATIENT.3-ORDER.4-TIMING_QTY.4-OBSERVATION.6-DSC",
-                                                position: 6,
-                                                segment: &crate::segment::dsc::DSC,
-                                                cardinality: Cardinality {
-                                                    min: 0,
-                                                    max: Max::Bounded(1),
-                                                },
-                                                status: None,
-                                            }),
-                                        ],
-                                    }),
-                                ],
-                            }),
-                        ],
-                    }),
-                ],
-            })],
-        }),
-    ],
+    nodes: &ORF_R04_NODES,
 };

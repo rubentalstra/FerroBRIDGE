@@ -9,604 +9,607 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`ADT_A16`], one `static` so a structure with the same tree links to it.
+pub static ADT_A16_NODES: [Node; 35] = [
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.5-EVN",
+        position: 5,
+        segment: &segment::evn::EVN,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.6-PID",
+        position: 6,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.7-PD1",
+        position: 7,
+        segment: &segment::pd1::PD1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.8-GSP",
+        position: 8,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.9-GSR",
+        position: 9,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.10-GSC",
+        position: 10,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.11-OH1",
+        position: 11,
+        segment: &segment::oh1::OH1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.12-OH2",
+        position: 12,
+        segment: &segment::oh2::OH2,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.13-OH3",
+        position: 13,
+        segment: &segment::oh3::OH3,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.14-OH4",
+        position: 14,
+        segment: &segment::oh4::OH4,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.15-ARV",
+        position: 15,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::B),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.16-ROL",
+        position: 16,
+        segment: &segment::rol::ROL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::B),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.17-PRT",
+        position: 17,
+        segment: &segment::prt::PRT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ADT_A16.18-NEXT_OF_KIN",
+        position: 18,
+        name: "NEXT_OF_KIN",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.18-NEXT_OF_KIN.1-NK1",
+                position: 1,
+                segment: &segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.18-NEXT_OF_KIN.2-GSP",
+                position: 2,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.18-NEXT_OF_KIN.3-GSR",
+                position: 3,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.18-NEXT_OF_KIN.4-OH2",
+                position: 4,
+                segment: &segment::oh2::OH2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.18-NEXT_OF_KIN.5-OH3",
+                position: 5,
+                segment: &segment::oh3::OH3,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.19-PV1",
+        position: 19,
+        segment: &segment::pv1::PV1,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.20-PV2",
+        position: 20,
+        segment: &segment::pv2::PV2,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.21-ARV",
+        position: 21,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::B),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.22-ROL",
+        position: 22,
+        segment: &segment::rol::ROL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::B),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.23-PRT",
+        position: 23,
+        segment: &segment::prt::PRT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.24-DB1",
+        position: 24,
+        segment: &segment::db1::DB1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ADT_A16.25-OBSERVATION",
+        position: 25,
+        name: "OBSERVATION",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.25-OBSERVATION.1-OBX",
+                position: 1,
+                segment: &segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.25-OBSERVATION.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.26-AL1",
+        position: 26,
+        segment: &segment::al1::AL1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.27-IAM",
+        position: 27,
+        segment: &segment::iam::IAM,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.28-DG1",
+        position: 28,
+        segment: &segment::dg1::DG1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.29-DRG",
+        position: 29,
+        segment: &segment::drg::DRG,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ADT_A16.30-PROCEDURE",
+        position: 30,
+        name: "PROCEDURE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.30-PROCEDURE.1-PR1",
+                position: 1,
+                segment: &segment::pr1::PR1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.30-PROCEDURE.2-ROL",
+                position: 2,
+                segment: &segment::rol::ROL,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::B),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.30-PROCEDURE.3-PRT",
+                position: 3,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.31-GT1",
+        position: 31,
+        segment: &segment::gt1::GT1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.32-GSP",
+        position: 32,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.33-GSR",
+        position: 33,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ADT_A16.34-INSURANCE",
+        position: 34,
+        name: "INSURANCE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.34-INSURANCE.1-IN1",
+                position: 1,
+                segment: &segment::in1::IN1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.34-INSURANCE.2-IN2",
+                position: 2,
+                segment: &segment::in2::IN2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.34-INSURANCE.3-IN3",
+                position: 3,
+                segment: &segment::in3::IN3,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.34-INSURANCE.4-GSP",
+                position: 4,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.34-INSURANCE.5-GSR",
+                position: 5,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.34-INSURANCE.6-ROL",
+                position: 6,
+                segment: &segment::rol::ROL,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::B),
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADT_A16.34-INSURANCE.7-PRT",
+                position: 7,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "ADT_A16.34-INSURANCE.8-AUTHORIZATION",
+                position: 8,
+                name: "AUTHORIZATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ADT_A16.34-INSURANCE.8-AUTHORIZATION.1-AUT",
+                        position: 1,
+                        segment: &segment::aut::AUT,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ADT_A16.34-INSURANCE.8-AUTHORIZATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "ADT_A16.34-INSURANCE.9-REFERRAL",
+                position: 9,
+                name: "REFERRAL",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ADT_A16.34-INSURANCE.9-REFERRAL.1-RF1",
+                        position: 1,
+                        segment: &segment::rf1::RF1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ADT_A16.34-INSURANCE.9-REFERRAL.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADT_A16.35-ACC",
+        position: 35,
+        segment: &segment::acc::ACC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `ADT_A16` message structure definition, `http://hl7.org/v2/StructureDefinition/ADT_A16`.
 pub static ADT_A16: Structure = Structure {
     id: "ADT_A16",
     url: Some("http://hl7.org/v2/StructureDefinition/ADT_A16"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.5-EVN",
-            position: 5,
-            segment: &segment::evn::EVN,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.6-PID",
-            position: 6,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.7-PD1",
-            position: 7,
-            segment: &segment::pd1::PD1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.8-GSP",
-            position: 8,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.9-GSR",
-            position: 9,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.10-GSC",
-            position: 10,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.11-OH1",
-            position: 11,
-            segment: &segment::oh1::OH1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.12-OH2",
-            position: 12,
-            segment: &segment::oh2::OH2,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.13-OH3",
-            position: 13,
-            segment: &segment::oh3::OH3,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.14-OH4",
-            position: 14,
-            segment: &segment::oh4::OH4,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.15-ARV",
-            position: 15,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::B),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.16-ROL",
-            position: 16,
-            segment: &segment::rol::ROL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::B),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.17-PRT",
-            position: 17,
-            segment: &segment::prt::PRT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ADT_A16.18-NEXT_OF_KIN",
-            position: 18,
-            name: "NEXT_OF_KIN",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.18-NEXT_OF_KIN.1-NK1",
-                    position: 1,
-                    segment: &segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.18-NEXT_OF_KIN.2-GSP",
-                    position: 2,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.18-NEXT_OF_KIN.3-GSR",
-                    position: 3,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.18-NEXT_OF_KIN.4-OH2",
-                    position: 4,
-                    segment: &segment::oh2::OH2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.18-NEXT_OF_KIN.5-OH3",
-                    position: 5,
-                    segment: &segment::oh3::OH3,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.19-PV1",
-            position: 19,
-            segment: &segment::pv1::PV1,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.20-PV2",
-            position: 20,
-            segment: &segment::pv2::PV2,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.21-ARV",
-            position: 21,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::B),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.22-ROL",
-            position: 22,
-            segment: &segment::rol::ROL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::B),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.23-PRT",
-            position: 23,
-            segment: &segment::prt::PRT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.24-DB1",
-            position: 24,
-            segment: &segment::db1::DB1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ADT_A16.25-OBSERVATION",
-            position: 25,
-            name: "OBSERVATION",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.25-OBSERVATION.1-OBX",
-                    position: 1,
-                    segment: &segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.25-OBSERVATION.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.26-AL1",
-            position: 26,
-            segment: &segment::al1::AL1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.27-IAM",
-            position: 27,
-            segment: &segment::iam::IAM,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.28-DG1",
-            position: 28,
-            segment: &segment::dg1::DG1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.29-DRG",
-            position: 29,
-            segment: &segment::drg::DRG,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ADT_A16.30-PROCEDURE",
-            position: 30,
-            name: "PROCEDURE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.30-PROCEDURE.1-PR1",
-                    position: 1,
-                    segment: &segment::pr1::PR1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.30-PROCEDURE.2-ROL",
-                    position: 2,
-                    segment: &segment::rol::ROL,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::B),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.30-PROCEDURE.3-PRT",
-                    position: 3,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.31-GT1",
-            position: 31,
-            segment: &segment::gt1::GT1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.32-GSP",
-            position: 32,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.33-GSR",
-            position: 33,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ADT_A16.34-INSURANCE",
-            position: 34,
-            name: "INSURANCE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.34-INSURANCE.1-IN1",
-                    position: 1,
-                    segment: &segment::in1::IN1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.34-INSURANCE.2-IN2",
-                    position: 2,
-                    segment: &segment::in2::IN2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.34-INSURANCE.3-IN3",
-                    position: 3,
-                    segment: &segment::in3::IN3,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.34-INSURANCE.4-GSP",
-                    position: 4,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.34-INSURANCE.5-GSR",
-                    position: 5,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.34-INSURANCE.6-ROL",
-                    position: 6,
-                    segment: &segment::rol::ROL,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::B),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADT_A16.34-INSURANCE.7-PRT",
-                    position: 7,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "ADT_A16.34-INSURANCE.8-AUTHORIZATION",
-                    position: 8,
-                    name: "AUTHORIZATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ADT_A16.34-INSURANCE.8-AUTHORIZATION.1-AUT",
-                            position: 1,
-                            segment: &segment::aut::AUT,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ADT_A16.34-INSURANCE.8-AUTHORIZATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "ADT_A16.34-INSURANCE.9-REFERRAL",
-                    position: 9,
-                    name: "REFERRAL",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ADT_A16.34-INSURANCE.9-REFERRAL.1-RF1",
-                            position: 1,
-                            segment: &segment::rf1::RF1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ADT_A16.34-INSURANCE.9-REFERRAL.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADT_A16.35-ACC",
-            position: 35,
-            segment: &segment::acc::ACC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &ADT_A16_NODES,
 };

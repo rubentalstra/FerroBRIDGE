@@ -6,210 +6,213 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`ORR_O02`], one `static` so a structure with the same tree links to it.
+pub static ORR_O02_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "ORR_O02.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORR_O02.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_5::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORR_O02.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_5::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORR_O02.4-NTE",
+        position: 4,
+        segment: &crate::legacy::v2_5::segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "ORR_O02.5-RESPONSE",
+        position: 5,
+        name: "RESPONSE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Group(Group {
+                id: "ORR_O02.5-RESPONSE.1-PATIENT",
+                position: 1,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ORR_O02.5-RESPONSE.1-PATIENT.1-PID",
+                        position: 1,
+                        segment: &crate::legacy::v2_5::segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORR_O02.5-RESPONSE.1-PATIENT.2-NTE",
+                        position: 2,
+                        segment: &crate::legacy::v2_5::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "ORR_O02.5-RESPONSE.2-ORDER",
+                position: 2,
+                name: "ORDER",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ORR_O02.5-RESPONSE.2-ORDER.1-ORC",
+                        position: 1,
+                        segment: &crate::legacy::v2_5::segment::orc::ORC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE",
+                        position: 2,
+                        name: "CHOICE",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Choice,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-1-OBR",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::obr::OBR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-2-RQD",
+                                position: 2,
+                                segment: &crate::legacy::v2_5::segment::rqd::RQD,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-3-RQ1",
+                                position: 3,
+                                segment: &crate::legacy::v2_5::segment::rq1::RQ1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-4-RXO",
+                                position: 4,
+                                segment: &crate::legacy::v2_5::segment::rxo::RXO,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-5-ODS",
+                                position: 5,
+                                segment: &crate::legacy::v2_5::segment::ods::ODS,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-6-ODT",
+                                position: 6,
+                                segment: &crate::legacy::v2_5::segment::odt::ODT,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-7-NTE",
+                                position: 7,
+                                segment: &crate::legacy::v2_5::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-8-CTI",
+                                position: 8,
+                                segment: &crate::legacy::v2_5::segment::cti::CTI,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `ORR_O02` message structure of the 2.5 tables, withdrawn as of 2.7.
 pub static ORR_O02: Structure = Structure {
     id: "ORR_O02",
     url: None,
     version: "2.5",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ORR_O02.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORR_O02.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_5::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORR_O02.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_5::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORR_O02.4-NTE",
-            position: 4,
-            segment: &crate::legacy::v2_5::segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "ORR_O02.5-RESPONSE",
-            position: 5,
-            name: "RESPONSE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Group(Group {
-                    id: "ORR_O02.5-RESPONSE.1-PATIENT",
-                    position: 1,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ORR_O02.5-RESPONSE.1-PATIENT.1-PID",
-                            position: 1,
-                            segment: &crate::legacy::v2_5::segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORR_O02.5-RESPONSE.1-PATIENT.2-NTE",
-                            position: 2,
-                            segment: &crate::legacy::v2_5::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "ORR_O02.5-RESPONSE.2-ORDER",
-                    position: 2,
-                    name: "ORDER",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ORR_O02.5-RESPONSE.2-ORDER.1-ORC",
-                            position: 1,
-                            segment: &crate::legacy::v2_5::segment::orc::ORC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Group(Group {
-                            id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE",
-                            position: 2,
-                            name: "CHOICE",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Choice,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-1-OBR",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_5::segment::obr::OBR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-2-RQD",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_5::segment::rqd::RQD,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-3-RQ1",
-                                    position: 3,
-                                    segment: &crate::legacy::v2_5::segment::rq1::RQ1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-4-RXO",
-                                    position: 4,
-                                    segment: &crate::legacy::v2_5::segment::rxo::RXO,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-5-ODS",
-                                    position: 5,
-                                    segment: &crate::legacy::v2_5::segment::ods::ODS,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-6-ODT",
-                                    position: 6,
-                                    segment: &crate::legacy::v2_5::segment::odt::ODT,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-7-NTE",
-                                    position: 7,
-                                    segment: &crate::legacy::v2_5::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORR_O02.5-RESPONSE.2-ORDER.2-CHOICE.choice-8-CTI",
-                                    position: 8,
-                                    segment: &crate::legacy::v2_5::segment::cti::CTI,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &ORR_O02_NODES,
 };

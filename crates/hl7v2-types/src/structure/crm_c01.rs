@@ -9,176 +9,179 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`CRM_C01`], one `static` so a structure with the same tree links to it.
+pub static CRM_C01_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "CRM_C01.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CRM_C01.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CRM_C01.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CRM_C01.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "CRM_C01.5-PATIENT",
+        position: 5,
+        name: "PATIENT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.1-PID",
+                position: 1,
+                segment: &segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.2-GSP",
+                position: 2,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.3-GSR",
+                position: 3,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.4-GSC",
+                position: 4,
+                segment: &segment::gsc::GSC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.5-PRT",
+                position: 5,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.6-ARV",
+                position: 6,
+                segment: &segment::arv::ARV,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::B),
+            }),
+            Node::Group(Group {
+                id: "CRM_C01.5-PATIENT.7-PATIENT_VISIT",
+                position: 7,
+                name: "PATIENT_VISIT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CRM_C01.5-PATIENT.7-PATIENT_VISIT.1-PV1",
+                        position: 1,
+                        segment: &segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CRM_C01.5-PATIENT.7-PATIENT_VISIT.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.8-CSR",
+                position: 8,
+                segment: &segment::csr::CSR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CRM_C01.5-PATIENT.9-CSP",
+                position: 9,
+                segment: &segment::csp::CSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `CRM_C01` message structure definition, `http://hl7.org/v2/StructureDefinition/CRM_C01`.
 pub static CRM_C01: Structure = Structure {
     id: "CRM_C01",
     url: Some("http://hl7.org/v2/StructureDefinition/CRM_C01"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "CRM_C01.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CRM_C01.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CRM_C01.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CRM_C01.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "CRM_C01.5-PATIENT",
-            position: 5,
-            name: "PATIENT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.1-PID",
-                    position: 1,
-                    segment: &segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.2-GSP",
-                    position: 2,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.3-GSR",
-                    position: 3,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.4-GSC",
-                    position: 4,
-                    segment: &segment::gsc::GSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.5-PRT",
-                    position: 5,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.6-ARV",
-                    position: 6,
-                    segment: &segment::arv::ARV,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::B),
-                }),
-                Node::Group(Group {
-                    id: "CRM_C01.5-PATIENT.7-PATIENT_VISIT",
-                    position: 7,
-                    name: "PATIENT_VISIT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CRM_C01.5-PATIENT.7-PATIENT_VISIT.1-PV1",
-                            position: 1,
-                            segment: &segment::pv1::PV1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CRM_C01.5-PATIENT.7-PATIENT_VISIT.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.8-CSR",
-                    position: 8,
-                    segment: &segment::csr::CSR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CRM_C01.5-PATIENT.9-CSP",
-                    position: 9,
-                    segment: &segment::csp::CSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &CRM_C01_NODES,
 };

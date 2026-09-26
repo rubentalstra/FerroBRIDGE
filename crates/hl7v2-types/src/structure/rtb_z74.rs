@@ -9,124 +9,127 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`RTB_Z74`], one `static` so a structure with the same tree links to it.
+pub static RTB_Z74_NODES: [Node; 9] = [
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.2-MSA",
+        position: 2,
+        segment: &segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.3-ERR",
+        position: 3,
+        segment: &segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.4-SFT",
+        position: 4,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.5-UAC",
+        position: 5,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.6-QAK",
+        position: 6,
+        segment: &segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.7-QPD",
+        position: 7,
+        segment: &segment::qpd::QPD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "RTB_Z74.8-ROW_DEFINITION",
+        position: 8,
+        name: "ROW_DEFINITION",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RTB_Z74.8-ROW_DEFINITION.1-RDF",
+                position: 1,
+                segment: &segment::rdf::RDF,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "RTB_Z74.8-ROW_DEFINITION.2-RDT",
+                position: 2,
+                segment: &segment::rdt::RDT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RTB_Z74.9-DSC",
+        position: 9,
+        segment: &segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `RTB_Z74` message structure definition, `http://hl7.org/v2/StructureDefinition/RTB_Z74`.
 pub static RTB_Z74: Structure = Structure {
     id: "RTB_Z74",
     url: Some("http://hl7.org/v2/StructureDefinition/RTB_Z74"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.2-MSA",
-            position: 2,
-            segment: &segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.3-ERR",
-            position: 3,
-            segment: &segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.4-SFT",
-            position: 4,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.5-UAC",
-            position: 5,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.6-QAK",
-            position: 6,
-            segment: &segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.7-QPD",
-            position: 7,
-            segment: &segment::qpd::QPD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "RTB_Z74.8-ROW_DEFINITION",
-            position: 8,
-            name: "ROW_DEFINITION",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RTB_Z74.8-ROW_DEFINITION.1-RDF",
-                    position: 1,
-                    segment: &segment::rdf::RDF,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RTB_Z74.8-ROW_DEFINITION.2-RDT",
-                    position: 2,
-                    segment: &segment::rdt::RDT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "RTB_Z74.9-DSC",
-            position: 9,
-            segment: &segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &RTB_Z74_NODES,
 };

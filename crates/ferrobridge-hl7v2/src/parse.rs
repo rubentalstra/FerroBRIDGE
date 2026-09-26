@@ -439,10 +439,35 @@ pub enum Unplaced {
         location: Location,
     },
     /// The message declares an earlier version than the definitions, and is
-    /// parsed against them.
+    /// parsed against them: the legacy tables carry no tree of the structure
+    /// at that version.
     EarlierVersion {
         /// MSH-12.1 as the message wrote it.
         declared: String,
+    },
+    /// A field the selected definition marks required (`R`) is empty; the
+    /// message is parsed and mapped all the same.
+    MissingRequiredField {
+        /// Where: the field.
+        location: Location,
+        /// The field's element id, for example `DG1.2` or `PID.5-patientName`.
+        field: &'static str,
+        /// The segment definition id, for example `DG1`.
+        segment: &'static str,
+        /// The version of the tables the structure comes from.
+        version: &'static str,
+    },
+    /// The message is parsed against the tree and segment tables of the
+    /// version named here, which MSH-12 selects ([`structure_for`]): its own
+    /// version where the legacy tables carry the structure there, and v2.9.1
+    /// otherwise. Not counted for a v2.9.1 message parsed against v2.9.1.
+    VersionSelected {
+        /// The structure id, for example `VXU_V04`.
+        structure: &'static str,
+        /// The version of the tables the tree comes from.
+        version: &'static str,
+        /// MSH-12.1 as the message wrote it.
+        declared: Option<String>,
     },
     /// MSH-9.3 names a structure other than the one the message is grouped
     /// by: one the definitions lack, where the message definition of MSH-9.1
@@ -476,6 +501,8 @@ impl Unplaced {
             Self::OutOfStructure { .. } => "out-of-structure",
             Self::ExtraField { .. } => "extra-field",
             Self::EarlierVersion { .. } => "earlier-version",
+            Self::VersionSelected { .. } => "version-selected",
+            Self::MissingRequiredField { .. } => "missing-required-field",
             Self::OtherStructure { .. } => "other-structure",
             Self::WithdrawnStructure { .. } => "withdrawn-structure",
         }
@@ -880,6 +907,14 @@ pub enum StructureError {
 /// [`hl7v2_types::message::legacy`] when MSH-9.3 is empty) by the version
 /// MSH-12 declares, or the nearest earlier version that carries it.
 ///
+/// A structure the definitions carry is then taken from the tables of the
+/// version MSH-12 declares ([`hl7v2_types::legacy::find`] by the id without
+/// its variant, `ORU_R01` at `2.5.1`), so its tree and its segments' field
+/// optionality are that version's. The v2.9.1 structure stays the answer for
+/// a message declaring 2.9.1, a version the legacy tables do not carry (2.9,
+/// a version after 2.8.2, or none), or one whose tables lack the structure;
+/// [`group`] counts [`Unplaced::VersionSelected`] with the version used.
+///
 /// # Errors
 ///
 /// Returns [`StructureError`] when MSH-9.3 is empty or names no structure
@@ -887,6 +922,23 @@ pub enum StructureError {
 /// of which the message definition names none, and when the legacy tables
 /// carry the structure only after the version MSH-12 declares.
 pub fn structure_for(message: &Message) -> Result<&'static Structure, StructureError> {
+    let structure = definitions_structure(message)?;
+    if structure.withdrawn_as_of.is_some() {
+        return Ok(structure);
+    }
+    // NOTE: HL7 v2.9.1 MSH-12 (hl7-v2ig MSH.json `MSH.12-versionId`) is "matched by the receiving
+    // system to its own version", so a version's own tables are used where carried; no vendored
+    // text rules on a version they lack, so the v2.9.1 fallback is our own design.
+    let own = message
+        .version()
+        .filter(|declared| *declared != crate::DEFINITIONS_VERSION)
+        .and_then(|declared| hl7v2_types::legacy::find(base_name(structure.id), declared));
+    Ok(own.unwrap_or(structure))
+}
+
+/// Selects the structure of the v2.9.1 definitions, or of the legacy tables
+/// for one they no longer carry, by the rules of [`structure_for`].
+fn definitions_structure(message: &Message) -> Result<&'static Structure, StructureError> {
     let code_event = message.message_type(1).zip(message.message_type(2));
     let indexed = code_event
         .and_then(|(code, event)| hl7v2_types::message::find(code, event))
@@ -1093,8 +1145,10 @@ fn base_name(id: &'static str) -> &'static str {
 /// sibling, a new instance of a repeating group whose first segments include
 /// it, or a sibling of an enclosing group. A segment with no such node is
 /// counted as [`Unplaced::OutOfStructure`], and the cursor stays where it was.
-/// A required segment or group left empty, and a required field left empty in
-/// a placed segment, are refusals.
+/// A required segment or group left empty is a refusal. A required field
+/// left empty in a placed segment is counted as
+/// [`Unplaced::MissingRequiredField`], and refuses only for MSH-9, MSH-10 and
+/// MSH-12.
 #[must_use]
 pub fn group(lexed: Lexed, structure: &'static Structure) -> Parsed {
     let Lexed { message, refusals } = lexed;
@@ -1112,12 +1166,25 @@ pub fn group(lexed: Lexed, structure: &'static Structure) -> Parsed {
             withdrawn_as_of,
             declared: parsed.message.version().map(String::from),
         });
-    } else if let Some(declared) = parsed.message.version()
-        && declared != crate::DEFINITIONS_VERSION
-    {
-        parsed.unplaced.push(Unplaced::EarlierVersion {
-            declared: String::from(declared),
-        });
+    } else {
+        let declared = parsed.message.version();
+        if structure.version != crate::DEFINITIONS_VERSION
+            || declared != Some(crate::DEFINITIONS_VERSION)
+        {
+            parsed.unplaced.push(Unplaced::VersionSelected {
+                structure: structure.id,
+                version: structure.version,
+                declared: declared.map(String::from),
+            });
+        }
+        if structure.version == crate::DEFINITIONS_VERSION
+            && let Some(declared) = declared
+            && declared != crate::DEFINITIONS_VERSION
+        {
+            parsed.unplaced.push(Unplaced::EarlierVersion {
+                declared: String::from(declared),
+            });
+        }
     }
     if let Some(declared) = parsed.message.message_type(3)
         && declared != base_name(structure.id)
@@ -1180,6 +1247,16 @@ fn placed_segments(items: &[Item]) -> Vec<(usize, &'static SegmentRef)> {
 
 /// Refuses a missing required field and counts a valued field beyond the
 /// segment's table.
+/// The MSH fields whose absence still refuses the message: the message type
+/// (MSH-9), the control id (MSH-10) and the version (MSH-12), without which
+/// no structure is selected and no acknowledgment names the message. MSH-1
+/// and MSH-2 refuse at the lexer.
+const ANSWER_FIELDS: [usize; 3] = [9, 10, 12];
+
+/// Checks the fields of the segment at `index` against the definition its
+/// node places: an empty required field is counted as
+/// [`Unplaced::MissingRequiredField`], one of [`ANSWER_FIELDS`] refuses, and
+/// a valued field beyond the table is counted as [`Unplaced::ExtraField`].
 fn check_fields(parsed: &mut Parsed, index: usize, node: &'static SegmentRef) {
     let location = parsed.location(index);
     let Some(segment) = parsed.message.segments.get(index) else {
@@ -1188,13 +1265,27 @@ fn check_fields(parsed: &mut Parsed, index: usize, node: &'static SegmentRef) {
     let definition = node.segment;
     for field in definition.fields {
         let position = usize::from(field.position);
-        if field.optionality == Optionality::R
-            && !segment.field(position).is_some_and(Field::is_valued)
+        if field.optionality != Optionality::R
+            || segment.field(position).is_some_and(Field::is_valued)
         {
+            continue;
+        }
+        let at = location.clone().with_field(position);
+        // NOTE: HL7 table 0516 (hl7.terminology CodeSystem-v2-0516) lets a receiver answer `W`,
+        // "transaction successful, but there may be issues"; keeping only the fields the bridge
+        // needs to answer at all as refusals is our own design.
+        if definition.id == "MSH" && ANSWER_FIELDS.contains(&position) {
             parsed.refusals.push(Refusal {
-                location: location.clone().with_field(position),
+                location: at,
                 code: ErrorCode::RequiredFieldMissing,
                 detail: format!("{} is required", field.id),
+            });
+        } else {
+            parsed.unplaced.push(Unplaced::MissingRequiredField {
+                location: at,
+                field: field.id,
+                segment: definition.id,
+                version: parsed.structure.version,
             });
         }
     }

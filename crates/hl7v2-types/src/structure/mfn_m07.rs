@@ -9,94 +9,97 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`MFN_M07`], one `static` so a structure with the same tree links to it.
+pub static MFN_M07_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M07.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M07.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M07.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M07.4-MFI",
+        position: 4,
+        segment: &segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "MFN_M07.5-MF_CLIN_STUDY_SCHED",
+        position: 5,
+        name: "MF_CLIN_STUDY_SCHED",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M07.5-MF_CLIN_STUDY_SCHED.1-MFE",
+                position: 1,
+                segment: &segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M07.5-MF_CLIN_STUDY_SCHED.2-CM0",
+                position: 2,
+                segment: &segment::cm0::CM0,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M07.5-MF_CLIN_STUDY_SCHED.3-CM2",
+                position: 3,
+                segment: &segment::cm2::CM2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M07` message structure definition, `http://hl7.org/v2/StructureDefinition/MFN_M07`.
 pub static MFN_M07: Structure = Structure {
     id: "MFN_M07",
     url: Some("http://hl7.org/v2/StructureDefinition/MFN_M07"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M07.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M07.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M07.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M07.4-MFI",
-            position: 4,
-            segment: &segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "MFN_M07.5-MF_CLIN_STUDY_SCHED",
-            position: 5,
-            name: "MF_CLIN_STUDY_SCHED",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M07.5-MF_CLIN_STUDY_SCHED.1-MFE",
-                    position: 1,
-                    segment: &segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M07.5-MF_CLIN_STUDY_SCHED.2-CM0",
-                    position: 2,
-                    segment: &segment::cm0::CM0,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M07.5-MF_CLIN_STUDY_SCHED.3-CM2",
-                    position: 3,
-                    segment: &segment::cm2::CM2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M07_NODES,
 };

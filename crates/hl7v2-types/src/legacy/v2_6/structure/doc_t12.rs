@@ -6,134 +6,137 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`DOC_T12`], one `static` so a structure with the same tree links to it.
+pub static DOC_T12_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "DOC_T12.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_6::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "DOC_T12.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_6::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "DOC_T12.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_6::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "DOC_T12.4-QAK",
+        position: 4,
+        segment: &crate::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "DOC_T12.5-QRD",
+        position: 5,
+        segment: &crate::legacy::v2_6::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "DOC_T12.6-RESULT",
+        position: 6,
+        name: "RESULT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "DOC_T12.6-RESULT.1-EVN",
+                position: 1,
+                segment: &crate::legacy::v2_6::segment::evn::EVN,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "DOC_T12.6-RESULT.2-PID",
+                position: 2,
+                segment: &crate::legacy::v2_6::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "DOC_T12.6-RESULT.3-PV1",
+                position: 3,
+                segment: &crate::legacy::v2_6::segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "DOC_T12.6-RESULT.4-TXA",
+                position: 4,
+                segment: &crate::legacy::v2_6::segment::txa::TXA,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "DOC_T12.6-RESULT.5-OBX",
+                position: 5,
+                segment: &crate::legacy::v2_6::segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "DOC_T12.7-DSC",
+        position: 7,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `DOC_T12` message structure of the 2.6 tables, withdrawn as of 2.7.
 pub static DOC_T12: Structure = Structure {
     id: "DOC_T12",
     url: None,
     version: "2.6",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "DOC_T12.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_6::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "DOC_T12.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_6::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "DOC_T12.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_6::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "DOC_T12.4-QAK",
-            position: 4,
-            segment: &crate::segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "DOC_T12.5-QRD",
-            position: 5,
-            segment: &crate::legacy::v2_6::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "DOC_T12.6-DSC",
-            position: 6,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "DOC_T12.7-RESULT",
-            position: 7,
-            name: "RESULT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "DOC_T12.7-RESULT.1-EVN",
-                    position: 1,
-                    segment: &crate::legacy::v2_6::segment::evn::EVN,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DOC_T12.7-RESULT.2-PID",
-                    position: 2,
-                    segment: &crate::legacy::v2_6::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DOC_T12.7-RESULT.3-PV1",
-                    position: 3,
-                    segment: &crate::legacy::v2_6::segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DOC_T12.7-RESULT.4-TXA",
-                    position: 4,
-                    segment: &crate::legacy::v2_6::segment::txa::TXA,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "DOC_T12.7-RESULT.5-OBX",
-                    position: 5,
-                    segment: &crate::legacy::v2_6::segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &DOC_T12_NODES,
 };

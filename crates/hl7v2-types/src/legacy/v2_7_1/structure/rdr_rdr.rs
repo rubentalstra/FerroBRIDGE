@@ -6,306 +6,309 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`RDR_RDR`], one `static` so a structure with the same tree links to it.
+pub static RDR_RDR_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "RDR_RDR.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_7_1::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RDR_RDR.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_7_1::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RDR_RDR.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_7_1::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RDR_RDR.4-SFT",
+        position: 4,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RDR_RDR.5-UAC",
+        position: 5,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "RDR_RDR.6-DEFINITION",
+        position: 6,
+        name: "DEFINITION",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RDR_RDR.6-DEFINITION.1-QRD",
+                position: 1,
+                segment: &crate::legacy::v2_7_1::segment::qrd::QRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RDR_RDR.6-DEFINITION.2-QRF",
+                position: 2,
+                segment: &crate::legacy::v2_7_1::segment::qrf::QRF,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "RDR_RDR.6-DEFINITION.3-PATIENT",
+                position: 3,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RDR_RDR.6-DEFINITION.3-PATIENT.1-PID",
+                        position: 1,
+                        segment: &crate::legacy::v2_7_1::segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RDR_RDR.6-DEFINITION.3-PATIENT.2-NTE",
+                        position: 2,
+                        segment: &crate::legacy::v2_7_1::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "RDR_RDR.6-DEFINITION.4-ORDER",
+                position: 4,
+                name: "ORDER",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RDR_RDR.6-DEFINITION.4-ORDER.1-ORC",
+                        position: 1,
+                        segment: &crate::legacy::v2_7_1::segment::orc::ORC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "RDR_RDR.6-DEFINITION.4-ORDER.2-TIMING",
+                        position: 2,
+                        name: "TIMING",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.2-TIMING.1-TQ1",
+                                position: 1,
+                                segment: &crate::segment::tq1::TQ1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.2-TIMING.2-TQ2",
+                                position: 2,
+                                segment: &crate::segment::tq2::TQ2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "RDR_RDR.6-DEFINITION.4-ORDER.3-ENCODING",
+                        position: 3,
+                        name: "ENCODING",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.3-ENCODING.1-RXE",
+                                position: 1,
+                                segment: &crate::legacy::v2_7_1::segment::rxe::RXE,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Group(Group {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.3-ENCODING.2-TIMING_ENCODED",
+                                position: 2,
+                                name: "TIMING_ENCODED",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "RDR_RDR.6-DEFINITION.4-ORDER.3-ENCODING.2-TIMING_ENCODED.1-TQ1",
+                                        position: 1,
+                                        segment: &crate::segment::tq1::TQ1,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: None,
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "RDR_RDR.6-DEFINITION.4-ORDER.3-ENCODING.2-TIMING_ENCODED.2-TQ2",
+                                        position: 2,
+                                        segment: &crate::segment::tq2::TQ2,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: None,
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.3-ENCODING.3-RXR",
+                                position: 3,
+                                segment: &crate::legacy::v2_7_1::segment::rxr::RXR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.3-ENCODING.4-RXC",
+                                position: 4,
+                                segment: &crate::legacy::v2_7_1::segment::rxc::RXC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "RDR_RDR.6-DEFINITION.4-ORDER.4-DISPENSE",
+                        position: 4,
+                        name: "DISPENSE",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.4-DISPENSE.1-RXD",
+                                position: 1,
+                                segment: &crate::legacy::v2_7_1::segment::rxd::RXD,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.4-DISPENSE.2-RXR",
+                                position: 2,
+                                segment: &crate::legacy::v2_7_1::segment::rxr::RXR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RDR_RDR.6-DEFINITION.4-ORDER.4-DISPENSE.3-RXC",
+                                position: 3,
+                                segment: &crate::legacy::v2_7_1::segment::rxc::RXC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RDR_RDR.7-DSC",
+        position: 7,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `RDR_RDR` message structure of the 2.7.1 tables, withdrawn as of 2.9.1.
 pub static RDR_RDR: Structure = Structure {
     id: "RDR_RDR",
     url: None,
     version: "2.7.1",
     withdrawn_as_of: Some("2.9.1"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RDR_RDR.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_7_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RDR_RDR.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_7_1::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RDR_RDR.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_7_1::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RDR_RDR.4-SFT",
-            position: 4,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RDR_RDR.5-UAC",
-            position: 5,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RDR_RDR.6-DSC",
-            position: 6,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "RDR_RDR.7-DEFINITION",
-            position: 7,
-            name: "DEFINITION",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RDR_RDR.7-DEFINITION.1-QRD",
-                    position: 1,
-                    segment: &crate::legacy::v2_7_1::segment::qrd::QRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RDR_RDR.7-DEFINITION.2-QRF",
-                    position: 2,
-                    segment: &crate::legacy::v2_7_1::segment::qrf::QRF,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "RDR_RDR.7-DEFINITION.3-PATIENT",
-                    position: 3,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RDR_RDR.7-DEFINITION.3-PATIENT.1-PID",
-                            position: 1,
-                            segment: &crate::legacy::v2_7_1::segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RDR_RDR.7-DEFINITION.3-PATIENT.2-NTE",
-                            position: 2,
-                            segment: &crate::legacy::v2_7_1::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "RDR_RDR.7-DEFINITION.4-ORDER",
-                    position: 4,
-                    name: "ORDER",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RDR_RDR.7-DEFINITION.4-ORDER.1-ORC",
-                            position: 1,
-                            segment: &crate::legacy::v2_7_1::segment::orc::ORC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Group(Group {
-                            id: "RDR_RDR.7-DEFINITION.4-ORDER.2-TIMING",
-                            position: 2,
-                            name: "TIMING",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.2-TIMING.1-TQ1",
-                                    position: 1,
-                                    segment: &crate::segment::tq1::TQ1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.2-TIMING.2-TQ2",
-                                    position: 2,
-                                    segment: &crate::segment::tq2::TQ2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "RDR_RDR.7-DEFINITION.4-ORDER.3-ENCODING",
-                            position: 3,
-                            name: "ENCODING",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.3-ENCODING.1-RXE",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_7_1::segment::rxe::RXE,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Group(Group {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.3-ENCODING.2-TIMING_ENCODED",
-                                    position: 2,
-                                    name: "TIMING_ENCODED",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "RDR_RDR.7-DEFINITION.4-ORDER.3-ENCODING.2-TIMING_ENCODED.1-TQ1",
-                                            position: 1,
-                                            segment: &crate::segment::tq1::TQ1,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: None,
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "RDR_RDR.7-DEFINITION.4-ORDER.3-ENCODING.2-TIMING_ENCODED.2-TQ2",
-                                            position: 2,
-                                            segment: &crate::segment::tq2::TQ2,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: None,
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.3-ENCODING.3-RXR",
-                                    position: 3,
-                                    segment: &crate::legacy::v2_7_1::segment::rxr::RXR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.3-ENCODING.4-RXC",
-                                    position: 4,
-                                    segment: &crate::legacy::v2_7_1::segment::rxc::RXC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "RDR_RDR.7-DEFINITION.4-ORDER.4-DISPENSE",
-                            position: 4,
-                            name: "DISPENSE",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.4-DISPENSE.1-RXD",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_7_1::segment::rxd::RXD,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.4-DISPENSE.2-RXR",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_7_1::segment::rxr::RXR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RDR_RDR.7-DEFINITION.4-ORDER.4-DISPENSE.3-RXC",
-                                    position: 3,
-                                    segment: &crate::legacy::v2_7_1::segment::rxc::RXC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &RDR_RDR_NODES,
 };

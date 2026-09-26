@@ -9,9 +9,9 @@
 //! field table, the batch envelopes included, `data_type` every primitive and
 //! complex data type with its component table, and `message` every message
 //! definition with the structure its trigger event selects. `legacy` holds
-//! the message structures the definitions no longer carry, from the tables
-//! of each earlier version that did, and `message` indexes them by code,
-//! event and version. The shapes are in `model`. Every file is `@generated`
+//! the message structures of each earlier version's tables, those the
+//! definitions no longer carry among them, and `message` indexes them by
+//! code, event and version. The shapes are in `model`. Every file is `@generated`
 //! by `fhir-codegen`; change the emitter and regenerate, never the output.
 //!
 //! The definitions are `HL7/v2ig` at commit `3adcdbfff654ccbff5cd33aa34bd909a087e8e19`, path `input/sourceOfTruth`:
@@ -20,9 +20,11 @@
 //!
 //! The legacy tables are the NIST IGAMT export of HL7's v2 database,
 //! `usnistgov/igamt-hl7Tools-service` at commit `83322dffdac18cb129a1bd80149f5439cf5686fd`, path `src/main/resources/hl7db`:
-//! 218 message structures of 57 structure codes over 11 versions, naming 495 segments
-//! whose field table differs from the v2.9.1 one (10030 fields) and 98 that agree with it,
-//! indexed by 218 legacy message entries.
+//! 1713 message structures of 254 structure codes over 11 versions (218 of 57 codes the
+//! definitions no longer carry), with 1532 trees of their own, 0 linked to the identical
+//! v2.9.1 tree and 181 to an earlier version's. The trees name 720 segments of their own
+//! (12954 fields), 446 references linked to the agreeing v2.9.1 segment and 327 to an earlier
+//! version's identical one, and 1713 legacy message entries index them.
 
 pub mod data_type;
 pub mod legacy;

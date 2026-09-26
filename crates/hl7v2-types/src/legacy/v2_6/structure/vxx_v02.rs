@@ -6,104 +6,107 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`VXX_V02`], one `static` so a structure with the same tree links to it.
+pub static VXX_V02_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "VXX_V02.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_6::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXX_V02.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_6::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXX_V02.3-SFT",
+        position: 3,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXX_V02.4-UAC",
+        position: 4,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXX_V02.5-QRD",
+        position: 5,
+        segment: &crate::legacy::v2_6::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXX_V02.6-QRF",
+        position: 6,
+        segment: &crate::legacy::v2_6::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "VXX_V02.7-PATIENT",
+        position: 7,
+        name: "PATIENT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "VXX_V02.7-PATIENT.1-PID",
+                position: 1,
+                segment: &crate::legacy::v2_6::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "VXX_V02.7-PATIENT.2-NK1",
+                position: 2,
+                segment: &crate::legacy::v2_6::segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `VXX_V02` message structure of the 2.6 tables, withdrawn as of 2.7.
 pub static VXX_V02: Structure = Structure {
     id: "VXX_V02",
     url: None,
     version: "2.6",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "VXX_V02.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_6::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXX_V02.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_6::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXX_V02.3-SFT",
-            position: 3,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXX_V02.4-UAC",
-            position: 4,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXX_V02.5-QRD",
-            position: 5,
-            segment: &crate::legacy::v2_6::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXX_V02.6-QRF",
-            position: 6,
-            segment: &crate::legacy::v2_6::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "VXX_V02.7-PATIENT",
-            position: 7,
-            name: "PATIENT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "VXX_V02.7-PATIENT.1-PID",
-                    position: 1,
-                    segment: &crate::legacy::v2_6::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "VXX_V02.7-PATIENT.2-NK1",
-                    position: 2,
-                    segment: &crate::legacy::v2_6::segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &VXX_V02_NODES,
 };

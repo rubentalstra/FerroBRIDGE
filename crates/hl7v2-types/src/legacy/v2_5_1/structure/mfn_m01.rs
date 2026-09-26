@@ -3,8 +3,10 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
 //! The `MFN_M01` message structure of the 2.5.1 tables, withdrawn as of 2.7.
+//!
+//! The tables give it the tree of the 2.5 tables, which it links to.
 
-use crate::model::{Cardinality, Group, GroupKind, Max, Node, Placeholder, SegmentRef, Structure};
+use crate::model::Structure;
 
 /// The `MFN_M01` message structure of the 2.5.1 tables, withdrawn as of 2.7.
 pub static MFN_M01: Structure = Structure {
@@ -12,66 +14,5 @@ pub static MFN_M01: Structure = Structure {
     url: None,
     version: "2.5.1",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M01.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M01.2-SFT",
-            position: 2,
-            segment: &crate::legacy::v2_5_1::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M01.3-MFI",
-            position: 3,
-            segment: &crate::legacy::v2_5_1::segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "MFN_M01.4-MF",
-            position: 4,
-            name: "MF",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M01.4-MF.1-MFE",
-                    position: 1,
-                    segment: &crate::legacy::v2_5_1::segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Placeholder(Placeholder {
-                    id: "MFN_M01.4-MF.2-Hxx",
-                    position: 2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                }),
-            ],
-        }),
-    ],
+    nodes: &crate::legacy::v2_5::structure::mfn_m01::MFN_M01_NODES,
 };

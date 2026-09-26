@@ -2,8 +2,8 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The legacy message structures of the 2.6 tables, and the segments they
-//! name whose field table differs from the v2.9.1 one.
+//! The message structures of the 2.6 tables, and the segments they name
+//! that no v2.9.1 or earlier `static` carries.
 
 pub mod data_type;
 pub mod segment;

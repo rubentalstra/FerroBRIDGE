@@ -4,23 +4,59 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The legacy message structures of the 2.3.1 tables, one module each.
 
+pub mod ack;
+pub mod crm_c01;
+pub mod csu_c09;
+pub mod mfk_m01;
 pub mod mfn_m01;
+pub mod mfn_m02;
 pub mod mfq_m01;
 pub mod mfr_m01;
+pub mod nmd_n02;
 pub mod nmq_n01;
 pub mod nmr_n01;
 pub mod orm_o01;
 pub mod orr_o02;
+pub mod pex_p07;
+pub mod pgl_pc6;
+pub mod ppg_pcg;
+pub mod ppp_pcb;
+pub mod ppr_pc1;
+pub mod ref_i12;
+pub mod rpa_i08;
+pub mod rqa_i08;
+pub mod rri_i12;
+pub mod siu_s12;
+pub mod srm_s01;
+pub mod srr_s01;
 
 /// Every message structure, in definition id order.
-pub static STRUCTURES: [&crate::model::Structure; 7] = [
+pub static STRUCTURES: [&crate::model::Structure; 25] = [
+    &ack::ACK,
+    &crm_c01::CRM_C01,
+    &csu_c09::CSU_C09,
+    &mfk_m01::MFK_M01,
     &mfn_m01::MFN_M01,
+    &mfn_m02::MFN_M02,
     &mfq_m01::MFQ_M01,
     &mfr_m01::MFR_M01,
+    &nmd_n02::NMD_N02,
     &nmq_n01::NMQ_N01,
     &nmr_n01::NMR_N01,
     &orm_o01::ORM_O01,
     &orr_o02::ORR_O02,
+    &pex_p07::PEX_P07,
+    &pgl_pc6::PGL_PC6,
+    &ppg_pcg::PPG_PCG,
+    &ppp_pcb::PPP_PCB,
+    &ppr_pc1::PPR_PC1,
+    &ref_i12::REF_I12,
+    &rpa_i08::RPA_I08,
+    &rqa_i08::RQA_I08,
+    &rri_i12::RRI_I12,
+    &siu_s12::SIU_S12,
+    &srm_s01::SRM_S01,
+    &srr_s01::SRR_S01,
 ];
 
 /// Returns the message structure whose definition id is `id`, for example `ORM_O01`.

@@ -9,870 +9,873 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`OPL_O37`], one `static` so a structure with the same tree links to it.
+pub static OPL_O37_NODES: [Node; 8] = [
+    Node::Segment(SegmentRef {
+        id: "OPL_O37.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OPL_O37.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OPL_O37.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OPL_O37.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OPL_O37.5-NTE",
+        position: 5,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OPL_O37.6-PRT",
+        position: 6,
+        segment: &segment::prt::PRT,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "OPL_O37.7-GUARANTOR",
+        position: 7,
+        name: "GUARANTOR",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.7-GUARANTOR.1-GT1",
+                position: 1,
+                segment: &segment::gt1::GT1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.7-GUARANTOR.2-NTE",
+                position: 2,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "OPL_O37.8-ORDER",
+        position: 8,
+        name: "ORDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.8-ORDER.1-NK1",
+                position: 1,
+                segment: &segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "OPL_O37.8-ORDER.2-PATIENT",
+                position: 2,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.1-PID",
+                        position: 1,
+                        segment: &segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.2-PD1",
+                        position: 2,
+                        segment: &segment::pd1::PD1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.3-GSP",
+                        position: 3,
+                        segment: &segment::gsp::GSP,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.4-GSR",
+                        position: 4,
+                        segment: &segment::gsr::GSR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.5-GSC",
+                        position: 5,
+                        segment: &segment::gsc::GSC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.6-PRT",
+                        position: 6,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.7-ARV",
+                        position: 7,
+                        segment: &segment::arv::ARV,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::B),
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.8-OBSERVATIONS_ON_PATIENT",
+                        position: 8,
+                        name: "OBSERVATIONS_ON_PATIENT",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.2-PATIENT.8-OBSERVATIONS_ON_PATIENT.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.2-PATIENT.8-OBSERVATIONS_ON_PATIENT.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE",
+                        position: 9,
+                        name: "INSURANCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE.1-IN1",
+                                position: 1,
+                                segment: &segment::in1::IN1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE.2-IN2",
+                                position: 2,
+                                segment: &segment::in2::IN2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE.3-IN3",
+                                position: 3,
+                                segment: &segment::in3::IN3,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.2-PATIENT.10-AL1",
+                        position: 10,
+                        segment: &segment::al1::AL1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "OPL_O37.8-ORDER.3-SPECIMEN",
+                position: 3,
+                name: "SPECIMEN",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.3-SPECIMEN.1-SPM",
+                        position: 1,
+                        segment: &segment::spm::SPM,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.3-SPECIMEN.2-SPECIMEN_OBSERVATION",
+                        position: 2,
+                        name: "SPECIMEN_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.2-SPECIMEN_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.2-SPECIMEN_OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER",
+                        position: 3,
+                        name: "CONTAINER",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.1-SAC",
+                                position: 1,
+                                segment: &segment::sac::SAC,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.2-CONTAINER_OBSERVATION",
+                                position: 2,
+                                name: "CONTAINER_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.2-CONTAINER_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.2-CONTAINER_OBSERVATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST",
+                        position: 4,
+                        name: "OBSERVATION_REQUEST",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.1-ORC",
+                                position: 1,
+                                segment: &segment::orc::ORC,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.3-OBR",
+                                position: 3,
+                                segment: &segment::obr::OBR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.4-PRT",
+                                position: 4,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.5-TIMING",
+                                position: 5,
+                                name: "TIMING",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.5-TIMING.1-TQ1",
+                                        position: 1,
+                                        segment: &segment::tq1::TQ1,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.5-TIMING.2-TQ2",
+                                        position: 2,
+                                        segment: &segment::tq2::TQ2,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.6-TCD",
+                                position: 6,
+                                segment: &segment::tcd::TCD,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.7-DG1",
+                                position: 7,
+                                segment: &segment::dg1::DG1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.8-ORDER_RELATED_OBSERVATION",
+                                position: 8,
+                                name: "ORDER_RELATED_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.8-ORDER_RELATED_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.8-ORDER_RELATED_OBSERVATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.8-ORDER.4-SGH",
+                position: 4,
+                segment: &segment::sgh::SGH,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT",
+                position: 5,
+                name: "PRIOR_RESULT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.1-NK1",
+                        position: 1,
+                        segment: &segment::nk1::NK1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR",
+                        position: 2,
+                        name: "PATIENT_PRIOR",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.1-PID",
+                                position: 1,
+                                segment: &segment::pid::PID,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.2-PD1",
+                                position: 2,
+                                segment: &segment::pd1::PD1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.3-GSP",
+                                position: 3,
+                                segment: &segment::gsp::GSP,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.4-GSR",
+                                position: 4,
+                                segment: &segment::gsr::GSR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.5-GSC",
+                                position: 5,
+                                segment: &segment::gsc::GSC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.6-PRT",
+                                position: 6,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.7-ARV",
+                                position: 7,
+                                segment: &segment::arv::ARV,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::B),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR",
+                        position: 3,
+                        name: "PATIENT_VISIT_PRIOR",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR.1-PV1",
+                                position: 1,
+                                segment: &segment::pv1::PV1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR.2-PV2",
+                                position: 2,
+                                segment: &segment::pv2::PV2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR.3-PRT",
+                                position: 3,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.4-AL1",
+                        position: 4,
+                        segment: &segment::al1::AL1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR",
+                        position: 5,
+                        name: "ORDER_PRIOR",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.1-OBR",
+                                position: 1,
+                                segment: &segment::obr::OBR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.2-ORC",
+                                position: 2,
+                                segment: &segment::orc::ORC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.3-OBSERVATION_PARTICIPATION_PRIOR",
+                                position: 3,
+                                name: "OBSERVATION_PARTICIPATION_PRIOR",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.3-OBSERVATION_PARTICIPATION_PRIOR.1-PRT",
+                                        position: 1,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.3-OBSERVATION_PARTICIPATION_PRIOR.2-DEV",
+                                        position: 2,
+                                        segment: &segment::dev::DEV,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.4-TIMING",
+                                position: 4,
+                                name: "TIMING",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.4-TIMING.1-TQ1",
+                                        position: 1,
+                                        segment: &segment::tq1::TQ1,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.4-TIMING.2-TQ2",
+                                        position: 2,
+                                        segment: &segment::tq2::TQ2,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.5-OBSERVATION_RESULT_GROUP",
+                                position: 5,
+                                name: "OBSERVATION_RESULT_GROUP",
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.5-OBSERVATION_RESULT_GROUP.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.5-OBSERVATION_RESULT_GROUP.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.8-ORDER.6-SGT",
+                position: 6,
+                segment: &segment::sgt::SGT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.8-ORDER.7-FT1",
+                position: 7,
+                segment: &segment::ft1::FT1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.8-ORDER.8-CTI",
+                position: 8,
+                segment: &segment::cti::CTI,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OPL_O37.8-ORDER.9-BLG",
+                position: 9,
+                segment: &segment::blg::BLG,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `OPL_O37` message structure definition, `http://hl7.org/v2/StructureDefinition/OPL_O37`.
 pub static OPL_O37: Structure = Structure {
     id: "OPL_O37",
     url: Some("http://hl7.org/v2/StructureDefinition/OPL_O37"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "OPL_O37.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OPL_O37.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OPL_O37.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OPL_O37.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OPL_O37.5-NTE",
-            position: 5,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OPL_O37.6-PRT",
-            position: 6,
-            segment: &segment::prt::PRT,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "OPL_O37.7-GUARANTOR",
-            position: 7,
-            name: "GUARANTOR",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.7-GUARANTOR.1-GT1",
-                    position: 1,
-                    segment: &segment::gt1::GT1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.7-GUARANTOR.2-NTE",
-                    position: 2,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "OPL_O37.8-ORDER",
-            position: 8,
-            name: "ORDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.8-ORDER.1-NK1",
-                    position: 1,
-                    segment: &segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "OPL_O37.8-ORDER.2-PATIENT",
-                    position: 2,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.1-PID",
-                            position: 1,
-                            segment: &segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.2-PD1",
-                            position: 2,
-                            segment: &segment::pd1::PD1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.3-GSP",
-                            position: 3,
-                            segment: &segment::gsp::GSP,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.4-GSR",
-                            position: 4,
-                            segment: &segment::gsr::GSR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.5-GSC",
-                            position: 5,
-                            segment: &segment::gsc::GSC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.6-PRT",
-                            position: 6,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.7-ARV",
-                            position: 7,
-                            segment: &segment::arv::ARV,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::B),
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.8-OBSERVATIONS_ON_PATIENT",
-                            position: 8,
-                            name: "OBSERVATIONS_ON_PATIENT",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.2-PATIENT.8-OBSERVATIONS_ON_PATIENT.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.2-PATIENT.8-OBSERVATIONS_ON_PATIENT.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE",
-                            position: 9,
-                            name: "INSURANCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE.1-IN1",
-                                    position: 1,
-                                    segment: &segment::in1::IN1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE.2-IN2",
-                                    position: 2,
-                                    segment: &segment::in2::IN2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.2-PATIENT.9-INSURANCE.3-IN3",
-                                    position: 3,
-                                    segment: &segment::in3::IN3,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.2-PATIENT.10-AL1",
-                            position: 10,
-                            segment: &segment::al1::AL1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "OPL_O37.8-ORDER.3-SPECIMEN",
-                    position: 3,
-                    name: "SPECIMEN",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.3-SPECIMEN.1-SPM",
-                            position: 1,
-                            segment: &segment::spm::SPM,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.3-SPECIMEN.2-SPECIMEN_OBSERVATION",
-                            position: 2,
-                            name: "SPECIMEN_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.2-SPECIMEN_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.2-SPECIMEN_OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER",
-                            position: 3,
-                            name: "CONTAINER",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.1-SAC",
-                                    position: 1,
-                                    segment: &segment::sac::SAC,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.2-CONTAINER_OBSERVATION",
-                                    position: 2,
-                                    name: "CONTAINER_OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.2-CONTAINER_OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.3-SPECIMEN.3-CONTAINER.2-CONTAINER_OBSERVATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST",
-                            position: 4,
-                            name: "OBSERVATION_REQUEST",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.1-ORC",
-                                    position: 1,
-                                    segment: &segment::orc::ORC,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.3-OBR",
-                                    position: 3,
-                                    segment: &segment::obr::OBR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.4-PRT",
-                                    position: 4,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.5-TIMING",
-                                    position: 5,
-                                    name: "TIMING",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.5-TIMING.1-TQ1",
-                                            position: 1,
-                                            segment: &segment::tq1::TQ1,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.5-TIMING.2-TQ2",
-                                            position: 2,
-                                            segment: &segment::tq2::TQ2,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.6-TCD",
-                                    position: 6,
-                                    segment: &segment::tcd::TCD,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.7-DG1",
-                                    position: 7,
-                                    segment: &segment::dg1::DG1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.8-ORDER_RELATED_OBSERVATION",
-                                    position: 8,
-                                    name: "ORDER_RELATED_OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.8-ORDER_RELATED_OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.3-SPECIMEN.4-OBSERVATION_REQUEST.8-ORDER_RELATED_OBSERVATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.8-ORDER.4-SGH",
-                    position: 4,
-                    segment: &segment::sgh::SGH,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT",
-                    position: 5,
-                    name: "PRIOR_RESULT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.1-NK1",
-                            position: 1,
-                            segment: &segment::nk1::NK1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR",
-                            position: 2,
-                            name: "PATIENT_PRIOR",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.1-PID",
-                                    position: 1,
-                                    segment: &segment::pid::PID,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.2-PD1",
-                                    position: 2,
-                                    segment: &segment::pd1::PD1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.3-GSP",
-                                    position: 3,
-                                    segment: &segment::gsp::GSP,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.4-GSR",
-                                    position: 4,
-                                    segment: &segment::gsr::GSR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.5-GSC",
-                                    position: 5,
-                                    segment: &segment::gsc::GSC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.6-PRT",
-                                    position: 6,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.2-PATIENT_PRIOR.7-ARV",
-                                    position: 7,
-                                    segment: &segment::arv::ARV,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::B),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR",
-                            position: 3,
-                            name: "PATIENT_VISIT_PRIOR",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR.1-PV1",
-                                    position: 1,
-                                    segment: &segment::pv1::PV1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR.2-PV2",
-                                    position: 2,
-                                    segment: &segment::pv2::PV2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.3-PATIENT_VISIT_PRIOR.3-PRT",
-                                    position: 3,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.4-AL1",
-                            position: 4,
-                            segment: &segment::al1::AL1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR",
-                            position: 5,
-                            name: "ORDER_PRIOR",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.1-OBR",
-                                    position: 1,
-                                    segment: &segment::obr::OBR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.2-ORC",
-                                    position: 2,
-                                    segment: &segment::orc::ORC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.3-OBSERVATION_PARTICIPATION_PRIOR",
-                                    position: 3,
-                                    name: "OBSERVATION_PARTICIPATION_PRIOR",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.3-OBSERVATION_PARTICIPATION_PRIOR.1-PRT",
-                                            position: 1,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.3-OBSERVATION_PARTICIPATION_PRIOR.2-DEV",
-                                            position: 2,
-                                            segment: &segment::dev::DEV,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.4-TIMING",
-                                    position: 4,
-                                    name: "TIMING",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.4-TIMING.1-TQ1",
-                                            position: 1,
-                                            segment: &segment::tq1::TQ1,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.4-TIMING.2-TQ2",
-                                            position: 2,
-                                            segment: &segment::tq2::TQ2,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.5-OBSERVATION_RESULT_GROUP",
-                                    position: 5,
-                                    name: "OBSERVATION_RESULT_GROUP",
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.5-OBSERVATION_RESULT_GROUP.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OPL_O37.8-ORDER.5-PRIOR_RESULT.5-ORDER_PRIOR.5-OBSERVATION_RESULT_GROUP.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.8-ORDER.6-SGT",
-                    position: 6,
-                    segment: &segment::sgt::SGT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.8-ORDER.7-FT1",
-                    position: 7,
-                    segment: &segment::ft1::FT1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.8-ORDER.8-CTI",
-                    position: 8,
-                    segment: &segment::cti::CTI,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OPL_O37.8-ORDER.9-BLG",
-                    position: 9,
-                    segment: &segment::blg::BLG,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &OPL_O37_NODES,
 };

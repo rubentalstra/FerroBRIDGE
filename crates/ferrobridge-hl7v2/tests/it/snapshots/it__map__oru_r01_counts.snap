@@ -3,7 +3,7 @@ source: crates/ferrobridge-hl7v2/tests/it/map.rs
 expression: mapped.counts()
 ---
 {
-    "earlier-version": 1,
+    "group-path": 1,
     "missing-required": 1,
     "narrative-condition": 19,
     "no-datatype-map": 1,
@@ -16,4 +16,5 @@ expression: mapped.counts()
     "unsupported-assignment": 1,
     "unsupported-condition": 4,
     "unsupported-target": 1,
+    "version-selected": 1,
 }

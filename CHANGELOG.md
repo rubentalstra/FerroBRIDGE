@@ -463,6 +463,27 @@ crates on crates.io.
   folders (#354), with no change in behaviour; the configuration file tree
   moves to `config::section` (`config::section::Telemetry`), and every other
   public item keeps its path.
+- `ferrobridge-hl7v2` parses every message against the tree and segment
+  tables of the version its MSH-12 declares, not only the structures v2.9.1
+  withdrew (#333). The required fields follow that version's optionality: a
+  2.5.1 `DG1` is held to DG1-1, DG1-2 and DG1-6, and a 2.9.1 one to DG1-1,
+  DG1-3 and DG1-6. An empty required field no longer refuses the message: it
+  is counted as `missing-required-field` naming the field, the segment and
+  the version, and the message is mapped and answered `AA`. Only MSH-9,
+  MSH-10 and MSH-12, which the answer needs, still refuse; required segments
+  and groups refuse as before. A guide row whose innermost group the
+  version's tree omits (`ORDER_OBSERVATION.COMMON_ORDER.ORC` against the
+  2.5.1 ORU_R01) reaches the segment placed in the parent group, counted as
+  `group-path`. The IGAMT 2.7.1 and 2.8 tables' OBX-4 `R`, which every
+  other version and v2.9.1 write `C`, is tolerated as an export defect and
+  emitted `C`. A message declaring 2.9.1, 2.9, a version
+  after 2.8.2, none, or a version whose tables lack the structure is parsed
+  against v2.9.1. Each selection is counted as `version-selected` with the
+  version used. `hl7v2-types::legacy` now holds every structure of versions
+  2.3 to 2.8.2 (1713 of 254 codes). A segment or tree identical to an
+  earlier one links to that static, so the crate packages at 1.2 MiB
+  compressed. Siblings in a legacy tree are now ordered by row id, which
+  fixes groups placed after their segments in the 2.5 to 2.8.2 trees.
 - The nine `openehr-*` crates step from 0.0.71 to 0.0.72, whose generated
   ITS-REST client carries what the bridge's CDR client added around it
   (#293, FerroEHR #3487). The composition commit headers travel through the

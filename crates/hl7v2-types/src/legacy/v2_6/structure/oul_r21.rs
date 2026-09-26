@@ -6,294 +6,297 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`OUL_R21`], one `static` so a structure with the same tree links to it.
+pub static OUL_R21_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "OUL_R21.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_6::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OUL_R21.2-SFT",
+        position: 2,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "OUL_R21.3-NTE",
+        position: 3,
+        segment: &crate::legacy::v2_6::segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "OUL_R21.4-PATIENT",
+        position: 4,
+        name: "PATIENT",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "OUL_R21.4-PATIENT.1-PID",
+                position: 1,
+                segment: &crate::legacy::v2_6::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "OUL_R21.4-PATIENT.2-PD1",
+                position: 2,
+                segment: &crate::legacy::v2_6::segment::pd1::PD1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "OUL_R21.4-PATIENT.3-NTE",
+                position: 3,
+                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "OUL_R21.4-PATIENT.4-VISIT",
+                position: 4,
+                name: "VISIT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.4-PATIENT.4-VISIT.1-PV1",
+                        position: 1,
+                        segment: &crate::legacy::v2_6::segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.4-PATIENT.4-VISIT.2-PV2",
+                        position: 2,
+                        segment: &crate::legacy::v2_6::segment::pv2::PV2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "OUL_R21.5-ORDER_OBSERVATION",
+        position: 5,
+        name: "ORDER_OBSERVATION",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Group(Group {
+                id: "OUL_R21.5-ORDER_OBSERVATION.1-CONTAINER",
+                position: 1,
+                name: "CONTAINER",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.1-CONTAINER.1-SAC",
+                        position: 1,
+                        segment: &crate::legacy::v2_6::segment::sac::SAC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.1-CONTAINER.2-SID",
+                        position: 2,
+                        segment: &crate::legacy::v2_6::segment::sid::SID,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "OUL_R21.5-ORDER_OBSERVATION.2-ORC",
+                position: 2,
+                segment: &crate::legacy::v2_6::segment::orc::ORC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "OUL_R21.5-ORDER_OBSERVATION.3-OBR",
+                position: 3,
+                segment: &crate::legacy::v2_6::segment::obr::OBR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "OUL_R21.5-ORDER_OBSERVATION.4-NTE",
+                position: 4,
+                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "OUL_R21.5-ORDER_OBSERVATION.5-TIMING_QTY",
+                position: 5,
+                name: "TIMING_QTY",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.5-TIMING_QTY.1-TQ1",
+                        position: 1,
+                        segment: &crate::segment::tq1::TQ1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.5-TIMING_QTY.2-TQ2",
+                        position: 2,
+                        segment: &crate::segment::tq2::TQ2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "OUL_R21.5-ORDER_OBSERVATION.6-OBSERVATION",
+                position: 6,
+                name: "OBSERVATION",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.6-OBSERVATION.1-OBX",
+                        position: 1,
+                        segment: &crate::legacy::v2_6::segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.6-OBSERVATION.2-TCD",
+                        position: 2,
+                        segment: &crate::legacy::v2_6::segment::tcd::TCD,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.6-OBSERVATION.3-SID",
+                        position: 3,
+                        segment: &crate::legacy::v2_6::segment::sid::SID,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OUL_R21.5-ORDER_OBSERVATION.6-OBSERVATION.4-NTE",
+                        position: 4,
+                        segment: &crate::legacy::v2_6::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "OUL_R21.5-ORDER_OBSERVATION.7-CTI",
+                position: 7,
+                segment: &crate::legacy::v2_6::segment::cti::CTI,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "OUL_R21.6-DSC",
+        position: 6,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `OUL_R21` message structure of the 2.6 tables, withdrawn as of 2.7.
 pub static OUL_R21: Structure = Structure {
     id: "OUL_R21",
     url: None,
     version: "2.6",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "OUL_R21.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_6::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OUL_R21.2-SFT",
-            position: 2,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OUL_R21.3-NTE",
-            position: 3,
-            segment: &crate::legacy::v2_6::segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "OUL_R21.4-DSC",
-            position: 4,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "OUL_R21.5-PATIENT",
-            position: 5,
-            name: "PATIENT",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "OUL_R21.5-PATIENT.1-PID",
-                    position: 1,
-                    segment: &crate::legacy::v2_6::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OUL_R21.5-PATIENT.2-PD1",
-                    position: 2,
-                    segment: &crate::legacy::v2_6::segment::pd1::PD1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OUL_R21.5-PATIENT.3-NTE",
-                    position: 3,
-                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "OUL_R21.5-PATIENT.4-VISIT",
-                    position: 4,
-                    name: "VISIT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.5-PATIENT.4-VISIT.1-PV1",
-                            position: 1,
-                            segment: &crate::legacy::v2_6::segment::pv1::PV1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.5-PATIENT.4-VISIT.2-PV2",
-                            position: 2,
-                            segment: &crate::legacy::v2_6::segment::pv2::PV2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "OUL_R21.6-ORDER_OBSERVATION",
-            position: 6,
-            name: "ORDER_OBSERVATION",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Group(Group {
-                    id: "OUL_R21.6-ORDER_OBSERVATION.1-CONTAINER",
-                    position: 1,
-                    name: "CONTAINER",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.1-CONTAINER.1-SAC",
-                            position: 1,
-                            segment: &crate::legacy::v2_6::segment::sac::SAC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.1-CONTAINER.2-SID",
-                            position: 2,
-                            segment: &crate::legacy::v2_6::segment::sid::SID,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OUL_R21.6-ORDER_OBSERVATION.2-ORC",
-                    position: 2,
-                    segment: &crate::legacy::v2_6::segment::orc::ORC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OUL_R21.6-ORDER_OBSERVATION.3-OBR",
-                    position: 3,
-                    segment: &crate::legacy::v2_6::segment::obr::OBR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OUL_R21.6-ORDER_OBSERVATION.4-NTE",
-                    position: 4,
-                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "OUL_R21.6-ORDER_OBSERVATION.5-TIMING_QTY",
-                    position: 5,
-                    name: "TIMING_QTY",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.5-TIMING_QTY.1-TQ1",
-                            position: 1,
-                            segment: &crate::segment::tq1::TQ1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.5-TIMING_QTY.2-TQ2",
-                            position: 2,
-                            segment: &crate::segment::tq2::TQ2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "OUL_R21.6-ORDER_OBSERVATION.6-OBSERVATION",
-                    position: 6,
-                    name: "OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.6-OBSERVATION.1-OBX",
-                            position: 1,
-                            segment: &crate::legacy::v2_6::segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.6-OBSERVATION.2-TCD",
-                            position: 2,
-                            segment: &crate::legacy::v2_6::segment::tcd::TCD,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.6-OBSERVATION.3-SID",
-                            position: 3,
-                            segment: &crate::legacy::v2_6::segment::sid::SID,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OUL_R21.6-ORDER_OBSERVATION.6-OBSERVATION.4-NTE",
-                            position: 4,
-                            segment: &crate::legacy::v2_6::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OUL_R21.6-ORDER_OBSERVATION.7-CTI",
-                    position: 7,
-                    segment: &crate::legacy::v2_6::segment::cti::CTI,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &OUL_R21_NODES,
 };

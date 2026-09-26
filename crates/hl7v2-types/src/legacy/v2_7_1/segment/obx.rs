@@ -81,7 +81,7 @@ pub static OBX: Segment = Segment {
                 min: 1,
                 max: Max::Bounded(1),
             },
-            optionality: Optionality::R,
+            optionality: Optionality::C,
             length: Some(Length {
                 min: 0,
                 max: Some(0),

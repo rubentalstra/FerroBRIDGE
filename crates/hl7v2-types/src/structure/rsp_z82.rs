@@ -9,462 +9,465 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`RSP_Z82`], one `static` so a structure with the same tree links to it.
+pub static RSP_Z82_NODES: [Node; 10] = [
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.4-MSA",
+        position: 4,
+        segment: &segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.5-ERR",
+        position: 5,
+        segment: &segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.6-QAK",
+        position: 6,
+        segment: &segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.7-QPD",
+        position: 7,
+        segment: &segment::qpd::QPD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.8-RCP",
+        position: 8,
+        segment: &segment::rcp::RCP,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "RSP_Z82.9-QUERY_RESPONSE",
+        position: 9,
+        name: "QUERY_RESPONSE",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Group(Group {
+                id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT",
+                position: 1,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.1-PID",
+                        position: 1,
+                        segment: &segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.2-PD1",
+                        position: 2,
+                        segment: &segment::pd1::PD1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.3-NTE",
+                        position: 3,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT",
+                        position: 4,
+                        name: "VISIT",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT.1-AL1",
+                                position: 1,
+                                segment: &segment::al1::AL1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT.2-PV1",
+                                position: 2,
+                                segment: &segment::pv1::PV1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT.3-PV2",
+                                position: 3,
+                                segment: &segment::pv2::PV2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER",
+                position: 2,
+                name: "COMMON_ORDER",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.1-ORC",
+                        position: 1,
+                        segment: &segment::orc::ORC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.2-TIMING",
+                        position: 2,
+                        name: "TIMING",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.2-TIMING.1-TQ1",
+                                position: 1,
+                                segment: &segment::tq1::TQ1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.2-TIMING.2-TQ2",
+                                position: 2,
+                                segment: &segment::tq2::TQ2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL",
+                        position: 3,
+                        name: "ORDER_DETAIL",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.1-RXO",
+                                position: 1,
+                                segment: &segment::rxo::RXO,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.2-NTE",
+                                position: 2,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.3-RXR",
+                                position: 3,
+                                segment: &segment::rxr::RXR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.4-TREATMENT",
+                                position: 4,
+                                name: "TREATMENT",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.4-TREATMENT.1-RXC",
+                                        position: 1,
+                                        segment: &segment::rxc::RXC,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.4-TREATMENT.2-NTE",
+                                        position: 2,
+                                        segment: &segment::nte::NTE,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER",
+                        position: 4,
+                        name: "ENCODED_ORDER",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.1-RXE",
+                                position: 1,
+                                segment: &segment::rxe::RXE,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.2-TIMING_ENCODED",
+                                position: 2,
+                                name: "TIMING_ENCODED",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.2-TIMING_ENCODED.1-TQ1",
+                                        position: 1,
+                                        segment: &segment::tq1::TQ1,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.2-TIMING_ENCODED.2-TQ2",
+                                        position: 2,
+                                        segment: &segment::tq2::TQ2,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.3-RXR",
+                                position: 3,
+                                segment: &segment::rxr::RXR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.4-RXC",
+                                position: 4,
+                                segment: &segment::rxc::RXC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.5-RXD",
+                        position: 5,
+                        segment: &segment::rxd::RXD,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.6-RXR",
+                        position: 6,
+                        segment: &segment::rxr::RXR,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.7-RXC",
+                        position: 7,
+                        segment: &segment::rxc::RXC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.8-OBSERVATION",
+                        position: 8,
+                        name: "OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.8-OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.8-OBSERVATION.2-NTE",
+                                position: 2,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_Z82.10-DSC",
+        position: 10,
+        segment: &segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `RSP_Z82` message structure definition, `http://hl7.org/v2/StructureDefinition/RSP_Z82`.
 pub static RSP_Z82: Structure = Structure {
     id: "RSP_Z82",
     url: Some("http://hl7.org/v2/StructureDefinition/RSP_Z82"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.4-MSA",
-            position: 4,
-            segment: &segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.5-ERR",
-            position: 5,
-            segment: &segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.6-QAK",
-            position: 6,
-            segment: &segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.7-QPD",
-            position: 7,
-            segment: &segment::qpd::QPD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.8-RCP",
-            position: 8,
-            segment: &segment::rcp::RCP,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "RSP_Z82.9-QUERY_RESPONSE",
-            position: 9,
-            name: "QUERY_RESPONSE",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Group(Group {
-                    id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT",
-                    position: 1,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.1-PID",
-                            position: 1,
-                            segment: &segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.2-PD1",
-                            position: 2,
-                            segment: &segment::pd1::PD1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.3-NTE",
-                            position: 3,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT",
-                            position: 4,
-                            name: "VISIT",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT.1-AL1",
-                                    position: 1,
-                                    segment: &segment::al1::AL1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT.2-PV1",
-                                    position: 2,
-                                    segment: &segment::pv1::PV1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.1-PATIENT.4-VISIT.3-PV2",
-                                    position: 3,
-                                    segment: &segment::pv2::PV2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER",
-                    position: 2,
-                    name: "COMMON_ORDER",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.1-ORC",
-                            position: 1,
-                            segment: &segment::orc::ORC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.2-TIMING",
-                            position: 2,
-                            name: "TIMING",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.2-TIMING.1-TQ1",
-                                    position: 1,
-                                    segment: &segment::tq1::TQ1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.2-TIMING.2-TQ2",
-                                    position: 2,
-                                    segment: &segment::tq2::TQ2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL",
-                            position: 3,
-                            name: "ORDER_DETAIL",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.1-RXO",
-                                    position: 1,
-                                    segment: &segment::rxo::RXO,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.2-NTE",
-                                    position: 2,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.3-RXR",
-                                    position: 3,
-                                    segment: &segment::rxr::RXR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.4-TREATMENT",
-                                    position: 4,
-                                    name: "TREATMENT",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.4-TREATMENT.1-RXC",
-                                            position: 1,
-                                            segment: &segment::rxc::RXC,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.3-ORDER_DETAIL.4-TREATMENT.2-NTE",
-                                            position: 2,
-                                            segment: &segment::nte::NTE,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER",
-                            position: 4,
-                            name: "ENCODED_ORDER",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.1-RXE",
-                                    position: 1,
-                                    segment: &segment::rxe::RXE,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.2-TIMING_ENCODED",
-                                    position: 2,
-                                    name: "TIMING_ENCODED",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.2-TIMING_ENCODED.1-TQ1",
-                                            position: 1,
-                                            segment: &segment::tq1::TQ1,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.2-TIMING_ENCODED.2-TQ2",
-                                            position: 2,
-                                            segment: &segment::tq2::TQ2,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.3-RXR",
-                                    position: 3,
-                                    segment: &segment::rxr::RXR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.4-ENCODED_ORDER.4-RXC",
-                                    position: 4,
-                                    segment: &segment::rxc::RXC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.5-RXD",
-                            position: 5,
-                            segment: &segment::rxd::RXD,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.6-RXR",
-                            position: 6,
-                            segment: &segment::rxr::RXR,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.7-RXC",
-                            position: 7,
-                            segment: &segment::rxc::RXC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.8-OBSERVATION",
-                            position: 8,
-                            name: "OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.8-OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RSP_Z82.9-QUERY_RESPONSE.2-COMMON_ORDER.8-OBSERVATION.2-NTE",
-                                    position: 2,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_Z82.10-DSC",
-            position: 10,
-            segment: &segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &RSP_Z82_NODES,
 };

@@ -6,388 +6,391 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`ADR_A19`], one `static` so a structure with the same tree links to it.
+pub static ADR_A19_NODES: [Node; 10] = [
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_6::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.2-SFT",
+        position: 2,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.3-UAC",
+        position: 3,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.4-MSA",
+        position: 4,
+        segment: &crate::legacy::v2_6::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.5-ERR",
+        position: 5,
+        segment: &crate::legacy::v2_6::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.6-QAK",
+        position: 6,
+        segment: &crate::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.7-QRD",
+        position: 7,
+        segment: &crate::legacy::v2_6::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.8-QRF",
+        position: 8,
+        segment: &crate::legacy::v2_6::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "ADR_A19.9-QUERY_RESPONSE",
+        position: 9,
+        name: "QUERY_RESPONSE",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.1-EVN",
+                position: 1,
+                segment: &crate::legacy::v2_6::segment::evn::EVN,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.2-PID",
+                position: 2,
+                segment: &crate::legacy::v2_6::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.3-PD1",
+                position: 3,
+                segment: &crate::legacy::v2_6::segment::pd1::PD1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.4-ARV",
+                position: 4,
+                segment: &crate::legacy::v2_6::segment::arv::ARV,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.5-ROL",
+                position: 5,
+                segment: &crate::legacy::v2_6::segment::rol::ROL,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.6-NK1",
+                position: 6,
+                segment: &crate::legacy::v2_6::segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.7-PV1",
+                position: 7,
+                segment: &crate::legacy::v2_6::segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.8-PV2",
+                position: 8,
+                segment: &crate::legacy::v2_6::segment::pv2::PV2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.9-ARV",
+                position: 9,
+                segment: &crate::legacy::v2_6::segment::arv::ARV,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.10-ROL",
+                position: 10,
+                segment: &crate::legacy::v2_6::segment::rol::ROL,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.11-DB1",
+                position: 11,
+                segment: &crate::legacy::v2_6::segment::db1::DB1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.12-OBX",
+                position: 12,
+                segment: &crate::legacy::v2_6::segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.13-AL1",
+                position: 13,
+                segment: &crate::legacy::v2_6::segment::al1::AL1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.14-DG1",
+                position: 14,
+                segment: &crate::legacy::v2_6::segment::dg1::DG1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.15-DRG",
+                position: 15,
+                segment: &crate::legacy::v2_6::segment::drg::DRG,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "ADR_A19.9-QUERY_RESPONSE.16-PROCEDURE",
+                position: 16,
+                name: "PROCEDURE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ADR_A19.9-QUERY_RESPONSE.16-PROCEDURE.1-PR1",
+                        position: 1,
+                        segment: &crate::legacy::v2_6::segment::pr1::PR1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ADR_A19.9-QUERY_RESPONSE.16-PROCEDURE.2-ROL",
+                        position: 2,
+                        segment: &crate::legacy::v2_6::segment::rol::ROL,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.17-GT1",
+                position: 17,
+                segment: &crate::legacy::v2_6::segment::gt1::GT1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "ADR_A19.9-QUERY_RESPONSE.18-INSURANCE",
+                position: 18,
+                name: "INSURANCE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ADR_A19.9-QUERY_RESPONSE.18-INSURANCE.1-IN1",
+                        position: 1,
+                        segment: &crate::legacy::v2_6::segment::in1::IN1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ADR_A19.9-QUERY_RESPONSE.18-INSURANCE.2-IN2",
+                        position: 2,
+                        segment: &crate::legacy::v2_6::segment::in2::IN2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ADR_A19.9-QUERY_RESPONSE.18-INSURANCE.3-IN3",
+                        position: 3,
+                        segment: &crate::legacy::v2_6::segment::in3::IN3,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ADR_A19.9-QUERY_RESPONSE.18-INSURANCE.4-ROL",
+                        position: 4,
+                        segment: &crate::legacy::v2_6::segment::rol::ROL,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.19-ACC",
+                position: 19,
+                segment: &crate::legacy::v2_6::segment::acc::ACC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.20-UB1",
+                position: 20,
+                segment: &crate::legacy::v2_6::segment::ub1::UB1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "ADR_A19.9-QUERY_RESPONSE.21-UB2",
+                position: 21,
+                segment: &crate::legacy::v2_5_1::segment::ub2::UB2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "ADR_A19.10-DSC",
+        position: 10,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `ADR_A19` message structure of the 2.6 tables, withdrawn as of 2.7.
 pub static ADR_A19: Structure = Structure {
     id: "ADR_A19",
     url: None,
     version: "2.6",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_6::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.2-SFT",
-            position: 2,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.3-UAC",
-            position: 3,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.4-MSA",
-            position: 4,
-            segment: &crate::legacy::v2_6::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.5-ERR",
-            position: 5,
-            segment: &crate::legacy::v2_6::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.6-QAK",
-            position: 6,
-            segment: &crate::segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.7-QRD",
-            position: 7,
-            segment: &crate::legacy::v2_6::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.8-QRF",
-            position: 8,
-            segment: &crate::legacy::v2_6::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "ADR_A19.9-DSC",
-            position: 9,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "ADR_A19.10-QUERY_RESPONSE",
-            position: 10,
-            name: "QUERY_RESPONSE",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.1-EVN",
-                    position: 1,
-                    segment: &crate::legacy::v2_6::segment::evn::EVN,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.2-PID",
-                    position: 2,
-                    segment: &crate::legacy::v2_6::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.3-PD1",
-                    position: 3,
-                    segment: &crate::legacy::v2_6::segment::pd1::PD1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.4-ARV",
-                    position: 4,
-                    segment: &crate::legacy::v2_6::segment::arv::ARV,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.5-ROL",
-                    position: 5,
-                    segment: &crate::legacy::v2_6::segment::rol::ROL,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.6-NK1",
-                    position: 6,
-                    segment: &crate::legacy::v2_6::segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.7-PV1",
-                    position: 7,
-                    segment: &crate::legacy::v2_6::segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.8-PV2",
-                    position: 8,
-                    segment: &crate::legacy::v2_6::segment::pv2::PV2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.9-ARV",
-                    position: 9,
-                    segment: &crate::legacy::v2_6::segment::arv::ARV,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.10-ROL",
-                    position: 10,
-                    segment: &crate::legacy::v2_6::segment::rol::ROL,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.11-DB1",
-                    position: 11,
-                    segment: &crate::legacy::v2_6::segment::db1::DB1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.12-OBX",
-                    position: 12,
-                    segment: &crate::legacy::v2_6::segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.13-AL1",
-                    position: 13,
-                    segment: &crate::legacy::v2_6::segment::al1::AL1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.14-DG1",
-                    position: 14,
-                    segment: &crate::legacy::v2_6::segment::dg1::DG1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.15-DRG",
-                    position: 15,
-                    segment: &crate::legacy::v2_6::segment::drg::DRG,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "ADR_A19.10-QUERY_RESPONSE.16-PROCEDURE",
-                    position: 16,
-                    name: "PROCEDURE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ADR_A19.10-QUERY_RESPONSE.16-PROCEDURE.1-PR1",
-                            position: 1,
-                            segment: &crate::legacy::v2_6::segment::pr1::PR1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ADR_A19.10-QUERY_RESPONSE.16-PROCEDURE.2-ROL",
-                            position: 2,
-                            segment: &crate::legacy::v2_6::segment::rol::ROL,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.17-GT1",
-                    position: 17,
-                    segment: &crate::legacy::v2_6::segment::gt1::GT1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "ADR_A19.10-QUERY_RESPONSE.18-INSURANCE",
-                    position: 18,
-                    name: "INSURANCE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ADR_A19.10-QUERY_RESPONSE.18-INSURANCE.1-IN1",
-                            position: 1,
-                            segment: &crate::legacy::v2_6::segment::in1::IN1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ADR_A19.10-QUERY_RESPONSE.18-INSURANCE.2-IN2",
-                            position: 2,
-                            segment: &crate::legacy::v2_6::segment::in2::IN2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ADR_A19.10-QUERY_RESPONSE.18-INSURANCE.3-IN3",
-                            position: 3,
-                            segment: &crate::legacy::v2_6::segment::in3::IN3,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ADR_A19.10-QUERY_RESPONSE.18-INSURANCE.4-ROL",
-                            position: 4,
-                            segment: &crate::legacy::v2_6::segment::rol::ROL,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.19-ACC",
-                    position: 19,
-                    segment: &crate::legacy::v2_6::segment::acc::ACC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.20-UB1",
-                    position: 20,
-                    segment: &crate::legacy::v2_6::segment::ub1::UB1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "ADR_A19.10-QUERY_RESPONSE.21-UB2",
-                    position: 21,
-                    segment: &crate::legacy::v2_6::segment::ub2::UB2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &ADR_A19_NODES,
 };

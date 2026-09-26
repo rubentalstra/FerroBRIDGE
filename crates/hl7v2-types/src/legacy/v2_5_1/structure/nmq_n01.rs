@@ -3,8 +3,10 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
 //! The `NMQ_N01` message structure of the 2.5.1 tables, withdrawn as of 2.7.
+//!
+//! The tables give it the tree of the 2.5 tables, which it links to.
 
-use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
+use crate::model::Structure;
 
 /// The `NMQ_N01` message structure of the 2.5.1 tables, withdrawn as of 2.7.
 pub static NMQ_N01: Structure = Structure {
@@ -12,100 +14,5 @@ pub static NMQ_N01: Structure = Structure {
     url: None,
     version: "2.5.1",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "NMQ_N01.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "NMQ_N01.2-SFT",
-            position: 2,
-            segment: &crate::legacy::v2_5_1::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "NMQ_N01.3-QRY_WITH_DETAIL",
-            position: 3,
-            name: "QRY_WITH_DETAIL",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.3-QRY_WITH_DETAIL.1-QRD",
-                    position: 1,
-                    segment: &crate::legacy::v2_5_1::segment::qrd::QRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.3-QRY_WITH_DETAIL.2-QRF",
-                    position: 2,
-                    segment: &crate::legacy::v2_5_1::segment::qrf::QRF,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "NMQ_N01.4-CLOCK_AND_STATISTICS",
-            position: 4,
-            name: "CLOCK_AND_STATISTICS",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.4-CLOCK_AND_STATISTICS.1-NCK",
-                    position: 1,
-                    segment: &crate::legacy::v2_5_1::segment::nck::NCK,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.4-CLOCK_AND_STATISTICS.2-NST",
-                    position: 2,
-                    segment: &crate::legacy::v2_5_1::segment::nst::NST,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.4-CLOCK_AND_STATISTICS.3-NSC",
-                    position: 3,
-                    segment: &crate::legacy::v2_5_1::segment::nsc::NSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &crate::legacy::v2_5::structure::nmq_n01::NMQ_N01_NODES,
 };

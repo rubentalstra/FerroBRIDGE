@@ -4,79 +4,317 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The legacy message structures of the 2.4 tables, one module each.
 
+pub mod ack;
 pub mod adr_a19;
+pub mod adt_a01;
+pub mod adt_a02;
+pub mod adt_a03;
+pub mod adt_a05;
+pub mod adt_a06;
+pub mod adt_a09;
+pub mod adt_a15;
+pub mod adt_a16;
+pub mod adt_a17;
 pub mod adt_a18;
+pub mod adt_a20;
+pub mod adt_a21;
+pub mod adt_a24;
 pub mod adt_a30;
+pub mod adt_a37;
+pub mod adt_a38;
+pub mod adt_a39;
+pub mod adt_a43;
+pub mod adt_a45;
+pub mod adt_a50;
+pub mod adt_a52;
+pub mod adt_a54;
+pub mod adt_a60;
+pub mod adt_a61;
+pub mod bar_p01;
+pub mod bar_p02;
+pub mod bar_p05;
+pub mod bar_p06;
+pub mod bar_p10;
+pub mod crm_c01;
+pub mod csu_c09;
+pub mod dft_p03;
+pub mod dft_p11;
+pub mod eac_u07;
+pub mod ean_u09;
+pub mod ear_u08;
+pub mod esr_u02;
+pub mod esu_u01;
+pub mod inr_u06;
+pub mod inu_u05;
+pub mod lsu_u12;
+pub mod mdm_t01;
+pub mod mdm_t02;
+pub mod mfk_m01;
 pub mod mfn_m01;
+pub mod mfn_m02;
 pub mod mfn_m03;
+pub mod mfn_m04;
+pub mod mfn_m05;
+pub mod mfn_m06;
+pub mod mfn_m07;
+pub mod mfn_m08;
+pub mod mfn_m09;
+pub mod mfn_m10;
+pub mod mfn_m11;
+pub mod mfn_m12;
 pub mod mfq_m01;
 pub mod mfr_m01;
+pub mod nmd_n02;
 pub mod nmq_n01;
 pub mod nmr_n01;
+pub mod omd_o03;
+pub mod omg_o19;
+pub mod oml_o21;
+pub mod omn_o07;
+pub mod omp_o09;
+pub mod oms_o05;
+pub mod ord_o04;
 pub mod orf_r04;
+pub mod org_o20;
+pub mod orl_o22;
 pub mod orm_o01;
+pub mod orn_o08;
+pub mod orp_o10;
 pub mod orr_o02;
+pub mod ors_o06;
+pub mod oru_r01;
 pub mod oul_r21;
+pub mod pex_p07;
+pub mod pgl_pc6;
+pub mod pmu_b01;
+pub mod pmu_b03;
+pub mod pmu_b04;
+pub mod ppg_pcg;
+pub mod ppp_pcb;
+pub mod ppr_pc1;
 pub mod ppt_pcl;
 pub mod ppv_pca;
 pub mod prr_pc5;
 pub mod ptr_pcf;
 pub mod qbp_k13;
+pub mod qbp_q11;
+pub mod qbp_q13;
+pub mod qbp_q15;
+pub mod qbp_q21;
+pub mod qbp_z73;
+pub mod qcn_j01;
 pub mod qry_a19;
 pub mod qry_pc4;
 pub mod qry_q01;
 pub mod qry_r02;
+pub mod qsb_q16;
+pub mod qvr_q17;
 pub mod rar_rar;
+pub mod ras_o17;
 pub mod rci_i05;
 pub mod rcl_i06;
+pub mod rde_o11;
 pub mod rdr_rdr;
+pub mod rds_o13;
+pub mod rdy_k15;
+pub mod ref_i12;
 pub mod rer_rer;
 pub mod rgr_rgr;
+pub mod rgv_o15;
 pub mod ror_ror;
+pub mod rpa_i08;
+pub mod rpi_i01;
+pub mod rpi_i04;
+pub mod rpl_i02;
+pub mod rpr_i03;
+pub mod rqa_i08;
 pub mod rqc_i05;
+pub mod rqi_i01;
+pub mod rqp_i04;
+pub mod rra_o18;
+pub mod rrd_o14;
+pub mod rre_o12;
+pub mod rrg_o16;
+pub mod rri_i12;
+pub mod rsp_k11;
 pub mod rsp_k13;
 pub mod rsp_k15;
+pub mod rsp_k21;
+pub mod rsp_k22;
+pub mod rsp_k23;
 pub mod rsp_k24;
+pub mod rsp_k25;
+pub mod rsp_z82;
+pub mod rsp_z86;
+pub mod rsp_z88;
+pub mod rsp_z90;
+pub mod rtb_k13;
 pub mod rtb_q13;
+pub mod rtb_z74;
+pub mod siu_s12;
+pub mod srm_s01;
+pub mod srr_s01;
+pub mod ssr_u04;
+pub mod ssu_u03;
 pub mod sur_p09;
+pub mod tcu_u10;
 
 /// Every message structure, in definition id order.
-pub static STRUCTURES: [&crate::model::Structure; 35] = [
+pub static STRUCTURES: [&crate::model::Structure; 154] = [
+    &ack::ACK,
     &adr_a19::ADR_A19,
+    &adt_a01::ADT_A01,
+    &adt_a02::ADT_A02,
+    &adt_a03::ADT_A03,
+    &adt_a05::ADT_A05,
+    &adt_a06::ADT_A06,
+    &adt_a09::ADT_A09,
+    &adt_a15::ADT_A15,
+    &adt_a16::ADT_A16,
+    &adt_a17::ADT_A17,
     &adt_a18::ADT_A18,
+    &adt_a20::ADT_A20,
+    &adt_a21::ADT_A21,
+    &adt_a24::ADT_A24,
     &adt_a30::ADT_A30,
+    &adt_a37::ADT_A37,
+    &adt_a38::ADT_A38,
+    &adt_a39::ADT_A39,
+    &adt_a43::ADT_A43,
+    &adt_a45::ADT_A45,
+    &adt_a50::ADT_A50,
+    &adt_a52::ADT_A52,
+    &adt_a54::ADT_A54,
+    &adt_a60::ADT_A60,
+    &adt_a61::ADT_A61,
+    &bar_p01::BAR_P01,
+    &bar_p02::BAR_P02,
+    &bar_p05::BAR_P05,
+    &bar_p06::BAR_P06,
+    &bar_p10::BAR_P10,
+    &crm_c01::CRM_C01,
+    &csu_c09::CSU_C09,
+    &dft_p03::DFT_P03,
+    &dft_p11::DFT_P11,
+    &eac_u07::EAC_U07,
+    &ean_u09::EAN_U09,
+    &ear_u08::EAR_U08,
+    &esr_u02::ESR_U02,
+    &esu_u01::ESU_U01,
+    &inr_u06::INR_U06,
+    &inu_u05::INU_U05,
+    &lsu_u12::LSU_U12,
+    &mdm_t01::MDM_T01,
+    &mdm_t02::MDM_T02,
+    &mfk_m01::MFK_M01,
     &mfn_m01::MFN_M01,
+    &mfn_m02::MFN_M02,
     &mfn_m03::MFN_M03,
+    &mfn_m04::MFN_M04,
+    &mfn_m05::MFN_M05,
+    &mfn_m06::MFN_M06,
+    &mfn_m07::MFN_M07,
+    &mfn_m08::MFN_M08,
+    &mfn_m09::MFN_M09,
+    &mfn_m10::MFN_M10,
+    &mfn_m11::MFN_M11,
+    &mfn_m12::MFN_M12,
     &mfq_m01::MFQ_M01,
     &mfr_m01::MFR_M01,
+    &nmd_n02::NMD_N02,
     &nmq_n01::NMQ_N01,
     &nmr_n01::NMR_N01,
+    &omd_o03::OMD_O03,
+    &omg_o19::OMG_O19,
+    &oml_o21::OML_O21,
+    &omn_o07::OMN_O07,
+    &omp_o09::OMP_O09,
+    &oms_o05::OMS_O05,
+    &ord_o04::ORD_O04,
     &orf_r04::ORF_R04,
+    &org_o20::ORG_O20,
+    &orl_o22::ORL_O22,
     &orm_o01::ORM_O01,
+    &orn_o08::ORN_O08,
+    &orp_o10::ORP_O10,
     &orr_o02::ORR_O02,
+    &ors_o06::ORS_O06,
+    &oru_r01::ORU_R01,
     &oul_r21::OUL_R21,
+    &pex_p07::PEX_P07,
+    &pgl_pc6::PGL_PC6,
+    &pmu_b01::PMU_B01,
+    &pmu_b03::PMU_B03,
+    &pmu_b04::PMU_B04,
+    &ppg_pcg::PPG_PCG,
+    &ppp_pcb::PPP_PCB,
+    &ppr_pc1::PPR_PC1,
     &ppt_pcl::PPT_PCL,
     &ppv_pca::PPV_PCA,
     &prr_pc5::PRR_PC5,
     &ptr_pcf::PTR_PCF,
     &qbp_k13::QBP_K13,
+    &qbp_q11::QBP_Q11,
+    &qbp_q13::QBP_Q13,
+    &qbp_q15::QBP_Q15,
+    &qbp_q21::QBP_Q21,
+    &qbp_z73::QBP_Z73,
+    &qcn_j01::QCN_J01,
     &qry_a19::QRY_A19,
     &qry_pc4::QRY_PC4,
     &qry_q01::QRY_Q01,
     &qry_r02::QRY_R02,
+    &qsb_q16::QSB_Q16,
+    &qvr_q17::QVR_Q17,
     &rar_rar::RAR_RAR,
+    &ras_o17::RAS_O17,
     &rci_i05::RCI_I05,
     &rcl_i06::RCL_I06,
+    &rde_o11::RDE_O11,
     &rdr_rdr::RDR_RDR,
+    &rds_o13::RDS_O13,
+    &rdy_k15::RDY_K15,
+    &ref_i12::REF_I12,
     &rer_rer::RER_RER,
     &rgr_rgr::RGR_RGR,
+    &rgv_o15::RGV_O15,
     &ror_ror::ROR_ROR,
+    &rpa_i08::RPA_I08,
+    &rpi_i01::RPI_I01,
+    &rpi_i04::RPI_I04,
+    &rpl_i02::RPL_I02,
+    &rpr_i03::RPR_I03,
+    &rqa_i08::RQA_I08,
     &rqc_i05::RQC_I05,
+    &rqi_i01::RQI_I01,
+    &rqp_i04::RQP_I04,
+    &rra_o18::RRA_O18,
+    &rrd_o14::RRD_O14,
+    &rre_o12::RRE_O12,
+    &rrg_o16::RRG_O16,
+    &rri_i12::RRI_I12,
+    &rsp_k11::RSP_K11,
     &rsp_k13::RSP_K13,
     &rsp_k15::RSP_K15,
+    &rsp_k21::RSP_K21,
+    &rsp_k22::RSP_K22,
+    &rsp_k23::RSP_K23,
     &rsp_k24::RSP_K24,
+    &rsp_k25::RSP_K25,
+    &rsp_z82::RSP_Z82,
+    &rsp_z86::RSP_Z86,
+    &rsp_z88::RSP_Z88,
+    &rsp_z90::RSP_Z90,
+    &rtb_k13::RTB_K13,
     &rtb_q13::RTB_Q13,
+    &rtb_z74::RTB_Z74,
+    &siu_s12::SIU_S12,
+    &srm_s01::SRM_S01,
+    &srr_s01::SRR_S01,
+    &ssr_u04::SSR_U04,
+    &ssu_u03::SSU_U03,
     &sur_p09::SUR_P09,
+    &tcu_u10::TCU_U10,
 ];
 
 /// Returns the message structure whose definition id is `id`, for example `ORM_O01`.

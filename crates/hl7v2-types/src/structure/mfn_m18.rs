@@ -9,128 +9,131 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`MFN_M18`], one `static` so a structure with the same tree links to it.
+pub static MFN_M18_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M18.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M18.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M18.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M18.4-MFI",
+        position: 4,
+        segment: &segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "MFN_M18.5-MF_PAYER",
+        position: 5,
+        name: "MF_PAYER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M18.5-MF_PAYER.1-MFE",
+                position: 1,
+                segment: &segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY",
+                position: 2,
+                name: "PAYER_MF_ENTRY",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.1-PM1",
+                        position: 1,
+                        segment: &segment::pm1::PM1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.2-PAYER_MF_COVERAGE",
+                        position: 2,
+                        name: "PAYER_MF_COVERAGE",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.2-PAYER_MF_COVERAGE.1-MCP",
+                                position: 1,
+                                segment: &segment::mcp::MCP,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.2-PAYER_MF_COVERAGE.2-DPS",
+                                position: 2,
+                                segment: &segment::dps::DPS,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M18` message structure definition, `http://hl7.org/v2/StructureDefinition/MFN_M18`.
 pub static MFN_M18: Structure = Structure {
     id: "MFN_M18",
     url: Some("http://hl7.org/v2/StructureDefinition/MFN_M18"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M18.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M18.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M18.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M18.4-MFI",
-            position: 4,
-            segment: &segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "MFN_M18.5-MF_PAYER",
-            position: 5,
-            name: "MF_PAYER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M18.5-MF_PAYER.1-MFE",
-                    position: 1,
-                    segment: &segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY",
-                    position: 2,
-                    name: "PAYER_MF_ENTRY",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.1-PM1",
-                            position: 1,
-                            segment: &segment::pm1::PM1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.2-PAYER_MF_COVERAGE",
-                            position: 2,
-                            name: "PAYER_MF_COVERAGE",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.2-PAYER_MF_COVERAGE.1-MCP",
-                                    position: 1,
-                                    segment: &segment::mcp::MCP,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "MFN_M18.5-MF_PAYER.2-PAYER_MF_ENTRY.2-PAYER_MF_COVERAGE.2-DPS",
-                                    position: 2,
-                                    segment: &segment::dps::DPS,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M18_NODES,
 };

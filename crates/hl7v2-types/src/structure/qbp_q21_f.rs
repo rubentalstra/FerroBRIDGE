@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The `QBP_Q21-F` message structure.
 
-use crate::model::Structure;
+use crate::model::{Node, Structure};
+
+/// The top-level nodes of [`QBP_Q21_F`], one `static` so a structure with the same tree links to it.
+pub static QBP_Q21_F_NODES: [Node; 0] = [];
 
 /// The `QBP_Q21-F` message structure definition, `http://hl7.org/v2/StructureDefinition/QBP_Q21-F`.
 pub static QBP_Q21_F: Structure = Structure {
@@ -12,5 +15,5 @@ pub static QBP_Q21_F: Structure = Structure {
     url: Some("http://hl7.org/v2/StructureDefinition/QBP_Q21-F"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[],
+    nodes: &QBP_Q21_F_NODES,
 };
