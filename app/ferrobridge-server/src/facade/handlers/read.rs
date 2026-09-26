@@ -326,29 +326,67 @@ async fn answered_version(
     }
 }
 
-/// Returns the openEHR version an `If-Match` names.
+/// Returns the openEHR version an `If-Match` names, checked against the latest
+/// version `container` holds.
 ///
-/// R4 sends the version id ("`If-Match: W/"2"`",
+/// R4 sends the `versionId` as a weak entity tag ("`If-Match: W/"2"`",
 /// <https://hl7.org/fhir/R4/http.html#concurrency>), and ITS-REST takes the
-/// whole `OBJECT_VERSION_ID`, so the two halves are joined here: a bare
-/// version tree id is completed against the version container the map holds.
-pub(crate) fn version_of_etag(
-    value: &str,
+/// whole `OBJECT_VERSION_ID`. A version tree id (`W/"N"`, `"N"` or `N`) that
+/// names the latest version completes to it, as vread completes its `[vid]`;
+/// one that names any other version is `412` carrying the current `ETag`. The
+/// CDR's own `uid::system::N` of `container` passes through for the CDR to
+/// check, and one of another container is `412`.
+///
+/// # Errors
+///
+/// A `400` for a value that names no version at all, a `412` for a stale or
+/// foreign version, and the refusal the read of the latest version answers.
+pub(crate) async fn version_of_etag(
+    client: &CdrClient,
+    ehr_id: &EhrId,
     container: &HierObjectId,
+    value: &str,
 ) -> Result<ObjectVersionId, Refusal> {
     let bare = entity_tag(value);
     if let Ok(full) = ObjectVersionId::new(bare) {
+        if full.object_id().value() != container.value() {
+            return Err(write::refuse(&status::Answer::new(
+                status::PRECONDITION_FAILED,
+                format!(
+                    "If-Match carries `{bare}`, a version of another composition than {}",
+                    container.value()
+                ),
+            )));
+        }
         return Ok(full);
     }
     // NOTE: a parse failure IS the answer here: a value that is no
     // OBJECT_VERSION_ID is the R4 spelling, which names the version tree id
     // alone (<https://hl7.org/fhir/R4/http.html#concurrency>).
-    Err(reply::refusal(
-        StatusCode::PRECONDITION_FAILED,
-        Issue::error(IssueType::Conflict).diagnosing(format!(
-            "If-Match carries `{bare}`, which names no version of {}; send the ETag this server last answered with",
-            container.value()
-        )),
+    let tree = VersionTreeId::new(bare).map_err(|error| {
+        reply::refusal(
+            StatusCode::BAD_REQUEST,
+            Issue::error(IssueType::Invalid).diagnosing(format!(
+                "If-Match carries `{bare}`, which is neither a versionId nor an openEHR version id: {}",
+                crate::facade::outcome::chain(&error)
+            )),
+        )
+    })?;
+    let current = latest_version(client, ehr_id, container).await?;
+    let current_tree = current.version_tree_id();
+    if current_tree.value() == tree.value() {
+        return Ok(current);
+    }
+    Err(write::refuse(
+        &status::Answer::new(
+            status::PRECONDITION_FAILED,
+            format!(
+                "If-Match names version {}, and the current version is {}",
+                tree.value(),
+                current_tree.value()
+            ),
+        )
+        .with_entity_tag(current_tree.value()),
     ))
 }
 

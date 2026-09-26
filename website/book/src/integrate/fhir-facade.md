@@ -156,7 +156,10 @@ a version the CDR reports deleted answers `410`.
 
 An update needs `If-Match` when the map knows the id. Without one, the facade
 reads the CDR's current `ETag` and answers `412` with it on a mismatch rather
-than overwriting a version the client never saw. A `PUT` to an id the map does
+than overwriting a version the client never saw. Send back the `ETag` a read
+or write answered, `If-Match: W/"1"`: the facade completes that `versionId` to
+the current composition version and answers `412` with the current `ETag`
+when it is stale. A value that names no version is `400`. A `PUT` to an id the map does
 not know is a `404`: this milestone does not upsert, and the
 `CapabilityStatement` says `updateCreate: false`.
 

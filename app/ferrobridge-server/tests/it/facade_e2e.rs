@@ -121,6 +121,141 @@ async fn the_facade_commits_a_condition_and_reads_it_back_from_a_real_cdr()
     Ok(())
 }
 
+#[tokio::test]
+async fn an_update_following_the_read_etag_commits_the_next_version_on_a_real_cdr()
+-> Result<(), Box<dyn StdError>> {
+    // The ETag is the versionId as a weak entity tag, If-Match carries it back,
+    // and a stale one is 412 (<https://hl7.org/fhir/R4/http.html#concurrency>).
+    if !containers::e2e_enabled() {
+        return Ok(());
+    }
+    let cdr = containers::cdr().await?;
+    upload_template(cdr.base_url()).await?;
+    let client = CdrClient::new(&CdrConfig::new(cdr.base_url().parse()?))?;
+    let set = programs::read_set(std::path::Path::new(FIXTURES))?;
+    let templates = programs::fetch_templates(&set, &client).await?;
+    let programs = programs::compile_set(&set, &templates)?;
+    let store: Arc<dyn Store> = Arc::new(MemoryStore::new());
+    let facade = Arc::new(Facade::new(
+        programs,
+        store,
+        client,
+        Settings {
+            base_url: String::from("http://ferrobridge.invalid/fhir"),
+            ehr_policy: Policy::CreateOnFirstWrite,
+            subject_namespace: String::from(SUBJECT_NAMESPACE),
+            system_id: String::from("ferrobridge.e2e"),
+            language: String::from("en"),
+            territory: String::from("GB"),
+        },
+    ));
+
+    let created = call(app(&facade), post_condition()?).await?;
+    assert_eq!(StatusCode::CREATED, created.0, "{}", created.1);
+    let id = created.1["id"]
+        .as_str()
+        .ok_or("the created resource carries an id")?
+        .to_owned();
+    let read = send(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, read.status, "{}", read.body);
+    let tag = read.etag.ok_or("a read carries an ETag")?;
+    assert_eq!("W/\"1\"", tag);
+
+    let code = created.1["code"]["coding"][0]["code"]
+        .as_str()
+        .ok_or("the created resource carries its code")?;
+    let mut revised = condition_coded(&id, code)?;
+    revised["code"]["text"] = serde_json::json!("Synthetic problem one, revised");
+    let updated = send(app(&facade), put_condition(&id, &revised, &tag)?).await?;
+    assert_eq!(StatusCode::OK, updated.status, "{}", updated.body);
+    assert_eq!(Some("W/\"2\""), updated.etag.as_deref());
+    assert!(
+        updated
+            .location
+            .as_deref()
+            .is_some_and(|location| location.ends_with(&format!("/Condition/{id}/_history/2"))),
+        "{:?}",
+        updated.location
+    );
+
+    let stale = send(app(&facade), put_condition(&id, &revised, &tag)?).await?;
+    assert_eq!(
+        StatusCode::PRECONDITION_FAILED,
+        stale.status,
+        "{}",
+        stale.body
+    );
+    assert_eq!(
+        Some("W/\"2\""),
+        stale.etag.as_deref(),
+        "the 412 carries the current version"
+    );
+
+    let first = call(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, first.0, "{}", first.1);
+    assert_eq!(Some("1"), first.1["meta"]["versionId"].as_str());
+    assert_eq!(
+        created.1["code"], first.1["code"],
+        "version 1 keeps the first content"
+    );
+    assert_ne!(revised["code"]["text"], first.1["code"]["text"]);
+    Ok(())
+}
+
+/// Returns a `PUT [base]/Condition/{id}` of `resource` carrying `If-Match`.
+fn put_condition(
+    id: &str,
+    resource: &serde_json::Value,
+    if_match: &str,
+) -> Result<Request<Body>, Box<dyn StdError>> {
+    Ok(Request::put(format!("/fhir/Condition/{id}"))
+        .header(header::CONTENT_TYPE, "application/fhir+json")
+        .header(header::IF_MATCH, if_match)
+        .body(Body::from(resource.to_string()))?)
+}
+
+/// The status, the `ETag`, the `Location` and the body of one answer.
+struct Answered {
+    status: StatusCode,
+    etag: Option<String>,
+    location: Option<String>,
+    body: serde_json::Value,
+}
+
+/// Sends `request` through `app` and keeps the headers a versioned write reads.
+async fn send(app: Router, request: Request<Body>) -> Result<Answered, Box<dyn StdError>> {
+    let response = app.oneshot(request).await?;
+    let text = |name: &header::HeaderName| {
+        response
+            .headers()
+            .get(name)
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_owned)
+    };
+    let (etag, location) = (text(&header::ETAG), text(&header::LOCATION));
+    let status = response.status();
+    let bytes = axum::body::to_bytes(response.into_body(), 1024 * 1024).await?;
+    let body = if bytes.is_empty() {
+        serde_json::Value::Null
+    } else {
+        serde_json::from_slice(&bytes)?
+    };
+    Ok(Answered {
+        status,
+        etag,
+        location,
+        body,
+    })
+}
+
 /// Returns the application under test.
 fn app(facade: &Arc<Facade>) -> Router {
     let state = AppState::with_health(Registry::default()).with_facade(Arc::clone(facade));

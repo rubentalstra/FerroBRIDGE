@@ -225,7 +225,7 @@ async fn precondition(
                 Issue::error(IssueType::Invalid).diagnosing("the If-Match header is not text"),
             )
         })?;
-        return read::version_of_etag(text, container);
+        return read::version_of_etag(client, ehr_id, container, text).await;
     }
     read::latest_version(client, ehr_id, container).await
 }
