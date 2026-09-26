@@ -139,10 +139,47 @@ expression: pretty(mapped.bundle())
           }
         ],
         "mode": "instance",
+        "partOf": {
+          "reference": "urn:uuid:89520c8a-83db-81e0-9467-ab38e31d8111"
+        },
         "physicalType": {
           "coding": [
             {
               "code": "bd",
+              "system": "http://terminology.hl7.org/CodeSystem/location-physical-type"
+            }
+          ]
+        },
+        "resourceType": "Location"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:089c96c6-46b2-8554-a152-22ef8e2992b6",
+      "resource": {
+        "identifier": [
+          {
+            "value": "WARD1"
+          }
+        ],
+        "resourceType": "Location"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:89520c8a-83db-81e0-9467-ab38e31d8111",
+      "resource": {
+        "identifier": [
+          {
+            "value": "101"
+          }
+        ],
+        "mode": "instance",
+        "partOf": {
+          "reference": "urn:uuid:089c96c6-46b2-8554-a152-22ef8e2992b6"
+        },
+        "physicalType": {
+          "coding": [
+            {
+              "code": "ro",
               "system": "http://terminology.hl7.org/CodeSystem/location-physical-type"
             }
           ]

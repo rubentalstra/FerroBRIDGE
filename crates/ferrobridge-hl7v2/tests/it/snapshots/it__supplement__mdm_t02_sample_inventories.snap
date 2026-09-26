@@ -14,7 +14,7 @@ expression: "(inventory(mapped.bundle()), inventory(&expected))"
         ),
         (
             "Location",
-            1,
+            4,
         ),
         (
             "MessageHeader",
