@@ -217,6 +217,11 @@ fn row_line(kind: &str, outcome: &Outcome) -> String {
             element,
             maps,
         } => (at, row, format!("{element} from {}", maps.join(" "))),
+        Outcome::DatatypeAmbiguous {
+            at,
+            row,
+            candidates,
+        } => (at, row, candidates.join(" ")),
         other => return format!("{kind}: {other:?}"),
     };
     format!(

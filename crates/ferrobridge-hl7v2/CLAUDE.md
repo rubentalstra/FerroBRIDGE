@@ -38,7 +38,14 @@ children (`Run::datatypes`). A child another row of the same source targets
 directly is left to that row (`Run::claimed`), unless that row only reaches
 the bridge's endpoint fallback (`Run::falls_back`). Two maps writing one child
 with different values roll the row back as `datatype-conflict`; with the same
-values they agree and the first map's writes stand.
+values they agree and the first map's writes stand. Before that, maps that
+are alternatives for one value (`Map::alternative_to`: one component mapped
+with no condition into the same child or `$value`, as the four EI variants
+into `Identifier`) are narrowed to one (`Run::select`): the one whose rows
+write from the most components of the value, then among those that write
+the same the one with the fewest rows; equally specific maps that write
+differently count `datatype-ambiguous` and none runs. A row whose
+`mappedVia` names a data type map runs that map alone.
 
 ## Instances are identities, allocated when a value first reaches them
 

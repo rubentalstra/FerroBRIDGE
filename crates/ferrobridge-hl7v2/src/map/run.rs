@@ -367,6 +367,36 @@ struct Mark {
     outcomes: usize,
 }
 
+/// The components a data type map's rows name, and those whose rows wrote.
+#[derive(Debug, Default)]
+struct Covered {
+    named: BTreeSet<usize>,
+    wrote: BTreeSet<usize>,
+}
+
+impl Covered {
+    /// Counts `started`'s component as written when the run's write count
+    /// grew past the count its row started at.
+    fn settle(&mut self, started: Option<(usize, usize)>, pushed: usize) {
+        if let Some((component, before)) = started
+            && pushed > before
+        {
+            self.wrote.insert(component);
+        }
+    }
+}
+
+/// One write recorded since a [`Mark`], as far as two maps' writes are
+/// compared: the resource, the steps and the value or the translation.
+#[derive(Debug, PartialEq)]
+struct Recorded {
+    resource: usize,
+    type_name: String,
+    slots: Vec<Slot>,
+    value: Option<Value>,
+    translation: Option<(String, String, Part)>,
+}
+
 /// A run in progress.
 #[derive(Debug)]
 pub(super) struct Run<'a> {
@@ -375,6 +405,9 @@ pub(super) struct Run<'a> {
     resources: Vec<Resource>,
     requests: Vec<Request>,
     outcomes: Vec<Outcome>,
+    /// The count of writes recorded over the run, which a rollback leaves as
+    /// it is, so its growth shows that a row wrote.
+    pushed: usize,
 }
 
 impl<'a> Run<'a> {
@@ -391,6 +424,7 @@ impl<'a> Run<'a> {
                 .cloned()
                 .map(Outcome::Parse)
                 .collect(),
+            pushed: 0,
         };
         run.create("Bundle", Identity::Envelope);
         run
@@ -794,8 +828,8 @@ impl<'a> Run<'a> {
         datum: Datum<'a>,
         base: &Base,
     ) -> Result<(), MapError> {
-        let named = self.datatype_rows(scope, map, datatype, datum, base, &BTreeSet::new())?;
-        self.unmapped_components(scope, &map.id, datum, &named);
+        let covered = self.datatype_rows(scope, map, datatype, datum, base, &BTreeSet::new())?;
+        self.unmapped_components(scope, &map.id, datum, &covered.named);
         Ok(())
     }
 
@@ -836,7 +870,10 @@ impl<'a> Run<'a> {
                 .resources
                 .get(leaf.resource)
                 .map_or(0, |resource| resource.writes.len());
-            named.extend(self.datatype_rows(scope, map, datatype, datum, leaf, &claimed)?);
+            named.extend(
+                self.datatype_rows(scope, map, datatype, datum, leaf, &claimed)?
+                    .named,
+            );
             let recorded = self
                 .resources
                 .get(leaf.resource)
@@ -1014,7 +1051,7 @@ impl<'a> Run<'a> {
 
     /// Runs the rows of a data type map over `datum` into `base`, skipping
     /// each row whose target starts at a child in `claimed`, and returns the
-    /// components the rows name.
+    /// components the rows name and those whose rows wrote.
     fn datatype_rows(
         &mut self,
         scope: &Scope<'a>,
@@ -1023,12 +1060,15 @@ impl<'a> Run<'a> {
         datum: Datum<'a>,
         base: &Base,
         claimed: &BTreeSet<String>,
-    ) -> Result<BTreeSet<usize>, MapError> {
+    ) -> Result<Covered, MapError> {
         let mut inner = scope.clone();
         inner.datatype = Some((String::from(datatype), datum));
         inner.repetition = None;
-        let mut named = BTreeSet::new();
+        let mut covered = Covered::default();
+        // The component of the row before, with the write count it started at.
+        let mut started: Option<(usize, usize)> = None;
         for row in &map.rows {
+            covered.settle(started.take(), self.pushed);
             let reference = row_ref(map, row);
             let (id, path) = split_source(&row.source, '.');
             if id != datatype {
@@ -1039,7 +1079,8 @@ impl<'a> Run<'a> {
                 continue;
             }
             if let Some(first) = path.first() {
-                named.insert(*first);
+                covered.named.insert(*first);
+                started = Some((*first, self.pushed));
             }
             let owned = match &row.target {
                 Ok(Target::Path { steps, .. }) => steps
@@ -1064,7 +1105,8 @@ impl<'a> Run<'a> {
             }
             self.apply(&inner, row, &reference, part, 0, base)?;
         }
-        Ok(named)
+        covered.settle(started, self.pushed);
+        Ok(covered)
     }
 
     /// Applies one row whose condition holds to a valued `datum`.
@@ -1231,11 +1273,20 @@ impl<'a> Run<'a> {
             self.assign(scope, assignment, &resolved, leaf, reference);
             return Ok(());
         }
+        let source_type = row.source_type.clone().unwrap_or_default();
         if let Some(mapped_via) = &row.mapped_via {
+            let named = match mapped_via {
+                MappedVia::Table(id) => {
+                    self.corpus.get(id).filter(|map| map.kind == Kind::Datatype)
+                }
+                MappedVia::Unresolved(_) => None,
+            };
+            if let Some(map) = named {
+                return self.datatype(scope, map, &source_type, datum, leaf);
+            }
             self.table(leaf, &resolved, mapped_via, datum, at, reference);
             return Ok(());
         }
-        let source_type = row.source_type.clone().unwrap_or_default();
         let target_type = match resolved.location() {
             fhirconnect::tree::element::Location::Complex(schema) => String::from(schema.name),
             _ => String::from(
@@ -1311,19 +1362,135 @@ impl<'a> Run<'a> {
         } else {
             self.complex_maps(&source_type, &target_type, leaf)
         };
-        match maps.as_slice() {
-            [] => {
-                self.outcomes.push(Outcome::NoDatatypeMap {
-                    at: scope.at.clone(),
-                    row: reference.clone(),
-                    source_type,
-                    target_type,
-                });
-                Ok(())
-            }
+        if maps.is_empty() {
+            self.outcomes.push(Outcome::NoDatatypeMap {
+                at: scope.at.clone(),
+                row: reference.clone(),
+                source_type,
+                target_type,
+            });
+            return Ok(());
+        }
+        let chosen = self.select(scope, reference, maps, &source_type, datum, leaf)?;
+        match chosen.as_slice() {
+            [] => Ok(()),
             [map] => self.datatype(scope, map, &source_type, datum, leaf),
             several => self.datatypes(scope, row, reference, several, &source_type, datum, leaf),
         }
+    }
+
+    /// Chooses one map from each set of alternatives among `maps`
+    /// ([`Map::alternative_to`]) and keeps every other map, by id.
+    ///
+    /// The map of a set whose rows write from the most components of `datum`
+    /// is chosen; among equally specific maps whose writes agree, the one
+    /// with the fewest rows, the plain map. Equally specific maps whose
+    /// writes differ are counted as [`Outcome::DatatypeAmbiguous`], and none
+    /// of them runs. No specification governs this: our own design, since
+    /// no row of the guide names the variant it runs.
+    fn select(
+        &mut self,
+        scope: &Scope<'a>,
+        reference: &RowRef,
+        maps: Vec<&'a Map>,
+        datatype: &str,
+        datum: Datum<'a>,
+        leaf: &Base,
+    ) -> Result<Vec<&'a Map>, MapError> {
+        let mut sets: Vec<Vec<&'a Map>> = Vec::new();
+        for map in maps {
+            let (joined, mut apart): (Vec<_>, Vec<_>) = std::mem::take(&mut sets)
+                .into_iter()
+                .partition(|set| set.iter().any(|other| other.alternative_to(map)));
+            let mut merged: Vec<&'a Map> = joined.into_iter().flatten().collect();
+            merged.push(map);
+            merged.sort_by(|a, b| a.id.cmp(&b.id));
+            apart.push(merged);
+            sets = apart;
+        }
+        let mut chosen = Vec::new();
+        for set in sets {
+            match set.as_slice() {
+                [one] => chosen.push(*one),
+                several => {
+                    if let Some(map) =
+                        self.choose(scope, reference, several, datatype, datum, leaf)?
+                    {
+                        chosen.push(map);
+                    }
+                }
+            }
+        }
+        chosen.sort_by(|a, b| a.id.cmp(&b.id));
+        Ok(chosen)
+    }
+
+    /// Chooses one of the alternative maps `set` for `datum`, as
+    /// [`Run::select`] describes, running each on trial and rolling it back.
+    fn choose(
+        &mut self,
+        scope: &Scope<'a>,
+        reference: &RowRef,
+        set: &[&'a Map],
+        datatype: &str,
+        datum: Datum<'a>,
+        leaf: &Base,
+    ) -> Result<Option<&'a Map>, MapError> {
+        let mut trials = Vec::new();
+        for map in set {
+            let mark = self.mark();
+            let covered =
+                self.datatype_rows(scope, map, datatype, datum, leaf, &BTreeSet::new())?;
+            let recorded = self.recorded_since(&mark);
+            self.rollback(&mark);
+            trials.push((*map, covered.wrote.len(), recorded));
+        }
+        let most = trials.iter().map(|(_, count, _)| *count).max().unwrap_or(0);
+        trials.retain(|(_, count, _)| *count == most);
+        let agree = trials
+            .split_first()
+            .is_some_and(|((_, _, first), rest)| rest.iter().all(|(_, _, other)| other == first));
+        if agree {
+            return Ok(trials.iter().map(|(map, _, _)| *map).min_by(|a, b| {
+                a.rows
+                    .len()
+                    .cmp(&b.rows.len())
+                    .then_with(|| a.id.cmp(&b.id))
+            }));
+        }
+        self.outcomes.push(Outcome::DatatypeAmbiguous {
+            at: scope.at.clone(),
+            row: reference.clone(),
+            candidates: trials.iter().map(|(map, _, _)| map.id.clone()).collect(),
+        });
+        Ok(None)
+    }
+
+    /// The writes recorded since `mark`, in every resource, for comparison.
+    fn recorded_since(&self, mark: &Mark) -> Vec<Recorded> {
+        let mut recorded = Vec::new();
+        for (index, resource) in self.resources.iter().enumerate() {
+            let start = mark.writes.get(index).copied().unwrap_or(0);
+            for write in resource.writes.get(start..).unwrap_or_default() {
+                let (value, translation) = match &write.value {
+                    Pending::Ready(value) => (Some(value.clone()), None),
+                    Pending::Translation { request, part } => (
+                        None,
+                        self.requests
+                            .get(*request)
+                            .map(|asked| (asked.url.clone(), asked.code.clone(), *part)),
+                    ),
+                };
+                recorded.push(Recorded {
+                    resource: index,
+                    type_name: resource.type_name.clone(),
+                    slots: write.slots.clone(),
+                    value,
+                    translation,
+                });
+            }
+        }
+        recorded
     }
 
     /// The data type maps from `source_type` into the complex element `leaf`:
@@ -1520,6 +1687,7 @@ impl<'a> Run<'a> {
             }
         }
         if let Some(resource) = self.resources.get_mut(leaf.resource) {
+            self.pushed = self.pushed.saturating_add(1);
             resource.writes.push(Write {
                 slots: leaf.slots.clone(),
                 value,
@@ -2485,9 +2653,15 @@ mod tests {
 
     /// The `MessageHeader` writes of a run, as dotted paths and ready values.
     fn header_writes(run: &Run<'_>) -> Vec<(String, Value)> {
+        writes_of(run, "MessageHeader")
+    }
+
+    /// The writes of a run into resources of `type_name`, as dotted paths and
+    /// ready values.
+    fn writes_of(run: &Run<'_>, type_name: &str) -> Vec<(String, Value)> {
         run.resources
             .iter()
-            .filter(|resource| resource.type_name == "MessageHeader")
+            .filter(|resource| resource.type_name == type_name)
             .flat_map(|resource| &resource.writes)
             .filter_map(|write| {
                 let path: Vec<&str> = write.slots.iter().map(|slot| slot.name.as_str()).collect();
@@ -2629,9 +2803,9 @@ mod tests {
         "||||||||||||NORTHNET^1.2.3.9^ISO",
     );
 
-    /// A data type map from `HD` into `MessageHeader.source` with one row per
-    /// `(component, child)` pair, at the canonical url `url`.
-    fn hd_source_map(id: &str, url: &str, rows: &[(&str, &str, &str)]) -> Value {
+    /// A data type map with one row per `(component, child, type)` triple, at
+    /// the canonical url `url`.
+    fn datatype_map(id: &str, url: &str, rows: &[(&str, &str, &str)]) -> Value {
         let elements: Vec<serde_json::Value> = rows
             .iter()
             .map(|(component, child, fhir_type)| {
@@ -2716,7 +2890,7 @@ mod tests {
     #[test]
     fn two_maps_into_distinct_children_complete_the_message_header() {
         let url = "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-endpoint-to-messageheader-source";
-        let endpoint = hd_source_map(
+        let endpoint = datatype_map(
             "datatype-hd-endpoint-to-messageheader-source",
             url,
             &[("HD.2", "endpoint", "url")],
@@ -2762,7 +2936,7 @@ mod tests {
     // target with different values refuse the row, counted once per child, and neither value lands.
     #[test]
     fn two_maps_into_one_child_refuse_the_row_as_a_counted_conflict() {
-        let conflicting = hd_source_map(
+        let conflicting = datatype_map(
             "datatype-hd-label-to-messageheader-source",
             "http://example.org/fhir/ConceptMap/datatype-hd-label-to-messageheader-source",
             &[("HD.2", "name", "string")],
@@ -2802,7 +2976,7 @@ mod tests {
     // same value agree, so the value is written once and no conflict is counted.
     #[test]
     fn two_maps_writing_one_child_with_one_value_agree() {
-        let agreeing = hd_source_map(
+        let agreeing = datatype_map(
             "datatype-hd-label-to-messageheader-source",
             "http://example.org/fhir/ConceptMap/datatype-hd-label-to-messageheader-source",
             &[("HD.1", "name", "string")],
@@ -2873,6 +3047,233 @@ mod tests {
         assert!(
             writes.iter().all(|(path, _)| !path.contains("extension")),
             "{writes:?}"
+        );
+    }
+
+    /// A synthetic message of `segments`, each ended by a carriage return.
+    fn message(segments: &[&str]) -> Parsed {
+        let text = format!("{}\r", segments.join("\r"));
+        let lexed = parse::lex(&text, Charset::Ascii).expect("it lexes");
+        let structure = parse::structure_for(&lexed.message).expect("a structure");
+        parse::group(lexed, structure)
+    }
+
+    /// A synthetic ORU^R01 whose one order carries `orc`.
+    fn order(orc: &str) -> Parsed {
+        message(&[
+            "MSH|^~\\&|LAB|NORTHLAB|EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00021|P|2.5.1",
+            "PID|1||PAT-0021^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M",
+            orc,
+            "OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN",
+        ])
+    }
+
+    /// The values written at `path` in resources of `type_name`.
+    fn values_at(run: &Run<'_>, type_name: &str, path: &str) -> Vec<Value> {
+        writes_of(run, type_name)
+            .into_iter()
+            .filter(|(written, _)| written == path)
+            .map(|(_, value)| value)
+            .collect()
+    }
+
+    fn text(value: &str) -> Value {
+        Value::String(String::from(value))
+    }
+
+    /// The conflicts, ambiguities and missing `ST` maps a run counted, the
+    /// refusals an EI value can meet.
+    fn ei_refusals<'r>(run: &'r Run<'_>) -> Vec<&'r Outcome> {
+        run.outcomes
+            .iter()
+            .filter(|outcome| match outcome {
+                Outcome::DatatypeConflict { .. } | Outcome::DatatypeAmbiguous { .. } => true,
+                Outcome::NoDatatypeMap { row, .. } => row.map == "datatype-st-to-identifier",
+                _ => false,
+            })
+            .collect()
+    }
+
+    // NOTE: `ConceptMap-datatype-ei-*-to-identifier`: the four variants each write `EI.1` into
+    // `value`, and `hd-endpoint` writes `name` from HD.1 only under a condition.
+    #[test]
+    fn the_ei_variants_are_alternatives_and_the_hd_maps_into_one_source_are_not() {
+        let corpus = corpus();
+        let map = |id: &str| corpus.get(id).expect("a vendored map");
+        let organization = map("datatype-ei-organization-to-identifier");
+        for other in [
+            "datatype-ei-defaultassigner-to-identifier",
+            "datatype-ei-extension-to-identifier",
+            "datatype-ei-system-to-identifier",
+        ] {
+            assert!(organization.alternative_to(map(other)), "{other}");
+        }
+        assert!(
+            !map("datatype-hd-endpoint-to-messageheader-source")
+                .alternative_to(map("datatype-hd-name-to-messageheader-source"))
+        );
+    }
+
+    // NOTE: `segment-orc-to-diagnosticreport` ORC-2 and ORC-3 into `identifier[1]` and `[2]`; a
+    // bare EI takes the plain variant, `datatype-ei-defaultassigner-to-identifier`, once.
+    #[test]
+    fn a_bare_placer_and_filler_number_give_one_identifier_each() {
+        let corpus = corpus();
+        let parsed = order("ORC|RE|PLC-1|FIL-1");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "DiagnosticReport", "identifier.value"),
+            vec![text("PLC-1"), text("FIL-1")],
+            "{:?}",
+            writes_of(&run, "DiagnosticReport")
+        );
+        assert!(
+            writes_of(&run, "DiagnosticReport")
+                .iter()
+                .all(|(path, _)| path != "identifier.system" && path != "identifier.assigner"),
+            "{:?}",
+            writes_of(&run, "DiagnosticReport")
+        );
+        assert_eq!(ei_refusals(&run), Vec::<&Outcome>::new());
+    }
+
+    // NOTE: `datatype-ei-organization-to-identifier` maps EI.2 into the assigner, the one variant
+    // with a row that runs on a namespace ID, so it is the most specific.
+    #[test]
+    fn a_value_with_an_assigning_authority_takes_the_organization_variant() {
+        let corpus = corpus();
+        let parsed = order("ORC|RE|PLC-1^ORDERDESK|FIL-1");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "DiagnosticReport", "identifier.value"),
+            vec![text("PLC-1"), text("FIL-1")]
+        );
+        assert!(
+            values_at(&run, "Organization", "identifier.value").contains(&text("ORDERDESK")),
+            "{:?}",
+            writes_of(&run, "Organization")
+        );
+        assert_eq!(ei_refusals(&run), Vec::<&Outcome>::new());
+    }
+
+    // NOTE: `segment-txa-to-documentreference` TXA-12 into `masterIdentifier`.
+    #[test]
+    fn a_unique_document_number_gives_one_master_identifier() {
+        let corpus = corpus();
+        let parsed = message(&[
+            "MSH|^~\\&|DOCS|NORTHHOSP|EHR|SOUTHCLINIC|20260925100000+0200||MDM^T02^MDM_T02|MSG00023|P|2.5.1",
+            "EVN||20260925095900+0200",
+            "PID|1||PAT-0023^^^NORTHHOSP^MR||Doe^Sam^^^^^L||19751111|U",
+            "PV1|1|O",
+            "TXA|1|CN|TX|20260925095000+0200||||||||DOC-0023|||||AU",
+        ]);
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "DocumentReference", "masterIdentifier.value"),
+            vec![text("DOC-0023")],
+            "{:?}",
+            writes_of(&run, "DocumentReference")
+        );
+        assert_eq!(ei_refusals(&run), Vec::<&Outcome>::new());
+    }
+
+    // NOTE: no specification governs this: our own design; two variants equally specific for a
+    // value that write it differently are counted with both named, and neither writes.
+    #[test]
+    fn two_equally_specific_variants_that_differ_are_a_counted_ambiguity() {
+        let rival = datatype_map(
+            "datatype-ei-rival-to-identifier",
+            "http://example.org/fhir/ConceptMap/datatype-ei-rival-to-identifier",
+            &[("EI.1", "value", "string"), ("EI.2", "type.text", "string")],
+        );
+        let corpus = supplemented(&[rival]);
+        let parsed = order("ORC|RE|PLC-1^ORDERDESK|FIL-1");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "DiagnosticReport", "identifier.value"),
+            vec![text("FIL-1")]
+        );
+        let ambiguous: Vec<(&str, &[String])> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::DatatypeAmbiguous {
+                    row, candidates, ..
+                } => Some((row.source.as_str(), candidates.as_slice())),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            ambiguous,
+            vec![(
+                "ORC-2",
+                &[
+                    String::from("datatype-ei-organization-to-identifier"),
+                    String::from("datatype-ei-rival-to-identifier"),
+                ][..]
+            )]
+        );
+    }
+
+    // NOTE: `StructureDefinition-TypeInfo.json` `mappedVia` is the "Url of the mapping artifact
+    // for the item", so a row naming a data type map runs that map alone.
+    #[test]
+    fn a_row_naming_its_data_type_map_runs_that_map() {
+        let segment: Value = serde_json::from_value(serde_json::json!({
+            "resourceType": "ConceptMap",
+            "id": "segment-orc-to-diagnosticreport",
+            "url": "http://example.org/fhir/ConceptMap/segment-orc-to-diagnosticreport",
+            "status": "active",
+            "group": [{ "element": [{
+                "code": "ORC-2",
+                "extension": [{
+                    "url": crate::map::corpus::TYPE_INFO,
+                    "extension": [{ "url": "type", "valueCode": "EI" }]
+                }],
+                "target": [{
+                    "code": "identifier[1]",
+                    "equivalence": "equivalent",
+                    "extension": [{
+                        "url": crate::map::corpus::TYPE_INFO,
+                        "extension": [
+                            { "url": "type", "valueCode": "Identifier" },
+                            {
+                                "url": "mappedVia",
+                                "valueUrl": "ConceptMap/datatype-ei-extension-to-identifier"
+                            }
+                        ]
+                    }]
+                }]
+            }]}]
+        }))
+        .expect("a JSON value");
+        let corpus = supplemented(&[segment]);
+        let parsed = order("ORC|RE|PLC-1^ORDERDESK");
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "DiagnosticReport", "identifier.value"),
+            vec![text("PLC-1")]
+        );
+        assert!(
+            values_at(&run, "Organization", "identifier.value")
+                .iter()
+                .all(|value| value != &text("ORDERDESK")),
+            "{:?}",
+            writes_of(&run, "Organization")
+        );
+        assert!(
+            run.outcomes.iter().any(|outcome| matches!(
+                outcome,
+                Outcome::UnmappedComponent { map, component: 2, .. }
+                    if map == "datatype-ei-extension-to-identifier"
+            )),
+            "{:?}",
+            run.outcomes
         );
     }
 

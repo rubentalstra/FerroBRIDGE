@@ -19,7 +19,6 @@ expression: summary(&mapped)
     "unsupported-condition: PV1[1] message-mdm-t02-to-bundle MDM_T02.PV1 -> Coverage[1] [IF PV1-20 VALUE]",
     "unmapped-field: PV1[1]-1",
     "narrative-condition: TXA[1]-2(1) datatype-cwe-to-codeableconcept CWE.1 -> coding[1].code []",
-    "no-datatype-map: TXA[1]-12(1) datatype-st-to-identifier ST.1 -> $value [String to Identifier]",
     "narrative-condition: TXA[1] message-mdm-t02-to-bundle MDM_T02.TXA -> Provenance []",
     "unmapped-field: TXA[1]-1",
     "unmapped-field: TXA[1]-4",
