@@ -101,7 +101,166 @@ async fn the_facade_commits_a_condition_and_reads_it_back_from_a_real_cdr()
         "meta.source names the composition version: {}",
         read.1
     );
+
+    // vread (<https://hl7.org/fhir/R4/http.html#vread>): the version the
+    // create's `Location` named reads back, and one the CDR never held is 404.
+    let version = call(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, version.0, "{}", version.1);
+    assert_eq!(Some("1"), version.1["meta"]["versionId"].as_str());
+    assert_eq!(created.1["code"], version.1["code"]);
+    let absent = call(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}/_history/2")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::NOT_FOUND, absent.0, "{}", absent.1);
     Ok(())
+}
+
+#[tokio::test]
+async fn an_update_following_the_read_etag_commits_the_next_version_on_a_real_cdr()
+-> Result<(), Box<dyn StdError>> {
+    // The ETag is the versionId as a weak entity tag, If-Match carries it back,
+    // and a stale one is 412 (<https://hl7.org/fhir/R4/http.html#concurrency>).
+    if !containers::e2e_enabled() {
+        return Ok(());
+    }
+    let cdr = containers::cdr().await?;
+    upload_template(cdr.base_url()).await?;
+    let client = CdrClient::new(&CdrConfig::new(cdr.base_url().parse()?))?;
+    let set = programs::read_set(std::path::Path::new(FIXTURES))?;
+    let templates = programs::fetch_templates(&set, &client).await?;
+    let programs = programs::compile_set(&set, &templates)?;
+    let store: Arc<dyn Store> = Arc::new(MemoryStore::new());
+    let facade = Arc::new(Facade::new(
+        programs,
+        store,
+        client,
+        Settings {
+            base_url: String::from("http://ferrobridge.invalid/fhir"),
+            ehr_policy: Policy::CreateOnFirstWrite,
+            subject_namespace: String::from(SUBJECT_NAMESPACE),
+            system_id: String::from("ferrobridge.e2e"),
+            language: String::from("en"),
+            territory: String::from("GB"),
+        },
+    ));
+
+    let created = call(app(&facade), post_condition()?).await?;
+    assert_eq!(StatusCode::CREATED, created.0, "{}", created.1);
+    let id = created.1["id"]
+        .as_str()
+        .ok_or("the created resource carries an id")?
+        .to_owned();
+    let read = send(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, read.status, "{}", read.body);
+    let tag = read.etag.ok_or("a read carries an ETag")?;
+    assert_eq!("W/\"1\"", tag);
+    // R4 condition.html: Condition.subject is 1..1, so the read names the
+    // person the identity map binds to the EHR although the mapping has no
+    // outbound row for it.
+    assert_eq!(
+        Some(SUBJECT_ID),
+        read.body["subject"]["identifier"]["value"].as_str(),
+        "{}",
+        read.body
+    );
+
+    // The read body goes back unchanged: what a client reads it can send.
+    let updated = send(app(&facade), put_condition(&id, &read.body, &tag)?).await?;
+    assert_eq!(StatusCode::OK, updated.status, "{}", updated.body);
+    assert_eq!(Some("W/\"2\""), updated.etag.as_deref());
+    assert!(
+        updated
+            .location
+            .as_deref()
+            .is_some_and(|location| location.ends_with(&format!("/Condition/{id}/_history/2"))),
+        "{:?}",
+        updated.location
+    );
+
+    let mut revised = read.body.clone();
+    revised["code"]["text"] = serde_json::json!("Synthetic problem one, revised");
+    let stale = send(app(&facade), put_condition(&id, &revised, &tag)?).await?;
+    assert_eq!(
+        StatusCode::PRECONDITION_FAILED,
+        stale.status,
+        "{}",
+        stale.body
+    );
+    assert_eq!(
+        Some("W/\"2\""),
+        stale.etag.as_deref(),
+        "the 412 carries the current version"
+    );
+
+    let first = call(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, first.0, "{}", first.1);
+    assert_eq!(Some("1"), first.1["meta"]["versionId"].as_str());
+    assert_eq!(
+        created.1["code"], first.1["code"],
+        "version 1 keeps the first content"
+    );
+    assert_ne!(revised["code"]["text"], first.1["code"]["text"]);
+    Ok(())
+}
+
+/// Returns a `PUT [base]/Condition/{id}` of `resource` carrying `If-Match`.
+fn put_condition(
+    id: &str,
+    resource: &serde_json::Value,
+    if_match: &str,
+) -> Result<Request<Body>, Box<dyn StdError>> {
+    Ok(Request::put(format!("/fhir/Condition/{id}"))
+        .header(header::CONTENT_TYPE, "application/fhir+json")
+        .header(header::IF_MATCH, if_match)
+        .body(Body::from(resource.to_string()))?)
+}
+
+/// The status, the `ETag`, the `Location` and the body of one answer.
+struct Answered {
+    status: StatusCode,
+    etag: Option<String>,
+    location: Option<String>,
+    body: serde_json::Value,
+}
+
+/// Sends `request` through `app` and keeps the headers a versioned write reads.
+async fn send(app: Router, request: Request<Body>) -> Result<Answered, Box<dyn StdError>> {
+    let response = app.oneshot(request).await?;
+    let text = |name: &header::HeaderName| {
+        response
+            .headers()
+            .get(name)
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_owned)
+    };
+    let (etag, location) = (text(&header::ETAG), text(&header::LOCATION));
+    let status = response.status();
+    let bytes = axum::body::to_bytes(response.into_body(), 1024 * 1024).await?;
+    let body = if bytes.is_empty() {
+        serde_json::Value::Null
+    } else {
+        serde_json::from_slice(&bytes)?
+    };
+    Ok(Answered {
+        status,
+        etag,
+        location,
+        body,
+    })
 }
 
 /// Returns the application under test.
@@ -289,18 +448,15 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
     .await?;
     assert_eq!(StatusCode::OK, read.0, "{}", read.1);
     let mut output = read.1;
-    // NOTE: no specification governs this: our own design, the identity the
-    // facade assigns and the version it reports are the facade's, not the
-    // mapping's, so they leave the comparison with the engine's declared set.
-    if let Some(object) = output.as_object_mut() {
-        object.remove("id");
-        object.remove("meta");
-    }
+    // R4 condition.html: Condition.subject is 1..1, and the KDS context has no
+    // outbound row for it, so the facade names the person the EHR is bound to.
+    assert_eq!(
+        input["subject"]["identifier"], output["subject"]["identifier"],
+        "the read names the subject the create was written for: {output}"
+    );
+    strip_facade_owned(&mut output);
     let mut compared = input.clone();
-    if let Some(object) = compared.as_object_mut() {
-        object.remove("id");
-        object.remove("meta");
-    }
+    strip_facade_owned(&mut compared);
     let set = ferrobridge_testkit::laws::declared(&[], &[], &compared, &output);
     let pinned = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
@@ -324,8 +480,11 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
             .ok_or("the snapshot carries the list")?
             .iter()
             .filter(|row| {
-                row.as_str()
-                    .is_some_and(|row| !row.starts_with("id ") && !row.starts_with("meta."))
+                row.as_str().is_some_and(|row| {
+                    !row.starts_with("id ")
+                        && !row.starts_with("meta.")
+                        && !row.starts_with("subject.")
+                })
             })
             .map(|row| {
                 if *row == defaulted {
@@ -342,6 +501,17 @@ async fn the_facade_round_trips_the_kds_condition_through_a_real_cdr()
         );
     }
     Ok(())
+}
+
+/// Removes what the facade writes of its own from `document`.
+fn strip_facade_owned(document: &mut serde_json::Value) {
+    // NOTE: no specification governs this: our own design, the identity, the
+    // version and the subject are the facade's, so they leave the comparison.
+    if let Some(object) = document.as_object_mut() {
+        object.remove("id");
+        object.remove("meta");
+        object.remove("subject");
+    }
 }
 
 /// Returns the synthetic `Condition` with `id`, coded `code`, for the case's

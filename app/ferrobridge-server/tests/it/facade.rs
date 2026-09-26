@@ -93,12 +93,17 @@ impl Harness {
 
     /// Returns the canonical composition the synthetic Condition maps to.
     fn composition(&self) -> serde_json::Value {
+        self.composition_of(&condition())
+    }
+
+    /// Returns the canonical composition `resource` maps to.
+    fn composition_of(&self, resource: &serde_json::Value) -> serde_json::Value {
         let loaded = self
             .facade
             .programs()
             .by_context("ferrobridge_facade.context")
             .expect("the fixture context compiled");
-        let document: fhir_types::codec::Value = serde_json::from_value(condition())
+        let document: fhir_types::codec::Value = serde_json::from_value(resource.clone())
             .expect("the synthetic Condition reads as a lexical document");
         let built = ferrobridge_server::facade::engine::inbound(
             loaded.program(),
@@ -637,7 +642,7 @@ async fn the_capability_statement_names_exactly_the_loaded_programs()
         .iter()
         .filter_map(|entry| entry["code"].as_str())
         .collect();
-    assert_eq!(vec!["create", "read", "update"], interactions);
+    assert_eq!(vec!["create", "read", "vread", "update"], interactions);
     assert!(
         condition["searchParam"].is_null(),
         "search is not declared until it is implemented: {condition}"
@@ -960,6 +965,82 @@ async fn the_same_composition_read_twice_yields_the_same_id() -> Result<(), Box<
 }
 
 #[tokio::test]
+async fn a_read_names_the_subject_the_identity_map_binds_to_the_ehr()
+-> Result<(), Box<dyn StdError>> {
+    // R4 condition.html: Condition.subject is 1..1, and the fixture mapping
+    // has no outbound row for it, so the facade writes it from the binding.
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, body) = call(
+        harness.app(),
+        Request::get(format!("/fhir/Condition/{id}")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert_eq!(
+        serde_json::json!({
+            "type": "Patient",
+            "identifier": {
+                "system": "http://example.org/fhir/sid/ferrobridge-subject",
+                "value": "synthetic-subject-0001"
+            }
+        }),
+        body["subject"],
+        "{body}"
+    );
+    let vread = call(
+        harness.app(),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, vread.0, "{}", vread.1);
+    assert_eq!(body["subject"], vread.1["subject"]);
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_read_whose_ehr_has_no_recorded_person_is_refused_naming_the_element()
+-> Result<(), Box<dyn StdError>> {
+    // A read never answers an instance R4 does not admit: without a person
+    // bound to the EHR, Condition.subject (1..1) stays absent.
+    let harness = harness().await;
+    let id = ferrobridge_server::facade::identity::FhirResourceId::new("unboundsubject")?;
+    harness.store.record_binding(
+        "Condition",
+        &id,
+        &ferrobridge_server::facade::identity::record::CompositionBinding {
+            ehr_id: String::from(EHR_ID),
+            versioned_object_uid: String::from(CONTAINER),
+            template_id: String::from("ferrobridge.diagnose.v1"),
+            resource_type: String::from("Condition"),
+            entry_path: String::from("/content[openEHR-EHR-EVALUATION.problem_diagnosis.v1]"),
+            split: 0,
+            context: String::from("ferrobridge_facade.context"),
+        },
+    )?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, body) = call(
+        harness.app(),
+        Request::get("/fhir/Condition/unboundsubject").body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::INTERNAL_SERVER_ERROR, status, "{body}");
+    let issue = first_issue(&body);
+    assert_eq!(Some("exception"), issue["code"].as_str());
+    assert_eq!(
+        Some("Condition.subject"),
+        issue["location"][0].as_str(),
+        "{body}"
+    );
+    assert!(
+        !body.to_string().contains("Synthetic problem one"),
+        "the refusal carries clinical content: {body}"
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn a_new_version_keeps_the_id_and_moves_the_version_id() -> Result<(), Box<dyn StdError>> {
     let harness = harness().await;
     let id = create_one(&harness).await?;
@@ -1007,6 +1088,164 @@ async fn a_composition_the_cdr_reports_deleted_is_four_hundred_and_ten()
     )
     .await?;
     assert_eq!(StatusCode::GONE, status);
+    assert_eq!(Some("deleted"), first_issue(&body)["code"].as_str());
+    Ok(())
+}
+
+/// Mounts the read of the composition version `version` that answers `200`
+/// with `body`.
+async fn mount_version(cdr: &MockServer, version: &str, body: &serde_json::Value) {
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/composition/{version}"
+        )))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("ETag", format!("W/\"{version}\""))
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(body.to_string()),
+        )
+        .mount(cdr)
+        .await;
+}
+
+/// Sends a `GET` of `path` and returns the status, the `ETag` and the body.
+async fn get_tagged(
+    harness: &Harness,
+    path: &str,
+) -> Result<(StatusCode, Option<String>, serde_json::Value), Box<dyn StdError>> {
+    let response = raw(harness.app(), Request::get(path).body(Body::empty())?).await?;
+    let status = response.status();
+    let tag = response
+        .headers()
+        .get(header::ETAG)
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
+    let bytes = axum::body::to_bytes(response.into_body(), 1024 * 1024).await?;
+    let body = serde_json::from_slice(&bytes)?;
+    Ok((status, tag, body))
+}
+
+#[tokio::test]
+async fn a_vread_of_the_location_a_create_answers_is_that_version() -> Result<(), Box<dyn StdError>>
+{
+    // vread answers `GET [base]/[type]/[id]/_history/[vid]` with an ETag
+    // naming the versionId (<https://hl7.org/fhir/R4/http.html#vread>).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_create(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, location, created) = post_located(&harness, &condition()).await?;
+    assert_eq!(StatusCode::CREATED, status, "{created}");
+    let location = location.ok_or("a create carries Location")?;
+    let path = location
+        .strip_prefix("http://ferrobridge.invalid")
+        .ok_or(format!("{location} is not under the base"))?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, tag, body) = get_tagged(&harness, path).await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert_eq!(Some("W/\"1\""), tag.as_deref());
+    assert_eq!(created["id"], body["id"]);
+    assert_eq!(Some("1"), body["meta"]["versionId"].as_str());
+    assert!(
+        body["meta"]["source"]
+            .as_str()
+            .is_some_and(|source| source.ends_with(VERSION_ONE)),
+        "{body}"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn after_an_update_each_version_reads_back_with_its_own_content()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    mount_version_two(&harness).await;
+    let (status, updated) = call(
+        harness.app(),
+        Request::put(format!("/fhir/Condition/{id}"))
+            .header(header::CONTENT_TYPE, "application/fhir+json")
+            .body(Body::from(revised_condition().to_string()))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{updated}");
+    assert_eq!(Some("2"), updated["meta"]["versionId"].as_str());
+
+    harness.cdr.reset().await;
+    let revised = harness.composition_of(&revised_condition());
+    mount_read(&harness.cdr, VERSION_TWO, &revised).await;
+    mount_version(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, tag, first) =
+        get_tagged(&harness, &format!("/fhir/Condition/{id}/_history/1")).await?;
+    assert_eq!(StatusCode::OK, status, "{first}");
+    assert_eq!(Some("W/\"1\""), tag.as_deref());
+    assert_eq!(Some("1"), first["meta"]["versionId"].as_str());
+    assert_eq!(
+        condition()["code"]["text"],
+        first["code"]["text"],
+        "{first}"
+    );
+    let (status, tag, second) =
+        get_tagged(&harness, &format!("/fhir/Condition/{id}/_history/2")).await?;
+    assert_eq!(StatusCode::OK, status, "{second}");
+    assert_eq!(Some("W/\"2\""), tag.as_deref());
+    assert_eq!(Some("2"), second["meta"]["versionId"].as_str());
+    assert_eq!(
+        revised_condition()["code"]["text"],
+        second["code"]["text"],
+        "{second}"
+    );
+    assert_ne!(first["code"]["text"], second["code"]["text"]);
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_vread_of_a_version_the_cdr_does_not_hold_is_four_hundred_and_four()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    for vid in ["7", "not-a-version"] {
+        let (status, body) = call(
+            harness.app(),
+            Request::get(format!("/fhir/Condition/{id}/_history/{vid}")).body(Body::empty())?,
+        )
+        .await?;
+        assert_eq!(StatusCode::NOT_FOUND, status, "{vid}: {body}");
+        assert_eq!(Some("not-found"), first_issue(&body)["code"].as_str());
+    }
+    let (status, body) = call(
+        harness.app(),
+        Request::get("/fhir/Condition/abcdef/_history/1").body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::NOT_FOUND, status, "{body}");
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_vread_of_a_version_the_cdr_reports_deleted_is_four_hundred_and_ten()
+-> Result<(), Box<dyn StdError>> {
+    // "If the version referred to is actually one where the resource was
+    // deleted, the server should return a 410"
+    // (<https://hl7.org/fhir/R4/http.html#vread>).
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_TWO, &harness.composition()).await;
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/composition/{VERSION_ONE}"
+        )))
+        .respond_with(ResponseTemplate::new(204))
+        .mount(&harness.cdr)
+        .await;
+    let (status, body) = call(
+        harness.app(),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::GONE, status, "{body}");
     assert_eq!(Some("deleted"), first_issue(&body)["code"].as_str());
     Ok(())
 }
@@ -1552,6 +1791,173 @@ async fn a_cdr_precondition_failure_is_four_hundred_and_twelve_with_the_current_
     Ok(())
 }
 
+/// Returns a `PUT [base]/Condition/{id}` carrying `If-Match: {if_match}`.
+fn put_if_match(id: &str, if_match: &str) -> Result<Request<Body>, Box<dyn StdError>> {
+    Ok(Request::put(format!("/fhir/Condition/{id}"))
+        .header(header::CONTENT_TYPE, "application/fhir+json")
+        .header(header::IF_MATCH, if_match)
+        .body(Body::from(revised_condition().to_string()))?)
+}
+
+/// Returns one response header as text.
+fn header_text<'a>(response: &'a Response<Body>, name: &header::HeaderName) -> Option<&'a str> {
+    response
+        .headers()
+        .get(name)
+        .and_then(|value| value.to_str().ok())
+}
+
+#[tokio::test]
+async fn an_update_carrying_the_etag_a_read_answered_commits_the_next_version()
+-> Result<(), Box<dyn StdError>> {
+    // The ETag is the versionId as a weak entity tag, and a version-aware
+    // update sends it back in If-Match
+    // (<https://hl7.org/fhir/R4/http.html#concurrency>).
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, tag, read) = get_tagged(&harness, &format!("/fhir/Condition/{id}")).await?;
+    assert_eq!(StatusCode::OK, status, "{read}");
+    let tag = tag.ok_or("a read carries an ETag")?;
+    assert_eq!("W/\"1\"", tag);
+    Mock::given(matchers::method("PUT"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/composition/{CONTAINER}"
+        )))
+        .and(matchers::header("If-Match", format!("\"{VERSION_ONE}\"")))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("ETag", format!("W/\"{VERSION_TWO}\""))
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(harness.composition().to_string()),
+        )
+        .mount(&harness.cdr)
+        .await;
+    let response = raw(harness.app(), put_if_match(&id, &tag)?).await?;
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(Some("W/\"2\""), header_text(&response, &header::ETAG));
+    assert!(
+        header_text(&response, &header::LOCATION)
+            .is_some_and(|location| location.ends_with(&format!("/Condition/{id}/_history/2"))),
+        "{:?}",
+        response.headers()
+    );
+    assert_eq!(
+        1,
+        writes(&harness).await.1,
+        "the CDR received the completed version"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn an_update_carrying_a_quoted_or_bare_version_id_is_completed_the_same_way()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    mount_version_two(&harness).await;
+    for if_match in ["\"1\"", "1"] {
+        let response = raw(harness.app(), put_if_match(&id, if_match)?).await?;
+        assert_eq!(StatusCode::OK, response.status(), "If-Match: {if_match}");
+        assert_eq!(Some("W/\"2\""), header_text(&response, &header::ETAG));
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn an_update_carrying_a_stale_etag_is_four_hundred_and_twelve_and_commits_nothing()
+-> Result<(), Box<dyn StdError>> {
+    // A version-aware update whose If-Match does not name the current version
+    // is 412 (<https://hl7.org/fhir/R4/http.html#concurrency>).
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_TWO, &harness.composition()).await;
+    mount_version_two(&harness).await;
+    let response = raw(harness.app(), put_if_match(&id, "W/\"1\"")?).await?;
+    assert_eq!(StatusCode::PRECONDITION_FAILED, response.status());
+    assert_eq!(
+        Some("W/\"2\""),
+        header_text(&response, &header::ETAG),
+        "the 412 carries the current version"
+    );
+    assert_eq!(0, writes(&harness).await.1, "no update reached the CDR");
+    Ok(())
+}
+
+#[tokio::test]
+async fn an_update_carrying_the_cdr_version_id_passes_it_through() -> Result<(), Box<dyn StdError>>
+{
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    Mock::given(matchers::method("PUT"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/composition/{CONTAINER}"
+        )))
+        .and(matchers::header("If-Match", format!("\"{VERSION_ONE}\"")))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("ETag", format!("W/\"{VERSION_TWO}\""))
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(harness.composition().to_string()),
+        )
+        .mount(&harness.cdr)
+        .await;
+    let response = raw(
+        harness.app(),
+        put_if_match(&id, &format!("W/\"{VERSION_ONE}\""))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(Some("W/\"2\""), header_text(&response, &header::ETAG));
+    assert_eq!(
+        0,
+        harness
+            .received("GET", &format!("/ehr/{EHR_ID}/composition/{CONTAINER}"))
+            .await,
+        "the CDR checks its own version id, so the facade reads nothing first"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn an_update_carrying_a_version_of_another_composition_is_four_hundred_and_twelve()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_version_two(&harness).await;
+    let foreign = "5f0e2b1a-0000-4000-8000-00000000000d::ferrobridge.test::1";
+    let (status, body) = call(
+        harness.app(),
+        put_if_match(&id, &format!("W/\"{foreign}\""))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::PRECONDITION_FAILED, status, "{body}");
+    assert_eq!(Some("conflict"), first_issue(&body)["code"].as_str());
+    assert_eq!(0, writes(&harness).await.1, "no update reached the CDR");
+    Ok(())
+}
+
+#[tokio::test]
+async fn an_update_carrying_a_malformed_if_match_is_four_hundred_and_commits_nothing()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    mount_version_two(&harness).await;
+    for if_match in ["W/\"one\"", "W/\"\"", "W/\"1"] {
+        let (status, body) = call(harness.app(), put_if_match(&id, if_match)?).await?;
+        assert_eq!(
+            StatusCode::BAD_REQUEST,
+            status,
+            "If-Match: {if_match}: {body}"
+        );
+        assert_eq!(Some("invalid"), first_issue(&body)["code"].as_str());
+    }
+    assert_eq!(0, writes(&harness).await.1, "no update reached the CDR");
+    Ok(())
+}
+
 #[tokio::test]
 async fn a_cdr_validation_refusal_is_four_hundred_and_twenty_two_with_its_errors()
 -> Result<(), Box<dyn StdError>> {
@@ -2078,6 +2484,39 @@ async fn a_transaction_carrying_one_resource_twice_is_refused() -> Result<(), Bo
             .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
             .await
     );
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_transaction_carrying_one_id_at_two_versions_is_refused_naming_both()
+-> Result<(), Box<dyn StdError>> {
+    // "A resource can only appear in a transaction once (by identity)", and
+    // an overlap of identities fails the transaction
+    // (<https://hl7.org/fhir/R4/http.html#transaction>).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_contribution(&harness.cdr).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[
+            ("urn:uuid:0000-one", condition_at("1")),
+            ("urn:uuid:0000-two", condition_at("2")),
+        ]),
+    )
+    .await?;
+    assert_eq!(StatusCode::BAD_REQUEST, status, "{body}");
+    let issue = first_issue(&body);
+    assert_eq!(Some("invalid"), issue["code"].as_str());
+    assert_eq!(
+        Some(vec!["urn:uuid:0000-one", "urn:uuid:0000-two"]),
+        issue["location"].as_array().map(|locations| locations
+            .iter()
+            .filter_map(serde_json::Value::as_str)
+            .collect()),
+        "{body}"
+    );
+    assert_eq!((0, 0, 0), writes(&harness).await, "nothing is committed");
+    assert_eq!(None, harness.store.consumed(&condition_source_at("1")?)?);
     Ok(())
 }
 

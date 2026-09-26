@@ -22,9 +22,15 @@
 # on disk at their pins).
 #
 # Needs cargo, cargo-nextest, jq, and the tools that script needs. Exit 0 when
-# clean, 1 on a regression or (under --check) drift, 2 on a usage error, a
-# missing result or a failed fetch.
+# clean, 1 on a regression, (under --check) drift or no cargo on PATH, 2 on a
+# usage error, a missing result or a failed fetch.
 set -euo pipefail
+
+# A missing cargo would otherwise read as every corpus test failing.
+if ! command -v cargo >/dev/null 2>&1; then
+  echo "conformance: cargo not found on PATH" >&2
+  exit 1
+fi
 cd "$(dirname "$0")/../.."
 
 readonly CORPORA=(fhirconnect-mapping-lib omocl roundtrip draft-rest-api hl7v2 hl7v2-smoke)

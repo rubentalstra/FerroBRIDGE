@@ -193,15 +193,19 @@ fn answer(
             &response_headers,
         )),
         media::Prefer::Representation => {
+            let subject = render::subject_of(facade, &written.ehr_id)?;
             let rendered = render::render(
                 program.program(),
                 program.index(),
                 &written.composition,
-                &written.id,
-                &written.version,
-                &source,
+                render::Origin {
+                    id: &written.id,
+                    version: &written.version,
+                    source: &source,
+                    subject: subject.as_ref(),
+                },
             )?;
-            render::log_warnings(&rendered);
+            render::log_outcome(&rendered);
             Ok(reply::resource(status, &rendered.body, &response_headers))
         }
     }
@@ -225,7 +229,7 @@ async fn precondition(
                 Issue::error(IssueType::Invalid).diagnosing("the If-Match header is not text"),
             )
         })?;
-        return read::version_of_etag(text, container);
+        return read::version_of_etag(client, ehr_id, container, text).await;
     }
     read::latest_version(client, ehr_id, container).await
 }

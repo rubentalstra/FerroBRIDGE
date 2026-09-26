@@ -2034,22 +2034,34 @@ fn sources_of(
         .collect()
 }
 
-/// Refuses a Bundle in which two entries carry one source key.
+/// Refuses a Bundle in which two entries carry one resource.
 ///
 /// "A resource can only appear in a transaction once (by identity)"
-/// (<https://hl7.org/fhir/R4/http.html#transaction>), and one key would bind
-/// two compositions to one consumed source.
+/// (<https://hl7.org/fhir/R4/http.html#transaction>), and the identity is the
+/// resource type and the `id`, whatever `meta.versionId` each entry states.
+/// One `id` at two versions is `400 invalid` naming both entries, since
+/// neither is the version the other follows and an unknown `id` would commit
+/// two compositions. An entry that repeats another's version as well keeps
+/// the `422 duplicate` that names the repeat (no specification governs the
+/// split: our own design).
 fn distinct(mapped: &[Mapped<'_>], sources: &[Option<SourceVersion>]) -> Result<(), Refused> {
-    let mut seen = BTreeSet::new();
-    let issues: Vec<Issue> = mapped
-        .iter()
-        .zip(sources)
-        .filter_map(|(entry, source)| {
-            let source = source.as_ref()?;
-            if seen.insert(source.storage_key()) {
-                return None;
-            }
-            Some(
+    let mut seen: BTreeMap<String, (&str, String)> = BTreeMap::new();
+    let mut repeated = Vec::new();
+    let mut versioned = Vec::new();
+    for (entry, source) in mapped.iter().zip(sources) {
+        let Some(source) = source.as_ref() else {
+            continue;
+        };
+        let known = seen.get(&source.once_key()).cloned();
+        let Some((first_url, first_key)) = known else {
+            seen.insert(
+                source.once_key(),
+                (entry.full_url.as_str(), source.storage_key()),
+            );
+            continue;
+        };
+        if first_key == source.storage_key() {
+            repeated.push(
                 Issue::error(IssueType::Duplicate)
                     .diagnosing(format!(
                         "{}/{} appears in this transaction more than once",
@@ -2057,13 +2069,29 @@ fn distinct(mapped: &[Mapped<'_>], sources: &[Option<SourceVersion>]) -> Result<
                         source.id()
                     ))
                     .at(entry.full_url.clone()),
-            )
-        })
-        .collect();
-    if issues.is_empty() {
+            );
+        } else {
+            versioned.push(
+                Issue::error(IssueType::Invalid)
+                    .diagnosing(format!(
+                        "{}/{} appears in this transaction at two versions, in {first_url} and {}; a transaction carries one resource once",
+                        source.resource_type(),
+                        source.id(),
+                        entry.full_url
+                    ))
+                    .at(String::from(first_url))
+                    .at(entry.full_url.clone()),
+            );
+        }
+    }
+    if !versioned.is_empty() {
+        versioned.extend(repeated);
+        return Err(Refused::of(StatusCode::BAD_REQUEST, versioned));
+    }
+    if repeated.is_empty() {
         Ok(())
     } else {
-        Err(Refused::of(StatusCode::UNPROCESSABLE_ENTITY, issues))
+        Err(Refused::of(StatusCode::UNPROCESSABLE_ENTITY, repeated))
     }
 }
 

@@ -11,7 +11,7 @@ of its own.
 The facade runs. It is off until `[facade] enabled` turns it on, and a disabled
 facade mounts no route, so a request answers `404` rather than `403`. What this
 page describes is what the server answers today: conformance, create, read,
-update, transaction and `$validate`. Search and batch are later work, and the
+vread, update, transaction and `$validate`. Search and batch are later work, and the
 `CapabilityStatement` leaves them out rather than claiming them.
 
 <!-- toc -->
@@ -37,6 +37,7 @@ for `spec.version`. The service base is `/fhir`.
 | `POST /fhir/{type}` | Create, conditional through `If-None-Exist` |
 | `POST /fhir/{type}/$validate` | The dry run that commits nothing |
 | `GET /fhir/{type}/{id}` | Read one resource back out of its composition |
+| `GET /fhir/{type}/{id}/_history/{vid}` | Vread: read the version a write's `Location` named |
 | `PUT /fhir/{type}/{id}` | Update, with `If-Match` |
 | `POST /fhir` | A `transaction` Bundle, all or nothing |
 
@@ -48,7 +49,7 @@ and a `_count` that is not a non-negative integer is a `400` with `invalid`,
 so a client never reads a page it did not ask for.
 
 The `CapabilityStatement` names exactly the resource types the loaded programs
-map, with `create`, `read` and `update` per type, `transaction` at system
+map, with `create`, `read`, `vread` and `update` per type, `transaction` at system
 level, the `$validate` operation, `updateCreate: false`, `conditionalCreate`
 and `conditionalUpdate` true, `fhirVersion: 4.0.1`, and no search parameter.
 When the FHIRconnect operations lane is served under the same base,
@@ -98,8 +99,9 @@ enters the derivation, so a new version of a composition reads back under the
 same id with a new `meta.versionId`. `meta.source` names the openEHR version
 uid the answer was read from.
 
-The identity map is a `redb` file with six tables: a patient identifier to its
-`ehr_id`, an external resource id to the internal one, an internal id to the
+The identity map is a `redb` file with seven tables: a patient identifier to its
+`ehr_id` and each `ehr_id` back to the first person recorded for it, an
+external resource id to the internal one, an internal id to the
 composition version container with the entry path and split occurrence, and the
 source resource `id` with its `meta.versionId` to the mapping that consumed
 them, beside the contribution each source was committed in and each
@@ -117,6 +119,26 @@ composition holds now, and a later version otherwise. A transaction entry with
 a known `id` and a new `meta.versionId` commits that later version inside the
 Bundle's contribution. The Operate page on failure and identity states the
 full rule.
+
+## A read is a valid instance
+
+Every resource the facade answers, on a read, a vread or a write under
+`Prefer: return=representation`, is a valid R4 instance: each element the R4
+element table marks `min 1` is present, at the top of the resource and inside
+every element and contained resource it carries. A mapping often has no
+outbound row for the subject, because the ingest reads the subject to find the
+EHR and the composition does not hold it. When the rendered resource has no
+`subject` (or `patient`, on a type that names its subject so), the facade
+writes it from the identity map: the person the map recorded for the
+composition's EHR, as a literal reference when the person was keyed by one in
+`subject_namespace`, and otherwise as a logical reference with `type: Patient`
+and the person's `identifier`. That is the form a create reads back into the
+same EHR, so you can send a read body back as an update unchanged. A subject
+the mapping wrote is kept. The log line of the request counts the elements the
+facade filled and names their paths, never a value. When a required element
+stays absent, the facade answers `500 exception` with the element path in
+`issue.location` rather than an invalid resource. No specification governs the
+fill: it is FerroBRIDGE's own design.
 
 ## Provenance
 
@@ -147,9 +169,18 @@ search would turn a duplicate into a second composition.
 A create answers `201` with `Location` naming the FHIR resource under the
 configured base URL and `ETag` carrying the version.
 
+That `Location` is `[base]/{type}/{id}/_history/{vid}`, and a `GET` of it is
+the R4 vread. The `{vid}` is the version tree id of the composition version
+the write committed, so the facade reads that exact version from the CDR and
+answers it with its `ETag`. A `{vid}` the CDR does not hold answers `404`, and
+a version the CDR reports deleted answers `410`.
+
 An update needs `If-Match` when the map knows the id. Without one, the facade
 reads the CDR's current `ETag` and answers `412` with it on a mismatch rather
-than overwriting a version the client never saw. A `PUT` to an id the map does
+than overwriting a version the client never saw. Send back the `ETag` a read
+or write answered, `If-Match: W/"1"`: the facade completes that `versionId` to
+the current composition version and answers `412` with the current `ETag`
+when it is stale. A value that names no version is `400`. A `PUT` to an id the map does
 not know is a `404`: this milestone does not upsert, and the
 `CapabilityStatement` says `updateCreate: false`.
 

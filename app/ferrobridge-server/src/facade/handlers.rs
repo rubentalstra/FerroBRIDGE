@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! The interactions: metadata, create, read, update, transaction, `$validate`.
+//! The interactions: metadata, create, read, vread, update, transaction,
+//! `$validate`.
 //!
 //! Each handler is the same shape. It checks the media types and the query
 //! parameters, resolves the program the request runs, calls the engine and the
@@ -11,6 +12,7 @@
 //! at a call site. Create, update and transaction write through
 //! [`crate::facade::ingest`], so the handlers keep only the HTTP half.
 
+mod complete;
 mod conditional;
 mod read;
 mod render;
@@ -81,6 +83,25 @@ pub async fn read_route(
         &facade.client_for(&headers),
         &resource_type,
         &id,
+        &headers,
+        &uri,
+    )
+    .await
+    .unwrap_or_else(Refusal::into_response)
+}
+
+/// `GET [base]/{type}/{id}/_history/{vid}`: read one version of a mapped
+/// resource back out of the CDR.
+pub async fn vread_route(
+    State(facade): State<Arc<Facade>>,
+    Path((resource_type, id, vid)): Path<(String, String, String)>,
+    headers: HeaderMap,
+    uri: Uri,
+) -> Response {
+    read::vread(
+        &facade,
+        &facade.client_for(&headers),
+        (&resource_type, &id, &vid),
         &headers,
         &uri,
     )

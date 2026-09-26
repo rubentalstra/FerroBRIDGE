@@ -31,6 +31,12 @@ crates on crates.io.
   hard, split into a module folder at 750, generated files excluded) is in
   `.claude/rules/rust-style.md`, and the forty files that breach it today are
   listed with the sub-issue that splits each.
+- The FHIR facade answers the R4 vread, `GET /fhir/{type}/{id}/_history/{vid}`
+  (#305), so the `Location` every create, update and transaction entry
+  answers now resolves. The facade reads the composition version whose
+  version tree id is `{vid}` and answers it with its `ETag`; a version the CDR
+  does not hold is `404`, one it reports deleted is `410`, and the
+  `CapabilityStatement` lists `vread` on every supported type.
 - FerroBRIDGE's supplements to the HL7 v2-to-FHIR guide (#256):
   ConceptMaps in the guide's own shape, shipped inside `ferrobridge-hl7v2`
   under `supplements/` and loaded over the guide's package by
@@ -524,6 +530,44 @@ crates on crates.io.
 
 ### Fixed
 
+- A facade read, vread or `return=representation` write answers a valid R4
+  instance (#350). A `Condition` mapped through a context with no outbound
+  subject row read back without `subject`, which R4 makes `1..1`, so the read
+  body could not be sent back as an update. The facade now writes `subject`
+  (or `patient`, where the type names it so) from the person the identity map
+  recorded for the composition's EHR whenever the rendered resource lacks it,
+  in the form a create reads back into the same EHR, and logs the element
+  paths it filled. It then checks every `min 1` element of the `fhir-types`
+  element table, nested and contained ones included, and answers
+  `500 exception` naming the element when one stays absent. The identity map
+  gains a seventh table from each `ehr_id` to its person, and a store an
+  earlier version wrote gains its rows when it opens.
+- A facade update that sends back the `ETag` a read answered, `If-Match:
+  W/"1"`, commits the next version and answers `200` with `_history/2` and the
+  new `ETag` (#347), as R4 concurrency prescribes. Before, every such `PUT`
+  answered `412`, and only the CDR's own `uid::system::N` form succeeded. The
+  facade completes `W/"N"`, `"N"` and a bare `N` to the current version of the
+  bound composition, at the cost of one extra CDR read per versioned update,
+  answers `412` with the current `ETag` when `N` is stale,
+  and `400 invalid` when the value names no version. The CDR's own form still
+  passes through, and one naming another composition is `412`.
+- A transaction Bundle that carries one resource `id` at two `meta.versionId`s
+  is refused with `400 invalid` naming both entries and commits nothing
+  (#306), as R4 allows a resource in a transaction once by identity. Before,
+  the two entries passed the duplicate check and an unknown `id` produced two
+  compositions. An entry that repeats another's version as well keeps its
+  `422 duplicate`.
+- A FHIR path that names a choice alternative by its concrete key, such as
+  `Observation.effectiveDateTime`, `valueQuantity` or an extension's
+  `valueCodeableConcept`, resolves to the one type that alternative carries,
+  so `Resolved::type_code` answers `dateTime` where it answered nothing
+  (#290). The v2-to-FHIR interpreter drops its own reading of the suffix and
+  asks the resolver, and a row whose target has no single type (a choice
+  element no alternative names) is counted as `untyped-target` naming the
+  element, where it went on under an empty type name.
+- `scripts/checks/conformance.sh` stops with "cargo not found on PATH" and
+  exit 1 before it runs anything, where a missing cargo read as every corpus
+  test failing.
 - A patient location (PL) gives one Location per level it values, linked by
   `partOf`, and the Encounter references the finest level: the bed, else the
   room, else the point of care (#342). The guide's `datatype-pl-to-location`

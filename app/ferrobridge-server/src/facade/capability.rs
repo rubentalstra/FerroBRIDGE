@@ -45,7 +45,7 @@ const VALIDATE_DEFINITION: &str = "http://hl7.org/fhir/OperationDefinition/Resou
 ///
 /// The codes are of `http://hl7.org/fhir/ValueSet/type-restful-interaction`
 /// (<https://hl7.org/fhir/R4/capabilitystatement.html>).
-const RESOURCE_INTERACTIONS: [&str; 3] = ["create", "read", "update"];
+const RESOURCE_INTERACTIONS: [&str; 4] = ["create", "read", "vread", "update"];
 
 /// The canonical `OperationDefinition` of `$tofhir`.
 ///

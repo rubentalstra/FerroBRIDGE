@@ -11,7 +11,8 @@
 //! binding so a re-sent Bundle is recognised when its first binding failed. A
 //! sixth keys each `Resource.identifier` a committed resource carries to its
 //! logical id, which is what the conditional create's `identifier` search
-//! reads.
+//! reads. A seventh keys each `ehr_id` back to the person it was recorded
+//! for, which is what a read writes a resource's subject from.
 //!
 //! Every write is record-once. "Once assigned, this value never changes"
 //! (<https://hl7.org/fhir/R4/resource.html>), so a `record_*` call answers with
@@ -112,6 +113,18 @@ pub trait Store: fmt::Debug + Send + Sync {
     ///
     /// Returns [`StoreError`] when the store cannot be read or written.
     fn record_ehr(&self, patient: &PersonId, ehr: &EhrId) -> Result<EhrId, StoreError>;
+
+    /// Returns the person `ehr` was first recorded for, when the map knows.
+    ///
+    /// [`Store::record_ehr`] writes the reverse row in the same step, record
+    /// once like the forward one, so the first person recorded for an EHR
+    /// stands.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`StoreError`] when the store cannot be read or holds a person
+    /// key this version cannot read.
+    fn person_of(&self, ehr: &EhrId) -> Result<Option<PersonId>, StoreError>;
 
     /// Returns the internal id recorded for a sender's id, when one is.
     ///
@@ -247,6 +260,8 @@ pub(crate) fn identified_id(key: &str, value: &str) -> Result<FhirResourceId, St
 struct Tables {
     /// Patient identifier to `ehr_id`.
     patients: BTreeMap<String, String>,
+    /// `ehr_id` to the person it was first recorded for.
+    subjects: BTreeMap<String, PersonId>,
     /// External resource id to internal resource id.
     external: BTreeMap<String, String>,
     /// Internal resource id to its composition binding.
@@ -263,7 +278,7 @@ struct Tables {
 /// The identity map a test drives, held in memory and lost with the process.
 #[derive(Debug, Default)]
 pub struct MemoryStore {
-    /// The six tables behind one lock, so a write is atomic across them.
+    /// The seven tables behind one lock, so a write is atomic across them.
     tables: Mutex<Tables>,
 }
 
@@ -306,8 +321,18 @@ impl Store for MemoryStore {
         }
         let key = patient.to_string();
         let value = ehr.as_str().to_owned();
-        self.with(|tables| tables.patients.insert(key, value))?;
+        self.with(|tables| {
+            tables
+                .subjects
+                .entry(value.clone())
+                .or_insert_with(|| patient.clone());
+            tables.patients.insert(key, value)
+        })?;
         Ok(ehr.clone())
+    }
+
+    fn person_of(&self, ehr: &EhrId) -> Result<Option<PersonId>, StoreError> {
+        self.with(|tables| tables.subjects.get(ehr.as_str()).cloned())
     }
 
     fn internal_of(
@@ -504,7 +529,13 @@ mod tests {
         let patient = PersonId::new("http://example.org/ns", "p-1").expect("a legal person id");
         let ehr = EhrId::new("bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11").expect("a legal ehr_id");
         assert_eq!(ehr, store.record_ehr(&patient, &ehr).expect("the write"));
-        assert_eq!(Some(ehr), store.ehr_of(&patient).expect("the read"));
+        assert_eq!(Some(ehr.clone()), store.ehr_of(&patient).expect("the read"));
+        assert_eq!(
+            Some(patient),
+            store.person_of(&ehr).expect("the reverse read")
+        );
+        let unknown = EhrId::new("0f4b3a0c-9f11-4a4a-9e0b-bd6b1e5a3b9b").expect("a legal ehr_id");
+        assert_eq!(None, store.person_of(&unknown).expect("the reverse read"));
 
         let external = ExternalResourceId::new("sender-1").expect("a legal external id");
         let internal = FhirResourceId::new("abc").expect("a legal FHIR id");

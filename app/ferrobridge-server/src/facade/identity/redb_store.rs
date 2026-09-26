@@ -5,7 +5,8 @@
 //!
 //! Four `redb` tables, one per row of `docs/architecture.md` §9, and a fifth
 //! from a source to the contribution that committed it, and a sixth from each
-//! `Resource.identifier` of a committed resource to its logical id. The file
+//! `Resource.identifier` of a committed resource to its logical id, and a
+//! seventh from each `ehr_id` back to the person it was recorded for. The file
 //! holds identifiers, archetype paths and mapping names and nothing else: no
 //! clinical value ever reaches it, which
 //! `the_store_never_holds_clinical_content` asserts by reading the file back
@@ -30,6 +31,7 @@ use crate::facade::identity::PersonId;
 use crate::facade::identity::record::CommittedSource;
 use crate::facade::identity::record::CompositionBinding;
 use crate::facade::identity::record::ConsumedSource;
+use crate::facade::identity::record::EhrSubject;
 use crate::facade::identity::record::Identifier;
 use crate::facade::identity::record::IdentifierQuery;
 use crate::facade::identity::record::SourceVersion;
@@ -41,6 +43,9 @@ use crate::facade::identity::store::identified_id;
 
 /// Patient identifier to `ehr_id`.
 const PATIENTS: TableDefinition<'static, &str, &str> = TableDefinition::new("patient_ehr");
+
+/// `ehr_id` to the person it was first recorded for, as JSON.
+const SUBJECTS: TableDefinition<'static, &str, &str> = TableDefinition::new("ehr_patient");
 
 /// External resource id to internal resource id.
 const EXTERNAL: TableDefinition<'static, &str, &str> = TableDefinition::new("external_internal");
@@ -75,8 +80,10 @@ pub struct RedbStore {
 impl RedbStore {
     /// Opens, or creates, the store at `path`.
     ///
-    /// The six tables are created in one transaction, so every later read
-    /// finds a table rather than a missing one.
+    /// The seven tables are created in one transaction, so every later read
+    /// finds a table rather than a missing one. A store an earlier version
+    /// wrote has no reverse row for its EHRs, so the same transaction writes
+    /// one for every patient row that lacks it.
     ///
     /// # Errors
     ///
@@ -94,7 +101,9 @@ impl RedbStore {
         };
         let write = store.database.begin_write().map_err(transaction)?;
         {
-            let _patients = write.open_table(PATIENTS).map_err(transaction)?;
+            let patients = write.open_table(PATIENTS).map_err(transaction)?;
+            let mut subjects = write.open_table(SUBJECTS).map_err(transaction)?;
+            backfill(&patients, &mut subjects)?;
             let _external = write.open_table(EXTERNAL).map_err(transaction)?;
             let _bindings = write.open_table(BINDINGS).map_err(transaction)?;
             let _sources = write.open_table(SOURCES).map_err(transaction)?;
@@ -168,6 +177,47 @@ impl RedbStore {
     }
 }
 
+/// Writes the reverse row of every patient row that has none.
+///
+/// A patient key is [`PersonId`]'s `namespace|id` rendering, split at its
+/// first `|`, as the R4 token search splits `system|code`
+/// (<https://hl7.org/fhir/R4/search.html#token>).
+fn backfill(
+    patients: &redb::Table<'_, &str, &str>,
+    subjects: &mut redb::Table<'_, &str, &str>,
+) -> Result<(), StoreError> {
+    let mut rows: Vec<(String, String)> = Vec::new();
+    for row in patients.iter().map_err(transaction)? {
+        let (key, value) = row.map_err(transaction)?;
+        rows.push((key.value().to_owned(), value.value().to_owned()));
+    }
+    for (key, ehr) in rows {
+        if subjects.get(ehr.as_str()).map_err(transaction)?.is_some() {
+            continue;
+        }
+        let (namespace, id) = key.split_once('|').unwrap_or((key.as_str(), ""));
+        let person = PersonId::new(namespace, id).map_err(|source| StoreError::Identifier {
+            key: key.clone(),
+            kind: "person key",
+            value: key.clone(),
+            source: Box::new(source),
+        })?;
+        let offered = rendered(&ehr, &subject_record(&person))?;
+        subjects
+            .insert(ehr.as_str(), offered.as_str())
+            .map_err(transaction)?;
+    }
+    Ok(())
+}
+
+/// Returns the reverse row `person` is stored as.
+fn subject_record(person: &PersonId) -> EhrSubject {
+    EhrSubject {
+        namespace: person.namespace().to_owned(),
+        id: person.id().to_owned(),
+    }
+}
+
 /// Returns the identifier this store read back, or a refusal naming the key.
 fn identifier<T, E>(
     key: &str,
@@ -232,8 +282,48 @@ impl Store for RedbStore {
 
     fn record_ehr(&self, patient: &PersonId, ehr: &EhrId) -> Result<EhrId, StoreError> {
         let key = patient.to_string();
-        let stood = self.record(PATIENTS, &key, ehr.as_str())?;
+        let offered = rendered(ehr.as_str(), &subject_record(patient))?;
+        let write = self.database.begin_write().map_err(transaction)?;
+        let stood = {
+            let mut patients = write.open_table(PATIENTS).map_err(transaction)?;
+            let existing = patients
+                .get(key.as_str())
+                .map_err(transaction)?
+                .map(|held| held.value().to_owned());
+            let stood = if let Some(held) = existing {
+                held
+            } else {
+                patients
+                    .insert(key.as_str(), ehr.as_str())
+                    .map_err(transaction)?;
+                ehr.as_str().to_owned()
+            };
+            let mut subjects = write.open_table(SUBJECTS).map_err(transaction)?;
+            if stood == ehr.as_str() && subjects.get(ehr.as_str()).map_err(transaction)?.is_none() {
+                subjects
+                    .insert(ehr.as_str(), offered.as_str())
+                    .map_err(transaction)?;
+            }
+            stood
+        };
+        write.commit().map_err(transaction)?;
         identifier(&key, "ehr_id", Some(stood), EhrId::new)?.ok_or(StoreError::Missing { key })
+    }
+
+    fn person_of(&self, ehr: &EhrId) -> Result<Option<PersonId>, StoreError> {
+        let key = ehr.as_str();
+        let held: Option<EhrSubject> = record_of(key, self.get(SUBJECTS, key)?)?;
+        held.map(|subject| {
+            PersonId::new(&subject.namespace, &subject.id).map_err(|source| {
+                StoreError::Identifier {
+                    key: key.to_owned(),
+                    kind: "person key",
+                    value: format!("{}|{}", subject.namespace, subject.id),
+                    source: Box::new(source),
+                }
+            })
+        })
+        .transpose()
     }
 
     fn internal_of(
@@ -368,6 +458,48 @@ mod tests {
             split: 0,
             context: String::from("ferrobridge_diagnosis.context"),
         }
+    }
+
+    #[test]
+    fn the_person_of_an_ehr_survives_a_restart_and_the_first_one_stands() {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        let path = directory.path().join("identity.redb");
+        let ehr = EhrId::new("bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11").expect("a legal ehr_id");
+        let first = PersonId::new("http://example.org/ns", "p-1").expect("a legal person id");
+        let second = PersonId::new("http://example.org/other", "p-2").expect("a legal person");
+        {
+            let store = RedbStore::open(&path).expect("the first open");
+            store.record_ehr(&first, &ehr).expect("the write");
+            store.record_ehr(&second, &ehr).expect("the second write");
+        }
+        let reopened = RedbStore::open(&path).expect("the second open");
+        assert_eq!(Some(first), reopened.person_of(&ehr).expect("the read"));
+    }
+
+    #[test]
+    fn a_store_without_reverse_rows_gains_them_when_it_opens() {
+        let directory = tempfile::tempdir().expect("a temporary directory");
+        let path = directory.path().join("identity.redb");
+        {
+            let database = redb::Database::create(&path).expect("the file");
+            let write = database.begin_write().expect("a write");
+            {
+                let mut patients = write.open_table(super::PATIENTS).expect("the table");
+                patients
+                    .insert(
+                        "http://example.org/ns|p-1",
+                        "bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11",
+                    )
+                    .expect("the row");
+            }
+            write.commit().expect("the commit");
+        }
+        let store = RedbStore::open(&path).expect("the open");
+        let ehr = EhrId::new("bd6b1e5a-3b9b-4a4a-9e0b-9f4b3a0c9f11").expect("a legal ehr_id");
+        assert_eq!(
+            Some(PersonId::new("http://example.org/ns", "p-1").expect("a legal person id")),
+            store.person_of(&ehr).expect("the read")
+        );
     }
 
     #[test]
