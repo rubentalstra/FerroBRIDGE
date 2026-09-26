@@ -209,6 +209,43 @@ pub enum Outcome {
         /// The ids of the equally specific maps.
         candidates: Vec<String>,
     },
+    /// One of the data type maps that each fill one half of a value
+    /// ([`corpus::Map::half_of`]), chosen for a row by its place among the
+    /// rows of its map from the same source into the same element: the
+    /// first row takes the half read from the first component.
+    DatatypeHalf {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The id of the map chosen.
+        map: String,
+        /// The ids of every half, in component order.
+        halves: Vec<String>,
+    },
+    /// A `(Type)` row whose path inside the referenced resource ends at a
+    /// `Reference` no data type map fills, written through the data type map
+    /// from the row's source into the referenced resource, whose rows write
+    /// that element.
+    ReferenceRoot {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The id of the data type map run at the resource.
+        map: String,
+    },
+    /// A primitive a data type map writes at `$value` of a complex element,
+    /// written into that element's `value` child, as `ST.1` into an
+    /// `Identifier`.
+    ValueChild {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The complex type, for example `Identifier`.
+        target_type: String,
+    },
     /// A `mappedVia` that names no loaded table map.
     UnresolvedTable {
         /// Where.
@@ -388,6 +425,9 @@ impl Outcome {
             Self::NoDatatypeMap { .. } => "no-datatype-map",
             Self::DatatypeConflict { .. } => "datatype-conflict",
             Self::DatatypeAmbiguous { .. } => "datatype-ambiguous",
+            Self::DatatypeHalf { .. } => "datatype-half",
+            Self::ReferenceRoot { .. } => "reference-root",
+            Self::ValueChild { .. } => "value-child",
             Self::UnresolvedTable { .. } => "unresolved-table",
             Self::NoTerminology { .. } => "no-terminology",
             Self::Untranslated { .. } => "untranslated",
