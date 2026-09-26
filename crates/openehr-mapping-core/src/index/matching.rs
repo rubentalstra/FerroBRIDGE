@@ -13,8 +13,9 @@ use crate::template::PathError;
 /// The root of a template carries the empty path, which the openEHR path
 /// grammar does not spell, so it becomes the path with no segments. That is
 /// the one place an empty string is a path: `RmPath::from_str("")` refuses
-/// it, so a consumer reads a node's path through [`ResolvedNode::rm_path`]
-/// rather than parsing the `aqlPath` string itself.
+/// it, so a consumer reads a node's path through
+/// [`ResolvedNode::rm_path`](super::ResolvedNode::rm_path) rather than parsing
+/// the `aqlPath` string itself.
 pub(super) fn parse_aql_path(path: &str) -> Result<RmPath, PathError> {
     if path.is_empty() {
         return Ok(RmPath {
