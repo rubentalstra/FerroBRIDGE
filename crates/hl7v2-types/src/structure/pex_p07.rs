@@ -9,650 +9,653 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`PEX_P07`], one `static` so a structure with the same tree links to it.
+pub static PEX_P07_NODES: [Node; 15] = [
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.5-EVN",
+        position: 5,
+        segment: &segment::evn::EVN,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.6-PID",
+        position: 6,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.7-PD1",
+        position: 7,
+        segment: &segment::pd1::PD1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.8-GSP",
+        position: 8,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.9-GSR",
+        position: 9,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.10-GSC",
+        position: 10,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.11-PRT",
+        position: 11,
+        segment: &segment::prt::PRT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.12-ARV",
+        position: 12,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::B),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PEX_P07.13-NTE",
+        position: 13,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "PEX_P07.14-VISIT",
+        position: 14,
+        name: "VISIT",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "PEX_P07.14-VISIT.1-PV1",
+                position: 1,
+                segment: &segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "PEX_P07.14-VISIT.2-PV2",
+                position: 2,
+                segment: &segment::pv2::PV2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "PEX_P07.14-VISIT.3-PRT",
+                position: 3,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "PEX_P07.15-EXPERIENCE",
+        position: 15,
+        name: "EXPERIENCE",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "PEX_P07.15-EXPERIENCE.1-PES",
+                position: 1,
+                segment: &segment::pes::PES,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION",
+                position: 2,
+                name: "PEX_OBSERVATION",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.1-PEO",
+                        position: 1,
+                        segment: &segment::peo::PEO,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE",
+                        position: 2,
+                        name: "PEX_CAUSE",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.1-PCR",
+                                position: 1,
+                                segment: &segment::pcr::PCR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER",
+                                position: 2,
+                                name: "RX_ORDER",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.1-RXE",
+                                        position: 1,
+                                        segment: &segment::rxe::RXE,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.3-TIMING_QTY",
+                                        position: 3,
+                                        name: "TIMING_QTY",
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.3-TIMING_QTY.1-TQ1",
+                                                position: 1,
+                                                segment: &segment::tq1::TQ1,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.3-TIMING_QTY.2-TQ2",
+                                                position: 2,
+                                                segment: &segment::tq2::TQ2,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.4-RXR",
+                                        position: 4,
+                                        segment: &segment::rxr::RXR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION",
+                                position: 3,
+                                name: "RX_ADMINISTRATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION.1-RXA",
+                                        position: 1,
+                                        segment: &segment::rxa::RXA,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION.2-RXR",
+                                        position: 2,
+                                        segment: &segment::rxr::RXR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION.3-PRT",
+                                        position: 3,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.4-PRB",
+                                position: 4,
+                                segment: &segment::prb::PRB,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.5-OBSERVATION",
+                                position: 5,
+                                name: "OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.5-OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.5-OBSERVATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.6-NTE",
+                                position: 6,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON",
+                                position: 7,
+                                name: "ASSOCIATED_PERSON",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.1-NK1",
+                                        position: 1,
+                                        segment: &segment::nk1::NK1,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.2-GSP",
+                                        position: 2,
+                                        segment: &segment::gsp::GSP,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.3-GSR",
+                                        position: 3,
+                                        segment: &segment::gsr::GSR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER",
+                                        position: 4,
+                                        name: "ASSOCIATED_RX_ORDER",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Bounded(1),
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.1-RXE",
+                                                position: 1,
+                                                segment: &segment::rxe::RXE,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.2-PRT",
+                                                position: 2,
+                                                segment: &segment::prt::PRT,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Group(Group {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.3-NK1_TIMING_QTY",
+                                                position: 3,
+                                                name: "NK1_TIMING_QTY",
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Unbounded,
+                                                },
+                                                kind: GroupKind::Sequence,
+                                                children: &[
+                                                    Node::Segment(SegmentRef {
+                                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.3-NK1_TIMING_QTY.1-TQ1",
+                                                        position: 1,
+                                                        segment: &segment::tq1::TQ1,
+                                                        cardinality: Cardinality {
+                                                            min: 1,
+                                                            max: Max::Bounded(1),
+                                                        },
+                                                        status: Some(SegmentStatus::A),
+                                                    }),
+                                                    Node::Segment(SegmentRef {
+                                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.3-NK1_TIMING_QTY.2-TQ2",
+                                                        position: 2,
+                                                        segment: &segment::tq2::TQ2,
+                                                        cardinality: Cardinality {
+                                                            min: 0,
+                                                            max: Max::Unbounded,
+                                                        },
+                                                        status: Some(SegmentStatus::A),
+                                                    }),
+                                                ],
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.4-RXR",
+                                                position: 4,
+                                                segment: &segment::rxr::RXR,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                    Node::Group(Group {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN",
+                                        position: 5,
+                                        name: "ASSOCIATED_RX_ADMIN",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN.1-RXA",
+                                                position: 1,
+                                                segment: &segment::rxa::RXA,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN.2-RXR",
+                                                position: 2,
+                                                segment: &segment::rxr::RXR,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN.3-PRT",
+                                                position: 3,
+                                                segment: &segment::prt::PRT,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.6-PRB",
+                                        position: 6,
+                                        segment: &segment::prb::PRB,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.7-ASSOCIATED_OBSERVATION",
+                                        position: 7,
+                                        name: "ASSOCIATED_OBSERVATION",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.7-ASSOCIATED_OBSERVATION.1-OBX",
+                                                position: 1,
+                                                segment: &segment::obx::OBX,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.7-ASSOCIATED_OBSERVATION.2-PRT",
+                                                position: 2,
+                                                segment: &segment::prt::PRT,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.8-STUDY",
+                                position: 8,
+                                name: "STUDY",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.8-STUDY.1-CSR",
+                                        position: 1,
+                                        segment: &segment::csr::CSR,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.8-STUDY.2-CSP",
+                                        position: 2,
+                                        segment: &segment::csp::CSP,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `PEX_P07` message structure definition, `http://hl7.org/v2/StructureDefinition/PEX_P07`.
 pub static PEX_P07: Structure = Structure {
     id: "PEX_P07",
     url: Some("http://hl7.org/v2/StructureDefinition/PEX_P07"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.5-EVN",
-            position: 5,
-            segment: &segment::evn::EVN,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.6-PID",
-            position: 6,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.7-PD1",
-            position: 7,
-            segment: &segment::pd1::PD1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.8-GSP",
-            position: 8,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.9-GSR",
-            position: 9,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.10-GSC",
-            position: 10,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.11-PRT",
-            position: 11,
-            segment: &segment::prt::PRT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.12-ARV",
-            position: 12,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::B),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PEX_P07.13-NTE",
-            position: 13,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "PEX_P07.14-VISIT",
-            position: 14,
-            name: "VISIT",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "PEX_P07.14-VISIT.1-PV1",
-                    position: 1,
-                    segment: &segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "PEX_P07.14-VISIT.2-PV2",
-                    position: 2,
-                    segment: &segment::pv2::PV2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "PEX_P07.14-VISIT.3-PRT",
-                    position: 3,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "PEX_P07.15-EXPERIENCE",
-            position: 15,
-            name: "EXPERIENCE",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "PEX_P07.15-EXPERIENCE.1-PES",
-                    position: 1,
-                    segment: &segment::pes::PES,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION",
-                    position: 2,
-                    name: "PEX_OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.1-PEO",
-                            position: 1,
-                            segment: &segment::peo::PEO,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE",
-                            position: 2,
-                            name: "PEX_CAUSE",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.1-PCR",
-                                    position: 1,
-                                    segment: &segment::pcr::PCR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER",
-                                    position: 2,
-                                    name: "RX_ORDER",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.1-RXE",
-                                            position: 1,
-                                            segment: &segment::rxe::RXE,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.3-TIMING_QTY",
-                                            position: 3,
-                                            name: "TIMING_QTY",
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.3-TIMING_QTY.1-TQ1",
-                                                    position: 1,
-                                                    segment: &segment::tq1::TQ1,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.3-TIMING_QTY.2-TQ2",
-                                                    position: 2,
-                                                    segment: &segment::tq2::TQ2,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.2-RX_ORDER.4-RXR",
-                                            position: 4,
-                                            segment: &segment::rxr::RXR,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION",
-                                    position: 3,
-                                    name: "RX_ADMINISTRATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION.1-RXA",
-                                            position: 1,
-                                            segment: &segment::rxa::RXA,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION.2-RXR",
-                                            position: 2,
-                                            segment: &segment::rxr::RXR,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.3-RX_ADMINISTRATION.3-PRT",
-                                            position: 3,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.4-PRB",
-                                    position: 4,
-                                    segment: &segment::prb::PRB,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.5-OBSERVATION",
-                                    position: 5,
-                                    name: "OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.5-OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.5-OBSERVATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.6-NTE",
-                                    position: 6,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON",
-                                    position: 7,
-                                    name: "ASSOCIATED_PERSON",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.1-NK1",
-                                            position: 1,
-                                            segment: &segment::nk1::NK1,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.2-GSP",
-                                            position: 2,
-                                            segment: &segment::gsp::GSP,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.3-GSR",
-                                            position: 3,
-                                            segment: &segment::gsr::GSR,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER",
-                                            position: 4,
-                                            name: "ASSOCIATED_RX_ORDER",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Bounded(1),
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.1-RXE",
-                                                    position: 1,
-                                                    segment: &segment::rxe::RXE,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.2-PRT",
-                                                    position: 2,
-                                                    segment: &segment::prt::PRT,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Group(Group {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.3-NK1_TIMING_QTY",
-                                                    position: 3,
-                                                    name: "NK1_TIMING_QTY",
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    kind: GroupKind::Sequence,
-                                                    children: &[
-                                                        Node::Segment(SegmentRef {
-                                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.3-NK1_TIMING_QTY.1-TQ1",
-                                                            position: 1,
-                                                            segment: &segment::tq1::TQ1,
-                                                            cardinality: Cardinality {
-                                                                min: 1,
-                                                                max: Max::Bounded(1),
-                                                            },
-                                                            status: Some(SegmentStatus::A),
-                                                        }),
-                                                        Node::Segment(SegmentRef {
-                                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.3-NK1_TIMING_QTY.2-TQ2",
-                                                            position: 2,
-                                                            segment: &segment::tq2::TQ2,
-                                                            cardinality: Cardinality {
-                                                                min: 0,
-                                                                max: Max::Unbounded,
-                                                            },
-                                                            status: Some(SegmentStatus::A),
-                                                        }),
-                                                    ],
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.4-ASSOCIATED_RX_ORDER.4-RXR",
-                                                    position: 4,
-                                                    segment: &segment::rxr::RXR,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                        Node::Group(Group {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN",
-                                            position: 5,
-                                            name: "ASSOCIATED_RX_ADMIN",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN.1-RXA",
-                                                    position: 1,
-                                                    segment: &segment::rxa::RXA,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN.2-RXR",
-                                                    position: 2,
-                                                    segment: &segment::rxr::RXR,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.5-ASSOCIATED_RX_ADMIN.3-PRT",
-                                                    position: 3,
-                                                    segment: &segment::prt::PRT,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.6-PRB",
-                                            position: 6,
-                                            segment: &segment::prb::PRB,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.7-ASSOCIATED_OBSERVATION",
-                                            position: 7,
-                                            name: "ASSOCIATED_OBSERVATION",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.7-ASSOCIATED_OBSERVATION.1-OBX",
-                                                    position: 1,
-                                                    segment: &segment::obx::OBX,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.7-ASSOCIATED_PERSON.7-ASSOCIATED_OBSERVATION.2-PRT",
-                                                    position: 2,
-                                                    segment: &segment::prt::PRT,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.8-STUDY",
-                                    position: 8,
-                                    name: "STUDY",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.8-STUDY.1-CSR",
-                                            position: 1,
-                                            segment: &segment::csr::CSR,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PEX_P07.15-EXPERIENCE.2-PEX_OBSERVATION.2-PEX_CAUSE.8-STUDY.2-CSP",
-                                            position: 2,
-                                            segment: &segment::csp::CSP,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &PEX_P07_NODES,
 };

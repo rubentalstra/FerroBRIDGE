@@ -9,508 +9,511 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`OSM_R26`], one `static` so a structure with the same tree links to it.
+pub static OSM_R26_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "OSM_R26.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSM_R26.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSM_R26.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OSM_R26.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "OSM_R26.5-SHIPMENT",
+        position: 5,
+        name: "SHIPMENT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "OSM_R26.5-SHIPMENT.1-SHP",
+                position: 1,
+                segment: &segment::shp::SHP,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OSM_R26.5-SHIPMENT.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "OSM_R26.5-SHIPMENT.3-SHIPPING_OBSERVATION",
+                position: 3,
+                name: "SHIPPING_OBSERVATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OSM_R26.5-SHIPMENT.3-SHIPPING_OBSERVATION.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OSM_R26.5-SHIPMENT.3-SHIPPING_OBSERVATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "OSM_R26.5-SHIPMENT.4-PACKAGE",
+                position: 4,
+                name: "PACKAGE",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.1-PAC",
+                        position: 1,
+                        segment: &segment::pac::PAC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN",
+                        position: 3,
+                        name: "SPECIMEN",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.1-SPM",
+                                position: 1,
+                                segment: &segment::spm::SPM,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.3-SPECIMEN_OBSERVATION",
+                                position: 3,
+                                name: "SPECIMEN_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.3-SPECIMEN_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.3-SPECIMEN_OBSERVATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER",
+                                position: 4,
+                                name: "CONTAINER",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.1-SAC",
+                                        position: 1,
+                                        segment: &segment::sac::SAC,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.2-CONTAINER_OBSERVATION",
+                                        position: 2,
+                                        name: "CONTAINER_OBSERVATION",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.2-CONTAINER_OBSERVATION.1-OBX",
+                                                position: 1,
+                                                segment: &segment::obx::OBX,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.2-CONTAINER_OBSERVATION.2-PRT",
+                                                position: 2,
+                                                segment: &segment::prt::PRT,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION",
+                                position: 5,
+                                name: "SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.1-PID",
+                                        position: 1,
+                                        segment: &segment::pid::PID,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.3-ARV",
+                                        position: 3,
+                                        segment: &segment::arv::ARV,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::B),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.4-PATIENT_OBSERVATION",
+                                        position: 4,
+                                        name: "PATIENT_OBSERVATION",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.4-PATIENT_OBSERVATION.1-OBX",
+                                                position: 1,
+                                                segment: &segment::obx::OBX,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.4-PATIENT_OBSERVATION.2-PRT",
+                                                position: 2,
+                                                segment: &segment::prt::PRT,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                    Node::Group(Group {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN",
+                                        position: 5,
+                                        name: "NEXT_OF_KIN",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN.1-NK1",
+                                                position: 1,
+                                                segment: &segment::nk1::NK1,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN.2-GSP",
+                                                position: 2,
+                                                segment: &segment::gsp::GSP,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN.3-GSR",
+                                                position: 3,
+                                                segment: &segment::gsr::GSR,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION",
+                                position: 6,
+                                name: "SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.1-PV1",
+                                        position: 1,
+                                        segment: &segment::pv1::PV1,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.3-PATIENT_VISIT_OBSERVATION",
+                                        position: 3,
+                                        name: "PATIENT_VISIT_OBSERVATION",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.3-PATIENT_VISIT_OBSERVATION.1-OBX",
+                                                position: 1,
+                                                segment: &segment::obx::OBX,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.3-PATIENT_VISIT_OBSERVATION.2-PRT",
+                                                position: 2,
+                                                segment: &segment::prt::PRT,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.4-PID",
+                                        position: 4,
+                                        segment: &segment::pid::PID,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.5-PRT",
+                                        position: 5,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN",
+                                        position: 6,
+                                        name: "NEXT_OF_KIN",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN.1-NK1",
+                                                position: 1,
+                                                segment: &segment::nk1::NK1,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN.2-GSP",
+                                                position: 2,
+                                                segment: &segment::gsp::GSP,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN.3-GSR",
+                                                position: 3,
+                                                segment: &segment::gsr::GSR,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `OSM_R26` message structure definition, `http://hl7.org/v2/StructureDefinition/OSM_R26`.
 pub static OSM_R26: Structure = Structure {
     id: "OSM_R26",
     url: Some("http://hl7.org/v2/StructureDefinition/OSM_R26"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "OSM_R26.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSM_R26.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSM_R26.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OSM_R26.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "OSM_R26.5-SHIPMENT",
-            position: 5,
-            name: "SHIPMENT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "OSM_R26.5-SHIPMENT.1-SHP",
-                    position: 1,
-                    segment: &segment::shp::SHP,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OSM_R26.5-SHIPMENT.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "OSM_R26.5-SHIPMENT.3-SHIPPING_OBSERVATION",
-                    position: 3,
-                    name: "SHIPPING_OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OSM_R26.5-SHIPMENT.3-SHIPPING_OBSERVATION.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OSM_R26.5-SHIPMENT.3-SHIPPING_OBSERVATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE",
-                    position: 4,
-                    name: "PACKAGE",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.1-PAC",
-                            position: 1,
-                            segment: &segment::pac::PAC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN",
-                            position: 3,
-                            name: "SPECIMEN",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.1-SPM",
-                                    position: 1,
-                                    segment: &segment::spm::SPM,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.3-SPECIMEN_OBSERVATION",
-                                    position: 3,
-                                    name: "SPECIMEN_OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.3-SPECIMEN_OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.3-SPECIMEN_OBSERVATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER",
-                                    position: 4,
-                                    name: "CONTAINER",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.1-SAC",
-                                            position: 1,
-                                            segment: &segment::sac::SAC,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.2-CONTAINER_OBSERVATION",
-                                            position: 2,
-                                            name: "CONTAINER_OBSERVATION",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.2-CONTAINER_OBSERVATION.1-OBX",
-                                                    position: 1,
-                                                    segment: &segment::obx::OBX,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.4-CONTAINER.2-CONTAINER_OBSERVATION.2-PRT",
-                                                    position: 2,
-                                                    segment: &segment::prt::PRT,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION",
-                                    position: 5,
-                                    name: "SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.1-PID",
-                                            position: 1,
-                                            segment: &segment::pid::PID,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.3-ARV",
-                                            position: 3,
-                                            segment: &segment::arv::ARV,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::B),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.4-PATIENT_OBSERVATION",
-                                            position: 4,
-                                            name: "PATIENT_OBSERVATION",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.4-PATIENT_OBSERVATION.1-OBX",
-                                                    position: 1,
-                                                    segment: &segment::obx::OBX,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.4-PATIENT_OBSERVATION.2-PRT",
-                                                    position: 2,
-                                                    segment: &segment::prt::PRT,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                        Node::Group(Group {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN",
-                                            position: 5,
-                                            name: "NEXT_OF_KIN",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN.1-NK1",
-                                                    position: 1,
-                                                    segment: &segment::nk1::NK1,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN.2-GSP",
-                                                    position: 2,
-                                                    segment: &segment::gsp::GSP,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.5-SUBJECT_PERSON_OR_ANIMAL_IDENTIFICATION.5-NEXT_OF_KIN.3-GSR",
-                                                    position: 3,
-                                                    segment: &segment::gsr::GSR,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION",
-                                    position: 6,
-                                    name: "SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.1-PV1",
-                                            position: 1,
-                                            segment: &segment::pv1::PV1,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.3-PATIENT_VISIT_OBSERVATION",
-                                            position: 3,
-                                            name: "PATIENT_VISIT_OBSERVATION",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.3-PATIENT_VISIT_OBSERVATION.1-OBX",
-                                                    position: 1,
-                                                    segment: &segment::obx::OBX,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.3-PATIENT_VISIT_OBSERVATION.2-PRT",
-                                                    position: 2,
-                                                    segment: &segment::prt::PRT,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.4-PID",
-                                            position: 4,
-                                            segment: &segment::pid::PID,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.5-PRT",
-                                            position: 5,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN",
-                                            position: 6,
-                                            name: "NEXT_OF_KIN",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN.1-NK1",
-                                                    position: 1,
-                                                    segment: &segment::nk1::NK1,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN.2-GSP",
-                                                    position: 2,
-                                                    segment: &segment::gsp::GSP,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "OSM_R26.5-SHIPMENT.4-PACKAGE.3-SPECIMEN.6-SUBJECT_POPULATION_OR_LOCATION_IDENTIFICATION.6-NEXT_OF_KIN.3-GSR",
-                                                    position: 3,
-                                                    segment: &segment::gsr::GSR,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &OSM_R26_NODES,
 };

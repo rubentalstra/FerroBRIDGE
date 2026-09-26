@@ -6,244 +6,247 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`SQM_S25`], one `static` so a structure with the same tree links to it.
+pub static SQM_S25_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "SQM_S25.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "SQM_S25.2-QRD",
+        position: 2,
+        segment: &crate::legacy::v2_5::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "SQM_S25.3-QRF",
+        position: 3,
+        segment: &crate::legacy::v2_5::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "SQM_S25.4-REQUEST",
+        position: 4,
+        name: "REQUEST",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "SQM_S25.4-REQUEST.1-ARQ",
+                position: 1,
+                segment: &crate::legacy::v2_5::segment::arq::ARQ,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "SQM_S25.4-REQUEST.2-APR",
+                position: 2,
+                segment: &crate::segment::apr::APR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "SQM_S25.4-REQUEST.3-PID",
+                position: 3,
+                segment: &crate::legacy::v2_5::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "SQM_S25.4-REQUEST.4-RESOURCES",
+                position: 4,
+                name: "RESOURCES",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SQM_S25.4-REQUEST.4-RESOURCES.1-RGS",
+                        position: 1,
+                        segment: &crate::legacy::v2_5::segment::rgs::RGS,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "SQM_S25.4-REQUEST.4-RESOURCES.2-SERVICE",
+                        position: 2,
+                        name: "SERVICE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.2-SERVICE.1-AIS",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::ais::AIS,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.2-SERVICE.2-APR",
+                                position: 2,
+                                segment: &crate::segment::apr::APR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SQM_S25.4-REQUEST.4-RESOURCES.3-GENERAL_RESOURCE",
+                        position: 3,
+                        name: "GENERAL_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::aig::AIG,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.3-GENERAL_RESOURCE.2-APR",
+                                position: 2,
+                                segment: &crate::segment::apr::APR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SQM_S25.4-REQUEST.4-RESOURCES.4-PERSONNEL_RESOURCE",
+                        position: 4,
+                        name: "PERSONNEL_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.4-PERSONNEL_RESOURCE.1-AIP",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::aip::AIP,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.4-PERSONNEL_RESOURCE.2-APR",
+                                position: 2,
+                                segment: &crate::segment::apr::APR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SQM_S25.4-REQUEST.4-RESOURCES.5-LOCATION_RESOURCE",
+                        position: 5,
+                        name: "LOCATION_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.5-LOCATION_RESOURCE.1-AIL",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::ail::AIL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQM_S25.4-REQUEST.4-RESOURCES.5-LOCATION_RESOURCE.2-APR",
+                                position: 2,
+                                segment: &crate::segment::apr::APR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "SQM_S25.5-DSC",
+        position: 5,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `SQM_S25` message structure of the 2.5 tables, withdrawn as of 2.7.
 pub static SQM_S25: Structure = Structure {
     id: "SQM_S25",
     url: None,
     version: "2.5",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "SQM_S25.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "SQM_S25.2-QRD",
-            position: 2,
-            segment: &crate::legacy::v2_5::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "SQM_S25.3-QRF",
-            position: 3,
-            segment: &crate::legacy::v2_5::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "SQM_S25.4-REQUEST",
-            position: 4,
-            name: "REQUEST",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "SQM_S25.4-REQUEST.1-ARQ",
-                    position: 1,
-                    segment: &crate::legacy::v2_5::segment::arq::ARQ,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SQM_S25.4-REQUEST.2-APR",
-                    position: 2,
-                    segment: &crate::segment::apr::APR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SQM_S25.4-REQUEST.3-PID",
-                    position: 3,
-                    segment: &crate::legacy::v2_5::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "SQM_S25.4-REQUEST.4-RESOURCES",
-                    position: 4,
-                    name: "RESOURCES",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SQM_S25.4-REQUEST.4-RESOURCES.1-RGS",
-                            position: 1,
-                            segment: &crate::legacy::v2_5::segment::rgs::RGS,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Group(Group {
-                            id: "SQM_S25.4-REQUEST.4-RESOURCES.2-SERVICE",
-                            position: 2,
-                            name: "SERVICE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.2-SERVICE.1-AIS",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_5::segment::ais::AIS,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.2-SERVICE.2-APR",
-                                    position: 2,
-                                    segment: &crate::segment::apr::APR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SQM_S25.4-REQUEST.4-RESOURCES.3-GENERAL_RESOURCE",
-                            position: 3,
-                            name: "GENERAL_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_5::segment::aig::AIG,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.3-GENERAL_RESOURCE.2-APR",
-                                    position: 2,
-                                    segment: &crate::segment::apr::APR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SQM_S25.4-REQUEST.4-RESOURCES.4-PERSONNEL_RESOURCE",
-                            position: 4,
-                            name: "PERSONNEL_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.4-PERSONNEL_RESOURCE.1-AIP",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_5::segment::aip::AIP,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.4-PERSONNEL_RESOURCE.2-APR",
-                                    position: 2,
-                                    segment: &crate::segment::apr::APR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SQM_S25.4-REQUEST.4-RESOURCES.5-LOCATION_RESOURCE",
-                            position: 5,
-                            name: "LOCATION_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.5-LOCATION_RESOURCE.1-AIL",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_5::segment::ail::AIL,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQM_S25.4-REQUEST.4-RESOURCES.5-LOCATION_RESOURCE.2-APR",
-                                    position: 2,
-                                    segment: &crate::segment::apr::APR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "SQM_S25.5-DSC",
-            position: 5,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &SQM_S25_NODES,
 };

@@ -71,6 +71,14 @@ pub static DDI: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `DIN` data type code of the 2.5 tables.
+pub static DIN: LegacyDataType = LegacyDataType {
+    code: "DIN",
+    version: "2.5",
+    name: "Date and Institution Name",
+    base: None,
+};
+
 /// The `DLD` data type code of the 2.5 tables.
 pub static DLD: LegacyDataType = LegacyDataType {
     code: "DLD",
@@ -84,6 +92,14 @@ pub static DLN: LegacyDataType = LegacyDataType {
     code: "DLN",
     version: "2.5",
     name: "Driver_s License Number",
+    base: None,
+};
+
+/// The `DLT` data type code of the 2.5 tables.
+pub static DLT: LegacyDataType = LegacyDataType {
+    code: "DLT",
+    version: "2.5",
+    name: "Delta",
     base: None,
 };
 
@@ -108,6 +124,14 @@ pub static DTN: LegacyDataType = LegacyDataType {
     code: "DTN",
     version: "2.5",
     name: "Day Type and Number",
+    base: None,
+};
+
+/// The `ED` data type code of the 2.5 tables.
+pub static ED: LegacyDataType = LegacyDataType {
+    code: "ED",
+    version: "2.5",
+    name: "Encapsulated Data",
     base: None,
 };
 
@@ -287,6 +311,14 @@ pub static OSP: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `PIP` data type code of the 2.5 tables.
+pub static PIP: LegacyDataType = LegacyDataType {
+    code: "PIP",
+    version: "2.5",
+    name: "Practitioner Institutional Privileges",
+    base: None,
+};
+
 /// The `PL` data type code of the 2.5 tables.
 pub static PL: LegacyDataType = LegacyDataType {
     code: "PL",
@@ -335,6 +367,14 @@ pub static PTA: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `RFR` data type code of the 2.5 tables.
+pub static RFR: LegacyDataType = LegacyDataType {
+    code: "RFR",
+    version: "2.5",
+    name: "Reference Range",
+    base: None,
+};
+
 /// The `RI` data type code of the 2.5 tables.
 pub static RI: LegacyDataType = LegacyDataType {
     code: "RI",
@@ -375,11 +415,27 @@ pub static SN: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `SPD` data type code of the 2.5 tables.
+pub static SPD: LegacyDataType = LegacyDataType {
+    code: "SPD",
+    version: "2.5",
+    name: "Specialty Description",
+    base: None,
+};
+
 /// The `SPS` data type code of the 2.5 tables.
 pub static SPS: LegacyDataType = LegacyDataType {
     code: "SPS",
     version: "2.5",
     name: "Specimen Source",
+    base: None,
+};
+
+/// The `SRT` data type code of the 2.5 tables.
+pub static SRT: LegacyDataType = LegacyDataType {
+    code: "SRT",
+    version: "2.5",
+    name: "Sort Order",
     base: None,
 };
 

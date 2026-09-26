@@ -496,7 +496,15 @@ impl<'a> Run<'a> {
             rows: row_contents(map),
             tree: tree_contents(structure, nodes),
         };
-        let found = regrouped(map, &visit.code, &tree, &contents)?;
+        let Some(found) = regrouped(map, &visit.code, &tree, &contents) else {
+            let source = unwrapped(map, &visit.code, &tree, &contents)?;
+            self.outcomes.push(Outcome::GroupPath {
+                at: at.clone(),
+                row_path: String::from(source),
+                tree_path: visit.code.clone(),
+            });
+            return Some(map.rows.iter().filter(|row| row.source == source).collect());
+        };
         if found.shifted {
             self.outcomes.push(Outcome::GroupPath {
                 at: at.clone(),
@@ -3447,6 +3455,96 @@ fn regrouped<'m>(
     })
 }
 
+/// The one message map row source whose innermost group the parsed tree
+/// omits, placing the segment directly in that group's parent.
+///
+/// The row source must name the tree `path`'s structure, groups and segment
+/// with one group more at the end, the tree must carry no group of that name
+/// in the parent, no row may name `path` itself, and the source must reach no
+/// other tree path ([`pairing`]). The guide's
+/// `ORU_R01.PATIENT_RESULT.ORDER_OBSERVATION.COMMON_ORDER.ORC` so reaches the
+/// 2.5.1 ORC, which its tables place in `ORDER_OBSERVATION` with no
+/// `COMMON_ORDER` group. No specification governs this: our own design.
+fn unwrapped<'m>(
+    map: &'m Map,
+    path: &str,
+    tree: &BTreeSet<String>,
+    contents: &Contents,
+) -> Option<&'m str> {
+    if map.rows.iter().any(|row| row.source == path) {
+        return None;
+    }
+    let (parent, segment) = path.rsplit_once('.')?;
+    let sources: BTreeSet<&str> = map
+        .rows
+        .iter()
+        .map(|row| row.source.as_str())
+        .filter(|source| !source.contains(":follow:") && !tree.contains(*source))
+        .filter(|source| {
+            source
+                .strip_prefix(parent)
+                .and_then(|rest| rest.strip_prefix('.'))
+                .and_then(|rest| rest.strip_suffix(segment))
+                .and_then(|rest| rest.strip_suffix('.'))
+                .is_some_and(|group| {
+                    !group.is_empty()
+                        && !group.contains('.')
+                        && !contents.tree.contains_key(&format!("{parent}.{group}"))
+                })
+        })
+        .collect();
+    let mut sources = sources.into_iter();
+    let Some(source) = sources.next() else {
+        return wrapped(map, path, tree, contents);
+    };
+    if sources.next().is_some() {
+        return None;
+    }
+    let elsewhere = tree
+        .iter()
+        .any(|other| other != path && pairing(source, other, contents).is_some());
+    (!elsewhere).then_some(source)
+}
+
+/// The one message map row source that places the segment directly in the
+/// parent of the tree `path`'s innermost group, which the rows never name.
+///
+/// It mirrors [`unwrapped`], for a tree that adds the innermost group where
+/// that one serves a tree that omits it: the supplement's
+/// `ORL_O22.RESPONSE.PID` reaches the 2.5.1 `ORL_O22.RESPONSE.PATIENT.PID`.
+/// The source must reach no other tree path, and no other tree path may
+/// wrap the segment in another group of the same parent. No specification
+/// governs this: our own design.
+fn wrapped<'m>(
+    map: &'m Map,
+    path: &str,
+    tree: &BTreeSet<String>,
+    contents: &Contents,
+) -> Option<&'m str> {
+    let (parent, segment) = path.rsplit_once('.')?;
+    let (grand, group) = parent.rsplit_once('.')?;
+    if contents.rows.contains_key(parent) {
+        return None;
+    }
+    let wanted = format!("{grand}.{segment}");
+    let source = map
+        .rows
+        .iter()
+        .map(|row| row.source.as_str())
+        .find(|source| *source == wanted && !tree.contains(*source))?;
+    let rivals = tree.iter().any(|other| {
+        other != path
+            && (pairing(source, other, contents).is_some()
+                || other
+                    .strip_prefix(grand)
+                    .and_then(|rest| rest.strip_prefix('.'))
+                    .and_then(|rest| rest.strip_suffix(segment))
+                    .and_then(|rest| rest.strip_suffix('.'))
+                    .is_some_and(|other_group| other_group != group && !other_group.contains('.')))
+    });
+    (!rivals).then_some(source)
+}
+
 /// The one candidate with the fewest renamed groups; `None` when there is
 /// none or two share the fewest.
 fn cheapest<T>(candidates: impl Iterator<Item = (T, Pairing)>) -> Option<(T, Pairing)> {
@@ -3941,7 +4039,7 @@ mod tests {
     #[test]
     fn a_current_result_renames_no_group() {
         let parsed = message(&[
-            "MSH|^~\\&|LAB|NORTHLAB|EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00033|P|2.5.1",
+            "MSH|^~\\&|LAB|NORTHLAB|EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01|MSG00033|P|2.9.1",
             "PID|1||PAT-0033^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M",
             "PV1|1|O",
             "ORC|RE|PLC-1|FIL-1",

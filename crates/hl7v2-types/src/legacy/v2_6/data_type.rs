@@ -63,6 +63,14 @@ pub static DDI: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `DIN` data type code of the 2.6 tables.
+pub static DIN: LegacyDataType = LegacyDataType {
+    code: "DIN",
+    version: "2.6",
+    name: "Date and Institution Name",
+    base: None,
+};
+
 /// The `DLD` data type code of the 2.6 tables.
 pub static DLD: LegacyDataType = LegacyDataType {
     code: "DLD",
@@ -76,6 +84,14 @@ pub static DLN: LegacyDataType = LegacyDataType {
     code: "DLN",
     version: "2.6",
     name: "Driver's License Number",
+    base: None,
+};
+
+/// The `DLT` data type code of the 2.6 tables.
+pub static DLT: LegacyDataType = LegacyDataType {
+    code: "DLT",
+    version: "2.6",
+    name: "Delta",
     base: None,
 };
 
@@ -108,6 +124,14 @@ pub static DTN: LegacyDataType = LegacyDataType {
     code: "DTN",
     version: "2.6",
     name: "Day Type and Number",
+    base: None,
+};
+
+/// The `ED` data type code of the 2.6 tables.
+pub static ED: LegacyDataType = LegacyDataType {
+    code: "ED",
+    version: "2.6",
+    name: "Encapsulated Data",
     base: None,
 };
 
@@ -279,11 +303,11 @@ pub static OCD: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `OSP` data type code of the 2.6 tables.
-pub static OSP: LegacyDataType = LegacyDataType {
-    code: "OSP",
+/// The `PIP` data type code of the 2.6 tables.
+pub static PIP: LegacyDataType = LegacyDataType {
+    code: "PIP",
     version: "2.6",
-    name: "Occurrence Span Code and Date",
+    name: "Practitioner Institutional Privileges",
     base: None,
 };
 
@@ -292,6 +316,14 @@ pub static PL: LegacyDataType = LegacyDataType {
     code: "PL",
     version: "2.6",
     name: "Person Location",
+    base: None,
+};
+
+/// The `PLN` data type code of the 2.6 tables.
+pub static PLN: LegacyDataType = LegacyDataType {
+    code: "PLN",
+    version: "2.6",
+    name: "Practitioner License or Other ID Number",
     base: None,
 };
 
@@ -327,6 +359,14 @@ pub static PTA: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `RFR` data type code of the 2.6 tables.
+pub static RFR: LegacyDataType = LegacyDataType {
+    code: "RFR",
+    version: "2.6",
+    name: "Reference Range",
+    base: None,
+};
+
 /// The `RI` data type code of the 2.6 tables.
 pub static RI: LegacyDataType = LegacyDataType {
     code: "RI",
@@ -356,6 +396,14 @@ pub static SN: LegacyDataType = LegacyDataType {
     code: "SN",
     version: "2.6",
     name: "Structured Numeric",
+    base: None,
+};
+
+/// The `SPD` data type code of the 2.6 tables.
+pub static SPD: LegacyDataType = LegacyDataType {
+    code: "SPD",
+    version: "2.6",
+    name: "Specialty Description",
     base: None,
 };
 

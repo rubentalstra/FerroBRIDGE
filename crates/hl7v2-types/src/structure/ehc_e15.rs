@@ -9,234 +9,237 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`EHC_E15`], one `static` so a structure with the same tree links to it.
+pub static EHC_E15_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "EHC_E15.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E15.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E15.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO",
+        position: 4,
+        name: "PAYMENT_REMITTANCE_HEADER_INFO",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Choice,
+        children: &[Node::Group(Group {
+            id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO.choice-1-Group",
+            position: 1,
+            name: "Group",
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+            kind: GroupKind::Sequence,
+            children: &[
+                Node::Segment(SegmentRef {
+                    id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO.choice-1-Group.1-PMT",
+                    position: 1,
+                    segment: &segment::pmt::PMT,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO.choice-1-Group.2-PYE",
+                    position: 2,
+                    segment: &segment::pye::PYE,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+            ],
+        })],
+    }),
+    Node::Group(Group {
+        id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO",
+        position: 5,
+        name: "PAYMENT_REMITTANCE_DETAIL_INFO",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.1-IPR",
+                position: 1,
+                segment: &segment::ipr::IPR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.2-IVC",
+                position: 2,
+                segment: &segment::ivc::IVC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION",
+                position: 3,
+                name: "PRODUCT_SERVICE_SECTION",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.1-PSS",
+                        position: 1,
+                        segment: &segment::pss::PSS,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP",
+                        position: 2,
+                        name: "PRODUCT_SERVICE_GROUP",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.1-PSG",
+                                position: 1,
+                                segment: &segment::psg::PSG,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PSL_ITEM_INFO",
+                                position: 2,
+                                name: "PSL_ITEM_INFO",
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PSL_ITEM_INFO.1-PSL",
+                                        position: 1,
+                                        segment: &segment::psl::PSL,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PSL_ITEM_INFO.2-ADJ",
+                                        position: 2,
+                                        segment: &segment::adj::ADJ,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "EHC_E15.6-ADJUSTMENT_PAYEE",
+        position: 6,
+        name: "ADJUSTMENT_PAYEE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "EHC_E15.6-ADJUSTMENT_PAYEE.1-ADJ",
+                position: 1,
+                segment: &segment::adj::ADJ,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E15.6-ADJUSTMENT_PAYEE.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E15.6-ADJUSTMENT_PAYEE.3-ROL",
+                position: 3,
+                segment: &segment::rol::ROL,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `EHC_E15` message structure definition, `http://hl7.org/v2/StructureDefinition/EHC_E15`.
 pub static EHC_E15: Structure = Structure {
     id: "EHC_E15",
     url: Some("http://hl7.org/v2/StructureDefinition/EHC_E15"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "EHC_E15.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E15.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E15.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO",
-            position: 4,
-            name: "PAYMENT_REMITTANCE_HEADER_INFO",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Choice,
-            children: &[Node::Group(Group {
-                id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO.choice-1-Group",
-                position: 1,
-                name: "Group",
-                cardinality: Cardinality {
-                    min: 0,
-                    max: Max::Bounded(1),
-                },
-                kind: GroupKind::Sequence,
-                children: &[
-                    Node::Segment(SegmentRef {
-                        id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO.choice-1-Group.1-PMT",
-                        position: 1,
-                        segment: &segment::pmt::PMT,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "EHC_E15.4-PAYMENT_REMITTANCE_HEADER_INFO.choice-1-Group.2-PYE",
-                        position: 2,
-                        segment: &segment::pye::PYE,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                ],
-            })],
-        }),
-        Node::Group(Group {
-            id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO",
-            position: 5,
-            name: "PAYMENT_REMITTANCE_DETAIL_INFO",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.1-IPR",
-                    position: 1,
-                    segment: &segment::ipr::IPR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.2-IVC",
-                    position: 2,
-                    segment: &segment::ivc::IVC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION",
-                    position: 3,
-                    name: "PRODUCT_SERVICE_SECTION",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.1-PSS",
-                            position: 1,
-                            segment: &segment::pss::PSS,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP",
-                            position: 2,
-                            name: "PRODUCT_SERVICE_GROUP",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.1-PSG",
-                                    position: 1,
-                                    segment: &segment::psg::PSG,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PSL_ITEM_INFO",
-                                    position: 2,
-                                    name: "PSL_ITEM_INFO",
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PSL_ITEM_INFO.1-PSL",
-                                            position: 1,
-                                            segment: &segment::psl::PSL,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "EHC_E15.5-PAYMENT_REMITTANCE_DETAIL_INFO.3-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PSL_ITEM_INFO.2-ADJ",
-                                            position: 2,
-                                            segment: &segment::adj::ADJ,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "EHC_E15.6-ADJUSTMENT_PAYEE",
-            position: 6,
-            name: "ADJUSTMENT_PAYEE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "EHC_E15.6-ADJUSTMENT_PAYEE.1-ADJ",
-                    position: 1,
-                    segment: &segment::adj::ADJ,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E15.6-ADJUSTMENT_PAYEE.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E15.6-ADJUSTMENT_PAYEE.3-ROL",
-                    position: 3,
-                    segment: &segment::rol::ROL,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &EHC_E15_NODES,
 };

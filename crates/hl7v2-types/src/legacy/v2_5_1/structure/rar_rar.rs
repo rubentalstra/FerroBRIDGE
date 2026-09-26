@@ -6,210 +6,213 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`RAR_RAR`], one `static` so a structure with the same tree links to it.
+pub static RAR_RAR_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "RAR_RAR.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RAR_RAR.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_5_1::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RAR_RAR.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_5_1::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RAR_RAR.4-SFT",
+        position: 4,
+        segment: &crate::legacy::v2_5::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "RAR_RAR.5-DEFINITION",
+        position: 5,
+        name: "DEFINITION",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RAR_RAR.5-DEFINITION.1-QRD",
+                position: 1,
+                segment: &crate::legacy::v2_5::segment::qrd::QRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RAR_RAR.5-DEFINITION.2-QRF",
+                position: 2,
+                segment: &crate::legacy::v2_5::segment::qrf::QRF,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "RAR_RAR.5-DEFINITION.3-PATIENT",
+                position: 3,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RAR_RAR.5-DEFINITION.3-PATIENT.1-PID",
+                        position: 1,
+                        segment: &crate::legacy::v2_5_1::segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RAR_RAR.5-DEFINITION.3-PATIENT.2-NTE",
+                        position: 2,
+                        segment: &crate::legacy::v2_5::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "RAR_RAR.5-DEFINITION.4-ORDER",
+                position: 4,
+                name: "ORDER",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "RAR_RAR.5-DEFINITION.4-ORDER.1-ORC",
+                        position: 1,
+                        segment: &crate::legacy::v2_5_1::segment::orc::ORC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING",
+                        position: 2,
+                        name: "ENCODING",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING.1-RXE",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::rxe::RXE,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING.2-RXR",
+                                position: 2,
+                                segment: &crate::legacy::v2_5::segment::rxr::RXR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING.3-RXC",
+                                position: 3,
+                                segment: &crate::legacy::v2_5::segment::rxc::RXC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RAR_RAR.5-DEFINITION.4-ORDER.3-RXA",
+                        position: 3,
+                        segment: &crate::legacy::v2_5::segment::rxa::RXA,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "RAR_RAR.5-DEFINITION.4-ORDER.4-RXR",
+                        position: 4,
+                        segment: &crate::legacy::v2_5::segment::rxr::RXR,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "RAR_RAR.6-DSC",
+        position: 6,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `RAR_RAR` message structure of the 2.5.1 tables, withdrawn as of 2.7.
 pub static RAR_RAR: Structure = Structure {
     id: "RAR_RAR",
     url: None,
     version: "2.5.1",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RAR_RAR.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RAR_RAR.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_5_1::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RAR_RAR.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_5_1::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RAR_RAR.4-SFT",
-            position: 4,
-            segment: &crate::legacy::v2_5_1::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "RAR_RAR.5-DEFINITION",
-            position: 5,
-            name: "DEFINITION",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RAR_RAR.5-DEFINITION.1-QRD",
-                    position: 1,
-                    segment: &crate::legacy::v2_5_1::segment::qrd::QRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RAR_RAR.5-DEFINITION.2-QRF",
-                    position: 2,
-                    segment: &crate::legacy::v2_5_1::segment::qrf::QRF,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "RAR_RAR.5-DEFINITION.3-PATIENT",
-                    position: 3,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RAR_RAR.5-DEFINITION.3-PATIENT.1-PID",
-                            position: 1,
-                            segment: &crate::legacy::v2_5_1::segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RAR_RAR.5-DEFINITION.3-PATIENT.2-NTE",
-                            position: 2,
-                            segment: &crate::legacy::v2_5_1::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "RAR_RAR.5-DEFINITION.4-ORDER",
-                    position: 4,
-                    name: "ORDER",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "RAR_RAR.5-DEFINITION.4-ORDER.1-ORC",
-                            position: 1,
-                            segment: &crate::legacy::v2_5_1::segment::orc::ORC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Group(Group {
-                            id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING",
-                            position: 2,
-                            name: "ENCODING",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING.1-RXE",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_5_1::segment::rxe::RXE,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING.2-RXR",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_5_1::segment::rxr::RXR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "RAR_RAR.5-DEFINITION.4-ORDER.2-ENCODING.3-RXC",
-                                    position: 3,
-                                    segment: &crate::legacy::v2_5_1::segment::rxc::RXC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RAR_RAR.5-DEFINITION.4-ORDER.3-RXA",
-                            position: 3,
-                            segment: &crate::legacy::v2_5_1::segment::rxa::RXA,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "RAR_RAR.5-DEFINITION.4-ORDER.4-RXR",
-                            position: 4,
-                            segment: &crate::legacy::v2_5_1::segment::rxr::RXR,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "RAR_RAR.6-DSC",
-            position: 6,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &RAR_RAR_NODES,
 };

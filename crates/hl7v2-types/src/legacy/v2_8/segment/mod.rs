@@ -2,71 +2,91 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The segments of the 2.8 tables whose field table differs from the v2.9.1 one, one module each.
+//! The segments of the 2.8 tables that no v2.9.1 or earlier `static` carries, one module each.
 
-pub mod al1;
-pub mod arv;
+pub mod acc;
+pub mod arq;
+pub mod aut;
+pub mod btx;
+pub mod bui;
+pub mod cdm;
+pub mod csp;
 pub mod cti;
-pub mod dg1;
-pub mod err;
-pub mod ft1;
+pub mod don;
+pub mod equ;
+pub mod gol;
 pub mod in1;
 pub mod in2;
 pub mod in3;
-pub mod msa;
-pub mod msh;
+pub mod itm;
+pub mod mrg;
 pub mod nk1;
-pub mod nte;
 pub mod obr;
 pub mod obx;
+pub mod om1;
+pub mod om4;
+pub mod om7;
 pub mod orc;
-pub mod pd1;
 pub mod pid;
+pub mod pkg;
+pub mod prb;
 pub mod prt;
+pub mod pth;
 pub mod pv1;
-pub mod pv2;
-pub mod qrd;
-pub mod qrf;
+pub mod rol;
+pub mod rxa;
 pub mod rxc;
 pub mod rxd;
 pub mod rxe;
-pub mod rxr;
-pub mod txa;
-pub mod urd;
-pub mod urs;
+pub mod rxg;
+pub mod rxo;
+pub mod rxv;
+pub mod sch;
+pub mod stf;
+pub mod tcc;
 
 /// Every segment, in definition id order.
-pub static SEGMENTS: [&crate::model::Segment; 30] = [
-    &al1::AL1,
-    &arv::ARV,
+pub static SEGMENTS: [&crate::model::Segment; 40] = [
+    &acc::ACC,
+    &arq::ARQ,
+    &aut::AUT,
+    &btx::BTX,
+    &bui::BUI,
+    &cdm::CDM,
+    &csp::CSP,
     &cti::CTI,
-    &dg1::DG1,
-    &err::ERR,
-    &ft1::FT1,
+    &don::DON,
+    &equ::EQU,
+    &gol::GOL,
     &in1::IN1,
     &in2::IN2,
     &in3::IN3,
-    &msa::MSA,
-    &msh::MSH,
+    &itm::ITM,
+    &mrg::MRG,
     &nk1::NK1,
-    &nte::NTE,
     &obr::OBR,
     &obx::OBX,
+    &om1::OM1,
+    &om4::OM4,
+    &om7::OM7,
     &orc::ORC,
-    &pd1::PD1,
     &pid::PID,
+    &pkg::PKG,
+    &prb::PRB,
     &prt::PRT,
+    &pth::PTH,
     &pv1::PV1,
-    &pv2::PV2,
-    &qrd::QRD,
-    &qrf::QRF,
+    &rol::ROL,
+    &rxa::RXA,
     &rxc::RXC,
     &rxd::RXD,
     &rxe::RXE,
-    &rxr::RXR,
-    &txa::TXA,
-    &urd::URD,
-    &urs::URS,
+    &rxg::RXG,
+    &rxo::RXO,
+    &rxv::RXV,
+    &sch::SCH,
+    &stf::STF,
+    &tcc::TCC,
 ];
 
 /// Returns the segment whose definition id is `id`, for example `ORC`.

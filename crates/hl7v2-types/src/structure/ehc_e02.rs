@@ -9,158 +9,161 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`EHC_E02`], one `static` so a structure with the same tree links to it.
+pub static EHC_E02_NODES: [Node; 4] = [
+    Node::Segment(SegmentRef {
+        id: "EHC_E02.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E02.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E02.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL",
+        position: 4,
+        name: "INVOICE_INFORMATION_CANCEL",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Choice,
+        children: &[Node::Group(Group {
+            id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group",
+            position: 1,
+            name: "Group",
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+            kind: GroupKind::Sequence,
+            children: &[
+                Node::Segment(SegmentRef {
+                    id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.1-IVC",
+                    position: 1,
+                    segment: &segment::ivc::IVC,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.2-PYE",
+                    position: 2,
+                    segment: &segment::pye::PYE,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.3-CTD",
+                    position: 3,
+                    segment: &segment::ctd::CTD,
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.4-NTE",
+                    position: 4,
+                    segment: &segment::nte::NTE,
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Group(Group {
+                    id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION",
+                    position: 5,
+                    name: "PRODUCT_SERVICE_SECTION",
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    kind: GroupKind::Sequence,
+                    children: &[
+                        Node::Segment(SegmentRef {
+                            id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.1-PSS",
+                            position: 1,
+                            segment: &segment::pss::PSS,
+                            cardinality: Cardinality {
+                                min: 1,
+                                max: Max::Bounded(1),
+                            },
+                            status: Some(SegmentStatus::A),
+                        }),
+                        Node::Group(Group {
+                            id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.2-PSG",
+                            position: 2,
+                            name: "PSG",
+                            cardinality: Cardinality {
+                                min: 0,
+                                max: Max::Unbounded,
+                            },
+                            kind: GroupKind::Sequence,
+                            children: &[
+                                Node::Segment(SegmentRef {
+                                    id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.2-PSG.1-PSG",
+                                    position: 1,
+                                    segment: &segment::psg::PSG,
+                                    cardinality: Cardinality {
+                                        min: 1,
+                                        max: Max::Bounded(1),
+                                    },
+                                    status: Some(SegmentStatus::A),
+                                }),
+                                Node::Segment(SegmentRef {
+                                    id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.2-PSG.2-PSL",
+                                    position: 2,
+                                    segment: &segment::psl::PSL,
+                                    cardinality: Cardinality {
+                                        min: 0,
+                                        max: Max::Unbounded,
+                                    },
+                                    status: Some(SegmentStatus::A),
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
+        })],
+    }),
+];
+
 /// The `EHC_E02` message structure definition, `http://hl7.org/v2/StructureDefinition/EHC_E02`.
 pub static EHC_E02: Structure = Structure {
     id: "EHC_E02",
     url: Some("http://hl7.org/v2/StructureDefinition/EHC_E02"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "EHC_E02.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E02.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E02.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL",
-            position: 4,
-            name: "INVOICE_INFORMATION_CANCEL",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Choice,
-            children: &[Node::Group(Group {
-                id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group",
-                position: 1,
-                name: "Group",
-                cardinality: Cardinality {
-                    min: 0,
-                    max: Max::Bounded(1),
-                },
-                kind: GroupKind::Sequence,
-                children: &[
-                    Node::Segment(SegmentRef {
-                        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.1-IVC",
-                        position: 1,
-                        segment: &segment::ivc::IVC,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.2-PYE",
-                        position: 2,
-                        segment: &segment::pye::PYE,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.3-CTD",
-                        position: 3,
-                        segment: &segment::ctd::CTD,
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.4-NTE",
-                        position: 4,
-                        segment: &segment::nte::NTE,
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Group(Group {
-                        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION",
-                        position: 5,
-                        name: "PRODUCT_SERVICE_SECTION",
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        kind: GroupKind::Sequence,
-                        children: &[
-                            Node::Segment(SegmentRef {
-                                id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.1-PSS",
-                                position: 1,
-                                segment: &segment::pss::PSS,
-                                cardinality: Cardinality {
-                                    min: 1,
-                                    max: Max::Bounded(1),
-                                },
-                                status: Some(SegmentStatus::A),
-                            }),
-                            Node::Group(Group {
-                                id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.2-PSG",
-                                position: 2,
-                                name: "PSG",
-                                cardinality: Cardinality {
-                                    min: 0,
-                                    max: Max::Unbounded,
-                                },
-                                kind: GroupKind::Sequence,
-                                children: &[
-                                    Node::Segment(SegmentRef {
-                                        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.2-PSG.1-PSG",
-                                        position: 1,
-                                        segment: &segment::psg::PSG,
-                                        cardinality: Cardinality {
-                                            min: 1,
-                                            max: Max::Bounded(1),
-                                        },
-                                        status: Some(SegmentStatus::A),
-                                    }),
-                                    Node::Segment(SegmentRef {
-                                        id: "EHC_E02.4-INVOICE_INFORMATION_CANCEL.choice-1-Group.5-PRODUCT_SERVICE_SECTION.2-PSG.2-PSL",
-                                        position: 2,
-                                        segment: &segment::psl::PSL,
-                                        cardinality: Cardinality {
-                                            min: 0,
-                                            max: Max::Unbounded,
-                                        },
-                                        status: Some(SegmentStatus::A),
-                                    }),
-                                ],
-                            }),
-                        ],
-                    }),
-                ],
-            })],
-        }),
-    ],
+    nodes: &EHC_E02_NODES,
 };

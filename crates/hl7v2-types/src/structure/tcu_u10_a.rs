@@ -9,94 +9,97 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`TCU_U10_A`], one `static` so a structure with the same tree links to it.
+pub static TCU_U10_A_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "TCU_U10-A.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "TCU_U10-A.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "TCU_U10-A.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "TCU_U10-A.4-EQU",
+        position: 4,
+        segment: &segment::equ::EQU,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "TCU_U10-A.5-TEST_CONFIGURATION",
+        position: 5,
+        name: "TEST_CONFIGURATION",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "TCU_U10-A.5-TEST_CONFIGURATION.1-SPM",
+                position: 1,
+                segment: &segment::spm::SPM,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "TCU_U10-A.5-TEST_CONFIGURATION.2-TCC",
+                position: 2,
+                segment: &segment::tcc::TCC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "TCU_U10-A.6-ROL",
+        position: 6,
+        segment: &segment::rol::ROL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::B),
+    }),
+];
+
 /// The `TCU_U10-A` message structure definition, `http://hl7.org/v2/StructureDefinition/TCU_U10-A`.
 pub static TCU_U10_A: Structure = Structure {
     id: "TCU_U10-A",
     url: Some("http://hl7.org/v2/StructureDefinition/TCU_U10-A"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "TCU_U10-A.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "TCU_U10-A.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "TCU_U10-A.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "TCU_U10-A.4-EQU",
-            position: 4,
-            segment: &segment::equ::EQU,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "TCU_U10-A.5-TEST_CONFIGURATION",
-            position: 5,
-            name: "TEST_CONFIGURATION",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "TCU_U10-A.5-TEST_CONFIGURATION.1-SPM",
-                    position: 1,
-                    segment: &segment::spm::SPM,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "TCU_U10-A.5-TEST_CONFIGURATION.2-TCC",
-                    position: 2,
-                    segment: &segment::tcc::TCC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "TCU_U10-A.6-ROL",
-            position: 6,
-            segment: &segment::rol::ROL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::B),
-        }),
-    ],
+    nodes: &TCU_U10_A_NODES,
 };

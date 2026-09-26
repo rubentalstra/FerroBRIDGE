@@ -6,282 +6,285 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`VXR_V03`], one `static` so a structure with the same tree links to it.
+pub static VXR_V03_NODES: [Node; 12] = [
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_5_1::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.3-SFT",
+        position: 3,
+        segment: &crate::legacy::v2_5::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.4-QRD",
+        position: 4,
+        segment: &crate::legacy::v2_5::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.5-QRF",
+        position: 5,
+        segment: &crate::legacy::v2_5::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.6-PID",
+        position: 6,
+        segment: &crate::legacy::v2_5_1::segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.7-PD1",
+        position: 7,
+        segment: &crate::legacy::v2_5::segment::pd1::PD1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.8-NK1",
+        position: 8,
+        segment: &crate::legacy::v2_5_1::segment::nk1::NK1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "VXR_V03.9-PATIENT_VISIT",
+        position: 9,
+        name: "PATIENT_VISIT",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.9-PATIENT_VISIT.1-PV1",
+                position: 1,
+                segment: &crate::legacy::v2_5::segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.9-PATIENT_VISIT.2-PV2",
+                position: 2,
+                segment: &crate::legacy::v2_5::segment::pv2::PV2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "VXR_V03.10-GT1",
+        position: 10,
+        segment: &crate::legacy::v2_5::segment::gt1::GT1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "VXR_V03.11-INSURANCE",
+        position: 11,
+        name: "INSURANCE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.11-INSURANCE.1-IN1",
+                position: 1,
+                segment: &crate::legacy::v2_5::segment::in1::IN1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.11-INSURANCE.2-IN2",
+                position: 2,
+                segment: &crate::legacy::v2_5_1::segment::in2::IN2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.11-INSURANCE.3-IN3",
+                position: 3,
+                segment: &crate::legacy::v2_5::segment::in3::IN3,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "VXR_V03.12-ORDER",
+        position: 12,
+        name: "ORDER",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.12-ORDER.1-ORC",
+                position: 1,
+                segment: &crate::legacy::v2_5_1::segment::orc::ORC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "VXR_V03.12-ORDER.2-TIMING",
+                position: 2,
+                name: "TIMING",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "VXR_V03.12-ORDER.2-TIMING.1-TQ1",
+                        position: 1,
+                        segment: &crate::legacy::v2_5::segment::tq1::TQ1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "VXR_V03.12-ORDER.2-TIMING.2-TQ2",
+                        position: 2,
+                        segment: &crate::segment::tq2::TQ2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.12-ORDER.3-RXA",
+                position: 3,
+                segment: &crate::legacy::v2_5::segment::rxa::RXA,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "VXR_V03.12-ORDER.4-RXR",
+                position: 4,
+                segment: &crate::legacy::v2_5::segment::rxr::RXR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "VXR_V03.12-ORDER.5-OBSERVATION",
+                position: 5,
+                name: "OBSERVATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "VXR_V03.12-ORDER.5-OBSERVATION.1-OBX",
+                        position: 1,
+                        segment: &crate::legacy::v2_5_1::segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "VXR_V03.12-ORDER.5-OBSERVATION.2-NTE",
+                        position: 2,
+                        segment: &crate::legacy::v2_5::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `VXR_V03` message structure of the 2.5.1 tables, withdrawn as of 2.7.
 pub static VXR_V03: Structure = Structure {
     id: "VXR_V03",
     url: None,
     version: "2.5.1",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_5_1::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.3-SFT",
-            position: 3,
-            segment: &crate::legacy::v2_5_1::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.4-QRD",
-            position: 4,
-            segment: &crate::legacy::v2_5_1::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.5-QRF",
-            position: 5,
-            segment: &crate::legacy::v2_5_1::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.6-PID",
-            position: 6,
-            segment: &crate::legacy::v2_5_1::segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.7-PD1",
-            position: 7,
-            segment: &crate::legacy::v2_5_1::segment::pd1::PD1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.8-NK1",
-            position: 8,
-            segment: &crate::legacy::v2_5_1::segment::nk1::NK1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "VXR_V03.9-PATIENT_VISIT",
-            position: 9,
-            name: "PATIENT_VISIT",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.9-PATIENT_VISIT.1-PV1",
-                    position: 1,
-                    segment: &crate::legacy::v2_5_1::segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.9-PATIENT_VISIT.2-PV2",
-                    position: 2,
-                    segment: &crate::legacy::v2_5_1::segment::pv2::PV2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "VXR_V03.10-GT1",
-            position: 10,
-            segment: &crate::legacy::v2_5_1::segment::gt1::GT1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "VXR_V03.11-INSURANCE",
-            position: 11,
-            name: "INSURANCE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.11-INSURANCE.1-IN1",
-                    position: 1,
-                    segment: &crate::legacy::v2_5_1::segment::in1::IN1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.11-INSURANCE.2-IN2",
-                    position: 2,
-                    segment: &crate::legacy::v2_5_1::segment::in2::IN2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.11-INSURANCE.3-IN3",
-                    position: 3,
-                    segment: &crate::legacy::v2_5_1::segment::in3::IN3,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "VXR_V03.12-ORDER",
-            position: 12,
-            name: "ORDER",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.12-ORDER.1-ORC",
-                    position: 1,
-                    segment: &crate::legacy::v2_5_1::segment::orc::ORC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "VXR_V03.12-ORDER.2-TIMING",
-                    position: 2,
-                    name: "TIMING",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "VXR_V03.12-ORDER.2-TIMING.1-TQ1",
-                            position: 1,
-                            segment: &crate::legacy::v2_5_1::segment::tq1::TQ1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "VXR_V03.12-ORDER.2-TIMING.2-TQ2",
-                            position: 2,
-                            segment: &crate::segment::tq2::TQ2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.12-ORDER.3-RXA",
-                    position: 3,
-                    segment: &crate::legacy::v2_5_1::segment::rxa::RXA,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "VXR_V03.12-ORDER.4-RXR",
-                    position: 4,
-                    segment: &crate::legacy::v2_5_1::segment::rxr::RXR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "VXR_V03.12-ORDER.5-OBSERVATION",
-                    position: 5,
-                    name: "OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "VXR_V03.12-ORDER.5-OBSERVATION.1-OBX",
-                            position: 1,
-                            segment: &crate::legacy::v2_5_1::segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "VXR_V03.12-ORDER.5-OBSERVATION.2-NTE",
-                            position: 2,
-                            segment: &crate::legacy::v2_5_1::segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &VXR_V03_NODES,
 };

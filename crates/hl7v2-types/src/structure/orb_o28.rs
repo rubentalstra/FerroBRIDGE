@@ -9,208 +9,211 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`ORB_O28`], one `static` so a structure with the same tree links to it.
+pub static ORB_O28_NODES: [Node; 8] = [
+    Node::Segment(SegmentRef {
+        id: "ORB_O28.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORB_O28.2-MSA",
+        position: 2,
+        segment: &segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORB_O28.3-ARV",
+        position: 3,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORB_O28.4-ERR",
+        position: 4,
+        segment: &segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORB_O28.5-SFT",
+        position: 5,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORB_O28.6-UAC",
+        position: 6,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORB_O28.7-NTE",
+        position: 7,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ORB_O28.8-RESPONSE",
+        position: 8,
+        name: "RESPONSE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[Node::Group(Group {
+            id: "ORB_O28.8-RESPONSE.1-PATIENT",
+            position: 1,
+            name: "PATIENT",
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+            kind: GroupKind::Sequence,
+            children: &[
+                Node::Segment(SegmentRef {
+                    id: "ORB_O28.8-RESPONSE.1-PATIENT.1-PID",
+                    position: 1,
+                    segment: &segment::pid::PID,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "ORB_O28.8-RESPONSE.1-PATIENT.2-PRT",
+                    position: 2,
+                    segment: &segment::prt::PRT,
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "ORB_O28.8-RESPONSE.1-PATIENT.3-ARV",
+                    position: 3,
+                    segment: &segment::arv::ARV,
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    status: Some(SegmentStatus::B),
+                }),
+                Node::Group(Group {
+                    id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER",
+                    position: 4,
+                    name: "ORDER",
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    kind: GroupKind::Sequence,
+                    children: &[
+                        Node::Segment(SegmentRef {
+                            id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.1-ORC",
+                            position: 1,
+                            segment: &segment::orc::ORC,
+                            cardinality: Cardinality {
+                                min: 1,
+                                max: Max::Bounded(1),
+                            },
+                            status: Some(SegmentStatus::A),
+                        }),
+                        Node::Segment(SegmentRef {
+                            id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.2-PRT",
+                            position: 2,
+                            segment: &segment::prt::PRT,
+                            cardinality: Cardinality {
+                                min: 0,
+                                max: Max::Unbounded,
+                            },
+                            status: Some(SegmentStatus::A),
+                        }),
+                        Node::Group(Group {
+                            id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.3-TIMING",
+                            position: 3,
+                            name: "TIMING",
+                            cardinality: Cardinality {
+                                min: 0,
+                                max: Max::Unbounded,
+                            },
+                            kind: GroupKind::Sequence,
+                            children: &[
+                                Node::Segment(SegmentRef {
+                                    id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.3-TIMING.1-TQ1",
+                                    position: 1,
+                                    segment: &segment::tq1::TQ1,
+                                    cardinality: Cardinality {
+                                        min: 1,
+                                        max: Max::Bounded(1),
+                                    },
+                                    status: Some(SegmentStatus::A),
+                                }),
+                                Node::Segment(SegmentRef {
+                                    id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.3-TIMING.2-TQ2",
+                                    position: 2,
+                                    segment: &segment::tq2::TQ2,
+                                    cardinality: Cardinality {
+                                        min: 0,
+                                        max: Max::Unbounded,
+                                    },
+                                    status: Some(SegmentStatus::A),
+                                }),
+                            ],
+                        }),
+                        Node::Segment(SegmentRef {
+                            id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.4-BPO",
+                            position: 4,
+                            segment: &segment::bpo::BPO,
+                            cardinality: Cardinality {
+                                min: 0,
+                                max: Max::Bounded(1),
+                            },
+                            status: Some(SegmentStatus::A),
+                        }),
+                    ],
+                }),
+            ],
+        })],
+    }),
+];
+
 /// The `ORB_O28` message structure definition, `http://hl7.org/v2/StructureDefinition/ORB_O28`.
 pub static ORB_O28: Structure = Structure {
     id: "ORB_O28",
     url: Some("http://hl7.org/v2/StructureDefinition/ORB_O28"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ORB_O28.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORB_O28.2-MSA",
-            position: 2,
-            segment: &segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORB_O28.3-ARV",
-            position: 3,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORB_O28.4-ERR",
-            position: 4,
-            segment: &segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORB_O28.5-SFT",
-            position: 5,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORB_O28.6-UAC",
-            position: 6,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORB_O28.7-NTE",
-            position: 7,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ORB_O28.8-RESPONSE",
-            position: 8,
-            name: "RESPONSE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[Node::Group(Group {
-                id: "ORB_O28.8-RESPONSE.1-PATIENT",
-                position: 1,
-                name: "PATIENT",
-                cardinality: Cardinality {
-                    min: 0,
-                    max: Max::Bounded(1),
-                },
-                kind: GroupKind::Sequence,
-                children: &[
-                    Node::Segment(SegmentRef {
-                        id: "ORB_O28.8-RESPONSE.1-PATIENT.1-PID",
-                        position: 1,
-                        segment: &segment::pid::PID,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "ORB_O28.8-RESPONSE.1-PATIENT.2-PRT",
-                        position: 2,
-                        segment: &segment::prt::PRT,
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "ORB_O28.8-RESPONSE.1-PATIENT.3-ARV",
-                        position: 3,
-                        segment: &segment::arv::ARV,
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        status: Some(SegmentStatus::B),
-                    }),
-                    Node::Group(Group {
-                        id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER",
-                        position: 4,
-                        name: "ORDER",
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        kind: GroupKind::Sequence,
-                        children: &[
-                            Node::Segment(SegmentRef {
-                                id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.1-ORC",
-                                position: 1,
-                                segment: &segment::orc::ORC,
-                                cardinality: Cardinality {
-                                    min: 1,
-                                    max: Max::Bounded(1),
-                                },
-                                status: Some(SegmentStatus::A),
-                            }),
-                            Node::Segment(SegmentRef {
-                                id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.2-PRT",
-                                position: 2,
-                                segment: &segment::prt::PRT,
-                                cardinality: Cardinality {
-                                    min: 0,
-                                    max: Max::Unbounded,
-                                },
-                                status: Some(SegmentStatus::A),
-                            }),
-                            Node::Group(Group {
-                                id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.3-TIMING",
-                                position: 3,
-                                name: "TIMING",
-                                cardinality: Cardinality {
-                                    min: 0,
-                                    max: Max::Unbounded,
-                                },
-                                kind: GroupKind::Sequence,
-                                children: &[
-                                    Node::Segment(SegmentRef {
-                                        id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.3-TIMING.1-TQ1",
-                                        position: 1,
-                                        segment: &segment::tq1::TQ1,
-                                        cardinality: Cardinality {
-                                            min: 1,
-                                            max: Max::Bounded(1),
-                                        },
-                                        status: Some(SegmentStatus::A),
-                                    }),
-                                    Node::Segment(SegmentRef {
-                                        id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.3-TIMING.2-TQ2",
-                                        position: 2,
-                                        segment: &segment::tq2::TQ2,
-                                        cardinality: Cardinality {
-                                            min: 0,
-                                            max: Max::Unbounded,
-                                        },
-                                        status: Some(SegmentStatus::A),
-                                    }),
-                                ],
-                            }),
-                            Node::Segment(SegmentRef {
-                                id: "ORB_O28.8-RESPONSE.1-PATIENT.4-ORDER.4-BPO",
-                                position: 4,
-                                segment: &segment::bpo::BPO,
-                                cardinality: Cardinality {
-                                    min: 0,
-                                    max: Max::Bounded(1),
-                                },
-                                status: Some(SegmentStatus::A),
-                            }),
-                        ],
-                    }),
-                ],
-            })],
-        }),
-    ],
+    nodes: &ORB_O28_NODES,
 };

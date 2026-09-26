@@ -2,7 +2,7 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The segments of the 2.3 tables whose field table differs from the v2.9.1 one, one module each.
+//! The segments of the 2.3 tables that no v2.9.1 or earlier `static` carries, one module each.
 
 pub mod al1;
 pub mod blg;
@@ -13,6 +13,8 @@ pub mod gt1;
 pub mod in1;
 pub mod in2;
 pub mod in3;
+pub mod mfa;
+pub mod mfi;
 pub mod msa;
 pub mod msh;
 pub mod nte;
@@ -30,7 +32,7 @@ pub mod rqd;
 pub mod rxo;
 
 /// Every segment, in definition id order.
-pub static SEGMENTS: [&crate::model::Segment; 24] = [
+pub static SEGMENTS: [&crate::model::Segment; 26] = [
     &al1::AL1,
     &blg::BLG,
     &cti::CTI,
@@ -40,6 +42,8 @@ pub static SEGMENTS: [&crate::model::Segment; 24] = [
     &in1::IN1,
     &in2::IN2,
     &in3::IN3,
+    &mfa::MFA,
+    &mfi::MFI,
     &msa::MSA,
     &msh::MSH,
     &nte::NTE,

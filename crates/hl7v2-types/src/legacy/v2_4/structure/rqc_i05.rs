@@ -6,114 +6,117 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`RQC_I05`], one `static` so a structure with the same tree links to it.
+pub static RQC_I05_NODES: [Node; 4] = [
+    Node::Segment(SegmentRef {
+        id: "RQC_I05.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQC_I05.2-QRD",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RQC_I05.3-QRF",
+        position: 3,
+        segment: &crate::legacy::v2_4::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "RQC_I05.4-PROVIDER",
+        position: 4,
+        name: "PROVIDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "RQC_I05.4-PROVIDER.1-PRD",
+                position: 1,
+                segment: &crate::legacy::v2_4::segment::prd::PRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQC_I05.4-PROVIDER.2-CTD",
+                position: 2,
+                segment: &crate::legacy::v2_4::segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQC_I05.4-PROVIDER.3-PID",
+                position: 3,
+                segment: &crate::legacy::v2_4::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQC_I05.4-PROVIDER.4-NK1",
+                position: 4,
+                segment: &crate::legacy::v2_4::segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQC_I05.4-PROVIDER.5-GT1",
+                position: 5,
+                segment: &crate::legacy::v2_4::segment::gt1::GT1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "RQC_I05.4-PROVIDER.6-NTE",
+                position: 6,
+                segment: &crate::legacy::v2_4::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `RQC_I05` message structure of the 2.4 tables, withdrawn as of 2.8.
 pub static RQC_I05: Structure = Structure {
     id: "RQC_I05",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.8"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RQC_I05.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQC_I05.2-QRD",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RQC_I05.3-QRF",
-            position: 3,
-            segment: &crate::legacy::v2_4::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "RQC_I05.4-PROVIDER",
-            position: 4,
-            name: "PROVIDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "RQC_I05.4-PROVIDER.1-PRD",
-                    position: 1,
-                    segment: &crate::legacy::v2_4::segment::prd::PRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQC_I05.4-PROVIDER.2-CTD",
-                    position: 2,
-                    segment: &crate::legacy::v2_4::segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQC_I05.4-PROVIDER.3-PID",
-                    position: 3,
-                    segment: &crate::legacy::v2_4::segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQC_I05.4-PROVIDER.4-NK1",
-                    position: 4,
-                    segment: &crate::legacy::v2_4::segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQC_I05.4-PROVIDER.5-GT1",
-                    position: 5,
-                    segment: &crate::legacy::v2_4::segment::gt1::GT1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "RQC_I05.4-PROVIDER.6-NTE",
-                    position: 6,
-                    segment: &crate::legacy::v2_4::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &RQC_I05_NODES,
 };

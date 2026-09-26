@@ -9,90 +9,93 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`QVR_Q17`], one `static` so a structure with the same tree links to it.
+pub static QVR_Q17_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "QVR_Q17.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QVR_Q17.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QVR_Q17.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QVR_Q17.4-QPD",
+        position: 4,
+        segment: &segment::qpd::QPD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "QVR_Q17.5-QBP",
+        position: 5,
+        name: "QBP",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[Node::Placeholder(Placeholder {
+            id: "QVR_Q17.5-QBP.1-Hxx",
+            position: 1,
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+        })],
+    }),
+    Node::Segment(SegmentRef {
+        id: "QVR_Q17.6-RCP",
+        position: 6,
+        segment: &segment::rcp::RCP,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "QVR_Q17.7-DSC",
+        position: 7,
+        segment: &segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `QVR_Q17` message structure definition, `http://hl7.org/v2/StructureDefinition/QVR_Q17`.
 pub static QVR_Q17: Structure = Structure {
     id: "QVR_Q17",
     url: Some("http://hl7.org/v2/StructureDefinition/QVR_Q17"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "QVR_Q17.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QVR_Q17.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QVR_Q17.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QVR_Q17.4-QPD",
-            position: 4,
-            segment: &segment::qpd::QPD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "QVR_Q17.5-QBP",
-            position: 5,
-            name: "QBP",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[Node::Placeholder(Placeholder {
-                id: "QVR_Q17.5-QBP.1-Hxx",
-                position: 1,
-                cardinality: Cardinality {
-                    min: 0,
-                    max: Max::Bounded(1),
-                },
-            })],
-        }),
-        Node::Segment(SegmentRef {
-            id: "QVR_Q17.6-RCP",
-            position: 6,
-            segment: &segment::rcp::RCP,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "QVR_Q17.7-DSC",
-            position: 7,
-            segment: &segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &QVR_Q17_NODES,
 };

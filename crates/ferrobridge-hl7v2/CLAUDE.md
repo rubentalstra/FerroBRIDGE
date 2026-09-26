@@ -150,7 +150,13 @@ run time.
 
 A shape `hl7v2-types` lacks (the event-to-structure table, data type
 components, `PartialEq` on the tree types) is a generator follow-up, never a
-local table here. `parse::structure_for` refuses a structure the definitions
+local table here. `parse::structure_for` selects the tree and segment tables
+of the version MSH-12 declares for every structure (#333), counted as
+`version-selected`, with v2.9.1 for 2.9.1, 2.9, a later or absent MSH-12,
+or a version whose tables lack the structure. An empty required field is
+counted as `missing-required-field` with the field, the segment and the
+version, and the message maps; only MSH-9, MSH-10 and MSH-12, which the
+answer needs, still refuse. It refuses a structure the definitions
 carry in variants, and the caller names the variant. An MSH-9.3 naming no
 structure falls back to the message index, counted as `other-structure`, and
 then to a structure v2.9.1 withdrew (`ORM_O01`) from `hl7v2_types::legacy` by
@@ -165,7 +171,16 @@ takes the rows of the one source whose groups differ from its own by one
 group, not the group holding the segment (`run::regrouped`), counted as
 `group-path`: the guide's `ORM_O01.ORDER_DETAIL.CHOICE.OBR` reaches the 2.3
 `ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`; a source that reaches two tree
-paths, or a path two sources reach, stays `unmapped-segment`. A group the
+paths, or a path two sources reach, stays `unmapped-segment`. When none
+does, the one source whose innermost group the tree omits, placing the
+segment directly in that group's parent, takes it (`run::unwrapped`), also
+counted as `group-path`: the guide's
+`ORU_R01.PATIENT_RESULT.ORDER_OBSERVATION.COMMON_ORDER.ORC` reaches the 2.5.1
+ORC in `ORDER_OBSERVATION`. Its mirror (`run::wrapped`) lets a row placing
+the segment in the parent reach a tree that adds the innermost group:
+the supplement's `ORL_O22.RESPONSE.PID` reaches the 2.5.1
+`ORL_O22.RESPONSE.PATIENT.PID`. The map only ever walks the tree the message
+was parsed with. A group the
 row names that the tree names otherwise at its position pairs with that
 tree group when the tree group holds every segment the guide's rows place
 in the row's group (`run::pairing`), counted as `group-renamed` naming

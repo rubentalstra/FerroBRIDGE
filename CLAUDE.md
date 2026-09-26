@@ -96,8 +96,9 @@ the testkit tool crate. Beside it:
   table of every segment definition (batch envelopes included), the component
   table of every data type, and every message definition indexed by code and
   trigger event with the structure variant it names (#289), plus `legacy`,
-  the 218 per-version trees of the 57 structures v2.9.1 withdrew
-  (`ORM_O01`) from the build-time IGAMT export of HL7's v2 database (#303).
+  the 1713 per-version structures of 2.3 to 2.8.2 (218 of them of the 57
+  codes v2.9.1 withdrew, `ORM_O01`) from the build-time IGAMT export of
+  HL7's v2 database (#303, #333), which the parser selects by MSH-12.
   Never hand-edited.
 - `crates/openehr-mapping-core`: the half of the mapping foundation both
   languages share (#74): the header they standardize between them, the YAML

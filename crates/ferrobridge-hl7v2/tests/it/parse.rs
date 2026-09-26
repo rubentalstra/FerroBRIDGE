@@ -39,7 +39,7 @@ fn tree(parsed: &Parsed) -> String {
 #[test]
 fn an_oru_r01_is_grouped_by_its_structure() {
     let parsed = support::parsed(&fixtures::oru_r01());
-    assert_eq!(parsed.structure().id, "ORU_R01-A");
+    assert_eq!(parsed.structure().id, "ORU_R01");
     assert_eq!(
         tree(&parsed),
         "MSH\n\
@@ -49,8 +49,7 @@ fn an_oru_r01_is_grouped_by_its_structure() {
          \x20   VISIT[0]\n\
          \x20     PV1\n\
          \x20 ORDER_OBSERVATION[0]\n\
-         \x20   COMMON_ORDER[0]\n\
-         \x20     ORC\n\
+         \x20   ORC\n\
          \x20   OBR\n\
          \x20   OBSERVATION[0]\n\
          \x20     OBX\n\
@@ -75,24 +74,63 @@ fn a_z_segment_is_a_counted_outcome() {
 }
 
 #[test]
-fn a_2_5_1_sender_is_parsed_under_the_later_definitions_and_counted() {
+fn a_2_5_1_sender_is_parsed_under_its_own_tables_and_counted() {
     let parsed = support::parsed(&fixtures::oru_r01());
-    assert!(parsed.unplaced().contains(&Unplaced::EarlierVersion {
-        declared: String::from("2.5.1"),
+    assert!(parsed.unplaced().contains(&Unplaced::VersionSelected {
+        structure: "ORU_R01",
+        version: "2.5.1",
+        declared: Some(String::from("2.5.1")),
     }));
+    assert!(
+        !parsed
+            .unplaced()
+            .iter()
+            .any(|outcome| matches!(outcome, Unplaced::EarlierVersion { .. })),
+        "a 2.5.1 tree is the sender's own, so the message is not parsed against 2.9.1"
+    );
 }
 
 #[test]
 fn an_adt_a01_is_grouped_by_its_structure() {
     let parsed = support::parsed(&fixtures::adt_a01());
-    assert_eq!(parsed.structure().id, "ADT_A01-A");
+    assert_eq!(parsed.structure().id, "ADT_A01");
     assert_eq!(tree(&parsed), "MSH\nEVN\nPID\nPV1\n");
     assert!(parsed.refusals().is_empty(), "{:?}", parsed.refusals());
 }
 
 #[test]
-fn a_missing_required_field_is_a_refusal_at_its_location() {
+fn a_missing_required_field_is_counted_at_its_location_and_the_message_parses() {
     let parsed = support::parsed(&fixtures::oru_r01_without_patient_name());
+    assert!(parsed.refusals().is_empty(), "{:?}", parsed.refusals());
+    let missing: Vec<(String, &str, &str, &str)> = parsed
+        .unplaced()
+        .iter()
+        .filter_map(|outcome| match outcome {
+            Unplaced::MissingRequiredField {
+                location,
+                field,
+                segment,
+                version,
+            } => Some((location.erl('^'), *field, *segment, *version)),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(
+        missing,
+        [(String::from("PID^1^5"), "PID.5", "PID", "2.5.1")]
+    );
+}
+
+#[test]
+fn an_empty_field_the_bridge_needs_to_answer_is_still_a_refusal() {
+    // MSH-12 empty selects v2.9.1, whose MSH-12 is required.
+    let bytes = fixtures::message(&[
+        b"MSH|^~\\&|ADMIT|NORTHHOSP|EHR|SOUTHCLINIC|20260926090000+0200||ADT^A01^ADT_A01|MSG00045|P|",
+        b"EVN||20260926085900+0200",
+        b"PID|1||PAT-0045^^^NORTHHOSP^MR||Test^Anna",
+        b"PV1|1|I",
+    ]);
+    let parsed = support::parsed(&bytes);
     let refusals: Vec<(String, ErrorCode)> = parsed
         .refusals()
         .iter()
@@ -100,7 +138,7 @@ fn a_missing_required_field_is_a_refusal_at_its_location() {
         .collect();
     assert_eq!(
         refusals,
-        [(String::from("PID^1^5"), ErrorCode::RequiredFieldMissing)]
+        [(String::from("MSH^1^12"), ErrorCode::RequiredFieldMissing)]
     );
 }
 
@@ -120,7 +158,7 @@ fn a_missing_required_segment_is_a_segment_sequence_refusal() {
             .collect::<Vec<_>>(),
         [(
             ErrorCode::SegmentSequence,
-            "the required segment ADT_A01-A.19-PV1 is missing"
+            "the required segment ADT_A01.8-PV1 is missing"
         )]
     );
 }
@@ -170,8 +208,13 @@ fn select(bytes: &[u8]) -> Result<&'static str, StructureError> {
 
 /// A synthetic header with `message_type` as MSH-9, and an EVN, a PID and a PV1.
 fn with_type(message_type: &str) -> Vec<u8> {
+    with_type_at(message_type, "2.5.1")
+}
+
+/// The header of [`with_type`] declaring `version` as MSH-12.
+fn with_type_at(message_type: &str, version: &str) -> Vec<u8> {
     let header = format!(
-        "MSH|^~\\&|ADMIT|NORTHHOSP|EHR|SOUTHCLINIC|20260925090000+0200||{message_type}|MSG00009|P|2.5.1"
+        "MSH|^~\\&|ADMIT|NORTHHOSP|EHR|SOUTHCLINIC|20260925090000+0200||{message_type}|MSG00009|P|{version}"
     );
     fixtures::message(&[
         header.as_bytes(),
@@ -183,14 +226,23 @@ fn with_type(message_type: &str) -> Vec<u8> {
 
 #[test]
 fn the_message_definition_of_the_trigger_event_selects_the_variant() {
-    // HL7/v2ig input/sourceOfTruth/message/messages/ORU-R01.json names ORU_R01-A.
-    assert_eq!(select(&fixtures::oru_r01()), Ok("ORU_R01-A"));
+    // HL7/v2ig input/sourceOfTruth/message/messages/ORU-R01.json names ORU_R01-A; a 2.5.1
+    // sender is parsed against the one ORU_R01 of its own tables.
+    assert_eq!(select(&fixtures::oru_r01()), Ok("ORU_R01"));
+    assert_eq!(
+        select(&with_type_at("ORU^R01^ORU_R01", "2.9.1")),
+        Ok("ORU_R01-A")
+    );
 }
 
 #[test]
 fn a_variant_other_than_the_first_is_chosen_from_the_message_table() {
     // HL7/v2ig input/sourceOfTruth/message/messages/ADT-A04.json names ADT_A01-B.
-    assert_eq!(select(&with_type("ADT^A04^ADT_A01")), Ok("ADT_A01-B"));
+    assert_eq!(select(&with_type("ADT^A04^ADT_A01")), Ok("ADT_A01"));
+    assert_eq!(
+        select(&with_type_at("ADT^A04^ADT_A01", "2.9.1")),
+        Ok("ADT_A01-B")
+    );
 }
 
 #[test]
@@ -206,9 +258,22 @@ fn a_structure_in_variants_no_message_definition_names_is_refused() {
 // ADT-A08.json names ADT_A01-C, which answers for the ADT_A08 no definition carries.
 #[test]
 fn an_unknown_structure_falls_back_to_the_message_definition_and_is_counted() {
+    // The 2.5.1 sender takes the ADT_A01 of its own tables.
     let bytes = with_type("ADT^A08^ADT_A08");
-    assert_eq!(select(&bytes), Ok("ADT_A01-C"));
+    assert_eq!(select(&bytes), Ok("ADT_A01"));
     let parsed = support::parsed(&bytes);
+    assert!(
+        parsed.unplaced().contains(&Unplaced::OtherStructure {
+            declared: String::from("ADT_A08"),
+            structure: "ADT_A01",
+        }),
+        "{:?}",
+        parsed.unplaced()
+    );
+    assert!(parsed.refusals().is_empty(), "{:?}", parsed.refusals());
+    let current = with_type_at("ADT^A08^ADT_A08", "2.9.1");
+    assert_eq!(select(&current), Ok("ADT_A01-C"));
+    let parsed = support::parsed(&current);
     assert!(
         parsed.unplaced().contains(&Unplaced::OtherStructure {
             declared: String::from("ADT_A08"),
@@ -217,7 +282,6 @@ fn an_unknown_structure_falls_back_to_the_message_definition_and_is_counted() {
         "{:?}",
         parsed.unplaced()
     );
-    assert!(parsed.refusals().is_empty(), "{:?}", parsed.refusals());
 }
 
 #[test]
@@ -309,7 +373,7 @@ fn vendored(path: &str) -> Vec<u8> {
 
 #[test]
 fn the_vendored_orm_o01_messages_parse_against_the_tree_of_their_version() {
-    // Each refusal is a field the tables of the declared version make required
+    // Each counted field is one the tables of the declared version make required
     // (ORC-7 at 2.3, AL1-1 at 2.6) and the message leaves empty.
     let refused: BTreeMap<&str, Vec<&str>> = BTreeMap::from([
         (ORM_O01_MESSAGES[0].0, vec!["ORC[1]-7 ORC.7 is required"]),
@@ -329,13 +393,13 @@ fn the_vendored_orm_o01_messages_parse_against_the_tree_of_their_version() {
         assert_eq!(parsed.structure().id, "ORM_O01", "{path}");
         assert_eq!(parsed.structure().version, version, "{path}");
         assert_eq!(parsed.structure().url, None, "{path}");
-        let refusals: Vec<String> = parsed
-            .refusals()
-            .iter()
-            .map(|refusal| format!("{} {}", refusal.location, refusal.detail))
-            .collect();
+        assert!(
+            parsed.refusals().is_empty(),
+            "{path}: {:?}",
+            parsed.refusals()
+        );
         let expected = refused.get(path).cloned().unwrap_or_default();
-        assert_eq!(refusals, expected, "{path}");
+        assert_eq!(required_missing(&parsed), expected, "{path}");
     }
 }
 
@@ -443,4 +507,125 @@ fn a_structure_neither_the_definitions_nor_the_legacy_tables_carry_is_unknown() 
             name: String::from("ORM_Z99"),
         })
     );
+}
+
+/// A synthetic ADT^A01 at `version` with one DG1 valuing DG1-1, DG1-2 and
+/// DG1-6 and leaving DG1-3 empty.
+fn adt_with_dg1(version: &str) -> Vec<u8> {
+    let header = format!(
+        "MSH|^~\\&|ADMIT|NORTHHOSP|EHR|SOUTHCLINIC|20260926090000+0200||ADT^A01^ADT_A01|MSG00041|P|{version}"
+    );
+    fixtures::message(&[
+        header.as_bytes(),
+        b"EVN||20260926085900+0200",
+        b"PID|1||PAT-0041^^^NORTHHOSP^MR||Test^Anna",
+        b"PV1|1|I",
+        b"DG1|1|I10||||A",
+    ])
+}
+
+/// The required-field refusals of `parsed`, as `location detail`.
+fn required_missing(parsed: &Parsed) -> Vec<String> {
+    parsed
+        .unplaced()
+        .iter()
+        .filter_map(|outcome| match outcome {
+            Unplaced::MissingRequiredField {
+                location, field, ..
+            } => Some(format!("{location} {field} is required")),
+            _ => None,
+        })
+        .collect()
+}
+
+// NOTE: the IGAMT 2.5.1 fields.json marks DG1-1, DG1-2 and DG1-6 required and the v2.9.1
+// DG1.json DG1-1, DG1-3 and DG1-6, so the counted field follows the version MSH-12 selects.
+#[test]
+fn a_2_5_1_message_is_held_to_the_2_5_1_field_optionality() {
+    let parsed = support::parsed(&adt_with_dg1("2.5.1"));
+    assert_eq!(
+        (parsed.structure().id, parsed.structure().version),
+        ("ADT_A01", "2.5.1")
+    );
+    assert_eq!(required_missing(&parsed), Vec::<String>::new());
+    assert!(parsed.unplaced().contains(&Unplaced::VersionSelected {
+        structure: "ADT_A01",
+        version: "2.5.1",
+        declared: Some(String::from("2.5.1")),
+    }));
+}
+
+#[test]
+fn the_same_message_at_2_9_1_is_held_to_the_field_2_9_1_requires() {
+    let parsed = support::parsed(&adt_with_dg1("2.9.1"));
+    assert_eq!(
+        (parsed.structure().id, parsed.structure().version),
+        ("ADT_A01-A", "2.9.1")
+    );
+    assert_eq!(
+        required_missing(&parsed),
+        ["DG1[1]-3 DG1.3-diagnosisCode is required"]
+    );
+    assert!(
+        parsed
+            .unplaced()
+            .iter()
+            .all(|outcome| outcome.kind() != "version-selected"),
+        "{:?}",
+        parsed.unplaced()
+    );
+}
+
+#[test]
+fn a_message_with_no_version_or_one_the_tables_lack_selects_v2_9_1_and_is_counted() {
+    let without = fixtures::message(&[
+        b"MSH|^~\\&|ADMIT|NORTHHOSP|EHR|SOUTHCLINIC|20260926090000+0200||ADT^A01^ADT_A01|MSG00042|P|",
+        b"EVN||20260926085900+0200",
+        b"PID|1||PAT-0042^^^NORTHHOSP^MR||Test^Anna",
+        b"PV1|1|I",
+    ]);
+    let parsed = support::parsed(&without);
+    assert_eq!(parsed.structure().version, "2.9.1");
+    assert!(parsed.unplaced().contains(&Unplaced::VersionSelected {
+        structure: "ADT_A01-A",
+        version: "2.9.1",
+        declared: None,
+    }));
+    let parsed = support::parsed(&adt_with_dg1("2.9"));
+    assert_eq!(parsed.structure().version, "2.9.1");
+    assert!(parsed.unplaced().contains(&Unplaced::VersionSelected {
+        structure: "ADT_A01-A",
+        version: "2.9.1",
+        declared: Some(String::from("2.9")),
+    }));
+    assert!(parsed.unplaced().contains(&Unplaced::EarlierVersion {
+        declared: String::from("2.9"),
+    }));
+}
+
+// NOTE: the IGAMT 2.5.1 fields.json and the v2.9.1 RXA.json both mark RXA-1 to RXA-6 required and
+// RXA-22 optional, so a 2.5.1 VXU^V04 without RXA-4 is counted under either version's tables.
+#[test]
+fn a_2_5_1_vxu_v04_is_parsed_against_the_2_5_1_tree_and_its_rxa_table() {
+    let bytes = fixtures::message(&[
+        b"MSH|^~\\&|IIS|NORTHCLINIC|REG|SOUTHREG|20260926090000+0200||VXU^V04^VXU_V04|MSG00043|P|2.5.1",
+        b"PID|1||PAT-0043^^^NORTHCLINIC^MR||Test^Bram",
+        b"ORC|RE||IMM-0043",
+        b"RXA|0|1|20260901||21^Varicella^CVX|999",
+    ]);
+    let parsed = support::parsed(&bytes);
+    assert_eq!(
+        (parsed.structure().id, parsed.structure().version),
+        ("VXU_V04", "2.5.1")
+    );
+    assert_eq!(required_missing(&parsed), ["RXA[1]-4 RXA.4 is required"]);
+    assert!(parsed.refusals().is_empty(), "{:?}", parsed.refusals());
+    let with_end = fixtures::message(&[
+        b"MSH|^~\\&|IIS|NORTHCLINIC|REG|SOUTHREG|20260926090000+0200||VXU^V04^VXU_V04|MSG00044|P|2.5.1",
+        b"PID|1||PAT-0044^^^NORTHCLINIC^MR||Test^Bram",
+        b"ORC|RE||IMM-0044",
+        b"RXA|0|1|20260901|20260901|21^Varicella^CVX|999",
+    ]);
+    let parsed = support::parsed(&with_end);
+    assert_eq!(required_missing(&parsed), Vec::<String>::new());
 }

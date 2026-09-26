@@ -6,82 +6,85 @@
 
 use crate::model::{Cardinality, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`UDM_Q05`], one `static` so a structure with the same tree links to it.
+pub static UDM_Q05_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "UDM_Q05.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_7_1::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "UDM_Q05.2-SFT",
+        position: 2,
+        segment: &crate::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "UDM_Q05.3-UAC",
+        position: 3,
+        segment: &crate::segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "UDM_Q05.4-URD",
+        position: 4,
+        segment: &crate::legacy::v2_8_1::segment::urd::URD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "UDM_Q05.5-URS",
+        position: 5,
+        segment: &crate::legacy::v2_8_1::segment::urs::URS,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "UDM_Q05.6-DSP",
+        position: 6,
+        segment: &crate::segment::dsp::DSP,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "UDM_Q05.7-DSC",
+        position: 7,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `UDM_Q05` message structure of the 2.8.1 tables, withdrawn as of 2.9.1.
 pub static UDM_Q05: Structure = Structure {
     id: "UDM_Q05",
     url: None,
     version: "2.8.1",
     withdrawn_as_of: Some("2.9.1"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "UDM_Q05.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_8_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "UDM_Q05.2-SFT",
-            position: 2,
-            segment: &crate::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "UDM_Q05.3-UAC",
-            position: 3,
-            segment: &crate::segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "UDM_Q05.4-URD",
-            position: 4,
-            segment: &crate::legacy::v2_8_1::segment::urd::URD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "UDM_Q05.5-URS",
-            position: 5,
-            segment: &crate::legacy::v2_8_1::segment::urs::URS,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "UDM_Q05.6-DSP",
-            position: 6,
-            segment: &crate::segment::dsp::DSP,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "UDM_Q05.7-DSC",
-            position: 7,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &UDM_Q05_NODES,
 };

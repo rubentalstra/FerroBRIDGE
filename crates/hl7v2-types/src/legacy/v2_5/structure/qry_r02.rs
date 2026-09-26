@@ -6,52 +6,55 @@
 
 use crate::model::{Cardinality, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`QRY_R02`], one `static` so a structure with the same tree links to it.
+pub static QRY_R02_NODES: [Node; 4] = [
+    Node::Segment(SegmentRef {
+        id: "QRY_R02.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "QRY_R02.2-SFT",
+        position: 2,
+        segment: &crate::legacy::v2_5::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "QRY_R02.3-QRD",
+        position: 3,
+        segment: &crate::legacy::v2_5::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "QRY_R02.4-QRF",
+        position: 4,
+        segment: &crate::legacy::v2_5::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `QRY_R02` message structure of the 2.5 tables, withdrawn as of 2.7.
 pub static QRY_R02: Structure = Structure {
     id: "QRY_R02",
     url: None,
     version: "2.5",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "QRY_R02.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_R02.2-SFT",
-            position: 2,
-            segment: &crate::legacy::v2_5::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_R02.3-QRD",
-            position: 3,
-            segment: &crate::legacy::v2_5::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_R02.4-QRF",
-            position: 4,
-            segment: &crate::legacy::v2_5::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &QRY_R02_NODES,
 };

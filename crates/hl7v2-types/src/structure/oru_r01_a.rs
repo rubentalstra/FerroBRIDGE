@@ -9,712 +9,715 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`ORU_R01_A`], one `static` so a structure with the same tree links to it.
+pub static ORU_R01_A_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "ORU_R01-A.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORU_R01-A.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORU_R01-A.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORU_R01-A.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "ORU_R01-A.5-PATIENT_RESULT",
+        position: 5,
+        name: "PATIENT_RESULT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Group(Group {
+                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT",
+                position: 1,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.1-PID",
+                        position: 1,
+                        segment: &segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.2-PD1",
+                        position: 2,
+                        segment: &segment::pd1::PD1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.3-GSP",
+                        position: 3,
+                        segment: &segment::gsp::GSP,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.4-GSR",
+                        position: 4,
+                        segment: &segment::gsr::GSR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.5-GSC",
+                        position: 5,
+                        segment: &segment::gsc::GSC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.6-PRT",
+                        position: 6,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.7-OH1",
+                        position: 7,
+                        segment: &segment::oh1::OH1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.8-OH2",
+                        position: 8,
+                        segment: &segment::oh2::OH2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.9-OH3",
+                        position: 9,
+                        segment: &segment::oh3::OH3,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.10-OH4",
+                        position: 10,
+                        segment: &segment::oh4::OH4,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.11-NTE",
+                        position: 11,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN",
+                        position: 12,
+                        name: "NEXT_OF_KIN",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.1-NK1",
+                                position: 1,
+                                segment: &segment::nk1::NK1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.2-GSP",
+                                position: 2,
+                                segment: &segment::gsp::GSP,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.3-GSR",
+                                position: 3,
+                                segment: &segment::gsr::GSR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.4-OH2",
+                                position: 4,
+                                segment: &segment::oh2::OH2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.5-OH3",
+                                position: 5,
+                                segment: &segment::oh3::OH3,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.13-ARV",
+                        position: 13,
+                        segment: &segment::arv::ARV,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::B),
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.14-PATIENT_OBSERVATION",
+                        position: 14,
+                        name: "PATIENT_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.14-PATIENT_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.14-PATIENT_OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT",
+                        position: 15,
+                        name: "VISIT",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT.1-PV1",
+                                position: 1,
+                                segment: &segment::pv1::PV1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT.2-PV2",
+                                position: 2,
+                                segment: &segment::pv2::PV2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT.3-PRT",
+                                position: 3,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE",
+                        position: 16,
+                        name: "INSURANCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE.1-IN1",
+                                position: 1,
+                                segment: &segment::in1::IN1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE.2-IN2",
+                                position: 2,
+                                segment: &segment::in2::IN2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE.3-IN3",
+                                position: 3,
+                                segment: &segment::in3::IN3,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION",
+                position: 2,
+                name: "ORDER_OBSERVATION",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER",
+                        position: 1,
+                        name: "COMMON_ORDER",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.1-ORC",
+                                position: 1,
+                                segment: &segment::orc::ORC,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT",
+                                position: 3,
+                                name: "ORDER_DOCUMENT",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT.3-TXA",
+                                        position: 3,
+                                        segment: &segment::txa::TXA,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.2-OBR",
+                        position: 2,
+                        segment: &segment::obr::OBR,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.3-NTE",
+                        position: 3,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.4-OBSERVATION_PARTICIPATION",
+                        position: 4,
+                        name: "OBSERVATION_PARTICIPATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.4-OBSERVATION_PARTICIPATION.1-PRT",
+                                position: 1,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.4-OBSERVATION_PARTICIPATION.2-DEV",
+                                position: 2,
+                                segment: &segment::dev::DEV,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.5-TIMING_QTY",
+                        position: 5,
+                        name: "TIMING_QTY",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.5-TIMING_QTY.1-TQ1",
+                                position: 1,
+                                segment: &segment::tq1::TQ1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.5-TIMING_QTY.2-TQ2",
+                                position: 2,
+                                segment: &segment::tq2::TQ2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.6-CTD",
+                        position: 6,
+                        segment: &segment::ctd::CTD,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION",
+                        position: 7,
+                        name: "OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION.3-NTE",
+                                position: 3,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.8-FT1",
+                        position: 8,
+                        segment: &segment::ft1::FT1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.9-CTI",
+                        position: 9,
+                        segment: &segment::cti::CTI,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN",
+                        position: 10,
+                        name: "SPECIMEN",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.1-SPM",
+                                position: 1,
+                                segment: &segment::spm::SPM,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.2-SPECIMEN_OBSERVATION",
+                                position: 2,
+                                name: "SPECIMEN_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.2-SPECIMEN_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.2-SPECIMEN_OBSERVATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "ORU_R01-A.5-PATIENT_RESULT.3-DEVICE",
+                position: 3,
+                name: "DEVICE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.3-DEVICE.1-DEV",
+                        position: 1,
+                        segment: &segment::dev::DEV,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "ORU_R01-A.5-PATIENT_RESULT.3-DEVICE.2-OBX",
+                        position: 2,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "ORU_R01-A.6-DSC",
+        position: 6,
+        segment: &segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `ORU_R01-A` message structure definition, `http://hl7.org/v2/StructureDefinition/ORU_R01-A`.
 pub static ORU_R01_A: Structure = Structure {
     id: "ORU_R01-A",
     url: Some("http://hl7.org/v2/StructureDefinition/ORU_R01-A"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "ORU_R01-A.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORU_R01-A.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORU_R01-A.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORU_R01-A.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "ORU_R01-A.5-PATIENT_RESULT",
-            position: 5,
-            name: "PATIENT_RESULT",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Group(Group {
-                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT",
-                    position: 1,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.1-PID",
-                            position: 1,
-                            segment: &segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.2-PD1",
-                            position: 2,
-                            segment: &segment::pd1::PD1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.3-GSP",
-                            position: 3,
-                            segment: &segment::gsp::GSP,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.4-GSR",
-                            position: 4,
-                            segment: &segment::gsr::GSR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.5-GSC",
-                            position: 5,
-                            segment: &segment::gsc::GSC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.6-PRT",
-                            position: 6,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.7-OH1",
-                            position: 7,
-                            segment: &segment::oh1::OH1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.8-OH2",
-                            position: 8,
-                            segment: &segment::oh2::OH2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.9-OH3",
-                            position: 9,
-                            segment: &segment::oh3::OH3,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.10-OH4",
-                            position: 10,
-                            segment: &segment::oh4::OH4,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.11-NTE",
-                            position: 11,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN",
-                            position: 12,
-                            name: "NEXT_OF_KIN",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.1-NK1",
-                                    position: 1,
-                                    segment: &segment::nk1::NK1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.2-GSP",
-                                    position: 2,
-                                    segment: &segment::gsp::GSP,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.3-GSR",
-                                    position: 3,
-                                    segment: &segment::gsr::GSR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.4-OH2",
-                                    position: 4,
-                                    segment: &segment::oh2::OH2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.12-NEXT_OF_KIN.5-OH3",
-                                    position: 5,
-                                    segment: &segment::oh3::OH3,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.13-ARV",
-                            position: 13,
-                            segment: &segment::arv::ARV,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::B),
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.14-PATIENT_OBSERVATION",
-                            position: 14,
-                            name: "PATIENT_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.14-PATIENT_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.14-PATIENT_OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT",
-                            position: 15,
-                            name: "VISIT",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT.1-PV1",
-                                    position: 1,
-                                    segment: &segment::pv1::PV1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT.2-PV2",
-                                    position: 2,
-                                    segment: &segment::pv2::PV2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.15-VISIT.3-PRT",
-                                    position: 3,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE",
-                            position: 16,
-                            name: "INSURANCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE.1-IN1",
-                                    position: 1,
-                                    segment: &segment::in1::IN1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE.2-IN2",
-                                    position: 2,
-                                    segment: &segment::in2::IN2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.1-PATIENT.16-INSURANCE.3-IN3",
-                                    position: 3,
-                                    segment: &segment::in3::IN3,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION",
-                    position: 2,
-                    name: "ORDER_OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER",
-                            position: 1,
-                            name: "COMMON_ORDER",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.1-ORC",
-                                    position: 1,
-                                    segment: &segment::orc::ORC,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT",
-                                    position: 3,
-                                    name: "ORDER_DOCUMENT",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.1-COMMON_ORDER.3-ORDER_DOCUMENT.3-TXA",
-                                            position: 3,
-                                            segment: &segment::txa::TXA,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.2-OBR",
-                            position: 2,
-                            segment: &segment::obr::OBR,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.3-NTE",
-                            position: 3,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.4-OBSERVATION_PARTICIPATION",
-                            position: 4,
-                            name: "OBSERVATION_PARTICIPATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.4-OBSERVATION_PARTICIPATION.1-PRT",
-                                    position: 1,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.4-OBSERVATION_PARTICIPATION.2-DEV",
-                                    position: 2,
-                                    segment: &segment::dev::DEV,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.5-TIMING_QTY",
-                            position: 5,
-                            name: "TIMING_QTY",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.5-TIMING_QTY.1-TQ1",
-                                    position: 1,
-                                    segment: &segment::tq1::TQ1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.5-TIMING_QTY.2-TQ2",
-                                    position: 2,
-                                    segment: &segment::tq2::TQ2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.6-CTD",
-                            position: 6,
-                            segment: &segment::ctd::CTD,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION",
-                            position: 7,
-                            name: "OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.7-OBSERVATION.3-NTE",
-                                    position: 3,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.8-FT1",
-                            position: 8,
-                            segment: &segment::ft1::FT1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.9-CTI",
-                            position: 9,
-                            segment: &segment::cti::CTI,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN",
-                            position: 10,
-                            name: "SPECIMEN",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.1-SPM",
-                                    position: 1,
-                                    segment: &segment::spm::SPM,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.2-SPECIMEN_OBSERVATION",
-                                    position: 2,
-                                    name: "SPECIMEN_OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.2-SPECIMEN_OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "ORU_R01-A.5-PATIENT_RESULT.2-ORDER_OBSERVATION.10-SPECIMEN.2-SPECIMEN_OBSERVATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "ORU_R01-A.5-PATIENT_RESULT.3-DEVICE",
-                    position: 3,
-                    name: "DEVICE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.3-DEVICE.1-DEV",
-                            position: 1,
-                            segment: &segment::dev::DEV,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "ORU_R01-A.5-PATIENT_RESULT.3-DEVICE.2-OBX",
-                            position: 2,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "ORU_R01-A.6-DSC",
-            position: 6,
-            segment: &segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &ORU_R01_A_NODES,
 };

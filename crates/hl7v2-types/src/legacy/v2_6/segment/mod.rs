@@ -2,9 +2,10 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The segments of the 2.6 tables whose field table differs from the v2.9.1 one, one module each.
+//! The segments of the 2.6 tables that no v2.9.1 or earlier `static` carries, one module each.
 
 pub mod acc;
+pub mod adj;
 pub mod aig;
 pub mod ail;
 pub mod aip;
@@ -12,46 +13,83 @@ pub mod ais;
 pub mod al1;
 pub mod arq;
 pub mod arv;
+pub mod aut;
+pub mod bpo;
+pub mod bpx;
+pub mod btx;
 pub mod cdm;
+pub mod cer;
+pub mod cns;
+pub mod csp;
+pub mod csr;
+pub mod css;
 pub mod cti;
 pub mod db1;
 pub mod dg1;
 pub mod drg;
-pub mod ed;
+pub mod ecd;
+pub mod ecr;
+pub mod edu;
+pub mod equ;
 pub mod err;
 pub mod evn;
 pub mod ft1;
 pub mod gol;
+pub mod gp2;
 pub mod gt1;
+pub mod iam;
+pub mod ilt;
 pub mod in1;
 pub mod in2;
 pub mod in3;
+pub mod inv;
+pub mod ipc;
+pub mod itm;
+pub mod ivc;
+pub mod ivt;
 pub mod ldp;
 pub mod loc;
+pub mod mfa;
 pub mod mfe;
 pub mod mfi;
 pub mod mrg;
 pub mod msa;
 pub mod msh;
+pub mod nds;
 pub mod nk1;
-pub mod nsc;
+pub mod npu;
 pub mod nte;
 pub mod obr;
 pub mod obx;
 pub mod ods;
 pub mod odt;
 pub mod om1;
+pub mod om2;
+pub mod om3;
+pub mod om4;
+pub mod om5;
+pub mod om7;
 pub mod orc;
+pub mod org;
+pub mod pce;
+pub mod pcr;
 pub mod pd1;
 pub mod pdc;
+pub mod peo;
 pub mod pid;
+pub mod pkg;
 pub mod pr1;
+pub mod pra;
 pub mod prc;
+pub mod psl;
 pub mod pv1;
 pub mod pv2;
+pub mod pye;
 pub mod qpd;
 pub mod qrd;
 pub mod qrf;
+pub mod qri;
+pub mod rf1;
 pub mod rol;
 pub mod rq1;
 pub mod rqd;
@@ -64,15 +102,21 @@ pub mod rxo;
 pub mod rxr;
 pub mod sac;
 pub mod sch;
+pub mod sdd;
 pub mod sid;
+pub mod spm;
+pub mod stf;
+pub mod stz;
+pub mod tcc;
 pub mod tcd;
 pub mod txa;
 pub mod ub1;
-pub mod ub2;
+pub mod vnd;
 
 /// Every segment, in definition id order.
-pub static SEGMENTS: [&crate::model::Segment; 65] = [
+pub static SEGMENTS: [&crate::model::Segment; 108] = [
     &acc::ACC,
+    &adj::ADJ,
     &aig::AIG,
     &ail::AIL,
     &aip::AIP,
@@ -80,46 +124,83 @@ pub static SEGMENTS: [&crate::model::Segment; 65] = [
     &al1::AL1,
     &arq::ARQ,
     &arv::ARV,
+    &aut::AUT,
+    &bpo::BPO,
+    &bpx::BPX,
+    &btx::BTX,
     &cdm::CDM,
+    &cer::CER,
+    &cns::CNS,
+    &csp::CSP,
+    &csr::CSR,
+    &css::CSS,
     &cti::CTI,
     &db1::DB1,
     &dg1::DG1,
     &drg::DRG,
-    &ed::ED,
+    &ecd::ECD,
+    &ecr::ECR,
+    &edu::EDU,
+    &equ::EQU,
     &err::ERR,
     &evn::EVN,
     &ft1::FT1,
     &gol::GOL,
+    &gp2::GP2,
     &gt1::GT1,
+    &iam::IAM,
+    &ilt::ILT,
     &in1::IN1,
     &in2::IN2,
     &in3::IN3,
+    &inv::INV,
+    &ipc::IPC,
+    &itm::ITM,
+    &ivc::IVC,
+    &ivt::IVT,
     &ldp::LDP,
     &loc::LOC,
+    &mfa::MFA,
     &mfe::MFE,
     &mfi::MFI,
     &mrg::MRG,
     &msa::MSA,
     &msh::MSH,
+    &nds::NDS,
     &nk1::NK1,
-    &nsc::NSC,
+    &npu::NPU,
     &nte::NTE,
     &obr::OBR,
     &obx::OBX,
     &ods::ODS,
     &odt::ODT,
     &om1::OM1,
+    &om2::OM2,
+    &om3::OM3,
+    &om4::OM4,
+    &om5::OM5,
+    &om7::OM7,
     &orc::ORC,
+    &org::ORG,
+    &pce::PCE,
+    &pcr::PCR,
     &pd1::PD1,
     &pdc::PDC,
+    &peo::PEO,
     &pid::PID,
+    &pkg::PKG,
     &pr1::PR1,
+    &pra::PRA,
     &prc::PRC,
+    &psl::PSL,
     &pv1::PV1,
     &pv2::PV2,
+    &pye::PYE,
     &qpd::QPD,
     &qrd::QRD,
     &qrf::QRF,
+    &qri::QRI,
+    &rf1::RF1,
     &rol::ROL,
     &rq1::RQ1,
     &rqd::RQD,
@@ -132,11 +213,16 @@ pub static SEGMENTS: [&crate::model::Segment; 65] = [
     &rxr::RXR,
     &sac::SAC,
     &sch::SCH,
+    &sdd::SDD,
     &sid::SID,
+    &spm::SPM,
+    &stf::STF,
+    &stz::STZ,
+    &tcc::TCC,
     &tcd::TCD,
     &txa::TXA,
     &ub1::UB1,
-    &ub2::UB2,
+    &vnd::VND,
 ];
 
 /// Returns the segment whose definition id is `id`, for example `ORC`.

@@ -9,618 +9,621 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`PPP_PCB`], one `static` so a structure with the same tree links to it.
+pub static PPP_PCB_NODES: [Node; 10] = [
+    Node::Segment(SegmentRef {
+        id: "PPP_PCB.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPP_PCB.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPP_PCB.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPP_PCB.4-PID",
+        position: 4,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPP_PCB.5-GSP",
+        position: 5,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPP_PCB.6-GSR",
+        position: 6,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPP_PCB.7-GSC",
+        position: 7,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "PPP_PCB.8-PROVIDER",
+        position: 8,
+        name: "PROVIDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "PPP_PCB.8-PROVIDER.1-PRD",
+                position: 1,
+                segment: &segment::prd::PRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "PPP_PCB.8-PROVIDER.2-CTD",
+                position: 2,
+                segment: &segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "PPP_PCB.9-PATIENT_VISIT",
+        position: 9,
+        name: "PATIENT_VISIT",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "PPP_PCB.9-PATIENT_VISIT.1-PV1",
+                position: 1,
+                segment: &segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "PPP_PCB.9-PATIENT_VISIT.2-PV2",
+                position: 2,
+                segment: &segment::pv2::PV2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "PPP_PCB.10-PATHWAY",
+        position: 10,
+        name: "PATHWAY",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "PPP_PCB.10-PATHWAY.1-PTH",
+                position: 1,
+                segment: &segment::pth::PTH,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "PPP_PCB.10-PATHWAY.2-NTE",
+                position: 2,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "PPP_PCB.10-PATHWAY.3-VAR",
+                position: 3,
+                segment: &segment::var::VAR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION",
+                position: 4,
+                name: "PATHWAY_PARTICIPATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION.1-ROL",
+                        position: 1,
+                        segment: &segment::rol::ROL,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::B),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION.3-VAR",
+                        position: 3,
+                        segment: &segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "PPP_PCB.10-PATHWAY.5-PROBLEM",
+                position: 5,
+                name: "PROBLEM",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.1-PRB",
+                        position: 1,
+                        segment: &segment::prb::PRB,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.2-NTE",
+                        position: 2,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.3-VAR",
+                        position: 3,
+                        segment: &segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION",
+                        position: 4,
+                        name: "PROBLEM_PARTICIPATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION.1-ROL",
+                                position: 1,
+                                segment: &segment::rol::ROL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::B),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION.3-VAR",
+                                position: 3,
+                                segment: &segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION",
+                        position: 5,
+                        name: "PROBLEM_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION.3-NTE",
+                                position: 3,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL",
+                        position: 6,
+                        name: "GOAL",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.1-GOL",
+                                position: 1,
+                                segment: &segment::gol::GOL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.2-NTE",
+                                position: 2,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.3-VAR",
+                                position: 3,
+                                segment: &segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION",
+                                position: 4,
+                                name: "GOAL_PARTICIPATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION.1-ROL",
+                                        position: 1,
+                                        segment: &segment::rol::ROL,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::B),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION.3-VAR",
+                                        position: 3,
+                                        segment: &segment::var::VAR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION",
+                                position: 5,
+                                name: "GOAL_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION.3-NTE",
+                                        position: 3,
+                                        segment: &segment::nte::NTE,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER",
+                        position: 7,
+                        name: "ORDER",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.1-ORC",
+                                position: 1,
+                                segment: &segment::orc::ORC,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL",
+                                position: 2,
+                                name: "ORDER_DETAIL",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Group(Group {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.1-CHOICE",
+                                        position: 1,
+                                        name: "CHOICE",
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        kind: GroupKind::Choice,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-1-OBR",
+                                                position: 1,
+                                                segment: &segment::obr::OBR,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Placeholder(Placeholder {
+                                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-2-Hxx",
+                                                position: 2,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Bounded(1),
+                                                },
+                                            }),
+                                        ],
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.2-NTE",
+                                        position: 2,
+                                        segment: &segment::nte::NTE,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.3-VAR",
+                                        position: 3,
+                                        segment: &segment::var::VAR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Group(Group {
+                                        id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION",
+                                        position: 4,
+                                        name: "ORDER_OBSERVATION",
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        kind: GroupKind::Sequence,
+                                        children: &[
+                                            Node::Segment(SegmentRef {
+                                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.1-OBX",
+                                                position: 1,
+                                                segment: &segment::obx::OBX,
+                                                cardinality: Cardinality {
+                                                    min: 1,
+                                                    max: Max::Bounded(1),
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.2-PRT",
+                                                position: 2,
+                                                segment: &segment::prt::PRT,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.3-NTE",
+                                                position: 3,
+                                                segment: &segment::nte::NTE,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                            Node::Segment(SegmentRef {
+                                                id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.4-VAR",
+                                                position: 4,
+                                                segment: &segment::var::VAR,
+                                                cardinality: Cardinality {
+                                                    min: 0,
+                                                    max: Max::Unbounded,
+                                                },
+                                                status: Some(SegmentStatus::A),
+                                            }),
+                                        ],
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `PPP_PCB` message structure definition, `http://hl7.org/v2/StructureDefinition/PPP_PCB`.
 pub static PPP_PCB: Structure = Structure {
     id: "PPP_PCB",
     url: Some("http://hl7.org/v2/StructureDefinition/PPP_PCB"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "PPP_PCB.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PPP_PCB.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PPP_PCB.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PPP_PCB.4-PID",
-            position: 4,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PPP_PCB.5-GSP",
-            position: 5,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PPP_PCB.6-GSR",
-            position: 6,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "PPP_PCB.7-GSC",
-            position: 7,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "PPP_PCB.8-PROVIDER",
-            position: 8,
-            name: "PROVIDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "PPP_PCB.8-PROVIDER.1-PRD",
-                    position: 1,
-                    segment: &segment::prd::PRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "PPP_PCB.8-PROVIDER.2-CTD",
-                    position: 2,
-                    segment: &segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "PPP_PCB.9-PATIENT_VISIT",
-            position: 9,
-            name: "PATIENT_VISIT",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "PPP_PCB.9-PATIENT_VISIT.1-PV1",
-                    position: 1,
-                    segment: &segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "PPP_PCB.9-PATIENT_VISIT.2-PV2",
-                    position: 2,
-                    segment: &segment::pv2::PV2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "PPP_PCB.10-PATHWAY",
-            position: 10,
-            name: "PATHWAY",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "PPP_PCB.10-PATHWAY.1-PTH",
-                    position: 1,
-                    segment: &segment::pth::PTH,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "PPP_PCB.10-PATHWAY.2-NTE",
-                    position: 2,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "PPP_PCB.10-PATHWAY.3-VAR",
-                    position: 3,
-                    segment: &segment::var::VAR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION",
-                    position: 4,
-                    name: "PATHWAY_PARTICIPATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION.1-ROL",
-                            position: 1,
-                            segment: &segment::rol::ROL,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::B),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "PPP_PCB.10-PATHWAY.4-PATHWAY_PARTICIPATION.3-VAR",
-                            position: 3,
-                            segment: &segment::var::VAR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM",
-                    position: 5,
-                    name: "PROBLEM",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.1-PRB",
-                            position: 1,
-                            segment: &segment::prb::PRB,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.2-NTE",
-                            position: 2,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.3-VAR",
-                            position: 3,
-                            segment: &segment::var::VAR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION",
-                            position: 4,
-                            name: "PROBLEM_PARTICIPATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION.1-ROL",
-                                    position: 1,
-                                    segment: &segment::rol::ROL,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::B),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.4-PROBLEM_PARTICIPATION.3-VAR",
-                                    position: 3,
-                                    segment: &segment::var::VAR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION",
-                            position: 5,
-                            name: "PROBLEM_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.5-PROBLEM_OBSERVATION.3-NTE",
-                                    position: 3,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL",
-                            position: 6,
-                            name: "GOAL",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.1-GOL",
-                                    position: 1,
-                                    segment: &segment::gol::GOL,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.2-NTE",
-                                    position: 2,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.3-VAR",
-                                    position: 3,
-                                    segment: &segment::var::VAR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION",
-                                    position: 4,
-                                    name: "GOAL_PARTICIPATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION.1-ROL",
-                                            position: 1,
-                                            segment: &segment::rol::ROL,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::B),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.4-GOAL_PARTICIPATION.3-VAR",
-                                            position: 3,
-                                            segment: &segment::var::VAR,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION",
-                                    position: 5,
-                                    name: "GOAL_OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.6-GOAL.5-GOAL_OBSERVATION.3-NTE",
-                                            position: 3,
-                                            segment: &segment::nte::NTE,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER",
-                            position: 7,
-                            name: "ORDER",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.1-ORC",
-                                    position: 1,
-                                    segment: &segment::orc::ORC,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL",
-                                    position: 2,
-                                    name: "ORDER_DETAIL",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Group(Group {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.1-CHOICE",
-                                            position: 1,
-                                            name: "CHOICE",
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            kind: GroupKind::Choice,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-1-OBR",
-                                                    position: 1,
-                                                    segment: &segment::obr::OBR,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Placeholder(Placeholder {
-                                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.1-CHOICE.choice-2-Hxx",
-                                                    position: 2,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                }),
-                                            ],
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.2-NTE",
-                                            position: 2,
-                                            segment: &segment::nte::NTE,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.3-VAR",
-                                            position: 3,
-                                            segment: &segment::var::VAR,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Group(Group {
-                                            id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION",
-                                            position: 4,
-                                            name: "ORDER_OBSERVATION",
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            kind: GroupKind::Sequence,
-                                            children: &[
-                                                Node::Segment(SegmentRef {
-                                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.1-OBX",
-                                                    position: 1,
-                                                    segment: &segment::obx::OBX,
-                                                    cardinality: Cardinality {
-                                                        min: 1,
-                                                        max: Max::Bounded(1),
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.2-PRT",
-                                                    position: 2,
-                                                    segment: &segment::prt::PRT,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.3-NTE",
-                                                    position: 3,
-                                                    segment: &segment::nte::NTE,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                                Node::Segment(SegmentRef {
-                                                    id: "PPP_PCB.10-PATHWAY.5-PROBLEM.7-ORDER.2-ORDER_DETAIL.4-ORDER_OBSERVATION.4-VAR",
-                                                    position: 4,
-                                                    segment: &segment::var::VAR,
-                                                    cardinality: Cardinality {
-                                                        min: 0,
-                                                        max: Max::Unbounded,
-                                                    },
-                                                    status: Some(SegmentStatus::A),
-                                                }),
-                                            ],
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &PPP_PCB_NODES,
 };

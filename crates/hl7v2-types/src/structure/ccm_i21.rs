@@ -9,1282 +9,1285 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`CCM_I21`], one `static` so a structure with the same tree links to it.
+pub static CCM_I21_NODES: [Node; 18] = [
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.4-PID",
+        position: 4,
+        segment: &segment::pid::PID,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.5-PD1",
+        position: 5,
+        segment: &segment::pd1::PD1,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.6-GSP",
+        position: 6,
+        segment: &segment::gsp::GSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.7-GSR",
+        position: 7,
+        segment: &segment::gsr::GSR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.8-GSC",
+        position: 8,
+        segment: &segment::gsc::GSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.9-NEXT_OF_KIN",
+        position: 9,
+        name: "NEXT_OF_KIN",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.9-NEXT_OF_KIN.1-NK1",
+                position: 1,
+                segment: &segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.9-NEXT_OF_KIN.2-GSP",
+                position: 2,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.9-NEXT_OF_KIN.3-GSR",
+                position: 3,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.10-INSURANCE",
+        position: 10,
+        name: "INSURANCE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.10-INSURANCE.1-IN1",
+                position: 1,
+                segment: &segment::in1::IN1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.10-INSURANCE.2-IN2",
+                position: 2,
+                segment: &segment::in2::IN2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.10-INSURANCE.3-IN3",
+                position: 3,
+                segment: &segment::in3::IN3,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.11-APPOINTMENT_HISTORY",
+        position: 11,
+        name: "APPOINTMENT_HISTORY",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.11-APPOINTMENT_HISTORY.1-SCH",
+                position: 1,
+                segment: &segment::sch::SCH,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES",
+                position: 2,
+                name: "RESOURCES",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.1-RGS",
+                        position: 1,
+                        segment: &segment::rgs::RGS,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL",
+                        position: 2,
+                        name: "RESOURCE_DETAIL",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Group(Group {
+                                id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT",
+                                position: 1,
+                                name: "RESOURCE_OBJECT",
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Choice,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-1-AIS",
+                                        position: 1,
+                                        segment: &segment::ais::AIS,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-2-AIG",
+                                        position: 2,
+                                        segment: &segment::aig::AIG,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-3-AIL",
+                                        position: 3,
+                                        segment: &segment::ail::AIL,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-4-AIP",
+                                        position: 4,
+                                        segment: &segment::aip::AIP,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.2-RESOURCE_OBSERVATION",
+                                position: 2,
+                                name: "RESOURCE_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.2-RESOURCE_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.2-RESOURCE_OBSERVATION.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.12-CLINICAL_HISTORY",
+        position: 12,
+        name: "CLINICAL_HISTORY",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.12-CLINICAL_HISTORY.1-ORC",
+                position: 1,
+                segment: &segment::orc::ORC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL",
+                position: 2,
+                name: "CLINICAL_HISTORY_DETAIL",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Group(Group {
+                        id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT",
+                        position: 1,
+                        name: "CLINICAL_HISTORY_OBJECT",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Choice,
+                        children: &[
+                            Node::Group(Group {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-1-Group",
+                                position: 1,
+                                name: "Group",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-1-Group.1-OBR",
+                                        position: 1,
+                                        segment: &segment::obr::OBR,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-1-Group.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-2-ODS",
+                                position: 2,
+                                segment: &segment::ods::ODS,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-3-PR1",
+                                position: 3,
+                                segment: &segment::pr1::PR1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-4-RF1",
+                                position: 4,
+                                segment: &segment::rf1::RF1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-5-AL1",
+                                position: 5,
+                                segment: &segment::al1::AL1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-6-IAM",
+                                position: 6,
+                                segment: &segment::iam::IAM,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-7-ACC",
+                                position: 7,
+                                segment: &segment::acc::ACC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-8-RMI",
+                                position: 8,
+                                segment: &segment::rmi::RMI,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-9-DB1",
+                                position: 9,
+                                segment: &segment::db1::DB1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-10-DG1",
+                                position: 10,
+                                segment: &segment::dg1::DG1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-11-DRG",
+                                position: 11,
+                                segment: &segment::drg::DRG,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-12-PDA",
+                                position: 12,
+                                segment: &segment::pda::PDA,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.2-CLINICAL_HISTORY_OBSERVATION",
+                        position: 2,
+                        name: "CLINICAL_HISTORY_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.2-CLINICAL_HISTORY_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.2-CLINICAL_HISTORY_OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY",
+                position: 3,
+                name: "PARTICIPATION_CLINICAL_HISTORY",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Group(Group {
+                        id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT",
+                        position: 1,
+                        name: "PARTICIPATION_CLINICAL_HISTORY_OBJECT",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Choice,
+                        children: &[
+                            Node::Group(Group {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-1-Group",
+                                position: 1,
+                                name: "Group",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-1-Group.1-ROL",
+                                        position: 1,
+                                        segment: &segment::rol::ROL,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::B),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-1-Group.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-2-PRD",
+                                position: 2,
+                                segment: &segment::prd::PRD,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.2-VAR",
+                        position: 2,
+                        segment: &segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.12-CLINICAL_HISTORY.4-CTI",
+                position: 4,
+                segment: &segment::cti::CTI,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.13-PATIENT_VISITS",
+        position: 13,
+        name: "PATIENT_VISITS",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.13-PATIENT_VISITS.1-PV1",
+                position: 1,
+                segment: &segment::pv1::PV1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.13-PATIENT_VISITS.2-PV2",
+                position: 2,
+                segment: &segment::pv2::PV2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.14-MEDICATION_HISTORY",
+        position: 14,
+        name: "MEDICATION_HISTORY",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.14-MEDICATION_HISTORY.1-ORC",
+                position: 1,
+                segment: &segment::orc::ORC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL",
+                position: 2,
+                name: "MEDICATION_ORDER_DETAIL",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.1-RXO",
+                        position: 1,
+                        segment: &segment::rxo::RXO,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.2-RXR",
+                        position: 2,
+                        segment: &segment::rxr::RXR,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.3-RXC",
+                        position: 3,
+                        segment: &segment::rxc::RXC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.4-MEDICATION_ORDER_OBSERVATION",
+                        position: 4,
+                        name: "MEDICATION_ORDER_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.4-MEDICATION_ORDER_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.4-MEDICATION_ORDER_OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL",
+                position: 3,
+                name: "MEDICATION_ENCODING_DETAIL",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.1-RXE",
+                        position: 1,
+                        segment: &segment::rxe::RXE,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.2-RXR",
+                        position: 2,
+                        segment: &segment::rxr::RXR,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.3-RXC",
+                        position: 3,
+                        segment: &segment::rxc::RXC,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.4-MEDICATION_ENCODING_OBSERVATION",
+                        position: 4,
+                        name: "MEDICATION_ENCODING_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.4-MEDICATION_ENCODING_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.4-MEDICATION_ENCODING_OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL",
+                position: 4,
+                name: "MEDICATION_ADMINISTRATION_DETAIL",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.1-RXA",
+                        position: 1,
+                        segment: &segment::rxa::RXA,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.2-RXR",
+                        position: 2,
+                        segment: &segment::rxr::RXR,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.3-MEDICATION_ADMINISTRATION_OBSERVATION",
+                        position: 3,
+                        name: "MEDICATION_ADMINISTRATION_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.3-MEDICATION_ADMINISTRATION_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.3-MEDICATION_ADMINISTRATION_OBSERVATION.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.14-MEDICATION_HISTORY.5-CTI",
+                position: 5,
+                segment: &segment::cti::CTI,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.15-PROBLEM",
+        position: 15,
+        name: "PROBLEM",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.15-PROBLEM.1-PRB",
+                position: 1,
+                segment: &segment::prb::PRB,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.15-PROBLEM.2-VAR",
+                position: 2,
+                segment: &segment::var::VAR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM",
+                position: 3,
+                name: "PARTICIPATION_PROBLEM",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Group(Group {
+                        id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT",
+                        position: 1,
+                        name: "PARTICIPATION_PROBLEM_OBJECT",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Choice,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT.choice-1-ROL",
+                                position: 1,
+                                segment: &segment::rol::ROL,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::B),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT.choice-2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT.choice-3-PRD",
+                                position: 3,
+                                segment: &segment::prd::PRD,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.2-VAR",
+                        position: 2,
+                        segment: &segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.15-PROBLEM.4-PROBLEM_OBSERVATION",
+                position: 4,
+                name: "PROBLEM_OBSERVATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.15-PROBLEM.4-PROBLEM_OBSERVATION.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.15-PROBLEM.4-PROBLEM_OBSERVATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.16-GOAL",
+        position: 16,
+        name: "GOAL",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.16-GOAL.1-GOL",
+                position: 1,
+                segment: &segment::gol::GOL,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.16-GOAL.2-VAR",
+                position: 2,
+                segment: &segment::var::VAR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL",
+                position: 3,
+                name: "PARTICIPATION_GOAL",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Group(Group {
+                        id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT",
+                        position: 1,
+                        name: "PARTICIPATION_GOAL_OBJECT",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Choice,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT.choice-1-ROL",
+                                position: 1,
+                                segment: &segment::rol::ROL,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::B),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT.choice-2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT.choice-3-PRD",
+                                position: 3,
+                                segment: &segment::prd::PRD,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.2-VAR",
+                        position: 2,
+                        segment: &segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.16-GOAL.4-GOAL_OBSERVATION",
+                position: 4,
+                name: "GOAL_OBSERVATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.16-GOAL.4-GOAL_OBSERVATION.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.16-GOAL.4-GOAL_OBSERVATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "CCM_I21.17-PATHWAY",
+        position: 17,
+        name: "PATHWAY",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.17-PATHWAY.1-PTH",
+                position: 1,
+                segment: &segment::pth::PTH,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "CCM_I21.17-PATHWAY.2-VAR",
+                position: 2,
+                segment: &segment::var::VAR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY",
+                position: 3,
+                name: "PARTICIPATION_PATHWAY",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Group(Group {
+                        id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.1-PARTICIPATION_PATHWAY_OBJECT",
+                        position: 1,
+                        name: "PARTICIPATION_PATHWAY_OBJECT",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Choice,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.1-PARTICIPATION_PATHWAY_OBJECT.choice-1-PRT",
+                                position: 1,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.1-PARTICIPATION_PATHWAY_OBJECT.choice-2-PRD",
+                                position: 2,
+                                segment: &segment::prd::PRD,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.2-VAR",
+                        position: 2,
+                        segment: &segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "CCM_I21.17-PATHWAY.4-PATHWAY_OBSERVATION",
+                position: 4,
+                name: "PATHWAY_OBSERVATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.17-PATHWAY.4-PATHWAY_OBSERVATION.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "CCM_I21.17-PATHWAY.4-PATHWAY_OBSERVATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "CCM_I21.18-REL",
+        position: 18,
+        segment: &segment::rel::REL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+];
+
 /// The `CCM_I21` message structure definition, `http://hl7.org/v2/StructureDefinition/CCM_I21`.
 pub static CCM_I21: Structure = Structure {
     id: "CCM_I21",
     url: Some("http://hl7.org/v2/StructureDefinition/CCM_I21"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.4-PID",
-            position: 4,
-            segment: &segment::pid::PID,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.5-PD1",
-            position: 5,
-            segment: &segment::pd1::PD1,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.6-GSP",
-            position: 6,
-            segment: &segment::gsp::GSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.7-GSR",
-            position: 7,
-            segment: &segment::gsr::GSR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.8-GSC",
-            position: 8,
-            segment: &segment::gsc::GSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.9-NEXT_OF_KIN",
-            position: 9,
-            name: "NEXT_OF_KIN",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.9-NEXT_OF_KIN.1-NK1",
-                    position: 1,
-                    segment: &segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.9-NEXT_OF_KIN.2-GSP",
-                    position: 2,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.9-NEXT_OF_KIN.3-GSR",
-                    position: 3,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.10-INSURANCE",
-            position: 10,
-            name: "INSURANCE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.10-INSURANCE.1-IN1",
-                    position: 1,
-                    segment: &segment::in1::IN1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.10-INSURANCE.2-IN2",
-                    position: 2,
-                    segment: &segment::in2::IN2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.10-INSURANCE.3-IN3",
-                    position: 3,
-                    segment: &segment::in3::IN3,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.11-APPOINTMENT_HISTORY",
-            position: 11,
-            name: "APPOINTMENT_HISTORY",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.11-APPOINTMENT_HISTORY.1-SCH",
-                    position: 1,
-                    segment: &segment::sch::SCH,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES",
-                    position: 2,
-                    name: "RESOURCES",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.1-RGS",
-                            position: 1,
-                            segment: &segment::rgs::RGS,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL",
-                            position: 2,
-                            name: "RESOURCE_DETAIL",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Group(Group {
-                                    id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT",
-                                    position: 1,
-                                    name: "RESOURCE_OBJECT",
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Choice,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-1-AIS",
-                                            position: 1,
-                                            segment: &segment::ais::AIS,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-2-AIG",
-                                            position: 2,
-                                            segment: &segment::aig::AIG,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-3-AIL",
-                                            position: 3,
-                                            segment: &segment::ail::AIL,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.1-RESOURCE_OBJECT.choice-4-AIP",
-                                            position: 4,
-                                            segment: &segment::aip::AIP,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Group(Group {
-                                    id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.2-RESOURCE_OBSERVATION",
-                                    position: 2,
-                                    name: "RESOURCE_OBSERVATION",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.2-RESOURCE_OBSERVATION.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.11-APPOINTMENT_HISTORY.2-RESOURCES.2-RESOURCE_DETAIL.2-RESOURCE_OBSERVATION.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.12-CLINICAL_HISTORY",
-            position: 12,
-            name: "CLINICAL_HISTORY",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.12-CLINICAL_HISTORY.1-ORC",
-                    position: 1,
-                    segment: &segment::orc::ORC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL",
-                    position: 2,
-                    name: "CLINICAL_HISTORY_DETAIL",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Group(Group {
-                            id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT",
-                            position: 1,
-                            name: "CLINICAL_HISTORY_OBJECT",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Choice,
-                            children: &[
-                                Node::Group(Group {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-1-Group",
-                                    position: 1,
-                                    name: "Group",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-1-Group.1-OBR",
-                                            position: 1,
-                                            segment: &segment::obr::OBR,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-1-Group.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-2-ODS",
-                                    position: 2,
-                                    segment: &segment::ods::ODS,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-3-PR1",
-                                    position: 3,
-                                    segment: &segment::pr1::PR1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-4-RF1",
-                                    position: 4,
-                                    segment: &segment::rf1::RF1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-5-AL1",
-                                    position: 5,
-                                    segment: &segment::al1::AL1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-6-IAM",
-                                    position: 6,
-                                    segment: &segment::iam::IAM,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-7-ACC",
-                                    position: 7,
-                                    segment: &segment::acc::ACC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-8-RMI",
-                                    position: 8,
-                                    segment: &segment::rmi::RMI,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-9-DB1",
-                                    position: 9,
-                                    segment: &segment::db1::DB1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-10-DG1",
-                                    position: 10,
-                                    segment: &segment::dg1::DG1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-11-DRG",
-                                    position: 11,
-                                    segment: &segment::drg::DRG,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.1-CLINICAL_HISTORY_OBJECT.choice-12-PDA",
-                                    position: 12,
-                                    segment: &segment::pda::PDA,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.2-CLINICAL_HISTORY_OBSERVATION",
-                            position: 2,
-                            name: "CLINICAL_HISTORY_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.2-CLINICAL_HISTORY_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.2-CLINICAL_HISTORY_DETAIL.2-CLINICAL_HISTORY_OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY",
-                    position: 3,
-                    name: "PARTICIPATION_CLINICAL_HISTORY",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Group(Group {
-                            id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT",
-                            position: 1,
-                            name: "PARTICIPATION_CLINICAL_HISTORY_OBJECT",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Choice,
-                            children: &[
-                                Node::Group(Group {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-1-Group",
-                                    position: 1,
-                                    name: "Group",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-1-Group.1-ROL",
-                                            position: 1,
-                                            segment: &segment::rol::ROL,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::B),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-1-Group.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.1-PARTICIPATION_CLINICAL_HISTORY_OBJECT.choice-2-PRD",
-                                    position: 2,
-                                    segment: &segment::prd::PRD,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.12-CLINICAL_HISTORY.3-PARTICIPATION_CLINICAL_HISTORY.2-VAR",
-                            position: 2,
-                            segment: &segment::var::VAR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.12-CLINICAL_HISTORY.4-CTI",
-                    position: 4,
-                    segment: &segment::cti::CTI,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.13-PATIENT_VISITS",
-            position: 13,
-            name: "PATIENT_VISITS",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.13-PATIENT_VISITS.1-PV1",
-                    position: 1,
-                    segment: &segment::pv1::PV1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.13-PATIENT_VISITS.2-PV2",
-                    position: 2,
-                    segment: &segment::pv2::PV2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.14-MEDICATION_HISTORY",
-            position: 14,
-            name: "MEDICATION_HISTORY",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.14-MEDICATION_HISTORY.1-ORC",
-                    position: 1,
-                    segment: &segment::orc::ORC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL",
-                    position: 2,
-                    name: "MEDICATION_ORDER_DETAIL",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.1-RXO",
-                            position: 1,
-                            segment: &segment::rxo::RXO,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.2-RXR",
-                            position: 2,
-                            segment: &segment::rxr::RXR,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.3-RXC",
-                            position: 3,
-                            segment: &segment::rxc::RXC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.4-MEDICATION_ORDER_OBSERVATION",
-                            position: 4,
-                            name: "MEDICATION_ORDER_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.4-MEDICATION_ORDER_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.14-MEDICATION_HISTORY.2-MEDICATION_ORDER_DETAIL.4-MEDICATION_ORDER_OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL",
-                    position: 3,
-                    name: "MEDICATION_ENCODING_DETAIL",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.1-RXE",
-                            position: 1,
-                            segment: &segment::rxe::RXE,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.2-RXR",
-                            position: 2,
-                            segment: &segment::rxr::RXR,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.3-RXC",
-                            position: 3,
-                            segment: &segment::rxc::RXC,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.4-MEDICATION_ENCODING_OBSERVATION",
-                            position: 4,
-                            name: "MEDICATION_ENCODING_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.4-MEDICATION_ENCODING_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.14-MEDICATION_HISTORY.3-MEDICATION_ENCODING_DETAIL.4-MEDICATION_ENCODING_OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL",
-                    position: 4,
-                    name: "MEDICATION_ADMINISTRATION_DETAIL",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.1-RXA",
-                            position: 1,
-                            segment: &segment::rxa::RXA,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.2-RXR",
-                            position: 2,
-                            segment: &segment::rxr::RXR,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.3-MEDICATION_ADMINISTRATION_OBSERVATION",
-                            position: 3,
-                            name: "MEDICATION_ADMINISTRATION_OBSERVATION",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.3-MEDICATION_ADMINISTRATION_OBSERVATION.1-OBX",
-                                    position: 1,
-                                    segment: &segment::obx::OBX,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.14-MEDICATION_HISTORY.4-MEDICATION_ADMINISTRATION_DETAIL.3-MEDICATION_ADMINISTRATION_OBSERVATION.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.14-MEDICATION_HISTORY.5-CTI",
-                    position: 5,
-                    segment: &segment::cti::CTI,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.15-PROBLEM",
-            position: 15,
-            name: "PROBLEM",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.15-PROBLEM.1-PRB",
-                    position: 1,
-                    segment: &segment::prb::PRB,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.15-PROBLEM.2-VAR",
-                    position: 2,
-                    segment: &segment::var::VAR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM",
-                    position: 3,
-                    name: "PARTICIPATION_PROBLEM",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Group(Group {
-                            id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT",
-                            position: 1,
-                            name: "PARTICIPATION_PROBLEM_OBJECT",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Choice,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT.choice-1-ROL",
-                                    position: 1,
-                                    segment: &segment::rol::ROL,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::B),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT.choice-2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.1-PARTICIPATION_PROBLEM_OBJECT.choice-3-PRD",
-                                    position: 3,
-                                    segment: &segment::prd::PRD,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.15-PROBLEM.3-PARTICIPATION_PROBLEM.2-VAR",
-                            position: 2,
-                            segment: &segment::var::VAR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.15-PROBLEM.4-PROBLEM_OBSERVATION",
-                    position: 4,
-                    name: "PROBLEM_OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.15-PROBLEM.4-PROBLEM_OBSERVATION.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.15-PROBLEM.4-PROBLEM_OBSERVATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.16-GOAL",
-            position: 16,
-            name: "GOAL",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.16-GOAL.1-GOL",
-                    position: 1,
-                    segment: &segment::gol::GOL,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.16-GOAL.2-VAR",
-                    position: 2,
-                    segment: &segment::var::VAR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL",
-                    position: 3,
-                    name: "PARTICIPATION_GOAL",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Group(Group {
-                            id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT",
-                            position: 1,
-                            name: "PARTICIPATION_GOAL_OBJECT",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Choice,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT.choice-1-ROL",
-                                    position: 1,
-                                    segment: &segment::rol::ROL,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::B),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT.choice-2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.1-PARTICIPATION_GOAL_OBJECT.choice-3-PRD",
-                                    position: 3,
-                                    segment: &segment::prd::PRD,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.16-GOAL.3-PARTICIPATION_GOAL.2-VAR",
-                            position: 2,
-                            segment: &segment::var::VAR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.16-GOAL.4-GOAL_OBSERVATION",
-                    position: 4,
-                    name: "GOAL_OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.16-GOAL.4-GOAL_OBSERVATION.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.16-GOAL.4-GOAL_OBSERVATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "CCM_I21.17-PATHWAY",
-            position: 17,
-            name: "PATHWAY",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.17-PATHWAY.1-PTH",
-                    position: 1,
-                    segment: &segment::pth::PTH,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "CCM_I21.17-PATHWAY.2-VAR",
-                    position: 2,
-                    segment: &segment::var::VAR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY",
-                    position: 3,
-                    name: "PARTICIPATION_PATHWAY",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Group(Group {
-                            id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.1-PARTICIPATION_PATHWAY_OBJECT",
-                            position: 1,
-                            name: "PARTICIPATION_PATHWAY_OBJECT",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Choice,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.1-PARTICIPATION_PATHWAY_OBJECT.choice-1-PRT",
-                                    position: 1,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.1-PARTICIPATION_PATHWAY_OBJECT.choice-2-PRD",
-                                    position: 2,
-                                    segment: &segment::prd::PRD,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.17-PATHWAY.3-PARTICIPATION_PATHWAY.2-VAR",
-                            position: 2,
-                            segment: &segment::var::VAR,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "CCM_I21.17-PATHWAY.4-PATHWAY_OBSERVATION",
-                    position: 4,
-                    name: "PATHWAY_OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.17-PATHWAY.4-PATHWAY_OBSERVATION.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "CCM_I21.17-PATHWAY.4-PATHWAY_OBSERVATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "CCM_I21.18-REL",
-            position: 18,
-            segment: &segment::rel::REL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-    ],
+    nodes: &CCM_I21_NODES,
 };

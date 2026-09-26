@@ -35,10 +35,12 @@ resources are the authority for what it emits (`.claude/rules/codegen.md`).
   `scripts/vendor/v2-legacy.sh` fetches into the ignored
   `vendor/hl7-v2-legacy/` (`legacy::source`, one directory of JSON tables
   per version, and table 0354 of `hl7.terminology`) and lowers every
-  structure whose code v2.9.1 lacks, per version, into the `lower` shapes
-  (`legacy::lower`). `v2::render` emits them under `legacy/` with the
-  segments whose field table differs from v2.9.1, and links the rest to the
-  v2.9.1 statics. `legacy::datatype` gives each data type code those
+  structure of every version into the `lower` shapes (`legacy::lower`,
+  #333), marking withdrawn those whose code v2.9.1 lacks. Nothing is emitted
+  twice (`legacy::lower::Owner`): a segment links to the agreeing v2.9.1
+  static or to an earlier version's identical one, and a tree identical to an
+  earlier version's links its `<NAME>_NODES` (`legacy::lower::tree_owner`).
+  `v2::render` emits the rest under `legacy/`. `legacy::datatype` gives each data type code those
   segments' fields name a `LegacyDataType` static per version, with the base
   type a version-specific code stands for (`CM_MSG` is `MSG`, `CE_0051` is
   `CE` bound to table 0051, `TS` is `DTM`), derived from the code since the

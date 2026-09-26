@@ -6,306 +6,309 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`SQR_S25`], one `static` so a structure with the same tree links to it.
+pub static SQR_S25_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "SQR_S25.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_6::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "SQR_S25.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_6::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "SQR_S25.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_6::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "SQR_S25.4-QAK",
+        position: 4,
+        segment: &crate::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "SQR_S25.5-SCHEDULE",
+        position: 5,
+        name: "SCHEDULE",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "SQR_S25.5-SCHEDULE.1-SCH",
+                position: 1,
+                segment: &crate::legacy::v2_6::segment::sch::SCH,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "SQR_S25.5-SCHEDULE.2-TQ1",
+                position: 2,
+                segment: &crate::segment::tq1::TQ1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "SQR_S25.5-SCHEDULE.3-NTE",
+                position: 3,
+                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "SQR_S25.5-SCHEDULE.4-PATIENT",
+                position: 4,
+                name: "PATIENT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SQR_S25.5-SCHEDULE.4-PATIENT.1-PID",
+                        position: 1,
+                        segment: &crate::legacy::v2_6::segment::pid::PID,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SQR_S25.5-SCHEDULE.4-PATIENT.2-PV1",
+                        position: 2,
+                        segment: &crate::legacy::v2_6::segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SQR_S25.5-SCHEDULE.4-PATIENT.3-PV2",
+                        position: 3,
+                        segment: &crate::legacy::v2_6::segment::pv2::PV2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SQR_S25.5-SCHEDULE.4-PATIENT.4-DG1",
+                        position: 4,
+                        segment: &crate::legacy::v2_6::segment::dg1::DG1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "SQR_S25.5-SCHEDULE.5-RESOURCES",
+                position: 5,
+                name: "RESOURCES",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SQR_S25.5-SCHEDULE.5-RESOURCES.1-RGS",
+                        position: 1,
+                        segment: &crate::segment::rgs::RGS,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "SQR_S25.5-SCHEDULE.5-RESOURCES.2-SERVICE",
+                        position: 2,
+                        name: "SERVICE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.2-SERVICE.1-AIS",
+                                position: 1,
+                                segment: &crate::legacy::v2_6::segment::ais::AIS,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.2-SERVICE.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SQR_S25.5-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE",
+                        position: 3,
+                        name: "GENERAL_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
+                                position: 1,
+                                segment: &crate::legacy::v2_6::segment::aig::AIG,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SQR_S25.5-SCHEDULE.5-RESOURCES.4-PERSONNEL_RESOURCE",
+                        position: 4,
+                        name: "PERSONNEL_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.4-PERSONNEL_RESOURCE.1-AIP",
+                                position: 1,
+                                segment: &crate::legacy::v2_6::segment::aip::AIP,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.4-PERSONNEL_RESOURCE.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "SQR_S25.5-SCHEDULE.5-RESOURCES.5-LOCATION_RESOURCE",
+                        position: 5,
+                        name: "LOCATION_RESOURCE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.5-LOCATION_RESOURCE.1-AIL",
+                                position: 1,
+                                segment: &crate::legacy::v2_6::segment::ail::AIL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "SQR_S25.5-SCHEDULE.5-RESOURCES.5-LOCATION_RESOURCE.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_6::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "SQR_S25.6-DSC",
+        position: 6,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `SQR_S25` message structure of the 2.6 tables, withdrawn as of 2.7.
 pub static SQR_S25: Structure = Structure {
     id: "SQR_S25",
     url: None,
     version: "2.6",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "SQR_S25.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_6::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "SQR_S25.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_6::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "SQR_S25.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_6::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "SQR_S25.4-QAK",
-            position: 4,
-            segment: &crate::segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "SQR_S25.5-DSC",
-            position: 5,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "SQR_S25.6-SCHEDULE",
-            position: 6,
-            name: "SCHEDULE",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "SQR_S25.6-SCHEDULE.1-SCH",
-                    position: 1,
-                    segment: &crate::legacy::v2_6::segment::sch::SCH,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SQR_S25.6-SCHEDULE.2-TQ1",
-                    position: 2,
-                    segment: &crate::segment::tq1::TQ1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SQR_S25.6-SCHEDULE.3-NTE",
-                    position: 3,
-                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: None,
-                }),
-                Node::Group(Group {
-                    id: "SQR_S25.6-SCHEDULE.4-PATIENT",
-                    position: 4,
-                    name: "PATIENT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SQR_S25.6-SCHEDULE.4-PATIENT.1-PID",
-                            position: 1,
-                            segment: &crate::legacy::v2_6::segment::pid::PID,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SQR_S25.6-SCHEDULE.4-PATIENT.2-PV1",
-                            position: 2,
-                            segment: &crate::legacy::v2_6::segment::pv1::PV1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SQR_S25.6-SCHEDULE.4-PATIENT.3-PV2",
-                            position: 3,
-                            segment: &crate::legacy::v2_6::segment::pv2::PV2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SQR_S25.6-SCHEDULE.4-PATIENT.4-DG1",
-                            position: 4,
-                            segment: &crate::legacy::v2_6::segment::dg1::DG1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES",
-                    position: 5,
-                    name: "RESOURCES",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SQR_S25.6-SCHEDULE.5-RESOURCES.1-RGS",
-                            position: 1,
-                            segment: &crate::segment::rgs::RGS,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: None,
-                        }),
-                        Node::Group(Group {
-                            id: "SQR_S25.6-SCHEDULE.5-RESOURCES.2-SERVICE",
-                            position: 2,
-                            name: "SERVICE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.2-SERVICE.1-AIS",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_6::segment::ais::AIS,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.2-SERVICE.2-NTE",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SQR_S25.6-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE",
-                            position: 3,
-                            name: "GENERAL_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.1-AIG",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_6::segment::aig::AIG,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.3-GENERAL_RESOURCE.2-NTE",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SQR_S25.6-SCHEDULE.5-RESOURCES.4-PERSONNEL_RESOURCE",
-                            position: 4,
-                            name: "PERSONNEL_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.4-PERSONNEL_RESOURCE.1-AIP",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_6::segment::aip::AIP,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.4-PERSONNEL_RESOURCE.2-NTE",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "SQR_S25.6-SCHEDULE.5-RESOURCES.5-LOCATION_RESOURCE",
-                            position: 5,
-                            name: "LOCATION_RESOURCE",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.5-LOCATION_RESOURCE.1-AIL",
-                                    position: 1,
-                                    segment: &crate::legacy::v2_6::segment::ail::AIL,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: None,
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "SQR_S25.6-SCHEDULE.5-RESOURCES.5-LOCATION_RESOURCE.2-NTE",
-                                    position: 2,
-                                    segment: &crate::legacy::v2_6::segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: None,
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &SQR_S25_NODES,
 };

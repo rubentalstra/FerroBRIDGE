@@ -53,10 +53,17 @@ pub struct EmitReport {
     pub legacy_structures: usize,
     /// The number of legacy structure codes.
     pub legacy_codes: usize,
-    /// The number of legacy segments that differ from their v2.9.1 segment.
+    /// The number of legacy structures whose code the v2.9.1 definitions lack.
+    pub legacy_withdrawn: usize,
+    /// The number of legacy trees emitted, the rest linking to an identical one.
+    pub legacy_trees: usize,
+    /// The number of legacy segments emitted.
     pub legacy_segments: usize,
     /// The number of legacy segment references linked to a v2.9.1 segment.
     pub legacy_shared: usize,
+    /// The number of legacy segment references linked to an earlier
+    /// version's identical segment.
+    pub legacy_inherited: usize,
     /// The files written or checked, relative to `src/`.
     pub files: Vec<String>,
 }
@@ -151,8 +158,11 @@ pub fn emit(options: &EmitOptions) -> Result<EmitReport, EmitError> {
         messages: model.messages.len(),
         legacy_structures: legacy.structure_count(),
         legacy_codes: legacy.code_count(),
+        legacy_withdrawn: legacy.withdrawn_count(),
+        legacy_trees: legacy.tree_count(),
         legacy_segments: legacy.segment_count(),
         legacy_shared: legacy.shared_count(),
+        legacy_inherited: legacy.inherited_count(),
         files: formatted.keys().cloned().collect(),
     })
 }

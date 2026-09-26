@@ -114,6 +114,28 @@ pub static CE_0172: LegacyDataType = LegacyDataType {
     }),
 };
 
+/// The `CE_0175` data type code of the 2.3 tables.
+pub static CE_0175: LegacyDataType = LegacyDataType {
+    code: "CE_0175",
+    version: "2.3",
+    name: "CE_NORM mit Tab. 0175",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0175"),
+    }),
+};
+
+/// The `CE_0181` data type code of the 2.3 tables.
+pub static CE_0181: LegacyDataType = LegacyDataType {
+    code: "CE_0181",
+    version: "2.3",
+    name: "CE_NORM mit Tab. 0181",
+    base: Some(LegacyBase {
+        code: "CE",
+        table: Some("0181"),
+    }),
+};
+
 /// The `CE_0212` data type code of the 2.3 tables.
 pub static CE_0212: LegacyDataType = LegacyDataType {
     code: "CE_0212",

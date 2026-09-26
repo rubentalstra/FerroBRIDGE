@@ -6,82 +6,85 @@
 
 use crate::model::{Cardinality, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`RSP_K15`], one `static` so a structure with the same tree links to it.
+pub static RSP_K15_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "RSP_K15.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_K15.2-MSA",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_K15.3-ERR",
+        position: 3,
+        segment: &crate::legacy::v2_4::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_K15.4-QAK",
+        position: 4,
+        segment: &crate::legacy::v2_4::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_K15.5-QPD",
+        position: 5,
+        segment: &crate::legacy::v2_4::segment::qpd::QPD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_K15.6-DSP",
+        position: 6,
+        segment: &crate::segment::dsp::DSP,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "RSP_K15.7-DSC",
+        position: 7,
+        segment: &crate::segment::dsc::DSC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `RSP_K15` message structure of the 2.4 tables, withdrawn as of 2.5.
 pub static RSP_K15: Structure = Structure {
     id: "RSP_K15",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.5"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "RSP_K15.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_K15.2-MSA",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_K15.3-ERR",
-            position: 3,
-            segment: &crate::legacy::v2_4::segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_K15.4-QAK",
-            position: 4,
-            segment: &crate::legacy::v2_4::segment::qak::QAK,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_K15.5-QPD",
-            position: 5,
-            segment: &crate::legacy::v2_4::segment::qpd::QPD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_K15.6-DSP",
-            position: 6,
-            segment: &crate::segment::dsp::DSP,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "RSP_K15.7-DSC",
-            position: 7,
-            segment: &crate::segment::dsc::DSC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &RSP_K15_NODES,
 };

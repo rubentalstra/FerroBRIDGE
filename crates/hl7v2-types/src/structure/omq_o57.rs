@@ -9,756 +9,759 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`OMQ_O57`], one `static` so a structure with the same tree links to it.
+pub static OMQ_O57_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "OMQ_O57.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OMQ_O57.2-ARV",
+        position: 2,
+        segment: &segment::arv::ARV,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OMQ_O57.3-SFT",
+        position: 3,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OMQ_O57.4-UAC",
+        position: 4,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "OMQ_O57.5-NTE",
+        position: 5,
+        segment: &segment::nte::NTE,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "OMQ_O57.6-PATIENT",
+        position: 6,
+        name: "PATIENT",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.1-PID",
+                position: 1,
+                segment: &segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.2-PD1",
+                position: 2,
+                segment: &segment::pd1::PD1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.3-GSP",
+                position: 3,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.4-GSR",
+                position: 4,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.5-GSC",
+                position: 5,
+                segment: &segment::gsc::GSC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.6-PRT",
+                position: 6,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.7-NTE",
+                position: 7,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.8-NK1",
+                position: 8,
+                segment: &segment::nk1::NK1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.9-GSP",
+                position: 9,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.10-GSR",
+                position: 10,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.11-ARV",
+                position: 11,
+                segment: &segment::arv::ARV,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::B),
+            }),
+            Node::Group(Group {
+                id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT",
+                position: 12,
+                name: "PATIENT_VISIT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT.1-PV1",
+                        position: 1,
+                        segment: &segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT.2-PV2",
+                        position: 2,
+                        segment: &segment::pv2::PV2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT.3-PRT",
+                        position: 3,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "OMQ_O57.6-PATIENT.13-INSURANCE",
+                position: 13,
+                name: "INSURANCE",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.6-PATIENT.13-INSURANCE.1-IN1",
+                        position: 1,
+                        segment: &segment::in1::IN1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.6-PATIENT.13-INSURANCE.2-IN2",
+                        position: 2,
+                        segment: &segment::in2::IN2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.6-PATIENT.13-INSURANCE.3-IN3",
+                        position: 3,
+                        segment: &segment::in3::IN3,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.14-GT1",
+                position: 14,
+                segment: &segment::gt1::GT1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.6-PATIENT.15-AL1",
+                position: 15,
+                segment: &segment::al1::AL1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "OMQ_O57.7-ORDER",
+        position: 7,
+        name: "ORDER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.1-ORC",
+                position: 1,
+                segment: &segment::orc::ORC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.2-PRT",
+                position: 2,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.3-OBX",
+                position: 3,
+                segment: &segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.4-PRT",
+                position: 4,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.5-TXA",
+                position: 5,
+                segment: &segment::txa::TXA,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.6-CTD",
+                position: 6,
+                segment: &segment::ctd::CTD,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.7-DG1",
+                position: 7,
+                segment: &segment::dg1::DG1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "OMQ_O57.7-ORDER.8-OBSERVATION",
+                position: 8,
+                name: "OBSERVATION",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.7-ORDER.8-OBSERVATION.1-OBX",
+                        position: 1,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.7-ORDER.8-OBSERVATION.2-PRT",
+                        position: 2,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.7-ORDER.8-OBSERVATION.3-NTE",
+                        position: 3,
+                        segment: &segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT",
+                position: 9,
+                name: "PRIOR_RESULT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Group(Group {
+                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR",
+                        position: 1,
+                        name: "PATIENT_PRIOR",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.1-PID",
+                                position: 1,
+                                segment: &segment::pid::PID,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.2-PD1",
+                                position: 2,
+                                segment: &segment::pd1::PD1,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.3-GSP",
+                                position: 3,
+                                segment: &segment::gsp::GSP,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.4-GSR",
+                                position: 4,
+                                segment: &segment::gsr::GSR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.5-GSC",
+                                position: 5,
+                                segment: &segment::gsc::GSC,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.6-PRT",
+                                position: 6,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.7-ARV",
+                                position: 7,
+                                segment: &segment::arv::ARV,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::B),
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR",
+                        position: 2,
+                        name: "PATIENT_VISIT_PRIOR",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR.1-PV1",
+                                position: 1,
+                                segment: &segment::pv1::PV1,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR.2-PV2",
+                                position: 2,
+                                segment: &segment::pv2::PV2,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR.3-PRT",
+                                position: 3,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                        ],
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.3-AL1",
+                        position: 3,
+                        segment: &segment::al1::AL1,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR",
+                        position: 4,
+                        name: "ORDER_PRIOR",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.1-ORC",
+                                position: 1,
+                                segment: &segment::orc::ORC,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.2-PRT",
+                                position: 2,
+                                segment: &segment::prt::PRT,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.3-OBR",
+                                position: 3,
+                                segment: &segment::obr::OBR,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.4-TIMING_PRIOR",
+                                position: 4,
+                                name: "TIMING_PRIOR",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.4-TIMING_PRIOR.1-TQ1",
+                                        position: 1,
+                                        segment: &segment::tq1::TQ1,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.4-TIMING_PRIOR.2-TQ2",
+                                        position: 2,
+                                        segment: &segment::tq2::TQ2,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.5-NTE",
+                                position: 5,
+                                segment: &segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.6-OBSERVATION_PARTICIPATION_PRIOR",
+                                position: 6,
+                                name: "OBSERVATION_PARTICIPATION_PRIOR",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.6-OBSERVATION_PARTICIPATION_PRIOR.1-PRT",
+                                        position: 1,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.6-OBSERVATION_PARTICIPATION_PRIOR.2-DEV",
+                                        position: 2,
+                                        segment: &segment::dev::DEV,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.7-CTD",
+                                position: 7,
+                                segment: &segment::ctd::CTD,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR",
+                                position: 8,
+                                name: "OBSERVATION_PRIOR",
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR.1-OBX",
+                                        position: 1,
+                                        segment: &segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR.2-PRT",
+                                        position: 2,
+                                        segment: &segment::prt::PRT,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR.3-NTE",
+                                        position: 3,
+                                        segment: &segment::nte::NTE,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.10-FT1",
+                position: 10,
+                segment: &segment::ft1::FT1,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.11-CTI",
+                position: 11,
+                segment: &segment::cti::CTI,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "OMQ_O57.7-ORDER.12-BLG",
+                position: 12,
+                segment: &segment::blg::BLG,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+];
+
 /// The `OMQ_O57` message structure definition, `http://hl7.org/v2/StructureDefinition/OMQ_O57`.
 pub static OMQ_O57: Structure = Structure {
     id: "OMQ_O57",
     url: Some("http://hl7.org/v2/StructureDefinition/OMQ_O57"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "OMQ_O57.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OMQ_O57.2-ARV",
-            position: 2,
-            segment: &segment::arv::ARV,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OMQ_O57.3-SFT",
-            position: 3,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OMQ_O57.4-UAC",
-            position: 4,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "OMQ_O57.5-NTE",
-            position: 5,
-            segment: &segment::nte::NTE,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "OMQ_O57.6-PATIENT",
-            position: 6,
-            name: "PATIENT",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.1-PID",
-                    position: 1,
-                    segment: &segment::pid::PID,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.2-PD1",
-                    position: 2,
-                    segment: &segment::pd1::PD1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.3-GSP",
-                    position: 3,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.4-GSR",
-                    position: 4,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.5-GSC",
-                    position: 5,
-                    segment: &segment::gsc::GSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.6-PRT",
-                    position: 6,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.7-NTE",
-                    position: 7,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.8-NK1",
-                    position: 8,
-                    segment: &segment::nk1::NK1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.9-GSP",
-                    position: 9,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.10-GSR",
-                    position: 10,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.11-ARV",
-                    position: 11,
-                    segment: &segment::arv::ARV,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::B),
-                }),
-                Node::Group(Group {
-                    id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT",
-                    position: 12,
-                    name: "PATIENT_VISIT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT.1-PV1",
-                            position: 1,
-                            segment: &segment::pv1::PV1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT.2-PV2",
-                            position: 2,
-                            segment: &segment::pv2::PV2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.6-PATIENT.12-PATIENT_VISIT.3-PRT",
-                            position: 3,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "OMQ_O57.6-PATIENT.13-INSURANCE",
-                    position: 13,
-                    name: "INSURANCE",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.6-PATIENT.13-INSURANCE.1-IN1",
-                            position: 1,
-                            segment: &segment::in1::IN1,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.6-PATIENT.13-INSURANCE.2-IN2",
-                            position: 2,
-                            segment: &segment::in2::IN2,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.6-PATIENT.13-INSURANCE.3-IN3",
-                            position: 3,
-                            segment: &segment::in3::IN3,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.14-GT1",
-                    position: 14,
-                    segment: &segment::gt1::GT1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.6-PATIENT.15-AL1",
-                    position: 15,
-                    segment: &segment::al1::AL1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "OMQ_O57.7-ORDER",
-            position: 7,
-            name: "ORDER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.1-ORC",
-                    position: 1,
-                    segment: &segment::orc::ORC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.2-PRT",
-                    position: 2,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.3-OBX",
-                    position: 3,
-                    segment: &segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.4-PRT",
-                    position: 4,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.5-TXA",
-                    position: 5,
-                    segment: &segment::txa::TXA,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.6-CTD",
-                    position: 6,
-                    segment: &segment::ctd::CTD,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.7-DG1",
-                    position: 7,
-                    segment: &segment::dg1::DG1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "OMQ_O57.7-ORDER.8-OBSERVATION",
-                    position: 8,
-                    name: "OBSERVATION",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.7-ORDER.8-OBSERVATION.1-OBX",
-                            position: 1,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.7-ORDER.8-OBSERVATION.2-PRT",
-                            position: 2,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.7-ORDER.8-OBSERVATION.3-NTE",
-                            position: 3,
-                            segment: &segment::nte::NTE,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Group(Group {
-                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT",
-                    position: 9,
-                    name: "PRIOR_RESULT",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Group(Group {
-                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR",
-                            position: 1,
-                            name: "PATIENT_PRIOR",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.1-PID",
-                                    position: 1,
-                                    segment: &segment::pid::PID,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.2-PD1",
-                                    position: 2,
-                                    segment: &segment::pd1::PD1,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.3-GSP",
-                                    position: 3,
-                                    segment: &segment::gsp::GSP,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.4-GSR",
-                                    position: 4,
-                                    segment: &segment::gsr::GSR,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.5-GSC",
-                                    position: 5,
-                                    segment: &segment::gsc::GSC,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.6-PRT",
-                                    position: 6,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.1-PATIENT_PRIOR.7-ARV",
-                                    position: 7,
-                                    segment: &segment::arv::ARV,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::B),
-                                }),
-                            ],
-                        }),
-                        Node::Group(Group {
-                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR",
-                            position: 2,
-                            name: "PATIENT_VISIT_PRIOR",
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Bounded(1),
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR.1-PV1",
-                                    position: 1,
-                                    segment: &segment::pv1::PV1,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR.2-PV2",
-                                    position: 2,
-                                    segment: &segment::pv2::PV2,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.2-PATIENT_VISIT_PRIOR.3-PRT",
-                                    position: 3,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                            ],
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.3-AL1",
-                            position: 3,
-                            segment: &segment::al1::AL1,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR",
-                            position: 4,
-                            name: "ORDER_PRIOR",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.1-ORC",
-                                    position: 1,
-                                    segment: &segment::orc::ORC,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.2-PRT",
-                                    position: 2,
-                                    segment: &segment::prt::PRT,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.3-OBR",
-                                    position: 3,
-                                    segment: &segment::obr::OBR,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.4-TIMING_PRIOR",
-                                    position: 4,
-                                    name: "TIMING_PRIOR",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.4-TIMING_PRIOR.1-TQ1",
-                                            position: 1,
-                                            segment: &segment::tq1::TQ1,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.4-TIMING_PRIOR.2-TQ2",
-                                            position: 2,
-                                            segment: &segment::tq2::TQ2,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.5-NTE",
-                                    position: 5,
-                                    segment: &segment::nte::NTE,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.6-OBSERVATION_PARTICIPATION_PRIOR",
-                                    position: 6,
-                                    name: "OBSERVATION_PARTICIPATION_PRIOR",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.6-OBSERVATION_PARTICIPATION_PRIOR.1-PRT",
-                                            position: 1,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.6-OBSERVATION_PARTICIPATION_PRIOR.2-DEV",
-                                            position: 2,
-                                            segment: &segment::dev::DEV,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                                Node::Segment(SegmentRef {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.7-CTD",
-                                    position: 7,
-                                    segment: &segment::ctd::CTD,
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR",
-                                    position: 8,
-                                    name: "OBSERVATION_PRIOR",
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR.1-OBX",
-                                            position: 1,
-                                            segment: &segment::obx::OBX,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR.2-PRT",
-                                            position: 2,
-                                            segment: &segment::prt::PRT,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "OMQ_O57.7-ORDER.9-PRIOR_RESULT.4-ORDER_PRIOR.8-OBSERVATION_PRIOR.3-NTE",
-                                            position: 3,
-                                            segment: &segment::nte::NTE,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.10-FT1",
-                    position: 10,
-                    segment: &segment::ft1::FT1,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.11-CTI",
-                    position: 11,
-                    segment: &segment::cti::CTI,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "OMQ_O57.7-ORDER.12-BLG",
-                    position: 12,
-                    segment: &segment::blg::BLG,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-    ],
+    nodes: &OMQ_O57_NODES,
 };

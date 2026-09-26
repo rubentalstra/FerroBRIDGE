@@ -191,7 +191,37 @@ async fn two_frames_in_one_write_are_answered_in_order() {
 }
 
 #[tokio::test]
-async fn a_missing_required_field_is_answered_ae_with_its_location() {
+async fn a_missing_required_field_the_bridge_needs_is_answered_ae_with_its_location() {
+    let listener = Listener::start(Codec::default()).await;
+    let mut stream = TcpStream::connect(listener.address)
+        .await
+        .expect("a connection");
+    // MSH-10 empty leaves the answer no control id to acknowledge.
+    let message = fixtures::message(&[
+        b"MSH|^~\\&|LAB|NORTHLAB|EHR|SOUTHCLINIC|20260925143000+0200||ORU^R01^ORU_R01||P|2.5.1",
+        b"PID|1||PAT-0007^^^NORTHLAB^MR||Doe^Sam",
+        b"ORC|RE|PLC-1|FIL-1",
+        b"OBR|1|PLC-1|FIL-1|2345-7^Glucose^LN",
+        b"OBX|1|NM|2345-7^Glucose^LN||5.4|mmol/L^mmol/L^UCUM|||||F",
+    ]);
+    stream
+        .write_all(&frame(&message))
+        .await
+        .expect("the frame is sent");
+    let ack = read_ack(&mut stream).await;
+    assert_eq!(msa(&ack), "MSA|AE|");
+    assert!(
+        ack.contains(
+            "\rERR||MSH^1^10|101^Required field missing^HL70357|E||||MSH.10 is required\r"
+        ),
+        "{ack}"
+    );
+    drop(stream);
+    listener.stop().await;
+}
+
+#[tokio::test]
+async fn a_missing_required_field_of_the_content_is_answered_aa() {
     let listener = Listener::start(Codec::default()).await;
     let mut stream = TcpStream::connect(listener.address)
         .await
@@ -201,13 +231,8 @@ async fn a_missing_required_field_is_answered_ae_with_its_location() {
         .await
         .expect("the frame is sent");
     let ack = read_ack(&mut stream).await;
-    assert_eq!(msa(&ack), "MSA|AE|MSG00004");
-    assert!(
-        ack.contains(
-            "\rERR||PID^1^5|101^Required field missing^HL70357|E||||PID.5-patientName is required\r"
-        ),
-        "{ack}"
-    );
+    assert_eq!(msa(&ack), "MSA|AA|MSG00004");
+    assert!(!ack.contains("\rERR|"), "{ack}");
     drop(stream);
     listener.stop().await;
 }

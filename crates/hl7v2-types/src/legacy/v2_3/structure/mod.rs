@@ -4,11 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //! The legacy message structures of the 2.3 tables, one module each.
 
+pub mod mfk_m01;
 pub mod orm_o01;
 pub mod orr_o02;
 
 /// Every message structure, in definition id order.
-pub static STRUCTURES: [&crate::model::Structure; 2] = [&orm_o01::ORM_O01, &orr_o02::ORR_O02];
+pub static STRUCTURES: [&crate::model::Structure; 3] =
+    [&mfk_m01::MFK_M01, &orm_o01::ORM_O01, &orr_o02::ORR_O02];
 
 /// Returns the message structure whose definition id is `id`, for example `ORM_O01`.
 #[must_use]

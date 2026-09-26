@@ -9,126 +9,129 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`EAR_U08`], one `static` so a structure with the same tree links to it.
+pub static EAR_U08_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "EAR_U08.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAR_U08.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAR_U08.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAR_U08.4-EQU",
+        position: 4,
+        segment: &segment::equ::EQU,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "EAR_U08.5-COMMAND_RESPONSE",
+        position: 5,
+        name: "COMMAND_RESPONSE",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "EAR_U08.5-COMMAND_RESPONSE.1-ECD",
+                position: 1,
+                segment: &segment::ecd::ECD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "EAR_U08.5-COMMAND_RESPONSE.2-SPECIMEN_CONTAINER",
+                position: 2,
+                name: "SPECIMEN_CONTAINER",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "EAR_U08.5-COMMAND_RESPONSE.2-SPECIMEN_CONTAINER.1-SAC",
+                        position: 1,
+                        segment: &segment::sac::SAC,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "EAR_U08.5-COMMAND_RESPONSE.2-SPECIMEN_CONTAINER.2-SPM",
+                        position: 2,
+                        segment: &segment::spm::SPM,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+            Node::Segment(SegmentRef {
+                id: "EAR_U08.5-COMMAND_RESPONSE.3-ECR",
+                position: 3,
+                segment: &segment::ecr::ECR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "EAR_U08.6-ROL",
+        position: 6,
+        segment: &segment::rol::ROL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::B),
+    }),
+];
+
 /// The `EAR_U08` message structure definition, `http://hl7.org/v2/StructureDefinition/EAR_U08`.
 pub static EAR_U08: Structure = Structure {
     id: "EAR_U08",
     url: Some("http://hl7.org/v2/StructureDefinition/EAR_U08"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "EAR_U08.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAR_U08.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAR_U08.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAR_U08.4-EQU",
-            position: 4,
-            segment: &segment::equ::EQU,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "EAR_U08.5-COMMAND_RESPONSE",
-            position: 5,
-            name: "COMMAND_RESPONSE",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "EAR_U08.5-COMMAND_RESPONSE.1-ECD",
-                    position: 1,
-                    segment: &segment::ecd::ECD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "EAR_U08.5-COMMAND_RESPONSE.2-SPECIMEN_CONTAINER",
-                    position: 2,
-                    name: "SPECIMEN_CONTAINER",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "EAR_U08.5-COMMAND_RESPONSE.2-SPECIMEN_CONTAINER.1-SAC",
-                            position: 1,
-                            segment: &segment::sac::SAC,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "EAR_U08.5-COMMAND_RESPONSE.2-SPECIMEN_CONTAINER.2-SPM",
-                            position: 2,
-                            segment: &segment::spm::SPM,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EAR_U08.5-COMMAND_RESPONSE.3-ECR",
-                    position: 3,
-                    segment: &segment::ecr::ECR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "EAR_U08.6-ROL",
-            position: 6,
-            segment: &segment::rol::ROL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::B),
-        }),
-    ],
+    nodes: &EAR_U08_NODES,
 };

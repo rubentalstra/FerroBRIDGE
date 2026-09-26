@@ -6,96 +6,99 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`NMQ_N01`], one `static` so a structure with the same tree links to it.
+pub static NMQ_N01_NODES: [Node; 3] = [
+    Node::Segment(SegmentRef {
+        id: "NMQ_N01.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_3_1::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "NMQ_N01.2-QRY_WITH_DETAIL",
+        position: 2,
+        name: "QRY_WITH_DETAIL",
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "NMQ_N01.2-QRY_WITH_DETAIL.1-QRD",
+                position: 1,
+                segment: &crate::legacy::v2_3_1::segment::qrd::QRD,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMQ_N01.2-QRY_WITH_DETAIL.2-QRF",
+                position: 2,
+                segment: &crate::legacy::v2_3_1::segment::qrf::QRF,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+    Node::Group(Group {
+        id: "NMQ_N01.3-CLOCK_AND_STATISTICS",
+        position: 3,
+        name: "CLOCK_AND_STATISTICS",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "NMQ_N01.3-CLOCK_AND_STATISTICS.1-NCK",
+                position: 1,
+                segment: &crate::legacy::v2_3_1::segment::nck::NCK,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMQ_N01.3-CLOCK_AND_STATISTICS.2-NST",
+                position: 2,
+                segment: &crate::legacy::v2_3_1::segment::nst::NST,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Segment(SegmentRef {
+                id: "NMQ_N01.3-CLOCK_AND_STATISTICS.3-NSC",
+                position: 3,
+                segment: &crate::legacy::v2_3_1::segment::nsc::NSC,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+        ],
+    }),
+];
+
 /// The `NMQ_N01` message structure of the 2.3.1 tables, withdrawn as of 2.7.
 pub static NMQ_N01: Structure = Structure {
     id: "NMQ_N01",
     url: None,
     version: "2.3.1",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "NMQ_N01.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_3_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Group(Group {
-            id: "NMQ_N01.2-QRY_WITH_DETAIL",
-            position: 2,
-            name: "QRY_WITH_DETAIL",
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.2-QRY_WITH_DETAIL.1-QRD",
-                    position: 1,
-                    segment: &crate::legacy::v2_3_1::segment::qrd::QRD,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.2-QRY_WITH_DETAIL.2-QRF",
-                    position: 2,
-                    segment: &crate::legacy::v2_3_1::segment::qrf::QRF,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-        Node::Group(Group {
-            id: "NMQ_N01.3-CLOCK_AND_STATISTICS",
-            position: 3,
-            name: "CLOCK_AND_STATISTICS",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.3-CLOCK_AND_STATISTICS.1-NCK",
-                    position: 1,
-                    segment: &crate::legacy::v2_3_1::segment::nck::NCK,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.3-CLOCK_AND_STATISTICS.2-NST",
-                    position: 2,
-                    segment: &crate::legacy::v2_3_1::segment::nst::NST,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-                Node::Segment(SegmentRef {
-                    id: "NMQ_N01.3-CLOCK_AND_STATISTICS.3-NSC",
-                    position: 3,
-                    segment: &crate::legacy::v2_3_1::segment::nsc::NSC,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: None,
-                }),
-            ],
-        }),
-    ],
+    nodes: &NMQ_N01_NODES,
 };

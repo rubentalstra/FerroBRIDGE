@@ -9,156 +9,159 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`SSU_U03`], one `static` so a structure with the same tree links to it.
+pub static SSU_U03_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "SSU_U03.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SSU_U03.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SSU_U03.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SSU_U03.4-EQU",
+        position: 4,
+        segment: &segment::equ::EQU,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "SSU_U03.5-SPECIMEN_CONTAINER",
+        position: 5,
+        name: "SPECIMEN_CONTAINER",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "SSU_U03.5-SPECIMEN_CONTAINER.1-SAC",
+                position: 1,
+                segment: &segment::sac::SAC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SSU_U03.5-SPECIMEN_CONTAINER.2-OBX",
+                position: 2,
+                segment: &segment::obx::OBX,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SSU_U03.5-SPECIMEN_CONTAINER.3-NTE",
+                position: 3,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "SSU_U03.5-SPECIMEN_CONTAINER.4-PRT",
+                position: 4,
+                segment: &segment::prt::PRT,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN",
+                position: 5,
+                name: "SPECIMEN",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN.1-SPM",
+                        position: 1,
+                        segment: &segment::spm::SPM,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN.2-OBX",
+                        position: 2,
+                        segment: &segment::obx::OBX,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN.3-PRT",
+                        position: 3,
+                        segment: &segment::prt::PRT,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                ],
+            }),
+        ],
+    }),
+    Node::Segment(SegmentRef {
+        id: "SSU_U03.6-ROL",
+        position: 6,
+        segment: &segment::rol::ROL,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::B),
+    }),
+];
+
 /// The `SSU_U03` message structure definition, `http://hl7.org/v2/StructureDefinition/SSU_U03`.
 pub static SSU_U03: Structure = Structure {
     id: "SSU_U03",
     url: Some("http://hl7.org/v2/StructureDefinition/SSU_U03"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "SSU_U03.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SSU_U03.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SSU_U03.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SSU_U03.4-EQU",
-            position: 4,
-            segment: &segment::equ::EQU,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "SSU_U03.5-SPECIMEN_CONTAINER",
-            position: 5,
-            name: "SPECIMEN_CONTAINER",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "SSU_U03.5-SPECIMEN_CONTAINER.1-SAC",
-                    position: 1,
-                    segment: &segment::sac::SAC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SSU_U03.5-SPECIMEN_CONTAINER.2-OBX",
-                    position: 2,
-                    segment: &segment::obx::OBX,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SSU_U03.5-SPECIMEN_CONTAINER.3-NTE",
-                    position: 3,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "SSU_U03.5-SPECIMEN_CONTAINER.4-PRT",
-                    position: 4,
-                    segment: &segment::prt::PRT,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN",
-                    position: 5,
-                    name: "SPECIMEN",
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN.1-SPM",
-                            position: 1,
-                            segment: &segment::spm::SPM,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN.2-OBX",
-                            position: 2,
-                            segment: &segment::obx::OBX,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Segment(SegmentRef {
-                            id: "SSU_U03.5-SPECIMEN_CONTAINER.5-SPECIMEN.3-PRT",
-                            position: 3,
-                            segment: &segment::prt::PRT,
-                            cardinality: Cardinality {
-                                min: 0,
-                                max: Max::Unbounded,
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                    ],
-                }),
-            ],
-        }),
-        Node::Segment(SegmentRef {
-            id: "SSU_U03.6-ROL",
-            position: 6,
-            segment: &segment::rol::ROL,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::B),
-        }),
-    ],
+    nodes: &SSU_U03_NODES,
 };

@@ -7,27 +7,11 @@
 
 use crate::model::LegacyDataType;
 
-/// The `AUI` data type code of the 2.8.2 tables.
-pub static AUI: LegacyDataType = LegacyDataType {
-    code: "AUI",
-    version: "2.8.2",
-    name: "Authorization Information",
-    base: None,
-};
-
 /// The `CNE` data type code of the 2.8.2 tables.
 pub static CNE: LegacyDataType = LegacyDataType {
     code: "CNE",
     version: "2.8.2",
     name: "Coded with No Exceptions",
-    base: None,
-};
-
-/// The `CP` data type code of the 2.8.2 tables.
-pub static CP: LegacyDataType = LegacyDataType {
-    code: "CP",
-    version: "2.8.2",
-    name: "Composite Price",
     base: None,
 };
 
@@ -55,22 +39,6 @@ pub static CX: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `DDI` data type code of the 2.8.2 tables.
-pub static DDI: LegacyDataType = LegacyDataType {
-    code: "DDI",
-    version: "2.8.2",
-    name: "Daily Deductible Information",
-    base: None,
-};
-
-/// The `DLD` data type code of the 2.8.2 tables.
-pub static DLD: LegacyDataType = LegacyDataType {
-    code: "DLD",
-    version: "2.8.2",
-    name: "Discharge to Location and Date",
-    base: None,
-};
-
 /// The `DR` data type code of the 2.8.2 tables.
 pub static DR: LegacyDataType = LegacyDataType {
     code: "DR",
@@ -79,27 +47,11 @@ pub static DR: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `DT` data type code of the 2.8.2 tables.
-pub static DT: LegacyDataType = LegacyDataType {
-    code: "DT",
-    version: "2.8.2",
-    name: "Date",
-    base: None,
-};
-
 /// The `DTM` data type code of the 2.8.2 tables.
 pub static DTM: LegacyDataType = LegacyDataType {
     code: "DTM",
     version: "2.8.2",
     name: "Date/Time",
-    base: None,
-};
-
-/// The `DTN` data type code of the 2.8.2 tables.
-pub static DTN: LegacyDataType = LegacyDataType {
-    code: "DTN",
-    version: "2.8.2",
-    name: "Day Type and Number",
     base: None,
 };
 
@@ -119,46 +71,6 @@ pub static EIP: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `ERL` data type code of the 2.8.2 tables.
-pub static ERL: LegacyDataType = LegacyDataType {
-    code: "ERL",
-    version: "2.8.2",
-    name: "Error Location",
-    base: None,
-};
-
-/// The `FC` data type code of the 2.8.2 tables.
-pub static FC: LegacyDataType = LegacyDataType {
-    code: "FC",
-    version: "2.8.2",
-    name: "Financial Class",
-    base: None,
-};
-
-/// The `FT` data type code of the 2.8.2 tables.
-pub static FT: LegacyDataType = LegacyDataType {
-    code: "FT",
-    version: "2.8.2",
-    name: "Formatted Text Data",
-    base: None,
-};
-
-/// The `HD` data type code of the 2.8.2 tables.
-pub static HD: LegacyDataType = LegacyDataType {
-    code: "HD",
-    version: "2.8.2",
-    name: "Hierarchic Designator",
-    base: None,
-};
-
-/// The `ICD` data type code of the 2.8.2 tables.
-pub static ICD: LegacyDataType = LegacyDataType {
-    code: "ICD",
-    version: "2.8.2",
-    name: "Insurance Certification Definition",
-    base: None,
-};
-
 /// The `ID` data type code of the 2.8.2 tables.
 pub static ID: LegacyDataType = LegacyDataType {
     code: "ID",
@@ -167,43 +79,11 @@ pub static ID: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `JCC` data type code of the 2.8.2 tables.
-pub static JCC: LegacyDataType = LegacyDataType {
-    code: "JCC",
-    version: "2.8.2",
-    name: "Job Code/Class",
-    base: None,
-};
-
 /// The `MOC` data type code of the 2.8.2 tables.
 pub static MOC: LegacyDataType = LegacyDataType {
     code: "MOC",
     version: "2.8.2",
     name: "Money and Code",
-    base: None,
-};
-
-/// The `MOP` data type code of the 2.8.2 tables.
-pub static MOP: LegacyDataType = LegacyDataType {
-    code: "MOP",
-    version: "2.8.2",
-    name: "Money or Percentage",
-    base: None,
-};
-
-/// The `MSG` data type code of the 2.8.2 tables.
-pub static MSG: LegacyDataType = LegacyDataType {
-    code: "MSG",
-    version: "2.8.2",
-    name: "Message Type",
-    base: None,
-};
-
-/// The `NA` data type code of the 2.8.2 tables.
-pub static NA: LegacyDataType = LegacyDataType {
-    code: "NA",
-    version: "2.8.2",
-    name: "Numeric Array",
     base: None,
 };
 
@@ -223,6 +103,14 @@ pub static NM: LegacyDataType = LegacyDataType {
     base: None,
 };
 
+/// The `NR` data type code of the 2.8.2 tables.
+pub static NR: LegacyDataType = LegacyDataType {
+    code: "NR",
+    version: "2.8.2",
+    name: "Numeric Range",
+    base: None,
+};
+
 /// The `OG` data type code of the 2.8.2 tables.
 pub static OG: LegacyDataType = LegacyDataType {
     code: "OG",
@@ -239,14 +127,6 @@ pub static PL: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `PPN` data type code of the 2.8.2 tables.
-pub static PPN: LegacyDataType = LegacyDataType {
-    code: "PPN",
-    version: "2.8.2",
-    name: "Performing Person Time Stamp",
-    base: None,
-};
-
 /// The `PRL` data type code of the 2.8.2 tables.
 pub static PRL: LegacyDataType = LegacyDataType {
     code: "PRL",
@@ -255,43 +135,11 @@ pub static PRL: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `PT` data type code of the 2.8.2 tables.
-pub static PT: LegacyDataType = LegacyDataType {
-    code: "PT",
-    version: "2.8.2",
-    name: "Processing Type",
-    base: None,
-};
-
-/// The `PTA` data type code of the 2.8.2 tables.
-pub static PTA: LegacyDataType = LegacyDataType {
-    code: "PTA",
-    version: "2.8.2",
-    name: "Policy Type and Amount",
-    base: None,
-};
-
-/// The `RMC` data type code of the 2.8.2 tables.
-pub static RMC: LegacyDataType = LegacyDataType {
-    code: "RMC",
-    version: "2.8.2",
-    name: "Room Coverage",
-    base: None,
-};
-
 /// The `SI` data type code of the 2.8.2 tables.
 pub static SI: LegacyDataType = LegacyDataType {
     code: "SI",
     version: "2.8.2",
     name: "Sequence ID",
-    base: None,
-};
-
-/// The `SN` data type code of the 2.8.2 tables.
-pub static SN: LegacyDataType = LegacyDataType {
-    code: "SN",
-    version: "2.8.2",
-    name: "Structured Numeric",
     base: None,
 };
 
@@ -319,14 +167,6 @@ pub static VARIES: LegacyDataType = LegacyDataType {
     base: None,
 };
 
-/// The `VID` data type code of the 2.8.2 tables.
-pub static VID: LegacyDataType = LegacyDataType {
-    code: "VID",
-    version: "2.8.2",
-    name: "Version Identifier",
-    base: None,
-};
-
 /// The `XAD` data type code of the 2.8.2 tables.
 pub static XAD: LegacyDataType = LegacyDataType {
     code: "XAD",
@@ -348,14 +188,6 @@ pub static XON: LegacyDataType = LegacyDataType {
     code: "XON",
     version: "2.8.2",
     name: "Extended Composite Name and Identification Number for Organizations",
-    base: None,
-};
-
-/// The `XPN` data type code of the 2.8.2 tables.
-pub static XPN: LegacyDataType = LegacyDataType {
-    code: "XPN",
-    version: "2.8.2",
-    name: "Extended Person Name",
     base: None,
 };
 

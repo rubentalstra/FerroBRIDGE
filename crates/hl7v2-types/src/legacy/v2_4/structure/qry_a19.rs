@@ -6,42 +6,45 @@
 
 use crate::model::{Cardinality, Max, Node, SegmentRef, Structure};
 
+/// The top-level nodes of [`QRY_A19`], one `static` so a structure with the same tree links to it.
+pub static QRY_A19_NODES: [Node; 3] = [
+    Node::Segment(SegmentRef {
+        id: "QRY_A19.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_4::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "QRY_A19.2-QRD",
+        position: 2,
+        segment: &crate::legacy::v2_4::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "QRY_A19.3-QRF",
+        position: 3,
+        segment: &crate::legacy::v2_4::segment::qrf::QRF,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+];
+
 /// The `QRY_A19` message structure of the 2.4 tables, withdrawn as of 2.7.
 pub static QRY_A19: Structure = Structure {
     id: "QRY_A19",
     url: None,
     version: "2.4",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "QRY_A19.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_4::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_A19.2-QRD",
-            position: 2,
-            segment: &crate::legacy::v2_4::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_A19.3-QRF",
-            position: 3,
-            segment: &crate::legacy::v2_4::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &QRY_A19_NODES,
 };

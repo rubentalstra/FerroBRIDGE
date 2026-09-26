@@ -9,230 +9,233 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`EHC_E10`], one `static` so a structure with the same tree links to it.
+pub static EHC_E10_NODES: [Node; 6] = [
+    Node::Segment(SegmentRef {
+        id: "EHC_E10.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E10.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E10.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E10.4-MSA",
+        position: 4,
+        segment: &segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "EHC_E10.5-ERR",
+        position: 5,
+        segment: &segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO",
+        position: 6,
+        name: "INVOICE_PROCESSING_RESULTS_INFO",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.1-IPR",
+                position: 1,
+                segment: &segment::ipr::IPR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.2-NTE",
+                position: 2,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.3-PYE",
+                position: 3,
+                segment: &segment::pye::PYE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.4-IN1",
+                position: 4,
+                segment: &segment::in1::IN1,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.5-GSP",
+                position: 5,
+                segment: &segment::gsp::GSP,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.6-GSR",
+                position: 6,
+                segment: &segment::gsr::GSR,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.7-IN2",
+                position: 7,
+                segment: &segment::in2::IN2,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.8-IVC",
+                position: 8,
+                segment: &segment::ivc::IVC,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION",
+                position: 9,
+                name: "PRODUCT_SERVICE_SECTION",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.1-PSS",
+                        position: 1,
+                        segment: &segment::pss::PSS,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP",
+                        position: 2,
+                        name: "PRODUCT_SERVICE_GROUP",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.1-PSG",
+                                position: 1,
+                                segment: &segment::psg::PSG,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PRODUCT_SERVICE_LINE_INFO",
+                                position: 2,
+                                name: "PRODUCT_SERVICE_LINE_INFO",
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PRODUCT_SERVICE_LINE_INFO.1-PSL",
+                                        position: 1,
+                                        segment: &segment::psl::PSL,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PRODUCT_SERVICE_LINE_INFO.2-ADJ",
+                                        position: 2,
+                                        segment: &segment::adj::ADJ,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: Some(SegmentStatus::A),
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `EHC_E10` message structure definition, `http://hl7.org/v2/StructureDefinition/EHC_E10`.
 pub static EHC_E10: Structure = Structure {
     id: "EHC_E10",
     url: Some("http://hl7.org/v2/StructureDefinition/EHC_E10"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "EHC_E10.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E10.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E10.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E10.4-MSA",
-            position: 4,
-            segment: &segment::msa::MSA,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "EHC_E10.5-ERR",
-            position: 5,
-            segment: &segment::err::ERR,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO",
-            position: 6,
-            name: "INVOICE_PROCESSING_RESULTS_INFO",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.1-IPR",
-                    position: 1,
-                    segment: &segment::ipr::IPR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.2-NTE",
-                    position: 2,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.3-PYE",
-                    position: 3,
-                    segment: &segment::pye::PYE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.4-IN1",
-                    position: 4,
-                    segment: &segment::in1::IN1,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.5-GSP",
-                    position: 5,
-                    segment: &segment::gsp::GSP,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.6-GSR",
-                    position: 6,
-                    segment: &segment::gsr::GSR,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.7-IN2",
-                    position: 7,
-                    segment: &segment::in2::IN2,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.8-IVC",
-                    position: 8,
-                    segment: &segment::ivc::IVC,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION",
-                    position: 9,
-                    name: "PRODUCT_SERVICE_SECTION",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.1-PSS",
-                            position: 1,
-                            segment: &segment::pss::PSS,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP",
-                            position: 2,
-                            name: "PRODUCT_SERVICE_GROUP",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.1-PSG",
-                                    position: 1,
-                                    segment: &segment::psg::PSG,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PRODUCT_SERVICE_LINE_INFO",
-                                    position: 2,
-                                    name: "PRODUCT_SERVICE_LINE_INFO",
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[
-                                        Node::Segment(SegmentRef {
-                                            id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PRODUCT_SERVICE_LINE_INFO.1-PSL",
-                                            position: 1,
-                                            segment: &segment::psl::PSL,
-                                            cardinality: Cardinality {
-                                                min: 1,
-                                                max: Max::Bounded(1),
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                        Node::Segment(SegmentRef {
-                                            id: "EHC_E10.6-INVOICE_PROCESSING_RESULTS_INFO.9-PRODUCT_SERVICE_SECTION.2-PRODUCT_SERVICE_GROUP.2-PRODUCT_SERVICE_LINE_INFO.2-ADJ",
-                                            position: 2,
-                                            segment: &segment::adj::ADJ,
-                                            cardinality: Cardinality {
-                                                min: 0,
-                                                max: Max::Unbounded,
-                                            },
-                                            status: Some(SegmentStatus::A),
-                                        }),
-                                    ],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &EHC_E10_NODES,
 };

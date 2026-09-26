@@ -3,8 +3,10 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
 //! The `QRY_A19` message structure of the 2.5.1 tables, withdrawn as of 2.7.
+//!
+//! The tables give it the tree of the 2.5 tables, which it links to.
 
-use crate::model::{Cardinality, Max, Node, SegmentRef, Structure};
+use crate::model::Structure;
 
 /// The `QRY_A19` message structure of the 2.5.1 tables, withdrawn as of 2.7.
 pub static QRY_A19: Structure = Structure {
@@ -12,46 +14,5 @@ pub static QRY_A19: Structure = Structure {
     url: None,
     version: "2.5.1",
     withdrawn_as_of: Some("2.7"),
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "QRY_A19.1-MSH",
-            position: 1,
-            segment: &crate::legacy::v2_5_1::segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_A19.2-SFT",
-            position: 2,
-            segment: &crate::legacy::v2_5_1::segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_A19.3-QRD",
-            position: 3,
-            segment: &crate::legacy::v2_5_1::segment::qrd::QRD,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-        Node::Segment(SegmentRef {
-            id: "QRY_A19.4-QRF",
-            position: 4,
-            segment: &crate::legacy::v2_5_1::segment::qrf::QRF,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: None,
-        }),
-    ],
+    nodes: &crate::legacy::v2_5::structure::qry_a19::QRY_A19_NODES,
 };

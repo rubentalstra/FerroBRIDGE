@@ -6,11 +6,500 @@
 
 use crate::model::{Cardinality, Group, GroupKind, Max, Node, Placeholder, SegmentRef, Structure};
 
+/// The top-level nodes of [`PPV_PCA`], one `static` so a structure with the same tree links to it.
+pub static PPV_PCA_NODES: [Node; 7] = [
+    Node::Segment(SegmentRef {
+        id: "PPV_PCA.1-MSH",
+        position: 1,
+        segment: &crate::legacy::v2_5::segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPV_PCA.2-SFT",
+        position: 2,
+        segment: &crate::legacy::v2_5::segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPV_PCA.3-MSA",
+        position: 3,
+        segment: &crate::legacy::v2_5_1::segment::msa::MSA,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPV_PCA.4-ERR",
+        position: 4,
+        segment: &crate::legacy::v2_5_1::segment::err::ERR,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPV_PCA.5-QAK",
+        position: 5,
+        segment: &crate::legacy::v2_5::segment::qak::QAK,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Segment(SegmentRef {
+        id: "PPV_PCA.6-QRD",
+        position: 6,
+        segment: &crate::legacy::v2_5::segment::qrd::QRD,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: None,
+    }),
+    Node::Group(Group {
+        id: "PPV_PCA.7-PATIENT",
+        position: 7,
+        name: "PATIENT",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "PPV_PCA.7-PATIENT.1-PID",
+                position: 1,
+                segment: &crate::legacy::v2_5_1::segment::pid::PID,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: None,
+            }),
+            Node::Group(Group {
+                id: "PPV_PCA.7-PATIENT.2-PATIENT_VISIT",
+                position: 2,
+                name: "PATIENT_VISIT",
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Bounded(1),
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "PPV_PCA.7-PATIENT.2-PATIENT_VISIT.1-PV1",
+                        position: 1,
+                        segment: &crate::legacy::v2_5::segment::pv1::PV1,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PPV_PCA.7-PATIENT.2-PATIENT_VISIT.2-PV2",
+                        position: 2,
+                        segment: &crate::legacy::v2_5::segment::pv2::PV2,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                ],
+            }),
+            Node::Group(Group {
+                id: "PPV_PCA.7-PATIENT.3-GOAL",
+                position: 3,
+                name: "GOAL",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.1-GOL",
+                        position: 1,
+                        segment: &crate::legacy::v2_5::segment::gol::GOL,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.2-NTE",
+                        position: 2,
+                        segment: &crate::legacy::v2_5::segment::nte::NTE,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Segment(SegmentRef {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.3-VAR",
+                        position: 3,
+                        segment: &crate::legacy::v2_5::segment::var::VAR,
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        status: None,
+                    }),
+                    Node::Group(Group {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.4-GOAL_ROLE",
+                        position: 4,
+                        name: "GOAL_ROLE",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.4-GOAL_ROLE.1-ROL",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::rol::ROL,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.4-GOAL_ROLE.2-VAR",
+                                position: 2,
+                                segment: &crate::legacy::v2_5::segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.5-GOAL_PATHWAY",
+                        position: 5,
+                        name: "GOAL_PATHWAY",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.5-GOAL_PATHWAY.1-PTH",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::pth::PTH,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.5-GOAL_PATHWAY.2-VAR",
+                                position: 2,
+                                segment: &crate::legacy::v2_5::segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.6-GOAL_OBSERVATION",
+                        position: 6,
+                        name: "GOAL_OBSERVATION",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.6-GOAL_OBSERVATION.1-OBX",
+                                position: 1,
+                                segment: &crate::legacy::v2_5_1::segment::obx::OBX,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.6-GOAL_OBSERVATION.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_5::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM",
+                        position: 7,
+                        name: "PROBLEM",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.1-PRB",
+                                position: 1,
+                                segment: &crate::legacy::v2_5::segment::prb::PRB,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.2-NTE",
+                                position: 2,
+                                segment: &crate::legacy::v2_5::segment::nte::NTE,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.3-VAR",
+                                position: 3,
+                                segment: &crate::legacy::v2_5::segment::var::VAR,
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                status: None,
+                            }),
+                            Node::Group(Group {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.4-PROBLEM_ROLE",
+                                position: 4,
+                                name: "PROBLEM_ROLE",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.4-PROBLEM_ROLE.1-ROL",
+                                        position: 1,
+                                        segment: &crate::legacy::v2_5::segment::rol::ROL,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: None,
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.4-PROBLEM_ROLE.2-VAR",
+                                        position: 2,
+                                        segment: &crate::legacy::v2_5::segment::var::VAR,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: None,
+                                    }),
+                                ],
+                            }),
+                            Node::Group(Group {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.5-PROBLEM_OBSERVATION",
+                                position: 5,
+                                name: "PROBLEM_OBSERVATION",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[
+                                    Node::Segment(SegmentRef {
+                                        id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.5-PROBLEM_OBSERVATION.1-OBX",
+                                        position: 1,
+                                        segment: &crate::legacy::v2_5_1::segment::obx::OBX,
+                                        cardinality: Cardinality {
+                                            min: 1,
+                                            max: Max::Bounded(1),
+                                        },
+                                        status: None,
+                                    }),
+                                    Node::Segment(SegmentRef {
+                                        id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.5-PROBLEM_OBSERVATION.2-NTE",
+                                        position: 2,
+                                        segment: &crate::legacy::v2_5::segment::nte::NTE,
+                                        cardinality: Cardinality {
+                                            min: 0,
+                                            max: Max::Unbounded,
+                                        },
+                                        status: None,
+                                    }),
+                                ],
+                            }),
+                        ],
+                    }),
+                    Node::Group(Group {
+                        id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER",
+                        position: 8,
+                        name: "ORDER",
+                        cardinality: Cardinality {
+                            min: 0,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.1-ORC",
+                                position: 1,
+                                segment: &crate::legacy::v2_5_1::segment::orc::ORC,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: None,
+                            }),
+                            Node::Group(Group {
+                                id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL",
+                                position: 2,
+                                name: "ORDER_DETAIL",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Bounded(1),
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[Node::Group(Group {
+                                    id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE",
+                                    position: 1,
+                                    name: "ORDER_CHOICE",
+                                    cardinality: Cardinality {
+                                        min: 1,
+                                        max: Max::Bounded(1),
+                                    },
+                                    kind: GroupKind::Choice,
+                                    children: &[
+                                        Node::Segment(SegmentRef {
+                                            id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-1-OBR",
+                                            position: 1,
+                                            segment: &crate::legacy::v2_5_1::segment::obr::OBR,
+                                            cardinality: Cardinality {
+                                                min: 1,
+                                                max: Max::Bounded(1),
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Placeholder(Placeholder {
+                                            id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-2-Hxx",
+                                            position: 2,
+                                            cardinality: Cardinality {
+                                                min: 1,
+                                                max: Max::Bounded(1),
+                                            },
+                                        }),
+                                        Node::Segment(SegmentRef {
+                                            id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-3-NTE",
+                                            position: 3,
+                                            segment: &crate::legacy::v2_5::segment::nte::NTE,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Unbounded,
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Segment(SegmentRef {
+                                            id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-4-VAR",
+                                            position: 4,
+                                            segment: &crate::legacy::v2_5::segment::var::VAR,
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Unbounded,
+                                            },
+                                            status: None,
+                                        }),
+                                        Node::Group(Group {
+                                            id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION",
+                                            position: 5,
+                                            name: "ORDER_OBSERVATION",
+                                            cardinality: Cardinality {
+                                                min: 0,
+                                                max: Max::Unbounded,
+                                            },
+                                            kind: GroupKind::Sequence,
+                                            children: &[
+                                                Node::Segment(SegmentRef {
+                                                    id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION.1-OBX",
+                                                    position: 1,
+                                                    segment:
+                                                        &crate::legacy::v2_5_1::segment::obx::OBX,
+                                                    cardinality: Cardinality {
+                                                        min: 1,
+                                                        max: Max::Bounded(1),
+                                                    },
+                                                    status: None,
+                                                }),
+                                                Node::Segment(SegmentRef {
+                                                    id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION.2-NTE",
+                                                    position: 2,
+                                                    segment:
+                                                        &crate::legacy::v2_5::segment::nte::NTE,
+                                                    cardinality: Cardinality {
+                                                        min: 0,
+                                                        max: Max::Unbounded,
+                                                    },
+                                                    status: None,
+                                                }),
+                                                Node::Segment(SegmentRef {
+                                                    id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION.3-VAR",
+                                                    position: 3,
+                                                    segment:
+                                                        &crate::legacy::v2_5::segment::var::VAR,
+                                                    cardinality: Cardinality {
+                                                        min: 0,
+                                                        max: Max::Unbounded,
+                                                    },
+                                                    status: None,
+                                                }),
+                                            ],
+                                        }),
+                                    ],
+                                })],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `PPV_PCA` message structure of the 2.5.1 tables, withdrawn as of 2.8.
 pub static PPV_PCA: Structure = Structure {
     id: "PPV_PCA",
     url: None,
     version: "2.5.1",
     withdrawn_as_of: Some("2.8"),
-    nodes: &[Node::Segment(SegmentRef { id: "PPV_PCA.1-MSH", position: 1, segment: &crate::legacy::v2_5_1::segment::msh::MSH, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.2-SFT", position: 2, segment: &crate::legacy::v2_5_1::segment::sft::SFT, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.3-MSA", position: 3, segment: &crate::legacy::v2_5_1::segment::msa::MSA, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.4-ERR", position: 4, segment: &crate::legacy::v2_5_1::segment::err::ERR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.5-QAK", position: 5, segment: &crate::legacy::v2_5_1::segment::qak::QAK, cardinality: Cardinality { min: 0, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.6-QRD", position: 6, segment: &crate::legacy::v2_5_1::segment::qrd::QRD, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Group(Group { id: "PPV_PCA.7-PATIENT", position: 7, name: "PATIENT", cardinality: Cardinality { min: 1, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.1-PID", position: 1, segment: &crate::legacy::v2_5_1::segment::pid::PID, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.2-PATIENT_VISIT", position: 2, name: "PATIENT_VISIT", cardinality: Cardinality { min: 0, max: Max::Bounded(1) }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.2-PATIENT_VISIT.1-PV1", position: 1, segment: &crate::legacy::v2_5_1::segment::pv1::PV1, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.2-PATIENT_VISIT.2-PV2", position: 2, segment: &crate::legacy::v2_5_1::segment::pv2::PV2, cardinality: Cardinality { min: 0, max: Max::Bounded(1) }, status: None }),] }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL", position: 3, name: "GOAL", cardinality: Cardinality { min: 1, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.1-GOL", position: 1, segment: &crate::legacy::v2_5_1::segment::gol::GOL, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.2-NTE", position: 2, segment: &crate::legacy::v2_5_1::segment::nte::NTE, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.3-VAR", position: 3, segment: &crate::legacy::v2_5_1::segment::var::VAR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.4-GOAL_ROLE", position: 4, name: "GOAL_ROLE", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.4-GOAL_ROLE.1-ROL", position: 1, segment: &crate::legacy::v2_5_1::segment::rol::ROL, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.4-GOAL_ROLE.2-VAR", position: 2, segment: &crate::legacy::v2_5_1::segment::var::VAR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),] }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.5-GOAL_PATHWAY", position: 5, name: "GOAL_PATHWAY", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.5-GOAL_PATHWAY.1-PTH", position: 1, segment: &crate::legacy::v2_5_1::segment::pth::PTH, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.5-GOAL_PATHWAY.2-VAR", position: 2, segment: &crate::legacy::v2_5_1::segment::var::VAR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),] }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.6-GOAL_OBSERVATION", position: 6, name: "GOAL_OBSERVATION", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.6-GOAL_OBSERVATION.1-OBX", position: 1, segment: &crate::legacy::v2_5_1::segment::obx::OBX, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.6-GOAL_OBSERVATION.2-NTE", position: 2, segment: &crate::legacy::v2_5_1::segment::nte::NTE, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),] }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM", position: 7, name: "PROBLEM", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.1-PRB", position: 1, segment: &crate::legacy::v2_5_1::segment::prb::PRB, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.2-NTE", position: 2, segment: &crate::legacy::v2_5_1::segment::nte::NTE, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.3-VAR", position: 3, segment: &crate::legacy::v2_5_1::segment::var::VAR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.4-PROBLEM_ROLE", position: 4, name: "PROBLEM_ROLE", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.4-PROBLEM_ROLE.1-ROL", position: 1, segment: &crate::legacy::v2_5_1::segment::rol::ROL, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.4-PROBLEM_ROLE.2-VAR", position: 2, segment: &crate::legacy::v2_5_1::segment::var::VAR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),] }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.5-PROBLEM_OBSERVATION", position: 5, name: "PROBLEM_OBSERVATION", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.5-PROBLEM_OBSERVATION.1-OBX", position: 1, segment: &crate::legacy::v2_5_1::segment::obx::OBX, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.7-PROBLEM.5-PROBLEM_OBSERVATION.2-NTE", position: 2, segment: &crate::legacy::v2_5_1::segment::nte::NTE, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),] }),] }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER", position: 8, name: "ORDER", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.1-ORC", position: 1, segment: &crate::legacy::v2_5_1::segment::orc::ORC, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL", position: 2, name: "ORDER_DETAIL", cardinality: Cardinality { min: 0, max: Max::Bounded(1) }, kind: GroupKind::Sequence, children: &[Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE", position: 1, name: "ORDER_CHOICE", cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, kind: GroupKind::Choice, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-1-OBR", position: 1, segment: &crate::legacy::v2_5_1::segment::obr::OBR, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Placeholder(Placeholder { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-2-Hxx", position: 2, cardinality: Cardinality { min: 1, max: Max::Bounded(1) } }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-3-NTE", position: 3, segment: &crate::legacy::v2_5_1::segment::nte::NTE, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-4-VAR", position: 4, segment: &crate::legacy::v2_5_1::segment::var::VAR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Group(Group { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION", position: 5, name: "ORDER_OBSERVATION", cardinality: Cardinality { min: 0, max: Max::Unbounded }, kind: GroupKind::Sequence, children: &[Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION.1-OBX", position: 1, segment: &crate::legacy::v2_5_1::segment::obx::OBX, cardinality: Cardinality { min: 1, max: Max::Bounded(1) }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION.2-NTE", position: 2, segment: &crate::legacy::v2_5_1::segment::nte::NTE, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),Node::Segment(SegmentRef { id: "PPV_PCA.7-PATIENT.3-GOAL.8-ORDER.2-ORDER_DETAIL.1-ORDER_CHOICE.choice-5-ORDER_OBSERVATION.3-VAR", position: 3, segment: &crate::legacy::v2_5_1::segment::var::VAR, cardinality: Cardinality { min: 0, max: Max::Unbounded }, status: None }),] }),] }),] }),] }),] }),] }),],
+    nodes: &PPV_PCA_NODES,
 };

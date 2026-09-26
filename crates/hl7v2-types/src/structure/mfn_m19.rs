@@ -9,158 +9,161 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`MFN_M19`], one `static` so a structure with the same tree links to it.
+pub static MFN_M19_NODES: [Node; 5] = [
+    Node::Segment(SegmentRef {
+        id: "MFN_M19.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M19.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M19.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "MFN_M19.4-MFI",
+        position: 4,
+        segment: &segment::mfi::MFI,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "MFN_M19.5-CONTRACT_RECORD",
+        position: 5,
+        name: "CONTRACT_RECORD",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Unbounded,
+        },
+        kind: GroupKind::Sequence,
+        children: &[
+            Node::Segment(SegmentRef {
+                id: "MFN_M19.5-CONTRACT_RECORD.1-MFE",
+                position: 1,
+                segment: &segment::mfe::MFE,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M19.5-CONTRACT_RECORD.2-CTR",
+                position: 2,
+                segment: &segment::ctr::CTR,
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Bounded(1),
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Segment(SegmentRef {
+                id: "MFN_M19.5-CONTRACT_RECORD.3-NTE",
+                position: 3,
+                segment: &segment::nte::NTE,
+                cardinality: Cardinality {
+                    min: 0,
+                    max: Max::Unbounded,
+                },
+                status: Some(SegmentStatus::A),
+            }),
+            Node::Group(Group {
+                id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD",
+                position: 4,
+                name: "MATERIAL_ITEM_RECORD",
+                cardinality: Cardinality {
+                    min: 1,
+                    max: Max::Unbounded,
+                },
+                kind: GroupKind::Sequence,
+                children: &[
+                    Node::Segment(SegmentRef {
+                        id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.1-ITM",
+                        position: 1,
+                        segment: &segment::itm::ITM,
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Bounded(1),
+                        },
+                        status: Some(SegmentStatus::A),
+                    }),
+                    Node::Group(Group {
+                        id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR",
+                        position: 2,
+                        name: "PURCHASING_VENDOR",
+                        cardinality: Cardinality {
+                            min: 1,
+                            max: Max::Unbounded,
+                        },
+                        kind: GroupKind::Sequence,
+                        children: &[
+                            Node::Segment(SegmentRef {
+                                id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR.1-VND",
+                                position: 1,
+                                segment: &segment::vnd::VND,
+                                cardinality: Cardinality {
+                                    min: 1,
+                                    max: Max::Bounded(1),
+                                },
+                                status: Some(SegmentStatus::A),
+                            }),
+                            Node::Group(Group {
+                                id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR.2-PACKAGING",
+                                position: 2,
+                                name: "PACKAGING",
+                                cardinality: Cardinality {
+                                    min: 0,
+                                    max: Max::Unbounded,
+                                },
+                                kind: GroupKind::Sequence,
+                                children: &[Node::Segment(SegmentRef {
+                                    id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR.2-PACKAGING.1-PKG",
+                                    position: 1,
+                                    segment: &segment::pkg::PKG,
+                                    cardinality: Cardinality {
+                                        min: 1,
+                                        max: Max::Bounded(1),
+                                    },
+                                    status: Some(SegmentStatus::A),
+                                })],
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ],
+    }),
+];
+
 /// The `MFN_M19` message structure definition, `http://hl7.org/v2/StructureDefinition/MFN_M19`.
 pub static MFN_M19: Structure = Structure {
     id: "MFN_M19",
     url: Some("http://hl7.org/v2/StructureDefinition/MFN_M19"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "MFN_M19.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M19.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M19.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "MFN_M19.4-MFI",
-            position: 4,
-            segment: &segment::mfi::MFI,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "MFN_M19.5-CONTRACT_RECORD",
-            position: 5,
-            name: "CONTRACT_RECORD",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Unbounded,
-            },
-            kind: GroupKind::Sequence,
-            children: &[
-                Node::Segment(SegmentRef {
-                    id: "MFN_M19.5-CONTRACT_RECORD.1-MFE",
-                    position: 1,
-                    segment: &segment::mfe::MFE,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M19.5-CONTRACT_RECORD.2-CTR",
-                    position: 2,
-                    segment: &segment::ctr::CTR,
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Bounded(1),
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Segment(SegmentRef {
-                    id: "MFN_M19.5-CONTRACT_RECORD.3-NTE",
-                    position: 3,
-                    segment: &segment::nte::NTE,
-                    cardinality: Cardinality {
-                        min: 0,
-                        max: Max::Unbounded,
-                    },
-                    status: Some(SegmentStatus::A),
-                }),
-                Node::Group(Group {
-                    id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD",
-                    position: 4,
-                    name: "MATERIAL_ITEM_RECORD",
-                    cardinality: Cardinality {
-                        min: 1,
-                        max: Max::Unbounded,
-                    },
-                    kind: GroupKind::Sequence,
-                    children: &[
-                        Node::Segment(SegmentRef {
-                            id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.1-ITM",
-                            position: 1,
-                            segment: &segment::itm::ITM,
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Bounded(1),
-                            },
-                            status: Some(SegmentStatus::A),
-                        }),
-                        Node::Group(Group {
-                            id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR",
-                            position: 2,
-                            name: "PURCHASING_VENDOR",
-                            cardinality: Cardinality {
-                                min: 1,
-                                max: Max::Unbounded,
-                            },
-                            kind: GroupKind::Sequence,
-                            children: &[
-                                Node::Segment(SegmentRef {
-                                    id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR.1-VND",
-                                    position: 1,
-                                    segment: &segment::vnd::VND,
-                                    cardinality: Cardinality {
-                                        min: 1,
-                                        max: Max::Bounded(1),
-                                    },
-                                    status: Some(SegmentStatus::A),
-                                }),
-                                Node::Group(Group {
-                                    id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR.2-PACKAGING",
-                                    position: 2,
-                                    name: "PACKAGING",
-                                    cardinality: Cardinality {
-                                        min: 0,
-                                        max: Max::Unbounded,
-                                    },
-                                    kind: GroupKind::Sequence,
-                                    children: &[Node::Segment(SegmentRef {
-                                        id: "MFN_M19.5-CONTRACT_RECORD.4-MATERIAL_ITEM_RECORD.2-PURCHASING_VENDOR.2-PACKAGING.1-PKG",
-                                        position: 1,
-                                        segment: &segment::pkg::PKG,
-                                        cardinality: Cardinality {
-                                            min: 1,
-                                            max: Max::Bounded(1),
-                                        },
-                                        status: Some(SegmentStatus::A),
-                                    })],
-                                }),
-                            ],
-                        }),
-                    ],
-                }),
-            ],
-        }),
-    ],
+    nodes: &MFN_M19_NODES,
 };

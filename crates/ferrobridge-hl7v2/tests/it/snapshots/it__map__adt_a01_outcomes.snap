@@ -3,7 +3,7 @@ source: crates/ferrobridge-hl7v2/tests/it/map.rs
 expression: summary(&mapped)
 ---
 [
-    "earlier-version: EarlierVersion { declared: \"2.5.1\" }",
+    "version-selected: VersionSelected { structure: \"ADT_A01\", version: \"2.5.1\", declared: Some(\"2.5.1\") }",
     "unsupported-assignment: MSH[1]-10(1) segment-msh-to-bundle MSH-10 -> identifier.system [/to be determined by the implementer/]",
     "unmapped-component: MSH[1]-9(1) datatype-msg-to-coding component 1",
     "unmapped-component: MSH[1]-9(1) datatype-msg-to-coding component 3",

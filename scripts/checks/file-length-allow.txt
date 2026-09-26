@@ -3,8 +3,8 @@
 3196 #354
 937 #354
 1094 crates/ferrobridge-hl7v2/src/map/condition.rs #355
-5178 crates/ferrobridge-hl7v2/src/map/run.rs #355
-1470 crates/ferrobridge-hl7v2/src/parse.rs #355
+5276 crates/ferrobridge-hl7v2/src/map/run.rs #355
+1561 crates/ferrobridge-hl7v2/src/parse.rs #355
 832 crates/ferrobridge-hl7v2/tests/it/corpus.rs #355
 858 crates/ferrobridge-hl7v2/tests/it/map.rs #355
 1193 tools/fhir-codegen/src/lower.rs #353
@@ -12,8 +12,9 @@
 1698 tools/fhir-codegen/src/render_codec.rs #353
 1072 tools/fhir-codegen/src/templates/codec.rs #353
 871 tools/fhir-codegen/src/templates/xml.rs #353
-901 tools/fhir-codegen/src/v2/legacy/lower.rs #353
+1417 tools/fhir-codegen/src/v2/legacy/lower.rs #353
 1982 tools/fhir-codegen/src/v2/lower.rs #353
-1070 tools/fhir-codegen/src/v2/render.rs #353
+1130 tools/fhir-codegen/src/v2/render.rs #353
 786 tools/fhir-codegen/tests/it/operations.rs #353
 1205 tools/fhir-codegen/tests/it/v2.rs #353
+774 tools/fhir-codegen/tests/it/v2_legacy.rs #353

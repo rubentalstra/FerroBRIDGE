@@ -9,84 +9,87 @@ use crate::model::{
 };
 use crate::segment;
 
+/// The top-level nodes of [`SDR_S31_A`], one `static` so a structure with the same tree links to it.
+pub static SDR_S31_A_NODES: [Node; 4] = [
+    Node::Segment(SegmentRef {
+        id: "SDR_S31-A.1-MSH",
+        position: 1,
+        segment: &segment::msh::MSH,
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SDR_S31-A.2-SFT",
+        position: 2,
+        segment: &segment::sft::SFT,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Unbounded,
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Segment(SegmentRef {
+        id: "SDR_S31-A.3-UAC",
+        position: 3,
+        segment: &segment::uac::UAC,
+        cardinality: Cardinality {
+            min: 0,
+            max: Max::Bounded(1),
+        },
+        status: Some(SegmentStatus::A),
+    }),
+    Node::Group(Group {
+        id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA",
+        position: 4,
+        name: "ANTI-MICROBIAL_DEVICE_DATA",
+        cardinality: Cardinality {
+            min: 1,
+            max: Max::Bounded(1),
+        },
+        kind: GroupKind::Choice,
+        children: &[Node::Group(Group {
+            id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA.choice-1-Group",
+            position: 1,
+            name: "Group",
+            cardinality: Cardinality {
+                min: 0,
+                max: Max::Bounded(1),
+            },
+            kind: GroupKind::Sequence,
+            children: &[
+                Node::Segment(SegmentRef {
+                    id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA.choice-1-Group.1-SDD",
+                    position: 1,
+                    segment: &segment::sdd::SDD,
+                    cardinality: Cardinality {
+                        min: 1,
+                        max: Max::Bounded(1),
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+                Node::Segment(SegmentRef {
+                    id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA.choice-1-Group.2-SCD",
+                    position: 2,
+                    segment: &segment::scd::SCD,
+                    cardinality: Cardinality {
+                        min: 0,
+                        max: Max::Unbounded,
+                    },
+                    status: Some(SegmentStatus::A),
+                }),
+            ],
+        })],
+    }),
+];
+
 /// The `SDR_S31-A` message structure definition, `http://hl7.org/v2/StructureDefinition/SDR_S31-A`.
 pub static SDR_S31_A: Structure = Structure {
     id: "SDR_S31-A",
     url: Some("http://hl7.org/v2/StructureDefinition/SDR_S31-A"),
     version: "2.9.1",
     withdrawn_as_of: None,
-    nodes: &[
-        Node::Segment(SegmentRef {
-            id: "SDR_S31-A.1-MSH",
-            position: 1,
-            segment: &segment::msh::MSH,
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SDR_S31-A.2-SFT",
-            position: 2,
-            segment: &segment::sft::SFT,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Unbounded,
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Segment(SegmentRef {
-            id: "SDR_S31-A.3-UAC",
-            position: 3,
-            segment: &segment::uac::UAC,
-            cardinality: Cardinality {
-                min: 0,
-                max: Max::Bounded(1),
-            },
-            status: Some(SegmentStatus::A),
-        }),
-        Node::Group(Group {
-            id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA",
-            position: 4,
-            name: "ANTI-MICROBIAL_DEVICE_DATA",
-            cardinality: Cardinality {
-                min: 1,
-                max: Max::Bounded(1),
-            },
-            kind: GroupKind::Choice,
-            children: &[Node::Group(Group {
-                id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA.choice-1-Group",
-                position: 1,
-                name: "Group",
-                cardinality: Cardinality {
-                    min: 0,
-                    max: Max::Bounded(1),
-                },
-                kind: GroupKind::Sequence,
-                children: &[
-                    Node::Segment(SegmentRef {
-                        id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA.choice-1-Group.1-SDD",
-                        position: 1,
-                        segment: &segment::sdd::SDD,
-                        cardinality: Cardinality {
-                            min: 1,
-                            max: Max::Bounded(1),
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                    Node::Segment(SegmentRef {
-                        id: "SDR_S31-A.4-ANTI-MICROBIAL_DEVICE_DATA.choice-1-Group.2-SCD",
-                        position: 2,
-                        segment: &segment::scd::SCD,
-                        cardinality: Cardinality {
-                            min: 0,
-                            max: Max::Unbounded,
-                        },
-                        status: Some(SegmentStatus::A),
-                    }),
-                ],
-            })],
-        }),
-    ],
+    nodes: &SDR_S31_A_NODES,
 };

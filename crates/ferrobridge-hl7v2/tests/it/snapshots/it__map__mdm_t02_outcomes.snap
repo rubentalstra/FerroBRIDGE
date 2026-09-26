@@ -3,7 +3,7 @@ source: crates/ferrobridge-hl7v2/tests/it/map.rs
 expression: summary(&mapped)
 ---
 [
-    "earlier-version: EarlierVersion { declared: \"2.5.1\" }",
+    "version-selected: VersionSelected { structure: \"MDM_T02\", version: \"2.5.1\", declared: Some(\"2.5.1\") }",
     "unsupported-assignment: MSH[1]-10(1) segment-msh-to-bundle MSH-10 -> identifier.system [/to be determined by the implementer/]",
     "unmapped-component: MSH[1]-9(1) datatype-msg-to-coding component 1",
     "unmapped-component: MSH[1]-9(1) datatype-msg-to-coding component 3",
@@ -22,7 +22,6 @@ expression: summary(&mapped)
     "narrative-condition: TXA[1] message-mdm-t02-to-bundle MDM_T02.TXA -> Provenance []",
     "unmapped-field: TXA[1]-1",
     "unmapped-field: TXA[1]-4",
-    "group-renamed: GroupRenamed { at: Location { segment: \"OBX\", sequence: 1, field: None, repetition: None, component: None, subcomponent: None }, row_path: \"MDM_T02.OBSERVATION.OBX\", tree_path: \"MDM_T02.FIXME.OBX\", row_group: \"OBSERVATION\", tree_group: \"FIXME\" }",
     "unknown-element: OBX[1]-5(1) segment-obx-to-documentreference OBX-5 -> content[4].data [the element table does not resolve the target path]",
     "unknown-element: OBX[1]-5(1) segment-obx-to-documentreference OBX-5 -> content[4].contentType [the element table does not resolve the target path]",
     "unmapped-field: OBX[1]-1",

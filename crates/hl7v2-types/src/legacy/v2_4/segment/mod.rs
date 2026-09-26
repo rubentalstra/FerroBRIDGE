@@ -2,31 +2,65 @@
 // Change the emitter (tools/fhir-codegen) and regenerate.
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: Apache-2.0
-//! The segments of the 2.4 tables whose field table differs from the v2.9.1 one, one module each.
+//! The segments of the 2.4 tables that no v2.9.1 or earlier `static` carries, one module each.
 
+pub mod abs;
 pub mod acc;
+pub mod aig;
+pub mod ail;
+pub mod aip;
+pub mod ais;
 pub mod al1;
+pub mod arq;
+pub mod aut;
+pub mod blc;
 pub mod blg;
+pub mod cdm;
+pub mod cm1;
+pub mod cm2;
+pub mod cns;
+pub mod csp;
+pub mod csr;
+pub mod css;
 pub mod ctd;
 pub mod cti;
 pub mod db1;
 pub mod dg1;
 pub mod drg;
+pub mod ecd;
+pub mod ecr;
+pub mod edu;
+pub mod eqp;
+pub mod equ;
 pub mod err;
 pub mod evn;
 pub mod ft1;
 pub mod gol;
+pub mod gp1;
+pub mod gp2;
 pub mod gt1;
+pub mod iam;
 pub mod in1;
 pub mod in2;
 pub mod in3;
+pub mod inv;
+pub mod isd;
+pub mod lan;
+pub mod lcc;
+pub mod lch;
+pub mod ldp;
+pub mod loc;
+pub mod lrl;
+pub mod mfa;
 pub mod mfe;
 pub mod mfi;
 pub mod mrg;
 pub mod msa;
 pub mod msh;
 pub mod nck;
+pub mod nds;
 pub mod nk1;
+pub mod npu;
 pub mod nsc;
 pub mod nst;
 pub mod nte;
@@ -35,22 +69,40 @@ pub mod obx;
 pub mod ods;
 pub mod odt;
 pub mod om1;
+pub mod om2;
+pub mod om3;
+pub mod om4;
+pub mod om5;
+pub mod om7;
 pub mod orc;
+pub mod org;
+pub mod pcr;
 pub mod pd1;
+pub mod pda;
 pub mod pdc;
+pub mod peo;
+pub mod pes;
 pub mod pid;
 pub mod pr1;
+pub mod pra;
 pub mod prb;
+pub mod prc;
 pub mod prd;
 pub mod psh;
 pub mod pth;
 pub mod pv1;
 pub mod pv2;
 pub mod qak;
+pub mod qid;
 pub mod qpd;
 pub mod qrd;
 pub mod qrf;
+pub mod qri;
+pub mod rcp;
 pub mod rdt;
+pub mod rf1;
+pub mod rgs;
+pub mod rmi;
 pub mod rol;
 pub mod rq1;
 pub mod rqd;
@@ -62,37 +114,75 @@ pub mod rxg;
 pub mod rxo;
 pub mod rxr;
 pub mod sac;
+pub mod sch;
 pub mod sid;
+pub mod stf;
+pub mod tcc;
 pub mod tcd;
+pub mod txa;
 pub mod ub1;
 pub mod ub2;
 pub mod var;
 
 /// Every segment, in definition id order.
-pub static SEGMENTS: [&crate::model::Segment; 63] = [
+pub static SEGMENTS: [&crate::model::Segment; 119] = [
+    &abs::ABS,
     &acc::ACC,
+    &aig::AIG,
+    &ail::AIL,
+    &aip::AIP,
+    &ais::AIS,
     &al1::AL1,
+    &arq::ARQ,
+    &aut::AUT,
+    &blc::BLC,
     &blg::BLG,
+    &cdm::CDM,
+    &cm1::CM1,
+    &cm2::CM2,
+    &cns::CNS,
+    &csp::CSP,
+    &csr::CSR,
+    &css::CSS,
     &ctd::CTD,
     &cti::CTI,
     &db1::DB1,
     &dg1::DG1,
     &drg::DRG,
+    &ecd::ECD,
+    &ecr::ECR,
+    &edu::EDU,
+    &eqp::EQP,
+    &equ::EQU,
     &err::ERR,
     &evn::EVN,
     &ft1::FT1,
     &gol::GOL,
+    &gp1::GP1,
+    &gp2::GP2,
     &gt1::GT1,
+    &iam::IAM,
     &in1::IN1,
     &in2::IN2,
     &in3::IN3,
+    &inv::INV,
+    &isd::ISD,
+    &lan::LAN,
+    &lcc::LCC,
+    &lch::LCH,
+    &ldp::LDP,
+    &loc::LOC,
+    &lrl::LRL,
+    &mfa::MFA,
     &mfe::MFE,
     &mfi::MFI,
     &mrg::MRG,
     &msa::MSA,
     &msh::MSH,
     &nck::NCK,
+    &nds::NDS,
     &nk1::NK1,
+    &npu::NPU,
     &nsc::NSC,
     &nst::NST,
     &nte::NTE,
@@ -101,22 +191,40 @@ pub static SEGMENTS: [&crate::model::Segment; 63] = [
     &ods::ODS,
     &odt::ODT,
     &om1::OM1,
+    &om2::OM2,
+    &om3::OM3,
+    &om4::OM4,
+    &om5::OM5,
+    &om7::OM7,
     &orc::ORC,
+    &org::ORG,
+    &pcr::PCR,
     &pd1::PD1,
+    &pda::PDA,
     &pdc::PDC,
+    &peo::PEO,
+    &pes::PES,
     &pid::PID,
     &pr1::PR1,
+    &pra::PRA,
     &prb::PRB,
+    &prc::PRC,
     &prd::PRD,
     &psh::PSH,
     &pth::PTH,
     &pv1::PV1,
     &pv2::PV2,
     &qak::QAK,
+    &qid::QID,
     &qpd::QPD,
     &qrd::QRD,
     &qrf::QRF,
+    &qri::QRI,
+    &rcp::RCP,
     &rdt::RDT,
+    &rf1::RF1,
+    &rgs::RGS,
+    &rmi::RMI,
     &rol::ROL,
     &rq1::RQ1,
     &rqd::RQD,
@@ -128,8 +236,12 @@ pub static SEGMENTS: [&crate::model::Segment; 63] = [
     &rxo::RXO,
     &rxr::RXR,
     &sac::SAC,
+    &sch::SCH,
     &sid::SID,
+    &stf::STF,
+    &tcc::TCC,
     &tcd::TCD,
+    &txa::TXA,
     &ub1::UB1,
     &ub2::UB2,
     &var::VAR,
