@@ -147,7 +147,10 @@ well (`OML_O21`, and `MDM_T02`, whose observation group is `FIXME`).
 ## Logs
 
 Libraries speak `tracing`, and no message content reaches a log: the listener
-logs the peer, the refusal kind and task failures, never a byte of a frame.
+logs the peer (the `mllp_connection` span), the refusal kind and task
+failures, never a byte of a frame. `mllp::serve_with` takes the idle and the
+frame timeout; a frame that stalls is refused as `Malformed::Stalled`, so the
+caller answers it as any malformed frame.
 
 ## Tests
 

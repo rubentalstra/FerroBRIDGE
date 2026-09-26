@@ -27,6 +27,9 @@ async-trait.workspace = true
 axum.workspace = true
 clap.workspace = true
 ferrobridge-term.workspace = true
+# The HL7 v2 face: the MLLP listener, the parse, the acknowledgment and the
+# v2-to-FHIR ConceptMap interpreter.
+ferrobridge-hl7v2.workspace = true
 # The generated FHIR R4 model the facade authors its wire bodies with.
 fhir-types = { workspace = true, features = ["r4", "resources"] }
 # The mapping language the facade runs: the loader, the compiler and the

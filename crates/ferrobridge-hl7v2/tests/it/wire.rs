@@ -8,7 +8,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use ferrobridge_hl7v2::mllp::{Codec, serve};
+use ferrobridge_hl7v2::mllp::{Codec, Timeouts, serve_with};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::oneshot;
@@ -26,12 +26,16 @@ struct Listener {
 
 impl Listener {
     async fn start(codec: Codec) -> Self {
+        Self::start_with(codec, Timeouts::default()).await
+    }
+
+    async fn start_with(codec: Codec, timeouts: Timeouts) -> Self {
         let socket = TcpListener::bind("127.0.0.1:0")
             .await
             .expect("a local port");
         let address = socket.local_addr().expect("an address");
         let (stop, stopped) = oneshot::channel::<()>();
-        let task = tokio::spawn(serve(socket, Arc::new(Face), codec, async {
+        let task = tokio::spawn(serve_with(socket, Arc::new(Face), codec, timeouts, async {
             let _signal = stopped.await;
         }));
         Self {
@@ -330,4 +334,51 @@ async fn the_listener_stops_on_its_signal_while_a_connection_is_open() {
     assert_eq!(msa(&read_ack(&mut stream).await), "MSA|AA|MSG00002");
     listener.stop().await;
     assert_closed(&mut stream).await;
+}
+
+#[tokio::test]
+async fn a_connection_idle_past_its_timeout_is_closed_without_an_answer() {
+    let listener = Listener::start_with(
+        Codec::default(),
+        Timeouts {
+            idle: Some(Duration::from_millis(100)),
+            frame: None,
+        },
+    )
+    .await;
+    let mut stream = TcpStream::connect(listener.address)
+        .await
+        .expect("a connection");
+    stream
+        .write_all(&frame(&fixtures::adt_a01()))
+        .await
+        .expect("the frame is sent");
+    assert_eq!(msa(&read_ack(&mut stream).await), "MSA|AA|MSG00002");
+    assert_closed(&mut stream).await;
+    listener.stop().await;
+}
+
+#[tokio::test]
+async fn a_frame_that_stalls_past_its_timeout_is_answered_ar_and_closed() {
+    let listener = Listener::start_with(
+        Codec::default(),
+        Timeouts {
+            idle: None,
+            frame: Some(Duration::from_millis(100)),
+        },
+    )
+    .await;
+    let mut stream = TcpStream::connect(listener.address)
+        .await
+        .expect("a connection");
+    let whole = frame(&fixtures::adt_a01());
+    let half = whole
+        .get(..whole.len() - 2)
+        .expect("a frame longer than its trailer");
+    stream.write_all(half).await.expect("the bytes are sent");
+    let ack = read_ack(&mut stream).await;
+    assert_eq!(msa(&ack), "MSA|AR|MSG00002");
+    assert!(ack.contains("did not complete within 100 ms"), "{ack}");
+    assert_closed(&mut stream).await;
+    listener.stop().await;
 }

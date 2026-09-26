@@ -153,11 +153,16 @@ than overwriting a version the client never saw. A `PUT` to an id the map does
 not know is a `404`: this milestone does not upsert, and the
 `CapabilityStatement` says `updateCreate: false`.
 
-A `transaction` Bundle maps every entry first, resolving references within the
-Bundle by `fullUrl` and then through the sending site with cycle protection,
-and commits the lot through one ITS-REST contribution so the CDR makes it
-atomic. Any failure answers one `OperationOutcome` naming every failing entry
-by `fullUrl`, and nothing is committed.
+A `transaction` Bundle maps every entry first and commits the lot through one
+ITS-REST contribution so the CDR makes it atomic. The facade uses `fullUrl`
+in two places. It names each entry by its `fullUrl` in every refusal, or by
+its position when it has none. And a `subject` or
+`patient` reference whose value is another entry's `fullUrl` is read through
+that entry: the person is that entry's first `identifier` with a value. The
+facade resolves no other reference. A reference is mapped as the resource
+carries it, and the facade never fetches a referenced resource from anywhere.
+Any failure answers one `OperationOutcome` naming every failing entry, and
+nothing is committed.
 
 A committed transaction answers `200` with a `transaction-response` Bundle,
 one entry per request entry in the same order. Each entry's `response` carries
@@ -171,6 +176,17 @@ A delivery that arrives while another delivery of the same Bundle or resource
 is still in flight is refused with `409` and commits nothing; retry it after
 the first one answers. The redelivery rule is on the
 [failure and identity](../operate/failure-and-identity.md) page.
+
+An HL7 v2 message that the [HL7 v2 face](../operate/hl7v2-face.md) receives
+goes through this same path as a transaction of its Bundle's entries, so the
+same identity and replay rules apply to it. Its entries are keyed by the
+message's MSH-10 and message type and their position in the Bundle, so a
+message sent again commits nothing and is answered `AA`, as its first delivery
+was. A message whose delivery overlaps another of the same message is refused
+and commits nothing. Each composition's `FEEDER_AUDIT` names the message where
+a resource would be named here. A subject reference to another entry of the
+Bundle is read through that entry: the person is the referenced resource's
+first `identifier`, the same pair a `subject.identifier` names.
 
 ## `$validate` is a dry run of this server
 

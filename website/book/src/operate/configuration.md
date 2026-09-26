@@ -354,6 +354,36 @@ facade consumed. No clinical content is written into it. Back it up with the
 CDR, because a lost map means the next create writes a second composition for a
 resource the CDR already holds.
 
+### `[hl7v2]`
+
+The HL7 v2 face: an MLLP listener whose messages are written into the CDR
+through the facade's ingest service. It is off until `enabled` is true, and an
+enabled face with the facade off is a boot error naming `hl7v2.enabled` and
+`facade.enabled`. This lane reaches identifiable data. The
+[HL7 v2 face](hl7v2-face.md) page states what it does with a message and how
+it answers.
+
+| Key | Default | Meaning |
+|---|---|---|
+| `enabled` | `false` | Whether the MLLP listener runs |
+| `listen` | `127.0.0.1:2575` | The socket address the listener binds |
+| `default_charset` | `ASCII` | The HL7 table 0211 code a message with an empty MSH-18 is read in |
+| `concept_maps` | none, required | The `package` directory of `hl7.fhir.uv.v2mappings`, loaded at boot |
+| `supplements` | `[]` | ConceptMap directories loaded over the guide, in order |
+| `unmapped_entries` | `skip_and_count` | `skip_and_count` or `refuse`, for an entry no program maps |
+| `ehr_policy` | the facade's | `existing` or `create_on_first_write`, for the face alone |
+| `profiles` | `[]` | `{ resource_type, profile }` pairs: the profile a resource of that R4 type claims when the guide wrote none |
+| `idle_timeout_ms` | `300000` | How long a connection may sit between messages; `0` keeps it open |
+| `frame_timeout_ms` | `30000` | How long one frame may take to arrive whole; `0` waits |
+| `frame_limit_bytes` | `1048576` | The largest message one frame may carry |
+| `log_outcomes` | `false` | Whether an `AE` or `AR` also logs the counted outcomes by kind at debug level |
+| `senders` | `[]` | The MSH-4 sending facilities accepted: `{ namespace_id }` or `{ universal_id, universal_id_type }`; empty accepts any |
+
+A resource type the R4 element table does not name, a profile that is not a
+URL, a resource type listed twice, and a sender that names neither a
+namespace id alone nor a universal id with its type are each a boot error
+naming the key.
+
 ### `[operations]`
 
 The `$tofhir` and `$toopenehr` lane. Both operations are pure transformations

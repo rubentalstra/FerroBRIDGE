@@ -38,7 +38,7 @@ serde_json.workspace = true
 # The digest a created resource's urn:uuid is derived from.
 sha2.workspace = true
 thiserror.workspace = true
-tokio = { workspace = true, features = ["net", "io-util", "rt", "sync", "macros"] }
+tokio = { workspace = true, features = ["net", "io-util", "rt", "sync", "macros", "time"] }
 tokio-util.workspace = true
 tracing.workspace = true
 uuid.workspace = true

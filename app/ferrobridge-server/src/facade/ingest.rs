@@ -16,6 +16,7 @@
 //! A refusal is a [`Refused`]: the status and the `OperationOutcome` issues a
 //! handler renders, left unrendered so the service carries no transport.
 
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
 use fhir_types::codec::Value;
@@ -53,6 +54,7 @@ use crate::facade::ehr;
 use crate::facade::engine;
 use crate::facade::identity::ExternalResourceId;
 use crate::facade::identity::FhirResourceId;
+use crate::facade::identity::IdError;
 use crate::facade::identity::PersonId;
 use crate::facade::identity::claims::Claim;
 use crate::facade::identity::claims::Claims;
@@ -1005,11 +1007,7 @@ impl<'a> Ingest<'a> {
             ));
         }
         let Some(ref subject) = partition.subject else {
-            return Err(Refused::new(
-                StatusCode::UNPROCESSABLE_ENTITY,
-                Issue::error(IssueType::Required)
-                    .diagnosing("the Bundle carries no entry this server maps"),
-            ));
+            return Err(nothing_mapped(&partition));
         };
         let sources = sources_of(&partition.mapped, provenance)?;
         distinct(&partition.mapped, &sources)?;
@@ -1046,12 +1044,7 @@ impl<'a> Ingest<'a> {
         }
         let ehr_id = ehr::resolve(&self.client, self.store, subject, self.settings.ehr_policy)
             .await
-            .map_err(|error| {
-                Refused::new(
-                    StatusCode::UNPROCESSABLE_ENTITY,
-                    Issue::error(IssueType::Processing).diagnosing(chain(&error)),
-                )
-            })?;
+            .map_err(|error| ehr_refusal(&error))?;
         let preceding = self.preceding(&ehr_id, &partition.mapped, &revised).await?;
         let (contribution, returned) = self
             .commit_all(&ehr_id, &partition.mapped, &preceding)
@@ -1356,6 +1349,10 @@ impl<'a> Ingest<'a> {
         provenance: &Provenance,
     ) -> Partition<'a> {
         let mut partition = Partition::default();
+        let locals: BTreeMap<&str, &Value> = entries
+            .iter()
+            .filter_map(|entry| Some((entry.get("fullUrl")?.as_str()?, entry.get("resource")?)))
+            .collect();
         for (index, entry) in entries.iter().enumerate() {
             let full_url = entry
                 .get("fullUrl")
@@ -1369,7 +1366,7 @@ impl<'a> Ingest<'a> {
                 );
                 continue;
             };
-            match self.map_one(resource, &full_url, index, provenance) {
+            match self.map_one(resource, &full_url, index, &locals, provenance) {
                 Ok(Mapping::Mapped(one, person)) => {
                     match partition.subject {
                         None => partition.subject = Some(person),
@@ -1402,11 +1399,16 @@ impl<'a> Ingest<'a> {
     }
 
     /// Maps one Bundle entry, naming it by its `fullUrl` on refusal.
+    ///
+    /// `locals` holds every entry of the Bundle by its `fullUrl`, so a
+    /// subject reference to another entry is read through that entry
+    /// ([`local_subject`]).
     fn map_one(
         &self,
         resource: &Value,
         full_url: &str,
         position: usize,
+        locals: &BTreeMap<&str, &Value>,
         provenance: &Provenance,
     ) -> Result<Mapping<'a>, Issue> {
         let inbound = Inbound::of(resource.clone(), "").map_err(|error| {
@@ -1450,13 +1452,16 @@ impl<'a> Ingest<'a> {
                 };
             }
         };
-        let subject = inbound
-            .subject(&self.settings.subject_namespace)
-            .map_err(|error| {
-                Issue::error(IssueType::Required)
-                    .diagnosing(chain(&error))
-                    .at(String::from(full_url))
-            })?;
+        let namespace = self.settings.subject_namespace.as_str();
+        let subject = match local_subject(&inbound, locals, namespace) {
+            Some(local) => local.map_err(|error| chain(&error)),
+            None => inbound.subject(namespace).map_err(|error| chain(&error)),
+        }
+        .map_err(|text| {
+            Issue::error(IssueType::Required)
+                .diagnosing(text)
+                .at(String::from(full_url))
+        })?;
         let (composition, instant) = self.run(program, &inbound, provenance).map_err(|error| {
             Issue::error(IssueType::Processing)
                 .diagnosing(chain(&error))
@@ -1841,6 +1846,74 @@ impl<'a> Ingest<'a> {
             )),
         }
     }
+}
+
+/// Returns the subject a Bundle-local reference of `inbound` names, read from
+/// the first `identifier` with a `value` of the entry it references.
+///
+/// A reference whose value is another entry's `fullUrl` resolves to that
+/// entry (R4 `Bundle.entry.fullUrl`; <https://hl7.org/fhir/R4/bundle.html#references>),
+/// so a `urn:uuid` a message Bundle allocates per message never becomes a
+/// person key of its own. `None` when `inbound` names its subject by
+/// identifier, when the reference names no entry of the Bundle, or when that
+/// entry carries no identifier with a value; the reference is then read as
+/// [`Inbound::subject`] reads it.
+fn local_subject(
+    inbound: &Inbound,
+    locals: &BTreeMap<&str, &Value>,
+    namespace: &str,
+) -> Option<Result<PersonId, IdError>> {
+    let document = inbound.document();
+    let reference = document
+        .get("subject")
+        .or_else(|| document.get("patient"))?;
+    if reference.get("identifier").is_some() {
+        return None;
+    }
+    let target = locals.get(reference.get("reference")?.as_str()?)?;
+    // NOTE: no specification governs this: our own design; the first identifier
+    // in document order keys the person, as PID-3's first repetition does.
+    let identifier = target
+        .get("identifier")
+        .and_then(Value::as_array)
+        .unwrap_or_default()
+        .iter()
+        .find(|identifier| identifier.get("value").and_then(Value::as_str).is_some())?;
+    let value = identifier.get("value").and_then(Value::as_str)?;
+    let system = identifier
+        .get("system")
+        .and_then(Value::as_str)
+        .unwrap_or(namespace);
+    Some(PersonId::new(system, value))
+}
+
+/// Returns the refusal of a Bundle no entry of which mapped, naming every
+/// entry that was skipped and why.
+fn nothing_mapped(partition: &Partition<'_>) -> Refused {
+    let mut issues = vec![
+        Issue::error(IssueType::Required)
+            .diagnosing("the Bundle carries no entry this server maps"),
+    ];
+    for slot in &partition.pending {
+        if let Pending::Skipped(skipped) = slot {
+            let why = match skipped.reason {
+                SkipReason::NoProgramForType => {
+                    format!("no loaded mapping answers for {}", skipped.resource_type)
+                }
+                SkipReason::NoProgramForProfiles { ref profiles } => format!(
+                    "no loaded mapping for {} claims one of the profiles [{}]",
+                    skipped.resource_type,
+                    profiles.join(", ")
+                ),
+            };
+            issues.push(
+                Issue::error(IssueType::NotSupported)
+                    .diagnosing(why)
+                    .at(skipped.full_url.clone()),
+            );
+        }
+    }
+    Refused::of(StatusCode::UNPROCESSABLE_ENTITY, issues)
 }
 
 /// Returns the consumed-source key of one resource: its `resourceType`, `id`

@@ -22,6 +22,7 @@ mod etl;
 mod etl_config;
 mod facade;
 mod facade_e2e;
+mod hl7v2;
 mod http;
 mod ingest;
 mod kds;

@@ -119,7 +119,7 @@ fn app(facade: &Arc<Facade>) -> Router {
 }
 
 /// Uploads the synthetic diagnosis template through the CDR's own route.
-async fn upload_template(base_url: &str) -> Result<(), Box<dyn StdError>> {
+pub(crate) async fn upload_template(base_url: &str) -> Result<(), Box<dyn StdError>> {
     let response = reqwest::Client::new()
         .post(format!("{base_url}/definition/template/adl1.4"))
         .header(header::CONTENT_TYPE, "application/xml")

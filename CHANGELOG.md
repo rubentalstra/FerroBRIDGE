@@ -25,6 +25,47 @@ crates on crates.io.
 
 ### Added
 
+- The HL7 v2 face in the server (#255). `[hl7v2] enabled = true` starts an
+  MLLP listener beside the HTTP server, under the same `SIGTERM` drain, with an
+  `hl7v2` line in the boot banner and an `hl7v2-listener` readiness indicator.
+  Each message runs through `ferrobridge_hl7v2::inbound` and the v2-to-FHIR
+  ConceptMaps into an R4 message Bundle, whose entries go through the facade's
+  ingest service as one transaction: the program is selected by `meta.profile`
+  as the facade selects it, a configured profile per resource type is claimed
+  where the guide wrote none, an entry naming no subject references the
+  message's one `Patient`, and every composition's `FEEDER_AUDIT` names the
+  message by MSH-10 and message type. The acknowledgment follows the commit:
+  `AA` when the CDR holds the compositions or held them from an earlier
+  delivery, `AE` with one `ERR` per refused entry for a refusal of the
+  content, `AR` when the message cannot be read or the CDR or the terminology
+  server failed (HL7 v2.5.1 chapter 2 §2.9.2.2). The section carries the
+  listen address, the default MSH-18 character set, the ConceptMap directory
+  and its supplements, the unmapped-entry rule, an EHR policy of its own, the
+  idle and frame timeouts, the frame ceiling and whether an `AE` or `AR` logs
+  the counted outcomes. No message byte reaches a log line; each connection
+  and each message has its own span naming the peer, MSH-10 and the message
+  type. The Operate book gains the HL7 v2 face page. Until a FHIRconnect
+  context maps the guide's resources (#258), a message is answered `AE` for
+  lack of a program. `[hl7v2] senders` lists the MSH-4 sending facilities
+  accepted, by namespace id (HD.1) or by universal id and type (HD.2, HD.3);
+  a message from any other is `AR` with an `ERR` at MSH^1^4 and is never
+  mapped, counted as `refused` on the connection's span. `/health/info` gains
+  `lanes`, the `hl7v2` lane with its listen address and whether its listener
+  is up, and the facade's `CapabilityStatement` names the HL7 v2 face in
+  `implementation.description` when it is configured.
+- `ferrobridge_hl7v2::mllp::serve_with` takes an idle and a frame timeout: a
+  connection idle past the first is closed, and a frame that does not complete
+  within the second is answered `AR` as `Malformed::Stalled`.
+  `mllp::Handler::handle` takes the connection's `mllp::Connection`, on which
+  a handler counts the frames it refused by its own policy; the
+  `mllp_connection` span records `messages` and `refused`.
+- The ingest service reads a subject reference to another entry of the Bundle
+  through that entry, taking the person from its first `identifier`, and a
+  Bundle none of whose entries maps is refused naming every skipped entry and
+  why. A Bundle whose EHR lookup the CDR failed or refused answers with the
+  status the status table gives that answer, as a single create does, instead
+  of `422`.
+
 - `hl7v2-types` carries the message structures HL7 withdrew before v2.9.1
   (#303), so `ferrobridge-hl7v2` parses the `ORM^O01` orders legacy senders
   still send. `scripts/vendor/v2-legacy.sh` fetches the NIST IGAMT export of

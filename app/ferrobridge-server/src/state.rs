@@ -106,6 +106,10 @@ pub struct AppState {
     facade: Option<Arc<crate::facade::Facade>>,
     /// The FHIRconnect operations lane, when a mapping set is configured.
     operations: Option<OperationsLane>,
+    /// The lanes the boot summary reported, for `GET /health/info`.
+    lanes: Vec<crate::startup::Lane>,
+    /// Whether the HL7 v2 listener accepts, when the face runs.
+    hl7v2: Option<crate::hl7v2::Listening>,
 }
 
 impl AppState {
@@ -162,6 +166,8 @@ impl AppState {
             logged_query_parameters: settings.telemetry.logged_query_parameters.clone(),
             facade: None,
             operations,
+            lanes: Vec::new(),
+            hl7v2: None,
         })
     }
 
@@ -174,6 +180,8 @@ impl AppState {
             logged_query_parameters: Vec::new(),
             facade: None,
             operations: None,
+            lanes: Vec::new(),
+            hl7v2: None,
         }
     }
 
@@ -189,6 +197,52 @@ impl AppState {
         )));
         self.facade = Some(facade);
         self
+    }
+
+    /// Returns this state with the HL7 v2 listener probed and reported.
+    #[must_use]
+    pub fn with_hl7v2(mut self, listening: crate::hl7v2::Listening) -> Self {
+        self.health = self
+            .health
+            .and(Arc::new(indicators::Hl7v2Listener::new(listening.clone())));
+        self.hl7v2 = Some(listening);
+        self
+    }
+
+    /// Returns whether the HL7 v2 listener accepts, when the face runs.
+    #[must_use]
+    pub const fn hl7v2(&self) -> Option<&crate::hl7v2::Listening> {
+        self.hl7v2.as_ref()
+    }
+
+    /// Returns this state with `lanes` as the lanes `GET /health/info`
+    /// reports.
+    #[must_use]
+    pub fn with_lanes(mut self, lanes: Vec<crate::startup::Lane>) -> Self {
+        self.lanes = lanes;
+        self
+    }
+
+    /// Returns the document `GET /health/info` answers: the build facts, the
+    /// pins and every lane, the HL7 v2 lane with its listen address and
+    /// whether its listener accepts now.
+    #[must_use]
+    pub fn info(&self) -> crate::build_info::Info {
+        let lanes = self
+            .lanes
+            .iter()
+            .map(|lane| crate::build_info::LaneInfo {
+                name: lane.name,
+                enabled: lane.enabled,
+                listen: lane.listen.clone(),
+                up: lane.listen.as_ref().map(|_| {
+                    self.hl7v2
+                        .as_ref()
+                        .is_some_and(crate::hl7v2::Listening::is_up)
+                }),
+            })
+            .collect();
+        crate::build_info::Info::current().with_lanes(lanes)
     }
 
     /// Returns the facade, when its lane is on.
@@ -227,5 +281,56 @@ impl AppState {
     #[must_use]
     pub fn logged_query_parameters(&self) -> &[String] {
         &self.logged_query_parameters
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AppState;
+    use crate::health::Registry;
+    use crate::hl7v2::Listening;
+    use crate::startup::Lane;
+
+    fn lanes() -> Vec<Lane> {
+        vec![
+            Lane {
+                name: "facade",
+                enabled: true,
+                ..Lane::default()
+            },
+            Lane {
+                name: "hl7v2",
+                enabled: true,
+                listen: Some(String::from("127.0.0.1:2575")),
+                ..Lane::default()
+            },
+        ]
+    }
+
+    #[test]
+    fn the_info_names_every_lane_and_the_hl7v2_listener_state() {
+        let state = AppState::with_health(Registry::default())
+            .with_hl7v2(Listening::default())
+            .with_lanes(lanes());
+        let document = serde_json::to_value(state.info()).expect("the info serializes");
+        let lanes = document["lanes"].as_array().expect("a lanes array");
+        assert_eq!(2, lanes.len());
+        assert_eq!(Some("facade"), lanes[0]["name"].as_str());
+        assert!(lanes[0].get("listen").is_none(), "a lane with no listener");
+        assert_eq!(Some("hl7v2"), lanes[1]["name"].as_str());
+        assert_eq!(Some("127.0.0.1:2575"), lanes[1]["listen"].as_str());
+        assert_eq!(Some(false), lanes[1]["up"].as_bool(), "not accepting yet");
+    }
+
+    #[test]
+    fn a_listener_that_accepts_reads_up_on_the_info() {
+        let listening = Listening::default();
+        let state = AppState::with_health(Registry::default())
+            .with_hl7v2(listening.clone())
+            .with_lanes(lanes());
+        listening.set(true);
+        let info = state.info();
+        let lane = info.lanes.iter().find(|lane| lane.name == "hl7v2");
+        assert_eq!(Some(Some(true)), lane.map(|lane| lane.up));
     }
 }

@@ -83,9 +83,14 @@ async fn the_info_route_serves_the_build_facts_and_the_pins() -> Result<(), Box<
         keys
     };
     assert_eq!(
-        vec!["build", "pins", "product", "version"],
+        vec!["build", "lanes", "pins", "product", "version"],
         keys(&document),
         "the document carries the facts and nothing else"
+    );
+    assert_eq!(
+        Some(0),
+        document["lanes"].as_array().map(Vec::len),
+        "a state with no lanes reports none"
     );
     assert_eq!(
         vec!["built_at", "commit", "commit_short", "rustc"],
