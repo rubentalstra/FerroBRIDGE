@@ -16,7 +16,7 @@ pub static CM1: Segment = Segment {
             id: "CM1.1",
             position: 1,
             name: "Set ID - CM1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static CM1: Segment = Segment {
             id: "CM1.2",
             position: 2,
             name: "Study Phase Identifier",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static CM1: Segment = Segment {
             id: "CM1.3",
             position: 3,
             name: "Description of Study Phase",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

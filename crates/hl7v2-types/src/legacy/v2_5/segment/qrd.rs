@@ -16,7 +16,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.1",
             position: 1,
             name: "Query Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.2",
             position: 2,
             name: "Query Format Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.3",
             position: 3,
             name: "Query Priority",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -76,7 +76,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.4",
             position: 4,
             name: "Query ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.5",
             position: 5,
             name: "Deferred Response Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +115,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.6",
             position: 6,
             name: "Deferred Response Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +133,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.7",
             position: 7,
             name: "Quantity Limited Request",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.8",
             position: 8,
             name: "Who Subject Filter",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -172,7 +172,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.9",
             position: 9,
             name: "What Subject Filter",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -193,7 +193,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.10",
             position: 10,
             name: "What Department Data Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -211,7 +211,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.11",
             position: 11,
             name: "What Data Code Value Qual.",
-            data_type: Some(DataTypeRef::Legacy("VR")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::VR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -229,7 +229,7 @@ pub static QRD: Segment = Segment {
             id: "QRD.12",
             position: 12,
             name: "Query Results Level",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -244,8 +244,11 @@ fn emitted_fields_agree_with_the_segment_definitions() {
                 Some(DataTypeRef::Undefined(code)) => {
                     assert!(hl7v2_types::data_type::find(code).is_none(), "{context}");
                 }
-                Some(DataTypeRef::Legacy(code)) => {
-                    panic!("{context}: a v2.9.1 field carries the legacy code {code}")
+                Some(DataTypeRef::Legacy(data_type)) => {
+                    panic!(
+                        "{context}: a v2.9.1 field carries the legacy code {}",
+                        data_type.code
+                    )
                 }
                 None => {}
             }
@@ -1139,11 +1142,11 @@ fn emitting_twice_is_byte_identical_and_check_passes() {
     let report = emit(&options(first.path(), false)).expect("first emit");
     emit(&options(second.path(), false)).expect("second emit");
     // lib.rs, model.rs, four index modules, one module per structure, segment,
-    // data type and message definition; then the legacy index, three modules
+    // data type and message definition; then the legacy index, four modules
     // per legacy version, and one module per legacy structure and segment.
     assert_eq!(
         report.files.len(),
-        6 + 305 + 190 + 83 + 696 + 1 + 11 * 3 + 218 + 495
+        6 + 305 + 190 + 83 + 696 + 1 + 11 * 4 + 218 + 495
     );
     assert_eq!(
         tree(&first.path().join("src")),

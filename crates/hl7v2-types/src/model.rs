@@ -21,8 +21,8 @@
 //! definitions no longer carry. Those tables give no canonical URL and no
 //! element ids, so a legacy entry carries no URL and an id derived by the
 //! same position rule, its fields carry their data type as a
-//! [`DataTypeRef::Legacy`] code, and a [`LegacyMessage`] indexes it by code,
-//! event and version.
+//! [`DataTypeRef::Legacy`] code with the base type it stands for, and a
+//! [`LegacyMessage`] indexes it by code, event and version.
 
 /// The cardinality of a field, a component, a segment in a group, or a group.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -230,10 +230,10 @@ pub enum DataTypeRef {
     /// A code no primitive or complex data type definition defines, for
     /// example `Varies`, carried as written.
     Undefined(&'static str),
-    /// The code of a legacy field's data type, for example `CE`, carried as
-    /// its version's tables write it; those tables carry no component
-    /// tables, so no [`DataType`] is linked.
-    Legacy(&'static str),
+    /// The data type code of a legacy field, for example `CE_0051`, as its
+    /// version's tables write it; those tables carry no component tables, so
+    /// no [`DataType`] is linked.
+    Legacy(&'static LegacyDataType),
 }
 
 impl DataTypeRef {
@@ -242,9 +242,35 @@ impl DataTypeRef {
     pub const fn code(&self) -> &'static str {
         match self {
             Self::Defined(data_type) => data_type.code,
-            Self::Undefined(code) | Self::Legacy(code) => code,
+            Self::Legacy(data_type) => data_type.code,
+            Self::Undefined(code) => code,
         }
     }
+}
+
+/// One data type code of a legacy version's tables, for example `CE_0051`
+/// at 2.3.
+#[derive(Debug, PartialEq, Eq)]
+pub struct LegacyDataType {
+    /// The code, for example `CE_0051`.
+    pub code: &'static str,
+    /// The HL7 version of the tables, for example `2.3`.
+    pub version: &'static str,
+    /// The name the tables give the code.
+    pub name: &'static str,
+    /// The base data type a version-specific code stands for: `MSG` for
+    /// `CM_MSG`, `CE` bound to table `0051` for `CE_0051`, `DTM` for `TS`;
+    /// `None` for a code that stands for no other.
+    pub base: Option<LegacyBase>,
+}
+
+/// The base data type of a version-specific [`LegacyDataType`] code.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LegacyBase {
+    /// The base code, for example `CE`.
+    pub code: &'static str,
+    /// The table the code binds the base to, for example `0051`.
+    pub table: Option<&'static str>,
 }
 
 /// One data type definition, for example `CX`.

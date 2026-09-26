@@ -16,7 +16,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.1",
             position: 1,
             name: "Variance Instance ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.2",
             position: 2,
             name: "Documented Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.3",
             position: 3,
             name: "Stated Variance Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.4",
             position: 4,
             name: "Variance Originator",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -88,7 +88,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.5",
             position: 5,
             name: "Variance Classification",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static VAR: Segment = Segment {
             id: "VAR.6",
             position: 6,
             name: "Variance Description",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

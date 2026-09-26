@@ -16,7 +16,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.1",
             position: 1,
             name: "Set ID - GT1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.2",
             position: 2,
             name: "Guarantor Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +52,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.3",
             position: 3,
             name: "Guarantor Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -70,7 +70,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.4",
             position: 4,
             name: "Guarantor Spouse Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -88,7 +88,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.5",
             position: 5,
             name: "Guarantor Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -106,7 +106,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.6",
             position: 6,
             name: "Guarantor Ph Num - Home",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -124,7 +124,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.7",
             position: 7,
             name: "Guarantor Ph Num - Business",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -142,7 +142,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.8",
             position: 8,
             name: "Guarantor Date/Time Of Birth",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +160,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.9",
             position: 9,
             name: "Guarantor Administrative Sex",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +181,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.10",
             position: 10,
             name: "Guarantor Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.11",
             position: 11,
             name: "Guarantor Relationship",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +223,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.12",
             position: 12,
             name: "Guarantor SSN",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +241,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.13",
             position: 13,
             name: "Guarantor Date - Begin",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +259,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.14",
             position: 14,
             name: "Guarantor Date - End",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +277,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.15",
             position: 15,
             name: "Guarantor Priority",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +295,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.16",
             position: 16,
             name: "Guarantor Employer Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -313,7 +313,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.17",
             position: 17,
             name: "Guarantor Employer Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -331,7 +331,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.18",
             position: 18,
             name: "Guarantor Employer Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -349,7 +349,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.19",
             position: 19,
             name: "Guarantor Employee ID Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -367,7 +367,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.20",
             position: 20,
             name: "Guarantor Employment Status",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -388,7 +388,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.21",
             position: 21,
             name: "Guarantor Organization Name",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -406,7 +406,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.22",
             position: 22,
             name: "Guarantor Billing Hold Flag",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -427,7 +427,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.23",
             position: 23,
             name: "Guarantor Credit Rating Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -448,7 +448,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.24",
             position: 24,
             name: "Guarantor Death Date And Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -466,7 +466,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.25",
             position: 25,
             name: "Guarantor Death Flag",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +487,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.26",
             position: 26,
             name: "Guarantor Charge Adjustment Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -508,7 +508,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.27",
             position: 27,
             name: "Guarantor Household Annual Income",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -526,7 +526,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.28",
             position: 28,
             name: "Guarantor Household Size",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -544,7 +544,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.29",
             position: 29,
             name: "Guarantor Employer ID Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -562,7 +562,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.30",
             position: 30,
             name: "Guarantor Marital Status Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -583,7 +583,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.31",
             position: 31,
             name: "Guarantor Hire Effective Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -601,7 +601,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.32",
             position: 32,
             name: "Employment Stop Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -619,7 +619,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.33",
             position: 33,
             name: "Living Dependency",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -640,7 +640,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.34",
             position: 34,
             name: "Ambulatory Status",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -661,7 +661,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.35",
             position: 35,
             name: "Citizenship",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -682,7 +682,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.36",
             position: 36,
             name: "Primary Language",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -703,7 +703,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.37",
             position: 37,
             name: "Living Arrangement",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -724,7 +724,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.38",
             position: 38,
             name: "Publicity Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -745,7 +745,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.39",
             position: 39,
             name: "Protection Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -766,7 +766,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.40",
             position: 40,
             name: "Student Indicator",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -787,7 +787,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.41",
             position: 41,
             name: "Religion",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -808,7 +808,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.42",
             position: 42,
             name: "Mother's Maiden Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -826,7 +826,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.43",
             position: 43,
             name: "Nationality",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -847,7 +847,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.44",
             position: 44,
             name: "Ethnic Group",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -868,7 +868,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.45",
             position: 45,
             name: "Contact Person's Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -886,7 +886,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.46",
             position: 46,
             name: "Contact Person's Telephone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -904,7 +904,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.47",
             position: 47,
             name: "Contact Reason",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -925,7 +925,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.48",
             position: 48,
             name: "Contact Relationship",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -946,7 +946,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.49",
             position: 49,
             name: "Job Title",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -964,7 +964,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.50",
             position: 50,
             name: "Job Code/Class",
-            data_type: Some(DataTypeRef::Legacy("JCC")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::JCC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -982,7 +982,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.51",
             position: 51,
             name: "Guarantor Employer's Organization Name",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1000,7 +1000,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.52",
             position: 52,
             name: "Handicap",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1021,7 +1021,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.53",
             position: 53,
             name: "Job Status",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1042,7 +1042,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.54",
             position: 54,
             name: "Guarantor Financial Class",
-            data_type: Some(DataTypeRef::Legacy("FC")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::FC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1060,7 +1060,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.55",
             position: 55,
             name: "Guarantor Race",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1081,7 +1081,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.56",
             position: 56,
             name: "Guarantor Birth Place",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1099,7 +1099,7 @@ pub static GT1: Segment = Segment {
             id: "GT1.57",
             position: 57,
             name: "VIP Indicator",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -16,7 +16,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.1",
             position: 1,
             name: "Provider Role",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -37,7 +37,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.2",
             position: 2,
             name: "Provider Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -55,7 +55,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.3",
             position: 3,
             name: "Provider Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -73,7 +73,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.4",
             position: 4,
             name: "Provider Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.5",
             position: 5,
             name: "Provider Communication Information",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +109,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.6",
             position: 6,
             name: "Preferred Method of Contact",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.7",
             position: 7,
             name: "Provider Identifiers",
-            data_type: Some(DataTypeRef::Legacy("PLN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::PLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -148,7 +148,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.8",
             position: 8,
             name: "Effective Start Date of Provider Role",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +166,7 @@ pub static PRD: Segment = Segment {
             id: "PRD.9",
             position: 9,
             name: "Effective End Date of Provider Role",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

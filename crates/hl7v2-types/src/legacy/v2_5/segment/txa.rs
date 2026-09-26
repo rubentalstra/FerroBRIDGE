@@ -16,7 +16,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.1",
             position: 1,
             name: "Set ID- TXA",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.2",
             position: 2,
             name: "Document Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.3",
             position: 3,
             name: "Document Content Presentation",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -76,7 +76,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.4",
             position: 4,
             name: "Activity Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.5",
             position: 5,
             name: "Primary Activity Provider Code/Name",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -112,7 +112,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.6",
             position: 6,
             name: "Origination Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.7",
             position: 7,
             name: "Transcription Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +148,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.8",
             position: 8,
             name: "Edit Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -166,7 +166,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.9",
             position: 9,
             name: "Originator Code/Name",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -184,7 +184,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.10",
             position: 10,
             name: "Assigned Document Authenticator",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -202,7 +202,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.11",
             position: 11,
             name: "Transcriptionist Code/Name",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -220,7 +220,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.12",
             position: 12,
             name: "Unique Document Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -238,7 +238,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.13",
             position: 13,
             name: "Parent Document Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +256,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.14",
             position: 14,
             name: "Placer Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -274,7 +274,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.15",
             position: 15,
             name: "Filler Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -292,7 +292,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.16",
             position: 16,
             name: "Unique Document File Name",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +310,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.17",
             position: 17,
             name: "Document Completion Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -331,7 +331,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.18",
             position: 18,
             name: "Document Confidentiality Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +352,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.19",
             position: 19,
             name: "Document Availability Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -373,7 +373,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.20",
             position: 20,
             name: "Document Storage Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -394,7 +394,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.21",
             position: 21,
             name: "Document Change Reason",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -412,7 +412,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.22",
             position: 22,
             name: "Authentication Person, Time Stamp",
-            data_type: Some(DataTypeRef::Legacy("PPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::PPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -430,7 +430,7 @@ pub static TXA: Segment = Segment {
             id: "TXA.23",
             position: 23,
             name: "Distributed Copies (Code and Name of Recipients)",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

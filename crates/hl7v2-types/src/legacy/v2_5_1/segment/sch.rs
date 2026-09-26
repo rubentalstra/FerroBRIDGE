@@ -16,7 +16,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.1",
             position: 1,
             name: "Placer Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.2",
             position: 2,
             name: "Filler Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.3",
             position: 3,
             name: "Occurrence Number",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.4",
             position: 4,
             name: "Placer Group Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.5",
             position: 5,
             name: "Schedule ID",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.6",
             position: 6,
             name: "Event Reason",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -124,7 +124,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.7",
             position: 7,
             name: "Appointment Reason",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +145,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.8",
             position: 8,
             name: "Appointment Type",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +166,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.9",
             position: 9,
             name: "Appointment Duration",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +184,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.10",
             position: 10,
             name: "Appointment Duration Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.11",
             position: 11,
             name: "Appointment Timing Quantity",
-            data_type: Some(DataTypeRef::Legacy("TQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -220,7 +220,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.12",
             position: 12,
             name: "Placer Contact Person",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -238,7 +238,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.13",
             position: 13,
             name: "Placer Contact Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +256,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.14",
             position: 14,
             name: "Placer Contact Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -274,7 +274,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.15",
             position: 15,
             name: "Placer Contact Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -292,7 +292,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.16",
             position: 16,
             name: "Filler Contact Person",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -310,7 +310,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.17",
             position: 17,
             name: "Filler Contact Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +328,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.18",
             position: 18,
             name: "Filler Contact Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -346,7 +346,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.19",
             position: 19,
             name: "Filler Contact Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +364,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.20",
             position: 20,
             name: "Entered By Person",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -382,7 +382,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.21",
             position: 21,
             name: "Entered By Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -400,7 +400,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.22",
             position: 22,
             name: "Entered By Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +418,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.23",
             position: 23,
             name: "Parent Placer Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +436,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.24",
             position: 24,
             name: "Parent Filler Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -454,7 +454,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.25",
             position: 25,
             name: "Filler Status Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -475,7 +475,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.26",
             position: 26,
             name: "Placer Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -493,7 +493,7 @@ pub static SCH: Segment = Segment {
             id: "SCH.27",
             position: 27,
             name: "Filler Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

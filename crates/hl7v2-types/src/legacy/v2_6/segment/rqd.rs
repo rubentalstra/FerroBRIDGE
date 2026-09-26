@@ -16,7 +16,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.1",
             position: 1,
             name: "Requisition Line Number",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.2",
             position: 2,
             name: "Item Code - Internal",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.3",
             position: 3,
             name: "Item Code - External",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -76,7 +76,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.4",
             position: 4,
             name: "Hospital Item Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +97,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.5",
             position: 5,
             name: "Requisition Quantity",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +115,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.6",
             position: 6,
             name: "Requisition Unit of Measure",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +136,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.7",
             position: 7,
             name: "Cost Center Account Number",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +157,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.8",
             position: 8,
             name: "Item Natural Account Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -178,7 +178,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.9",
             position: 9,
             name: "Deliver To ID",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -199,7 +199,7 @@ pub static RQD: Segment = Segment {
             id: "RQD.10",
             position: 10,
             name: "Date Needed",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

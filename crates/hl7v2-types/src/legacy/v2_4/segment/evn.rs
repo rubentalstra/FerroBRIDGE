@@ -16,7 +16,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.1",
             position: 1,
             name: "Event Type Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.2",
             position: 2,
             name: "Recorded Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.3",
             position: 3,
             name: "Date/Time Planned Event",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.4",
             position: 4,
             name: "Event Reason Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.5",
             position: 5,
             name: "Operator ID",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -115,7 +115,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.6",
             position: 6,
             name: "Event Occurred",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +133,7 @@ pub static EVN: Segment = Segment {
             id: "EVN.7",
             position: 7,
             name: "Event Facility",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

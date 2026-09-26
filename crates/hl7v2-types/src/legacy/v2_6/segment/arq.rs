@@ -16,7 +16,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.1",
             position: 1,
             name: "Placer Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.2",
             position: 2,
             name: "Filler Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.3",
             position: 3,
             name: "Occurrence Number",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.4",
             position: 4,
             name: "Placer Group Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.5",
             position: 5,
             name: "Schedule ID",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.6",
             position: 6,
             name: "Request Event Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +124,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.7",
             position: 7,
             name: "Appointment Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +145,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.8",
             position: 8,
             name: "Appointment Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +166,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.9",
             position: 9,
             name: "Appointment Duration",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +181,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.10",
             position: 10,
             name: "Appointment Duration Units",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -196,7 +196,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.11",
             position: 11,
             name: "Requested Start Date/Time Range",
-            data_type: Some(DataTypeRef::Legacy("DR")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -214,7 +214,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.12",
             position: 12,
             name: "Priority-ARQ",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -232,7 +232,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.13",
             position: 13,
             name: "Repeating Interval",
-            data_type: Some(DataTypeRef::Legacy("RI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::RI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -250,7 +250,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.14",
             position: 14,
             name: "Repeating Interval Duration",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -268,7 +268,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.15",
             position: 15,
             name: "Placer Contact Person",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -286,7 +286,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.16",
             position: 16,
             name: "Placer Contact Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -304,7 +304,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.17",
             position: 17,
             name: "Placer Contact Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -322,7 +322,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.18",
             position: 18,
             name: "Placer Contact Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -340,7 +340,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.19",
             position: 19,
             name: "Entered By Person",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -358,7 +358,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.20",
             position: 20,
             name: "Entered By Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -376,7 +376,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.21",
             position: 21,
             name: "Entered By Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -394,7 +394,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.22",
             position: 22,
             name: "Parent Placer Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -412,7 +412,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.23",
             position: 23,
             name: "Parent Filler Appointment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -430,7 +430,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.24",
             position: 24,
             name: "Placer Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -448,7 +448,7 @@ pub static ARQ: Segment = Segment {
             id: "ARQ.25",
             position: 25,
             name: "Filler Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

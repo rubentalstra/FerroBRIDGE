@@ -16,7 +16,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.1",
             position: 1,
             name: "Give Sub-ID Counter",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.2",
             position: 2,
             name: "Administration Sub-ID Counter",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.3",
             position: 3,
             name: "Date/Time Start of Administration",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.4",
             position: 4,
             name: "Date/Time End of Administration",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.5",
             position: 5,
             name: "Administered Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -109,7 +109,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.6",
             position: 6,
             name: "Administered Amount",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -127,7 +127,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.7",
             position: 7,
             name: "Administered Units",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +148,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.8",
             position: 8,
             name: "Administered Dosage Form",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +169,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.9",
             position: 9,
             name: "Administration Notes",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -190,7 +190,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.10",
             position: 10,
             name: "Administering Provider",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -208,7 +208,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.11",
             position: 11,
             name: "Administered-at Location",
-            data_type: Some(DataTypeRef::Legacy("LA2")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::LA2)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +223,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.12",
             position: 12,
             name: "Administered Per (Time Unit)",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +241,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.13",
             position: 13,
             name: "Administered Strength",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +259,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.14",
             position: 14,
             name: "Administered Strength Units",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +280,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.15",
             position: 15,
             name: "Substance Lot Number",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -298,7 +298,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.16",
             position: 16,
             name: "Substance Expiration Date",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -316,7 +316,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.17",
             position: 17,
             name: "Substance Manufacturer Name",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -337,7 +337,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.18",
             position: 18,
             name: "Substance/Treatment Refusal Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -358,7 +358,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.19",
             position: 19,
             name: "Indication",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -379,7 +379,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.20",
             position: 20,
             name: "Completion Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -400,7 +400,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.21",
             position: 21,
             name: "Action Code - RXA",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -421,7 +421,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.22",
             position: 22,
             name: "System Entry Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +439,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.23",
             position: 23,
             name: "Administered Drug Strength Volume",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +457,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.24",
             position: 24,
             name: "Administered Drug Strength Volume Units",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -478,7 +478,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.25",
             position: 25,
             name: "Administered Barcode Identifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -499,7 +499,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.26",
             position: 26,
             name: "Pharmacy Order Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +520,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.27",
             position: 27,
             name: "Administer-at",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -538,7 +538,7 @@ pub static RXA: Segment = Segment {
             id: "RXA.28",
             position: 28,
             name: "Administered-at Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

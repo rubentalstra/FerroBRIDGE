@@ -16,7 +16,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.1",
             position: 1,
             name: "Acknowledgement code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.2",
             position: 2,
             name: "Message Control ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.3",
             position: 3,
             name: "Text Message",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.4",
             position: 4,
             name: "Expected Sequence Number",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.5",
             position: 5,
             name: "Delayed Acknowledgement Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +112,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.6",
             position: 6,
             name: "Error Condition",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

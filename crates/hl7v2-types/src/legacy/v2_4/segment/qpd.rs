@@ -16,7 +16,9 @@ pub static QPD: Segment = Segment {
             id: "QPD.1",
             position: 1,
             name: "Message Query Name",
-            data_type: Some(DataTypeRef::Legacy("CE_0471")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0471,
+            )),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +39,7 @@ pub static QPD: Segment = Segment {
             id: "QPD.2",
             position: 2,
             name: "Query Tag",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +57,7 @@ pub static QPD: Segment = Segment {
             id: "QPD.3",
             position: 3,
             name: "User Parameters (in successive fields)",
-            data_type: Some(DataTypeRef::Legacy("VARIES")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::VARIES)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

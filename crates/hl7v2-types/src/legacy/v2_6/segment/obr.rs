@@ -16,7 +16,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.1",
             position: 1,
             name: "Set ID - OBR",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.2",
             position: 2,
             name: "Placer Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.3",
             position: 3,
             name: "Filler Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.4",
             position: 4,
             name: "Universal Service Identifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.5",
             position: 5,
             name: "Priority",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +103,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.6",
             position: 6,
             name: "Requested Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +118,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.7",
             position: 7,
             name: "Observation Date/Time #",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +136,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.8",
             position: 8,
             name: "Observation End Date/Time #",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.9",
             position: 9,
             name: "Collection Volume *",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +172,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.10",
             position: 10,
             name: "Collector Identifier *",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -190,7 +190,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.11",
             position: 11,
             name: "Specimen Action Code *",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +211,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.12",
             position: 12,
             name: "Danger Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -232,7 +232,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.13",
             position: 13,
             name: "Relevant Clinical Information",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -250,7 +250,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.14",
             position: 14,
             name: "Specimen Received Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -268,7 +268,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.15",
             position: 15,
             name: "Specimen Source",
-            data_type: Some(DataTypeRef::Legacy("SPS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SPS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -283,7 +283,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.16",
             position: 16,
             name: "Ordering Provider",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -301,7 +301,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.17",
             position: 17,
             name: "Order Callback Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -319,7 +319,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.18",
             position: 18,
             name: "Placer Field 1",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -337,7 +337,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.19",
             position: 19,
             name: "Placer Field 2",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -355,7 +355,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.20",
             position: 20,
             name: "Filler Field 1 +",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -373,7 +373,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.21",
             position: 21,
             name: "Filler Field 2 +",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -391,7 +391,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.22",
             position: 22,
             name: "Results Rpt/Status Chng - Date/Time +",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -409,7 +409,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.23",
             position: 23,
             name: "Charge to Practice +",
-            data_type: Some(DataTypeRef::Legacy("MOC")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::MOC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -427,7 +427,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.24",
             position: 24,
             name: "Diagnostic Serv Sect ID",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -448,7 +448,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.25",
             position: 25,
             name: "Result Status +",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -469,7 +469,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.26",
             position: 26,
             name: "Parent Result +",
-            data_type: Some(DataTypeRef::Legacy("PRL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::PRL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +487,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.27",
             position: 27,
             name: "Quantity/Timing",
-            data_type: Some(DataTypeRef::Legacy("TQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::TQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -502,7 +502,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.28",
             position: 28,
             name: "Result Copies To",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -520,7 +520,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.29",
             position: 29,
             name: "Parent",
-            data_type: Some(DataTypeRef::Legacy("EIP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -538,7 +538,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.30",
             position: 30,
             name: "Transportation Mode",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -559,7 +559,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.31",
             position: 31,
             name: "Reason for Study",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -580,7 +580,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.32",
             position: 32,
             name: "Principal Result Interpreter +",
-            data_type: Some(DataTypeRef::Legacy("NDL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NDL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -595,7 +595,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.33",
             position: 33,
             name: "Assistant Result Interpreter +",
-            data_type: Some(DataTypeRef::Legacy("NDL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NDL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -610,7 +610,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.34",
             position: 34,
             name: "Technician +",
-            data_type: Some(DataTypeRef::Legacy("NDL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NDL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -625,7 +625,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.35",
             position: 35,
             name: "Transcriptionist +",
-            data_type: Some(DataTypeRef::Legacy("NDL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NDL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -640,7 +640,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.36",
             position: 36,
             name: "Scheduled Date/Time +",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -658,7 +658,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.37",
             position: 37,
             name: "Number of Sample Containers *",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -676,7 +676,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.38",
             position: 38,
             name: "Transport Logistics of Collected Sample *",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -697,7 +697,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.39",
             position: 39,
             name: "Collector's Comment *",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -718,7 +718,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.40",
             position: 40,
             name: "Transport Arrangement Responsibility",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -739,7 +739,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.41",
             position: 41,
             name: "Transport Arranged",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -760,7 +760,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.42",
             position: 42,
             name: "Escort Required",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -781,7 +781,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.43",
             position: 43,
             name: "Planned Patient Transport Comment",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -802,7 +802,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.44",
             position: 44,
             name: "Procedure Code",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -823,7 +823,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.45",
             position: 45,
             name: "Procedure Code Modifier",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -844,7 +844,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.46",
             position: 46,
             name: "Placer Supplemental Service Information",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -865,7 +865,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.47",
             position: 47,
             name: "Filler Supplemental Service Information",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -886,7 +886,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.48",
             position: 48,
             name: "Medically Necessary Duplicate Procedure Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -907,7 +907,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.49",
             position: 49,
             name: "Result Handling",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -928,7 +928,7 @@ pub static OBR: Segment = Segment {
             id: "OBR.50",
             position: 50,
             name: "Parent Universal Service Identifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

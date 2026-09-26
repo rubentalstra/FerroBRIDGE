@@ -16,7 +16,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.1",
             position: 1,
             name: "Route",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.2",
             position: 2,
             name: "Administration Site",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -58,7 +58,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.3",
             position: 3,
             name: "Administration Device",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +79,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.4",
             position: 4,
             name: "Administration Method",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +100,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.5",
             position: 5,
             name: "Routing Instruction",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +121,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.6",
             position: 6,
             name: "Administration Site Modifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

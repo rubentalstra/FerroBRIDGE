@@ -16,7 +16,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.1",
             position: 1,
             name: "Set ID - NK1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.2",
             position: 2,
             name: "Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +52,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.3",
             position: 3,
             name: "Relationship",
-            data_type: Some(DataTypeRef::Legacy("CE_0063")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0063,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +75,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.4",
             position: 4,
             name: "Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -91,7 +93,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.5",
             position: 5,
             name: "Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +111,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.6",
             position: 6,
             name: "Business Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -127,7 +129,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.7",
             position: 7,
             name: "Contact Role",
-            data_type: Some(DataTypeRef::Legacy("CE_0131")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0131,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +152,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.8",
             position: 8,
             name: "Start Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +170,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.9",
             position: 9,
             name: "End Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +188,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.10",
             position: 10,
             name: "Next of Kin / Associated Parties Job Title",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +206,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.11",
             position: 11,
             name: "Next of Kin / Associated Parties Job Code/Class",
-            data_type: Some(DataTypeRef::Legacy("JCC")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::JCC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +227,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.12",
             position: 12,
             name: "Next of Kin / Associated Parties Employee Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +245,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.13",
             position: 13,
             name: "Organization Name - NK1",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -259,7 +263,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.14",
             position: 14,
             name: "Marital Status",
-            data_type: Some(DataTypeRef::Legacy("CE_0002")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0002,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +286,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.15",
             position: 15,
             name: "Administrative Sex",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -301,7 +307,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.16",
             position: 16,
             name: "Date/Time Of Birth",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -319,7 +325,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.17",
             position: 17,
             name: "Living Dependency",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -340,7 +346,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.18",
             position: 18,
             name: "Ambulatory Status",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -361,7 +367,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.19",
             position: 19,
             name: "Citizenship",
-            data_type: Some(DataTypeRef::Legacy("CE_0171")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0171,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -382,7 +390,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.20",
             position: 20,
             name: "Primary Language",
-            data_type: Some(DataTypeRef::Legacy("CE_0296")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0296,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -403,7 +413,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.21",
             position: 21,
             name: "Living Arrangement",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -424,7 +434,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.22",
             position: 22,
             name: "Publicity Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0215")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0215,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -445,7 +457,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.23",
             position: 23,
             name: "Protection Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -466,7 +478,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.24",
             position: 24,
             name: "Student Indicator",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -487,7 +499,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.25",
             position: 25,
             name: "Religion",
-            data_type: Some(DataTypeRef::Legacy("CE_0006")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0006,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -508,7 +522,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.26",
             position: 26,
             name: "Mother's Maiden Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -526,7 +540,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.27",
             position: 27,
             name: "Nationality",
-            data_type: Some(DataTypeRef::Legacy("CE_0212")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0212,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -547,7 +563,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.28",
             position: 28,
             name: "Ethnic Group",
-            data_type: Some(DataTypeRef::Legacy("CE_0189")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0189,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -568,7 +586,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.29",
             position: 29,
             name: "Contact Reason",
-            data_type: Some(DataTypeRef::Legacy("CE_0222")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0222,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -589,7 +609,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.30",
             position: 30,
             name: "Contact Person's Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -607,7 +627,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.31",
             position: 31,
             name: "Contact Person's Telephone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -625,7 +645,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.32",
             position: 32,
             name: "Contact Person's Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -643,7 +663,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.33",
             position: 33,
             name: "Next of Kin/Associated Party's Identifiers",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -661,7 +681,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.34",
             position: 34,
             name: "Job Status",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -682,7 +702,9 @@ pub static NK1: Segment = Segment {
             id: "NK1.35",
             position: 35,
             name: "Race",
-            data_type: Some(DataTypeRef::Legacy("CE_0005")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0005,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -703,7 +725,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.36",
             position: 36,
             name: "Handicap",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -724,7 +746,7 @@ pub static NK1: Segment = Segment {
             id: "NK1.37",
             position: 37,
             name: "Contact Person Social Security Number",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

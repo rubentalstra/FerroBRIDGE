@@ -124,7 +124,19 @@ carry in variants, and the caller names the variant. An MSH-9.3 naming no
 structure falls back to the message index, counted as `other-structure`, and
 then to a structure v2.9.1 withdrew (`ORM_O01`) from `hl7v2_types::legacy` by
 MSH-12 (#303), counted as `withdrawn-structure`; a legacy tree is never
-written here.
+written here. A legacy field's type code the guide has no data type map
+for (`CM_MSG`, `CE_0051`) takes the base type the generated
+`LegacyDataType` links it to before the map lookup, counted as
+`base-typed`; a code the guide maps keeps its map (`TS` keeps
+`datatype-ts-to-datetime`). The link is the generator's, never a table
+here. A segment whose group path no row names
+takes the rows of the one source whose groups differ from its own by one
+group, not the group holding the segment (`run::regrouped`), counted as
+`group-path`: the guide's `ORM_O01.ORDER_DETAIL.CHOICE.OBR` reaches the 2.3
+`ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`; a source that reaches two tree
+paths, or a path two sources reach, stays `unmapped-segment`. The rule
+holds for v2.9.1 trees too, since the guide's paths disagree with the
+v2.9.1 definitions as well (`OML_O21`).
 
 ## Logs
 

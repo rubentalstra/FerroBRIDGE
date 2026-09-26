@@ -16,7 +16,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.1",
             position: 1,
             name: "External Accession Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.2",
             position: 2,
             name: "Accession Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.3",
             position: 3,
             name: "Container Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.4",
             position: 4,
             name: "Primary (parent) Container Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.5",
             position: 5,
             name: "Equipment Container Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.6",
             position: 6,
             name: "Specimen Source",
-            data_type: Some(DataTypeRef::Legacy("SPS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::SPS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +124,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.7",
             position: 7,
             name: "Registration Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +142,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.8",
             position: 8,
             name: "Container Status",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +163,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.9",
             position: 9,
             name: "Carrier Type",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +184,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.10",
             position: 10,
             name: "Carrier Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.11",
             position: 11,
             name: "Position in Carrier",
-            data_type: Some(DataTypeRef::Legacy("NA")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NA)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +220,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.12",
             position: 12,
             name: "Tray Type - SAC",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +241,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.13",
             position: 13,
             name: "Tray Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +259,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.14",
             position: 14,
             name: "Position in Tray",
-            data_type: Some(DataTypeRef::Legacy("NA")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NA)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +277,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.15",
             position: 15,
             name: "Location",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -295,7 +295,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.16",
             position: 16,
             name: "Container Height",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +313,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.17",
             position: 17,
             name: "Container Diameter",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +331,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.18",
             position: 18,
             name: "Barrier Delta",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +349,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.19",
             position: 19,
             name: "Bottom Delta",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -367,7 +367,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.20",
             position: 20,
             name: "Container Height/Diameter/Delta Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -385,7 +385,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.21",
             position: 21,
             name: "Container Volume",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -403,7 +403,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.22",
             position: 22,
             name: "Available Specimen Volume",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -421,7 +421,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.23",
             position: 23,
             name: "Initial Specimen Volume",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +439,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.24",
             position: 24,
             name: "Volume Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +457,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.25",
             position: 25,
             name: "Separator Type",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -478,7 +478,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.26",
             position: 26,
             name: "Cap Type",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -499,7 +499,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.27",
             position: 27,
             name: "Additive",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -520,7 +520,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.28",
             position: 28,
             name: "Specimen Component",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -538,7 +538,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.29",
             position: 29,
             name: "Dilution Factor",
-            data_type: Some(DataTypeRef::Legacy("SN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -556,7 +556,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.30",
             position: 30,
             name: "Treatment",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -577,7 +577,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.31",
             position: 31,
             name: "Temperature",
-            data_type: Some(DataTypeRef::Legacy("SN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -595,7 +595,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.32",
             position: 32,
             name: "Hemolysis Index",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -613,7 +613,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.33",
             position: 33,
             name: "Hemolysis Index Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -631,7 +631,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.34",
             position: 34,
             name: "Lipemia Index",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -649,7 +649,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.35",
             position: 35,
             name: "Lipemia Index Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -667,7 +667,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.36",
             position: 36,
             name: "Icterus Index",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -685,7 +685,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.37",
             position: 37,
             name: "Icterus Index Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -703,7 +703,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.38",
             position: 38,
             name: "Fibrin Index",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -721,7 +721,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.39",
             position: 39,
             name: "Fibrin Index Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -739,7 +739,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.40",
             position: 40,
             name: "System Induced Contaminants",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -760,7 +760,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.41",
             position: 41,
             name: "Drug Interference",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -781,7 +781,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.42",
             position: 42,
             name: "Artificial Blood",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -802,7 +802,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.43",
             position: 43,
             name: "Special Handling Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -823,7 +823,7 @@ pub static SAC: Segment = Segment {
             id: "SAC.44",
             position: 44,
             name: "Other Environmental Factors",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

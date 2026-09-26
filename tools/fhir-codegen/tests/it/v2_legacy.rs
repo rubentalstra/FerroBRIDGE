@@ -23,7 +23,7 @@ use fhir_codegen::v2::legacy::lower::{LegacyDefect, LegacyError, LegacyModel};
 use fhir_codegen::v2::legacy::source::{
     CodeStatus, TABLE_0354, TABLES_DIR, Table0354, Tables, version_key,
 };
-use hl7v2_types::model::{DataTypeRef, Max, Node, Structure};
+use hl7v2_types::model::{DataTypeRef, LegacyBase, LegacyDataType, Max, Node, Structure};
 use serde_json::Value;
 
 use crate::v2::MODEL;
@@ -454,4 +454,90 @@ fn a_directory_not_named_as_a_version_is_refused() {
         Tables::open(copy.path()),
         Err(fhir_codegen::v2::legacy::source::SourceError::NotAVersion { ref name }) if name == "latest"
     ));
+}
+
+/// The legacy data type a field of `segment` at `position` names.
+fn legacy_type(
+    segment: &'static hl7v2_types::model::Segment,
+    position: u16,
+) -> &'static LegacyDataType {
+    let field = segment
+        .fields
+        .iter()
+        .find(|field| field.position == position)
+        .expect("the field");
+    match field.data_type {
+        Some(DataTypeRef::Legacy(data_type)) => data_type,
+        other => panic!("{}: expected a legacy data type, got {other:?}", field.id),
+    }
+}
+
+#[test]
+fn a_version_specific_code_links_the_base_type_it_stands_for() {
+    let msh = &hl7v2_types::legacy::v2_3::segment::msh::MSH;
+    let dg1 = &hl7v2_types::legacy::v2_3::segment::dg1::DG1;
+    let message_type = legacy_type(msh, 9);
+    assert_eq!(message_type.code, "CM_MSG");
+    assert_eq!(
+        message_type.base,
+        Some(LegacyBase {
+            code: "MSG",
+            table: None
+        })
+    );
+    let diagnosis = legacy_type(dg1, 3);
+    assert_eq!(diagnosis.code, "CE_0051");
+    assert_eq!(
+        diagnosis.base,
+        Some(LegacyBase {
+            code: "CE",
+            table: Some("0051")
+        })
+    );
+    let stamp = legacy_type(msh, 7);
+    assert_eq!(stamp.code, "TS");
+    assert_eq!(
+        stamp.base,
+        Some(LegacyBase {
+            code: "DTM",
+            table: None
+        })
+    );
+    assert_eq!(
+        legacy_type(msh, 4).base,
+        None,
+        "HD stands for no other type"
+    );
+}
+
+#[test]
+fn every_legacy_field_type_is_its_versions_own_code_with_the_tables_name() {
+    for version in &LEGACY.versions {
+        let names: BTreeMap<String, String> = raw(&version.version, "datatypes")
+            .into_iter()
+            .map(|row| {
+                (
+                    row["id"].as_str().expect("id").to_owned(),
+                    row["description"].as_str().expect("a name").to_owned(),
+                )
+            })
+            .collect();
+        for (code, data_type) in &version.data_types {
+            assert_eq!(Some(&data_type.name), names.get(code), "{code}");
+        }
+    }
+    for structure in &hl7v2_types::legacy::STRUCTURES {
+        let mut segments = Vec::new();
+        references(structure.nodes, &mut segments);
+        for segment in segments.into_iter().filter(|segment| segment.url.is_none()) {
+            for field in segment.fields {
+                if let Some(DataTypeRef::Legacy(data_type)) = field.data_type {
+                    assert_eq!(data_type.version, structure.version, "{}", field.id);
+                    if let Some(base) = data_type.base {
+                        assert_ne!(base.code, data_type.code, "{}", field.id);
+                    }
+                }
+            }
+        }
+    }
 }

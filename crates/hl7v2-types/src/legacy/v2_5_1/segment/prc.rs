@@ -16,7 +16,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.1",
             position: 1,
             name: "Primary Key Value - PRC",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.2",
             position: 2,
             name: "Facility ID - PRC",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -58,7 +58,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.3",
             position: 3,
             name: "Department",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -79,7 +79,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.4",
             position: 4,
             name: "Valid Patient Classes",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -100,7 +100,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.5",
             position: 5,
             name: "Price",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -118,7 +118,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.6",
             position: 6,
             name: "Formula",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -136,7 +136,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.7",
             position: 7,
             name: "Minimum Quantity",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.8",
             position: 8,
             name: "Maximum Quantity",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +172,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.9",
             position: 9,
             name: "Minimum Price",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -190,7 +190,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.10",
             position: 10,
             name: "Maximum Price",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +208,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.11",
             position: 11,
             name: "Effective Start Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -226,7 +226,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.12",
             position: 12,
             name: "Effective End Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -244,7 +244,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.13",
             position: 13,
             name: "Price Override Flag",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -265,7 +265,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.14",
             position: 14,
             name: "Billing Category",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -286,7 +286,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.15",
             position: 15,
             name: "Chargeable Flag",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -307,7 +307,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.16",
             position: 16,
             name: "Active/Inactive Flag",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +328,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.17",
             position: 17,
             name: "Cost",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +346,7 @@ pub static PRC: Segment = Segment {
             id: "PRC.18",
             position: 18,
             name: "Charge On Indicator",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

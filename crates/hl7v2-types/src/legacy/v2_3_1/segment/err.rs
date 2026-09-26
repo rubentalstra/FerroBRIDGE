@@ -15,7 +15,7 @@ pub static ERR: Segment = Segment {
         id: "ERR.1",
         position: 1,
         name: "Error Code and Location",
-        data_type: Some(DataTypeRef::Legacy("ELD")),
+        data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ELD)),
         cardinality: Cardinality {
             min: 1,
             max: Max::Unbounded,

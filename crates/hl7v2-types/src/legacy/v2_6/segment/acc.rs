@@ -16,7 +16,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.1",
             position: 1,
             name: "Accident Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.2",
             position: 2,
             name: "Accident Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.3",
             position: 3,
             name: "Accident Location",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.4",
             position: 4,
             name: "Auto Accident State",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.5",
             position: 5,
             name: "Accident Job Related Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +112,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.6",
             position: 6,
             name: "Accident Death Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +133,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.7",
             position: 7,
             name: "Entered By",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +151,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.8",
             position: 8,
             name: "Accident Description",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +169,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.9",
             position: 9,
             name: "Brought In By",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +187,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.10",
             position: 10,
             name: "Police Notified Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +208,7 @@ pub static ACC: Segment = Segment {
             id: "ACC.11",
             position: 11,
             name: "Accident Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

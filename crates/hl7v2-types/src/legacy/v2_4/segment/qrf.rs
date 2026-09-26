@@ -16,7 +16,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.1",
             position: 1,
             name: "Where Subject Filter",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -34,7 +34,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.2",
             position: 2,
             name: "When Data Start Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.3",
             position: 3,
             name: "When Data End Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.4",
             position: 4,
             name: "What User Qualifier",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -88,7 +88,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.5",
             position: 5,
             name: "Other QRY Subject Filter",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -106,7 +106,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.6",
             position: 6,
             name: "Which Date/Time Qualifier",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -127,7 +127,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.7",
             position: 7,
             name: "Which Date/Time Status Qualifier",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -148,7 +148,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.8",
             position: 8,
             name: "Date/Time Selection Qualifier",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -169,7 +169,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.9",
             position: 9,
             name: "When Quantity/Timing Qualifier",
-            data_type: Some(DataTypeRef::Legacy("TQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +187,7 @@ pub static QRF: Segment = Segment {
             id: "QRF.10",
             position: 10,
             name: "Search Confidence Threshold",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

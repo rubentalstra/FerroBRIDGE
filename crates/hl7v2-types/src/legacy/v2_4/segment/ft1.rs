@@ -16,7 +16,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.1",
             position: 1,
             name: "Set ID - FT1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.2",
             position: 2,
             name: "Transaction ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.3",
             position: 3,
             name: "Transaction Batch ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.4",
             position: 4,
             name: "Transaction Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.5",
             position: 5,
             name: "Transaction Posting Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.6",
             position: 6,
             name: "Transaction Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -127,7 +127,9 @@ pub static FT1: Segment = Segment {
             id: "FT1.7",
             position: 7,
             name: "Transaction Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0132")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0132,
+            )),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -148,7 +150,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.8",
             position: 8,
             name: "Transaction Description",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +168,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.9",
             position: 9,
             name: "Transaction Description - Alt",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +186,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.10",
             position: 10,
             name: "Transaction Quantity",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +204,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.11",
             position: 11,
             name: "Transaction Amount - Extended",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +222,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.12",
             position: 12,
             name: "Transaction Amount - Unit",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +240,9 @@ pub static FT1: Segment = Segment {
             id: "FT1.13",
             position: 13,
             name: "Department Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0049")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0049,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +263,9 @@ pub static FT1: Segment = Segment {
             id: "FT1.14",
             position: 14,
             name: "Insurance Plan ID",
-            data_type: Some(DataTypeRef::Legacy("CE_0072")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0072,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +286,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.15",
             position: 15,
             name: "Insurance Amount",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -298,7 +304,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.16",
             position: 16,
             name: "Assigned Patient Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -316,7 +322,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.17",
             position: 17,
             name: "Fee Schedule",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -337,7 +343,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.18",
             position: 18,
             name: "Patient Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -358,7 +364,9 @@ pub static FT1: Segment = Segment {
             id: "FT1.19",
             position: 19,
             name: "Diagnosis Code - FT1",
-            data_type: Some(DataTypeRef::Legacy("CE_0051")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0051,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -379,7 +387,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.20",
             position: 20,
             name: "Performed By Code",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -400,7 +408,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.21",
             position: 21,
             name: "Ordered By Code",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -418,7 +426,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.22",
             position: 22,
             name: "Unit Cost",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +444,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.23",
             position: 23,
             name: "Filler Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -454,7 +462,7 @@ pub static FT1: Segment = Segment {
             id: "FT1.24",
             position: 24,
             name: "Entered By Code",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -472,7 +480,9 @@ pub static FT1: Segment = Segment {
             id: "FT1.25",
             position: 25,
             name: "Procedure Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0088")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0088,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -493,7 +503,9 @@ pub static FT1: Segment = Segment {
             id: "FT1.26",
             position: 26,
             name: "Procedure Code Modifier",
-            data_type: Some(DataTypeRef::Legacy("CE_0340")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0340,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

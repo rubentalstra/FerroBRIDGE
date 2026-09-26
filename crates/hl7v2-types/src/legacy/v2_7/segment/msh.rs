@@ -16,7 +16,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.1",
             position: 1,
             name: "Field Separator",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.2",
             position: 2,
             name: "Encoding Characters",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.3",
             position: 3,
             name: "Sending Application",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.4",
             position: 4,
             name: "Sending Facility",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.5",
             position: 5,
             name: "Receiving Application",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.6",
             position: 6,
             name: "Receiving Facility",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +124,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.7",
             position: 7,
             name: "Date/Time of Message",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -139,7 +139,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.8",
             position: 8,
             name: "Security",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.9",
             position: 9,
             name: "Message Type",
-            data_type: Some(DataTypeRef::Legacy("MSG")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::MSG)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -169,7 +169,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.10",
             position: 10,
             name: "Message Control ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -187,7 +187,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.11",
             position: 11,
             name: "Processing ID",
-            data_type: Some(DataTypeRef::Legacy("PT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::PT)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.12",
             position: 12,
             name: "Version ID",
-            data_type: Some(DataTypeRef::Legacy("VID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::VID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -217,7 +217,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.13",
             position: 13,
             name: "Sequence Number",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -232,7 +232,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.14",
             position: 14,
             name: "Continuation Pointer",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -247,7 +247,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.15",
             position: 15,
             name: "Accept Acknowledgment Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -268,7 +268,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.16",
             position: 16,
             name: "Application Acknowledgment Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -289,7 +289,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.17",
             position: 17,
             name: "Country Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +310,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.18",
             position: 18,
             name: "Character Set",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -331,7 +331,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.19",
             position: 19,
             name: "Principal Language Of Message",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +346,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.20",
             position: 20,
             name: "Alternate Character Set Handling Scheme",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -367,7 +367,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.21",
             position: 21,
             name: "Message Profile Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -382,7 +382,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.22",
             position: 22,
             name: "Sending Responsible Organization",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +397,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.23",
             position: 23,
             name: "Receiving Responsible Organization",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -412,7 +412,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.24",
             position: 24,
             name: "Sending Network Address",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -427,7 +427,7 @@ pub static MSH: Segment = Segment {
             id: "MSH.25",
             position: 25,
             name: "Receiving Network Address",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

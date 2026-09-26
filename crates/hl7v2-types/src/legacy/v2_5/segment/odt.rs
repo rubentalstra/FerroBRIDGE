@@ -16,7 +16,7 @@ pub static ODT: Segment = Segment {
             id: "ODT.1",
             position: 1,
             name: "Tray Type",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static ODT: Segment = Segment {
             id: "ODT.2",
             position: 2,
             name: "Service Period",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -55,7 +55,7 @@ pub static ODT: Segment = Segment {
             id: "ODT.3",
             position: 3,
             name: "Text Instruction",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

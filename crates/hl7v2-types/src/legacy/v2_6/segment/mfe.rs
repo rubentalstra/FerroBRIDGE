@@ -16,7 +16,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.1",
             position: 1,
             name: "Record-Level Event Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.2",
             position: 2,
             name: "MFN Control ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.3",
             position: 3,
             name: "Effective Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.4",
             position: 4,
             name: "Primary Key Value - MFE",
-            data_type: Some(DataTypeRef::Legacy("VARIES")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::VARIES)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -94,7 +94,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.5",
             position: 5,
             name: "Primary Key Value Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -115,7 +115,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.6",
             position: 6,
             name: "Entered Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +133,7 @@ pub static MFE: Segment = Segment {
             id: "MFE.7",
             position: 7,
             name: "Entered By",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

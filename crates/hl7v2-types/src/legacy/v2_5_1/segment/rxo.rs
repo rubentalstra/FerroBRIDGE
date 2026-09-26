@@ -16,7 +16,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.1",
             position: 1,
             name: "Requested Give Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.2",
             position: 2,
             name: "Requested Give Amount - Minimum",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.3",
             position: 3,
             name: "Requested Give Amount - Maximum",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.4",
             position: 4,
             name: "Requested Give Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.5",
             position: 5,
             name: "Requested Dosage Form",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.6",
             position: 6,
             name: "Provider's Pharmacy/Treatment Instructions",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -124,7 +124,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.7",
             position: 7,
             name: "Provider's Administration Instructions",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -142,7 +142,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.8",
             position: 8,
             name: "Deliver-To Location",
-            data_type: Some(DataTypeRef::Legacy("LA1")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::LA1)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +160,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.9",
             position: 9,
             name: "Allow Substitutions",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +181,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.10",
             position: 10,
             name: "Requested Dispense Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -199,7 +199,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.11",
             position: 11,
             name: "Requested Dispense Amount",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +217,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.12",
             position: 12,
             name: "Requested Dispense Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +235,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.13",
             position: 13,
             name: "Number Of Refills",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +253,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.14",
             position: 14,
             name: "Ordering Provider's DEA Number",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -271,7 +271,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.15",
             position: 15,
             name: "Pharmacist/Treatment Supplier's Verifier ID",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -289,7 +289,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.16",
             position: 16,
             name: "Needs Human Review",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +310,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.17",
             position: 17,
             name: "Requested Give Per (Time Unit)",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -328,7 +328,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.18",
             position: 18,
             name: "Requested Give Strength",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +346,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.19",
             position: 19,
             name: "Requested Give Strength Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +364,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.20",
             position: 20,
             name: "Indication",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -382,7 +382,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.21",
             position: 21,
             name: "Requested Give Rate Amount",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -400,7 +400,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.22",
             position: 22,
             name: "Requested Give Rate Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +418,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.23",
             position: 23,
             name: "Total Daily Dose",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +436,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.24",
             position: 24,
             name: "Supplementary Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -454,7 +454,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.25",
             position: 25,
             name: "Requested Drug Strength Volume",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -472,7 +472,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.26",
             position: 26,
             name: "Requested Drug Strength Volume Units",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -490,7 +490,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.27",
             position: 27,
             name: "Pharmacy Order Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -511,7 +511,7 @@ pub static RXO: Segment = Segment {
             id: "RXO.28",
             position: 28,
             name: "Dispensing Interval",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

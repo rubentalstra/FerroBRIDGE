@@ -16,7 +16,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.1",
             position: 1,
             name: "Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.2",
             position: 2,
             name: "Service Period",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(10),
@@ -58,7 +58,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.3",
             position: 3,
             name: "Diet, Supplement, or Preference Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(20),
@@ -79,7 +79,7 @@ pub static ODS: Segment = Segment {
             id: "ODS.4",
             position: 4,
             name: "Text Instruction",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),

@@ -16,7 +16,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.1",
             position: 1,
             name: "Prior Patient Identifier List",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -34,7 +34,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.2",
             position: 2,
             name: "Prior Alternate Patient ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -49,7 +49,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.3",
             position: 3,
             name: "Prior Patient Account Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +67,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.4",
             position: 4,
             name: "Prior Patient ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +82,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.5",
             position: 5,
             name: "Prior Visit Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +100,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.6",
             position: 6,
             name: "Prior Alternate Visit ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +118,7 @@ pub static MRG: Segment = Segment {
             id: "MRG.7",
             position: 7,
             name: "Prior Patient Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

@@ -16,7 +16,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.1",
             position: 1,
             name: "Set ID - CM2",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.2",
             position: 2,
             name: "Scheduled Time Point",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.3",
             position: 3,
             name: "Description of Time Point",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static CM2: Segment = Segment {
             id: "CM2.4",
             position: 4,
             name: "Events Scheduled This Time Point",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(200),

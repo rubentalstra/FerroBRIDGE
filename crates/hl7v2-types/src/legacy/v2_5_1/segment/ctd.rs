@@ -16,7 +16,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.1",
             position: 1,
             name: "Contact Role",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -37,7 +37,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.2",
             position: 2,
             name: "Contact Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -55,7 +55,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.3",
             position: 3,
             name: "Contact Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -73,7 +73,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.4",
             position: 4,
             name: "Contact Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.5",
             position: 5,
             name: "Contact Communication Information",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +109,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.6",
             position: 6,
             name: "Preferred Method of Contact",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static CTD: Segment = Segment {
             id: "CTD.7",
             position: 7,
             name: "Contact Identifiers",
-            data_type: Some(DataTypeRef::Legacy("PLN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

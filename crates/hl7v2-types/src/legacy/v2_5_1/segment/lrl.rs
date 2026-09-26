@@ -16,7 +16,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.1",
             position: 1,
             name: "Primary Key Value - LRL",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.2",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.3",
             position: 3,
             name: "Segment Unique Key",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.4",
             position: 4,
             name: "Location Relationship ID",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.5",
             position: 5,
             name: "Organizational Location Relationship Value",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -112,7 +112,7 @@ pub static LRL: Segment = Segment {
             id: "LRL.6",
             position: 6,
             name: "Patient Location Relationship Value",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

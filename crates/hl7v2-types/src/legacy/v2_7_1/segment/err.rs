@@ -34,7 +34,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.2",
             position: 2,
             name: "Error Location",
-            data_type: Some(DataTypeRef::Legacy("ERL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::ERL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +52,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.3",
             position: 3,
             name: "HL7 Error Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.4",
             position: 4,
             name: "Severity",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.5",
             position: 5,
             name: "Application Error Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +115,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.6",
             position: 6,
             name: "Application Error Parameter",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(10),
@@ -133,7 +133,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.7",
             position: 7,
             name: "Diagnostic Information",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +151,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.8",
             position: 8,
             name: "User Message",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +169,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.9",
             position: 9,
             name: "Inform Person Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -190,7 +190,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.10",
             position: 10,
             name: "Override Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +211,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.11",
             position: 11,
             name: "Override Reason Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -232,7 +232,7 @@ pub static ERR: Segment = Segment {
             id: "ERR.12",
             position: 12,
             name: "Help Desk Contact Point",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

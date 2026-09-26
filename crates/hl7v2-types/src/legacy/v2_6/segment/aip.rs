@@ -16,7 +16,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.1",
             position: 1,
             name: "Set ID - AIP",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.2",
             position: 2,
             name: "Segment Action Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.3",
             position: 3,
             name: "Personnel Resource ID",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -73,7 +73,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.4",
             position: 4,
             name: "Resource Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.5",
             position: 5,
             name: "Resource Group",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +112,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.6",
             position: 6,
             name: "Start Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.7",
             position: 7,
             name: "Start Date/Time Offset",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +148,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.8",
             position: 8,
             name: "Start Date/Time Offset Units",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +166,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.9",
             position: 9,
             name: "Duration",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -184,7 +184,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.10",
             position: 10,
             name: "Duration Units",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.11",
             position: 11,
             name: "Allow Substitution Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +223,7 @@ pub static AIP: Segment = Segment {
             id: "AIP.12",
             position: 12,
             name: "Filler Status Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

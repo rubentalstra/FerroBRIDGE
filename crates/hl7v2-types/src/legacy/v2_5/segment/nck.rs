@@ -15,7 +15,7 @@ pub static NCK: Segment = Segment {
         id: "NCK.1",
         position: 1,
         name: "System Date/Time",
-        data_type: Some(DataTypeRef::Legacy("TS")),
+        data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
         cardinality: Cardinality {
             min: 1,
             max: Max::Bounded(1),

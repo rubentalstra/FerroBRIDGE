@@ -16,7 +16,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.1",
             position: 1,
             name: "Query Tag",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static QAK: Segment = Segment {
             id: "QAK.2",
             position: 2,
             name: "Query Response Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -16,7 +16,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.1",
             position: 1,
             name: "Participation Instance ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.2",
             position: 2,
             name: "Action Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.3",
             position: 3,
             name: "Action Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.4",
             position: 4,
             name: "Participation",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.5",
             position: 5,
             name: "Participation Person",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -112,7 +112,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.6",
             position: 6,
             name: "Participation Person Provider Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.7",
             position: 7,
             name: "Participant Organization Unit Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +151,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.8",
             position: 8,
             name: "Participation Organization",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -169,7 +169,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.9",
             position: 9,
             name: "Participant Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -187,7 +187,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.10",
             position: 10,
             name: "Participation Device",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -205,7 +205,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.11",
             position: 11,
             name: "Participation Begin Date/Time (arrival time)",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -223,7 +223,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.12",
             position: 12,
             name: "Participation End Date/Time (departure time)",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +241,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.13",
             position: 13,
             name: "Participation Qualitative Duration",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +259,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.14",
             position: 14,
             name: "Participation Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +277,7 @@ pub static PRT: Segment = Segment {
             id: "PRT.15",
             position: 15,
             name: "Participant Telecommunication Address",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

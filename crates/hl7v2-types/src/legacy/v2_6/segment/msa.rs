@@ -16,7 +16,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.1",
             position: 1,
             name: "Acknowledgment Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.2",
             position: 2,
             name: "Message Control ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.3",
             position: 3,
             name: "Text Message",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.4",
             position: 4,
             name: "Expected Sequence Number",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +103,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.6",
             position: 6,
             name: "Error Condition",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +121,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.7",
             position: 7,
             name: "Message Waiting Number",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +139,7 @@ pub static MSA: Segment = Segment {
             id: "MSA.8",
             position: 8,
             name: "Message Waiting Priority",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

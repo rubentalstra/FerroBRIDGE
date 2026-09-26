@@ -16,7 +16,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.1",
             position: 1,
             name: "RX Component Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.2",
             position: 2,
             name: "Component Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.3",
             position: 3,
             name: "Component Amount",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.4",
             position: 4,
             name: "Component Units",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.5",
             position: 5,
             name: "Component Strength",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +103,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.6",
             position: 6,
             name: "Component Strength Units",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -121,7 +121,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.7",
             position: 7,
             name: "Supplementary Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -139,7 +139,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.8",
             position: 8,
             name: "Component Drug Strength Volume",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static RXC: Segment = Segment {
             id: "RXC.9",
             position: 9,
             name: "Component Drug Strength Volume Units",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

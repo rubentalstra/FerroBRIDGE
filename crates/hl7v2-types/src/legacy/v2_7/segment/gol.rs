@@ -16,7 +16,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.1",
             position: 1,
             name: "Action Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.2",
             position: 2,
             name: "Action Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.3",
             position: 3,
             name: "Goal ID",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +67,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.4",
             position: 4,
             name: "Goal Instance ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -82,7 +82,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.5",
             position: 5,
             name: "Episode of Care ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +97,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.6",
             position: 6,
             name: "Goal List Priority",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +112,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.7",
             position: 7,
             name: "Goal Established Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +127,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.8",
             position: 8,
             name: "Expected Goal Achieve Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +142,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.9",
             position: 9,
             name: "Goal Classification",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +157,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.10",
             position: 10,
             name: "Goal Management Discipline",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -172,7 +172,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.11",
             position: 11,
             name: "Current Goal Review Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +187,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.12",
             position: 12,
             name: "Current Goal Review Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.13",
             position: 13,
             name: "Next Goal Review Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +217,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.14",
             position: 14,
             name: "Previous Goal Review Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -247,7 +247,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.16",
             position: 16,
             name: "Goal Evaluation",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -262,7 +262,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.17",
             position: 17,
             name: "Goal Evaluation Comment",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +277,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.18",
             position: 18,
             name: "Goal Life Cycle Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -292,7 +292,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.19",
             position: 19,
             name: "Goal Life Cycle Status Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -307,7 +307,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.20",
             position: 20,
             name: "Goal Target Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -322,7 +322,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.21",
             position: 21,
             name: "Goal Target Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -337,7 +337,7 @@ pub static GOL: Segment = Segment {
             id: "GOL.22",
             position: 22,
             name: "Mood Code",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

@@ -16,7 +16,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.1",
             position: 1,
             name: "Primary Key Value - LOC",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.2",
             position: 2,
             name: "Location Description",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.3",
             position: 3,
             name: "Location Type - LOC",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -73,7 +73,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.4",
             position: 4,
             name: "Organization Name - LOC",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -91,7 +91,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.5",
             position: 5,
             name: "Location Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +109,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.6",
             position: 6,
             name: "Location Phone",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -127,7 +127,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.7",
             position: 7,
             name: "License Number",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -148,7 +148,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.8",
             position: 8,
             name: "Location Equipment",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -169,7 +169,7 @@ pub static LOC: Segment = Segment {
             id: "LOC.9",
             position: 9,
             name: "Location Service Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
