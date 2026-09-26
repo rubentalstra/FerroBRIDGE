@@ -477,6 +477,8 @@ crates on crates.io.
 - `ferrobridge-server` splits its seven files over 750 lines into module
   folders (#354), with no change in behaviour; the configuration file tree
   moves to `config::section` (`config::section::Telemetry`), and every other
+- `fhir-codegen` splits nine of its files over 750 lines into module folders
+  (#353), with no change in behaviour or in the generated crates; every
   public item keeps its path.
 - `ferrobridge-hl7v2` parses every message against the tree and segment
   tables of the version its MSH-12 declares, not only the structures v2.9.1
