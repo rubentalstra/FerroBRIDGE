@@ -23,7 +23,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use openehr_mapping_core::header::Header;
-use openehr_mapping_core::header::MappingName;
+use openehr_mapping_core::header::metadata::MappingName;
 use openehr_mapping_core::position::Located;
 use openehr_mapping_core::position::Position;
 

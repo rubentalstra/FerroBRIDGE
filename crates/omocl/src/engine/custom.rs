@@ -14,8 +14,8 @@
 use core::fmt;
 use std::sync::Arc;
 
-use omop_cdm::graph::RecordKey;
-use omop_cdm::graph::Row;
+use omop_cdm::graph::key::RecordKey;
+use omop_cdm::graph::row::Row;
 
 use crate::model::semantic::ConverterRegistry;
 use crate::model::semantic::FirstPartyConverters;

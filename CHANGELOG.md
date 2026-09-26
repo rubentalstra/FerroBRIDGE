@@ -444,6 +444,11 @@ crates on crates.io.
 
 ### Changed
 
+- `openehr-mapping-core`, `omocl` and `omop-cdm` split their six files over
+  750 lines into module folders (#356), with no change in behaviour; the
+  public types keep their names and a caller imports each from its new child
+  module (`header::metadata::MappingName`, `graph::row::Row`,
+  `writer::error::WriteError`).
 - The five generator tests that emit a whole crate run only behind
   `FERROBRIDGE_CODEGEN_EMIT=1`, set by the `codegen-drift` job over a release
   build; the `test` job and the SonarQube Cloud coverage run skip them, since

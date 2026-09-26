@@ -22,9 +22,9 @@ use openehr_sdt::flat::path::Segment;
 use openehr_sdt::flat::path::Suffix;
 use serde_json::Value;
 
-use crate::index::FlatId;
 use crate::index::ResolvedNode;
 use crate::index::WebTemplateIndex;
+use crate::index::paths::FlatId;
 use crate::template::Generation;
 use crate::template::PathError;
 

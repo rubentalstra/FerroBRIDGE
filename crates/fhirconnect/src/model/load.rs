@@ -16,8 +16,8 @@ use std::path::PathBuf;
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::diagnostic::DiagnosticCode;
 use openehr_mapping_core::diagnostic::ModelPath;
-use openehr_mapping_core::header::MappingName;
-use openehr_mapping_core::header::MappingType;
+use openehr_mapping_core::header::metadata::MappingName;
+use openehr_mapping_core::header::metadata::MappingType;
 use openehr_mapping_core::loader::MappingDocument;
 use openehr_mapping_core::loader::load_file;
 

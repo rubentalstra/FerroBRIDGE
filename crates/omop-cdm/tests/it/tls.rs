@@ -14,7 +14,7 @@ use ferrobridge_testkit::tls::{TlsError, TlsMaterial};
 use omop_cdm::connection::CdmConnection;
 use omop_cdm::database::CdmPool;
 use omop_cdm::ddl::SchemaName;
-use omop_cdm::writer::{CdmWriter, PersonPolicy, WriteError};
+use omop_cdm::writer::{CdmWriter, error::WriteError, input::PersonPolicy};
 use sqlx::postgres::PgPoolOptions;
 use std::error::Error;
 use std::time::Duration;

@@ -15,9 +15,9 @@ use crate::etl::report::RunReport;
 use crate::etl::{RunError, RunOptions};
 use omocl::engine::concept::VocabularyAliases;
 use omop_cdm::database::{CdmPool, ConnectError};
-use omop_cdm::graph::EmptyIdentifier;
+use omop_cdm::graph::key::EmptyIdentifier;
 use omop_cdm::vocabulary::ConceptResolver;
-use omop_cdm::writer::{CdmWriter, RunId, WriteError};
+use omop_cdm::writer::{CdmWriter, error::WriteError, input::RunId};
 
 /// Why `etl run` could not run.
 #[derive(Debug, thiserror::Error)]

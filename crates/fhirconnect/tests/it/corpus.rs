@@ -25,7 +25,7 @@ use fhirconnect::model::schema::Schemas;
 use fhirconnect::model::schema::published;
 use fhirconnect::model::schema::strict;
 use fhirconnect::model::semantic::StaticMappingCodes;
-use openehr_mapping_core::header::MappingName;
+use openehr_mapping_core::header::metadata::MappingName;
 use openehr_mapping_core::loader::load_str;
 
 /// The vendored mapping library, relative to this crate's manifest.

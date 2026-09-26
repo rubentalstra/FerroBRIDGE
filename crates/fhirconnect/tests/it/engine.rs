@@ -61,9 +61,9 @@ use fhirconnect::resolve::program::TemplateId;
 use fhirconnect::tree::path::FhirPath;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_mapping_core::composition::NodeValue;
-use openehr_mapping_core::header::MappingName;
-use openehr_mapping_core::index::AqlPath;
+use openehr_mapping_core::header::metadata::MappingName;
 use openehr_mapping_core::index::WebTemplateIndex;
+use openehr_mapping_core::index::paths::AqlPath;
 use openehr_mapping_core::template::Generation;
 use openehr_rm::v1_2::paths::RmPath;
 

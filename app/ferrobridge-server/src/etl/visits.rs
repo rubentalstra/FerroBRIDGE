@@ -14,7 +14,9 @@
 //! <https://ohdsi.github.io/CommonDataModel/cdm54.html#visit_occurrence>).
 
 use crate::etl::aql::CheckedQuery;
-use omop_cdm::graph::{MappingName, Refusal, Visit, VisitKey, VisitSource};
+use omop_cdm::graph::{
+    key::MappingName, key::Visit, key::VisitKey, key::VisitSource, report::Refusal,
+};
 use omop_cdm::value::{CdmDate, CdmDatetime};
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use std::collections::BTreeMap;

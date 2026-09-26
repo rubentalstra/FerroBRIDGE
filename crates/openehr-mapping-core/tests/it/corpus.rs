@@ -14,7 +14,7 @@ use std::path::PathBuf;
 
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::diagnostic::DiagnosticCode;
-use openehr_mapping_core::header::MappingLanguage;
+use openehr_mapping_core::header::grammar::MappingLanguage;
 use openehr_mapping_core::loader;
 
 /// The two vendored mapping corpora, relative to the repository root.

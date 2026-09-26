@@ -26,7 +26,7 @@ use ferrobridge_testkit::fixtures::{
 };
 use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
-use omop_cdm::writer::{CdmWriter, PersonPolicy};
+use omop_cdm::writer::{CdmWriter, input::PersonPolicy};
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_its::rest::generated::ehr::client::EhrCreateOutcome;
 use openehr_its::rest::generated::ehr::client::{

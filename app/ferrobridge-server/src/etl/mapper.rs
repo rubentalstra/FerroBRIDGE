@@ -29,7 +29,7 @@ use omocl::model::load::MappingSet;
 use omocl::model::semantic::FirstPartyConverters;
 use omocl::resolve::program::Program;
 use omop_cdm::graph::RecordGraph;
-use omop_cdm::graph::Refusal;
+use omop_cdm::graph::report::Refusal;
 use omop_cdm::value::CdmDate;
 use omop_cdm::vocabulary::ConceptResolver;
 use omop_cdm::vocabulary::Resolution;

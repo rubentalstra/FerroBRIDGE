@@ -20,8 +20,8 @@ use std::collections::BTreeMap;
 use std::path::Path;
 use std::path::PathBuf;
 
-use openehr_mapping_core::header::ArchetypeId;
 use openehr_mapping_core::header::Header;
+use openehr_mapping_core::header::archetype::ArchetypeId;
 use openehr_mapping_core::path::MappingPath;
 use openehr_mapping_core::position::Located;
 use openehr_mapping_core::position::Position;

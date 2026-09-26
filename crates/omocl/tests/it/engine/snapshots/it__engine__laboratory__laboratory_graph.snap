@@ -1,5 +1,5 @@
 ---
-source: crates/omocl/tests/it/engine.rs
+source: crates/omocl/tests/it/engine/laboratory.rs
 expression: render(&graph)?
 ---
 measurement composition-synthetic-1 /content[openEHR-EHR-OBSERVATION.laboratory_test_result.v1 and 1]/data[at0001 and 1]/events[at0002 and 1]/data[at0003 and 1]/items[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1 and 1]/ Laboratory_test_analyte_v1#0.0 (Laboratory_test_analyte_v1)

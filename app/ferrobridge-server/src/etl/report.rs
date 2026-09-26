@@ -11,7 +11,7 @@
 //! own design.
 
 use crate::etl::tie::Tie;
-use omop_cdm::graph::{Refusal, Report, Source};
+use omop_cdm::graph::{key::Source, report::Refusal, report::Report};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt;

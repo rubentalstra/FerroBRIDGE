@@ -21,8 +21,8 @@ use std::path::Path;
 
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::diagnostic::ModelPath;
-use openehr_mapping_core::header::MappingName;
-use openehr_mapping_core::header::MappingType;
+use openehr_mapping_core::header::metadata::MappingName;
+use openehr_mapping_core::header::metadata::MappingType;
 use openehr_mapping_core::position::Located;
 use openehr_mapping_core::position::Position;
 

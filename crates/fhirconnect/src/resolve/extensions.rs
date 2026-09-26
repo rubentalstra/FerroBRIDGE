@@ -18,7 +18,7 @@ use std::path::Path;
 
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::diagnostic::ModelPath;
-use openehr_mapping_core::header::MappingName;
+use openehr_mapping_core::header::metadata::MappingName;
 use openehr_mapping_core::position::Position;
 
 use crate::model::ast::ExtensionMethod;

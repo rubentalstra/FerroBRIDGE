@@ -19,8 +19,8 @@ use std::path::PathBuf;
 use crate::diagnostic::Diagnostic;
 use crate::diagnostic::DiagnosticCode;
 use crate::diagnostic::ModelPath;
-use crate::header::ArchetypeId;
-use crate::header::MappingName;
+use crate::header::archetype::ArchetypeId;
+use crate::header::metadata::MappingName;
 use crate::loader::MappingDocument;
 use crate::position::Position;
 
@@ -166,8 +166,8 @@ mod tests {
     use super::RegistryError;
     use crate::diagnostic::Diagnostic;
     use crate::diagnostic::DiagnosticCode;
-    use crate::header::ArchetypeId;
-    use crate::header::MappingName;
+    use crate::header::archetype::ArchetypeId;
+    use crate::header::metadata::MappingName;
     use crate::loader::load_str;
 
     fn source(name: &str, archetype: &str) -> String {

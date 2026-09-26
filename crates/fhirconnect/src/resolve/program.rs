@@ -17,11 +17,11 @@ use core::fmt;
 use core::str::FromStr;
 
 use openehr_mapping_core::diagnostic::Diagnostic;
-use openehr_mapping_core::header::ArchetypeId;
-use openehr_mapping_core::header::MappingName;
-use openehr_mapping_core::header::MappingVersion;
-use openehr_mapping_core::index::FlatId;
+use openehr_mapping_core::header::archetype::ArchetypeId;
+use openehr_mapping_core::header::metadata::MappingName;
+use openehr_mapping_core::header::metadata::MappingVersion;
 use openehr_mapping_core::index::ResolvedNode;
+use openehr_mapping_core::index::paths::FlatId;
 use openehr_mapping_core::template::Generation;
 use openehr_rm::v1_2::paths::RmPath;
 
