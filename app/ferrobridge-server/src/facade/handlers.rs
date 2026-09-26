@@ -42,15 +42,17 @@ pub(crate) use crate::facade::reply::Refusal;
 /// `GET [base]/metadata`: the `CapabilityStatement` of the loaded programs.
 ///
 /// `operations` says whether the router serves the FHIRconnect operations
-/// beside the facade, so the statement declares them only then.
+/// beside the facade, so the statement declares them only then, and `hl7v2`
+/// whether the HL7 v2 face runs, so the statement names it only then.
 #[must_use]
 pub fn metadata_route(
     facade: &Facade,
     headers: &HeaderMap,
     uri: &Uri,
     operations: capability::Operations,
+    hl7v2: capability::Hl7v2,
 ) -> Response {
-    metadata(facade, headers, uri, operations).unwrap_or_else(Refusal::into_response)
+    metadata(facade, headers, uri, operations, hl7v2).unwrap_or_else(Refusal::into_response)
 }
 
 /// `POST [base]/{type}`: create, conditional and idempotent by source
@@ -129,10 +131,15 @@ fn metadata(
     headers: &HeaderMap,
     uri: &Uri,
     operations: capability::Operations,
+    hl7v2: capability::Hl7v2,
 ) -> Result<Response, Refusal> {
     guard(headers, uri, Body::Absent)?;
-    let statement =
-        capability::statement(facade.programs(), &facade.settings().base_url, operations);
+    let statement = capability::statement_with(
+        facade.programs(),
+        &facade.settings().base_url,
+        operations,
+        hl7v2,
+    );
     let encoded = statement.to_json().map_err(|error| {
         reply::refusal(
             StatusCode::INTERNAL_SERVER_ERROR,

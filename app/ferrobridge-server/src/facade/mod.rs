@@ -159,12 +159,27 @@ impl Facade {
     /// client of its own.
     #[must_use]
     pub fn ingest(&self, client: CdrClient) -> ingest::Ingest<'_> {
+        self.ingest_under(client, &self.settings)
+    }
+
+    /// Returns the ingest service over this facade's programs, identity map
+    /// and claims, calling the CDR through `client` under `settings`.
+    ///
+    /// A face whose deployment states its own EHR policy passes settings of
+    /// its own; the identity map and the claims stay the facade's, so one
+    /// source delivered through two faces is recognised by both.
+    #[must_use]
+    pub fn ingest_under<'a>(
+        &'a self,
+        client: CdrClient,
+        settings: &'a Settings,
+    ) -> ingest::Ingest<'a> {
         ingest::Ingest::new(
             &self.programs,
             self.store.as_ref(),
             &self.claims,
             client,
-            &self.settings,
+            settings,
         )
     }
 }
@@ -176,8 +191,14 @@ impl Facade {
 /// system-level transaction. Search and batch have no route, so a request for
 /// either answers `404` (<https://hl7.org/fhir/R4/http.html>). `operations`
 /// is whether the same router serves the FHIRconnect operations, which the
-/// conformance statement declares only then.
-pub fn routes(facade: Arc<Facade>, operations: capability::Operations) -> Router {
+/// conformance statement declares only then, and `hl7v2` whether the HL7 v2
+/// face runs, which the statement's implementation description names only
+/// then.
+pub fn routes(
+    facade: Arc<Facade>,
+    operations: capability::Operations,
+    hl7v2: capability::Hl7v2,
+) -> Router {
     Router::new()
         .route(
             &format!("{BASE_PATH}/metadata"),
@@ -185,7 +206,7 @@ pub fn routes(facade: Arc<Facade>, operations: capability::Operations) -> Router
                 move |axum::extract::State(facade): axum::extract::State<Arc<Facade>>,
                       headers: http::HeaderMap,
                       uri: http::Uri| async move {
-                    handlers::metadata_route(&facade, &headers, &uri, operations)
+                    handlers::metadata_route(&facade, &headers, &uri, operations, hl7v2)
                 },
             ),
         )

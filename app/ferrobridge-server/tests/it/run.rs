@@ -141,7 +141,10 @@ fn serve_under_json_prints_no_banner_and_only_json_lines() {
         .filter(|event| event["message"] == "lane")
         .filter_map(|event| event["lane"].as_str())
         .collect();
-    assert_eq!(vec!["facade", "operations", "etl", "terminology"], lanes);
+    assert_eq!(
+        vec!["facade", "hl7v2", "operations", "etl", "terminology"],
+        lanes
+    );
     let console = &events[0];
     assert_eq!(Some("json"), console["format"].as_str());
     assert_eq!(Some(false), console["colour"].as_bool());

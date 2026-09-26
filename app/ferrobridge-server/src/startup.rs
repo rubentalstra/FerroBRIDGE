@@ -25,8 +25,12 @@ pub struct MappingCounts {
 /// One lane of this deployment, as the banner and the summary report it.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Lane {
-    /// The lane's name: `facade`, `operations`, `etl` or `terminology`.
+    /// The lane's name: `facade`, `hl7v2`, `operations`, `etl` or
+    /// `terminology`.
     pub name: &'static str,
+    /// The socket address a face listens on, for a face with a listener of
+    /// its own.
+    pub listen: Option<String>,
     /// Whether the configuration switches it on.
     pub enabled: bool,
     /// Whether it carries identifiable data.
@@ -59,15 +63,22 @@ impl Lane {
     }
 }
 
-/// Returns the four lanes `settings` describes, with no mapping counts yet.
+/// Returns the five lanes `settings` describes, with no mapping counts yet.
 ///
 /// The operations reach the CDR only for their templates, so a deployment that
 /// names a template directory reports no CDR host for them. The ETL runs under
-/// `ferrobridge etl run`; `serve` reports the lane it would run.
+/// `ferrobridge etl run`; `serve` reports the lane it would run. The HL7 v2
+/// face writes through the facade's CDR and translates its table values on
+/// the terminology server.
 #[must_use]
 pub fn lanes(settings: &Settings) -> Vec<Lane> {
     let cdr_host = settings.cdr.as_ref().and_then(|cdr| host_of(&cdr.base_url));
+    let terminology_host = settings
+        .terminology
+        .as_ref()
+        .and_then(|terminology| host_of(&terminology.base_url));
     let facade = settings.facade.is_some();
+    let hl7v2 = settings.hl7v2.as_ref();
     let operations = settings.operations.enabled && settings.mapping_directory.is_some();
     let etl = settings.etl.is_some();
     let cdm = settings.cdm.as_ref();
@@ -81,6 +92,15 @@ pub fn lanes(settings: &Settings) -> Vec<Lane> {
             enabled: facade,
             identifiable: facade,
             cdr_host: cdr_host.clone().filter(|_| facade),
+            ..Lane::default()
+        },
+        Lane {
+            name: "hl7v2",
+            enabled: hl7v2.is_some(),
+            identifiable: hl7v2.is_some(),
+            listen: hl7v2.map(|face| face.listen.to_string()),
+            cdr_host: cdr_host.clone().filter(|_| hl7v2.is_some()),
+            terminology_host: terminology_host.clone().filter(|_| hl7v2.is_some()),
             ..Lane::default()
         },
         Lane {
@@ -112,10 +132,7 @@ pub fn lanes(settings: &Settings) -> Vec<Lane> {
         Lane {
             name: "terminology",
             enabled: settings.terminology.is_some(),
-            terminology_host: settings
-                .terminology
-                .as_ref()
-                .and_then(|terminology| host_of(&terminology.base_url)),
+            terminology_host,
             ..Lane::default()
         },
     ]
@@ -140,6 +157,7 @@ pub fn log(lanes: &[Lane]) {
             lane = lane.name,
             enabled = lane.enabled,
             identifiable = lane.identifiable,
+            listen = lane.listen.as_deref(),
             cdr_host = lane.cdr_host.as_deref(),
             terminology_host = lane.terminology_host.as_deref(),
             cdm_host = lane.cdm_host.as_deref(),

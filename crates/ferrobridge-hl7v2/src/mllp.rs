@@ -11,16 +11,25 @@
 //! start block, and a frame past the configured ceiling are each a typed
 //! refusal ([`FrameError`]). Release 2's reliable delivery (the commit
 //! acknowledgment `<SB><ACK><EB><CR>`) is not spoken.
+//!
+//! A connection that sits between frames past its idle timeout is closed, and
+//! a frame that does not complete within its frame timeout is refused as
+//! [`Malformed::Stalled`] ([`Timeouts`]; no specification governs either
+//! bound: our own design).
 
 use core::future::Future;
+use core::time::Duration;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use bytes::{Buf, BufMut, BytesMut};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::watch;
 use tokio::task::JoinSet;
+use tokio::time::Instant;
 use tokio_util::codec::{Decoder, Encoder};
+use tracing::Instrument;
 
 /// The start block, `0x0B`.
 pub const START_BLOCK: u8 = 0x0B;
@@ -50,6 +59,11 @@ pub enum Malformed {
     },
     /// The peer closed the connection inside a frame.
     Truncated,
+    /// The frame did not complete within the frame timeout.
+    Stalled {
+        /// The frame timeout.
+        limit: Duration,
+    },
 }
 
 impl core::fmt::Display for Malformed {
@@ -64,6 +78,11 @@ impl core::fmt::Display for Malformed {
                 write!(f, "the frame runs past the ceiling of {limit} bytes")
             }
             Self::Truncated => f.write_str("the connection closed inside a frame"),
+            Self::Stalled { limit } => write!(
+                f,
+                "the frame did not complete within {} ms",
+                limit.as_millis()
+            ),
         }
     }
 }
@@ -231,14 +250,43 @@ impl Encoder<&[u8]> for Codec {
     }
 }
 
+/// What one connection counts, recorded on its `mllp_connection` span.
+///
+/// The listener counts the frames it answered; the handler counts the frames
+/// it refused by its own policy before handling them (a sender it does not
+/// accept, say), so the span says how many of a peer's messages were turned
+/// away.
+#[derive(Debug, Default)]
+pub struct Connection {
+    refused: AtomicUsize,
+}
+
+impl Connection {
+    /// Counts one frame the handler refused by its own policy.
+    pub fn refuse(&self) {
+        self.refused.fetch_add(1, Ordering::Relaxed);
+    }
+
+    /// Returns how many frames the handler refused.
+    #[must_use]
+    pub fn refused(&self) -> usize {
+        self.refused.load(Ordering::Relaxed)
+    }
+}
+
 /// What the listener hands each frame to.
 ///
 /// The answer is the acknowledgment's bytes, framed by the listener. A
 /// handler that cannot answer a frame at all returns `None`, and the listener
 /// closes the connection.
 pub trait Handler: Send + Sync + 'static {
-    /// Answers one frame's message bytes.
-    fn handle(&self, message: Vec<u8>) -> impl Future<Output = Option<Vec<u8>>> + Send;
+    /// Answers one frame's message bytes, counting on `connection` what the
+    /// connection's span reports.
+    fn handle(
+        &self,
+        message: Vec<u8>,
+        connection: &Connection,
+    ) -> impl Future<Output = Option<Vec<u8>>> + Send;
 
     /// Answers a malformed frame from the message bytes read before the
     /// refusal, before the listener closes the connection.
@@ -251,12 +299,21 @@ pub trait Handler: Send + Sync + 'static {
     }
 }
 
+/// How long one connection may wait on its peer.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct Timeouts {
+    /// How long a connection may sit with no frame begun before it is
+    /// closed; `None` waits for as long as the peer keeps it open.
+    pub idle: Option<Duration>,
+    /// How long a frame may take from its first byte to its trailer before it
+    /// is refused as [`Malformed::Stalled`]; `None` waits for the trailer.
+    pub frame: Option<Duration>,
+}
+
 /// Accepts connections on `listener` until `shutdown` completes, answering
-/// every frame through `handler`.
+/// every frame through `handler`, with no timeout on a connection.
 ///
-/// On shutdown the listener stops accepting, each connection finishes the
-/// frame it is answering and closes, and the call returns once every
-/// connection has closed.
+/// [`serve_with`] states the timeouts.
 ///
 /// # Errors
 ///
@@ -265,6 +322,27 @@ pub async fn serve<H: Handler>(
     listener: TcpListener,
     handler: Arc<H>,
     codec: Codec,
+    shutdown: impl Future<Output = ()> + Send,
+) -> std::io::Result<()> {
+    serve_with(listener, handler, codec, Timeouts::default(), shutdown).await
+}
+
+/// Accepts connections on `listener` until `shutdown` completes, answering
+/// every frame through `handler` under `timeouts`.
+///
+/// On shutdown the listener stops accepting, each connection finishes the
+/// frame it is answering and closes, and the call returns once every
+/// connection has closed. Each connection runs in its own `mllp_connection`
+/// span naming the peer.
+///
+/// # Errors
+///
+/// Returns the I/O error of a failed `accept`.
+pub async fn serve_with<H: Handler>(
+    listener: TcpListener,
+    handler: Arc<H>,
+    codec: Codec,
+    timeouts: Timeouts,
     shutdown: impl Future<Output = ()> + Send,
 ) -> std::io::Result<()> {
     let (stop, stopped) = watch::channel(false);
@@ -278,11 +356,22 @@ pub async fn serve<H: Handler>(
                 tracing::debug!(peer = %peer, "MLLP connection accepted");
                 let handler = Arc::clone(&handler);
                 let stopped = stopped.clone();
-                connections.spawn(async move {
-                    if let Err(error) = connection(stream, handler.as_ref(), codec, stopped).await {
-                        tracing::warn!(error = %error, "MLLP connection closed on an error");
+                let span = tracing::info_span!(
+                    "mllp_connection",
+                    peer = %peer,
+                    messages = tracing::field::Empty,
+                    refused = tracing::field::Empty,
+                );
+                connections.spawn(
+                    async move {
+                        let ended =
+                            connection(stream, handler.as_ref(), codec, timeouts, stopped).await;
+                        if let Err(error) = ended {
+                            tracing::warn!(error = %error, "MLLP connection closed on an error");
+                        }
                     }
-                });
+                    .instrument(span),
+                );
             }
             Some(finished) = connections.join_next(), if !connections.is_empty() => {
                 if let Err(error) = finished {
@@ -301,14 +390,20 @@ pub async fn serve<H: Handler>(
 }
 
 /// Answers the frames of one connection until the peer closes it, a frame is
-/// malformed, or the listener stops.
+/// malformed or stalls, the connection idles past its timeout, or the
+/// listener stops.
 async fn connection<H: Handler>(
     mut stream: TcpStream,
     handler: &H,
     mut codec: Codec,
+    timeouts: Timeouts,
     mut stopped: watch::Receiver<bool>,
 ) -> Result<(), FrameError> {
     let mut buffer = BytesMut::new();
+    let counts = Connection::default();
+    let mut messages = 0usize;
+    let mut idle_since = Instant::now();
+    let mut frame_since: Option<Instant> = None;
     loop {
         let decoded = match codec.decode(&mut buffer) {
             Ok(Some(message)) => Some(message),
@@ -319,7 +414,12 @@ async fn connection<H: Handler>(
             Err(other) => return Err(other),
         };
         if let Some(message) = decoded {
-            let Some(reply) = handler.handle(message).await else {
+            let answered = handler.handle(message, &counts).await;
+            messages = messages.saturating_add(1);
+            let span = tracing::Span::current();
+            span.record("messages", messages);
+            span.record("refused", counts.refused());
+            let Some(reply) = answered else {
                 return Ok(());
             };
             let mut out = BytesMut::new();
@@ -328,11 +428,34 @@ async fn connection<H: Handler>(
             if *stopped.borrow() {
                 return Ok(());
             }
+            idle_since = Instant::now();
+            frame_since = (!buffer.is_empty()).then_some(idle_since);
             continue;
         }
+        let deadline = match frame_since {
+            None => timeouts
+                .idle
+                .and_then(|idle| Some((idle_since.checked_add(idle)?, None))),
+            Some(since) => timeouts
+                .frame
+                .and_then(|frame| Some((since.checked_add(frame)?, Some(frame)))),
+        };
         buffer.reserve(READ_CHUNK);
         tokio::select! {
+            () = expiry(deadline.map(|(at, _)| at)) => {
+                if let Some(limit) = deadline.and_then(|(_, frame)| frame) {
+                    let partial = buffer.get(1..).unwrap_or_default().to_vec();
+                    let kind = Malformed::Stalled { limit };
+                    return refuse(&mut stream, handler, &mut codec, kind, &partial).await;
+                }
+                tracing::debug!("MLLP connection closed after its idle timeout");
+                stream.shutdown().await?;
+                return Ok(());
+            }
             read = stream.read_buf(&mut buffer) => {
+                if frame_since.is_none() && !buffer.is_empty() {
+                    frame_since = Some(Instant::now());
+                }
                 if read? == 0 {
                     return match codec.decode_eof(&mut buffer) {
                         Ok(_) => Ok(()),
@@ -349,6 +472,14 @@ async fn connection<H: Handler>(
                 }
             }
         }
+    }
+}
+
+/// Completes at `deadline`, or never when there is none.
+async fn expiry(deadline: Option<Instant>) {
+    match deadline {
+        Some(at) => tokio::time::sleep_until(at).await,
+        None => std::future::pending().await,
     }
 }
 

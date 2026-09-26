@@ -28,7 +28,16 @@ fn every_lane_is_reported_with_the_hosts_it_reaches() -> Result<(), Box<dyn StdE
     let settings = Config::from_sources(Some(FILE), &BTreeMap::new())?.resolve()?;
     let lanes = startup::lanes(&settings);
     let names: Vec<&str> = lanes.iter().map(|lane| lane.name).collect();
-    assert_eq!(vec!["facade", "operations", "etl", "terminology"], names);
+    assert_eq!(
+        vec!["facade", "hl7v2", "operations", "etl", "terminology"],
+        names
+    );
+    let hl7v2 = lanes
+        .iter()
+        .find(|lane| lane.name == "hl7v2")
+        .expect("the hl7v2 lane");
+    assert!(!hl7v2.enabled, "no [hl7v2] section");
+    assert_eq!(None, hl7v2.listen, "an off face listens nowhere");
     let lane = |name: &str| lanes.iter().find(|lane| lane.name == name);
     let facade = lane("facade").expect("the facade lane");
     assert!(!facade.enabled, "no [facade] section");

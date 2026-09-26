@@ -13,7 +13,7 @@ use ferrobridge_hl7v2::ack::{self, Code, Stamp};
 use ferrobridge_hl7v2::decode::{self, Charset};
 use ferrobridge_hl7v2::inbound::{self, Received};
 use ferrobridge_hl7v2::map::corpus::Corpus;
-use ferrobridge_hl7v2::mllp::{Handler, Malformed};
+use ferrobridge_hl7v2::mllp::{Connection, Handler, Malformed};
 use ferrobridge_hl7v2::parse::{self, Parsed};
 use ferrobridge_term::client::Client;
 use ferrobridge_term::config::{Config, RetryPolicy, WireVersion};
@@ -51,7 +51,11 @@ pub(crate) fn corpus() -> Corpus {
 pub(crate) struct Face;
 
 impl Handler for Face {
-    fn handle(&self, message: Vec<u8>) -> impl Future<Output = Option<Vec<u8>>> + Send {
+    fn handle(
+        &self,
+        message: Vec<u8>,
+        _connection: &Connection,
+    ) -> impl Future<Output = Option<Vec<u8>>> + Send {
         let reply = match inbound::receive(&message, Charset::Ascii, parse::structure_for, STAMP) {
             Received::Parsed(inbound) => inbound.answer(Code::Accept, &[], STAMP).ok(),
             Received::Answered { reply, .. } => Some(reply),

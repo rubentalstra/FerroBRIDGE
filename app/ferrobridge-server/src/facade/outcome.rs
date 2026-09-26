@@ -194,6 +194,18 @@ impl Issue {
         self.code
     }
 
+    /// Returns the `diagnostics` of this issue, when it has one.
+    #[must_use]
+    pub fn diagnostics(&self) -> Option<&str> {
+        self.diagnostics.as_deref()
+    }
+
+    /// Returns the element paths this issue is located at, in order.
+    #[must_use]
+    pub fn locations(&self) -> &[String] {
+        &self.locations
+    }
+
     /// Returns the generated R4 issue this describes.
     #[must_use]
     pub fn build(&self) -> OperationOutcomeIssue {

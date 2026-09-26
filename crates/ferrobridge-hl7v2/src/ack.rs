@@ -110,6 +110,19 @@ impl Header {
         self.field(10).filter(|value| !value.is_empty())
     }
 
+    /// Returns the message code and trigger event of MSH-9 as written, joined
+    /// by `^` (`ORU^R01`); `None` when MSH-9.1 is empty.
+    #[must_use]
+    pub fn type_code(&self) -> Option<String> {
+        let code = self.message_type(1).filter(|code| !code.is_empty())?;
+        Some(
+            match self.message_type(2).filter(|event| !event.is_empty()) {
+                Some(event) => format!("{code}^{event}"),
+                None => String::from(code),
+            },
+        )
+    }
+
     /// Returns the component at `position` of MSH-9 as written, from 1.
     fn message_type(&self, position: usize) -> Option<&str> {
         self.field(9)?
@@ -305,6 +318,14 @@ mod tests {
             ack.ends_with("MSA|AE|MSG-1\rERR||PID^1^3|101^Required field missing^HL70357|E||||PID.3 is required\r"),
             "{ack}"
         );
+    }
+
+    #[test]
+    fn the_type_code_joins_the_message_code_and_the_event() {
+        let header = Header::from_text(MESSAGE).expect("a header");
+        assert_eq!(header.type_code().as_deref(), Some("ORU^R01"));
+        let bare = Header::from_text("MSH|^~\\&|LAB||||||ACK|MSG-2|P|2.5.1").expect("a header");
+        assert_eq!(bare.type_code().as_deref(), Some("ACK"));
     }
 
     #[test]

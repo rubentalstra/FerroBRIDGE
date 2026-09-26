@@ -105,6 +105,40 @@ impl HealthIndicator for IdentityStore {
     }
 }
 
+/// The HL7 v2 listener probe.
+///
+/// The face answers only while its MLLP listener accepts, so readiness
+/// reports it down from the stop signal on, and when an `accept` failed.
+#[derive(Debug, Clone)]
+pub struct Hl7v2Listener {
+    /// Whether the listener accepts.
+    listening: crate::hl7v2::Listening,
+}
+
+impl Hl7v2Listener {
+    /// Returns a probe over `listening`.
+    #[must_use]
+    pub const fn new(listening: crate::hl7v2::Listening) -> Self {
+        Self { listening }
+    }
+}
+
+impl HealthIndicator for Hl7v2Listener {
+    fn name(&self) -> &'static str {
+        "hl7v2-listener"
+    }
+
+    fn check(&self) -> Check<'_> {
+        Box::pin(async move {
+            if self.listening.is_up() {
+                IndicatorState::up()
+            } else {
+                IndicatorState::down("the MLLP listener is not accepting connections")
+            }
+        })
+    }
+}
+
 /// Returns `error` and every cause behind it as one line.
 ///
 /// The readiness body states why an upstream is down, so the whole chain is

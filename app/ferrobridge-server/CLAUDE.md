@@ -96,6 +96,17 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   the duplication it exists to prevent. The Bundle path's rule for an entry no
   program maps is explicit on the call (`UnmappedEntries`), and the
   transaction route passes `Refuse`.
+- **The HL7 v2 face (`src/hl7v2/`) is a face, never a second pipeline.** It
+  owns the MLLP listener, the message's span and the acknowledgment; the
+  mapping is `ferrobridge-hl7v2`'s and the write is `Ingest::ingest_bundle`
+  under the facade's programs, identity map and claims
+  (`Facade::ingest_under` with the face's EHR policy). The only Bundle edits
+  it makes before the hand-off are the configured `meta.profile` claims and
+  the subject reference to the message's one `Patient`, both flagged as our
+  own design. `hl7v2::answer` is the one place an outcome becomes `AA`, `AE`
+  or `AR`: a status no content change clears is `AR`, every other refusal
+  `AE`. A message byte never reaches a log; the spans carry MSH-10 and the
+  message type.
 - **A new interaction is four changes in one edit**: the route, the
   `CapabilityStatement` it is declared in, the wire test, and the Integrate
   page. An interaction the statement does not declare answers `404`, and one it

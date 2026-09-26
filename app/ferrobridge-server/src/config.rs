@@ -49,6 +49,8 @@ pub struct Config {
     pub facade: Facade,
     /// The FHIRconnect operations.
     pub operations: Operations,
+    /// The HL7 v2 face, off until its section turns it on.
+    pub hl7v2: Hl7v2,
 }
 
 /// The mapping set this deployment runs.
@@ -118,6 +120,95 @@ impl Default for Facade {
             composition_territory: String::new(),
         }
     }
+}
+
+/// The HL7 v2 face: an MLLP listener whose messages enter the facade's
+/// ingest service.
+///
+/// The face is off until `enabled` is set, and it needs the facade: the
+/// ingest service, the identity map and the programs it writes through are
+/// the facade's. No specification governs this configuration: our own
+/// design.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Hl7v2 {
+    /// Whether the MLLP listener runs.
+    pub enabled: bool,
+    /// The socket address the MLLP listener binds.
+    pub listen: String,
+    /// The HL7 table 0211 code a message with an empty MSH-18 is read in.
+    pub default_charset: String,
+    /// The directory the v2-to-FHIR `ConceptMap` files are read from: the
+    /// `package` directory of `hl7.fhir.uv.v2mappings`.
+    pub concept_maps: Option<PathBuf>,
+    /// Directories of supplement `ConceptMap` files, loaded over the guide in
+    /// order; a map with the url of a loaded one replaces it.
+    pub supplements: Vec<PathBuf>,
+    /// What an entry no program maps does to the message: `skip_and_count`
+    /// or `refuse`.
+    pub unmapped_entries: String,
+    /// The EHR policy of the face, `existing` or `create_on_first_write`;
+    /// unset, the facade's.
+    pub ehr_policy: Option<String>,
+    /// The profile each resource type claims when the message map wrote none,
+    /// so the facade's program selection reaches the context that claims it.
+    pub profiles: Vec<Hl7v2Profile>,
+    /// How long a connection may sit between frames before it is closed; `0`
+    /// never closes it.
+    pub idle_timeout_ms: u64,
+    /// How long one frame may take from its first byte to its trailer before
+    /// it is answered `AR`; `0` waits for the trailer.
+    pub frame_timeout_ms: u64,
+    /// The largest message one frame may carry, in bytes.
+    pub frame_limit_bytes: usize,
+    /// Whether an `AE` or an `AR` also logs, at debug level, the counted
+    /// outcomes of the run by kind.
+    pub log_outcomes: bool,
+    /// The sending facilities (MSH-4) the face accepts; empty accepts any.
+    pub senders: Vec<Hl7v2Sender>,
+}
+
+impl Default for Hl7v2 {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            listen: String::from("127.0.0.1:2575"),
+            default_charset: String::from("ASCII"),
+            concept_maps: None,
+            supplements: Vec::new(),
+            unmapped_entries: String::from("skip_and_count"),
+            ehr_policy: None,
+            profiles: Vec::new(),
+            idle_timeout_ms: 300_000,
+            frame_timeout_ms: 30_000,
+            frame_limit_bytes: 1024 * 1024,
+            log_outcomes: false,
+            senders: Vec::new(),
+        }
+    }
+}
+
+/// One sending facility the HL7 v2 face accepts: a namespace id alone, or a
+/// universal id with its type.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Hl7v2Sender {
+    /// HD.1 of MSH-4.
+    pub namespace_id: String,
+    /// HD.2 of MSH-4.
+    pub universal_id: String,
+    /// HD.3 of MSH-4, such as `ISO`.
+    pub universal_id_type: String,
+}
+
+/// The profile one resource type of a mapped message claims.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Hl7v2Profile {
+    /// The R4 resource type, such as `Observation`.
+    pub resource_type: String,
+    /// The canonical URL written into `meta.profile`.
+    pub profile: String,
 }
 
 /// The FHIRconnect operations lane.
@@ -549,6 +640,63 @@ pub enum Error {
         #[source]
         source: Box<crate::etl::aql::AqlError>,
     },
+    /// A lane is switched on and a lane it needs is not.
+    #[error("{key} is set, and it needs {needs}")]
+    Needs {
+        /// The key that switches the lane on.
+        key: String,
+        /// The lane it needs, as the key that switches it on.
+        needs: String,
+    },
+    /// A character set code is not one of HL7 table 0211 that is decoded.
+    #[error(
+        "{key} is `{value}`; the character sets are ASCII, UNICODE UTF-8, 8859/1 to 8859/9 and 8859/15"
+    )]
+    Charset {
+        /// The key that holds it.
+        key: String,
+        /// The value it holds.
+        value: String,
+    },
+    /// The unmapped-entry policy names neither of the two values.
+    #[error("{key} is `{value}`; the policies are skip_and_count and refuse")]
+    UnmappedEntries {
+        /// The key that holds it.
+        key: String,
+        /// The value it holds.
+        value: String,
+    },
+    /// A resource type the R4 element table does not name.
+    #[error("{key} is `{value}`, which names no R4 resource type")]
+    ResourceType {
+        /// The key that holds it.
+        key: String,
+        /// The value it holds.
+        value: String,
+    },
+    /// A resource type named twice.
+    #[error("{key} names {value} twice")]
+    Duplicate {
+        /// The list that holds it.
+        key: String,
+        /// The value named twice.
+        value: String,
+    },
+    /// A sending facility named neither by a namespace id alone nor by a
+    /// universal id with its type.
+    #[error(
+        "{key} names a sender by namespace_id alone, or by universal_id with universal_id_type"
+    )]
+    Sender {
+        /// The key that holds it.
+        key: String,
+    },
+    /// A size that would refuse every message.
+    #[error("{key} is 0; a frame carries at least one byte")]
+    FrameLimit {
+        /// The key that holds it.
+        key: String,
+    },
     /// The mapping set the operations lane runs did not load.
     #[error("the mapping set could not be loaded")]
     Mappings {
@@ -680,6 +828,11 @@ impl Config {
             } else {
                 None
             },
+            hl7v2: if self.hl7v2.enabled {
+                Some(resolve_hl7v2(&self.hl7v2, self.facade.enabled)?)
+            } else {
+                None
+            },
             operations: OperationsSettings {
                 enabled: self.operations.enabled,
                 device_reference: self.operations.device_reference.clone(),
@@ -725,16 +878,7 @@ pub struct FacadeSettings {
 
 /// Returns the facade settings `facade` describes.
 fn resolve_facade(facade: &Facade) -> Result<FacadeSettings, Error> {
-    let ehr_policy = match facade.ehr_policy.as_str() {
-        "existing" => crate::facade::ehr::Policy::Existing,
-        "create_on_first_write" => crate::facade::ehr::Policy::CreateOnFirstWrite,
-        _ => {
-            return Err(Error::EhrPolicy {
-                key: String::from("facade.ehr_policy"),
-                value: facade.ehr_policy.clone(),
-            });
-        }
-    };
+    let ehr_policy = ehr_policy_of("facade.ehr_policy", &facade.ehr_policy)?;
     for (key, value) in [
         ("facade.base_url", &facade.base_url),
         ("facade.composition_language", &facade.composition_language),
@@ -759,6 +903,155 @@ fn resolve_facade(facade: &Facade) -> Result<FacadeSettings, Error> {
             territory: facade.composition_territory.clone(),
         },
         identity_store: facade.identity_store.clone(),
+    })
+}
+
+/// The HL7 v2 face, resolved.
+#[derive(Debug, Clone)]
+pub struct Hl7v2Settings {
+    /// The socket address the MLLP listener binds.
+    pub listen: SocketAddr,
+    /// The character set a message with an empty MSH-18 is read in.
+    pub default_charset: ferrobridge_hl7v2::decode::Charset,
+    /// The directory of the guide's `ConceptMap` files.
+    pub concept_maps: PathBuf,
+    /// The supplement directories, in load order.
+    pub supplements: Vec<PathBuf>,
+    /// What an entry no program maps does to the message.
+    pub unmapped: crate::facade::ingest::UnmappedEntries,
+    /// The EHR policy of the face, when it differs from the facade's.
+    pub ehr_policy: Option<crate::facade::ehr::Policy>,
+    /// The profile each resource type claims when the message map wrote
+    /// none, by resource type.
+    pub profiles: BTreeMap<String, String>,
+    /// How long a connection and a frame may wait on the peer.
+    pub timeouts: ferrobridge_hl7v2::mllp::Timeouts,
+    /// The largest message one frame may carry, in bytes.
+    pub frame_limit: usize,
+    /// Whether an `AE` or an `AR` also logs the counted outcomes.
+    pub log_outcomes: bool,
+    /// The sending facilities the face accepts; empty accepts any.
+    pub senders: Vec<crate::hl7v2::Sender>,
+}
+
+/// Returns the sender `sender` names under `key`.
+fn sender_of(key: &str, sender: &Hl7v2Sender) -> Result<crate::hl7v2::Sender, Error> {
+    let named = |text: &str| !text.is_empty();
+    match (
+        named(&sender.namespace_id),
+        named(&sender.universal_id),
+        named(&sender.universal_id_type),
+    ) {
+        (true, false, false) => Ok(crate::hl7v2::Sender::Namespace(sender.namespace_id.clone())),
+        (false, true, true) => Ok(crate::hl7v2::Sender::Universal {
+            id: sender.universal_id.clone(),
+            kind: sender.universal_id_type.clone(),
+        }),
+        _ => Err(Error::Sender {
+            key: key.to_owned(),
+        }),
+    }
+}
+
+/// Returns the EHR policy `value` names under `key`.
+fn ehr_policy_of(key: &str, value: &str) -> Result<crate::facade::ehr::Policy, Error> {
+    match value {
+        "existing" => Ok(crate::facade::ehr::Policy::Existing),
+        "create_on_first_write" => Ok(crate::facade::ehr::Policy::CreateOnFirstWrite),
+        _ => Err(Error::EhrPolicy {
+            key: key.to_owned(),
+            value: value.to_owned(),
+        }),
+    }
+}
+
+/// Returns the timeout `milliseconds` states, `None` for `0`.
+fn timeout_of(milliseconds: u64) -> Option<Duration> {
+    (milliseconds > 0).then(|| Duration::from_millis(milliseconds))
+}
+
+/// Returns the HL7 v2 face `hl7v2` describes, refused when the facade it
+/// writes through is off.
+fn resolve_hl7v2(hl7v2: &Hl7v2, facade: bool) -> Result<Hl7v2Settings, Error> {
+    if !facade {
+        return Err(Error::Needs {
+            key: String::from("hl7v2.enabled"),
+            needs: String::from("facade.enabled"),
+        });
+    }
+    let listen = hl7v2
+        .listen
+        .parse::<SocketAddr>()
+        .map_err(|source| Error::Listen {
+            key: String::from("hl7v2.listen"),
+            source,
+        })?;
+    let default_charset = ferrobridge_hl7v2::decode::Charset::from_code(&hl7v2.default_charset)
+        .ok_or_else(|| Error::Charset {
+            key: String::from("hl7v2.default_charset"),
+            value: hl7v2.default_charset.clone(),
+        })?;
+    let concept_maps = hl7v2.concept_maps.clone().ok_or_else(|| Error::Missing {
+        key: String::from("hl7v2.concept_maps"),
+    })?;
+    let unmapped = match hl7v2.unmapped_entries.as_str() {
+        "skip_and_count" => crate::facade::ingest::UnmappedEntries::SkipAndCount,
+        "refuse" => crate::facade::ingest::UnmappedEntries::Refuse,
+        _ => {
+            return Err(Error::UnmappedEntries {
+                key: String::from("hl7v2.unmapped_entries"),
+                value: hl7v2.unmapped_entries.clone(),
+            });
+        }
+    };
+    let ehr_policy = hl7v2
+        .ehr_policy
+        .as_deref()
+        .map(|value| ehr_policy_of("hl7v2.ehr_policy", value))
+        .transpose()?;
+    let mut profiles = BTreeMap::new();
+    for claimed in &hl7v2.profiles {
+        if !fhir_types::r4::schema::SCHEMAS.is_resource(&claimed.resource_type) {
+            return Err(Error::ResourceType {
+                key: String::from("hl7v2.profiles.resource_type"),
+                value: claimed.resource_type.clone(),
+            });
+        }
+        url_of("hl7v2.profiles.profile", &claimed.profile)?;
+        if profiles
+            .insert(claimed.resource_type.clone(), claimed.profile.clone())
+            .is_some()
+        {
+            return Err(Error::Duplicate {
+                key: String::from("hl7v2.profiles"),
+                value: claimed.resource_type.clone(),
+            });
+        }
+    }
+    if hl7v2.frame_limit_bytes == 0 {
+        return Err(Error::FrameLimit {
+            key: String::from("hl7v2.frame_limit_bytes"),
+        });
+    }
+    Ok(Hl7v2Settings {
+        listen,
+        default_charset,
+        concept_maps,
+        supplements: hl7v2.supplements.clone(),
+        unmapped,
+        ehr_policy,
+        profiles,
+        timeouts: ferrobridge_hl7v2::mllp::Timeouts {
+            idle: timeout_of(hl7v2.idle_timeout_ms),
+            frame: timeout_of(hl7v2.frame_timeout_ms),
+        },
+        frame_limit: hl7v2.frame_limit_bytes,
+        log_outcomes: hl7v2.log_outcomes,
+        senders: hl7v2
+            .senders
+            .iter()
+            .map(|sender| sender_of("hl7v2.senders", sender))
+            .collect::<Result<Vec<_>, Error>>()?,
     })
 }
 
@@ -790,6 +1083,8 @@ pub struct Settings {
     pub mappings: Option<MappingSettings>,
     /// The facade lane, when it is on.
     pub facade: Option<FacadeSettings>,
+    /// The HL7 v2 face, when it is on.
+    pub hl7v2: Option<Hl7v2Settings>,
     /// The FHIRconnect operations lane.
     pub operations: OperationsSettings,
 }

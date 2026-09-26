@@ -356,12 +356,22 @@ async fn a_bundle_whose_every_entry_is_skipped_commits_nothing_and_is_refused()
         .ok_or("a Bundle with nothing to commit is refused")?;
     assert_eq!(StatusCode::UNPROCESSABLE_ENTITY, refused.status());
     assert_eq!(
-        vec![IssueType::Required],
+        vec![IssueType::Required, IssueType::NotSupported],
         refused
             .issues()
             .iter()
             .map(ferrobridge_server::facade::outcome::Issue::code)
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>(),
+        "the refusal names the Bundle and then every skipped entry"
+    );
+    let skipped = refused.issues().get(1).ok_or("the skipped entry's issue")?;
+    assert_eq!(
+        vec![String::from("urn:uuid:0000-practitioner")],
+        skipped.locations()
+    );
+    assert_eq!(
+        Some("no loaded mapping answers for Practitioner"),
+        skipped.diagnostics()
     );
     assert_eq!(0, contributions(&cdr).await);
     Ok(())

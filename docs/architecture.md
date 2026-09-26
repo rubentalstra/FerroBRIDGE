@@ -1162,7 +1162,7 @@ published `openehr-*` crates do.
 | `omop-cdm` | CDM v5.4 row types and column metadata generated from the OHDSI field definitions; the OHDSI PostgreSQL DDL vendored verbatim and embedded; `graph`, the record graph the OMOCL engine emits and the writer commits; behind the default `database` feature, the vocabulary loader and concept resolver, the derived-table runners and the `COPY` writer, so a metadata-only consumer (`omocl`) takes the crate with `default-features = false` and builds no database client | generated plus hand-written | yes |
 | `ferrobridge-term` | the FHIR terminology client over `fhir-types` | hand-written | yes |
 | `ferrobridge-hl7v2` | the HL7 v2 face (#254): `mllp` (the MLLP Release 1 frame codec on `tokio-util` and the listener), `decode` (MSH-18 through `encoding_rs`, a byte outside the declared set refused), `parse` (positional split, escape decoding, the grouping by the `hl7v2-types` structure tree), `ack` (original-mode `AA`, `AE`, `AR`), `inbound` (one message through those steps), `map` (the interpreter of the `hl7.fhir.uv.v2mappings` ConceptMaps, read from a directory at run time, writing through `fhirconnect::tree` and translating every table value through `ferrobridge-term`; conditions and target notation on `logos` and `chumsky`) | hand-written | yes (0.0.0 reservation) |
-| `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade, the FHIRconnect operations, the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `cdr` module over the generated ITS-REST client of `openehr-its` (the commit headers, the kept upstream answer, the ids an `ETag` names, the template fetch, the AQL paging); the `redb` identity store; the change-feed adapter | hand-written | no |
+| `app/ferrobridge-server` | the one binary, `ferrobridge`: `serve` (the FHIR facade, the FHIRconnect operations, the ETL job API), `etl` (a batch run), `cdm init` (apply the DDL), `vocab load`, `mapping check`; thin `main.rs` over a `lib.rs`; the `cdr` module over the generated ITS-REST client of `openehr-its` (the commit headers, the kept upstream answer, the ids an `ETag` names, the template fetch, the AQL paging); the `redb` identity store; the `hl7v2` face beside the FHIR facade (the `[hl7v2]` MLLP listener, each message written through the facade's ingest service, the acknowledgment chosen from the commit outcome); the change-feed adapter | hand-written | no |
 | `tools/fhir-codegen` | the FHIR generator moved from the sibling, with its `emit --check` drift gate and its vendored packages | hand-written | no |
 | `tools/omop-cdm-codegen` | the CDM generator with its `emit --check` drift gate | hand-written | no |
 | `tools/ferrobridge-testkit` | the pin-matrix reader, fixtures, the synthetic vocabulary, the CDR and terminology stubs (`wiremock`), the container harness (`testcontainers`); a path-only dev-dependency | hand-written | no |
@@ -1187,6 +1187,7 @@ flowchart BT
     SV --> OC
     SV -->|"generated ITS-REST client"| OE
     SV --> TC
+    SV -->|"the HL7 v2 face"| HL
     TK["tools/ferrobridge-testkit<br/>(path-only dev-dependency)"] -.-> SV
     CG["tools/fhir-codegen"] -.->|"emits"| FT
     OG["tools/omop-cdm-codegen"] -.->|"emits"| OC
@@ -1286,6 +1287,15 @@ other v2 crates stay out.
   a refusal from what the CDR sent, and it is never an `Option` for a failure.
 - `ferrobridge-term` to `fhirconnect`: typed lookup, translate and
   validate outcomes, with a failed call a typed error.
+- `ferrobridge-hl7v2` to the server's `hl7v2` face: a parsed message with the
+  header its acknowledgment echoes, or the `AR` or `AE` the parse already
+  owes; then an R4 message Bundle with its counted outcomes, or a typed
+  `MapError`. The face hands the Bundle's entries to the facade's ingest
+  service as one transaction, the message named by MSH-10 and type as the
+  `FEEDER_AUDIT` item, and answers `AA`, `AE` or `AR` from the ingest's
+  `Ingested` or `Refused` (no specification governs the hand-off: our own
+  design). The face and the FHIR facade are two faces over one ingest path,
+  one identity map and one set of in-flight claims.
 
 Identifiers cross every seam as distinct types: an `EhrId`, a version
 container `HierObjectId`, an `ObjectVersionId`, a `FhirResourceId`, a

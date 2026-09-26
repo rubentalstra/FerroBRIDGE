@@ -1174,6 +1174,7 @@ dependencies = [
  "async-trait",
  "axum",
  "clap",
+ "ferrobridge-hl7v2",
  "ferrobridge-term",
  "ferrobridge-testkit",
  "fhir-types",

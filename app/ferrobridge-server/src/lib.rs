@@ -19,6 +19,7 @@ pub mod config;
 pub mod etl;
 pub mod facade;
 pub mod health;
+pub mod hl7v2;
 pub mod indicators;
 pub mod mappings;
 pub mod operations;
@@ -318,8 +319,16 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
         if let Some(operations) = state.operations() {
             set_counts(&mut lanes, "operations", operation_counts(operations));
         }
+        let mut face = None;
+        if let Some(lane) = settings.hl7v2.as_ref() {
+            let (started, listening) = start_hl7v2(&settings, lane, &state)
+                .await
+                .context("starting the HL7 v2 face")?;
+            state = state.with_hl7v2(listening);
+            face = Some(started);
+        }
         startup::log(&lanes);
-        let state = Arc::new(state);
+        let state = Arc::new(state.with_lanes(lanes));
         tracing::info!(
             version = state::VERSION,
             indicators = state.health().names().join(","),
@@ -329,16 +338,130 @@ fn serve_command(settings: Settings) -> anyhow::Result<()> {
             .await
             .with_context(|| format!("binding {}", settings.server.listen))?;
         tracing::info!(listen = %settings.server.listen, "listening");
-        serve(
-            listener,
-            router(Arc::clone(&state), &settings.server),
-            &settings.server,
-        )
-        .await
-        .context("serving HTTP")?;
+        let app = router(Arc::clone(&state), &settings.server);
+        match face {
+            None => serve(listener, app, &settings.server)
+                .await
+                .context("serving HTTP")?,
+            Some(face) => serve_with_face(listener, app, &settings.server, face).await?,
+        }
         tracing::info!("ferrobridge stopped");
         Ok(())
     })
+}
+
+/// The HL7 v2 face, bound and ready to serve.
+struct StartedFace {
+    /// The bound MLLP socket.
+    socket: TcpListener,
+    /// The face its frames are answered by.
+    face: Arc<hl7v2::Face>,
+    /// How the listener runs.
+    listener: hl7v2::Listener,
+    /// Whether the listener accepts, for the readiness probe.
+    listening: hl7v2::Listening,
+}
+
+/// Loads the HL7 v2 face's `ConceptMaps` and binds its listener.
+///
+/// A corpus that does not load and a port that cannot be bound both refuse
+/// the start, as a facade mapping that does not compile does.
+async fn start_hl7v2(
+    settings: &Settings,
+    lane: &config::Hl7v2Settings,
+    state: &AppState,
+) -> anyhow::Result<(StartedFace, hl7v2::Listening)> {
+    use anyhow::Context;
+
+    let facade = state
+        .facade()
+        .cloned()
+        .context("the HL7 v2 face writes through the facade, and the facade is off")?;
+    let corpus = hl7v2::load_corpus(lane).with_context(|| {
+        format!(
+            "loading the v2-to-FHIR ConceptMaps from {}",
+            lane.concept_maps.display()
+        )
+    })?;
+    let maps = corpus.maps().count();
+    let terminology = settings
+        .terminology
+        .as_ref()
+        .map(|config| ferrobridge_term::client::Client::new(config.clone()))
+        .transpose()
+        .context("building the terminology client the HL7 v2 face translates through")?;
+    let socket = TcpListener::bind(lane.listen)
+        .await
+        .with_context(|| format!("binding {}", lane.listen))?;
+    tracing::info!(
+        lane = "hl7v2",
+        listen = %lane.listen,
+        concept_maps = maps,
+        profiles = lane.profiles.len(),
+        "the HL7 v2 face listens for MLLP"
+    );
+    let listening = hl7v2::Listening::default();
+    let face = StartedFace {
+        socket,
+        face: Arc::new(hl7v2::Face::new(facade, corpus, terminology, lane)),
+        listener: hl7v2::Listener::of(lane, settings.server.shutdown_timeout),
+        listening: listening.clone(),
+    };
+    Ok((face, listening))
+}
+
+/// Serves HTTP and the HL7 v2 face until the process is asked to stop, each
+/// draining within the same bound.
+///
+/// The one signal stops both, and a listener that fails stops the other, so
+/// the process never keeps half its surface.
+async fn serve_with_face(
+    listener: TcpListener,
+    app: Router,
+    server: &ServerSettings,
+    face: StartedFace,
+) -> anyhow::Result<()> {
+    use anyhow::Context;
+
+    let (stop, _) = tokio::sync::watch::channel(false);
+    let stop = Arc::new(stop);
+    let signal = {
+        let stop = Arc::clone(&stop);
+        tokio::spawn(async move {
+            shutdown_signal().await;
+            stop.send_replace(true);
+        })
+    };
+    let http = async {
+        let ended = serve_until(listener, app, server.shutdown_timeout, stopped(&stop)).await;
+        stop.send_replace(true);
+        ended
+    };
+    let mllp = async {
+        let ended = hl7v2::serve_until(
+            face.socket,
+            face.face,
+            face.listener,
+            face.listening,
+            stopped(&stop),
+        )
+        .await;
+        stop.send_replace(true);
+        ended
+    };
+    let (http, mllp) = tokio::join!(http, mllp);
+    signal.abort();
+    http.context("serving HTTP")?;
+    mllp.context("serving MLLP")?;
+    Ok(())
+}
+
+/// Completes once `stop` reads `true`.
+fn stopped(stop: &tokio::sync::watch::Sender<bool>) -> impl Future<Output = ()> + Send + 'static {
+    let mut receiver = stop.subscribe();
+    async move {
+        let _settled = receiver.wait_for(|stopped| *stopped).await.is_ok();
+    }
 }
 
 /// Records `counts` on the lane called `name`.
@@ -477,7 +600,12 @@ pub fn router(state: Arc<AppState>, server: &ServerSettings) -> Router {
         } else {
             facade::capability::Operations::Absent
         };
-        routes = routes.merge(facade::routes(Arc::clone(mounted), operations));
+        let hl7v2 = if state.hl7v2().is_some() {
+            facade::capability::Hl7v2::Configured
+        } else {
+            facade::capability::Hl7v2::Absent
+        };
+        routes = routes.merge(facade::routes(Arc::clone(mounted), operations, hl7v2));
     }
     with_middleware(routes, state, server)
 }
@@ -523,9 +651,9 @@ async fn liveness() -> StatusCode {
     StatusCode::OK
 }
 
-/// `GET /health/info`: the build facts and the pins, as JSON.
-async fn info() -> Response {
-    axum::Json(build_info::Info::current()).into_response()
+/// `GET /health/info`: the build facts, the pins and the lanes, as JSON.
+async fn info(State(state): State<Arc<AppState>>) -> Response {
+    axum::Json(state.info()).into_response()
 }
 
 /// `GET /health/readiness`: the state of every registered indicator.

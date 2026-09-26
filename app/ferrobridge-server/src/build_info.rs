@@ -88,6 +88,23 @@ pub struct Info {
     pub build: Build,
     /// The pins the process serves.
     pub pins: Vec<Pin>,
+    /// The lanes this deployment configures, in banner order.
+    pub lanes: Vec<LaneInfo>,
+}
+
+/// One lane, as `GET /health/info` reports it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct LaneInfo {
+    /// The lane's name, as the banner names it.
+    pub name: &'static str,
+    /// Whether the configuration switches it on.
+    pub enabled: bool,
+    /// The socket address a face with a listener of its own binds.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub listen: Option<String>,
+    /// Whether that listener accepts connections now.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub up: Option<bool>,
 }
 
 /// The build facts, as `GET /health/info` reports them.
@@ -117,7 +134,15 @@ impl Info {
                 rustc: RUSTC,
             },
             pins: pins(),
+            lanes: Vec::new(),
         }
+    }
+
+    /// Returns these facts with `lanes` as the lanes reported.
+    #[must_use]
+    pub fn with_lanes(mut self, lanes: Vec<LaneInfo>) -> Self {
+        self.lanes = lanes;
+        self
     }
 }
 

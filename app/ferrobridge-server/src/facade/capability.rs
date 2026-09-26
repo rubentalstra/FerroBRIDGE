@@ -75,6 +75,33 @@ pub enum Operations {
     Absent,
 }
 
+/// Whether the HL7 v2 face writes into the CDR beside the facade.
+///
+/// The statement's implementation description names the face only when it is
+/// configured, so a client learns that resources can reach the CDR by another
+/// inbound path under the same identity rules.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Hl7v2 {
+    /// `[hl7v2]` is configured.
+    Configured,
+    /// No HL7 v2 face runs.
+    Absent,
+}
+
+/// The implementation description of a facade with no HL7 v2 face.
+const DESCRIPTION: &str = "The FerroBRIDGE FHIR facade over an openEHR CDR";
+
+/// The sentence the implementation description gains with an HL7 v2 face.
+const HL7V2_SENTENCE: &str = "An HL7 v2 face over MLLP is another inbound path into the same CDR, under the same identity and replay rules.";
+
+/// Returns the statement the loaded `programs` support, with no HL7 v2 face.
+///
+/// [`statement_with`] states the face.
+#[must_use]
+pub fn statement(programs: &Programs, base: &str, operations: Operations) -> CapabilityStatement {
+    statement_with(programs, base, operations, Hl7v2::Absent)
+}
+
 /// Returns the statement the loaded `programs` support.
 ///
 /// `base` is the absolute URL the facade is reachable at, which the statement
@@ -84,9 +111,21 @@ pub enum Operations {
 /// (<https://hl7.org/fhir/R4/capabilitystatement.html>,
 /// `CapabilityStatement.rest.operation`). Their direct forms are never named:
 /// the chapter calls them "a deliberate deviation from the FHIR Operations
-/// framework" and keeps them out of its implementation guide.
+/// framework" and keeps them out of its implementation guide. With
+/// [`Hl7v2::Configured`], `implementation.description` gains one sentence
+/// naming the HL7 v2 face (no specification governs its wording: our own
+/// design).
 #[must_use]
-pub fn statement(programs: &Programs, base: &str, operations: Operations) -> CapabilityStatement {
+pub fn statement_with(
+    programs: &Programs,
+    base: &str,
+    operations: Operations,
+    hl7v2: Hl7v2,
+) -> CapabilityStatement {
+    let description = match hl7v2 {
+        Hl7v2::Absent => String::from(DESCRIPTION),
+        Hl7v2::Configured => format!("{DESCRIPTION}. {HL7V2_SENTENCE}"),
+    };
     CapabilityStatement {
         status: "active".into(),
         // NOTE: `date` is "the date when the capability statement was
@@ -106,7 +145,7 @@ pub fn statement(programs: &Programs, base: &str, operations: Operations) -> Cap
         }),
         implementation: Some(
             fhir_types::r4::capability_statement::CapabilityStatementImplementation {
-                description: "The FerroBRIDGE FHIR facade over an openEHR CDR".into(),
+                description: description.into(),
                 url: Some(base.into()),
                 ..fhir_types::r4::capability_statement::CapabilityStatementImplementation::default()
             },
@@ -177,8 +216,36 @@ fn resource(name: &str) -> CapabilityStatementRestResource {
 
 #[cfg(test)]
 mod tests {
-    use super::{FHIR_VERSION, Operations, TOFHIR_DEFINITION, TOOPENEHR_DEFINITION, statement};
+    use super::{
+        FHIR_VERSION, Hl7v2, Operations, TOFHIR_DEFINITION, TOOPENEHR_DEFINITION, statement,
+        statement_with,
+    };
     use crate::facade::programs::Programs;
+
+    /// Returns the implementation description of the statement `hl7v2` shapes.
+    fn description(hl7v2: Hl7v2) -> Option<String> {
+        statement_with(
+            &Programs::default(),
+            "http://localhost:8080/fhir",
+            Operations::Absent,
+            hl7v2,
+        )
+        .implementation
+        .and_then(|implementation| implementation.description.value)
+    }
+
+    #[test]
+    fn the_hl7v2_face_is_named_only_when_it_is_configured() {
+        let with = description(Hl7v2::Configured).expect("a description");
+        assert!(with.contains("HL7 v2 face"), "{with}");
+        assert!(with.contains("same identity"), "{with}");
+        let without = description(Hl7v2::Absent).expect("a description");
+        assert!(!without.contains("HL7 v2"), "{without}");
+        assert!(
+            with.starts_with(&without),
+            "the sentence follows the description"
+        );
+    }
 
     #[test]
     fn an_empty_registry_names_no_resource_type() {

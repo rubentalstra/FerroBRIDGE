@@ -82,8 +82,16 @@ pub fn render(version: &str, pins: &[Pin], lanes: &[Lane], colour: bool) -> Stri
         } else {
             paint(OFF_COLOUR, "off")
         };
-        let hosts = lane.hosts().join(", ");
-        let line = format!("  {:<NAME_WIDTH$}{state}  {hosts}", lane.name);
+        let listens = lane
+            .listen
+            .as_ref()
+            .map(|listen| format!("listens on {listen}"));
+        let targets: Vec<&str> = listens.as_deref().into_iter().chain(lane.hosts()).collect();
+        let line = format!(
+            "  {:<NAME_WIDTH$}{state}  {}",
+            lane.name,
+            targets.join(", ")
+        );
         rows.push(line.trim_end().to_owned());
     }
     let mut out = rows.join("\n");
@@ -193,5 +201,21 @@ mod tests {
             "{banner}"
         );
         assert!(banner.contains("terminology       off\n"), "{banner}");
+    }
+
+    #[test]
+    fn a_face_with_a_listener_names_its_address_before_its_hosts() {
+        let lanes = [Lane {
+            name: "hl7v2",
+            enabled: true,
+            listen: Some(String::from("0.0.0.0:2575")),
+            cdr_host: Some(String::from("cdr.invalid:8443")),
+            ..Lane::default()
+        }];
+        let banner = render("1.2.3", &pins(), &lanes, false);
+        assert!(
+            banner.contains("hl7v2             on   listens on 0.0.0.0:2575, cdr.invalid:8443\n"),
+            "{banner}"
+        );
     }
 }
