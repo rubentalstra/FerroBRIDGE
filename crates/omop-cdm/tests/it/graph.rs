@@ -6,9 +6,10 @@
 //! required column, and a graph holds only its own composition's rows.
 
 use omop_cdm::graph::{
-    ArchetypeRootPath, Discriminator, GraphError, Link, LinkEnd, MappingName, OccurrencePath,
-    RecordGraph, RecordKey, Reference, Refusal, Row, RowBuilder, Source, Value, Visit, VisitKey,
-    VisitSource,
+    RecordGraph, key::ArchetypeRootPath, key::Discriminator, key::MappingName, key::OccurrencePath,
+    key::RecordKey, key::Source, key::Visit, key::VisitKey, key::VisitSource, link::Link,
+    link::LinkEnd, report::Refusal, row::GraphError, row::Reference, row::Row, row::RowBuilder,
+    row::Value,
 };
 use omop_cdm::value::CdmDate;
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;

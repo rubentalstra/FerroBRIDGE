@@ -39,7 +39,7 @@ use fhirconnect::resolve::select::select_by_profile;
 use fhirconnect::resolve::select::select_by_profile_pinned;
 use fhirconnect::resolve::select::select_by_template;
 use openehr_mapping_core::diagnostic::Diagnostic;
-use openehr_mapping_core::header::MappingName;
+use openehr_mapping_core::header::metadata::MappingName;
 use openehr_mapping_core::index::WebTemplateIndex;
 use openehr_mapping_core::loader::load_str;
 use openehr_mapping_core::template::Generation;

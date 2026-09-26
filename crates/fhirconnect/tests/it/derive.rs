@@ -31,7 +31,7 @@ use fhirconnect::resolve::program::Derived;
 use fhirconnect::resolve::program::Mapping;
 use fhirconnect::resolve::program::Program;
 use openehr_mapping_core::composition::CanonicalComposition;
-use openehr_mapping_core::header::MappingName;
+use openehr_mapping_core::header::metadata::MappingName;
 use openehr_mapping_core::index::WebTemplateIndex;
 
 use crate::resolve::codes;

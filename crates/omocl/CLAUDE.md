@@ -82,7 +82,7 @@ design; the graph seam is `omop_cdm::graph`, owned by `omop-cdm`.
 each with its first diagnostic and its defect, the eight `metadata.name`
 mismatches as data, and the per-type key union as a committed snapshot. A file
 that starts or stops failing is re-adjudicated against the grammar, never
-absorbed. `tests/it/resolve.rs` and `tests/it/engine.rs` run over the
+absorbed. `tests/it/resolve.rs` and `tests/it/engine/` run over the
 synthetic laboratory template (`ferrobridge_testkit::fixtures::LABORATORY_REPORT_OPT`)
 and its FLAT composition (`LABORATORY_REPORT_FLAT`), with a map-backed
 `ConceptSource` in `tests/it/lab.rs`; each engine rule has its own case and

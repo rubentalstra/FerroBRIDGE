@@ -20,11 +20,12 @@ use ferrobridge_testkit::fixtures::{MINIMAL_EVALUATION_COMPOSITION, MINIMAL_EVAL
 use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::graph::{
-    ArchetypeRootPath, Discriminator, Link, LinkEnd, MappingName, OccurrencePath, RecordGraph,
-    RecordKey, Reference, Refusal, Row, Value, VisitKey, VisitSource,
+    RecordGraph, key::ArchetypeRootPath, key::Discriminator, key::MappingName, key::OccurrencePath,
+    key::RecordKey, key::VisitKey, key::VisitSource, link::Link, link::LinkEnd, report::Refusal,
+    row::Reference, row::Row, row::Value,
 };
 use omop_cdm::value::CdmDate;
-use omop_cdm::writer::{CdmWriter, PersonPolicy, RunId, VisitConcepts};
+use omop_cdm::writer::{CdmWriter, input::PersonPolicy, input::RunId, input::VisitConcepts};
 use serde_json::json;
 use std::error::Error;
 use wiremock::matchers::{body_string_contains, method, path};
@@ -96,7 +97,7 @@ impl Laboratory {
         composition: &SourceComposition<'_>,
         key: RecordKey,
         date: Option<&str>,
-    ) -> Result<Row, omop_cdm::graph::GraphError> {
+    ) -> Result<Row, omop_cdm::graph::row::GraphError> {
         let mut builder = Row::builder("measurement", key)?
             .reference(
                 "person_id",
@@ -146,7 +147,7 @@ impl Laboratory {
             .get(index)
             .copied()
             .unwrap_or(Behaviour::Map);
-        let refused = |error: omop_cdm::graph::GraphError| Refusal::of_row(&error);
+        let refused = |error: omop_cdm::graph::row::GraphError| Refusal::of_row(&error);
         let mut graph = RecordGraph::new(composition.source.clone());
         let result = Self::key(composition, "/");
         graph
@@ -612,7 +613,7 @@ impl Mapper for Tied {
 impl Tied {
     /// Builds the graph of `composition`.
     fn graph(composition: &SourceComposition<'_>) -> Result<RecordGraph, Refusal> {
-        let refused = |error: omop_cdm::graph::GraphError| Refusal::of_row(&error);
+        let refused = |error: omop_cdm::graph::row::GraphError| Refusal::of_row(&error);
         let mut builder = Row::builder("measurement", Laboratory::key(composition, "/"))
             .map_err(refused)?
             .reference(

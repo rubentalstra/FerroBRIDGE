@@ -20,14 +20,14 @@
 use std::collections::BTreeMap;
 
 use omop_cdm::generated::concept::Concept;
-use omop_cdm::graph::ArchetypeRootPath;
-use omop_cdm::graph::Discriminator;
-use omop_cdm::graph::MappingName;
-use omop_cdm::graph::OccurrencePath;
-use omop_cdm::graph::RecordKey;
-use omop_cdm::graph::Row;
-use omop_cdm::graph::Source;
-use omop_cdm::graph::VisitKey;
+use omop_cdm::graph::key::ArchetypeRootPath;
+use omop_cdm::graph::key::Discriminator;
+use omop_cdm::graph::key::MappingName;
+use omop_cdm::graph::key::OccurrencePath;
+use omop_cdm::graph::key::RecordKey;
+use omop_cdm::graph::key::Source;
+use omop_cdm::graph::key::VisitKey;
+use omop_cdm::graph::row::Row;
 use omop_cdm::value::CdmDate;
 use omop_cdm::vocabulary::ConceptCode;
 use omop_cdm::vocabulary::Resolution;
@@ -230,7 +230,7 @@ fn key_of_draft(draft: &Draft<'_>, source: &Source, branch: u16) -> Result<Recor
             draft.record.entry
         ))
     })?;
-    let empty = |error: omop_cdm::graph::EmptyIdentifier| invalid(error.to_string());
+    let empty = |error: omop_cdm::graph::key::EmptyIdentifier| invalid(error.to_string());
     Ok(RecordKey::new(
         source,
         ArchetypeRootPath::new(draft.root_path.clone()).map_err(empty)?,
@@ -280,9 +280,9 @@ impl Finisher<'_> {
             };
             let row = row::build(target.table(), key, &cells, &filled).map_err(|error| {
                 let (kind, column) = match error {
-                    RowError::Graph(omop_cdm::graph::GraphError::Missing { column, .. }) => {
-                        (RefusalKind::RequiredColumn, Some(column))
-                    }
+                    RowError::Graph(omop_cdm::graph::row::GraphError::Missing {
+                        column, ..
+                    }) => (RefusalKind::RequiredColumn, Some(column)),
                     RowError::Invalid { column, .. } => (RefusalKind::InvalidValue, Some(column)),
                     RowError::Graph(_) => (RefusalKind::InvalidValue, None),
                 };

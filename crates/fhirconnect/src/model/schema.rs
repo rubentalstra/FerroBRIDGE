@@ -20,7 +20,7 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 
 use openehr_mapping_core::diagnostic::Diagnostic;
-use openehr_mapping_core::header::MappingType;
+use openehr_mapping_core::header::metadata::MappingType;
 use openehr_mapping_core::loader::MappingDocument;
 use openehr_mapping_core::schema::locate;
 use openehr_mapping_core::schema::to_json;

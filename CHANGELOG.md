@@ -444,6 +444,11 @@ crates on crates.io.
 
 ### Changed
 
+- `openehr-mapping-core`, `omocl` and `omop-cdm` split their six files over
+  750 lines into module folders (#356), with no change in behaviour; the
+  public types keep their names and a caller imports each from its new child
+  module (`header::metadata::MappingName`, `graph::row::Row`,
+  `writer::error::WriteError`).
 - The nine `openehr-*` crates step from 0.0.71 to 0.0.72, whose generated
   ITS-REST client carries what the bridge's CDR client added around it
   (#293, FerroEHR #3487). The composition commit headers travel through the

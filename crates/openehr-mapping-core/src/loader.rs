@@ -212,8 +212,8 @@ mod tests {
     use super::parse_str;
     use crate::diagnostic::Diagnostic;
     use crate::diagnostic::DiagnosticCode;
-    use crate::header::MappingLanguage;
-    use crate::header::MappingType;
+    use crate::header::grammar::MappingLanguage;
+    use crate::header::metadata::MappingType;
     use crate::position::Position;
 
     const MINIMAL: &str = "grammar: OMOCL/v1.0.0\n\

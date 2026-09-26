@@ -14,12 +14,12 @@
 
 use std::collections::BTreeMap;
 
-use omop_cdm::graph::GraphError;
-use omop_cdm::graph::RecordKey;
-use omop_cdm::graph::Reference;
-use omop_cdm::graph::Row;
-use omop_cdm::graph::Value;
-use omop_cdm::graph::VisitKey;
+use omop_cdm::graph::key::RecordKey;
+use omop_cdm::graph::key::VisitKey;
+use omop_cdm::graph::row::GraphError;
+use omop_cdm::graph::row::Reference;
+use omop_cdm::graph::row::Row;
+use omop_cdm::graph::row::Value;
 use omop_cdm::meta::ColumnMeta;
 use omop_cdm::value::CdmDate;
 use omop_cdm::value::CdmDatetime;
@@ -120,7 +120,7 @@ pub(crate) fn build(
     cells: &Cells,
     filled: &Filled<'_>,
 ) -> Result<Row, RowError> {
-    let meta = omop_cdm::graph::cdm_table(table)?;
+    let meta = omop_cdm::graph::row::cdm_table(table)?;
     let mut builder = Row::builder(table, key)?;
     for (&name, cell) in &cells.map {
         let column = meta.column(name).ok_or_else(|| GraphError::UnknownColumn {

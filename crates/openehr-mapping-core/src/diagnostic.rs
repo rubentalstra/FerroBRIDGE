@@ -12,7 +12,7 @@ use core::fmt;
 use std::path::Path;
 use std::path::PathBuf;
 
-use crate::header::MappingName;
+use crate::header::metadata::MappingName;
 use crate::position::Position;
 
 /// How bad a diagnostic is.
@@ -429,7 +429,7 @@ mod tests {
     use super::LanguageCodeError;
     use super::ModelPath;
     use super::Severity;
-    use crate::header::MappingName;
+    use crate::header::metadata::MappingName;
     use crate::position::Position;
 
     #[test]

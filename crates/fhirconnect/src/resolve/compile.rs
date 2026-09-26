@@ -27,13 +27,13 @@ use fhir_types::schema::ValueKind;
 use openehr_mapping_core::diagnostic::Diagnostic;
 use openehr_mapping_core::diagnostic::ModelPath;
 use openehr_mapping_core::diagnostic::Severity;
-use openehr_mapping_core::header::ArchetypeId;
-use openehr_mapping_core::header::MappingName;
-use openehr_mapping_core::header::MappingType;
+use openehr_mapping_core::header::archetype::ArchetypeId;
+use openehr_mapping_core::header::metadata::MappingName;
+use openehr_mapping_core::header::metadata::MappingType;
 use openehr_mapping_core::index::ResolvedNode;
 use openehr_mapping_core::index::WebTemplateIndex;
-use openehr_mapping_core::index::archetype_release_version;
-use openehr_mapping_core::index::node_id_matches;
+use openehr_mapping_core::index::matching::archetype_release_version;
+use openehr_mapping_core::index::matching::node_id_matches;
 use openehr_mapping_core::path::MappingPath;
 use openehr_mapping_core::position::Located;
 use openehr_mapping_core::position::Position;
@@ -2210,7 +2210,7 @@ fn constrains(segment: &PathSegment) -> bool {
 fn occurrences(
     template: &WebTemplateIndex,
     node: &ResolvedNode,
-) -> Result<Vec<openehr_mapping_core::index::FlatId>, PathError> {
+) -> Result<Vec<openehr_mapping_core::index::paths::FlatId>, PathError> {
     let mut axes = Vec::new();
     let mut prefix = String::new();
     for segment in node.flat_id().as_str().split('/') {
@@ -2218,7 +2218,7 @@ fn occurrences(
             prefix.push('/');
         }
         prefix.push_str(segment);
-        let flat_id = openehr_mapping_core::index::FlatId::new(prefix.clone());
+        let flat_id = openehr_mapping_core::index::paths::FlatId::new(prefix.clone());
         let found = match template.node_by_flat_id(&flat_id) {
             Ok(found) => found,
             // NOTE: a flat id is built one level at a time and the index

@@ -1101,7 +1101,7 @@ pub struct CdmSettings {
     /// The schema the natural-key side table lives in.
     pub bridge_schema: omop_cdm::ddl::SchemaName,
     /// What the writer does for an EHR with no `PERSON`.
-    pub person_policy: omop_cdm::writer::PersonPolicy,
+    pub person_policy: omop_cdm::writer::input::PersonPolicy,
 }
 
 /// The mapping set, resolved.
@@ -1296,8 +1296,8 @@ fn resolve_cdm(cdm: &Cdm) -> Result<CdmSettings, Error> {
         })
     };
     let person_policy = match cdm.person_policy.as_str() {
-        "create_on_first_sight" => omop_cdm::writer::PersonPolicy::CreateOnFirstSight,
-        "existing" => omop_cdm::writer::PersonPolicy::Existing,
+        "create_on_first_sight" => omop_cdm::writer::input::PersonPolicy::CreateOnFirstSight,
+        "existing" => omop_cdm::writer::input::PersonPolicy::Existing,
         _ => {
             return Err(Error::PersonPolicy {
                 key: String::from("cdm.person_policy"),
@@ -1379,7 +1379,7 @@ fn resolve_etl(etl: &Etl) -> Result<crate::etl::EtlSettings, Error> {
                     &visits.aql,
                     crate::etl::aql::CheckedQuery::visits,
                 )?,
-                concepts: omop_cdm::writer::VisitConcepts {
+                concepts: omop_cdm::writer::input::VisitConcepts {
                     visit_concept_id: required(
                         "etl.visits.visit_concept_id",
                         visits.visit_concept_id,

@@ -37,7 +37,7 @@ fn the_cdm_section_defaults_its_schemas_and_policy() -> Result<(), Box<dyn StdEr
     assert_eq!("cdm", cdm.schema.as_str());
     assert_eq!("ferrobridge", cdm.bridge_schema.as_str());
     assert_eq!(
-        omop_cdm::writer::PersonPolicy::CreateOnFirstSight,
+        omop_cdm::writer::input::PersonPolicy::CreateOnFirstSight,
         cdm.person_policy
     );
     Ok(())

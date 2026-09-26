@@ -17,7 +17,9 @@
 //! and leaves the tie to the ETL. No specification governs the rule, its
 //! reading of time or its tie-breaker: our own design.
 
-use omop_cdm::graph::{Cell, RecordGraph, Refusal, Value, Visit, VisitKey};
+use omop_cdm::graph::{
+    RecordGraph, key::Visit, key::VisitKey, report::Refusal, row::Cell, row::Value,
+};
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::foundation_types::time::iso8601_date_time::Iso8601DateTime;
 use openehr_mapping_core::composition::CanonicalComposition;
@@ -246,8 +248,9 @@ impl Windows {
 mod tests {
     use super::{Tie, Wall, Windows, anchor, resolved_moment};
     use omop_cdm::graph::{
-        ArchetypeRootPath, Discriminator, MappingName, OccurrencePath, RecordGraph, RecordKey,
-        Reference, Row, RowBuilder, Source, Value, Visit, VisitKey, VisitSource,
+        RecordGraph, key::ArchetypeRootPath, key::Discriminator, key::MappingName,
+        key::OccurrencePath, key::RecordKey, key::Source, key::Visit, key::VisitKey,
+        key::VisitSource, row::Reference, row::Row, row::RowBuilder, row::Value,
     };
     use omop_cdm::value::{CdmDate, CdmDatetime};
     use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;

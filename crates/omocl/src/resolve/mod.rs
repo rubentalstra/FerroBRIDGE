@@ -19,9 +19,9 @@ use core::fmt;
 use std::collections::BTreeSet;
 use std::sync::Arc;
 
-use openehr_mapping_core::header::ArchetypeId;
+use openehr_mapping_core::header::archetype::ArchetypeId;
 use openehr_mapping_core::index::WebTemplateIndex;
-use openehr_mapping_core::index::node_id_matches;
+use openehr_mapping_core::index::matching::node_id_matches;
 use openehr_mapping_core::path::MappingPath;
 use openehr_rm::v1_2::paths::PathSegment;
 use openehr_rm::v1_2::paths::RmPath;

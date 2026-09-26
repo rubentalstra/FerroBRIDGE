@@ -14,7 +14,7 @@
 //! runs in one transaction, so a refusal leaves the earlier table in place.
 
 use crate::ddl::{self, SchemaName};
-use crate::writer::{CdmWriter, Step, WriteError};
+use crate::writer::{CdmWriter, error::Step, error::WriteError};
 
 /// The PostgreSQL form of the CDM's "Condition Eras" script
 /// (`sql/PROVENANCE.md`), with the `@cdmDatabaseSchema` placeholder.

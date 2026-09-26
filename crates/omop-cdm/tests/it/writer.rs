@@ -14,11 +14,14 @@ use ferrobridge_testkit::containers::{self, Postgres};
 use omop_cdm::database::{self, CdmPool};
 use omop_cdm::ddl::SchemaName;
 use omop_cdm::graph::{
-    ArchetypeRootPath, Discriminator, Link, LinkEnd, MappingName, OccurrencePath, RecordGraph,
-    RecordKey, Reference, Row, Source, Value, Visit, VisitKey, VisitSource,
+    RecordGraph, key::ArchetypeRootPath, key::Discriminator, key::MappingName, key::OccurrencePath,
+    key::RecordKey, key::Source, key::Visit, key::VisitKey, key::VisitSource, link::Link,
+    link::LinkEnd, row::Reference, row::Row, row::Value,
 };
 use omop_cdm::value::CdmDate;
-use omop_cdm::writer::{CdmWriter, PersonPolicy, RunId, VisitConcepts, WriteError};
+use omop_cdm::writer::{
+    CdmWriter, error::WriteError, input::PersonPolicy, input::RunId, input::VisitConcepts,
+};
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
