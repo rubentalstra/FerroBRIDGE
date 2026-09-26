@@ -45,6 +45,14 @@ pub(crate) fn corpus() -> Corpus {
     Corpus::load(&package()).expect("the vendored package loads")
 }
 
+/// The corpus with the crate's shipped supplements over it, as the face
+/// runs it.
+pub(crate) fn shipped() -> Corpus {
+    corpus()
+        .with_shipped_supplements()
+        .expect("the shipped supplements load")
+}
+
 /// The face the wire tests put behind the listener: it receives each message
 /// and answers `AA` for one that parses with no refusal.
 #[derive(Debug, Default)]

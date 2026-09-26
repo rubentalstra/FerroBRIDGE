@@ -1,0 +1,398 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "segment-pid-to-appointment",
+  "url": "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-pid-to-appointment",
+  "name": "FerroBRIDGEPidToAppointmentWithThePatientByIdentifier",
+  "title": "FerroBRIDGE supplement: PID to Appointment with the patient by identifier",
+  "status": "active",
+  "experimental": true,
+  "publisher": "Vernum Projecten B.V. (FerroBRIDGE)",
+  "description": "Overrides ConceptMap/segment-pid-to-appointment of hl7.fhir.uv.v2mappings 1.0.0. The guide maps PID-2, PID-3 and PID-4 into extension[n].valueReference(Patient) and participant.actor[n](Patient), which create a Patient per row beside the Patient[1] the SIU_S12 message map builds from the same PID, and ships no CX to Patient data type map to fill them. This supplement writes each into the identifier of that reference, the logical reference FHIR R4 Reference.identifier defines, through the guide's CX to Identifier map, so the message keeps one Patient. Every other row is the guide's. Recorded on FerroBRIDGE #332 (#336).",
+  "group": [
+    {
+      "element": [
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-2",
+          "display": "Patient ID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "uri"
+                    },
+                    {
+                      "url": "assignment",
+                      "valueString": "\"http://hl7.org/fhir/5.0/StructureDefinition/extension-Appointment.subject\""
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "extension[1].url",
+              "display": "extension[1].url",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-2",
+          "display": "Patient ID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "extension[1].valueReference.identifier",
+              "display": "extension[1].valueReference.identifier",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-2",
+          "display": "Patient ID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "participant[1].actor.identifier",
+              "display": "participant[1].actor.identifier",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-3",
+          "display": "Patient Identifier List",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "uri"
+                    },
+                    {
+                      "url": "assignment",
+                      "valueString": "\"http://hl7.org/fhir/5.0/StructureDefinition/extension-Appointment.subject\""
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "extension[2].url",
+              "display": "extension[2].url",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-3",
+          "display": "Patient Identifier List",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "extension[2].valueReference.identifier",
+              "display": "extension[2].valueReference.identifier",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-3",
+          "display": "Patient Identifier List",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "participant[2].actor.identifier",
+              "display": "participant[2].actor.identifier",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-4",
+          "display": "Alternate Patient ID - PID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "uri"
+                    },
+                    {
+                      "url": "assignment",
+                      "valueString": "\"http://hl7.org/fhir/5.0/StructureDefinition/extension-Appointment.subject\""
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "extension[3].url",
+              "display": "extension[3].url",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-4",
+          "display": "Alternate Patient ID - PID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "extension[3].valueReference.identifier",
+              "display": "extension[3].valueReference.identifier",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CX"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "PID-4",
+          "display": "Alternate Patient ID - PID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "participant[3].actor.identifier",
+              "display": "participant[3].actor.identifier",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -14,10 +14,13 @@
 //! are read once here, so a form the interpreter cannot run is known before
 //! a message arrives and is counted when a row reaches it.
 //!
-//! A supplement is a second directory of `ConceptMaps` in the same shape, loaded
-//! after the package: a supplement map with the canonical url of a package map
-//! replaces it whole, and any other is added. No specification governs this:
-//! our own design.
+//! A supplement is a `ConceptMap` in the same shape, loaded after the package:
+//! a supplement map with the id or the canonical url of a loaded map replaces
+//! it whole, and any other is added. The crate ships its own
+//! ([`Corpus::with_shipped_supplements`], the files of [`supplement`]), and a
+//! directory of an operator's own loads after them ([`Corpus::supplement`]).
+//! No specification governs this: our own design, under the guide's leave to
+//! add a mapping locally (`mapping_guidelines.md` §General Format/Approach).
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -28,6 +31,7 @@ use fhir_types::r4::extension::{Extension, ExtensionValue};
 
 use crate::map::condition::{self, AssignmentError, ConditionError, Expr, Part};
 use crate::map::notation::{self, NotationError, Target};
+use crate::map::supplement;
 
 /// The canonical url of the `TypeInfo` extension.
 pub const TYPE_INFO: &str = "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo";
@@ -143,6 +147,18 @@ pub struct TableGroup {
     pub target: String,
 }
 
+/// Where a loaded `ConceptMap` came from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Origin {
+    /// The directory [`Corpus::load`] read: the guide's package.
+    Guide,
+    /// A supplement loaded over it.
+    Supplement {
+        /// Whether it replaced a map loaded before it, by id or by url.
+        overrides: bool,
+    },
+}
+
 /// One `ConceptMap`, read into rows.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Map {
@@ -156,6 +172,8 @@ pub struct Map {
     pub rows: Vec<Row>,
     /// The groups of a table map.
     pub groups: Vec<TableGroup>,
+    /// Where the map came from.
+    pub origin: Origin,
 }
 
 impl Map {
@@ -305,18 +323,35 @@ impl Corpus {
     /// a file is no R4 `ConceptMap` with an id and a url.
     pub fn load(directory: &Path) -> Result<Self, CorpusError> {
         let mut corpus = Self::default();
-        corpus.add_directory(directory)?;
+        corpus.add_directory(directory, false)?;
         Ok(corpus)
     }
 
     /// Loads the `ConceptMaps` of a supplement directory over this corpus: a map
-    /// with the url of a loaded one replaces it, any other is added.
+    /// with the id or the url of a loaded one replaces it, any other is added.
     ///
     /// # Errors
     ///
     /// Returns [`CorpusError`] as [`Corpus::load`] does.
     pub fn supplement(mut self, directory: &Path) -> Result<Self, CorpusError> {
-        self.add_directory(directory)?;
+        self.add_directory(directory, true)?;
+        Ok(self)
+    }
+
+    /// Loads the supplements this crate ships ([`supplement::SHIPPED`]) over
+    /// this corpus, in file name order, as [`Corpus::supplement`] loads a
+    /// directory.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CorpusError`] when a shipped file is no R4 `ConceptMap` with
+    /// an id and a url, which the crate's tests rule out.
+    pub fn with_shipped_supplements(mut self) -> Result<Self, CorpusError> {
+        for (name, text) in supplement::SHIPPED {
+            let path = Path::new(supplement::DIRECTORY).join(name);
+            let map = decode_map(&path, text.as_bytes())?;
+            self.insert(map, true);
+        }
         Ok(self)
     }
 
@@ -389,8 +424,9 @@ impl Corpus {
             .collect()
     }
 
-    /// Reads one directory's `ConceptMaps` into the corpus.
-    fn add_directory(&mut self, directory: &Path) -> Result<(), CorpusError> {
+    /// Reads one directory's `ConceptMaps` into the corpus, as supplements
+    /// when `supplement` holds.
+    fn add_directory(&mut self, directory: &Path, supplement: bool) -> Result<(), CorpusError> {
         let read = |source| CorpusError::Read {
             path: directory.to_path_buf(),
             source,
@@ -410,28 +446,41 @@ impl Corpus {
         });
         paths.sort();
         for path in paths {
-            let map = read_map(&path)?;
-            let replaced = self
-                .maps
-                .iter()
-                .find(|(_, loaded)| loaded.url == map.url)
-                .map(|(id, _)| id.clone());
-            if let Some(id) = replaced {
-                self.maps.remove(&id);
-            }
-            self.maps.insert(map.id.clone(), map);
+            let bytes = std::fs::read(&path).map_err(|source| CorpusError::Read {
+                path: path.clone(),
+                source,
+            })?;
+            let map = decode_map(&path, &bytes)?;
+            self.insert(map, supplement);
         }
         Ok(())
     }
+
+    /// Adds `map`, replacing every loaded map with its id or its url, and
+    /// marks it a supplement when `supplement` holds.
+    fn insert(&mut self, mut map: Map, supplement: bool) {
+        let replaced: Vec<String> = self
+            .maps
+            .iter()
+            .filter(|(id, loaded)| **id == map.id || loaded.url == map.url)
+            .map(|(id, _)| id.clone())
+            .collect();
+        if supplement {
+            map.origin = Origin::Supplement {
+                overrides: !replaced.is_empty(),
+            };
+        }
+        for id in replaced {
+            self.maps.remove(&id);
+        }
+        self.maps.insert(map.id.clone(), map);
+    }
 }
 
-/// Reads one `ConceptMap` file.
-fn read_map(path: &Path) -> Result<Map, CorpusError> {
-    let bytes = std::fs::read(path).map_err(|source| CorpusError::Read {
-        path: path.to_path_buf(),
-        source,
-    })?;
-    let value: Value = serde_json::from_slice(&bytes).map_err(|source| CorpusError::Json {
+/// Decodes the bytes of one `ConceptMap` file, read from `path`, as a guide
+/// map.
+fn decode_map(path: &Path, bytes: &[u8]) -> Result<Map, CorpusError> {
+    let value: Value = serde_json::from_slice(bytes).map_err(|source| CorpusError::Json {
         path: path.to_path_buf(),
         source,
     })?;
@@ -488,6 +537,7 @@ fn read_map(path: &Path) -> Result<Map, CorpusError> {
         kind,
         rows,
         groups,
+        origin: Origin::Guide,
     })
 }
 

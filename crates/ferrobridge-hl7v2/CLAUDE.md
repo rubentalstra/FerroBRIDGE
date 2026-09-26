@@ -21,8 +21,27 @@ fields, a data type map maps the components, a table map goes through
 written through `fhirconnect::tree::write::write` over
 `fhir_types::r4::schema::SCHEMAS`. Never add a second FHIR writer, a table
 evaluator, or a per-message code path. A gap in the corpus is a counted
-outcome here and a ConceptMap in a supplement directory (#256), in the guide's
-own shape.
+outcome here and a ConceptMap in a supplement, in the guide's own shape.
+
+## Supplements are ConceptMaps, shipped under `supplements/`
+
+`supplements/` holds FerroBRIDGE's own ConceptMaps (#256), one file per map
+named `ConceptMap-<id>.json`, compiled in through `map::supplement::SHIPPED`
+(the crate's `include` packages the directory; a test fails when the list and
+the directory differ). `Corpus::with_shipped_supplements` loads them over the
+guide, and an operator's `[hl7v2] supplements` directories load after them
+(`Corpus::supplement`). A supplement with the id or url of a loaded map
+replaces it, and `Map::origin` records which it is; the run counts each
+supplement map it uses once per message as `supplemented`. Every file names
+FerroBRIDGE in `title`; its `description` opens with `Overrides
+ConceptMap/<id> of hl7.fhir.uv.v2mappings 1.0.0.` (keeping the guide's id and
+url) or `Adds` (a url under `map::supplement::CANONICAL_BASE`), says what it
+changes and why, and names the tracker issue (`FerroBRIDGE #N`); the test in
+`map::supplement` holds every file to that. A supplement changes rows, never
+the interpreter: a gap a ConceptMap cannot express is an interpreter issue.
+The tests of `map::run` and `tests/it/map.rs` run the guide alone and pin
+its behaviour; `tests/it/supplement.rs` runs each supplement on the row it
+changes against the guide alone, and the corpus test runs the shipped set.
 
 ## Selection by name is a recorded design, flagged in the code
 
@@ -159,4 +178,7 @@ against the generated structures, the ACK codes on the wire against a plain
 `TcpStream` sender, and the interpreter over the vendored package with the
 table maps answered by a `wiremock` terminology stub that answers from the
 guide's own table maps. The bundles and outcome lists are reviewed `insta`
-snapshots. Every fixture is synthetic (`tests/it/fixtures.rs`).
+snapshots. Every fixture is synthetic (`tests/it/fixtures.rs`); the one
+exception is the guide's own MDM^T02 sample pair under
+`vendor/v2-to-fhir/samples/`, mapped against its Bundle in
+`tests/it/supplement.rs`.

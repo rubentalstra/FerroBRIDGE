@@ -1,0 +1,909 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "segment-sch-to-appointment",
+  "url": "http://hl7.org/fhir/uv/v2mappings/ConceptMap/segment-sch-to-appointment",
+  "name": "FerroBRIDGESchToAppointmentWithBasedonByIdentifier",
+  "title": "FerroBRIDGE supplement: SCH to Appointment with basedOn by identifier",
+  "status": "active",
+  "experimental": true,
+  "publisher": "Vernum Projecten B.V. (FerroBRIDGE)",
+  "description": "Overrides ConceptMap/segment-sch-to-appointment of hl7.fhir.uv.v2mappings 1.0.0. The guide maps SCH-26 and SCH-27 into basedOn(ServiceRequest), which creates a ServiceRequest, and ships no EI to ServiceRequest data type map to fill it. This supplement writes the placer order number (SCH-26) into basedOn[1].identifier and the filler order number (SCH-27) into basedOn[2].identifier, the logical reference FHIR R4 Reference.identifier defines, through the guide's EI to Identifier maps. Every other row is the guide's. Recorded on FerroBRIDGE #332 (#336).",
+  "group": [
+    {
+      "element": [
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "EI"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-1",
+          "display": "Placer Appointment ID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": -1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "identifier[1]",
+              "display": "identifier[1]",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "EI"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-2",
+          "display": "Filler Appointment ID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": -1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "identifier[2]",
+              "display": "identifier[2]",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CWE"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-7",
+          "display": "Appointment Reason",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "CodeableConcept"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": -1
+                    },
+                    {
+                      "url": "mappedVia",
+                      "valueUrl": "ConceptMap/table-hl70276-to-sct"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "reasonCode[1]",
+              "display": "reasonCode[1]",
+              "equivalence": "equivalent",
+              "dependsOn": [
+                {
+                  "property": "Computable-ANTLR",
+                  "value": "IF CWE.3 IS \"HL70276\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CWE"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-7",
+          "display": "Appointment Reason",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "CodeableConcept"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "mappedVia",
+                      "valueUrl": "ConceptMap/table-hl70277-to-v2-0277"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "appointmentType[1]",
+              "display": "appointmentType[1]",
+              "equivalence": "equivalent",
+              "comment": "Note that in V2 this is Table HL70276, but there is a problem with that as it does not reflect SCH-7, rather SCH-8.  We are working on correcting that in HL7 v2.",
+              "dependsOn": [
+                {
+                  "property": "Computable-ANTLR",
+                  "value": "IF CWE.3 IS \"HL70277\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CWE"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-8",
+          "display": "Appointment Type",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "CodeableConcept"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "mappedVia",
+                      "valueUrl": "ConceptMap/table-hl70277-to-v2-0277"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "appointmentType[1]",
+              "display": "appointmentType[1]",
+              "equivalence": "equivalent",
+              "comment": "Note that in V2 this is Table HL70276, but there is a problem with that as it does not reflect SCH-7, rather SCH-8.  We are working on correcting that in HL7 v2.",
+              "dependsOn": [
+                {
+                  "property": "Computable-ANTLR",
+                  "value": "IF CWE.3 IS \"HL70277\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "NM"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-9",
+          "display": "Appointment Duration",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "positiveInt"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "minutesDuration[1]",
+              "display": "minutesDuration[1]",
+              "equivalence": "equivalent",
+              "dependsOn": [
+                {
+                  "property": "Narrative-Condition",
+                  "value": "If SCH-10 indicates units of minutes"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "TQ"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-11",
+          "display": "Appointment Timing Quantity",
+          "target": [
+            {
+              "code": "$this",
+              "display": "$this",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-12",
+          "display": "Placer Contact Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Reference(Practitioner)"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[1].actor(Practitioner)",
+              "display": "participant[1].actor(Practitioner)",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-12",
+          "display": "Placer Contact Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "assignment",
+                      "valueString": "#placer contact#"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[1].type.coding.code",
+              "display": "participant[1].type.coding.code",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-12",
+          "display": "Placer Contact Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "assignment",
+                      "valueString": "\"http://terminology.hl7.org/CodeSystem/participant-type\""
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[1].type.coding.system",
+              "display": "participant[1].type.coding.system",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-16",
+          "display": "Filler Contact Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Reference(Practitioner)"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[2].actor(Practitioner)",
+              "display": "participant[2].actor(Practitioner)",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-16",
+          "display": "Filler Contact Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "assignment",
+                      "valueString": "#filler contact#"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[2].type.coding.code",
+              "display": "participant[2].type.coding.code",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-16",
+          "display": "Filler Contact Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "assignment",
+                      "valueString": "\"http://terminology.hl7.org/CodeSystem/participant-type\""
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[2].type.coding.system",
+              "display": "participant[2].type.coding.system",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-20",
+          "display": "Entered By Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Reference(Practitioner)"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 0
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[3].actor(Practitioner)",
+              "display": "participant[3].actor(Practitioner)",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-20",
+          "display": "Entered By Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "assignment",
+                      "valueString": "enterer"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[3].type[1].coding.code",
+              "display": "participant[3].type[1].coding.code",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "XCN"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-20",
+          "display": "Entered By Person",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "assignment",
+                      "valueString": "http://terminology.hl7.org/CodeSystem/provenance-participant-type"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "participant[3].type[1].coding.system",
+              "display": "participant[3].type[1].coding.system",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "CWE"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-25",
+          "display": "Filler Status Code",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "code"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "mappedVia",
+                      "valueUrl": "ConceptMap/table-hl70278-to-appointmentstatus"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "status",
+              "display": "status",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "EI"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-26",
+          "display": "Placer Order Number",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "basedOn[1].identifier",
+              "display": "basedOn[1].identifier",
+              "equivalence": "equivalent",
+              "comment": "If valued, make sure that Appointment.basedOn is used to link to the ServiceRequest"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "EI"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": -1
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": -1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "SCH-27",
+          "display": "Filler Order Number",
+          "target": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "Identifier"
+                    }
+                  ]
+                }
+              ],
+              "code": "basedOn[2].identifier",
+              "display": "basedOn[2].identifier",
+              "equivalence": "equivalent",
+              "comment": "If valued, make sure that Appointment.basedOn is used to link to the ServiceRequest"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -37,6 +37,7 @@ pub mod convert;
 pub mod corpus;
 pub mod notation;
 mod run;
+pub mod supplement;
 
 use std::collections::BTreeMap;
 
@@ -64,6 +65,17 @@ pub struct RowRef {
 pub enum Outcome {
     /// A segment or field the parse did not place.
     Parse(Unplaced),
+    /// A supplement map the run used ([`corpus::Origin::Supplement`]),
+    /// counted once per message where it first ran, so a mapped value can be
+    /// told from one the guide alone writes.
+    Supplemented {
+        /// Where the map first ran.
+        at: Location,
+        /// The map's id.
+        map: String,
+        /// Whether it replaced a map of the guide.
+        overrides: bool,
+    },
     /// A segment no row of the message map names.
     UnmappedSegment {
         /// Where.
@@ -455,6 +467,7 @@ impl Outcome {
     pub const fn kind(&self) -> &'static str {
         match self {
             Self::Parse(unplaced) => unplaced.kind(),
+            Self::Supplemented { .. } => "supplemented",
             Self::UnmappedSegment { .. } => "unmapped-segment",
             Self::UnmappedField { .. } => "unmapped-field",
             Self::UnmappedComponent { .. } => "unmapped-component",

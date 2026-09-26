@@ -55,6 +55,32 @@ pub(crate) fn mdm_t02() -> Vec<u8> {
     ])
 }
 
+/// An unsolicited specimen-oriented result, OUL^R22: a patient, one blood
+/// specimen, the final report of the order it answers (OBR-25 `F`), and one
+/// numeric result.
+pub(crate) fn oul_r22() -> Vec<u8> {
+    message(&[
+        b"MSH|^~\\&|LAB|NORTHLAB|EHR|SOUTHCLINIC|20260926101500+0200||OUL^R22^OUL_R22|MSG00042|P|2.5.1",
+        b"PID|1||PAT-0042^^^NORTHHOSP^MR||Doe^Sam^^^^^L||19800101|M",
+        b"SPM|1|SPC-42||BLD^Whole blood^HL70487",
+        b"OBR|1|PLC-42|FIL-42|2345-7^Glucose^LN|||20260926080000+0200||||||||||||||||||F",
+        b"OBX|1|NM|2345-7^Glucose^LN||5.4|mmol/L^mmol/L^UCUM|3.9-5.8|N|||F|||20260926090000+0200",
+    ])
+}
+
+/// A laboratory order response, ORL^O22: the acknowledgment of an order,
+/// the patient, the accepted order, its request and its specimen.
+pub(crate) fn orl_o22() -> Vec<u8> {
+    message(&[
+        b"MSH|^~\\&|LAB|NORTHLAB|EHR|SOUTHCLINIC|20260926101500+0200||ORL^O22^ORL_O22|MSG00041|P|2.5.1",
+        b"MSA|AA|ORD00041",
+        b"PID|1||PAT-0041^^^NORTHHOSP^MR||Doe^Sam^^^^^L||19800101|M",
+        b"ORC|OK|PLC-41|FIL-41",
+        b"OBR|1|PLC-41|FIL-41|2345-7^Glucose^LN",
+        b"SPM|1|SPC-41||BLD^Whole blood^HL70487",
+    ])
+}
+
 /// The ORU^R01 of [`oru_r01`] without PID-5, which the definitions mark
 /// required.
 pub(crate) fn oru_r01_without_patient_name() -> Vec<u8> {

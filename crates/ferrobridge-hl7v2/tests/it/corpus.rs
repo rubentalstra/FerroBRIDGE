@@ -32,7 +32,7 @@ use bytes::BytesMut;
 use ferrobridge_hl7v2::decode::Charset;
 use ferrobridge_hl7v2::inbound::{self, Received};
 use ferrobridge_hl7v2::map::corpus::{Condition, Kind};
-use ferrobridge_hl7v2::map::{Mapped, map};
+use ferrobridge_hl7v2::map::{Mapped, Outcome, map};
 use ferrobridge_hl7v2::mllp::Codec;
 use ferrobridge_term::client::Client;
 use ferrobridge_term::config::{Config, RetryPolicy, WireVersion};
@@ -636,13 +636,21 @@ fn chain(error: &dyn Error) -> String {
     text
 }
 
-/// The run's counted outcomes, by kind.
+/// The run's counted outcomes, by kind, with one `supplemented:<map>` count
+/// per supplement map the run used, so a verdict can be attributed to it.
 fn counted(mapped: &Mapped) -> BTreeMap<String, usize> {
-    mapped
+    let mut counts: BTreeMap<String, usize> = mapped
         .counts()
         .into_iter()
         .map(|(kind, count)| (String::from(kind), count))
-        .collect()
+        .collect();
+    for outcome in mapped.outcomes() {
+        if let Outcome::Supplemented { map, .. } = outcome {
+            let slot = counts.entry(format!("supplemented:{map}")).or_insert(0);
+            *slot = slot.saturating_add(1);
+        }
+    }
+    counts
 }
 
 /// Runs one message through the face and returns its verdict.
@@ -715,15 +723,20 @@ async fn run(
     Case::pass(&message.id).with_outcomes(outcomes)
 }
 
-/// Runs every message and records the verdicts of `corpus`.
+/// Runs every message through the guide with the crate's shipped supplements
+/// over it, as the face runs it, and records the verdicts of `corpus`.
+///
+/// A difference from an expected Bundle is classified against the guide
+/// alone ([`Targets`]), so a class names what the guide lacks whatever the
+/// supplements fill.
 async fn measure(corpus: Corpus, messages: &[Message]) -> Result<(), Box<dyn Error>> {
-    let guide = support::corpus();
-    let targets = Targets::of(&guide);
+    let targets = Targets::of(&support::corpus());
+    let shipped = support::shipped();
     let tables = GuideTables::load(&support::package())?;
     let (_server, client) = tables.serve().await?;
     let mut cases = Vec::with_capacity(messages.len());
     for message in messages {
-        cases.push(run(message, &guide, &targets, &client).await);
+        cases.push(run(message, &shipped, &targets, &client).await);
     }
     let outcome = record(corpus, &cases)?;
     assert!(

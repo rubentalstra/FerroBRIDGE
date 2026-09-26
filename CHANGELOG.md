@@ -25,6 +25,24 @@ crates on crates.io.
 
 ### Added
 
+- FerroBRIDGE's supplements to the HL7 v2-to-FHIR guide (#256):
+  ConceptMaps in the guide's own shape, shipped inside `ferrobridge-hl7v2`
+  under `supplements/` and loaded over the guide's package by
+  `Corpus::with_shipped_supplements`, which the face calls before the
+  `[hl7v2] supplements` directories; a supplement with the id or url of a
+  loaded map replaces it, any other is added, and the run counts each one it
+  uses as `supplemented` (`Outcome::Supplemented`, `corpus::Origin`). The
+  shipped set runs CWE.1, CE.1 and CF.1 into `Coding.code` without the
+  guide's narrative gate, names the CF components and the `Quantity`
+  elements OBX-6 fills, keeps HD.2 out of `MessageHeader.source.software`,
+  gives the destination one name, lets MSH-24 give the source endpoint beside
+  an MSH-3 application name, writes ORC-2, SCH-26, SCH-27 and PID-2 to PID-4
+  as `Reference.identifier` where the guide names a resource no map fills,
+  fixes the `ADT_A01.PD1` row of the ADT_A05 and ADT_A09 message maps, and
+  adds message maps for ADT_A03, BAR_P01, ORL_O22 and OUL_R22. The vendored
+  HL7 corpora move from 142 to 153 of 511 and the NIST and AIRA smoke sets
+  from 189 to 199 of 379. The HL7 v2 face page lists every supplement with
+  its reason.
 - The HL7 v2 face in the server (#255). `[hl7v2] enabled = true` starts an
   MLLP listener beside the HTTP server, under the same `SIGTERM` drain, with an
   `hl7v2` line in the boot banner and an `hl7v2-listener` readiness indicator.

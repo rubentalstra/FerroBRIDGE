@@ -16,11 +16,12 @@ readme = "README.md"
 keywords = ["hl7", "hl7v2", "mllp", "fhir", "healthcare"]
 categories = ["parser-implementations", "network-programming", "science"]
 # The crate line is published on crates.io; include is the packaged content.
-# The v2-to-FHIR corpus is read from a directory at run time and never packaged.
+# The v2-to-FHIR corpus is read from a directory at run time and never packaged;
+# the crate's own supplements under supplements/ are compiled in and packaged.
 # The patterns are anchored at the root, so the LICENSE and README.md files of
 # the HL7 v2 message sets under vendor/ stay out of the package too.
 publish = true
-include = ["/src/**", "/README.md", "/LICENSE"]
+include = ["/src/**", "/supplements/**", "/README.md", "/LICENSE"]
 
 [dependencies]
 bytes.workspace = true

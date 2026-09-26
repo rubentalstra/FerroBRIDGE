@@ -43,14 +43,15 @@ use crate::facade::Facade;
 use crate::facade::ingest::{Provenance, UnmappedEntries};
 use crate::hl7v2::answer::{Settled, Tally};
 
-/// Loads the guide's `ConceptMaps` and every supplement over them, in order.
+/// Loads the guide's `ConceptMaps`, the supplements `ferrobridge-hl7v2`
+/// ships, and every supplement directory of the settings over them, in order.
 ///
 /// # Errors
 ///
 /// Returns the [`CorpusError`] of the first directory or file that does not
 /// load.
 pub fn load_corpus(settings: &Hl7v2Settings) -> Result<Corpus, CorpusError> {
-    let mut corpus = Corpus::load(&settings.concept_maps)?;
+    let mut corpus = Corpus::load(&settings.concept_maps)?.with_shipped_supplements()?;
     for supplement in &settings.supplements {
         corpus = corpus.supplement(supplement)?;
     }

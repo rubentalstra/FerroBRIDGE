@@ -1,0 +1,50 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "datatype-hd-name-to-messageheader-destination",
+  "url": "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-name-to-messageheader-destination",
+  "name": "FerroBRIDGEHdNameToMessageheaderDestinationFromHd1",
+  "title": "FerroBRIDGE supplement: HD name to MessageHeader.destination from HD.1",
+  "status": "active",
+  "experimental": true,
+  "publisher": "Vernum Projecten B.V. (FerroBRIDGE)",
+  "description": "Overrides ConceptMap/datatype-hd-name-to-messageheader-destination of hl7.fhir.uv.v2mappings 1.0.0. The guide writes HD.2 into MessageHeader.destination.name while datatype-hd-endpoint-to-messageheader-destination writes HD.1 into the same name, so an MSH-25 with both components gets two names and the row is refused. This supplement writes HD.1 into name, as the endpoint map and the source name map do. Recorded as an upstream defect on FerroBRIDGE #332.",
+  "group": [
+    {
+      "element": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo",
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "IS"
+                }
+              ]
+            }
+          ],
+          "code": "HD.1",
+          "display": "Namespace ID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "string"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "name",
+              "display": "name",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

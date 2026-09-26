@@ -1,0 +1,58 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "datatype-hd-name-to-messageheader-source",
+  "url": "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-hd-name-to-messageheader-source",
+  "name": "FerroBRIDGEHdNameToMessageheaderSourceWithoutSoftware",
+  "title": "FerroBRIDGE supplement: HD name to MessageHeader.source without software",
+  "status": "active",
+  "experimental": true,
+  "publisher": "Vernum Projecten B.V. (FerroBRIDGE)",
+  "description": "Overrides ConceptMap/datatype-hd-name-to-messageheader-source of hl7.fhir.uv.v2mappings 1.0.0. The guide writes HD.2, the universal ID, into MessageHeader.source.software, which FHIR R4 defines as the name of the software running the source system; a universal ID names the application, so it is no software name. This supplement drops that row and keeps the HD.1 row into name; HD.2 reaches the endpoint through datatype-hd-endpoint-to-messageheader-source. Recorded on FerroBRIDGE #332 (#324).",
+  "group": [
+    {
+      "element": [
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "IS"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 0
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "HD.1",
+          "display": "Namespace ID",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "string"
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "name",
+              "display": "name",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
