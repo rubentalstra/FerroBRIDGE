@@ -17,7 +17,7 @@ use crate::support::{self, Tables};
 /// The table answers a server loaded with the guide's table maps gives for
 /// the codes the fixtures carry, read from those maps; the displays come
 /// from the target code systems.
-fn tables() -> Tables {
+pub(crate) fn tables() -> Tables {
     Tables::default()
         .answer(
             "table-hl70004-to-v3-actcode",
@@ -99,12 +99,12 @@ fn tables() -> Tables {
 }
 
 /// The Bundle as indented JSON, each number in the text it was written in.
-fn pretty(bundle: &Value) -> String {
+pub(crate) fn pretty(bundle: &Value) -> String {
     serde_json::to_string_pretty(bundle).expect("the Bundle serializes")
 }
 
 /// The entries of the Bundle.
-fn entries(bundle: &Value) -> &[Value] {
+pub(crate) fn entries(bundle: &Value) -> &[Value] {
     bundle
         .get("entry")
         .and_then(Value::as_array)
@@ -112,7 +112,7 @@ fn entries(bundle: &Value) -> &[Value] {
 }
 
 /// The resources of the Bundle with `resource_type`.
-fn resources<'b>(bundle: &'b Value, resource_type: &str) -> Vec<&'b Value> {
+pub(crate) fn resources<'b>(bundle: &'b Value, resource_type: &str) -> Vec<&'b Value> {
     entries(bundle)
         .iter()
         .filter_map(|entry| entry.get("resource"))
@@ -143,7 +143,7 @@ async fn mapped(bytes: &[u8]) -> (Mapped, Vec<(String, String)>) {
 }
 
 /// A reviewable summary of the outcomes: kind, where, and the row.
-fn summary(mapped: &Mapped) -> Vec<String> {
+pub(crate) fn summary(mapped: &Mapped) -> Vec<String> {
     mapped.outcomes().iter().map(line).collect()
 }
 

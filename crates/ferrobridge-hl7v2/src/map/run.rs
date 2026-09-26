@@ -24,7 +24,9 @@ use sha2::{Digest, Sha256};
 use crate::map::condition::{self, Operand, Probe, Unevaluable};
 use crate::map::constraint;
 use crate::map::convert;
-use crate::map::corpus::{Assignment, Condition, Corpus, Kind, Map, MappedVia, Row, TableGroup};
+use crate::map::corpus::{
+    Assignment, Condition, Corpus, Kind, Map, MappedVia, Origin, Row, TableGroup,
+};
 use crate::map::notation::{self, Label, Step, Target};
 use crate::map::{ElementError, MapError, Outcome, RowRef};
 use crate::parse::{Component, Field, Item, Location, Parsed, Repetition, Segment};
@@ -502,6 +504,27 @@ impl<'a> Run<'a> {
         )
     }
 
+    /// Counts `map` as [`Outcome::Supplemented`] at `at` when it is a
+    /// supplement the run has not counted yet.
+    ///
+    /// No specification governs this: our own design; once per map and
+    /// message keeps the count a record of which supplements a message used.
+    fn supplemented(&mut self, map: &Map, at: &Location) {
+        let Origin::Supplement { overrides } = map.origin else {
+            return;
+        };
+        let counted = self.outcomes.iter().any(
+            |outcome| matches!(outcome, Outcome::Supplemented { map: id, .. } if *id == map.id),
+        );
+        if !counted {
+            self.outcomes.push(Outcome::Supplemented {
+                at: at.clone(),
+                map: map.id.clone(),
+                overrides,
+            });
+        }
+    }
+
     /// Maps one placed segment through the message map rows naming it.
     fn visit(&mut self, map: &'a Map, visit: &Visit<'a>) -> Result<(), MapError> {
         let at = self.parsed.location(visit.index);
@@ -509,6 +532,7 @@ impl<'a> Run<'a> {
             self.outcomes.push(Outcome::UnmappedSegment { at });
             return Ok(());
         };
+        self.supplemented(map, &at);
         let scope = Scope {
             parsed: self.parsed,
             index: visit.index,
@@ -659,6 +683,7 @@ impl<'a> Run<'a> {
         let Some(segment) = scope.segment() else {
             return Ok(());
         };
+        self.supplemented(map, &scope.at);
         for row in &map.rows {
             let reference = row_ref(map, row);
             let (id, path) = split_source(&row.source, '-');
@@ -1120,6 +1145,7 @@ impl<'a> Run<'a> {
         base: &Base,
         claimed: &BTreeSet<String>,
     ) -> Result<Covered, MapError> {
+        self.supplemented(map, &scope.at);
         let mut inner = scope.clone();
         inner.datatype = Some((String::from(datatype), datum));
         inner.repetition = None;
@@ -4457,5 +4483,118 @@ mod tests {
             run.outcomes
         );
         assert_eq!(ei_refusals(&run), Vec::<&Outcome>::new());
+    }
+
+    /// The vendored package with the crate's shipped supplements over it.
+    fn shipped() -> Corpus {
+        corpus()
+            .with_shipped_supplements()
+            .expect("the shipped supplements load")
+    }
+
+    // NOTE: HL7 v2.3 types OBR-4 `CE`, so the order runs `datatype-ce-to-codeableconcept`, whose
+    // CE.1 row the supplement runs with no Narrative-Condition.
+    #[test]
+    fn ce_one_is_the_code_of_a_legacy_order() {
+        let parsed = message(&[
+            "MSH|^~\\&|NORTHLAB|NORTHHOSP|EHR|SOUTHCLINIC|20260925143000+0200||ORM^O01|MSG00044|P|2.3",
+            "PID|1||PAT-0044^^^NORTHHOSP^MR||Doe^Sam||19800101|M",
+            "ORC|NW|PLC-44",
+            "OBR|1|PLC-44||2345-7^Glucose^LN",
+        ]);
+        let guide = corpus();
+        let mut run = Run::new(&guide, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "ServiceRequest", "code.coding.code"),
+            Vec::<Value>::new()
+        );
+        let supplemented = shipped();
+        let mut run = Run::new(&supplemented, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(
+            values_at(&run, "ServiceRequest", "code.coding.code"),
+            vec![text("2345-7")],
+            "{:?}",
+            writes_of(&run, "ServiceRequest")
+        );
+        assert!(run.outcomes.iter().any(|outcome| matches!(
+            outcome,
+            Outcome::Supplemented { map, overrides: true, .. }
+                if map == "datatype-ce-to-codeableconcept"
+        )));
+    }
+
+    /// A synthetic SIU^S12 for one patient, with the placer and filler order
+    /// numbers in SCH-26 and SCH-27.
+    fn appointment() -> Parsed {
+        let mut sch = vec!["SCH", "APT-46", "APT-F-46", "", "", "", "ROUTINE^Routine^L"];
+        sch.extend([""; 9]);
+        sch.push("Pullen^Jeri");
+        sch.extend(["", "", ""]);
+        sch.push("Pullen^Jeri");
+        sch.extend(["", "", "", "", ""]);
+        sch.extend(["PLC-46^NORTHHOSP", "FIL-46^NORTHHOSP"]);
+        let sch = sch.join("|");
+        message(&[
+            "MSH|^~\\&|SCHED|NORTHHOSP|EHR|SOUTHCLINIC|20260926100000+0200||SIU^S12^SIU_S12|MSG00046|P|2.5.1",
+            &sch,
+            "PID|1||PAT-0046^^^NORTHHOSP^MR||Doe^Sam^^^^^L||19800101|M",
+            "RGS|1",
+        ])
+    }
+
+    // NOTE: `segment-pid-to-appointment` and `segment-sch-to-appointment` write their `(Type)`
+    // rows as R4 Reference.identifier in the supplements, so no second Patient is created.
+    #[test]
+    fn an_appointment_names_its_patient_and_orders_by_identifier() {
+        let parsed = appointment();
+        let guide = corpus();
+        let mut run = Run::new(&guide, &parsed);
+        run.message().expect("the walk runs");
+        let patients = |run: &Run<'_>| {
+            run.resources
+                .iter()
+                .filter(|resource| resource.type_name == "Patient")
+                .count()
+        };
+        assert_eq!(patients(&run), 1);
+        let refused: Vec<&str> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::NoDatatypeMap { row, .. } => Some(row.source.as_str()),
+                _ => None,
+            })
+            .filter(|source| ["PID-3", "SCH-26", "SCH-27"].contains(source))
+            .collect();
+        assert_eq!(refused.len(), 4, "{:?}", run.outcomes);
+        let supplemented = shipped();
+        let mut run = Run::new(&supplemented, &parsed);
+        run.message().expect("the walk runs");
+        assert_eq!(patients(&run), 1);
+        assert_eq!(
+            values_at(&run, "Appointment", "basedOn.identifier.value"),
+            vec![text("PLC-46"), text("FIL-46")],
+            "{:?}",
+            writes_of(&run, "Appointment")
+        );
+        assert_eq!(
+            values_at(
+                &run,
+                "Appointment",
+                "extension.valueReference.identifier.value"
+            ),
+            vec![text("PAT-0046")]
+        );
+        assert_eq!(
+            values_at(&run, "Appointment", "participant.actor.identifier.value"),
+            vec![text("PAT-0046")]
+        );
+        assert!(
+            run.resources
+                .iter()
+                .all(|resource| resource.type_name != "ServiceRequest")
+        );
     }
 }

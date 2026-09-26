@@ -40,6 +40,10 @@ specification, and the OMOP Common Data Model through the OMOCL specification.
   through `fhirconnect::tree` over the `fhir-types` R4 element table, and the
   output is an R4 message `Bundle`. Every condition, target or value the run
   cannot carry is a typed, counted outcome.
+- `map::supplement`: FerroBRIDGE's own ConceptMaps in the guide's shape,
+  packaged with the crate under `supplements/`, which override a guide map
+  or add one it lacks; `Corpus::with_shipped_supplements` loads them over the
+  guide, and the run counts each one it uses as `supplemented`.
 
 ## Status
 

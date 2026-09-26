@@ -1,0 +1,232 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "datatype-cwe-to-quantity",
+  "url": "http://hl7.org/fhir/uv/v2mappings/ConceptMap/datatype-cwe-to-quantity",
+  "name": "FerroBRIDGECweToQuantityWithElementRelativeTargets",
+  "title": "FerroBRIDGE supplement: CWE to Quantity with element-relative targets",
+  "status": "active",
+  "experimental": true,
+  "publisher": "Vernum Projecten B.V. (FerroBRIDGE)",
+  "description": "Overrides ConceptMap/datatype-cwe-to-quantity of hl7.fhir.uv.v2mappings 1.0.0. The guide writes its targets as Quantity.code, Quantity.unit and Quantity.system, where every other data type map names the element relative to the type it fills (datatype-cwe-to-coding writes code, display and system), so the element table finds no element Quantity under the Quantity the row fills and the units of OBX-6 are lost. This supplement names them code, unit and system, the elements of the FHIR R4 Quantity data type; the sources and the conditions are the guide's. Recorded as an upstream defect on FerroBRIDGE #332.",
+  "group": [
+    {
+      "element": [
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "ST"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 0
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "CWE.1",
+          "display": "Identifier",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "code"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "code",
+              "display": "code",
+              "equivalence": "equivalent",
+              "comment": "The source of Quantity.value will likely come from a different field (eg. OBX-5 may populate Quantity.value while OBX-6 populates the remaining Quantity elements).",
+              "dependsOn": [
+                {
+                  "property": "Computable-ANTLR",
+                  "value": "IF CWE.1 IS VALUED AND CWE.3 IS VALUED"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "ST"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 0
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "CWE.1",
+          "display": "Identifier",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "string"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "unit",
+              "display": "unit",
+              "equivalence": "equivalent",
+              "dependsOn": [
+                {
+                  "property": "Computable-ANTLR",
+                  "value": "If CWE.2 IS NOT VALUED"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "ST"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 0
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "CWE.2",
+          "display": "Text",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "string"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "unit",
+              "display": "unit",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "extension": [
+                {
+                  "url": "type",
+                  "valueCode": "ID"
+                },
+                {
+                  "url": "cardinalityMin",
+                  "valueInteger": 0
+                },
+                {
+                  "url": "cardinalityMax",
+                  "valueInteger": 1
+                }
+              ],
+              "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+            }
+          ],
+          "code": "CWE.3",
+          "display": "Name of Coding System",
+          "target": [
+            {
+              "extension": [
+                {
+                  "extension": [
+                    {
+                      "url": "type",
+                      "valueCode": "uri"
+                    },
+                    {
+                      "url": "cardinalityMin",
+                      "valueInteger": 1
+                    },
+                    {
+                      "url": "cardinalityMax",
+                      "valueInteger": 1
+                    }
+                  ],
+                  "url": "http://hl7.org/fhir/uv/v2mappings/StructureDefinition/TypeInfo"
+                }
+              ],
+              "code": "system",
+              "display": "system",
+              "equivalence": "equivalent",
+              "dependsOn": [
+                {
+                  "property": "Computable-ANTLR",
+                  "value": "IF CWE.1 IS VALUED AND CWE.3 IS VALUED"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

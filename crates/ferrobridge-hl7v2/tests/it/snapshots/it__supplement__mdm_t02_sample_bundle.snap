@@ -1,0 +1,389 @@
+---
+source: crates/ferrobridge-hl7v2/tests/it/supplement.rs
+expression: pretty(mapped.bundle())
+---
+{
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:9cb10cce-6600-8b54-8a07-b38d613f05be",
+      "resource": {
+        "destination": [
+          {
+            "_endpoint": {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/R4/extension-data-absent-reason.html",
+                  "valueCode": "unknown"
+                }
+              ]
+            }
+          }
+        ],
+        "eventCoding": {
+          "code": "T02",
+          "display": "MDM^T02^MDM_T02",
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0003"
+        },
+        "meta": {
+          "tag": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0103"
+            }
+          ]
+        },
+        "resourceType": "MessageHeader",
+        "sender": {
+          "reference": "urn:uuid:8e1a230c-93cd-85e0-a55f-89e469e28cd2"
+        },
+        "source": {
+          "endpoint": "urn:ferrobridge:hl7v2-hd:HIE",
+          "name": "HIE"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8e1a230c-93cd-85e0-a55f-89e469e28cd2",
+      "resource": {
+        "identifier": [
+          {
+            "value": "REDDING HOSPITAL"
+          }
+        ],
+        "resourceType": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:781fb15f-8ed0-8fa0-9125-a8a735fe1b50",
+      "resource": {
+        "address": [
+          {
+            "city": "BOULDER",
+            "country": "US",
+            "postalCode": "12345-2144",
+            "state": "CO"
+          }
+        ],
+        "birthDate": "1994-12-01",
+        "gender": "male",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "code": "MR"
+                }
+              ]
+            },
+            "value": "000322330"
+          }
+        ],
+        "name": [
+          {
+            "family": "JOHN",
+            "given": [
+              "DOE",
+              "TEST"
+            ],
+            "suffix": [
+              "JR."
+            ]
+          }
+        ],
+        "resourceType": "Patient",
+        "telecom": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/contactpoint-area",
+                "valueString": "103"
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/contactpoint-local",
+                "valueString": "1443441"
+              }
+            ],
+            "value": "103 1443441"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:993f1f80-60bb-8cfc-a1c5-6bdcf327c4d5",
+      "resource": {
+        "class": {
+          "code": "IMP",
+          "display": "inpatient encounter",
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode"
+        },
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "code": "VN",
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203"
+                }
+              ],
+              "text": "visit number"
+            },
+            "value": "1234567891"
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "urn:uuid:797d83df-3dcc-85b7-97ed-6d281e5d479b"
+            },
+            "status": "active"
+          }
+        ],
+        "participant": [
+          {
+            "individual": {
+              "reference": "urn:uuid:47c3562b-d160-8631-bdda-6c7f43a042ab"
+            },
+            "type": [
+              {
+                "coding": [
+                  {
+                    "code": "ATND",
+                    "display": "attender",
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "resourceType": "Encounter",
+        "status": "in-progress"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:797d83df-3dcc-85b7-97ed-6d281e5d479b",
+      "resource": {
+        "identifier": [
+          {
+            "value": "F151-01"
+          }
+        ],
+        "mode": "instance",
+        "physicalType": {
+          "coding": [
+            {
+              "code": "bd",
+              "system": "http://terminology.hl7.org/CodeSystem/location-physical-type"
+            }
+          ]
+        },
+        "resourceType": "Location"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:47c3562b-d160-8631-bdda-6c7f43a042ab",
+      "resource": {
+        "identifier": [
+          {
+            "value": "1123456771"
+          }
+        ],
+        "name": [
+          {
+            "family": "MITCHELL",
+            "given": [
+              "HILA",
+              "K"
+            ]
+          }
+        ],
+        "resourceType": "Practitioner"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a19027ed-89b5-886f-8092-424e287a5bcf",
+      "resource": {
+        "identifier": [
+          {
+            "value": "SndFac"
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "code": "ISO"
+                }
+              ]
+            },
+            "value": "1.2.3.4.5"
+          }
+        ],
+        "resourceType": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:3783af36-a89d-8ea2-a86b-10c4e1895383",
+      "resource": {
+        "practitioner": {
+          "reference": "urn:uuid:87979d49-dc09-82dd-ad74-2f7d0d9aa55a"
+        },
+        "resourceType": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:87979d49-dc09-82dd-ad74-2f7d0d9aa55a",
+      "resource": {
+        "identifier": [
+          {
+            "value": "5742200012"
+          }
+        ],
+        "name": [
+          {
+            "family": "Radon",
+            "given": [
+              "Nicholas"
+            ],
+            "use": "official"
+          }
+        ],
+        "resourceType": "Practitioner"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2de23773-91d8-8e25-a1c2-12f0b4206e29",
+      "resource": {
+        "identifier": [
+          {
+            "value": "5742200012"
+          }
+        ],
+        "name": [
+          {
+            "family": "Radon",
+            "given": [
+              "Nicholas"
+            ],
+            "use": "official"
+          }
+        ],
+        "resourceType": "Practitioner"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f20213f6-4e40-8048-976d-5922972f5e41",
+      "resource": {
+        "identifier": [
+          {
+            "value": "Good Health Hospital"
+          }
+        ],
+        "name": "L",
+        "resourceType": "Organization"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:9166d44b-cef4-8752-95c2-c3dbcb8c2715",
+      "resource": {
+        "authenticator": {
+          "reference": "urn:uuid:cb64d6c2-2fd2-8254-8cd0-fdf2abf38331"
+        },
+        "author": [
+          {
+            "reference": "urn:uuid:0600465c-a407-85db-ad9e-6b4426c34f09"
+          }
+        ],
+        "content": [
+          {
+            "attachment": {
+              "contentType": "TX"
+            }
+          },
+          {
+            "attachment": {
+              "contentType": "PDF"
+            }
+          }
+        ],
+        "description": "Discharge Summary",
+        "docStatus": "AU",
+        "identifier": [
+          {
+            "value": "PN_Radon_20230820174913.RTF"
+          }
+        ],
+        "masterIdentifier": {
+          "assigner": {
+            "reference": "urn:uuid:5000bdf8-345c-8cd6-ab1d-a38b7108045d"
+          },
+          "value": "3738931392"
+        },
+        "resourceType": "DocumentReference",
+        "status": "current",
+        "type": {
+          "coding": [
+            {
+              "code": "PN"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:0600465c-a407-85db-ad9e-6b4426c34f09",
+      "resource": {
+        "identifier": [
+          {
+            "value": "5742200012"
+          }
+        ],
+        "name": [
+          {
+            "family": "Radon",
+            "given": [
+              "Nicholas"
+            ],
+            "use": "official"
+          }
+        ],
+        "resourceType": "Practitioner"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cb64d6c2-2fd2-8254-8cd0-fdf2abf38331",
+      "resource": {
+        "identifier": [
+          {
+            "value": "1123456771"
+          }
+        ],
+        "name": [
+          {
+            "family": "MITCHELL",
+            "given": [
+              "HILA",
+              "K"
+            ],
+            "use": "official"
+          }
+        ],
+        "resourceType": "Practitioner"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:5000bdf8-345c-8cd6-ab1d-a38b7108045d",
+      "resource": {
+        "identifier": [
+          {
+            "value": "REDDING HOSPITAL"
+          }
+        ],
+        "resourceType": "Organization"
+      }
+    }
+  ],
+  "identifier": {
+    "value": "10819306"
+  },
+  "resourceType": "Bundle",
+  "type": "message"
+}

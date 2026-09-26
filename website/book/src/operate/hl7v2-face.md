@@ -53,7 +53,7 @@ syntax in the variable. The section holds no secret.
 | `listen` | `127.0.0.1:2575` | The socket address the listener binds |
 | `default_charset` | `ASCII` | The HL7 table 0211 code a message with an empty MSH-18 is read in: `ASCII`, `UNICODE UTF-8`, `8859/1` to `8859/9` or `8859/15` |
 | `concept_maps` | none, required | The directory of the guide's ConceptMaps: the `package` directory of `hl7.fhir.uv.v2mappings` |
-| `supplements` | `[]` | Directories of ConceptMaps loaded over the guide in order; a map with the url of a loaded one replaces it |
+| `supplements` | `[]` | Directories of your own ConceptMaps, loaded in order after the guide and the supplements the face ships; a map with the id or the url of a loaded one replaces it |
 | `unmapped_entries` | `skip_and_count` | What an entry no program maps does: `skip_and_count` commits the others, `refuse` refuses the message |
 | `ehr_policy` | the facade's | `existing` or `create_on_first_write`, for the face alone |
 | `profiles` | `[]` | A list of `{ resource_type, profile }`: the profile a resource of that type claims in `meta.profile` when the guide's maps wrote none |
@@ -73,8 +73,10 @@ syntax in the variable. The section holds no secret.
    position and grouped by its message structure. With `senders` set, a
    message whose MSH-4 names none of them is answered `AR` here and is never
    mapped.
-3. The guide's message, segment and data type maps write an R4 message Bundle.
-   Every row the run cannot carry is a counted outcome.
+3. The guide's message, segment and data type maps, with the supplements over
+   them, write an R4 message Bundle. Every row the run cannot carry is a
+   counted outcome, and every supplement map the run used is counted once as
+   `supplemented`.
 4. Every entry whose resource type is listed under `profiles` and that claims
    no profile gets that profile in `meta.profile`, and every entry with a
    `subject` or `patient` reference and none set references the message's one
@@ -88,6 +90,64 @@ syntax in the variable. The section holds no secret.
    type (`ORU^R01`) as the item type.
 6. The acknowledgment is sent once the ingest settled, so `AA` means the CDR
    holds the message's compositions.
+
+## Supplements to the guide
+
+The guide invites an implementation to add a mapping it needs locally
+(`mapping_guidelines.md`, General Format/Approach). FerroBRIDGE does that with
+supplements: ConceptMaps in the guide's own shape that override a map of the
+guide or add one it lacks. No specification governs how they load or how they
+are marked; that is FerroBRIDGE's own design, and it works as follows.
+
+- The face ships its supplements inside `ferrobridge-hl7v2` (the crate's
+  `supplements/` directory, compiled in) and loads them over the guide's
+  package at boot. The `supplements` directories of `[hl7v2]` load after
+  them, so a map of your own can replace one of FerroBRIDGE's.
+- A supplement with the id or the canonical url of a loaded map replaces that
+  map whole. Any other supplement is added.
+- Each shipped supplement names FerroBRIDGE in its `title`. Its `description`
+  names the guide map it overrides, or the structure it adds, the rows it
+  changes and why, and the tracker issue that records the defect. An override
+  keeps the guide map's id and url. An added map takes an id in the guide's
+  naming form and a url under `https://ferrobridge.eu/fhir/v2mappings/`, so it
+  never claims a canonical url of the guide.
+- The run counts each supplement map it uses once per message, as
+  `supplemented` naming the map, so an outcome list shows which values a
+  supplement wrote.
+
+The shipped supplements:
+
+| Map | Kind | What it changes, and why |
+|---|---|---|
+| `datatype-cwe-to-codeableconcept` | override | Runs the CWE.1 row into `coding[1].code` with no condition. The guide gates it on a Narrative-Condition no machine evaluates, so no Coding it writes carries a code (#332) |
+| `datatype-ce-to-codeableconcept` | override | The same row for CE, the type HL7 v2.3 and earlier give most coded fields (#332) |
+| `datatype-cf-to-codeableconcept` | override | Names the sources CF.1 to CF.13, where the guide names them CWE.1 to CWE.13 so no CF row runs, and runs CF.1 with no condition (#332) |
+| `datatype-cwe-to-quantity` | override | Names the targets `code`, `unit` and `system`, where the guide writes `Quantity.code` and so on, which the element table cannot find under the Quantity the row fills; OBX-6 units are kept (#332) |
+| `datatype-hd-name-to-messageheader-source` | override | Drops the row that writes HD.2, a universal ID, into `MessageHeader.source.software`, which R4 defines as the software's name (#324) |
+| `datatype-hd-name-to-messageheader-destination` | override | Writes HD.1 into `destination.name`, as the endpoint map does, where the guide writes HD.2 and the two maps disagree (#332) |
+| `segment-msh-to-messageheader` | override | With both MSH-3 and MSH-24 valued, MSH-3 names the source and MSH-24 gives its endpoint; with one of them empty, the other runs as the guide writes it (#311) |
+| `segment-orc-to-diagnosticreport` | override | Writes ORC-2 into `basedOn.identifier` (R4 `Reference.identifier`), where the guide writes `basedOn(ServiceRequest)` with no map to fill it (#336) |
+| `segment-sch-to-appointment` | override | Writes SCH-26 and SCH-27 into `basedOn[1].identifier` and `basedOn[2].identifier` for the same reason (#336) |
+| `segment-pid-to-appointment` | override | Writes PID-2, PID-3 and PID-4 into the identifier of the Appointment's patient references, so the message keeps one Patient where the guide's `(Patient)` rows would create one per row (#336) |
+| `message-adt-a05-to-bundle`, `message-adt-a09-to-bundle` | override | Names the PD1 row `ADT_A05.PD1` and `ADT_A09.PD1`, where the guide names it `ADT_A01.PD1`, which leaves ADT_A05 and ADT_A09 with no message map (#332) |
+| `message-adt-a03-to-bundle` | added | ADT_A03 (A03 discharge), from the rows of the guide's ADT_A01 map at the same paths (#256) |
+| `message-bar-p01-to-bundle` | added | BAR_P01 (P01 add patient accounts), from the ADT_A01 rows for the segments the two share, the visit segments under `VISIT`; GT1, UB1, UB2, ACC and DRG have no segment map in the guide and are counted unmapped (#256) |
+| `message-orl-o22-to-bundle` | added | ORL_O22 (the laboratory order response), from the guide's OML_O21 rows under `RESPONSE`, with the MSA row into `MessageHeader.response` (#256) |
+| `message-oul-r22-to-bundle` | added | OUL_R22 (the specimen-oriented observation), from the guide's ORU_R01 rows at the OUL_R22 paths; the OBR row into a Specimen is left out, since SPM carries the specimen (#256) |
+
+What the supplements leave to the guide, and what stays open:
+
+- CWE.3 is written into `Coding.system` as the sender sends it (`LN`). The
+  guide's comment on that row says a vocabulary table gives the URI, and the
+  guide ships no table map for HL7 table 0396, so the value stays the v2
+  mnemonic until one exists.
+- DFT_P03 has no message map. Its defining segment, FT1, has no segment map in
+  the guide, so a map for the rest would acknowledge a charge message without
+  its charges.
+- The `PL` to `Location` map's `[n].` rows, which describe the bed, room,
+  floor, point of care, building and facility as sibling Locations, still count
+  as `unplaced-instance`: only the bed reaches the Location the Encounter
+  references.
 
 ## The acknowledgment
 
@@ -154,8 +214,9 @@ acknowledged, and the connection closes, within the same
 
 ## Until a mapping context covers the guide's resources
 
-No published FHIRconnect context in the tree maps the resources the guide
-writes for the six message families (ADT, ORU, ORM and OML, MDM, SIU, VXU):
+No published FHIRconnect context in the tree maps the resources the guide and
+its supplements write for the message families (ADT, BAR, ORU, OUL, ORM, OML
+and ORL, MDM, SIU, VXU):
 the published contexts do not compile in-tree for lack of their templates
 (issue #258). Until one does, a message's Bundle reaches the ingest service and
 is refused for lack of a program: the sender gets `AE` with one `ERR` per
