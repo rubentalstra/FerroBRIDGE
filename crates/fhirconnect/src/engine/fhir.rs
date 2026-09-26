@@ -25,7 +25,7 @@ use fhir_types::r4::quantity::Quantity;
 use fhir_types::r4::reference::Reference;
 use fhir_types::schema::ValueKind;
 
-use crate::model::ast::DataType;
+use crate::model::ast::keyword::DataType;
 use crate::tree::element::Location;
 
 /// Which FHIR element a mapping writes.

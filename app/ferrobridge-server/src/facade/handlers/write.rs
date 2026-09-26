@@ -24,7 +24,7 @@
 
 use crate::cdr::CdrClient;
 use crate::cdr::ids::EhrId;
-use fhirconnect::resolve::program::TemplateId;
+use fhirconnect::resolve::program::binding::TemplateId;
 use http::HeaderMap;
 use http::StatusCode;
 use http::Uri;

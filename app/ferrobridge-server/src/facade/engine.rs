@@ -17,7 +17,7 @@ use fhirconnect::engine::origin::SourceItem;
 use fhirconnect::engine::outcome::Outcome;
 use fhirconnect::engine::seam::Seams;
 use fhirconnect::engine::traverse::Defaults;
-use fhirconnect::engine::traverse::EngineError;
+use fhirconnect::engine::traverse::error::EngineError;
 use fhirconnect::engine::traverse::to_fhir;
 use fhirconnect::engine::traverse::to_openehr;
 use fhirconnect::resolve::program::Program;

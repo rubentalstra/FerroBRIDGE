@@ -4,7 +4,7 @@
 937 #354
 802 app/ferrobridge-server/src/cdr/mod.rs #354
 1570 app/ferrobridge-server/src/config.rs #354
-2762 app/ferrobridge-server/src/facade/ingest.rs #354
+2763 app/ferrobridge-server/src/facade/ingest.rs #354
 805 app/ferrobridge-server/tests/it/config.rs #354
 937 app/ferrobridge-server/tests/it/etl.rs #354
 3635 app/ferrobridge-server/tests/it/facade.rs #354
@@ -14,18 +14,6 @@
 1470 crates/ferrobridge-hl7v2/src/parse.rs #355
 832 crates/ferrobridge-hl7v2/tests/it/corpus.rs #355
 858 crates/ferrobridge-hl7v2/tests/it/map.rs #355
-3834 crates/fhirconnect/src/engine/traverse.rs #352
-936 crates/fhirconnect/src/model/ast.rs #352
-1522 crates/fhirconnect/src/model/parse.rs #352
-839 crates/fhirconnect/src/operations/contract.rs #352
-2326 crates/fhirconnect/src/resolve/compile.rs #352
-1740 crates/fhirconnect/src/resolve/program.rs #352
-1087 crates/fhirconnect/src/tree/element.rs #352
-914 crates/fhirconnect/src/tree/path.rs #352
-2335 crates/fhirconnect/tests/it/engine.rs #352
-1262 crates/fhirconnect/tests/it/operations.rs #352
-2410 crates/fhirconnect/tests/it/resolve.rs #352
-795 crates/fhirconnect/tests/it/tree.rs #352
 1193 tools/fhir-codegen/src/lower.rs #353
 1213 tools/fhir-codegen/src/operations.rs #353
 1698 tools/fhir-codegen/src/render_codec.rs #353
@@ -35,4 +23,4 @@
 1982 tools/fhir-codegen/src/v2/lower.rs #353
 1070 tools/fhir-codegen/src/v2/render.rs #353
 786 tools/fhir-codegen/tests/it/operations.rs #353
-1196 tools/fhir-codegen/tests/it/v2.rs #353
+1205 tools/fhir-codegen/tests/it/v2.rs #353

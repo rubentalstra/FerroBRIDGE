@@ -46,7 +46,7 @@ pub mod text;
 
 use core::fmt;
 
-use crate::model::ast::Direction;
+use crate::model::ast::keyword::Direction;
 
 /// One data-type cell of the specification's chapter, run both ways.
 ///

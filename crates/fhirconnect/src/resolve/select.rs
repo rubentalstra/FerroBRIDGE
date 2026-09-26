@@ -16,7 +16,7 @@
 use std::sync::Arc;
 
 use crate::resolve::program::Program;
-use crate::resolve::program::TemplateId;
+use crate::resolve::program::binding::TemplateId;
 
 /// Why no single program answers a selection.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]

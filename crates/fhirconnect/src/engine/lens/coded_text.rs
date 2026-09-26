@@ -29,7 +29,7 @@ use crate::engine::lens::code_phrase::CodePhraseLens;
 use crate::engine::lens::code_phrase::text_of;
 use crate::engine::lens::term_mapping::coding_of;
 use crate::engine::lens::term_mapping::mapping_of;
-use crate::model::ast::Direction;
+use crate::model::ast::keyword::Direction;
 
 /// The name the `CodeableConcept` cell carries in a diagnostic.
 pub const CODEABLE_CONCEPT_CELL: &str = "DV_CODED_TEXT against CodeableConcept";

@@ -30,8 +30,8 @@ use crate::model::ast::Condition;
 use crate::model::ast::ContextMappingFile;
 use crate::model::ast::Mapping;
 use crate::model::ast::ModelMappingFile;
-use crate::model::ast::Variable;
 use crate::model::ast::With;
+use crate::model::ast::keyword::Variable;
 use crate::model::error::ModelCode;
 use crate::model::load::MappingSet;
 

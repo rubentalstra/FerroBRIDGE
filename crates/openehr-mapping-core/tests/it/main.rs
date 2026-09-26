@@ -8,6 +8,7 @@
 
 mod anchors;
 mod corpus;
+mod header;
 mod malformed;
 mod paths;
 mod pins;

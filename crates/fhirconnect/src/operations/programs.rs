@@ -15,7 +15,7 @@ use std::sync::Arc;
 use openehr_mapping_core::index::WebTemplateIndex;
 
 use crate::resolve::program::Program;
-use crate::resolve::program::TemplateId;
+use crate::resolve::program::binding::TemplateId;
 
 /// Why a program does not join the set.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]

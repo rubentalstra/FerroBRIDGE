@@ -20,7 +20,7 @@ use fhir_types::schema::Kind;
 use fhir_types::schema::ValueKind;
 use openehr_rm::v1_2::model;
 
-use crate::model::ast::DataType;
+use crate::model::ast::keyword::DataType;
 
 /// The FHIR type codes each openEHR class converts with, in the order the
 /// class's page of the data-type chapter lists them.

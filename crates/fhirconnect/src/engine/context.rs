@@ -13,7 +13,7 @@
 //! (`docs/specs/fhirconnect/draft-rest-api/rest/input/fsh/operations/ToFhir.fsh`).
 //!
 //! A member the caller did not supply is a typed refusal
-//! ([`crate::engine::traverse::EngineError::ContextMember`]) rather than an
+//! ([`crate::engine::traverse::error::EngineError::ContextMember`]) rather than an
 //! invented value.
 
 use fhir_types::r4::reference::Reference;

@@ -18,8 +18,6 @@
 
 pub mod matching;
 pub mod paths;
-#[cfg(test)]
-mod tests;
 
 use std::collections::BTreeMap;
 

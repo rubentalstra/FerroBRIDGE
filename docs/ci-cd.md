@@ -98,7 +98,7 @@ each case a verdict and write it to `target/conformance/<corpus>.json` through
 | `fhirconnect-mapping-lib` | a file of `docs/specs/fhirconnect-mapping-lib/` | `crates/fhirconnect/tests/it/corpus.rs` |
 | `omocl` | a file of `docs/specs/omocl/` | `crates/omocl/tests/it/corpus.rs` |
 | `roundtrip` | a round-trip chain | `crates/fhirconnect/tests/it/roundtrip.rs` |
-| `draft-rest-api` | an FSH operation definition of the draft chapter | `crates/fhirconnect/tests/it/operations.rs` |
+| `draft-rest-api` | an FSH operation definition of the draft chapter | `crates/fhirconnect/tests/it/operations/definitions.rs` |
 
 Each test compares its verdicts with the committed
 `conformance/<corpus>/pass-list.txt` and fails when a listed case no longer

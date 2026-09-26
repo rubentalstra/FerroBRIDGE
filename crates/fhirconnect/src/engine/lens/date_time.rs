@@ -23,7 +23,7 @@ use crate::engine::lens::Fallback;
 use crate::engine::lens::Lens;
 use crate::engine::lens::LensError;
 use crate::engine::lens::code_phrase::text_of;
-use crate::model::ast::Direction;
+use crate::model::ast::keyword::Direction;
 
 /// The name the `dateTime` cell carries in a diagnostic.
 pub const DATE_TIME_CELL: &str = "DV_DATE_TIME against dateTime";

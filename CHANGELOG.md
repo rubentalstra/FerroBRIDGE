@@ -455,6 +455,10 @@ crates on crates.io.
   a full emit of `hl7v2-types` took up to fourteen minutes per test under
   coverage instrumentation and pushed both past their 45-minute timeouts.
   `codegen-drift` runs `emit --check` in release.
+- `fhirconnect` splits its twelve files over 750 lines into module folders
+  (#352), with no change in behaviour; a caller imports a moved public type
+  from its child module (`engine::traverse::error::EngineError`,
+  `resolve::program::mapping::Mapping`, `model::ast::keyword::Direction`).
 - The nine `openehr-*` crates step from 0.0.71 to 0.0.72, whose generated
   ITS-REST client carries what the bridge's CDR client added around it
   (#293, FerroEHR #3487). The composition commit headers travel through the
