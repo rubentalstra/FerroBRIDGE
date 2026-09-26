@@ -30,7 +30,7 @@ use fhir_types::r4::parameters::ParametersParameter;
 use fhir_types::r4::parameters::ParametersParameterValue;
 use fhir_types::r4::resource::Resource;
 use fhir_types::r4::schema::SCHEMAS;
-use fhirconnect::engine::traverse::NoMappingFunctions;
+use fhirconnect::engine::traverse::functions::NoMappingFunctions;
 use fhirconnect::operations::TO_FHIR;
 use fhirconnect::operations::TO_OPENEHR;
 use fhirconnect::operations::contract::CompositionPayload;
@@ -40,7 +40,7 @@ use fhirconnect::operations::contract::ToOpenehrRequest;
 use fhirconnect::operations::error::OperationError;
 use fhirconnect::operations::issues;
 use fhirconnect::operations::run;
-use fhirconnect::resolve::program::TemplateId;
+use fhirconnect::resolve::program::binding::TemplateId;
 use http::StatusCode;
 use http::header::CONTENT_TYPE;
 use serde::Deserialize;
@@ -212,7 +212,8 @@ fn tofhir_answer(
     query: &OperationQuery,
     body: &str,
 ) -> Result<Response, OperationError> {
-    let mut parameters = fhirconnect::operations::contract::parameters_from_json(TO_FHIR, body)?;
+    let mut parameters =
+        fhirconnect::operations::contract::parameters::parameters_from_json(TO_FHIR, body)?;
     merge_query(&mut parameters, query);
     let request = ToFhirRequest::from_parameters(&parameters)?;
     let answer = run::to_fhir(

@@ -104,7 +104,7 @@ fi
 # One package per invocation, as the CI test lane runs them.
 for package in fhirconnect omocl ferrobridge-hl7v2; do
   if ! cargo nextest run --locked -p "$package" --no-tests=fail --no-fail-fast \
-    -E 'test(/^[a-z_]+::conformance_/)'; then
+    -E 'test(/conformance_/)'; then
     echo "conformance: a $package corpus test failed; a case its list records no longer passes"
     failed=1
   fi

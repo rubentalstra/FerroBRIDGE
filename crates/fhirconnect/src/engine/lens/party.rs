@@ -27,7 +27,7 @@ use crate::engine::lens::Fallback;
 use crate::engine::lens::Lens;
 use crate::engine::lens::LensError;
 use crate::engine::lens::code_phrase::text_of;
-use crate::model::ast::Direction;
+use crate::model::ast::keyword::Direction;
 
 /// The name the `Reference` cell carries in a diagnostic.
 pub const PARTY_CELL: &str = "PARTY_IDENTIFIED against Reference";

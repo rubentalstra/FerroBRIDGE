@@ -24,7 +24,7 @@ use crate::engine::lens::party::PartyLens;
 use crate::engine::lens::proportion::PercentLens;
 use crate::engine::lens::text::TextLens;
 use crate::engine::rm::RmValue;
-use crate::model::ast::Direction;
+use crate::model::ast::keyword::Direction;
 
 /// What a cell produced, with the one-way rows it took.
 #[derive(Debug, Clone, PartialEq)]

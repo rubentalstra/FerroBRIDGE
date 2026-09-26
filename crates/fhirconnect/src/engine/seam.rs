@@ -21,9 +21,9 @@ use core::fmt;
 use fhir_types::codec::Value;
 use sha2::Digest;
 
-use crate::engine::traverse::MappingFunctions;
-use crate::engine::traverse::NoMappingFunctions;
-use crate::resolve::program::ResourceType;
+use crate::engine::traverse::functions::MappingFunctions;
+use crate::engine::traverse::functions::NoMappingFunctions;
+use crate::resolve::program::binding::ResourceType;
 
 /// Where the resource a FHIR reference points at comes from.
 pub trait ReferenceSource: fmt::Debug {
@@ -369,7 +369,7 @@ mod tests {
     use super::IdentitySink;
     use super::NoReferences;
     use super::ReferenceSource;
-    use crate::resolve::program::ResourceType;
+    use crate::resolve::program::binding::ResourceType;
     use fhir_types::codec::Value;
 
     #[test]

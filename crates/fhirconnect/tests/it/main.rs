@@ -11,6 +11,7 @@ mod corpus;
 mod derive;
 mod engine;
 mod laws;
+mod model;
 mod operations;
 mod pins;
 mod resolve;

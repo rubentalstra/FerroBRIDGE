@@ -25,7 +25,7 @@ use fhirconnect::model::load::MappingSet;
 use fhirconnect::model::semantic::StaticMappingCodes;
 use fhirconnect::resolve::compile::compile;
 use fhirconnect::resolve::program::Program;
-use fhirconnect::resolve::program::TemplateId;
+use fhirconnect::resolve::program::binding::TemplateId;
 use fhirconnect::resolve::select::SelectError;
 use fhirconnect::resolve::select::select_by_profile_pinned;
 use openehr_mapping_core::diagnostic::Diagnostic;

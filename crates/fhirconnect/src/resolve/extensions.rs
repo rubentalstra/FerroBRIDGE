@@ -21,9 +21,9 @@ use openehr_mapping_core::diagnostic::ModelPath;
 use openehr_mapping_core::header::metadata::MappingName;
 use openehr_mapping_core::position::Position;
 
-use crate::model::ast::ExtensionMethod;
 use crate::model::ast::Mapping;
 use crate::model::ast::ModelMappingFile;
+use crate::model::ast::keyword::ExtensionMethod;
 use crate::resolve::error::ResolveCode;
 
 /// One mapping method of a merged model mapping, with the file it came from.

@@ -21,7 +21,7 @@
 //! of [`lens`], each run both ways and tested against the well-behaved-lens
 //! laws, so a cell cannot disagree with itself.
 //!
-//! The direction is [`crate::model::ast::Direction`], the type the
+//! The direction is [`crate::model::ast::keyword::Direction`], the type the
 //! `unidirectional` key already parses into: it names the same two
 //! directions, and a second enum beside it would only need converting.
 //!

@@ -20,9 +20,9 @@
 
 use fhir_types::codec::Value;
 
-use crate::model::ast::ConditionOperator;
-use crate::model::ast::Direction;
-use crate::resolve::program::Condition;
+use crate::model::ast::keyword::ConditionOperator;
+use crate::model::ast::keyword::Direction;
+use crate::resolve::program::condition::Condition;
 use crate::tree::Occurrence;
 use crate::tree::element::Location;
 use crate::tree::element::Table;
@@ -129,10 +129,12 @@ pub fn evaluate<T: Table + ?Sized>(
 }
 
 /// Returns the resolved FHIR expression a condition target names.
-fn fhir_target(target: &crate::resolve::program::Target) -> Result<&FhirPath, ConditionError> {
+fn fhir_target(
+    target: &crate::resolve::program::target::Target,
+) -> Result<&FhirPath, ConditionError> {
     match *target {
-        crate::resolve::program::Target::Fhir(ref target) => Ok(target.expression()),
-        crate::resolve::program::Target::Openehr(_) => Err(ConditionError::WrongSide),
+        crate::resolve::program::target::Target::Fhir(ref target) => Ok(target.expression()),
+        crate::resolve::program::target::Target::Openehr(_) => Err(ConditionError::WrongSide),
     }
 }
 

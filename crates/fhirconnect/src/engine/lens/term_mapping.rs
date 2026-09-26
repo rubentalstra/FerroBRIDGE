@@ -15,7 +15,7 @@ use openehr_rm::v1_2::data_types::text::term_mapping::TermMapping;
 use crate::engine::lens::Lens;
 use crate::engine::lens::LensError;
 use crate::engine::lens::code_phrase::CodePhraseLens;
-use crate::model::ast::Direction;
+use crate::model::ast::keyword::Direction;
 
 /// The `match` operator a mapping FHIR can carry writes.
 pub const EQUIVALENT: char = '=';

@@ -15,8 +15,6 @@
 pub mod archetype;
 pub mod grammar;
 pub mod metadata;
-#[cfg(test)]
-mod tests;
 
 use core::str::FromStr;
 

@@ -44,7 +44,10 @@ split into a module folder before it grows further (owner ruling 2026-09-26).
 Generated files are outside the rule. The shape of a split is a folder
 `<name>/mod.rs` holding the module doc, the `mod` declarations and the items
 every child shares, with one child file per concern; tests split the same
-way, one file per subject under `tests/it/<subject>/`. The zero-re-export rule
+way, one file per subject under `tests/it/<subject>/`. A split never creates
+a test file under `src/`: a test of private internals stays an inline
+`#[cfg(test)] mod tests` in the child whose internals it reads, and a test of
+the public API moves to `tests/it/` (`testing.md` §Where tests live). The zero-re-export rule
 stands: every import names the defining module, so a split never adds `pub
 use`. A split moves code without changing behaviour: the same tests pass
 before and after, and a defect found on the way is filed, never fixed in the

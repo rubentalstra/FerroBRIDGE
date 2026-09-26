@@ -372,7 +372,7 @@ fn compile_all(set: &mut ProgramSet, loaded: &MappingSet) -> Result<(), Error> {
         let name = context.header().name().value().clone();
         let template = template_of(context)?;
         let index = set
-            .template(&fhirconnect::resolve::program::TemplateId::new(
+            .template(&fhirconnect::resolve::program::binding::TemplateId::new(
                 template.clone(),
             ))
             .ok_or_else(|| Error::UnknownTemplate {

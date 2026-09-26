@@ -12,7 +12,7 @@ use fhir_types::operation::ParametersError;
 use fhir_types::r4::operation_outcome::OperationOutcome;
 use openehr_mapping_core::template::PathError;
 
-use crate::engine::traverse::EngineError;
+use crate::engine::traverse::error::EngineError;
 use crate::operations::issues;
 use crate::resolve::select::SelectError;
 

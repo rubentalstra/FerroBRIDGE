@@ -25,7 +25,7 @@ use openehr_rm::v1_2::data_types::text::code_phrase::CodePhrase;
 use crate::engine::lens::Fallback;
 use crate::engine::lens::Lens;
 use crate::engine::lens::LensError;
-use crate::model::ast::Direction;
+use crate::model::ast::keyword::Direction;
 
 /// The name this cell carries in a diagnostic.
 pub const CELL: &str = "CODE_PHRASE against Coding";

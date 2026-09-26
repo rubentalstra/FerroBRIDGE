@@ -21,7 +21,8 @@ use std::collections::BTreeSet;
 
 use fhir_types::codec::Value;
 use fhirconnect::engine::origin::SourceItem;
-use fhirconnect::resolve::program::TemplateId;
+use fhirconnect::engine::traverse::error::EngineError;
+use fhirconnect::resolve::program::binding::TemplateId;
 use fhirconnect::resolve::select::SelectError;
 use http::StatusCode;
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
@@ -1616,7 +1617,7 @@ impl<'a> Ingest<'a> {
         program: &Loaded,
         inbound: &Inbound,
         provenance: &Provenance,
-    ) -> Result<(CanonicalComposition, String), fhirconnect::engine::traverse::EngineError> {
+    ) -> Result<(CanonicalComposition, String), EngineError> {
         // NOTE: no specification governs this: our own design, one instant serves
         // every defaulted time of one ingest, so each resource reads the clock once.
         let now = jiff::Timestamp::now().to_string();
@@ -2588,7 +2589,7 @@ fn representation(
 /// governs this: our own design), so the answer is a `422` whose diagnostics
 /// name the mapping and the element the engine refused at.
 #[must_use]
-pub fn engine_refusal(error: &fhirconnect::engine::traverse::EngineError) -> Refused {
+pub fn engine_refusal(error: &EngineError) -> Refused {
     Refused::new(
         StatusCode::UNPROCESSABLE_ENTITY,
         Issue::error(IssueType::Processing)
