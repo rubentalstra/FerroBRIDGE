@@ -1,5 +1,5 @@
 ---
-source: tools/fhir-codegen/tests/it/v2.rs
+source: tools/fhir-codegen/tests/it/v2/structures.rs
 expression: tree
 ---
 1 MSH 1..1 Some(A)

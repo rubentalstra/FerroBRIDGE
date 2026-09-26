@@ -45,8 +45,10 @@ if [ "$mode" != files ]; then
   while IFS= read -r f; do files+=("$f"); done < <(git ls-files -- '*.rs' ':(glob,exclude)**/vendor/**')
 fi
 
+# A template under a generator's src/templates/ is the text of one generated
+# file, embedded verbatim, so it is generated output in source form.
 hand_written() {
-  case "$1" in */vendor/*) return 1 ;; esac
+  case "$1" in */vendor/*|*/src/templates/*) return 1 ;; esac
   ! head -n1 "$1" | grep -q '@generated'
 }
 

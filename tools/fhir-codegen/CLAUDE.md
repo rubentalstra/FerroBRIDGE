@@ -60,6 +60,10 @@ resources are the authority for what it emits (`.claude/rules/codegen.md`).
   toolchain formats the output so `cargo fmt --check` and the emitter agree.
 - `cargo run -p fhir-codegen -- emit` regenerates; `-- emit --check`
   is the drift check CI runs.
+- The larger modules are folders with one child per concern: `lower/`
+  (`structure`, `cycle`), `operations/` (`field`, `render`), `render_codec/`
+  (`lexical`, `primitive`, `choice`, `json`, `builder`, `serialize`),
+  `v2/lower/`, `v2/render/` and `v2/legacy/lower/`.
 - `main.rs` is thin over `lib.rs` so the loader and emitter are tested
   through the library.
 - This crate is a tool, so it may write to stdout and stderr; every such site
@@ -78,7 +82,7 @@ thing collide, the module path disambiguates (`fhir::` versus `lower::`).
 
 ## The full-emit tests run behind a gate
 
-Five integration tests emit a whole generated crate (`emit.rs` and `v2.rs`:
+Five integration tests emit a whole generated crate (`emit.rs` and `v2/emit.rs`:
 emitting twice is byte-identical, the check reports drift, the committed
 crate is in sync). A full emit takes minutes in a debug build and longer
 under coverage instrumentation, so they run only when

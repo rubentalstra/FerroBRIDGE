@@ -1,13 +1,2 @@
 # Known file-length breaches: "<lines> <path> #<issue>". A listed file passes
 # while it does not grow past its recorded count; the split removes the entry.
-1193 tools/fhir-codegen/src/lower.rs #353
-1213 tools/fhir-codegen/src/operations.rs #353
-1698 tools/fhir-codegen/src/render_codec.rs #353
-1072 tools/fhir-codegen/src/templates/codec.rs #353
-871 tools/fhir-codegen/src/templates/xml.rs #353
-1417 tools/fhir-codegen/src/v2/legacy/lower.rs #353
-1982 tools/fhir-codegen/src/v2/lower.rs #353
-1130 tools/fhir-codegen/src/v2/render.rs #353
-786 tools/fhir-codegen/tests/it/operations.rs #353
-1205 tools/fhir-codegen/tests/it/v2.rs #353
-774 tools/fhir-codegen/tests/it/v2_legacy.rs #353

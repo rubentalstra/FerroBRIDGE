@@ -41,7 +41,9 @@ generation discipline: `codegen.md`.
 
 A hand-written Rust file is at most 1000 lines, and a file over 750 lines is
 split into a module folder before it grows further (owner ruling 2026-09-26).
-Generated files are outside the rule. The shape of a split is a folder
+Generated files are outside the rule, and so is a template under a
+generator's `src/templates/`, which is the text of one generated file embedded
+verbatim. The shape of a split is a folder
 `<name>/mod.rs` holding the module doc, the `mod` declarations and the items
 every child shares, with one child file per concern; tests split the same
 way, one file per subject under `tests/it/<subject>/`. A split never creates
