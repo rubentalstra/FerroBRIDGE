@@ -12,14 +12,45 @@
 [![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/rubentalstra/FerroBRIDGE?sort=semver)](https://github.com/rubentalstra/FerroBRIDGE/releases/latest)
 
-**Conformance**, one badge per corpus the tests measure (`conformance/`, #366 adds a row per standard and per HL7 v2 message family):
+**Conformance**, measured by the corpus tests under `conformance/`; each badge links to its pass list.
 
+FHIRconnect 1.0.0:
 [![FHIRconnect mapping library](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Ffhirconnect-mapping-lib.json)](conformance/fhirconnect-mapping-lib/pass-list.txt)
-[![OMOCL mapping library](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fomocl.json)](conformance/omocl/pass-list.txt)
-[![FHIR round-trip laws](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Froundtrip.json)](conformance/roundtrip/pass-list.txt)
 [![FHIRconnect REST API (draft)](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fdraft-rest-api.json)](conformance/draft-rest-api/pass-list.txt)
+
+OMOCL 1.0.0:
+[![OMOCL mapping library](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fomocl.json)](conformance/omocl/pass-list.txt)
+
+FHIR R4:
+[![FHIR round-trip laws](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Froundtrip.json)](conformance/roundtrip/pass-list.txt)
+
+HL7 v2, by corpus, then by message family and by version across both corpora:
 [![HL7 v2 message corpora](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2.json)](conformance/hl7v2/pass-list.txt)
 [![HL7 v2 smoke corpora (NIST, AIRA)](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-smoke.json)](conformance/hl7v2-smoke/pass-list.txt)
+[![HL7 v2 ACK](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-ack.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 ADT](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-adt.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 BAR](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-bar.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 DFT](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-dft.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 MDM](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-mdm.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 OMG](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-omg.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 OML](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-oml.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 ORL](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-orl.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 ORM](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-orm.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 ORU](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-oru.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 OUL](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-oul.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 PPR](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-ppr.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 RDE](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-rde.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 RDS](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-rds.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 REF](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-ref.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 SIU](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-siu.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2 VXU](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-family-vxu.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2.3](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-version-2.3.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2.3.1](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-version-2.3.1.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2.4](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-version-2.4.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2.5](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-version-2.5.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2.5.1](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-version-2.5.1.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2.6](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-version-2.6.json)](conformance/hl7v2/pass-list.txt)
+[![HL7 v2.8](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2-version-2.8.json)](conformance/hl7v2/pass-list.txt)
 <!-- badges:end -->
 
 A pure-Rust, standalone bridge between openEHR and two interoperability

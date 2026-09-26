@@ -102,6 +102,10 @@ pub struct Case {
     failure: Option<String>,
     /// What the case counted beside its verdict, by kind.
     outcomes: BTreeMap<String, usize>,
+    /// The HL7 v2 message family of the case, or `None` outside those corpora.
+    family: Option<String>,
+    /// The HL7 v2 version the case declares, or `None` outside those corpora.
+    version: Option<String>,
 }
 
 impl Case {
@@ -112,6 +116,8 @@ impl Case {
             id: id.into(),
             failure: None,
             outcomes: BTreeMap::new(),
+            family: None,
+            version: None,
         }
     }
 
@@ -122,6 +128,8 @@ impl Case {
             id: id.into(),
             failure: Some(reason.into()),
             outcomes: BTreeMap::new(),
+            family: None,
+            version: None,
         }
     }
 
@@ -133,6 +141,34 @@ impl Case {
     pub fn with_outcomes(mut self, outcomes: BTreeMap<String, usize>) -> Self {
         self.outcomes = outcomes;
         self
+    }
+
+    /// Returns the case with the HL7 v2 message family it belongs to, such as
+    /// `ADT`, which the gate counts its family badges by.
+    #[must_use]
+    pub fn with_family(mut self, family: impl Into<String>) -> Self {
+        self.family = Some(family.into());
+        self
+    }
+
+    /// Returns the case with the HL7 v2 version its message declares, such as
+    /// `2.5.1`, which the gate counts its version badges by.
+    #[must_use]
+    pub fn with_version(mut self, version: impl Into<String>) -> Self {
+        self.version = Some(version.into());
+        self
+    }
+
+    /// Returns the HL7 v2 message family of the case, when it has one.
+    #[must_use]
+    pub fn family(&self) -> Option<&str> {
+        self.family.as_deref()
+    }
+
+    /// Returns the HL7 v2 version of the case, when it has one.
+    #[must_use]
+    pub fn version(&self) -> Option<&str> {
+        self.version.as_deref()
     }
 
     /// Returns what the case counted beside its verdict.
@@ -301,6 +337,8 @@ fn write_result(corpus: Corpus, verdicts: &BTreeMap<&str, &Case>) -> Result<(), 
                 "passed": case.passed(),
                 "failure": case.failure,
                 "outcomes": case.outcomes,
+                "family": case.family,
+                "version": case.version,
             })
         })
         .collect();
@@ -458,6 +496,18 @@ mod tests {
         assert_eq!(case.outcomes(), &outcomes);
         let failed = Case::fail("b.hl7", "refused").with_outcomes(outcomes);
         assert_eq!(failed.failure(), Some("refused"));
+    }
+
+    #[test]
+    fn a_case_carries_no_family_or_version_until_it_is_given_one() {
+        let plain = Case::pass("a.yml");
+        assert_eq!((plain.family(), plain.version()), (None, None));
+        let message = Case::fail("b.hl7", "refused")
+            .with_family("ADT")
+            .with_version("2.5.1");
+        assert_eq!(message.family(), Some("ADT"));
+        assert_eq!(message.version(), Some("2.5.1"));
+        assert_eq!(message.failure(), Some("refused"));
     }
 
     #[test]

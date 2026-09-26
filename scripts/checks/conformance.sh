@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: BUSL-1.1
 # The conformance gate (#24): runs the six corpus tests, compares what they
 # measured with the committed pass lists under conformance/, and renders one
-# shields.io endpoint badge per corpus (https://shields.io/badges/endpoint-badge).
+# shields.io endpoint badge per corpus (https://shields.io/badges/endpoint-badge),
+# one per HL7 v2 message family and one per HL7 v2 version (#366), and the
+# README block between badges:begin and badges:end from those badges.
 #
 #   scripts/checks/conformance.sh            # run and compare; warn on drift
-#   scripts/checks/conformance.sh --update   # run and rewrite lists and badges
+#   scripts/checks/conformance.sh --update   # run and rewrite lists, badges, README block
 #   scripts/checks/conformance.sh --check    # run and fail on any drift (CI)
 #
 # The tests write target/conformance/<corpus>.json through the testkit's
@@ -14,8 +16,14 @@
 # FERROBRIDGE_CONFORMANCE_UPDATE is 1, so the lists come from the same tests
 # the suite runs. A case the list records that no longer passes fails every
 # mode. Under --check, an unlisted passing case, a moved total, a badge that
-# disagrees with its list, and a README badge naming no committed badge fail
-# too, because the list is what the ratchet protects.
+# disagrees with what --update would write, a family or version badge no case
+# counts, and a README block that disagrees with the badges fail too, because
+# the list is what the ratchet protects.
+#
+# The family and version badges count the cases of both HL7 v2 corpora by the
+# family (MSH-9.1) and the version (MSH-12) the corpus test records per case:
+# one badge per family with at least one case, by family code, and one per
+# version seen. They link to the hl7v2 pass list.
 #
 # The hl7v2-smoke corpus reads the NIST and AIRA sets, which it fetches first
 # through scripts/vendor/hl7v2-samples.sh --build-time (a no-op when they are
@@ -36,6 +44,18 @@ cd "$(dirname "$0")/../.."
 readonly CORPORA=(fhirconnect-mapping-lib omocl roundtrip draft-rest-api hl7v2 hl7v2-smoke)
 readonly OUT=target/conformance
 readonly BADGES=conformance/badges
+# The shields.io endpoint prefix every conformance badge file is read through.
+readonly ENDPOINT='https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2F'
+# The build badges, the first row of the README block.
+readonly BUILD_BADGES=(
+  '[![CI](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/ci.yml/badge.svg)](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/ci.yml)'
+  '[![CodeQL](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml/badge.svg)](https://github.com/rubentalstra/FerroBRIDGE/actions/workflows/codeql.yml)'
+  '[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/rubentalstra/FerroBRIDGE/badge)](https://scorecard.dev/viewer/?uri=github.com/rubentalstra/FerroBRIDGE)'
+  '[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rubentalstra_FerroBRIDGE&metric=alert_status)](https://sonarcloud.io/summary/overall?id=rubentalstra_FerroBRIDGE)'
+  '[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=rubentalstra_FerroBRIDGE&metric=coverage)](https://sonarcloud.io/summary/new_code?id=rubentalstra_FerroBRIDGE)'
+  '[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)'
+  '[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/rubentalstra/FerroBRIDGE?sort=semver)](https://github.com/rubentalstra/FerroBRIDGE/releases/latest)'
+)
 
 mode=compare
 case "${1:-}" in
@@ -77,18 +97,35 @@ colour_of() {
   fi
 }
 
+# The badge JSON of a label and k passing out of n.
+fraction_badge() {
+  jq -cn --arg label "$1" --arg message "$2 / $3" --arg color "$(colour_of "$2" "$3")" \
+    '{schemaVersion: 1, label: $label, message: $message, color: $color}'
+}
+
 # The badge JSON a pass list implies.
 badge_of() {
   local corpus="$1" list="conformance/$1/pass-list.txt" passed total
   passed="$(grep -vc '^total ' "$list" || true)"
   total="$(sed -n 's/^total \([0-9][0-9]*\)$/\1/p' "$list")"
   [[ -n "$total" ]] || { echo "conformance: $list has no total line" >&2; return 2; }
-  jq -cn --arg label "$(label_of "$corpus")" --arg message "$passed / $total" \
-    --arg color "$(colour_of "$passed" "$total")" \
-    '{schemaVersion: 1, label: $label, message: $message, color: $color}'
+  fraction_badge "$(label_of "$corpus")" "$passed" "$total"
 }
 
 failed=0
+
+# Writes badge $1 as $2 under --update, else compares it with the file and
+# names $3, what the badge is rendered from, when they disagree.
+emit_badge() {
+  local badge="$BADGES/$1.json"
+  if [[ "$mode" = update ]]; then
+    mkdir -p "$BADGES"
+    printf '%s\n' "$2" >"$badge"
+  elif [[ ! -f "$badge" ]] || [[ "$(cat "$badge")" != "$2" ]]; then
+    echo "conformance: $badge disagrees with $3; run $0 --update"
+    if [[ "$mode" = check ]]; then failed=1; fi
+  fi
+}
 
 rm -rf "$OUT"
 export FERROBRIDGE_CONFORMANCE_OUT="$PWD/$OUT"
@@ -141,33 +178,105 @@ for corpus in "${CORPORA[@]}"; do
     echo "conformance: $corpus holds $measured_total cases and its list records $listed_total; run $0 --update"
     if [[ "$mode" = check ]]; then failed=1; fi
   fi
+  emit_badge "$corpus" "$(badge_of "$corpus")" "$list"
+done
 
-  badge="$BADGES/$corpus.json"
-  rendered="$(badge_of "$corpus")"
-  if [[ "$mode" = update ]]; then
-    mkdir -p "$BADGES"
-    printf '%s\n' "$rendered" >"$badge"
-  elif [[ ! -f "$badge" ]] || [[ "$(cat "$badge")" != "$rendered" ]]; then
-    echo "conformance: $badge disagrees with $list; run $0 --update"
-    if [[ "$mode" = check ]]; then failed=1; fi
+# Every case of both HL7 v2 corpora, and the passing and total count of the
+# cases whose field $1 is $2.
+hl7v2_cases="$(jq -c -s '[.[].cases[]]' "$OUT/hl7v2.json" "$OUT/hl7v2-smoke.json")"
+fraction_of() {
+  jq -r --arg field "$1" --arg value "$2" \
+    '[.[] | select(.[$field] == $value)] | "\([.[] | select(.passed)] | length) \(length)"' \
+    <<<"$hl7v2_cases"
+}
+
+families=()
+while IFS= read -r family; do
+  [[ -n "$family" ]] || continue
+  read -r passed total < <(fraction_of family "$family")
+  name="hl7v2-family-$(tr '[:upper:]' '[:lower:]' <<<"$family")"
+  families+=("$name")
+  emit_badge "$name" "$(fraction_badge "$family" "$passed" "$total")" "the HL7 v2 results"
+done < <(jq -r '[.[] | .family | select(. != null and test("^[A-Z0-9]+$"))] | unique | .[]' \
+  <<<"$hl7v2_cases" | LC_ALL=C sort)
+versions=()
+while IFS= read -r version; do
+  [[ -n "$version" ]] || continue
+  read -r passed total < <(fraction_of version "$version")
+  name="hl7v2-version-$version"
+  versions+=("$name")
+  emit_badge "$name" "$(fraction_badge "v$version" "$passed" "$total")" "the HL7 v2 results"
+done < <(jq -r '[.[] | .version | select(. != null and test("^[0-9]+(\\.[0-9]+)+$"))]
+  | unique | sort_by(split(".") | map(tonumber)) | .[]' <<<"$hl7v2_cases")
+
+# A family or version badge no case counts any more goes with --update.
+derived=" ${families[*]-} ${versions[*]-} "
+for stale in "$BADGES"/hl7v2-family-*.json "$BADGES"/hl7v2-version-*.json; do
+  [[ -f "$stale" ]] || continue
+  if [[ "$derived" != *" $(basename "$stale" .json) "* ]]; then
+    if [[ "$mode" = update ]]; then
+      rm "$stale"
+    else
+      echo "conformance: $stale counts no case any more; run $0 --update"
+      if [[ "$mode" = check ]]; then failed=1; fi
+    fi
   fi
 done
 
-# Every conformance badge the README shows names a committed badge file, and
-# every corpus has one on the README.
-readme_badges="$(grep -oE 'conformance%2Fbadges%2F[a-z0-9-]+\.json' README.md | sed 's/.*%2F//' || true)"
-for corpus in "${CORPORA[@]}"; do
-  if ! grep -qx "$corpus.json" <<<"$readme_badges"; then
-    echo "conformance: README.md shows no badge for $corpus"
-    failed=1
-  fi
-done
-while IFS= read -r named; do
-  [[ -n "$named" ]] || continue
-  if [[ ! -f "$BADGES/$named" ]]; then
-    echo "conformance: README.md names $BADGES/$named, which does not exist"
-    failed=1
-  fi
-done <<<"$readme_badges"
+# The markdown of one badge: its alt text, its badge file, the list it links to.
+badge_link() {
+  echo "[![$1](${ENDPOINT}${2}.json)]($3)"
+}
+
+# The README block with its markers, in a fixed order: the build badges, then
+# one row per standard, the HL7 v2 row closing on its family and version badges.
+render_block() {
+  local name
+  echo '<!-- badges:begin -->'
+  printf '%s\n' "${BUILD_BADGES[@]}"
+  echo
+  echo "**Conformance**, measured by the corpus tests under \`conformance/\`; each badge links to its pass list."
+  echo
+  echo 'FHIRconnect 1.0.0:'
+  badge_link "$(label_of fhirconnect-mapping-lib)" fhirconnect-mapping-lib conformance/fhirconnect-mapping-lib/pass-list.txt
+  badge_link "$(label_of draft-rest-api)" draft-rest-api conformance/draft-rest-api/pass-list.txt
+  echo
+  echo 'OMOCL 1.0.0:'
+  badge_link "$(label_of omocl)" omocl conformance/omocl/pass-list.txt
+  echo
+  echo 'FHIR R4:'
+  badge_link "$(label_of roundtrip)" roundtrip conformance/roundtrip/pass-list.txt
+  echo
+  echo 'HL7 v2, by corpus, then by message family and by version across both corpora:'
+  badge_link "$(label_of hl7v2)" hl7v2 conformance/hl7v2/pass-list.txt
+  badge_link "$(label_of hl7v2-smoke)" hl7v2-smoke conformance/hl7v2-smoke/pass-list.txt
+  for name in ${families[@]+"${families[@]}"}; do
+    badge_link "HL7 v2 $(tr '[:lower:]' '[:upper:]' <<<"${name#hl7v2-family-}")" "$name" conformance/hl7v2/pass-list.txt
+  done
+  for name in ${versions[@]+"${versions[@]}"}; do
+    badge_link "HL7 v${name#hl7v2-version-}" "$name" conformance/hl7v2/pass-list.txt
+  done
+  echo '<!-- badges:end -->'
+}
+
+block="$(render_block)"
+if ! grep -qx '<!-- badges:begin -->' README.md || ! grep -qx '<!-- badges:end -->' README.md; then
+  echo "conformance: README.md has no badges:begin and badges:end markers"
+  exit 1
+fi
+if [[ "$mode" = update ]]; then
+  rendered="$(mktemp)"
+  trap 'rm -f "$rendered" "$rendered.readme"' EXIT
+  printf '%s\n' "$block" >"$rendered"
+  awk -v block="$rendered" '
+    $0 == "<!-- badges:begin -->" { while ((getline line < block) > 0) print line; skipping = 1; next }
+    $0 == "<!-- badges:end -->" { skipping = 0; next }
+    !skipping { print }
+  ' README.md >"$rendered.readme"
+  cat "$rendered.readme" >README.md
+elif [[ "$(sed -n '/^<!-- badges:begin -->$/,/^<!-- badges:end -->$/p' README.md)" != "$block" ]]; then
+  echo "conformance: the README.md badge block disagrees with the badge files; run $0 --update"
+  if [[ "$mode" = check ]]; then failed=1; fi
+fi
 
 exit "$failed"
