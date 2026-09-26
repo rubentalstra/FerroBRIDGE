@@ -16,7 +16,10 @@
 //! openEHR is a registered trademark of the openEHR Foundation.
 
 pub mod commit;
+mod composition;
 pub mod config;
+mod contribution;
+mod ehr;
 pub mod error;
 pub mod ids;
 pub mod query;
@@ -27,41 +30,16 @@ use http::HeaderMap;
 use http::HeaderName;
 use http::HeaderValue;
 use http::StatusCode;
-use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
-use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
 use openehr_its::rest::client::Client;
 use openehr_its::rest::client::ClientError;
 use openehr_its::rest::client::Credentials;
 use openehr_its::rest::client::ReqwestTransport;
 use openehr_its::rest::client::RetryPolicy;
 use openehr_its::rest::generated::common::Identifier;
-use openehr_its::rest::generated::ehr::CompositionCreateParams;
-use openehr_its::rest::generated::ehr::CompositionDeleteParams;
-use openehr_its::rest::generated::ehr::CompositionGetParams;
-use openehr_its::rest::generated::ehr::CompositionUpdateParams;
-use openehr_its::rest::generated::ehr::ContributionCreateParams;
-use openehr_its::rest::generated::ehr::ContributionGetParams;
-use openehr_its::rest::generated::ehr::EhrCreateParams;
-use openehr_its::rest::generated::ehr::EhrGetByIdParams;
-use openehr_its::rest::generated::ehr::EhrGetBySubjectParams;
-use openehr_its::rest::generated::ehr::NewContribution;
-use openehr_its::rest::generated::ehr::client::CompositionCreateOutcome;
-use openehr_its::rest::generated::ehr::client::CompositionDeleteOutcome;
-use openehr_its::rest::generated::ehr::client::CompositionGetOutcome;
-use openehr_its::rest::generated::ehr::client::CompositionUpdateOutcome;
-use openehr_its::rest::generated::ehr::client::ContributionCreateOutcome;
-use openehr_its::rest::generated::ehr::client::ContributionGetOutcome;
-use openehr_its::rest::generated::ehr::client::EhrClient;
-use openehr_its::rest::generated::ehr::client::EhrCreateOutcome;
-use openehr_its::rest::generated::ehr::client::EhrGetByIdOutcome;
-use openehr_its::rest::generated::ehr::client::EhrGetBySubjectOutcome;
 use openehr_rm::v1_2::common::change_control::contribution::Contribution;
-use openehr_rm::v1_2::composition::composition::Composition;
-use openehr_rm::v1_2::ehr::ehr_status::EhrStatus;
 use serde::de::DeserializeOwned;
 
-use crate::cdr::commit::CommitContext;
 use crate::cdr::config::CdrConfig;
 use crate::cdr::error::CdrError;
 use crate::cdr::error::Upstream;
@@ -69,8 +47,6 @@ use crate::cdr::ids::ContributionUid;
 use crate::cdr::ids::EhrId;
 use crate::cdr::ids::IdError;
 use crate::cdr::ids::RequestId;
-use crate::cdr::ids::SubjectId;
-use crate::cdr::ids::SubjectNamespace;
 use crate::cdr::transport::Scoped;
 
 /// The openEHR ITS-REST release the bridge speaks.
@@ -270,265 +246,6 @@ impl CdrClient {
         };
         tracing::debug!(status = %status, "the openEHR service answered a probe");
         Ok(status)
-    }
-
-    /// Creates an EHR with a server-assigned identifier.
-    ///
-    /// `status` is the optional `EHR_STATUS` the service commits with the new
-    /// EHR (`ehr-codegen.openapi.yaml`, `ehr_create`). The call is a `POST`,
-    /// so it is never retried.
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the call did not reach a documented answer.
-    pub async fn create_ehr(
-        &self,
-        status: Option<&EhrStatus>,
-        prefer: Prefer,
-    ) -> Result<Answered<EhrCreateOutcome>, CdrError> {
-        let client = self.call(HeaderMap::new())?;
-        let params = EhrCreateParams {
-            prefer: Some(prefer.param()),
-            accept: None,
-            content_type: None,
-            openehr_version: None,
-            openehr_audit_details: None,
-        };
-        let answered = EhrClient::new(&client).ehr_create(&params, status).await;
-        answered_by(&client, answered)
-    }
-
-    /// Retrieves the EHR with `ehr_id` (`ehr-codegen.openapi.yaml`,
-    /// `ehr_get_by_id`).
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the call did not reach a documented answer.
-    pub async fn ehr(&self, ehr_id: &EhrId) -> Result<Answered<EhrGetByIdOutcome>, CdrError> {
-        let client = self.call(representation())?;
-        let params = EhrGetByIdParams {
-            ehr_id: String::from(ehr_id.as_str()),
-            accept: None,
-        };
-        let answered = EhrClient::new(&client).ehr_get_by_id(&params).await;
-        answered_by(&client, answered)
-    }
-
-    /// Retrieves the EHR whose subject is `subject_id` in `namespace`.
-    ///
-    /// The parameters are matched against
-    /// `EHR_STATUS.subject.external_ref.id.value` and
-    /// `EHR_STATUS.subject.external_ref.namespace`
-    /// (`ehr-codegen.openapi.yaml`, `ehr_get_by_subject`).
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the call did not reach a documented answer.
-    pub async fn ehr_by_subject(
-        &self,
-        subject_id: &SubjectId,
-        namespace: &SubjectNamespace,
-    ) -> Result<Answered<EhrGetBySubjectOutcome>, CdrError> {
-        let client = self.call(representation())?;
-        let params = EhrGetBySubjectParams {
-            subject_id: String::from(subject_id.as_str()),
-            subject_namespace: String::from(namespace.as_str()),
-            accept: None,
-        };
-        let answered = EhrClient::new(&client).ehr_get_by_subject(&params).await;
-        answered_by(&client, answered)
-    }
-
-    /// Commits the first version of a composition into the EHR `ehr_id`.
-    ///
-    /// The body is canonical JSON, the mandatory composition representation of
-    /// ITS-REST 1.1.0, and `commit` renders the committal metadata headers.
-    /// The call is a `POST`, so it is never retried.
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the commit metadata cannot travel in a header
-    /// or the call did not reach a documented answer.
-    pub async fn create_composition(
-        &self,
-        ehr_id: &EhrId,
-        composition: &Composition,
-        commit: &CommitContext,
-        prefer: Prefer,
-    ) -> Result<Answered<CompositionCreateOutcome>, CdrError> {
-        let headers = commit.headers()?;
-        let client = self.call(HeaderMap::new())?;
-        let params = CompositionCreateParams {
-            ehr_id: String::from(ehr_id.as_str()),
-            prefer: Some(prefer.param()),
-            accept: None,
-            content_type: None,
-            openehr_item_tag: None,
-            openehr_version_item_tag: None,
-            openehr_version: headers.version,
-            openehr_audit_details: headers.audit_details,
-            openehr_template_id: headers.template_id,
-        };
-        let answered = EhrClient::new(&client)
-            .composition_create(&params, composition)
-            .await;
-        answered_by(&client, answered)
-    }
-
-    /// Commits a new version of the composition `versioned_object_uid`.
-    ///
-    /// `preceding` is the latest version the caller knows of; it travels as
-    /// the `If-Match` header, quoted and without the `W/` an `ETag` carries.
-    /// The call is idempotent under that precondition, so the retry budget
-    /// applies.
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the commit metadata cannot travel in a header
-    /// or the call did not reach a documented answer.
-    pub async fn update_composition(
-        &self,
-        ehr_id: &EhrId,
-        versioned_object_uid: &HierObjectId,
-        preceding: &ObjectVersionId,
-        composition: &Composition,
-        commit: &CommitContext,
-        prefer: Prefer,
-    ) -> Result<Answered<CompositionUpdateOutcome>, CdrError> {
-        let headers = commit.headers()?;
-        let client = self.call(HeaderMap::new())?;
-        let params = CompositionUpdateParams {
-            ehr_id: String::from(ehr_id.as_str()),
-            uid_based_id: String::from(versioned_object_uid.value()),
-            if_match: if_match_value(preceding),
-            prefer: Some(prefer.param()),
-            accept: None,
-            content_type: None,
-            openehr_item_tag: None,
-            openehr_version_item_tag: None,
-            openehr_version: headers.version,
-            openehr_audit_details: headers.audit_details,
-            openehr_template_id: headers.template_id,
-        };
-        let answered = EhrClient::new(&client)
-            .composition_update(&params, composition)
-            .await;
-        answered_by(&client, answered)
-    }
-
-    /// Retrieves a version of a composition.
-    ///
-    /// "The `uid_based_id` can take a form of an `OBJECT_VERSION_ID` identifier
-    /// taken from `VERSION.uid.value` …, or a form of a `HIER_OBJECT_ID`
-    /// identifier taken from `VERSIONED_OBJECT.uid.value`"
-    /// (`ehr-codegen.openapi.yaml`, `composition_get`). `at` selects the
-    /// version extant at that time and is only meaningful when `uid_based_id`
-    /// is a version container.
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the call did not reach a documented answer.
-    pub async fn composition(
-        &self,
-        ehr_id: &EhrId,
-        uid_based_id: &UidBasedId,
-        at: Option<&VersionAtTime>,
-    ) -> Result<Answered<CompositionGetOutcome>, CdrError> {
-        let client = self.call(representation())?;
-        let params = CompositionGetParams {
-            ehr_id: String::from(ehr_id.as_str()),
-            uid_based_id: String::from(uid_based_id.value()),
-            version_at_time: at.map(|at| String::from(at.as_str())),
-            accept: None,
-        };
-        let answered = EhrClient::new(&client).composition_get(&params).await;
-        answered_by(&client, answered)
-    }
-
-    /// Deletes the composition whose latest version is `preceding`.
-    ///
-    /// "The `uid_based_id` MUST be in a form of an `OBJECT_VERSION_ID`
-    /// identifier taken from the last (most recent) `VERSION.uid.value`"
-    /// (`ehr-codegen.openapi.yaml`, `composition_delete`), which is why this
-    /// call takes a version identifier and is retryable.
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the call did not reach a documented answer.
-    pub async fn delete_composition(
-        &self,
-        ehr_id: &EhrId,
-        preceding: &ObjectVersionId,
-    ) -> Result<Answered<CompositionDeleteOutcome>, CdrError> {
-        let client = self.call(representation())?;
-        let params = CompositionDeleteParams {
-            ehr_id: String::from(ehr_id.as_str()),
-            uid_based_id: String::from(preceding.value()),
-            openehr_version: None,
-            openehr_audit_details: None,
-        };
-        let answered = EhrClient::new(&client).composition_delete(&params).await;
-        answered_by(&client, answered)
-    }
-
-    /// Commits a CONTRIBUTION into the EHR `ehr_id`.
-    ///
-    /// The versions and their audits travel in the body, which is why this
-    /// call sends no committal metadata header: the `NewContribution` schema
-    /// carries `audit` and each `versions[i].commit_audit` itself
-    /// (`ehr-codegen.openapi.yaml`, `contribution_create`). The call is a
-    /// `POST`, so it is never retried.
-    ///
-    /// # Errors
-    /// Returns [`CdrError::CommittedBody`], naming the committed contribution,
-    /// when a `201` body is not JSON, and [`CdrError`] otherwise when the call
-    /// did not reach a documented answer.
-    pub async fn create_contribution(
-        &self,
-        ehr_id: &EhrId,
-        contribution: &NewContribution,
-        prefer: Prefer,
-    ) -> Result<Answered<ContributionCreateOutcome>, CdrError> {
-        let client = self.call(HeaderMap::new())?;
-        let params = ContributionCreateParams {
-            ehr_id: String::from(ehr_id.as_str()),
-            prefer: Some(prefer.param()),
-            accept: None,
-            content_type: None,
-            openehr_template_id: None,
-        };
-        let answered = EhrClient::new(&client)
-            .contribution_create(&params, contribution)
-            .await;
-        match answered {
-            Err(source @ ClientError::Body { status, .. }) if status == StatusCode::CREATED => {
-                let upstream = client.transport().answered();
-                let etag = upstream
-                    .as_ref()
-                    .and_then(|upstream| upstream.header("etag"));
-                let contribution_uid =
-                    contribution_uid_from_etag("contribution_create", status, etag.as_deref())?;
-                Err(CdrError::CommittedBody {
-                    contribution_uid,
-                    source: Box::new(source),
-                })
-            }
-            answered => answered_by(&client, answered),
-        }
-    }
-
-    /// Retrieves the CONTRIBUTION `contribution_uid` of the EHR `ehr_id`
-    /// (`ehr-codegen.openapi.yaml`, `contribution_get`). The call is a `GET`,
-    /// so the retry budget applies.
-    ///
-    /// # Errors
-    /// Returns [`CdrError`] when the call did not reach a documented answer.
-    pub async fn contribution(
-        &self,
-        ehr_id: &EhrId,
-        contribution_uid: &ContributionUid,
-    ) -> Result<Answered<ContributionGetOutcome>, CdrError> {
-        let client = self.call(representation())?;
-        let params = ContributionGetParams {
-            ehr_id: String::from(ehr_id.as_str()),
-            contribution_uid: String::from(contribution_uid.as_str()),
-            accept: None,
-        };
-        let answered = EhrClient::new(&client).contribution_get(&params).await;
-        answered_by(&client, answered)
     }
 }
 

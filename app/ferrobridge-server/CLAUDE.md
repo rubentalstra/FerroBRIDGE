@@ -11,9 +11,12 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   (`.claude/rules/rust-style.md` §Default values). The per-field
   `#[serde(default = "path")]` form is banned, and so is a `fn default_x()`.
 - **A new configuration key is three changes in one edit**: the field with its
-  default, the Operate page's variable table in `website/book/src/operate/`,
-  and a case in `tests/it/config.rs`. A key with no documented variable name is
-  a key an operator cannot set.
+  default in `src/config/section.rs` (the file tree), the Operate page's
+  variable table in `website/book/src/operate/`, and a case under
+  `tests/it/config/`. A key with no documented variable name is a key an
+  operator cannot set. `src/config/` holds the tree and its resolved settings
+  in `mod.rs`, the environment overrides in `overrides`, each lane's
+  resolution in `resolve` and the upstream credentials in `credentials`.
 - **A secret is reachable through a `<key>_file` sibling, read once at boot**,
   and lives in a `SecretString` after that. A value and its `_file` together is
   a boot error, and so is an unknown key. The refusal names the key.
@@ -50,7 +53,9 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   beside each outcome for the `ETag` of an adl2 template or of a `201` whose
   body does not decode, the ids an `ETag` names, the two-route template fetch
   and the AQL paging. A gap in the generated client is a request to
-  `openehr-its`, never a hand-written copy of the operation here.
+  `openehr-its`, never a hand-written copy of the operation here. `mod.rs`
+  holds the handle and the answer helpers; the `CdrClient` calls sit in
+  `ehr`, `composition` and `contribution`, one child per resource group.
 - **A documented status is an outcome, never an error**, and a refusal keeps
   the status and the `ErrorBody` the outcome or `ClientError` carries, so the
   facade's status table diagnoses it (`facade::status::diagnostics`).
@@ -95,7 +100,12 @@ the real run path; a binary-only crate cannot be imported from `tests/`
   writes into the CDR calls that one service: a second map-and-commit loop is
   the duplication it exists to prevent. The Bundle path's rule for an entry no
   program maps is explicit on the call (`UnmappedEntries`), and the
-  transaction route passes `Refuse`.
+  transaction route passes `Refuse`. `src/facade/ingest/` is cut by path:
+  `single` (the single create and update), `transaction` and `entries` (the
+  Bundle), `reconcile` (a delivery an earlier one committed or consumed),
+  `pairing` (a contribution's versions to the entries sent, with the content
+  tie-break), `claim`, `binding` (the engine run and the identity record) and
+  `refusal`; the public types stay in `mod.rs`.
 - **The HL7 v2 face (`src/hl7v2/`) is a face, never a second pipeline.** It
   owns the MLLP listener, the message's span and the acknowledgment; the
   mapping is `ferrobridge-hl7v2`'s and the write is `Ingest::ingest_bundle`

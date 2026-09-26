@@ -2,13 +2,6 @@
 # while it does not grow past its recorded count; the split removes the entry.
 3196 #354
 937 #354
-802 app/ferrobridge-server/src/cdr/mod.rs #354
-1570 app/ferrobridge-server/src/config.rs #354
-2763 app/ferrobridge-server/src/facade/ingest.rs #354
-805 app/ferrobridge-server/tests/it/config.rs #354
-937 app/ferrobridge-server/tests/it/etl.rs #354
-3635 app/ferrobridge-server/tests/it/facade.rs #354
-842 app/ferrobridge-server/tests/it/operations.rs #354
 1094 crates/ferrobridge-hl7v2/src/map/condition.rs #355
 5178 crates/ferrobridge-hl7v2/src/map/run.rs #355
 1470 crates/ferrobridge-hl7v2/src/parse.rs #355
