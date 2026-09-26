@@ -1457,14 +1457,8 @@ impl<'a> Run<'a> {
             self.table(leaf, &resolved, mapped_via, datum, at, reference);
             return Ok(());
         }
-        let target_type = match resolved.location() {
-            fhirconnect::tree::element::Location::Complex(schema) => String::from(schema.name),
-            _ => String::from(
-                resolved
-                    .type_code()
-                    .or_else(|| alternative(&resolved))
-                    .unwrap_or_default(),
-            ),
+        let Some(target_type) = self.target_type(&resolved, at, reference) else {
+            return Ok(());
         };
         let complex = matches!(
             resolved.location(),
@@ -1996,6 +1990,25 @@ impl<'a> Run<'a> {
                 None
             }
         }
+    }
+
+    /// The FHIR type a value at `resolved` is rendered as, counting
+    /// `untyped-target` when the element has no single type.
+    fn target_type(
+        &mut self,
+        resolved: &fhirconnect::tree::element::Resolved,
+        at: &Location,
+        reference: &RowRef,
+    ) -> Option<String> {
+        let code = resolved.type_code();
+        if code.is_none() {
+            self.outcomes.push(Outcome::UntypedTarget {
+                at: at.clone(),
+                row: reference.clone(),
+                element: String::from(resolved.leaf()),
+            });
+        }
+        code.map(String::from)
     }
 
     /// Extends `base` by `steps`, giving each step its instance key: its label,
@@ -2944,7 +2957,7 @@ fn refusal(
     ) {
         return None;
     }
-    let code = resolved.type_code().or_else(|| alternative(resolved))?;
+    let code = resolved.type_code()?;
     let error = constraint::lexical(code, value).err()?;
     Some((String::from(resolved.leaf()), code, error))
 }
@@ -2961,28 +2974,6 @@ fn resolve_path(
     };
     let path = text.parse::<FhirPath>()?;
     Ok(resolve(&SCHEMAS, resource_type, &path)?)
-}
-
-/// The type of the choice alternative a path ends on, read from the element
-/// table's entry: the listed type whose name the JSON key's suffix spells
-/// (<https://hl7.org/fhir/R4/json.html>, choice elements).
-///
-/// `Resolved::type_code` answers `None` for a resolved choice alternative,
-/// since the table entry lists every alternative.
-fn alternative(resolved: &fhirconnect::tree::element::Resolved) -> Option<&'static str> {
-    // TODO(#290): read the alternative from fhirconnect once `Resolved` names it.
-    let Some(Move::Member(field)) = resolved.moves().last() else {
-        return None;
-    };
-    let stem = field.path().rsplit('.').next()?.strip_suffix("[x]")?;
-    let suffix = field.key().strip_prefix(stem)?;
-    field.types().iter().copied().find(|code| {
-        let mut characters = code.chars();
-        characters.next().is_some_and(|first| {
-            suffix.starts_with(first.to_ascii_uppercase())
-                && suffix.get(1..) == Some(characters.as_str())
-        })
-    })
 }
 
 /// Whether each step of `names` enters a repeating element.
@@ -5148,5 +5139,40 @@ mod tests {
             .get("datatype-pl-to-location")
             .expect("the guide ships the PL map");
         assert!(super::names_siblings(map, "Location"));
+    }
+
+    #[test]
+    fn a_choice_with_no_alternative_named_is_an_untyped_target() {
+        let corpus = corpus();
+        let parsed = parsed("NORTHLAB|NORTHHOSP|EHR|SOUTHCLINIC");
+        let mut run = Run::new(&corpus, &parsed);
+        let before = run.outcomes.len();
+        let at = parse::Location {
+            segment: String::from("OBX"),
+            sequence: 1,
+            field: Some(5),
+            ..parse::Location::default()
+        };
+        let reference = crate::map::RowRef {
+            map: String::from("segment-obx-to-observation"),
+            source: String::from("OBX-5"),
+            target: String::from("value"),
+        };
+        let chosen = resolve_path("Observation", &["valueString"]).expect("valueString resolves");
+        assert_eq!(
+            run.target_type(&chosen, &at, &reference).as_deref(),
+            Some("string")
+        );
+        assert_eq!(run.outcomes.len(), before, "{:?}", run.outcomes);
+        let open = resolve_path("Observation", &["value"]).expect("value[x] resolves");
+        assert_eq!(run.target_type(&open, &at, &reference), None);
+        assert_eq!(
+            run.outcomes.get(before..).unwrap_or_default(),
+            [Outcome::UntypedTarget {
+                at,
+                row: reference,
+                element: String::from("Observation.value[x]"),
+            }]
+        );
     }
 }

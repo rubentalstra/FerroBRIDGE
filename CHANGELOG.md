@@ -524,6 +524,17 @@ crates on crates.io.
 
 ### Fixed
 
+- A FHIR path that names a choice alternative by its concrete key, such as
+  `Observation.effectiveDateTime`, `valueQuantity` or an extension's
+  `valueCodeableConcept`, resolves to the one type that alternative carries,
+  so `Resolved::type_code` answers `dateTime` where it answered nothing
+  (#290). The v2-to-FHIR interpreter drops its own reading of the suffix and
+  asks the resolver, and a row whose target has no single type (a choice
+  element no alternative names) is counted as `untyped-target` naming the
+  element, where it went on under an empty type name.
+- `scripts/checks/conformance.sh` stops with "cargo not found on PATH" and
+  exit 1 before it runs anything, where a missing cargo read as every corpus
+  test failing.
 - A patient location (PL) gives one Location per level it values, linked by
   `partOf`, and the Encounter references the finest level: the bed, else the
   room, else the point of care (#342). The guide's `datatype-pl-to-location`

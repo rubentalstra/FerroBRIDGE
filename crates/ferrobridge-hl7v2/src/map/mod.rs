@@ -292,6 +292,17 @@ pub enum Outcome {
         /// Why.
         error: ConvertError,
     },
+    /// A target with no single FHIR type to render a value as: a choice
+    /// element no alternative names, a resource or a deferred reference
+    /// (<https://hl7.org/fhir/R4/formats.html#choice>).
+    UntypedTarget {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The definition path of the target element.
+        element: String,
+    },
     /// A further repetition of a field whose target does not repeat.
     RepetitionDropped {
         /// Where.
@@ -523,6 +534,7 @@ impl Outcome {
             Self::NoTerminology { .. } => "no-terminology",
             Self::Untranslated { .. } => "untranslated",
             Self::Unconvertible { .. } => "unconvertible",
+            Self::UntypedTarget { .. } => "untyped-target",
             Self::RepetitionDropped { .. } => "repetition-dropped",
             Self::UnplacedInstance { .. } => "unplaced-instance",
             Self::FinestSibling { .. } => "finest-sibling",

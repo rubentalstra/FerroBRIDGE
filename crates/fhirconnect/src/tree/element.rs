@@ -372,7 +372,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
 
     /// Steps into a member of the complex type the walk stands in.
     fn member(&mut self, schema: &'static TypeSchema, name: &str) -> Result<(), ResolveError> {
-        let (field, kind, key) =
+        let (field, kind, key, types) =
             named(schema, name).ok_or_else(|| ResolveError::UnknownElement {
                 owner: String::from(schema.path),
                 name: String::from(name),
@@ -383,7 +383,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
             kind,
             min: field.min,
             max: field.max,
-            types: field.types,
+            types,
         };
         self.owner = String::from(field.path);
         if let Kind::Choice(variants) = kind {
@@ -492,14 +492,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
                     .collect::<Vec<_>>()
                     .join(", "),
             })?;
-        // NOTE: a chosen alternative has the one type its suffix names
-        // (<https://hl7.org/fhir/R4/formats.html#choice>), so the field keeps that code alone.
-        let types = field
-            .types
-            .iter()
-            .position(|code| code.eq_ignore_ascii_case(suffix))
-            .and_then(|at| field.types.get(at))
-            .map_or(field.types, core::slice::from_ref);
+        let types = alternative(field.types, suffix);
         let chosen = Field {
             path: field.path.clone(),
             key: format!("{}{suffix}", field.key),
@@ -585,7 +578,7 @@ impl<T: Table + ?Sized> Walk<'_, T> {
         }
         let (field, path) = match &self.location {
             Location::Complex(schema) => {
-                let (field, _, _) = named(schema, EXTENSION_ELEMENT).ok_or_else(|| {
+                let (field, ..) = named(schema, EXTENSION_ELEMENT).ok_or_else(|| {
                     ResolveError::UnknownElement {
                         owner: String::from(schema.path),
                         name: String::from(EXTENSION_ELEMENT),
@@ -710,15 +703,19 @@ impl<T: Table + ?Sized> Walk<'_, T> {
     }
 }
 
-/// The element `name` selects in `schema`, with the kind and the JSON key it
-/// lands on.
+/// What [`named`] selects: the table entry, the kind and JSON key it lands on,
+/// and the type codes the landing element admits.
+type Named = (&'static FieldSchema, Kind, String, &'static [&'static str]);
+
+/// The element `name` selects in `schema`, with the kind, the JSON key and
+/// the type codes it lands on.
 ///
 /// A name is an element name, or a choice element's name with the suffix of
 /// one alternative, which is how the JSON representation spells a resolved
 /// choice (<https://hl7.org/fhir/R4/json.html>).
-fn named(schema: &'static TypeSchema, name: &str) -> Option<(&'static FieldSchema, Kind, String)> {
+fn named(schema: &'static TypeSchema, name: &str) -> Option<Named> {
     if let Some(field) = schema.fields.iter().find(|field| field.name == name) {
-        return Some((field, field.kind, String::from(name)));
+        return Some((field, field.kind, String::from(name), field.types));
     }
     schema.fields.iter().find_map(|field| {
         let Kind::Choice(variants) = field.kind else {
@@ -728,8 +725,27 @@ fn named(schema: &'static TypeSchema, name: &str) -> Option<(&'static FieldSchem
         variants
             .iter()
             .find(|(candidate, _)| *candidate == suffix)
-            .map(|(_, kind)| (field, *kind, String::from(name)))
+            .map(|(_, kind)| {
+                (
+                    field,
+                    *kind,
+                    String::from(name),
+                    alternative(field.types, suffix),
+                )
+            })
     })
+}
+
+/// The type codes of the choice alternative `suffix` names, out of the
+/// choice's `types`.
+fn alternative(types: &'static [&'static str], suffix: &str) -> &'static [&'static str] {
+    // NOTE: a chosen alternative has the one type its suffix names
+    // (<https://hl7.org/fhir/R4/formats.html#choice>), so the field keeps that code alone.
+    types
+        .iter()
+        .position(|code| code.eq_ignore_ascii_case(suffix))
+        .and_then(|at| types.get(at))
+        .map_or(types, core::slice::from_ref)
 }
 
 #[cfg(test)]
@@ -1020,6 +1036,52 @@ mod tests {
         assert_eq!(category.max(), None);
         assert_eq!(category.min(), 0);
         assert_eq!(category.kind(), Kind::Complex("CodeableConcept"));
+        Ok(())
+    }
+
+    #[test]
+    fn a_choice_alternative_answers_the_type_its_suffix_names()
+    -> Result<(), Box<dyn core::error::Error>> {
+        for (expression, code) in [
+            ("$resource.effectiveDateTime", "dateTime"),
+            ("$resource.effective.ofType(dateTime)", "dateTime"),
+            ("$resource.effectivePeriod", "Period"),
+            ("$resource.valueQuantity", "Quantity"),
+            ("$resource.valueString", "string"),
+            ("$resource.component.valueString", "string"),
+            ("$resource.component.valueBoolean", "boolean"),
+            (
+                "$resource.extension('http://example.org/fhir/StructureDefinition/probe').valueCodeableConcept",
+                "CodeableConcept",
+            ),
+            (
+                "$resource.extension('http://example.org/fhir/StructureDefinition/probe').valueDateTime",
+                "dateTime",
+            ),
+        ] {
+            let resolved = resolved("Observation", expression)?;
+            assert_eq!(resolved.type_code(), Some(code), "{expression}");
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn a_resolved_alternative_keeps_only_its_own_type_code()
+    -> Result<(), Box<dyn core::error::Error>> {
+        let resolved = resolved("Observation", "$resource.effectiveDateTime")?;
+        let Some(Move::Member(field)) = resolved.moves().last() else {
+            panic!("a resolved alternative should be a member move")
+        };
+        assert_eq!(field.path(), "Observation.effective[x]");
+        assert_eq!(field.key(), "effectiveDateTime");
+        assert_eq!(field.types(), ["dateTime"]);
+        Ok(())
+    }
+
+    #[test]
+    fn an_unresolved_choice_still_has_no_single_type() -> Result<(), Box<dyn core::error::Error>> {
+        let resolved = resolved("Observation", "$resource.effective")?;
+        assert_eq!(resolved.type_code(), None);
         Ok(())
     }
 }
