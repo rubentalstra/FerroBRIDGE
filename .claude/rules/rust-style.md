@@ -37,6 +37,21 @@ generation discipline: `codegen.md`.
   (the mapping interpreter, the target-side document construction, the
   terminology binding). Consult prior art when useful; never port it blindly.
 
+## File and module size
+
+A hand-written Rust file is at most 1000 lines, and a file over 750 lines is
+split into a module folder before it grows further (owner ruling 2026-09-26).
+Generated files are outside the rule. The shape of a split is a folder
+`<name>/mod.rs` holding the module doc, the `mod` declarations and the items
+every child shares, with one child file per concern; tests split the same
+way, one file per subject under `tests/it/<subject>/`. The zero-re-export rule
+stands: every import names the defining module, so a split never adds `pub
+use`. A split moves code without changing behaviour: the same tests pass
+before and after, and a defect found on the way is filed, never fixed in the
+split. Enforced by `scripts/checks/file-length.sh` (CI guard tier): a hard
+breach fails, a listed breach in `scripts/checks/file-length-allow.txt`
+passes only while it does not grow, and the split removes its entry.
+
 ## Comments and documentation
 
 The comment and doc-comment discipline lives in **`comments.md`** (RFC 505 plus
