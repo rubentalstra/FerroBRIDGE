@@ -11,7 +11,7 @@ of its own.
 The facade runs. It is off until `[facade] enabled` turns it on, and a disabled
 facade mounts no route, so a request answers `404` rather than `403`. What this
 page describes is what the server answers today: conformance, create, read,
-update, transaction and `$validate`. Search and batch are later work, and the
+vread, update, transaction and `$validate`. Search and batch are later work, and the
 `CapabilityStatement` leaves them out rather than claiming them.
 
 <!-- toc -->
@@ -37,6 +37,7 @@ for `spec.version`. The service base is `/fhir`.
 | `POST /fhir/{type}` | Create, conditional through `If-None-Exist` |
 | `POST /fhir/{type}/$validate` | The dry run that commits nothing |
 | `GET /fhir/{type}/{id}` | Read one resource back out of its composition |
+| `GET /fhir/{type}/{id}/_history/{vid}` | Vread: read the version a write's `Location` named |
 | `PUT /fhir/{type}/{id}` | Update, with `If-Match` |
 | `POST /fhir` | A `transaction` Bundle, all or nothing |
 
@@ -48,7 +49,7 @@ and a `_count` that is not a non-negative integer is a `400` with `invalid`,
 so a client never reads a page it did not ask for.
 
 The `CapabilityStatement` names exactly the resource types the loaded programs
-map, with `create`, `read` and `update` per type, `transaction` at system
+map, with `create`, `read`, `vread` and `update` per type, `transaction` at system
 level, the `$validate` operation, `updateCreate: false`, `conditionalCreate`
 and `conditionalUpdate` true, `fhirVersion: 4.0.1`, and no search parameter.
 When the FHIRconnect operations lane is served under the same base,
@@ -146,6 +147,12 @@ search would turn a duplicate into a second composition.
 
 A create answers `201` with `Location` naming the FHIR resource under the
 configured base URL and `ETag` carrying the version.
+
+That `Location` is `[base]/{type}/{id}/_history/{vid}`, and a `GET` of it is
+the R4 vread. The `{vid}` is the version tree id of the composition version
+the write committed, so the facade reads that exact version from the CDR and
+answers it with its `ETag`. A `{vid}` the CDR does not hold answers `404`, and
+a version the CDR reports deleted answers `410`.
 
 An update needs `If-Match` when the map knows the id. Without one, the facade
 reads the CDR's current `ETag` and answers `412` with it on a mismatch rather

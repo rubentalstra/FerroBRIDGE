@@ -187,8 +187,8 @@ impl Facade {
 /// Returns the facade's routes, mounted under [`BASE_PATH`].
 ///
 /// Only what this milestone implements is mounted: the conformance statement,
-/// a type-level create, `$validate`, an instance read and update, and a
-/// system-level transaction. Search and batch have no route, so a request for
+/// a type-level create, `$validate`, an instance read and update, a vread, and
+/// a system-level transaction. Search and batch have no route, so a request for
 /// either answers `404` (<https://hl7.org/fhir/R4/http.html>). `operations`
 /// is whether the same router serves the FHIRconnect operations, which the
 /// conformance statement declares only then, and `hl7v2` whether the HL7 v2
@@ -222,6 +222,10 @@ pub fn routes(
         .route(
             &format!("{BASE_PATH}/{{resource_type}}/{{id}}"),
             get(handlers::read_route).put(handlers::update_route),
+        )
+        .route(
+            &format!("{BASE_PATH}/{{resource_type}}/{{id}}/_history/{{vid}}"),
+            get(handlers::vread_route),
         )
         .with_state(facade)
 }

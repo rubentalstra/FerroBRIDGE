@@ -93,12 +93,17 @@ impl Harness {
 
     /// Returns the canonical composition the synthetic Condition maps to.
     fn composition(&self) -> serde_json::Value {
+        self.composition_of(&condition())
+    }
+
+    /// Returns the canonical composition `resource` maps to.
+    fn composition_of(&self, resource: &serde_json::Value) -> serde_json::Value {
         let loaded = self
             .facade
             .programs()
             .by_context("ferrobridge_facade.context")
             .expect("the fixture context compiled");
-        let document: fhir_types::codec::Value = serde_json::from_value(condition())
+        let document: fhir_types::codec::Value = serde_json::from_value(resource.clone())
             .expect("the synthetic Condition reads as a lexical document");
         let built = ferrobridge_server::facade::engine::inbound(
             loaded.program(),
@@ -637,7 +642,7 @@ async fn the_capability_statement_names_exactly_the_loaded_programs()
         .iter()
         .filter_map(|entry| entry["code"].as_str())
         .collect();
-    assert_eq!(vec!["create", "read", "update"], interactions);
+    assert_eq!(vec!["create", "read", "vread", "update"], interactions);
     assert!(
         condition["searchParam"].is_null(),
         "search is not declared until it is implemented: {condition}"
@@ -1007,6 +1012,164 @@ async fn a_composition_the_cdr_reports_deleted_is_four_hundred_and_ten()
     )
     .await?;
     assert_eq!(StatusCode::GONE, status);
+    assert_eq!(Some("deleted"), first_issue(&body)["code"].as_str());
+    Ok(())
+}
+
+/// Mounts the read of the composition version `version` that answers `200`
+/// with `body`.
+async fn mount_version(cdr: &MockServer, version: &str, body: &serde_json::Value) {
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/composition/{version}"
+        )))
+        .respond_with(
+            ResponseTemplate::new(200)
+                .insert_header("ETag", format!("W/\"{version}\""))
+                .insert_header("Content-Type", "application/json")
+                .set_body_string(body.to_string()),
+        )
+        .mount(cdr)
+        .await;
+}
+
+/// Sends a `GET` of `path` and returns the status, the `ETag` and the body.
+async fn get_tagged(
+    harness: &Harness,
+    path: &str,
+) -> Result<(StatusCode, Option<String>, serde_json::Value), Box<dyn StdError>> {
+    let response = raw(harness.app(), Request::get(path).body(Body::empty())?).await?;
+    let status = response.status();
+    let tag = response
+        .headers()
+        .get(header::ETAG)
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
+    let bytes = axum::body::to_bytes(response.into_body(), 1024 * 1024).await?;
+    let body = serde_json::from_slice(&bytes)?;
+    Ok((status, tag, body))
+}
+
+#[tokio::test]
+async fn a_vread_of_the_location_a_create_answers_is_that_version() -> Result<(), Box<dyn StdError>>
+{
+    // vread answers `GET [base]/[type]/[id]/_history/[vid]` with an ETag
+    // naming the versionId (<https://hl7.org/fhir/R4/http.html#vread>).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_create(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, location, created) = post_located(&harness, &condition()).await?;
+    assert_eq!(StatusCode::CREATED, status, "{created}");
+    let location = location.ok_or("a create carries Location")?;
+    let path = location
+        .strip_prefix("http://ferrobridge.invalid")
+        .ok_or(format!("{location} is not under the base"))?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, tag, body) = get_tagged(&harness, path).await?;
+    assert_eq!(StatusCode::OK, status, "{body}");
+    assert_eq!(Some("W/\"1\""), tag.as_deref());
+    assert_eq!(created["id"], body["id"]);
+    assert_eq!(Some("1"), body["meta"]["versionId"].as_str());
+    assert!(
+        body["meta"]["source"]
+            .as_str()
+            .is_some_and(|source| source.ends_with(VERSION_ONE)),
+        "{body}"
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn after_an_update_each_version_reads_back_with_its_own_content()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    mount_version_two(&harness).await;
+    let (status, updated) = call(
+        harness.app(),
+        Request::put(format!("/fhir/Condition/{id}"))
+            .header(header::CONTENT_TYPE, "application/fhir+json")
+            .body(Body::from(revised_condition().to_string()))?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, status, "{updated}");
+    assert_eq!(Some("2"), updated["meta"]["versionId"].as_str());
+
+    harness.cdr.reset().await;
+    let revised = harness.composition_of(&revised_condition());
+    mount_read(&harness.cdr, VERSION_TWO, &revised).await;
+    mount_version(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    let (status, tag, first) =
+        get_tagged(&harness, &format!("/fhir/Condition/{id}/_history/1")).await?;
+    assert_eq!(StatusCode::OK, status, "{first}");
+    assert_eq!(Some("W/\"1\""), tag.as_deref());
+    assert_eq!(Some("1"), first["meta"]["versionId"].as_str());
+    assert_eq!(
+        condition()["code"]["text"],
+        first["code"]["text"],
+        "{first}"
+    );
+    let (status, tag, second) =
+        get_tagged(&harness, &format!("/fhir/Condition/{id}/_history/2")).await?;
+    assert_eq!(StatusCode::OK, status, "{second}");
+    assert_eq!(Some("W/\"2\""), tag.as_deref());
+    assert_eq!(Some("2"), second["meta"]["versionId"].as_str());
+    assert_eq!(
+        revised_condition()["code"]["text"],
+        second["code"]["text"],
+        "{second}"
+    );
+    assert_ne!(first["code"]["text"], second["code"]["text"]);
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_vread_of_a_version_the_cdr_does_not_hold_is_four_hundred_and_four()
+-> Result<(), Box<dyn StdError>> {
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_ONE, &harness.composition()).await;
+    for vid in ["7", "not-a-version"] {
+        let (status, body) = call(
+            harness.app(),
+            Request::get(format!("/fhir/Condition/{id}/_history/{vid}")).body(Body::empty())?,
+        )
+        .await?;
+        assert_eq!(StatusCode::NOT_FOUND, status, "{vid}: {body}");
+        assert_eq!(Some("not-found"), first_issue(&body)["code"].as_str());
+    }
+    let (status, body) = call(
+        harness.app(),
+        Request::get("/fhir/Condition/abcdef/_history/1").body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::NOT_FOUND, status, "{body}");
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_vread_of_a_version_the_cdr_reports_deleted_is_four_hundred_and_ten()
+-> Result<(), Box<dyn StdError>> {
+    // "If the version referred to is actually one where the resource was
+    // deleted, the server should return a 410"
+    // (<https://hl7.org/fhir/R4/http.html#vread>).
+    let harness = harness().await;
+    let id = create_one(&harness).await?;
+    mount_read(&harness.cdr, VERSION_TWO, &harness.composition()).await;
+    Mock::given(matchers::method("GET"))
+        .and(matchers::path(format!(
+            "/ehr/{EHR_ID}/composition/{VERSION_ONE}"
+        )))
+        .respond_with(ResponseTemplate::new(204))
+        .mount(&harness.cdr)
+        .await;
+    let (status, body) = call(
+        harness.app(),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::GONE, status, "{body}");
     assert_eq!(Some("deleted"), first_issue(&body)["code"].as_str());
     Ok(())
 }
@@ -2078,6 +2241,39 @@ async fn a_transaction_carrying_one_resource_twice_is_refused() -> Result<(), Bo
             .received("POST", &format!("/ehr/{EHR_ID}/contribution"))
             .await
     );
+    Ok(())
+}
+
+#[tokio::test]
+async fn a_transaction_carrying_one_id_at_two_versions_is_refused_naming_both()
+-> Result<(), Box<dyn StdError>> {
+    // "A resource can only appear in a transaction once (by identity)", and
+    // an overlap of identities fails the transaction
+    // (<https://hl7.org/fhir/R4/http.html#transaction>).
+    let harness = harness().await;
+    mount_ehr(&harness.cdr).await;
+    mount_contribution(&harness.cdr).await;
+    let (status, body) = post_transaction(
+        &harness,
+        &transaction_of(&[
+            ("urn:uuid:0000-one", condition_at("1")),
+            ("urn:uuid:0000-two", condition_at("2")),
+        ]),
+    )
+    .await?;
+    assert_eq!(StatusCode::BAD_REQUEST, status, "{body}");
+    let issue = first_issue(&body);
+    assert_eq!(Some("invalid"), issue["code"].as_str());
+    assert_eq!(
+        Some(vec!["urn:uuid:0000-one", "urn:uuid:0000-two"]),
+        issue["location"].as_array().map(|locations| locations
+            .iter()
+            .filter_map(serde_json::Value::as_str)
+            .collect()),
+        "{body}"
+    );
+    assert_eq!((0, 0, 0), writes(&harness).await, "nothing is committed");
+    assert_eq!(None, harness.store.consumed(&condition_source_at("1")?)?);
     Ok(())
 }
 
