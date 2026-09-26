@@ -84,7 +84,19 @@ indices in the order values arrive, all or nothing per write. A resource
 instance from the message map is keyed by its label and the occurrences of the
 repeating nodes above its segment, and a later segment reuses the instance
 whose key is the longest prefix of its own. Never write a positional index
-from a label.
+from a label. A `[k].` row at the root of a resource a `(Type)` row created,
+in a map whose rows reference a labelled instance of that resource's type
+(`partOf.reference(Location[2])`, `names_siblings`), writes the `k`-th
+sibling of that resource (`Identity::Sibling`, `[1].` is the resource
+itself), created on first sight. `Run::siblings` settles each family before
+the writes apply: a reference between siblings to one no value reached climbs
+the static edges of the map's rows to a valued one (`sibling-unresolved`
+when none), every reference to the family moves to the finest valued
+sibling, the one no other valued sibling is part of (`finest-sibling`; two
+such stay put as `sibling-ambiguous`), and a sibling no value reached, or an
+empty anchor its references left, stays out of the Bundle. The order of the
+levels is the map's, never a table here: the PL chain comes from the
+`datatype-pl-to-location` supplement.
 
 ## Strict at every seam
 

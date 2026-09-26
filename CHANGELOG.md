@@ -518,6 +518,29 @@ crates on crates.io.
 
 ### Fixed
 
+- A patient location (PL) gives one Location per level it values, linked by
+  `partOf`, and the Encounter references the finest level: the bed, else the
+  room, else the point of care (#342). The guide's `datatype-pl-to-location`
+  writes the levels through `[1].` to `[6].` rows, which the interpreter
+  counted as `unplaced-instance` (1538 outcomes over the vendored corpus), so
+  only the bed was written. A `[k].` row of a data type map whose rows
+  reference a labelled instance of the resource type they fill now writes the
+  `k`-th sibling of the resource the `(Type)` row created, on first sight; a
+  reference between siblings to a level no value reaches climbs to the level
+  that one's own row names, and one that reaches no valued level is counted
+  as `sibling-unresolved`; the references to the family take the finest
+  level, counted as `finest-sibling`, or stay put as `sibling-ambiguous`
+  when the chain leaves two. A supplement to the PL map (#332) links the
+  levels in the order its PL.10 rows give (bed, room, point of care, floor,
+  building, facility), where the guide's `partOf` rows disagree and the
+  building names itself; writes the point of care's `mode` and
+  `physicalType` at elements Location has; fixes the PL.10 labels and
+  conditions; and writes PL.9 into the finest valued level. The guide's
+  MDM^T02 sample now maps to the four Locations of its expected Bundle.
+  The pass counts do not move (153 of 511 vendored, 199 of 379 smoke); over
+  the vendored passes the expected-Bundle comparison counts 63 fewer
+  corpus gaps (571 to 508: every `Location.partOf`, `identifier`, `mode` and
+  `physicalType` difference) and 15 fewer count differences (166 to 151).
 - A segment whose group path no row of the guide's message map names takes
   the rows of the one source whose groups differ from its own by a single
   group, other than the group holding the segment (#334). The guide writes

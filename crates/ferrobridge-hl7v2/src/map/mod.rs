@@ -300,12 +300,44 @@ pub enum Outcome {
         row: RowRef,
     },
     /// A data type map row whose `[n].` prefix names another instance of an
-    /// element that does not repeat, or of the resource the data type fills.
+    /// element that does not repeat, or of the resource the data type fills
+    /// when the map names no sibling of that resource.
     UnplacedInstance {
         /// Where.
         at: Location,
         /// The row.
         row: RowRef,
+    },
+    /// The level of a `[k].` sibling family every reference to the family
+    /// takes: its finest valued sibling, the bed of a PL, else its room,
+    /// else its point of care.
+    FinestSibling {
+        /// Where the row that references the family ran.
+        at: Location,
+        /// That row.
+        row: RowRef,
+        /// The `k` of the sibling the references take.
+        label: u32,
+    },
+    /// A reference between siblings that reaches no valued sibling: one back
+    /// to its own sibling, a loop, or a climb past the last valued level.
+    SiblingUnresolved {
+        /// Where.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The `k` the row names.
+        label: u32,
+    },
+    /// A sibling family with no single finest valued sibling, whose
+    /// references stay at the resource the `(Type)` row names.
+    SiblingAmbiguous {
+        /// Where the row that references the family ran.
+        at: Location,
+        /// That row.
+        row: RowRef,
+        /// The `k` of every valued sibling no other one is part of.
+        labels: Vec<u32>,
     },
     /// A complex value read as a primitive, whose later components hold
     /// values the primitive does not carry.
@@ -493,6 +525,9 @@ impl Outcome {
             Self::Unconvertible { .. } => "unconvertible",
             Self::RepetitionDropped { .. } => "repetition-dropped",
             Self::UnplacedInstance { .. } => "unplaced-instance",
+            Self::FinestSibling { .. } => "finest-sibling",
+            Self::SiblingUnresolved { .. } => "sibling-unresolved",
+            Self::SiblingAmbiguous { .. } => "sibling-ambiguous",
             Self::ComponentsDropped { .. } => "components-dropped",
             Self::UnknownElement { .. } => "unknown-element",
             Self::Unwritable { .. } => "unwritable",

@@ -205,6 +205,9 @@ fn row_line(kind: &str, outcome: &Outcome) -> String {
             error,
         } => (at, row, format!("{element} is no {fhir_type}: {error}")),
         Outcome::FacilityEndpoint { at, row, element } => (at, row, element.clone()),
+        Outcome::FinestSibling { at, row, label }
+        | Outcome::SiblingUnresolved { at, row, label } => (at, row, label.to_string()),
+        Outcome::SiblingAmbiguous { at, row, labels } => (at, row, format!("{labels:?}")),
         Outcome::NoDatatypeMap {
             at,
             row,

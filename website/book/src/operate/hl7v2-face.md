@@ -125,6 +125,7 @@ The shipped supplements:
 | `datatype-cwe-to-quantity` | override | Names the targets `code`, `unit` and `system`, where the guide writes `Quantity.code` and so on, which the element table cannot find under the Quantity the row fills; OBX-6 units are kept (#332) |
 | `datatype-hd-name-to-messageheader-source` | override | Drops the row that writes HD.2, a universal ID, into `MessageHeader.source.software`, which R4 defines as the software's name (#324) |
 | `datatype-hd-name-to-messageheader-destination` | override | Writes HD.1 into `destination.name`, as the endpoint map does, where the guide writes HD.2 and the two maps disagree (#332) |
+| `datatype-pl-to-location` | override | Links the six Locations of a PL (bed, room, point of care, floor, building, facility) into one `partOf` chain in the order the guide's PL.10 rows give the finest level, where the guide's `partOf` rows disagree with it and the building's names itself; writes the point of care's `mode` and `physicalType` (`wa`, the code the guide repository's MDM^T02 sample gives PL.1) at elements Location has; names the point of care and the building in the PL.10 rows as their second set does; and writes PL.9 into the finest valued level (#342, #332) |
 | `segment-msh-to-messageheader` | override | With both MSH-3 and MSH-24 valued, MSH-3 names the source and MSH-24 gives its endpoint; with one of them empty, the other runs as the guide writes it (#311) |
 | `segment-orc-to-diagnosticreport` | override | Writes ORC-2 into `basedOn.identifier` (R4 `Reference.identifier`), where the guide writes `basedOn(ServiceRequest)` with no map to fill it (#336) |
 | `segment-sch-to-appointment` | override | Writes SCH-26 and SCH-27 into `basedOn[1].identifier` and `basedOn[2].identifier` for the same reason (#336) |
@@ -144,10 +145,38 @@ What the supplements leave to the guide, and what stays open:
 - DFT_P03 has no message map. Its defining segment, FT1, has no segment map in
   the guide, so a map for the rest would acknowledge a charge message without
   its charges.
-- The `PL` to `Location` map's `[n].` rows, which describe the bed, room,
-  floor, point of care, building and facility as sibling Locations, still count
-  as `unplaced-instance`: only the bed reaches the Location the Encounter
-  references.
+- The `PL` to `Location` map's PL.11 rows write `[1-6].identifier[n].assigner`,
+  one value spread over six Locations, which the interpreter refuses as it
+  refuses every spreading label, so a location's assigning authority is
+  counted and not written.
+
+## Sibling resources of one value
+
+The `PL` to `Location` map writes one Location per level of a patient
+location through rows prefixed `[1].` to `[6].`, and links them with
+`partOf.reference(Location[k])` rows. The guide's notation says the prefix
+applies where the data type is used (`mapping_guidelines.md`, \[n\] Notation),
+which for a map into a resource is the resource, and leaves the rest to the
+implementer. FerroBRIDGE's own design, for any data type map whose rows
+reference a labelled instance of the resource type they fill:
+
+- A `[k].` row writes into the `k`-th sibling of the resource the `(Type)` row
+  created, and the sibling exists once a value reaches it. `[1].` is that
+  resource itself. A sibling no value reaches never enters the Bundle.
+- A `(Location[k])` reference between siblings points at sibling `k` when it
+  holds a value. When it holds none, the reference climbs to the sibling that
+  `k`'s own row names, and so on up the chain, so a PL without a floor has its
+  point of care in its building, or in its facility. A reference that climbs
+  past the last valued level, loops, or names its own sibling is counted as
+  `sibling-unresolved` and not written.
+- Every reference to the family (`Encounter.location.location`, and any other
+  reference to the Location the row created) takes the finest valued level:
+  the sibling no other valued sibling is part of. For a PL that is the bed,
+  else the room, else the point of care. It is counted once as
+  `finest-sibling` naming the level. When the chain leaves more than one such
+  sibling, the references stay at the Location the guide's `(Type)` row
+  names, or are dropped when that Location holds no value, counted as
+  `sibling-ambiguous`.
 
 ## The acknowledgment
 
