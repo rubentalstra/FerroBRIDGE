@@ -642,7 +642,18 @@ jobs:
           key: hl7-v2-legacy-${{ steps.v2-legacy.outputs.commit }}
       - name: Fetch and verify the HL7 v2 legacy tables
         run: bash scripts/vendor/v2-legacy.sh
-      - run: cargo run --locked -p fhir-codegen -- emit --check
+      # A release build: a full emit of the two generated crates takes minutes
+      # in a debug build, and this job is the one place it runs.
+      - run: cargo run --locked --release -p fhir-codegen -- emit --check
+      # The tests that emit a whole crate run only here, behind the gate the
+      # test binary reads (tools/fhir-codegen/tests/it/main.rs); the `test`
+      # and coverage jobs skip them and stay within their timeouts.
+      - uses: taiki-e/install-action@76c2e6406e52637deed7160d77bded76bd83e06e # v2.87.14
+        with:
+          tool: cargo-nextest
+      - run: cargo nextest run --locked --release -p fhir-codegen --no-tests=pass
+        env:
+          FERROBRIDGE_CODEGEN_EMIT: "1"
 
   # The same gate for the OMOP side: regenerate crates/omop-cdm from the
   # vendored OHDSI CommonDataModel definitions and fail on any difference.

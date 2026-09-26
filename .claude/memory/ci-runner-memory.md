@@ -40,3 +40,9 @@ five minutes with no diagnostic. It now runs `cargo hack nextest run
 --workspace` and `cargo hack test --doc --workspace`, one package at a time,
 like the clippy and msrv lanes.
 
+
+**Full-emit tests (2026-09-26):** after #303 grew `hl7v2-types` to 2038 files,
+the three v2 full-emit tests took 368 s to 819 s each under coverage and the
+SonarQube Cloud and `test` jobs hit their 45-minute timeouts, queueing
+eighteen runs. Any test that emits a whole generated crate goes behind
+`FERROBRIDGE_CODEGEN_EMIT=1` and runs only in `codegen-drift`, in release.
