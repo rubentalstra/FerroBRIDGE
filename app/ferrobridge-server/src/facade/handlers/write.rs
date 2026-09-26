@@ -193,15 +193,19 @@ fn answer(
             &response_headers,
         )),
         media::Prefer::Representation => {
+            let subject = render::subject_of(facade, &written.ehr_id)?;
             let rendered = render::render(
                 program.program(),
                 program.index(),
                 &written.composition,
-                &written.id,
-                &written.version,
-                &source,
+                render::Origin {
+                    id: &written.id,
+                    version: &written.version,
+                    source: &source,
+                    subject: subject.as_ref(),
+                },
             )?;
-            render::log_warnings(&rendered);
+            render::log_outcome(&rendered);
             Ok(reply::resource(status, &rendered.body, &response_headers))
         }
     }

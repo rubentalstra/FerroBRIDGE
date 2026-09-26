@@ -40,6 +40,22 @@ pub struct CompositionBinding {
     pub context: String,
 }
 
+/// The person one EHR was first recorded for: the reverse row of the patient
+/// table.
+///
+/// The read path writes a resource's subject from it when the mapping carries
+/// none, so the row holds the person key and nothing about the person
+/// (`docs/architecture.md` §9; no specification governs the reverse row: our
+/// own design).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct EhrSubject {
+    /// The namespace the person identifier belongs to.
+    pub namespace: String,
+    /// The identifier inside that namespace.
+    pub id: String,
+}
+
 /// The mapping one inbound resource version was consumed by.
 ///
 /// The key is the sending system's `id` and `meta.versionId`, so a re-sent

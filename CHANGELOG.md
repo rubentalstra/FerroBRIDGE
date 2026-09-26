@@ -530,6 +530,18 @@ crates on crates.io.
 
 ### Fixed
 
+- A facade read, vread or `return=representation` write answers a valid R4
+  instance (#350). A `Condition` mapped through a context with no outbound
+  subject row read back without `subject`, which R4 makes `1..1`, so the read
+  body could not be sent back as an update. The facade now writes `subject`
+  (or `patient`, where the type names it so) from the person the identity map
+  recorded for the composition's EHR whenever the rendered resource lacks it,
+  in the form a create reads back into the same EHR, and logs the element
+  paths it filled. It then checks every `min 1` element of the `fhir-types`
+  element table, nested and contained ones included, and answers
+  `500 exception` naming the element when one stays absent. The identity map
+  gains a seventh table from each `ehr_id` to its person, and a store an
+  earlier version wrote gains its rows when it opens.
 - A facade update that sends back the `ETag` a read answered, `If-Match:
   W/"1"`, commits the next version and answers `200` with `_history/2` and the
   new `ETag` (#347), as R4 concurrency prescribes. Before, every such `PUT`
