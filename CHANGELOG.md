@@ -585,6 +585,14 @@ crates on crates.io.
 
 ### Fixed
 
+- The HL7 v2 parser no longer opens a segment group the following segments
+  leave with a required member empty when a later node takes the segment
+  (#343). A 2.9.1 OUL^R22 of `SPM, OBR, ORC, OBX` placed its OBX in
+  `ORDER_DOCUMENT`, whose required TXA never came, and reported nothing; the
+  OBX now opens the `RESULT` group, and an OBX followed by its TXA still
+  opens `ORDER_DOCUMENT`. A group left with a required member missing is a
+  `100` refusal naming the member and the group, located at the group's
+  first segment.
 - A facade read, vread or `return=representation` write answers a valid R4
   instance (#350). A `Condition` mapped through a context with no outbound
   subject row read back without `subject`, which R4 makes `1..1`, so the read

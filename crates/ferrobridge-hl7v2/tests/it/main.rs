@@ -18,6 +18,7 @@ mod condition;
 mod corpus;
 mod decode;
 mod fixtures;
+mod grouping;
 mod map;
 mod parse;
 mod supplement;

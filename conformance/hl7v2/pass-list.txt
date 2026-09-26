@@ -46,6 +46,7 @@ fhir-converter/data/SampleData/Hl7v2/MDM-T10-02.hl7
 fhir-converter/data/SampleData/Hl7v2/MDM_01.hl7
 fhir-converter/data/SampleData/Hl7v2/OML-O21-01.hl7
 fhir-converter/data/SampleData/Hl7v2/OML-O21-02.hl7
+fhir-converter/data/SampleData/Hl7v2/OML-O21-03.hl7
 fhir-converter/data/SampleData/Hl7v2/ORM-O01-01.hl7
 fhir-converter/data/SampleData/Hl7v2/ORM-O01-02.hl7
 fhir-converter/data/SampleData/Hl7v2/ORM-O01-03.hl7
