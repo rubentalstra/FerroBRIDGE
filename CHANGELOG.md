@@ -31,6 +31,12 @@ crates on crates.io.
   hard, split into a module folder at 750, generated files excluded) is in
   `.claude/rules/rust-style.md`, and the forty files that breach it today are
   listed with the sub-issue that splits each.
+- The FHIR facade answers the R4 vread, `GET /fhir/{type}/{id}/_history/{vid}`
+  (#305), so the `Location` every create, update and transaction entry
+  answers now resolves. The facade reads the composition version whose
+  version tree id is `{vid}` and answers it with its `ETag`; a version the CDR
+  does not hold is `404`, one it reports deleted is `410`, and the
+  `CapabilityStatement` lists `vread` on every supported type.
 - FerroBRIDGE's supplements to the HL7 v2-to-FHIR guide (#256):
   ConceptMaps in the guide's own shape, shipped inside `ferrobridge-hl7v2`
   under `supplements/` and loaded over the guide's package by
@@ -524,6 +530,12 @@ crates on crates.io.
 
 ### Fixed
 
+- A transaction Bundle that carries one resource `id` at two `meta.versionId`s
+  is refused with `400 invalid` naming both entries and commits nothing
+  (#306), as R4 allows a resource in a transaction once by identity. Before,
+  the two entries passed the duplicate check and an unknown `id` produced two
+  compositions. An entry that repeats another's version as well keeps its
+  `422 duplicate`.
 - A FHIR path that names a choice alternative by its concrete key, such as
   `Observation.effectiveDateTime`, `valueQuantity` or an extension's
   `valueCodeableConcept`, resolves to the one type that alternative carries,

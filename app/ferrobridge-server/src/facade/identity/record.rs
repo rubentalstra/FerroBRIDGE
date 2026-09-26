@@ -76,6 +76,10 @@ pub struct CommittedSource {
     pub contribution_uid: String,
 }
 
+/// The type-slot prefix of a message entry key, a colon no FHIR resource type
+/// carries.
+const MESSAGE_TYPE_PREFIX: &str = "message:";
+
 /// The key of one inbound resource version.
 ///
 /// A resource that arrives without a `meta.versionId` still has an identity,
@@ -127,7 +131,7 @@ impl SourceVersion {
     ) -> Result<Self, IdError> {
         let checked = ExternalResourceId::new(message_type)?;
         Ok(Self {
-            resource_type: format!("message:{checked}"),
+            resource_type: format!("{MESSAGE_TYPE_PREFIX}{checked}"),
             id: control_id,
             version_id: Some(format!("entry-{position}")),
         })
@@ -177,6 +181,22 @@ impl SourceVersion {
     #[must_use]
     pub fn resource_key(&self) -> String {
         format!("{}\u{1f}{}", self.resource_type, self.id)
+    }
+
+    /// Returns the key one delivery may carry once.
+    ///
+    /// A resource appears in a transaction once by identity, whatever its
+    /// `meta.versionId` (<https://hl7.org/fhir/R4/http.html#transaction>), so
+    /// its key is the [`resource_key`](Self::resource_key). Each entry of one
+    /// message is a source of its own, so a message entry keeps its whole
+    /// [`storage_key`](Self::storage_key).
+    #[must_use]
+    pub fn once_key(&self) -> String {
+        if self.resource_type.starts_with(MESSAGE_TYPE_PREFIX) {
+            self.storage_key()
+        } else {
+            self.resource_key()
+        }
     }
 
     /// Returns the range of storage keys that holds every version of this
@@ -372,6 +392,20 @@ mod tests {
         assert!(!range.contains(&key("c-10", Some("1"))));
         assert!(!range.contains(&key("c-", None)));
         assert_ne!(source.resource_key(), key("c-1", None));
+    }
+
+    #[test]
+    fn a_resource_is_once_by_id_and_a_message_entry_by_position() {
+        let id = || ExternalResourceId::new("c-1").expect("a legal external id");
+        let one = SourceVersion::new("Condition", id(), Some(String::from("1")));
+        let two = SourceVersion::new("Condition", id(), Some(String::from("2")));
+        assert_eq!(one.once_key(), two.once_key());
+        let control = || ExternalResourceId::new("MSG-0001").expect("a legal external id");
+        let first =
+            SourceVersion::of_message_entry("ORU^R01", control(), 0).expect("a legal message type");
+        let second =
+            SourceVersion::of_message_entry("ORU^R01", control(), 1).expect("a legal message type");
+        assert_ne!(first.once_key(), second.once_key());
     }
 
     #[test]

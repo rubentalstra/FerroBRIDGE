@@ -101,6 +101,23 @@ async fn the_facade_commits_a_condition_and_reads_it_back_from_a_real_cdr()
         "meta.source names the composition version: {}",
         read.1
     );
+
+    // vread (<https://hl7.org/fhir/R4/http.html#vread>): the version the
+    // create's `Location` named reads back, and one the CDR never held is 404.
+    let version = call(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}/_history/1")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::OK, version.0, "{}", version.1);
+    assert_eq!(Some("1"), version.1["meta"]["versionId"].as_str());
+    assert_eq!(created.1["code"], version.1["code"]);
+    let absent = call(
+        app(&facade),
+        Request::get(format!("/fhir/Condition/{id}/_history/2")).body(Body::empty())?,
+    )
+    .await?;
+    assert_eq!(StatusCode::NOT_FOUND, absent.0, "{}", absent.1);
     Ok(())
 }
 

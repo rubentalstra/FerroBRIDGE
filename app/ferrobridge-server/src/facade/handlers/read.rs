@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: Vernum Projecten B.V.
 // SPDX-License-Identifier: BUSL-1.1
 
-//! Read, and the lookups the other interactions share with it.
+//! Read and vread, and the lookups the other interactions share with them.
 //!
 //! A read resolves the logical id through the identity map to one composition
 //! and maps that composition back with the program the map recorded. An id the
 //! map does not know is `404`; a composition the CDR reports deleted is `410`
-//! (`docs/architecture.md` §4.6).
+//! (`docs/architecture.md` §4.6). A vread does the same for the composition
+//! version whose version tree id is the `[vid]` a write's `Location` named
+//! (<https://hl7.org/fhir/R4/http.html#vread>).
 
 use http::HeaderMap;
 use http::StatusCode;
@@ -14,6 +16,7 @@ use http::Uri;
 use openehr_base::v1_3::base_types::identification::hier_object_id::HierObjectId;
 use openehr_base::v1_3::base_types::identification::object_version_id::ObjectVersionId;
 use openehr_base::v1_3::base_types::identification::uid_based_id::UidBasedId;
+use openehr_base::v1_3::base_types::identification::version_tree_id::VersionTreeId;
 use openehr_its::rest::generated::ehr::client::CompositionGetOutcome;
 use openehr_mapping_core::composition::CanonicalComposition;
 use openehr_rm::v1_2::composition::composition::Composition;
@@ -55,6 +58,89 @@ pub(crate) async fn read(
         .map_err(|error| stored_identifier(&error))?;
     let (version, composition) =
         fetch(facade, client, &ehr_id, &container, &binding.template_id).await?;
+    let source = render::composition_url(client.base_url(), &ehr_id, &version)?;
+    let rendered = render::render(
+        program.program(),
+        program.index(),
+        &composition,
+        &internal,
+        &version,
+        &source,
+    )?;
+    render::log_warnings(&rendered);
+    Ok(reply::resource(
+        StatusCode::OK,
+        &rendered.body,
+        &[reply::Header::entity_tag(version.version_tree_id().value())],
+    ))
+}
+
+/// `GET [base]/{type}/{id}/_history/{vid}`.
+///
+/// The `[vid]` is the version tree id every write answers in its `Location`
+/// and `ETag`, so the version it names joins the version container the map
+/// binds, the creating system of the latest version, and `[vid]` (no
+/// specification governs the inversion: our own design). A `[vid]` that is no
+/// version tree id, or that the CDR does not hold, is `404`; a version the CDR
+/// reports deleted is `410`.
+pub(crate) async fn vread(
+    facade: &Facade,
+    client: &CdrClient,
+    target: (&str, &str, &str),
+    headers: &HeaderMap,
+    uri: &Uri,
+) -> Result<axum::response::Response, Refusal> {
+    let (resource_type, id, vid) = target;
+    crate::facade::handlers::guard(headers, uri, Body::Absent)?;
+    crate::facade::handlers::supported(facade, resource_type)?;
+    let internal = internal_id(id)?;
+    let binding =
+        binding(facade, resource_type, &internal)?.ok_or_else(|| unknown(resource_type, id))?;
+    let program = program_of(facade, &binding)?;
+    let tree = VersionTreeId::new(vid).map_err(|error| {
+        reply::refusal(
+            StatusCode::NOT_FOUND,
+            Issue::error(IssueType::NotFound).diagnosing(format!(
+                "{resource_type}/{id} has no version {vid}: {}",
+                crate::facade::outcome::chain(&error)
+            )),
+        )
+    })?;
+    let ehr_id = EhrId::new(&binding.ehr_id).map_err(|error| stored_identifier(&error))?;
+    let container = HierObjectId::new(&binding.versioned_object_uid)
+        .map_err(|error| stored_identifier(&error))?;
+    let (newest, newest_body) = latest(client, &ehr_id, &container).await?;
+    let (version, body) = if newest.version_tree_id().value() == tree.value() {
+        (newest, newest_body)
+    } else {
+        let wanted = ObjectVersionId::new(format!(
+            "{}::{}::{}",
+            container.value(),
+            newest.creating_system_id_str(),
+            tree.value()
+        ))
+        .map_err(|error| stored_identifier(&error))?;
+        let (named, body) = answered_version(
+            client,
+            &ehr_id,
+            &UidBasedId::ObjectVersionId(wanted.clone()),
+        )
+        .await?;
+        if let Some(named) = named
+            && named != wanted
+        {
+            return Err(reply::refusal(
+                StatusCode::BAD_GATEWAY,
+                Issue::error(IssueType::Exception).diagnosing(format!(
+                    "the CDR answered version {} where {} was asked for",
+                    named.value(),
+                    wanted.value()
+                )),
+            ));
+        }
+        (wanted, body)
+    };
+    let composition = canonical(facade, &body, &binding.template_id)?;
     let source = render::composition_url(client.base_url(), &ehr_id, &version)?;
     let rendered = render::render(
         program.program(),
@@ -149,7 +235,16 @@ pub(crate) async fn fetch(
     template_id: &str,
 ) -> Result<(ObjectVersionId, CanonicalComposition), Refusal> {
     let (version, composition) = latest(client, ehr_id, container).await?;
-    let text = openehr_its::json::to_canonical_json(&composition);
+    Ok((version, canonical(facade, &composition, template_id)?))
+}
+
+/// Returns the canonical form of one composition the CDR served.
+fn canonical(
+    facade: &Facade,
+    composition: &Composition,
+    template_id: &str,
+) -> Result<CanonicalComposition, Refusal> {
+    let text = openehr_its::json::to_canonical_json(composition);
     let value = text.parse::<serde_json::Value>().map_err(|error| {
         reply::refusal(
             StatusCode::BAD_GATEWAY,
@@ -166,10 +261,7 @@ pub(crate) async fn fetch(
         .map_or(openehr_mapping_core::template::Generation::Adl14, |entry| {
             entry.index().generation()
         });
-    Ok((
-        version,
-        CanonicalComposition::new(value, template_id, generation),
-    ))
+    Ok(CanonicalComposition::new(value, template_id, generation))
 }
 
 /// Returns the latest version of one composition, for a precondition check.
@@ -190,22 +282,37 @@ async fn latest(
     ehr_id: &EhrId,
     container: &HierObjectId,
 ) -> Result<(ObjectVersionId, Composition), Refusal> {
+    let (version, body) =
+        answered_version(client, ehr_id, &UidBasedId::HierObjectId(container.clone())).await?;
+    let version = version.ok_or_else(|| {
+        reply::refusal(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Issue::error(IssueType::Exception)
+                .diagnosing("the CDR answered a composition with no ETag"),
+        )
+    })?;
+    Ok((version, body))
+}
+
+/// Reads the composition version `uid_based_id` names, with the version its
+/// `ETag` names when the CDR sent one.
+///
+/// A `204` is the CDR reporting the version deleted, which is `410`
+/// (`ehr-codegen.openapi.yaml`, `composition_get`).
+async fn answered_version(
+    client: &CdrClient,
+    ehr_id: &EhrId,
+    uid_based_id: &UidBasedId,
+) -> Result<(Option<ObjectVersionId>, Composition), Refusal> {
     let answered = client
-        .composition(ehr_id, &UidBasedId::HierObjectId(container.clone()), None)
+        .composition(ehr_id, uid_based_id, None)
         .await
         .map_err(|error| write::refuse(&status::of_client_error(&error)))?;
     match answered.outcome {
         CompositionGetOutcome::Ok { body, headers } => {
             let version =
                 crate::cdr::optional_version_from_etag("composition_get", headers.etag.as_deref())
-                    .map_err(|error| write::refuse(&status::of_client_error(&error)))?
-                    .ok_or_else(|| {
-                        reply::refusal(
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Issue::error(IssueType::Exception)
-                                .diagnosing("the CDR answered a composition with no ETag"),
-                        )
-                    })?;
+                    .map_err(|error| write::refuse(&status::of_client_error(&error)))?;
             Ok((version, body))
         }
         CompositionGetOutcome::NoContent => Err(write::refuse(&status::Answer::new(
