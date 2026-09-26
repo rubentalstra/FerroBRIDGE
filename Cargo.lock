@@ -1168,7 +1168,7 @@ dependencies = [
 
 [[package]]
 name = "ferrobridge-server"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1235,7 +1235,7 @@ dependencies = [
 
 [[package]]
 name = "ferrobridge-testkit"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "fhir-types",
  "reqwest",
@@ -1262,7 +1262,7 @@ dependencies = [
 
 [[package]]
 name = "fhir-codegen"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "clap",
@@ -2548,7 +2548,7 @@ dependencies = [
 
 [[package]]
 name = "omop-cdm-codegen"
-version = "0.0.3"
+version = "0.0.4"
 dependencies = [
  "anyhow",
  "clap",

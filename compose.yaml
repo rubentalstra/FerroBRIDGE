@@ -62,7 +62,7 @@ name: ferrobridge
 
 services:
   ferrobridge:
-    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.3}
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.4}
     container_name: ferrobridge
     restart: unless-stopped
     ports:
@@ -136,7 +136,7 @@ services:
   #
   #   docker compose --profile cdm run --rm cdm-init
   cdm-init:
-    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.3}
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.4}
     profiles: [cdm]
     command: ["cdm", "init"]
     restart: "no"
@@ -163,7 +163,7 @@ services:
   # TODO(#233): `vocab load` exits 2 today naming that issue, so this service is
   # the shape the job runs in rather than a working load.
   vocab-load:
-    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.3}
+    image: ghcr.io/rubentalstra/ferrobridge:${FERROBRIDGE_VERSION:-0.0.4}
     profiles: [vocab]
     command: ["vocab", "load", "/vocabulary", "--schema", "cdm"]
     restart: "no"
