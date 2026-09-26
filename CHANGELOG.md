@@ -530,6 +530,15 @@ crates on crates.io.
 
 ### Fixed
 
+- A facade update that sends back the `ETag` a read answered, `If-Match:
+  W/"1"`, commits the next version and answers `200` with `_history/2` and the
+  new `ETag` (#347), as R4 concurrency prescribes. Before, every such `PUT`
+  answered `412`, and only the CDR's own `uid::system::N` form succeeded. The
+  facade completes `W/"N"`, `"N"` and a bare `N` to the current version of the
+  bound composition, at the cost of one extra CDR read per versioned update,
+  answers `412` with the current `ETag` when `N` is stale,
+  and `400 invalid` when the value names no version. The CDR's own form still
+  passes through, and one naming another composition is `412`.
 - A transaction Bundle that carries one resource `id` at two `meta.versionId`s
   is refused with `400 invalid` naming both entries and commits nothing
   (#306), as R4 allows a resource in a transaction once by identity. Before,
