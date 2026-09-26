@@ -197,6 +197,21 @@ jobs:
           persist-credentials: false
       - run: bash scripts/checks/comment-style.sh --all
 
+  # The file-length guard: a hand-written Rust file stays under 1000 lines and
+  # a listed breach may not grow (`.claude/rules/rust-style.md` §File and
+  # module size, #351).
+  file-length:
+    name: file-length
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: bash scripts/checks/file-length.sh
+
   # The version-drift guard. It compares every present config file against
   # docs/VERSIONS.md and skips loudly for the files that have not landed yet,
   # so it is useful now and grows teeth as files appear.
@@ -751,6 +766,7 @@ jobs:
       - shellcheck
       - dockerfile-lint
       - comment-style
+      - file-length
       - versions
       - favicon-sync
       - detect

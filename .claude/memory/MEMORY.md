@@ -68,3 +68,4 @@
 
 - [openehr-its rest-client upstream](openehr-its-rest-client-upstream.md) — the generated client since 0.0.71; the #293 workarounds went at 0.0.72
 - [HL7 v2 test corpora](hl7v2-test-corpora.md) — the vendored v2 message sets, their licences, and that no real traffic is public
+- [File-length rule](file-length-rule.md) — hand-written .rs ≤ 1000 lines, split at 750 into module folders; guard with ratchet allow-list (#351)

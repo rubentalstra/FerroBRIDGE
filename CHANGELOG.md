@@ -25,6 +25,12 @@ crates on crates.io.
 
 ### Added
 
+- The file-length guard (#351). `scripts/checks/file-length.sh` fails the CI
+  guard tier when a hand-written Rust file exceeds 1000 lines or a listed
+  breach in `scripts/checks/file-length-allow.txt` grows; the rule (1000
+  hard, split into a module folder at 750, generated files excluded) is in
+  `.claude/rules/rust-style.md`, and the forty files that breach it today are
+  listed with the sub-issue that splits each.
 - FerroBRIDGE's supplements to the HL7 v2-to-FHIR guide (#256):
   ConceptMaps in the guide's own shape, shipped inside `ferrobridge-hl7v2`
   under `supplements/` and loaded over the guide's package by
