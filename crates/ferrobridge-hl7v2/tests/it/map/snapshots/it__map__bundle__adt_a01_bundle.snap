@@ -1,5 +1,5 @@
 ---
-source: crates/ferrobridge-hl7v2/tests/it/map.rs
+source: crates/ferrobridge-hl7v2/tests/it/map/bundle.rs
 expression: pretty(mapped.bundle())
 ---
 {

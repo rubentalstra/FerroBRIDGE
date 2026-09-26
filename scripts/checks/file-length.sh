@@ -60,6 +60,16 @@ listed() {
 fail=0
 warn=0
 breaches=()
+# A listed path that no longer exists is a stale entry: the split removed the
+# file, so the entry goes with it.
+if [ "$mode" = check ] && [ -f "$ALLOW" ]; then
+  while IFS=' ' read -r first path _; do
+    case "$first" in ''|\#*) continue ;; esac
+    [ -f "$path" ] && continue
+    note "FAIL $path is listed but does not exist; remove its allow-list entry"
+    fail=1
+  done < "$ALLOW"
+fi
 for f in "${files[@]}"; do
   [ -f "$f" ] || continue
   hand_written "$f" || continue

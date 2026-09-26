@@ -39,7 +39,7 @@ url) or `Adds` (a url under `map::supplement::CANONICAL_BASE`), says what it
 changes and why, and names the tracker issue (`FerroBRIDGE #N`); the test in
 `map::supplement` holds every file to that. A supplement changes rows, never
 the interpreter: a gap a ConceptMap cannot express is an interpreter issue.
-The tests of `map::run` and `tests/it/map.rs` run the guide alone and pin
+The tests of `map::run` and `tests/it/map/` run the guide alone and pin
 its behaviour; `tests/it/supplement.rs` runs each supplement on the row it
 changes against the guide alone, and the corpus test runs the shipped set.
 
@@ -150,7 +150,7 @@ run time.
 
 A shape `hl7v2-types` lacks (the event-to-structure table, data type
 components, `PartialEq` on the tree types) is a generator follow-up, never a
-local table here. `parse::structure_for` selects the tree and segment tables
+local table here. `parse::structure::structure_for` selects the tree and segment tables
 of the version MSH-12 declares for every structure (#333), counted as
 `version-selected`, with v2.9.1 for 2.9.1, 2.9, a later or absent MSH-12,
 or a version whose tables lack the structure. An empty required field is
@@ -168,22 +168,22 @@ for (`CM_MSG`, `CE_0051`) takes the base type the generated
 `datatype-ts-to-datetime`). The link is the generator's, never a table
 here. A segment whose group path no row names
 takes the rows of the one source whose groups differ from its own by one
-group, not the group holding the segment (`run::regrouped`), counted as
+group, not the group holding the segment (`run::grouping::regrouped`), counted as
 `group-path`: the guide's `ORM_O01.ORDER_DETAIL.CHOICE.OBR` reaches the 2.3
 `ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`; a source that reaches two tree
 paths, or a path two sources reach, stays `unmapped-segment`. When none
 does, the one source whose innermost group the tree omits, placing the
-segment directly in that group's parent, takes it (`run::unwrapped`), also
+segment directly in that group's parent, takes it (`run::grouping::unwrapped`), also
 counted as `group-path`: the guide's
 `ORU_R01.PATIENT_RESULT.ORDER_OBSERVATION.COMMON_ORDER.ORC` reaches the 2.5.1
-ORC in `ORDER_OBSERVATION`. Its mirror (`run::wrapped`) lets a row placing
+ORC in `ORDER_OBSERVATION`. Its mirror (`run::grouping::wrapped`) lets a row placing
 the segment in the parent reach a tree that adds the innermost group:
 the supplement's `ORL_O22.RESPONSE.PID` reaches the 2.5.1
 `ORL_O22.RESPONSE.PATIENT.PID`. The map only ever walks the tree the message
 was parsed with. A group the
 row names that the tree names otherwise at its position pairs with that
 tree group when the tree group holds every segment the guide's rows place
-in the row's group (`run::pairing`), counted as `group-renamed` naming
+in the row's group (`run::grouping::pairing`), counted as `group-renamed` naming
 both: the guide's `ORM_O01.PATIENT.VISIT.PV1` reaches the 2.3
 `ORM_O01.PATIENT.PATIENT_VISIT.PV1`. The pairing with the fewest renames
 counts, and two at the fewest stay unmapped. The rule holds for v2.9.1

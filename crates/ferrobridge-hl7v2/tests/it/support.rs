@@ -14,6 +14,7 @@ use ferrobridge_hl7v2::decode::{self, Charset};
 use ferrobridge_hl7v2::inbound::{self, Received};
 use ferrobridge_hl7v2::map::corpus::Corpus;
 use ferrobridge_hl7v2::mllp::{Connection, Handler, Malformed};
+use ferrobridge_hl7v2::parse::structure::structure_for;
 use ferrobridge_hl7v2::parse::{self, Parsed};
 use ferrobridge_term::client::Client;
 use ferrobridge_term::config::{Config, RetryPolicy, WireVersion};
@@ -29,9 +30,9 @@ pub(crate) const STAMP: Stamp<'static> = Stamp {
 /// Decodes, lexes and groups a fixture, with ASCII as the agreed default.
 pub(crate) fn parsed(bytes: &[u8]) -> Parsed {
     let decoded = decode::decode(bytes, Charset::Ascii).expect("the fixture decodes");
-    let lexed = parse::lex(&decoded.text, decoded.charset).expect("the fixture lexes");
-    let structure = parse::structure_for(&lexed.message).expect("the fixture names a structure");
-    parse::group(lexed, structure)
+    let lexed = parse::lex::lex(&decoded.text, decoded.charset).expect("the fixture lexes");
+    let structure = structure_for(&lexed.message).expect("the fixture names a structure");
+    parse::grouping::group(lexed, structure)
 }
 
 /// The vendored v2-to-FHIR package.
@@ -64,7 +65,7 @@ impl Handler for Face {
         message: Vec<u8>,
         _connection: &Connection,
     ) -> impl Future<Output = Option<Vec<u8>>> + Send {
-        let reply = match inbound::receive(&message, Charset::Ascii, parse::structure_for, STAMP) {
+        let reply = match inbound::receive(&message, Charset::Ascii, structure_for, STAMP) {
             Received::Parsed(inbound) => inbound.answer(Code::Accept, &[], STAMP).ok(),
             Received::Answered { reply, .. } => Some(reply),
             Received::Unanswerable => None,

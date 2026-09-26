@@ -453,6 +453,12 @@ crates on crates.io.
 
 ### Changed
 
+- `ferrobridge-hl7v2` splits its files over 750 lines into module folders
+  (#355), with no change in behaviour: the interpreter run in `map/run/` by
+  phase, the parser in `parse/` by phase, and the interpreter tests in
+  `tests/it/map/`; the condition grammar tests move to `tests/it/condition.rs`,
+  and a caller names the parse phases by their module (`parse::lex::lex`,
+  `parse::structure::structure_for`, `parse::grouping::group`).
 - `openehr-mapping-core`, `omocl` and `omop-cdm` split their six files over
   750 lines into module folders (#356), with no change in behaviour; the
   public types keep their names and a caller imports each from its new child

@@ -1,5 +1,5 @@
 ---
-source: crates/ferrobridge-hl7v2/tests/it/map.rs
+source: crates/ferrobridge-hl7v2/tests/it/map/package.rs
 expression: "format!(\"computable: {computable}\\nrefused: {refused}\\nnarrative: {narrative}\\n\\\n             defective (no operand):\\n{}unsupported:\\n{}\",\nlist(&defective), list(&unsupported))"
 ---
 computable: 415

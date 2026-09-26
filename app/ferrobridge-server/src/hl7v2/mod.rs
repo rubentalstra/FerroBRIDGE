@@ -32,6 +32,7 @@ use ferrobridge_hl7v2::decode::Charset;
 use ferrobridge_hl7v2::inbound::{self, Inbound, Received};
 use ferrobridge_hl7v2::map::corpus::{Corpus, CorpusError};
 use ferrobridge_hl7v2::mllp::{self, Codec, Connection, Handler, Malformed, Timeouts};
+use ferrobridge_hl7v2::parse::structure::structure_for;
 use ferrobridge_hl7v2::parse::{self, Message};
 use fhir_types::codec::Value;
 use fhirconnect::engine::origin::{MessageControlId, MessageType, SourceItem};
@@ -170,7 +171,7 @@ impl Face {
         async {
             let stamped = Stamped::now();
             let stamp = stamped.stamp();
-            match inbound::receive(message, self.charset, parse::structure_for, stamp) {
+            match inbound::receive(message, self.charset, structure_for, stamp) {
                 Received::Unanswerable => {
                     tracing::warn!("the message names no readable header and is not answered");
                     None
@@ -681,7 +682,7 @@ mod tests {
         let text = format!(
             "MSH|^~\\&|LAB|{facility}|EHR|SOUTH|20260925120000+0200||ORU^R01^ORU_R01|MSG-1|P|2.5.1\r"
         );
-        ferrobridge_hl7v2::parse::lex(&text, ferrobridge_hl7v2::decode::Charset::Ascii)
+        ferrobridge_hl7v2::parse::lex::lex(&text, ferrobridge_hl7v2::decode::Charset::Ascii)
             .expect("the header lexes")
             .message
     }
