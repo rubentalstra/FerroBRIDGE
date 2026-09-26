@@ -34,6 +34,17 @@ mod v2_legacy;
 mod value_conversion;
 mod xml;
 
+/// The gate of the tests that emit a whole generated crate.
+///
+/// A full emit of `fhir-types` or `hl7v2-types` takes minutes in a debug build
+/// and longer under coverage instrumentation, so those tests run only when
+/// `FERROBRIDGE_CODEGEN_EMIT` is exactly `1`, which the `codegen-drift` job
+/// sets over a release build. Elsewhere they return early and pass, as the
+/// `FERROBRIDGE_E2E` gate of the testkit does.
+pub(crate) fn full_emit() -> bool {
+    std::env::var("FERROBRIDGE_CODEGEN_EMIT").as_deref() == Ok("1")
+}
+
 /// The vendored R4B core package, loaded once for every test.
 static R4B: LazyLock<Package> = LazyLock::new(|| {
     Package::open(r4b_dir()).expect("the vendored hl7.fhir.r4b.core package should load")

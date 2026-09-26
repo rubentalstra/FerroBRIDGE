@@ -73,3 +73,14 @@ stage produced it. The FHIR side keeps FHIR's names verbatim
 `lower::TypeDef` one type definition, `lower::Cardinality` a cardinality). A
 `Rust`, `Fhir`, or `Gen` prefix on a type name is a smell: if two views of one
 thing collide, the module path disambiguates (`fhir::` versus `lower::`).
+
+## The full-emit tests run behind a gate
+
+Five integration tests emit a whole generated crate (`emit.rs` and `v2.rs`:
+emitting twice is byte-identical, the check reports drift, the committed
+crate is in sync). A full emit takes minutes in a debug build and longer
+under coverage instrumentation, so they run only when
+`FERROBRIDGE_CODEGEN_EMIT` is exactly `1`, which the `codegen-drift` CI job
+sets over a release build; elsewhere they return early and pass. Run
+them locally with `FERROBRIDGE_CODEGEN_EMIT=1 cargo nextest run --release -p
+fhir-codegen`. The drift check itself (`emit --check`) stays the guard.
