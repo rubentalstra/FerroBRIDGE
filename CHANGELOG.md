@@ -469,6 +469,19 @@ crates on crates.io.
   paths, or a tree path two row paths reach, stays `unmapped-segment`. Over
   the corpora 39 segments take this path; the pass counts do not move (142
   of 511 vendored, 189 of 379 smoke).
+- A group of a row's path that names no tree group at its position pairs
+  with the one tree group there whose segments hold the row's segment and
+  every segment the guide's rows place in the row's group (#339). The guide
+  writes `ORM_O01.PATIENT.VISIT.PV1` where the 2.3 tree has
+  `ORM_O01.PATIENT.PATIENT_VISIT.PV1`, so the PV1 and PV2 of a legacy order
+  now reach their rows, counted as `group-renamed` naming both group names.
+  A pairing composes with the one-group tolerance of #334, and among the
+  pairings the one with the fewest renamed groups counts; two tree groups
+  that qualify leave the segment `unmapped-segment`. The v2.9.1 MDM_T02
+  definitions name the observation group `FIXME`, so the OBX of a document
+  notification now reaches the guide's `MDM_T02.OBSERVATION.OBX` rows. Over
+  the corpora 60 segments take this path; the pass counts do not move (142
+  of 511 vendored, 189 of 379 smoke).
 - A legacy field whose version names its type by a version-specific code
   the guide has no data type map for resolves to the base type before the
   map lookup (#335): `CM_MSG` to `MSG` and `CE_0051` to `CE`, counted as
