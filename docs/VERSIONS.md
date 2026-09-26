@@ -182,6 +182,28 @@ of every `PROVENANCE.md` below back against its row.
 | `hl7.terminology` (THO) | 7.3.0 | `tools/fhir-codegen/vendor/hl7.terminology/PROVENANCE.md` |
 | `hl7.fhir.uv.v2mappings` (the v2-to-FHIR IG) | 1.0.0 | `tools/fhir-codegen/vendor/hl7.fhir.uv.v2mappings/PROVENANCE.md` (FHIR 4.0.1; the package declares CC0-1.0, its source repository `HL7/v2-to-fhir` Apache-2.0) |
 
+## FHIR examples packages (the conformance corpora, build time, never committed)
+
+HL7's examples package per FHIR version is the corpus of the four `fhir-types`
+conformance tests and of the R4 facade test (#373). Each is the version of the
+core package the table above pins, from the same registry: R4, R4B and R5 from
+packages.fhir.org, the R6 ballot from packages2.fhir.org. At about 600 MB
+unpacked they are fetched at build time by
+`scripts/vendor/fhir-packages.sh --build-time` into the ignored
+`tools/ferrobridge-testkit/vendor/<package>/package/`, and only each
+`PROVENANCE.md` is committed. The Pin cell is the version, the file count and
+the tree digest the script checks a fetch or a restored cache against;
+`scripts/checks/versions.sh` reads the version and the digest back from each
+`PROVENANCE.md`, and `scripts/checks/pin-freshness.sh` reads each version
+against the registry's `latest`.
+
+| Item | Pin | Repeated in |
+|---|---|---|
+| `hl7.fhir.r4.examples` | 4.0.1 files `5311` digest `51f5c093f9f197fcab683ac1bc3380e44b1c7e37c6c74baeefff7fa3eb8b7c1e` | `tools/ferrobridge-testkit/vendor/hl7.fhir.r4.examples/PROVENANCE.md`, the `test` and `conformance` jobs of `.github/workflows/ci.yml` and the coverage job of `.github/workflows/sonar.yml` (their cache key) |
+| `hl7.fhir.r4b.examples` | 4.3.0 files `2842` digest `7c42275e73bff53eef52c9f48e3bd82d3eaef66275ac00975a259828086be6b9` | `tools/ferrobridge-testkit/vendor/hl7.fhir.r4b.examples/PROVENANCE.md`, the same cache key |
+| `hl7.fhir.r5.examples` | 5.0.0 files `2824` digest `afddb711d22bbf8c45158cb4be0a8936ecd458df1a2a99cf5debd5274a7bee47` | `tools/ferrobridge-testkit/vendor/hl7.fhir.r5.examples/PROVENANCE.md`, the same cache key |
+| `hl7.fhir.r6.examples` | 6.0.0-ballot5 files `2488` digest `4654c0fa42180b2ef3abec208458482cb1092fe3c63ef4ec4661a3feb50a7b3f` | `tools/ferrobridge-testkit/vendor/hl7.fhir.r6.examples/PROVENANCE.md`, the same cache key |
+
 ## Profile packages (the mapping targets)
 
 No profile package is pinned yet. A row is added here the moment a context

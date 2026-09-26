@@ -148,7 +148,9 @@ the testkit tool crate. Beside it:
   `docs/VERSIONS.md`; `stubs` carries the documented ITS-REST and FHIR R4
   terminology response shapes for `wiremock`; `fixtures/` holds the synthetic
   template, composition and FHIR resources; `matrix_pin` reads the pin matrix;
-  `conformance` is the helper the corpus tests report their verdicts through.
+  `conformance` is the helper the corpus tests report their verdicts through;
+  `vendor/` is the ignored home of the four HL7 FHIR examples packages the
+  per-version model corpora read, fetched at build time (#373).
   `vocabulary` holds the synthetic OHDSI vocabulary for the ten vocabulary
   tables and its `COPY` loader (the observed Athena shape is #88).
 - `docs/specs/`: the vendored specification corpora (#71), one directory per
@@ -171,8 +173,9 @@ the testkit tool crate. Beside it:
   bump rule; `favicon-sync.sh`, the book theme favicon against the brand mark;
   `pin-freshness.sh`, every pin no ecosystem watches against its newest
   upstream release; and `conformance.sh`, the pass-list gate over the six
-  corpora under `conformance/` (the HL7 v2 messages count twice: the vendored
-  sets and the build-time smoke sets) (a regression fails, a new pass asks for the
+  corpora under `conformance/` (eleven: the two mapping libraries, the
+  round-trip laws, the REST API draft, the two HL7 v2 message sets, the four
+  FHIR examples packages per version, and the R4 facade) (a regression fails, a new pass asks for the
   list, `--update` rewrites the lists and the shields.io badge JSON).
 - `.github/`: issue and pull-request templates, CODEOWNERS, Dependabot, and
   ten workflows (CI, Docs, Scorecard, CodeQL, SonarQube Cloud, Release,

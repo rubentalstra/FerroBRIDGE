@@ -8,6 +8,7 @@
 //! asserted against the single source of truth; [`conformance`] records the
 //! corpus verdicts the conformance gate reads; [`containers`] starts the
 //! PostgreSQL and the reference CDR the end-to-end lane runs against;
+//! [`examples`] finds the HL7 examples packages fetched at build time;
 //! [`fixtures`] holds the synthetic documents the suites commit and map;
 //! [`laws`] compares the two ends of a round trip;
 //! [`stubs`] carries the upstream response shapes for `wiremock`;
@@ -21,6 +22,7 @@
 
 pub mod conformance;
 pub mod containers;
+pub mod examples;
 pub mod fixtures;
 pub mod laws;
 pub mod stubs;

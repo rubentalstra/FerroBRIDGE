@@ -6,4 +6,5 @@
 #![allow(clippy::panic_in_result_fn, reason = "test assertions")]
 
 mod corpora;
+mod fhir_examples;
 mod matrix;

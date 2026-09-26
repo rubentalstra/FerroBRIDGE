@@ -16,3 +16,4 @@ tools/fhir-codegen/vendor/** linguist-vendored -text
 docs/specs/** linguist-vendored -text
 tools/ferrobridge-testkit/fixtures/opt/kds/** linguist-vendored -text
 crates/ferrobridge-hl7v2/vendor/** linguist-vendored -text
+tools/ferrobridge-testkit/vendor/** linguist-vendored -text

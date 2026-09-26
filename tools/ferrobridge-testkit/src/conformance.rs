@@ -50,17 +50,33 @@ pub enum Corpus {
     Hl7v2,
     /// The HL7 v2 message sets fetched at build time, one case per message.
     Hl7v2Smoke,
+    /// The FHIR R4 examples package through `fhir-types`, one case per file.
+    FhirR4,
+    /// The FHIR R4B examples package through `fhir-types`, one case per file.
+    FhirR4b,
+    /// The FHIR R5 examples package through `fhir-types`, one case per file.
+    FhirR5,
+    /// The FHIR R6 ballot examples package through `fhir-types`, one case per
+    /// file.
+    FhirR6,
+    /// The FHIR R4 examples the facade serves, one case per context and file.
+    FhirR4Facade,
 }
 
 impl Corpus {
     /// Every corpus, in the order the gate reports them.
-    pub const ALL: [Self; 6] = [
+    pub const ALL: [Self; 11] = [
         Self::FhirconnectMappingLib,
         Self::Omocl,
         Self::Roundtrip,
         Self::DraftRestApi,
         Self::Hl7v2,
         Self::Hl7v2Smoke,
+        Self::FhirR4,
+        Self::FhirR4b,
+        Self::FhirR5,
+        Self::FhirR6,
+        Self::FhirR4Facade,
     ];
 
     /// Returns the corpus identifier, which names its directory under
@@ -74,6 +90,11 @@ impl Corpus {
             Self::DraftRestApi => "draft-rest-api",
             Self::Hl7v2 => "hl7v2",
             Self::Hl7v2Smoke => "hl7v2-smoke",
+            Self::FhirR4 => "fhir-r4",
+            Self::FhirR4b => "fhir-r4b",
+            Self::FhirR5 => "fhir-r5",
+            Self::FhirR6 => "fhir-r6",
+            Self::FhirR4Facade => "fhir-r4-facade",
         }
     }
 
@@ -275,6 +296,25 @@ pub enum ConformanceError {
 /// read, [`ConformanceError::Json`] when the result cannot be rendered, and
 /// [`ConformanceError::MalformedList`] when the committed list is malformed.
 pub fn record(corpus: Corpus, cases: &[Case]) -> Result<Outcome, ConformanceError> {
+    record_set_aside(corpus, cases, &BTreeMap::new())
+}
+
+/// Records the verdicts of one corpus as [`record`] does, with the inputs the
+/// corpus read and made no case of, counted by kind.
+///
+/// A set-aside input is neither a pass nor a failure: the corpus holds it and
+/// the measured surface does not reach it, such as an example of a resource
+/// type no loaded mapping serves. The counts go into the result beside the
+/// cases and never into the pass list.
+///
+/// # Errors
+///
+/// Returns what [`record`] returns.
+pub fn record_set_aside(
+    corpus: Corpus,
+    cases: &[Case],
+    set_aside: &BTreeMap<String, usize>,
+) -> Result<Outcome, ConformanceError> {
     let mut verdicts: BTreeMap<&str, &Case> = BTreeMap::new();
     for case in cases {
         if case.id.is_empty() || case.id.chars().any(char::is_whitespace) {
@@ -290,7 +330,7 @@ pub fn record(corpus: Corpus, cases: &[Case]) -> Result<Outcome, ConformanceErro
             });
         }
     }
-    write_result(corpus, &verdicts)?;
+    write_result(corpus, &verdicts, set_aside)?;
     let list = corpus.pass_list();
     if std::env::var(UPDATE_VARIABLE).is_ok_and(|value| value == "1") {
         write_list(&list, &verdicts)?;
@@ -328,7 +368,11 @@ fn out_directory() -> PathBuf {
 }
 
 /// Writes `<out>/<corpus>.json`.
-fn write_result(corpus: Corpus, verdicts: &BTreeMap<&str, &Case>) -> Result<(), ConformanceError> {
+fn write_result(
+    corpus: Corpus,
+    verdicts: &BTreeMap<&str, &Case>,
+    set_aside: &BTreeMap<String, usize>,
+) -> Result<(), ConformanceError> {
     let rendered: Vec<serde_json::Value> = verdicts
         .values()
         .map(|case| {
@@ -345,6 +389,7 @@ fn write_result(corpus: Corpus, verdicts: &BTreeMap<&str, &Case>) -> Result<(), 
     let document = serde_json::json!({
         "corpus": corpus.id(),
         "total": verdicts.len(),
+        "set_aside": set_aside,
         "cases": rendered,
     });
     let mut text = serde_json::to_string_pretty(&document)

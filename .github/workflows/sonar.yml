@@ -92,6 +92,26 @@ jobs:
         if: ${{ hashFiles('Cargo.toml') != '' }}
         run: bash scripts/vendor/v2-legacy.sh
 
+      # The FHIR model corpora and the R4 facade corpus read the HL7 examples
+      # packages, fetched at build time and never committed (ci.yml test).
+      - name: Read the pinned FHIR examples packages
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        id: fhir-examples
+        run: echo "key=$(bash scripts/vendor/fhir-packages.sh --cache-key)" >> "$GITHUB_OUTPUT"
+      - name: Restore the FHIR examples packages
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r4.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r4b.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r5.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r6.examples/package
+          key: fhir-examples-${{ steps.fhir-examples.outputs.key }}
+      - name: Fetch and verify the FHIR examples packages
+        if: ${{ hashFiles('Cargo.toml') != '' }}
+        run: bash scripts/vendor/fhir-packages.sh --build-time
+
       # The lcov file sonar.rust.lcov.reportPaths names. One package at a time:
       # a workspace-wide instrumented build schedules the two generated giants
       # side by side and the runner kills it with exit 143 (#146), the same

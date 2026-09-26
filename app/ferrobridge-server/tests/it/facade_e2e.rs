@@ -307,7 +307,7 @@ fn post_condition() -> Result<Request<Body>, Box<dyn StdError>> {
 }
 
 /// Uploads the published `KDS_Diagnose` template through the CDR's own route.
-async fn upload_kds_template(base_url: &str) -> Result<(), Box<dyn StdError>> {
+pub(crate) async fn upload_kds_template(base_url: &str) -> Result<(), Box<dyn StdError>> {
     let response = reqwest::Client::new()
         .post(format!("{base_url}/definition/template/adl1.4"))
         .header(header::CONTENT_TYPE, "application/xml")

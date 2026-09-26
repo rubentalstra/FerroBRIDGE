@@ -8,12 +8,14 @@ paths: ["scripts/vendor/*.sh", "**/vendor/**", "docs/specs/**"]
 # Vendored inputs
 
 External material enters this repository one way only: a committed fetch
-script, vendored verbatim, stamped with provenance. Five trees exist: the six
+script, vendored verbatim, stamped with provenance. Six trees exist: the six
 HL7 FHIR packages under `tools/fhir-codegen/vendor/` (#72, #252), the
 specification corpora under `docs/specs/`, one directory per corpus, fetched by
 `scripts/vendor/*.sh` from the pins in `docs/VERSIONS.md` (#71), the three HL7
 v2 message sets under `crates/ferrobridge-hl7v2/vendor/` (#292, with the NIST
-and AIRA sets fetched at build time beside them), and the two build-time
+and AIRA sets fetched at build time beside them), the four HL7 FHIR examples
+packages fetched at build time into `tools/ferrobridge-testkit/vendor/` (#373;
+600 MB unpacked, so never committed), and the two build-time
 trees under `tools/fhir-codegen/vendor/`: `hl7-v2ig/`, fetched by
 `scripts/vendor/v2ig.sh`, and `hl7-v2-legacy/`, fetched by
 `scripts/vendor/v2-legacy.sh` (#303). Neither is committed, because the
