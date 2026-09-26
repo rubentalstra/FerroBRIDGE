@@ -16,7 +16,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.1",
             position: 1,
             name: "Sequence Number - Test/ Observation Master File",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.2",
             position: 2,
             name: "Producer's Service/Test/Observation ID",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.3",
             position: 3,
             name: "Permitted Data Types",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -76,7 +76,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.4",
             position: 4,
             name: "Specimen Required",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -97,7 +97,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.5",
             position: 5,
             name: "Producer ID",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -118,7 +118,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.6",
             position: 6,
             name: "Observation Description",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +136,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.7",
             position: 7,
             name: "Other Service/Test/Observation IDs for the Observation",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +157,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.8",
             position: 8,
             name: "Other Names",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -175,7 +175,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.9",
             position: 9,
             name: "Preferred Report Name for the Observation",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +193,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.10",
             position: 10,
             name: "Preferred Short Name or Mnemonic for Observation",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +211,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.11",
             position: 11,
             name: "Preferred Long Name for the Observation",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +229,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.12",
             position: 12,
             name: "Orderability",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -250,7 +250,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.13",
             position: 13,
             name: "Identity of Instrument Used to Perform this Study",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -271,7 +271,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.14",
             position: 14,
             name: "Coded Representation of Method",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -292,7 +292,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.15",
             position: 15,
             name: "Portable Device Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +313,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.16",
             position: 16,
             name: "Observation Producing Department/Section",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -334,7 +334,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.17",
             position: 17,
             name: "Telephone Number of Section",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +352,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.18",
             position: 18,
             name: "Nature of Service/Test/Observation",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -373,7 +373,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.19",
             position: 19,
             name: "Report Subheader",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -394,7 +394,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.20",
             position: 20,
             name: "Report Display Order",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -412,7 +412,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.21",
             position: 21,
             name: "Date/Time Stamp for any change in Definition for the Observation",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -430,7 +430,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.22",
             position: 22,
             name: "Effective Date/Time of Change",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -448,7 +448,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.23",
             position: 23,
             name: "Typical Turn-Around Time",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -466,7 +466,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.24",
             position: 24,
             name: "Processing Time",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -484,7 +484,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.25",
             position: 25,
             name: "Processing Priority",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -505,7 +505,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.26",
             position: 26,
             name: "Reporting Priority",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -526,7 +526,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.27",
             position: 27,
             name: "Outside Site(s) Where Observation may be Performed",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -547,7 +547,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.28",
             position: 28,
             name: "Address of Outside Site(s)",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -565,7 +565,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.29",
             position: 29,
             name: "Phone Number of Outside Site",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -583,7 +583,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.30",
             position: 30,
             name: "Confidentiality Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -604,7 +604,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.31",
             position: 31,
             name: "Observations Required to Interpret the Observation",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -625,7 +625,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.32",
             position: 32,
             name: "Interpretation of Observations",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -643,7 +643,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.33",
             position: 33,
             name: "Contraindications to Observations",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -664,7 +664,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.34",
             position: 34,
             name: "Reflex Tests/Observations",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -685,7 +685,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.35",
             position: 35,
             name: "Rules that Trigger Reflex Testing",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -703,7 +703,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.36",
             position: 36,
             name: "Fixed Canned Message",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -724,7 +724,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.37",
             position: 37,
             name: "Patient Preparation",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -742,7 +742,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.38",
             position: 38,
             name: "Procedure Medication",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -763,7 +763,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.39",
             position: 39,
             name: "Factors that may Affect Affect the Observation",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -781,7 +781,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.40",
             position: 40,
             name: "Service/Test/Observation Performance Schedule",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -799,7 +799,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.41",
             position: 41,
             name: "Description of Test Methods",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -817,7 +817,9 @@ pub static OM1: Segment = Segment {
             id: "OM1.42",
             position: 42,
             name: "Kind of Quantity Observed",
-            data_type: Some(DataTypeRef::Legacy("CE_0254")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0254,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -838,7 +840,9 @@ pub static OM1: Segment = Segment {
             id: "OM1.43",
             position: 43,
             name: "Point Versus Interval",
-            data_type: Some(DataTypeRef::Legacy("CE_0255")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0255,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -859,7 +863,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.44",
             position: 44,
             name: "Challenge Information",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -880,7 +884,9 @@ pub static OM1: Segment = Segment {
             id: "OM1.45",
             position: 45,
             name: "Relationship Modifier",
-            data_type: Some(DataTypeRef::Legacy("CE_0258")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0258,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -901,7 +907,7 @@ pub static OM1: Segment = Segment {
             id: "OM1.46",
             position: 46,
             name: "Target Anatomic Site Of Test",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -922,7 +928,9 @@ pub static OM1: Segment = Segment {
             id: "OM1.47",
             position: 47,
             name: "Modality Of Imaging Measurement",
-            data_type: Some(DataTypeRef::Legacy("CE_0259")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0259,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

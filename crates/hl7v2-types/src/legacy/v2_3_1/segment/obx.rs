@@ -16,7 +16,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.1",
             position: 1,
             name: "Set ID - OBX",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.2",
             position: 2,
             name: "Value Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.3",
             position: 3,
             name: "Observation Identifier",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.4",
             position: 4,
             name: "Observation Sub-ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +91,9 @@ pub static OBX: Segment = Segment {
             id: "OBX.5",
             position: 5,
             name: "Observation Value",
-            data_type: Some(DataTypeRef::Legacy("VARIES")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_3_1::data_type::VARIES,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +111,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.6",
             position: 6,
             name: "Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +129,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.7",
             position: 7,
             name: "References Range",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +147,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.8",
             position: 8,
             name: "Abnormal Flags",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -166,7 +168,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.9",
             position: 9,
             name: "Probability",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -184,7 +186,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.10",
             position: 10,
             name: "Nature of Abnormal Test",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -205,7 +207,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.11",
             position: 11,
             name: "Observation Result Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -226,7 +228,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.12",
             position: 12,
             name: "Date Last Obs Normal Values",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -244,7 +246,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.13",
             position: 13,
             name: "User Defined Access Checks",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -262,7 +264,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.14",
             position: 14,
             name: "Date/Time of the Observation",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +282,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.15",
             position: 15,
             name: "Producer's ID",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -298,7 +300,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.16",
             position: 16,
             name: "Responsible Observer",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -316,7 +318,7 @@ pub static OBX: Segment = Segment {
             id: "OBX.17",
             position: 17,
             name: "Observation Method",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

@@ -16,7 +16,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.1",
             position: 1,
             name: "Set ID",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.2",
             position: 2,
             name: "Access Restriction Action Code",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.3",
             position: 3,
             name: "Access Restriction Value",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -76,7 +76,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.4",
             position: 4,
             name: "Access Restriction Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -97,7 +97,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.5",
             position: 5,
             name: "Special Access Restriction Instructions",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -115,7 +115,7 @@ pub static ARV: Segment = Segment {
             id: "ARV.6",
             position: 6,
             name: "Access Restriction Date Range",
-            data_type: Some(DataTypeRef::Legacy("DR")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

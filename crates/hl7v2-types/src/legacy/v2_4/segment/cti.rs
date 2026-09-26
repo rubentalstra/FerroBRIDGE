@@ -16,7 +16,7 @@ pub static CTI: Segment = Segment {
             id: "CTI.1",
             position: 1,
             name: "Sponsor Study ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static CTI: Segment = Segment {
             id: "CTI.2",
             position: 2,
             name: "Study Phase Identifier",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static CTI: Segment = Segment {
             id: "CTI.3",
             position: 3,
             name: "Study Scheduled Time Point",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

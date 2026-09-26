@@ -16,7 +16,9 @@ pub static RXR: Segment = Segment {
             id: "RXR.1",
             position: 1,
             name: "Route",
-            data_type: Some(DataTypeRef::Legacy("CE_0162")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0162,
+            )),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +39,9 @@ pub static RXR: Segment = Segment {
             id: "RXR.2",
             position: 2,
             name: "Administration Site",
-            data_type: Some(DataTypeRef::Legacy("CE_0163")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0163,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -58,7 +62,9 @@ pub static RXR: Segment = Segment {
             id: "RXR.3",
             position: 3,
             name: "Administration Device",
-            data_type: Some(DataTypeRef::Legacy("CE_0164")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0164,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -79,7 +85,9 @@ pub static RXR: Segment = Segment {
             id: "RXR.4",
             position: 4,
             name: "Administration Method",
-            data_type: Some(DataTypeRef::Legacy("CE_0165")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0165,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +108,7 @@ pub static RXR: Segment = Segment {
             id: "RXR.5",
             position: 5,
             name: "Routing Instruction",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

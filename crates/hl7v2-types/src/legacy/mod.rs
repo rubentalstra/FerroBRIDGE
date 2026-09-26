@@ -8,6 +8,8 @@
 //! A version module holds `structure`, one module per structure with its
 //! tree, and `segment` for each segment whose field table differs from the
 //! v2.9.1 one; a tree links a segment that agrees to the v2.9.1 `static`.
+//! `data_type` holds the data type codes those segments' fields name, each
+//! with the base type a version-specific code stands for.
 //! Each [`crate::model::Structure`] here carries its version and the version
 //! it is withdrawn as of.
 

@@ -459,6 +459,27 @@ crates on crates.io.
 
 ### Fixed
 
+- A segment whose group path no row of the guide's message map names takes
+  the rows of the one source whose groups differ from its own by a single
+  group, other than the group holding the segment (#334). The guide writes
+  `ORM_O01.ORDER_DETAIL.CHOICE.OBR` where the 2.3 tree places OBR at
+  `ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`, so the OBR, RXO, NTE, DG1 and OBX
+  of a legacy order now reach their rows, each counted as `group-path`
+  naming the row path and the tree path. A row path that reaches two tree
+  paths, or a tree path two row paths reach, stays `unmapped-segment`. Over
+  the corpora 39 segments take this path; the pass counts do not move (142
+  of 511 vendored, 189 of 379 smoke).
+- A legacy field whose version names its type by a version-specific code
+  the guide has no data type map for resolves to the base type before the
+  map lookup (#335): `CM_MSG` to `MSG` and `CE_0051` to `CE`, counted as
+  `base-typed` naming both codes. A code the guide maps keeps the guide's
+  map: `TS` stays on `datatype-ts-to-datetime`. `hl7v2-types` carries the
+  link: each legacy version module gains a `data_type` module with one
+  `LegacyDataType` per code its segments' fields name, whose base is `MSG`
+  for `CM_MSG`, `CE` bound to table 0051 for `CE_0051` and `DTM` for `TS`,
+  and `DataTypeRef::Legacy` points at it. A code that stands for no defined
+  type keeps its code and stays `no-datatype-map` when no map names it. The
+  pass counts do not move.
 - The two `datatype-eip-<half>-to-identifier` maps each fill an `Identifier`
   of their own (#336). The guide maps SPM-2 into `Specimen.identifier[1]`
   and `identifier[2]` and ORC-4 into `DiagnosticReport.identifier[3]` and
@@ -478,7 +499,7 @@ crates on crates.io.
   element with a primitive `value` child lands there, counted as
   `value-child`: TXA-16 through `datatype-st-to-identifier` gives
   `DocumentReference.identifier.value`. Over the corpora, `datatype-conflict`
-  falls from 1226 to 155 and `no-datatype-map` from 1525 to 379; the pass
+  falls from 1226 to 155 and `no-datatype-map` from 1525 to 389; the pass
   counts do not move (142 of 511 vendored, 189 of 379 smoke), since no
   outcome decides a verdict.
 - A field of a legacy v2 message takes its data type from the segment

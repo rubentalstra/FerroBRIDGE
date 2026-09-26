@@ -16,7 +16,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.1",
             position: 1,
             name: "Set ID - PV1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.2",
             position: 2,
             name: "Patient Class",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.3",
             position: 3,
             name: "Assigned Patient Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.4",
             position: 4,
             name: "Admission Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +94,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.5",
             position: 5,
             name: "Preadmit Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +112,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.6",
             position: 6,
             name: "Prior Patient Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.7",
             position: 7,
             name: "Attending Doctor",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -151,7 +151,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.8",
             position: 8,
             name: "Referring Doctor",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -172,7 +172,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.9",
             position: 9,
             name: "Consulting Doctor",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -190,7 +190,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.10",
             position: 10,
             name: "Hospital Service",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +211,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.11",
             position: 11,
             name: "Temporary Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +229,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.12",
             position: 12,
             name: "Preadmit Test Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -250,7 +250,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.13",
             position: 13,
             name: "Re-admission Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -271,7 +271,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.14",
             position: 14,
             name: "Admit Source",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -292,7 +292,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.15",
             position: 15,
             name: "Ambulatory Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -313,7 +313,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.16",
             position: 16,
             name: "VIP Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -334,7 +334,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.17",
             position: 17,
             name: "Admitting Doctor",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -355,7 +355,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.18",
             position: 18,
             name: "Patient Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -376,7 +376,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.19",
             position: 19,
             name: "Visit Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -394,7 +394,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.20",
             position: 20,
             name: "Financial Class",
-            data_type: Some(DataTypeRef::Legacy("FC")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::FC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -415,7 +415,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.21",
             position: 21,
             name: "Charge Price Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +436,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.22",
             position: 22,
             name: "Courtesy Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +457,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.23",
             position: 23,
             name: "Credit Rating",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -478,7 +478,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.24",
             position: 24,
             name: "Contract Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -499,7 +499,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.25",
             position: 25,
             name: "Contract Effective Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -517,7 +517,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.26",
             position: 26,
             name: "Contract Amount",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -535,7 +535,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.27",
             position: 27,
             name: "Contract Period",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -553,7 +553,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.28",
             position: 28,
             name: "Interest Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -574,7 +574,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.29",
             position: 29,
             name: "Transfer to Bad Debt Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -595,7 +595,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.30",
             position: 30,
             name: "Transfer to Bad Debt Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -613,7 +613,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.31",
             position: 31,
             name: "Bad Debt Agency Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -634,7 +634,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.32",
             position: 32,
             name: "Bad Debt Transfer Amount",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -652,7 +652,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.33",
             position: 33,
             name: "Bad Debt Recovery Amount",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -670,7 +670,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.34",
             position: 34,
             name: "Delete Account Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -691,7 +691,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.35",
             position: 35,
             name: "Delete Account Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -709,7 +709,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.36",
             position: 36,
             name: "Discharge Disposition",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -730,7 +730,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.37",
             position: 37,
             name: "Discharged to Location",
-            data_type: Some(DataTypeRef::Legacy("DLD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DLD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -751,7 +751,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.38",
             position: 38,
             name: "Diet Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -772,7 +772,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.39",
             position: 39,
             name: "Servicing Facility",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -793,7 +793,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.40",
             position: 40,
             name: "Bed Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -814,7 +814,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.41",
             position: 41,
             name: "Account Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -835,7 +835,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.42",
             position: 42,
             name: "Pending Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -853,7 +853,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.43",
             position: 43,
             name: "Prior Temporary Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -871,7 +871,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.44",
             position: 44,
             name: "Admit Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -889,7 +889,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.45",
             position: 45,
             name: "Discharge Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -907,7 +907,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.46",
             position: 46,
             name: "Current Patient Balance",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -925,7 +925,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.47",
             position: 47,
             name: "Total Charges",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -943,7 +943,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.48",
             position: 48,
             name: "Total Adjustments",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -961,7 +961,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.49",
             position: 49,
             name: "Total Payments",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -979,7 +979,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.50",
             position: 50,
             name: "Alternate Visit ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -1000,7 +1000,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.51",
             position: 51,
             name: "Visit Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1039,7 +1039,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.53",
             position: 53,
             name: "Service Episode Description",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -1057,7 +1057,7 @@ pub static PV1: Segment = Segment {
             id: "PV1.54",
             position: 54,
             name: "Service Episode Identifier",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

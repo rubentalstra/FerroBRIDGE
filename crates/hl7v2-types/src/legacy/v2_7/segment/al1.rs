@@ -16,7 +16,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.1",
             position: 1,
             name: "Set ID - AL1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.2",
             position: 2,
             name: "Allergen Type Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.3",
             position: 3,
             name: "Allergen Code/Mnemonic/Description",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -67,7 +67,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.4",
             position: 4,
             name: "Allergy Severity Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +85,7 @@ pub static AL1: Segment = Segment {
             id: "AL1.5",
             position: 5,
             name: "Allergy Reaction Code",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

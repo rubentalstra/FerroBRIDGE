@@ -15,7 +15,7 @@ pub static DSC: Segment = Segment {
         id: "DSC.1",
         position: 1,
         name: "Continuation Pointer",
-        data_type: Some(DataTypeRef::Legacy("ST")),
+        data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_3_1::data_type::ST)),
         cardinality: Cardinality {
             min: 0,
             max: Max::Bounded(1),

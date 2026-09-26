@@ -16,7 +16,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.1",
             position: 1,
             name: "Primary Key Value - LCC",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.2",
             position: 2,
             name: "Location Department",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.3",
             position: 3,
             name: "Accommodation Type",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -76,7 +76,7 @@ pub static LCC: Segment = Segment {
             id: "LCC.4",
             position: 4,
             name: "Charge Code",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,

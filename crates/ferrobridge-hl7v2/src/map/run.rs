@@ -456,18 +456,35 @@ impl<'a> Run<'a> {
         Ok(())
     }
 
-    /// Maps one placed segment through the message map rows naming it.
-    fn visit(&mut self, map: &'a Map, visit: &Visit<'a>) -> Result<(), MapError> {
-        let at = self.parsed.location(visit.index);
+    /// The message map rows naming a placed segment: the rows whose source is
+    /// its path, else the rows of the one source [`regrouped`] reaches it
+    /// by, counted as `group-path`; `None` when no row names it.
+    fn rows(&mut self, map: &'a Map, visit: &Visit<'a>, at: &Location) -> Option<Vec<&'a Row>> {
         let rows: Vec<&Row> = map
             .rows
             .iter()
             .filter(|row| visit.matches(&row.source))
             .collect();
-        if rows.is_empty() {
+        if !rows.is_empty() {
+            return Some(rows);
+        }
+        let tree = tree_paths(self.parsed.structure_name(), self.parsed.structure().nodes);
+        let source = regrouped(map, &visit.code, &tree)?;
+        self.outcomes.push(Outcome::GroupPath {
+            at: at.clone(),
+            row_path: String::from(source),
+            tree_path: visit.code.clone(),
+        });
+        Some(map.rows.iter().filter(|row| row.source == source).collect())
+    }
+
+    /// Maps one placed segment through the message map rows naming it.
+    fn visit(&mut self, map: &'a Map, visit: &Visit<'a>) -> Result<(), MapError> {
+        let at = self.parsed.location(visit.index);
+        let Some(rows) = self.rows(map, visit, &at) else {
             self.outcomes.push(Outcome::UnmappedSegment { at });
             return Ok(());
-        }
+        };
         let scope = Scope {
             parsed: self.parsed,
             index: visit.index,
@@ -655,9 +672,22 @@ impl<'a> Run<'a> {
                 continue;
             }
             let legacy = self.parsed.structure().withdrawn_as_of.is_some() && components.is_empty();
+            if (legacy || row.source_type.is_none())
+                && let Some((code, base)) =
+                    version_specific(self.corpus, scope.definition, position)
+            {
+                self.outcomes.push(Outcome::BaseTyped {
+                    at: once.at.clone(),
+                    row: reference.clone(),
+                    field: format!("{id}-{position}"),
+                    code: code.code,
+                    base: base.code,
+                    version: code.version,
+                });
+            }
             let (source_type, replaced) = field_type(
                 row.source_type.clone(),
-                definition_type(scope.definition, position),
+                definition_type(self.corpus, scope.definition, position),
                 legacy,
             );
             if let (Some(row_type), Some(version_type)) = (replaced, source_type.clone()) {
@@ -2615,17 +2645,51 @@ fn split_source(source: &str, separator: char) -> (&str, Vec<usize>) {
 
 /// The data type the placed segment's definition gives a field, when its
 /// `TypeInfo` names none: the definition of the version the parser selected
-/// the structure from, so a legacy field keeps its own version's code.
+/// the structure from, so a legacy field keeps its own version's type.
+///
+/// The guide's maps come first: a legacy code the guide has a data type map
+/// for keeps that map (`TS` keeps `datatype-ts-to-datetime`), and one it has
+/// none for gives the base type the generated tables link it to
+/// ([`version_specific`]): `CM_MSG` gives `MSG` and `CE_0051` gives `CE`.
 fn definition_type(
+    corpus: &Corpus,
     definition: &'static hl7v2_types::model::Segment,
     position: usize,
 ) -> Option<String> {
+    if let Some((_, base)) = version_specific(corpus, definition, position) {
+        return Some(String::from(base.code));
+    }
     definition
         .fields
         .iter()
         .find(|field| usize::from(field.position) == position)?
         .data_type
         .map(|data_type| String::from(data_type.code()))
+}
+
+/// The legacy data type code of a field that stands for a base type, with
+/// that base, as the generated tables link them, when the guide has no data
+/// type map from the code as written.
+fn version_specific(
+    corpus: &Corpus,
+    definition: &'static hl7v2_types::model::Segment,
+    position: usize,
+) -> Option<(
+    &'static hl7v2_types::model::LegacyDataType,
+    hl7v2_types::model::LegacyBase,
+)> {
+    let field = definition
+        .fields
+        .iter()
+        .find(|field| usize::from(field.position) == position)?;
+    match field.data_type {
+        Some(hl7v2_types::model::DataTypeRef::Legacy(code))
+            if !corpus.maps_from("datatype", code.code) =>
+        {
+            Some((code, code.base?))
+        }
+        _ => None,
+    }
 }
 
 /// The data type a field row maps its value by, with the type the row names
@@ -2814,6 +2878,98 @@ fn preceding(
     ids
 }
 
+/// The path of every segment node of a structure's tree, as a message map
+/// row names it: `ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`.
+fn tree_paths(structure: &str, nodes: &'static [hl7v2_types::model::Node]) -> BTreeSet<String> {
+    fn walk(prefix: &str, nodes: &'static [hl7v2_types::model::Node], out: &mut BTreeSet<String>) {
+        for node in nodes {
+            match node {
+                hl7v2_types::model::Node::Segment(reference) => {
+                    out.insert(format!("{prefix}.{}", reference.segment.id));
+                }
+                hl7v2_types::model::Node::Group(group) => {
+                    walk(&format!("{prefix}.{}", group.name), group.children, out);
+                }
+                hl7v2_types::model::Node::Placeholder(_) => {}
+            }
+        }
+    }
+    let mut out = BTreeSet::new();
+    walk(structure, nodes, &mut out);
+    out
+}
+
+/// The one message map row source whose group path differs from the parsed
+/// segment's `path` by a single group, among the `tree` paths of its
+/// structure.
+///
+/// The guide's message maps name the group paths of one structure per
+/// message (`ORM_O01.ORDER_DETAIL.CHOICE.OBR`), while a legacy tree nests the
+/// groups of its own version (`ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR` at
+/// 2.3). A row source matches when it names the same structure and segment
+/// and the same ordered groups but one, which the tree adds or omits, and the
+/// group holding the segment agrees ([`one_group_apart`]). A row source any
+/// tree path names exactly belongs to that path. The match holds only when
+/// one row source matches `path` and that source matches no other tree path;
+/// otherwise the segment stays unmapped. The rule holds for every tree,
+/// legacy and v2.9.1 alike, since the guide's paths also disagree with the
+/// v2.9.1 definitions (`OML_O21`). No specification governs this: our
+/// own design, since `mapping_guidelines.md` writes one structure per message.
+fn regrouped<'m>(map: &'m Map, path: &str, tree: &BTreeSet<String>) -> Option<&'m str> {
+    let sources: BTreeSet<&str> = map
+        .rows
+        .iter()
+        .map(|row| row.source.as_str())
+        .filter(|source| !source.contains(":follow:") && !tree.contains(*source))
+        .collect();
+    let mut matched = sources
+        .into_iter()
+        .filter(|source| one_group_apart(source, path));
+    let source = matched.next()?;
+    if matched.next().is_some() {
+        return None;
+    }
+    let mut reached = tree.iter().filter(|other| one_group_apart(source, other));
+    let only = reached.next()?;
+    (only == path && reached.next().is_none()).then_some(source)
+}
+
+/// Whether two segment paths name one structure and one segment, and their
+/// groups differ by one group that is not the group holding the segment.
+fn one_group_apart(left: &str, right: &str) -> bool {
+    let left: Vec<&str> = left.split('.').collect();
+    let right: Vec<&str> = right.split('.').collect();
+    let (Some((left_structure, left_rest)), Some((right_structure, right_rest))) =
+        (left.split_first(), right.split_first())
+    else {
+        return false;
+    };
+    let (Some((left_segment, left_groups)), Some((right_segment, right_groups))) =
+        (left_rest.split_last(), right_rest.split_last())
+    else {
+        return false;
+    };
+    if left_structure != right_structure || left_segment != right_segment {
+        return false;
+    }
+    let (longer, shorter) = if left_groups.len() > right_groups.len() {
+        (left_groups, right_groups)
+    } else {
+        (right_groups, left_groups)
+    };
+    if longer.len() != shorter.len().saturating_add(1) || shorter.last() != longer.last() {
+        return false;
+    }
+    (0..longer.len().saturating_sub(1)).any(|dropped| {
+        longer
+            .iter()
+            .enumerate()
+            .filter(|(index, _)| *index != dropped)
+            .map(|(_, group)| group)
+            .eq(shorter.iter())
+    })
+}
+
 /// Whether a node repeats.
 const fn repeats(max: Max) -> bool {
     match max {
@@ -2829,7 +2985,8 @@ mod tests {
     use fhir_types::codec::{Json, Path, Value};
 
     use super::{
-        Outcome, Pending, Run, alternatives, collect, definition_type, field_type, resolve_path,
+        Outcome, Pending, Run, alternatives, collect, definition_type, field_type, one_group_apart,
+        regrouped, resolve_path, tree_paths,
     };
     use crate::decode::Charset;
     use crate::map::corpus::Corpus;
@@ -2932,10 +3089,10 @@ mod tests {
             .iter()
             .find(|visit| visit.code == "ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR")
             .expect("the OBR is placed");
-        let legacy = definition_type(obr.definition, 4).expect("OBR-4 is typed at 2.3");
+        let legacy = definition_type(&corpus(), obr.definition, 4).expect("OBR-4 is typed at 2.3");
         assert_eq!(legacy, "CE");
         assert_eq!(
-            definition_type(&hl7v2_types::segment::obr::OBR, 4).as_deref(),
+            definition_type(&corpus(), &hl7v2_types::segment::obr::OBR, 4).as_deref(),
             Some("CWE")
         );
         let corpus = corpus();
@@ -2947,8 +3104,6 @@ mod tests {
             field_type(Some(String::from("CWE")), Some(legacy.clone()), true),
             (Some(legacy), Some(String::from("CWE")))
         );
-        // NOTE: the guide's ORM_O01 message map names `ORM_O01.ORDER_DETAIL.CHOICE.OBR`, outside
-        // the ORDER group the 2.3 tree places OBR in, so the walk is shown on PID-8 (2.3 `IS`).
         let mut run = Run::new(&corpus, &parsed);
         run.message().expect("the walk runs");
         let typed: Vec<(&str, &str, &str, &str)> = run
@@ -2973,6 +3128,186 @@ mod tests {
         assert!(typed.contains(&("PID-8", "CWE", "IS", "2.3")), "{typed:?}");
     }
 
+    /// A synthetic 2.3 ORM^O01 with a laboratory order carrying a note, a
+    /// diagnosis and a result, and a pharmacy order.
+    fn legacy_order() -> Parsed {
+        message(&[
+            "MSH|^~\\&|NORTHLAB|NORTHHOSP|EHR|SOUTHCLINIC|20260925143000+0200||ORM^O01|MSG00031|P|2.3",
+            "PID|1||PAT-0031^^^NORTHLAB^MR||Doe^Sam^^^^^L||19800101|M",
+            "ORC|NW|PLC-31",
+            "OBR|1|PLC-31||2345-7^Glucose^LN",
+            "NTE|1||Fasting sample",
+            "DG1|1||E11.9^Type 2 diabetes^I10",
+            "OBX|1|NM|2345-7^Glucose^LN||5.4|mmol/L",
+            "ORC|NW|PLC-32",
+            "RXO|RX-1^Metformin^NDC|500",
+        ])
+    }
+
+    #[test]
+    fn a_legacy_order_detail_reaches_the_guides_rows_through_its_group_path() {
+        let parsed = legacy_order();
+        assert_eq!(parsed.structure().version, "2.3");
+        let corpus = corpus();
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let matched: Vec<(&str, &str)> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::GroupPath {
+                    row_path,
+                    tree_path,
+                    ..
+                } => Some((row_path.as_str(), tree_path.as_str())),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            matched,
+            [
+                (
+                    "ORM_O01.ORDER_DETAIL.CHOICE.OBR",
+                    "ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR"
+                ),
+                ("ORM_O01.ORDER_DETAIL.NTE", "ORM_O01.ORDER.ORDER_DETAIL.NTE"),
+                ("ORM_O01.ORDER_DETAIL.DG1", "ORM_O01.ORDER.ORDER_DETAIL.DG1"),
+                (
+                    "ORM_O01.ORDER_DETAIL.OBSERVATION.OBX",
+                    "ORM_O01.ORDER.ORDER_DETAIL.OBSERVATION.OBX"
+                ),
+                (
+                    "ORM_O01.ORDER_DETAIL.CHOICE.RXO",
+                    "ORM_O01.ORDER.ORDER_DETAIL.CHOICE.RXO"
+                ),
+            ]
+        );
+        let unmapped: Vec<&Outcome> = run
+            .outcomes
+            .iter()
+            .filter(|outcome| matches!(outcome, Outcome::UnmappedSegment { .. }))
+            .collect();
+        assert!(unmapped.is_empty(), "{unmapped:?}");
+        for type_name in ["ServiceRequest", "Observation", "MedicationRequest"] {
+            assert!(
+                !writes_of(&run, type_name).is_empty(),
+                "the order detail writes a {type_name}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_group_path_that_reaches_two_tree_paths_stays_unmapped() {
+        let corpus = corpus();
+        let map = corpus
+            .message_map("ORM_O01")
+            .expect("the ORM_O01 message map");
+        let obr = "ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR";
+        let one: std::collections::BTreeSet<String> = [String::from(obr)].into();
+        assert_eq!(
+            regrouped(map, obr, &one),
+            Some("ORM_O01.ORDER_DETAIL.CHOICE.OBR")
+        );
+        let two: std::collections::BTreeSet<String> = [
+            String::from(obr),
+            String::from("ORM_O01.ORDER_DETAIL.EXTRA.CHOICE.OBR"),
+        ]
+        .into();
+        assert_eq!(regrouped(map, obr, &two), None);
+        let top: std::collections::BTreeSet<String> = [String::from("ORM_O01.NTE")].into();
+        assert_eq!(regrouped(map, "ORM_O01.NTE", &top), None);
+    }
+
+    #[test]
+    fn two_paths_one_group_apart_share_the_group_holding_the_segment() {
+        let row = "ORM_O01.ORDER_DETAIL.CHOICE.OBR";
+        assert!(one_group_apart(
+            row,
+            "ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR"
+        ));
+        assert!(one_group_apart(row, "ORM_O01.CHOICE.OBR"));
+        assert!(!one_group_apart(row, "ORM_O01.ORDER_DETAIL.OBR"));
+        assert!(!one_group_apart(row, "ORM_O01.ORDER_DETAIL.CHOICE.X.OBR"));
+        assert!(!one_group_apart(row, "ORM_O01.A.B.ORDER_DETAIL.CHOICE.OBR"));
+        assert!(!one_group_apart(
+            row,
+            "ORM_O01.ORDER.ORDER_DETAIL.CHOICE.RXO"
+        ));
+        assert!(!one_group_apart(
+            row,
+            "ORU_R01.ORDER.ORDER_DETAIL.CHOICE.OBR"
+        ));
+        assert!(!one_group_apart("ORM_O01.ORDER_DETAIL.NTE", "ORM_O01.NTE"));
+    }
+
+    #[test]
+    fn the_tree_paths_name_every_segment_node_by_its_groups() {
+        let structure = hl7v2_types::legacy::find("ORM_O01", "2.3").expect("ORM_O01 at 2.3");
+        let paths = tree_paths("ORM_O01", structure.nodes);
+        assert!(paths.contains("ORM_O01.MSH"));
+        assert!(paths.contains("ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR"));
+        assert!(paths.contains("ORM_O01.ORDER.ORDER_DETAIL.OBSERVATION.OBX"));
+    }
+
+    #[test]
+    fn a_version_specific_field_type_resolves_to_its_base_for_the_map_lookup() {
+        let msh = &hl7v2_types::legacy::v2_3::segment::msh::MSH;
+        let dg1 = &hl7v2_types::legacy::v2_3::segment::dg1::DG1;
+        let corpus = corpus();
+        assert_eq!(definition_type(&corpus, msh, 9).as_deref(), Some("MSG"));
+        assert_eq!(definition_type(&corpus, dg1, 3).as_deref(), Some("CE"));
+        assert_eq!(definition_type(&corpus, msh, 4).as_deref(), Some("HD"));
+        let parsed = legacy_order();
+        let mut run = Run::new(&corpus, &parsed);
+        run.message().expect("the walk runs");
+        let based: Vec<(&str, &str, &str, &str)> = run
+            .outcomes
+            .iter()
+            .filter_map(|outcome| match outcome {
+                Outcome::BaseTyped {
+                    field,
+                    code,
+                    base,
+                    version,
+                    ..
+                } => Some((field.as_str(), *code, *base, *version)),
+                _ => None,
+            })
+            .collect();
+        for expected in [
+            ("MSH-9", "CM_MSG", "MSG", "2.3"),
+            ("DG1-3", "CE_0051", "CE", "2.3"),
+        ] {
+            assert!(based.contains(&expected), "{expected:?} in {based:?}");
+        }
+        assert!(
+            based.iter().all(|(_, code, _, _)| *code != "TS"),
+            "{based:?}"
+        );
+        let unmapped_types: Vec<&Outcome> = run
+            .outcomes
+            .iter()
+            .filter(|outcome| {
+                matches!(outcome, Outcome::NoDatatypeMap { source_type, .. }
+                    if ["CM_MSG", "CE_0051", "TS"].contains(&source_type.as_str()))
+            })
+            .collect();
+        assert!(unmapped_types.is_empty(), "{unmapped_types:?}");
+    }
+
+    #[test]
+    fn a_legacy_code_the_guide_maps_keeps_the_guides_map() {
+        let corpus = corpus();
+        let msh = &hl7v2_types::legacy::v2_3::segment::msh::MSH;
+        assert!(corpus.maps_from("datatype", "TS"));
+        assert!(!corpus.maps_from("datatype", "CM_MSG"));
+        assert_eq!(definition_type(&corpus, msh, 7).as_deref(), Some("TS"));
+        let chosen = corpus
+            .find("datatype", "TS", "dateTime")
+            .expect("the guide's TS map");
+        assert_eq!(chosen.id, "datatype-ts-to-datetime");
+    }
+
     // NOTE: the guide's ORC-4 rows name `EIP` and the v2.9.1 definitions `EI`; a
     // v2.9.1 structure keeps the row's type and counts no substitution.
     #[test]
@@ -2986,7 +3321,7 @@ mod tests {
         assert_eq!(structure.withdrawn_as_of, None);
         let parsed = parse::group(lexed, structure);
         assert_eq!(
-            definition_type(&hl7v2_types::segment::orc::ORC, 4).as_deref(),
+            definition_type(&corpus(), &hl7v2_types::segment::orc::ORC, 4).as_deref(),
             Some("EI")
         );
         assert_eq!(

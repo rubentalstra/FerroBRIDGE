@@ -16,7 +16,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.1",
             position: 1,
             name: "Living Dependency",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -37,7 +37,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.2",
             position: 2,
             name: "Living Arrangement",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -58,7 +58,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.3",
             position: 3,
             name: "Patient Primary Facility",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -97,7 +97,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.5",
             position: 5,
             name: "Student Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +118,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.6",
             position: 6,
             name: "Handicap",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +139,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.7",
             position: 7,
             name: "Living Will Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +160,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.8",
             position: 8,
             name: "Organ Donor Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +181,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.9",
             position: 9,
             name: "Separate Bill",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.10",
             position: 10,
             name: "Duplicate Patient",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -220,7 +220,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.11",
             position: 11,
             name: "Publicity Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +241,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.12",
             position: 12,
             name: "Protection Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -262,7 +262,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.13",
             position: 13,
             name: "Protection Indicator Effective Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +280,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.14",
             position: 14,
             name: "Place of Worship",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -298,7 +298,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.15",
             position: 15,
             name: "Advance Directive Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -319,7 +319,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.16",
             position: 16,
             name: "Immunization Registry Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -340,7 +340,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.17",
             position: 17,
             name: "Immunization Registry Status Effective Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -358,7 +358,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.18",
             position: 18,
             name: "Publicity Code Effective Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -376,7 +376,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.19",
             position: 19,
             name: "Military Branch",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +397,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.20",
             position: 20,
             name: "Military Rank/Grade",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +418,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.21",
             position: 21,
             name: "Military Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -439,7 +439,7 @@ pub static PD1: Segment = Segment {
             id: "PD1.22",
             position: 22,
             name: "Advance Directive Last Verified Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

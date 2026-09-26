@@ -16,7 +16,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.1",
             position: 1,
             name: "Set ID - IN3",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.2",
             position: 2,
             name: "Certification Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.3",
             position: 3,
             name: "Certified By",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +70,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.4",
             position: 4,
             name: "Certification Required",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.5",
             position: 5,
             name: "Penalty",
-            data_type: Some(DataTypeRef::Legacy("MOP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::MOP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +109,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.6",
             position: 6,
             name: "Certification Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +127,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.7",
             position: 7,
             name: "Certification Modify Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +145,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.8",
             position: 8,
             name: "Operator",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -163,7 +163,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.9",
             position: 9,
             name: "Certification Begin Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +181,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.10",
             position: 10,
             name: "Certification End Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -199,7 +199,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.11",
             position: 11,
             name: "Days",
-            data_type: Some(DataTypeRef::Legacy("DTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +217,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.12",
             position: 12,
             name: "Non-Concur Code/Description",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +238,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.13",
             position: 13,
             name: "Non-Concur Effective Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +256,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.14",
             position: 14,
             name: "Physician Reviewer",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -277,7 +277,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.15",
             position: 15,
             name: "Certification Contact",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +295,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.16",
             position: 16,
             name: "Certification Contact Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -313,7 +313,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.17",
             position: 17,
             name: "Appeal Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -334,7 +334,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.18",
             position: 18,
             name: "Certification Agency",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -355,7 +355,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.19",
             position: 19,
             name: "Certification Agency Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -373,7 +373,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.20",
             position: 20,
             name: "Pre-Certification Requirement",
-            data_type: Some(DataTypeRef::Legacy("ICD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::ICD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -394,7 +394,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.21",
             position: 21,
             name: "Case Manager",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -412,7 +412,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.22",
             position: 22,
             name: "Second Opinion Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -430,7 +430,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.23",
             position: 23,
             name: "Second Opinion Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -451,7 +451,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.24",
             position: 24,
             name: "Second Opinion Documentation Received",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -472,7 +472,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.25",
             position: 25,
             name: "Second Opinion Physician",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -493,7 +493,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.26",
             position: 26,
             name: "Certification Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -514,7 +514,7 @@ pub static IN3: Segment = Segment {
             id: "IN3.27",
             position: 27,
             name: "Certification Category",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

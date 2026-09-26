@@ -16,7 +16,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.1",
             position: 1,
             name: "Universal Service Identifier",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.2",
             position: 2,
             name: "Auto-Dilution Factor",
-            data_type: Some(DataTypeRef::Legacy("SN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.3",
             position: 3,
             name: "Rerun Dilution Factor",
-            data_type: Some(DataTypeRef::Legacy("SN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.4",
             position: 4,
             name: "Pre-Dilution Factor",
-            data_type: Some(DataTypeRef::Legacy("SN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.5",
             position: 5,
             name: "Endogenous Content of Pre-Dilution Diluent",
-            data_type: Some(DataTypeRef::Legacy("SN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::SN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.6",
             position: 6,
             name: "Automatic Repeat Allowed",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +127,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.7",
             position: 7,
             name: "Reflex Allowed",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +148,7 @@ pub static TCD: Segment = Segment {
             id: "TCD.8",
             position: 8,
             name: "Analyte Repeat Status",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

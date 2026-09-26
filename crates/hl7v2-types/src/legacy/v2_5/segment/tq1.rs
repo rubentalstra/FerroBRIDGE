@@ -16,7 +16,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.1",
             position: 1,
             name: "Set ID - TQ1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.2",
             position: 2,
             name: "Quantity",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.3",
             position: 3,
             name: "Repeat Pattern",
-            data_type: Some(DataTypeRef::Legacy("RPT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::RPT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -73,7 +73,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.4",
             position: 4,
             name: "Explicit Time",
-            data_type: Some(DataTypeRef::Legacy("TM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -91,7 +91,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.5",
             position: 5,
             name: "Relative Time and Units",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -109,7 +109,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.6",
             position: 6,
             name: "Service Duration",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +127,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.7",
             position: 7,
             name: "Start date/time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +145,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.8",
             position: 8,
             name: "End date/time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +163,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.9",
             position: 9,
             name: "Priority",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -184,7 +184,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.10",
             position: 10,
             name: "Condition text",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +202,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.11",
             position: 11,
             name: "Text instruction",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +220,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.12",
             position: 12,
             name: "Conjunction",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +241,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.13",
             position: 13,
             name: "Occurrence duration",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +259,7 @@ pub static TQ1: Segment = Segment {
             id: "TQ1.14",
             position: 14,
             name: "Total occurrence's",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

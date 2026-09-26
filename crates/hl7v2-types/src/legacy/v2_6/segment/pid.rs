@@ -16,7 +16,7 @@ pub static PID: Segment = Segment {
             id: "PID.1",
             position: 1,
             name: "Set ID - PID",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static PID: Segment = Segment {
             id: "PID.2",
             position: 2,
             name: "Patient ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +49,7 @@ pub static PID: Segment = Segment {
             id: "PID.3",
             position: 3,
             name: "Patient Identifier List",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -67,7 +67,7 @@ pub static PID: Segment = Segment {
             id: "PID.4",
             position: 4,
             name: "Alternate Patient ID - PID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -82,7 +82,7 @@ pub static PID: Segment = Segment {
             id: "PID.5",
             position: 5,
             name: "Patient Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XPN)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -103,7 +103,7 @@ pub static PID: Segment = Segment {
             id: "PID.6",
             position: 6,
             name: "Mother's Maiden Name",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -121,7 +121,7 @@ pub static PID: Segment = Segment {
             id: "PID.7",
             position: 7,
             name: "Date/Time of Birth",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +139,7 @@ pub static PID: Segment = Segment {
             id: "PID.8",
             position: 8,
             name: "Administrative Sex",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -160,7 +160,7 @@ pub static PID: Segment = Segment {
             id: "PID.9",
             position: 9,
             name: "Patient Alias",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -175,7 +175,7 @@ pub static PID: Segment = Segment {
             id: "PID.10",
             position: 10,
             name: "Race",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -196,7 +196,7 @@ pub static PID: Segment = Segment {
             id: "PID.11",
             position: 11,
             name: "Patient Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -214,7 +214,7 @@ pub static PID: Segment = Segment {
             id: "PID.12",
             position: 12,
             name: "County Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -232,7 +232,7 @@ pub static PID: Segment = Segment {
             id: "PID.13",
             position: 13,
             name: "Phone Number - Home",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -250,7 +250,7 @@ pub static PID: Segment = Segment {
             id: "PID.14",
             position: 14,
             name: "Phone Number - Business",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -268,7 +268,7 @@ pub static PID: Segment = Segment {
             id: "PID.15",
             position: 15,
             name: "Primary Language",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -289,7 +289,7 @@ pub static PID: Segment = Segment {
             id: "PID.16",
             position: 16,
             name: "Marital Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +310,7 @@ pub static PID: Segment = Segment {
             id: "PID.17",
             position: 17,
             name: "Religion",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +331,7 @@ pub static PID: Segment = Segment {
             id: "PID.18",
             position: 18,
             name: "Patient Account Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +349,7 @@ pub static PID: Segment = Segment {
             id: "PID.19",
             position: 19,
             name: "SSN Number - Patient",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -364,7 +364,7 @@ pub static PID: Segment = Segment {
             id: "PID.20",
             position: 20,
             name: "Driver's License Number - Patient",
-            data_type: Some(DataTypeRef::Legacy("DLN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DLN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +379,7 @@ pub static PID: Segment = Segment {
             id: "PID.21",
             position: 21,
             name: "Mother's Identifier",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -397,7 +397,7 @@ pub static PID: Segment = Segment {
             id: "PID.22",
             position: 22,
             name: "Ethnic Group",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -418,7 +418,7 @@ pub static PID: Segment = Segment {
             id: "PID.23",
             position: 23,
             name: "Birth Place",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +436,7 @@ pub static PID: Segment = Segment {
             id: "PID.24",
             position: 24,
             name: "Multiple Birth Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +457,7 @@ pub static PID: Segment = Segment {
             id: "PID.25",
             position: 25,
             name: "Birth Order",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -475,7 +475,7 @@ pub static PID: Segment = Segment {
             id: "PID.26",
             position: 26,
             name: "Citizenship",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -496,7 +496,7 @@ pub static PID: Segment = Segment {
             id: "PID.27",
             position: 27,
             name: "Veterans Military Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -517,7 +517,7 @@ pub static PID: Segment = Segment {
             id: "PID.28",
             position: 28,
             name: "Nationality",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -535,7 +535,7 @@ pub static PID: Segment = Segment {
             id: "PID.29",
             position: 29,
             name: "Patient Death Date and Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -553,7 +553,7 @@ pub static PID: Segment = Segment {
             id: "PID.30",
             position: 30,
             name: "Patient Death Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -574,7 +574,7 @@ pub static PID: Segment = Segment {
             id: "PID.31",
             position: 31,
             name: "Identity Unknown Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -595,7 +595,7 @@ pub static PID: Segment = Segment {
             id: "PID.32",
             position: 32,
             name: "Identity Reliability Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -616,7 +616,7 @@ pub static PID: Segment = Segment {
             id: "PID.33",
             position: 33,
             name: "Last Update Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -634,7 +634,7 @@ pub static PID: Segment = Segment {
             id: "PID.34",
             position: 34,
             name: "Last Update Facility",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -652,7 +652,7 @@ pub static PID: Segment = Segment {
             id: "PID.35",
             position: 35,
             name: "Species Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -673,7 +673,7 @@ pub static PID: Segment = Segment {
             id: "PID.36",
             position: 36,
             name: "Breed Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -694,7 +694,7 @@ pub static PID: Segment = Segment {
             id: "PID.37",
             position: 37,
             name: "Strain",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -712,7 +712,7 @@ pub static PID: Segment = Segment {
             id: "PID.38",
             position: 38,
             name: "Production Class Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -733,7 +733,7 @@ pub static PID: Segment = Segment {
             id: "PID.39",
             position: 39,
             name: "Tribal Citizenship",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

@@ -16,7 +16,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.1",
             position: 1,
             name: "Set ID - NTE",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -31,7 +31,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.2",
             position: 2,
             name: "Source of Comment",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.3",
             position: 3,
             name: "Comment",
-            data_type: Some(DataTypeRef::Legacy("FT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -67,7 +67,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.4",
             position: 4,
             name: "Comment Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +85,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.5",
             position: 5,
             name: "Entered By",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -100,7 +100,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.6",
             position: 6,
             name: "Entered Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -115,7 +115,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.7",
             position: 7,
             name: "Effective Start Date",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static NTE: Segment = Segment {
             id: "NTE.8",
             position: 8,
             name: "Expiration Date",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

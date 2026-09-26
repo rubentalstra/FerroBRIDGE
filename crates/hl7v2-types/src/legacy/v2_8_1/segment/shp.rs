@@ -16,7 +16,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.1",
             position: 1,
             name: "Shipment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.2",
             position: 2,
             name: "Internal Shipment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -52,7 +52,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.3",
             position: 3,
             name: "Shipment Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.4",
             position: 4,
             name: "Shipment Status Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::DTM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.5",
             position: 5,
             name: "Shipment Status Reason",
-            data_type: Some(DataTypeRef::Legacy("TX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::TX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +109,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.6",
             position: 6,
             name: "Shipment Priority",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -130,7 +130,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.7",
             position: 7,
             name: "Shipment Confidentiality",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -151,7 +151,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.8",
             position: 8,
             name: "Number of Packages in Shipment",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +169,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.9",
             position: 9,
             name: "Shipment Condition",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -190,7 +190,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.10",
             position: 10,
             name: "Shipment Handling Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -211,7 +211,7 @@ pub static SHP: Segment = Segment {
             id: "SHP.11",
             position: 11,
             name: "Shipment Risk Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_1::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

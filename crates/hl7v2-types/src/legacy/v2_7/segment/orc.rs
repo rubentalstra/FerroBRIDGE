@@ -16,7 +16,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.1",
             position: 1,
             name: "Order Control",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.2",
             position: 2,
             name: "Placer Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.3",
             position: 3,
             name: "Filler Order Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +67,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.4",
             position: 4,
             name: "Placer Group Number",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -82,7 +82,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.5",
             position: 5,
             name: "Order Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +103,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.6",
             position: 6,
             name: "Response Flag",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +139,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.8",
             position: 8,
             name: "Parent",
-            data_type: Some(DataTypeRef::Legacy("EIP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.9",
             position: 9,
             name: "Date/Time of Transaction",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -169,7 +169,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.10",
             position: 10,
             name: "Entered By",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -184,7 +184,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.11",
             position: 11,
             name: "Verified By",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -199,7 +199,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.12",
             position: 12,
             name: "Ordering Provider",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -214,7 +214,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.13",
             position: 13,
             name: "Enterer's Location",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::PL)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +229,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.14",
             position: 14,
             name: "Call Back Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(2),
@@ -244,7 +244,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.15",
             position: 15,
             name: "Order Effective Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +259,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.16",
             position: 16,
             name: "Order Control Code Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +277,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.17",
             position: 17,
             name: "Entering Organization",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +295,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.18",
             position: 18,
             name: "Entering Device",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +313,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.19",
             position: 19,
             name: "Action By",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -328,7 +328,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.20",
             position: 20,
             name: "Advanced Beneficiary Notice Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -346,7 +346,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.21",
             position: 21,
             name: "Ordering Facility Name",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XON)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -361,7 +361,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.22",
             position: 22,
             name: "Ordering Facility Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -376,7 +376,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.23",
             position: 23,
             name: "Ordering Facility Phone Number",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -391,7 +391,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.24",
             position: 24,
             name: "Ordering Provider Address",
-            data_type: Some(DataTypeRef::Legacy("XAD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::XAD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -406,7 +406,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.25",
             position: 25,
             name: "Order Status Modifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -424,7 +424,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.26",
             position: 26,
             name: "Advanced Beneficiary Notice Override Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -442,7 +442,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.27",
             position: 27,
             name: "Filler's Expected Availability Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +457,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.28",
             position: 28,
             name: "Confidentiality Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -475,7 +475,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.29",
             position: 29,
             name: "Order Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -493,7 +493,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.30",
             position: 30,
             name: "Enterer Authorization Mode",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -511,7 +511,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.31",
             position: 31,
             name: "Parent Universal Service Identifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -526,7 +526,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.32",
             position: 32,
             name: "Advanced Beneficiary Notice Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -541,7 +541,7 @@ pub static ORC: Segment = Segment {
             id: "ORC.33",
             position: 33,
             name: "Alternate Placer Order Number",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_7::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

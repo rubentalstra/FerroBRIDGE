@@ -16,7 +16,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.1",
             position: 1,
             name: "Action Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.2",
             position: 2,
             name: "Pathway ID",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.3",
             position: 3,
             name: "Pathway Instance ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::EI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.4",
             position: 4,
             name: "Pathway Established Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.5",
             position: 5,
             name: "Pathway Life Cycle Status",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -109,7 +109,7 @@ pub static PTH: Segment = Segment {
             id: "PTH.6",
             position: 6,
             name: "Change Pathway Life Cycle Status Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

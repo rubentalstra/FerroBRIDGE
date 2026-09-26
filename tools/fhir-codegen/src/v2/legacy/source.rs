@@ -200,6 +200,20 @@ pub struct DataElementRow {
     pub conf_length: Option<IgnoredAny>,
 }
 
+/// A row of `datatypes.json`: one data type code of the version.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DataTypeRow {
+    /// The data type code, for example `CE` or `CE_0051`.
+    pub id: String,
+    /// The data type name, for example `coded element`.
+    pub description: String,
+    /// Not read.
+    pub primitive: IgnoredAny,
+    /// Not read; absent on a code the version's chapters give no section.
+    pub section: Option<IgnoredAny>,
+}
+
 /// The tables of one version.
 #[derive(Debug, Clone)]
 pub struct VersionTables {
@@ -217,6 +231,8 @@ pub struct VersionTables {
     pub fields: Vec<FieldRow>,
     /// `data_elements.json`.
     pub data_elements: Vec<DataElementRow>,
+    /// `datatypes.json`.
+    pub data_types: Vec<DataTypeRow>,
 }
 
 impl VersionTables {
@@ -281,6 +297,7 @@ impl Tables {
                 segments: parse(&dir.join("segments.json"))?,
                 fields: parse(&dir.join("fields.json"))?,
                 data_elements: parse(&dir.join("data_elements.json"))?,
+                data_types: parse(&dir.join("datatypes.json"))?,
                 version,
             });
         }

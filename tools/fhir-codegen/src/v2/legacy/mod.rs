@@ -11,8 +11,11 @@
 //! package. [`lower::LegacyModel`] selects every structure whose code the
 //! v2.9.1 definitions lack, lowers its tree and the segments it names per
 //! version, and links each segment that agrees with its v2.9.1 definition to
-//! that definition. Each defect of the export is tolerated only where it was
-//! found ([`lower::LegacyDefect::tolerated_in`]).
+//! that definition, and [`datatype::lower_data_types`] gives each data type
+//! code the fields name the base type it stands for. Each defect of the
+//! export is tolerated only where it was found
+//! ([`lower::LegacyDefect::tolerated_in`]).
 
+pub mod datatype;
 pub mod lower;
 pub mod source;

@@ -16,7 +16,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.1",
             position: 1,
             name: "Set ID - PR1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.2",
             position: 2,
             name: "Procedure Coding Method",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,9 @@ pub static PR1: Segment = Segment {
             id: "PR1.3",
             position: 3,
             name: "Procedure Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0088")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0088,
+            )),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -76,7 +78,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.4",
             position: 4,
             name: "Procedure Description",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +96,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.5",
             position: 5,
             name: "Procedure Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -112,7 +114,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.6",
             position: 6,
             name: "Procedure Functional Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -133,7 +135,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.7",
             position: 7,
             name: "Procedure Minutes",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +153,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.8",
             position: 8,
             name: "Anesthesiologist",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -172,7 +174,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.9",
             position: 9,
             name: "Anesthesia Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +195,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.10",
             position: 10,
             name: "Anesthesia Minutes",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -211,7 +213,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.11",
             position: 11,
             name: "Surgeon",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -232,7 +234,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.12",
             position: 12,
             name: "Procedure Practitioner",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -253,7 +255,9 @@ pub static PR1: Segment = Segment {
             id: "PR1.13",
             position: 13,
             name: "Consent Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0059")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0059,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -274,7 +278,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.14",
             position: 14,
             name: "Procedure Priority",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +299,9 @@ pub static PR1: Segment = Segment {
             id: "PR1.15",
             position: 15,
             name: "Associated Diagnosis Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0051")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0051,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -316,7 +322,9 @@ pub static PR1: Segment = Segment {
             id: "PR1.16",
             position: 16,
             name: "Procedure Code Modifier",
-            data_type: Some(DataTypeRef::Legacy("CE_0340")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0340,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -337,7 +345,7 @@ pub static PR1: Segment = Segment {
             id: "PR1.17",
             position: 17,
             name: "Procedure DRG Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -358,7 +366,9 @@ pub static PR1: Segment = Segment {
             id: "PR1.18",
             position: 18,
             name: "Tissue Type Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0417")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0417,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

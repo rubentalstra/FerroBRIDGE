@@ -16,7 +16,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.1",
             position: 1,
             name: "Set ID - DG1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -49,7 +49,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.3",
             position: 3,
             name: "Diagnosis Code - DG1",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -85,7 +85,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.5",
             position: 5,
             name: "Diagnosis Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +103,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.6",
             position: 6,
             name: "Diagnosis Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -124,7 +124,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.7",
             position: 7,
             name: "Major Diagnostic Category",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -145,7 +145,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.8",
             position: 8,
             name: "Diagnostic Related Group",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +166,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.9",
             position: 9,
             name: "DRG Approval Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +187,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.10",
             position: 10,
             name: "DRG Grouper Review Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +208,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.11",
             position: 11,
             name: "Outlier Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -229,7 +229,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.12",
             position: 12,
             name: "Outlier Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -247,7 +247,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.13",
             position: 13,
             name: "Outlier Cost",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +280,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.15",
             position: 15,
             name: "Diagnosis Priority",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -301,7 +301,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.16",
             position: 16,
             name: "Diagnosing Clinician",
-            data_type: Some(DataTypeRef::Legacy("XCN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XCN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -319,7 +319,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.17",
             position: 17,
             name: "Diagnosis Classification",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -340,7 +340,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.18",
             position: 18,
             name: "Confidential Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -361,7 +361,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.19",
             position: 19,
             name: "Attestation Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -379,7 +379,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.20",
             position: 20,
             name: "Diagnosis Identifier",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -397,7 +397,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.21",
             position: 21,
             name: "Diagnosis Action Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -418,7 +418,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.22",
             position: 22,
             name: "Parent Diagnosis",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -436,7 +436,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.23",
             position: 23,
             name: "DRG CCL Value Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -457,7 +457,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.24",
             position: 24,
             name: "DRG Grouping Usage",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -478,7 +478,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.25",
             position: 25,
             name: "DRG Diagnosis Determination Status",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -499,7 +499,7 @@ pub static DG1: Segment = Segment {
             id: "DG1.26",
             position: 26,
             name: "Present On Admission (POA) Indicator",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

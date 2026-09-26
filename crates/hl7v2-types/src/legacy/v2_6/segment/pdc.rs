@@ -16,7 +16,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.1",
             position: 1,
             name: "Manufacturer/Distributor",
-            data_type: Some(DataTypeRef::Legacy("XON")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XON)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Unbounded,
@@ -34,7 +34,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.2",
             position: 2,
             name: "Country",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.3",
             position: 3,
             name: "Brand Name",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -73,7 +73,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.4",
             position: 4,
             name: "Device Family Name",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.5",
             position: 5,
             name: "Generic Name",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +112,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.6",
             position: 6,
             name: "Model Identifier",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -130,7 +130,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.7",
             position: 7,
             name: "Catalogue Identifier",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -148,7 +148,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.8",
             position: 8,
             name: "Other Identifier",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -166,7 +166,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.9",
             position: 9,
             name: "Product Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -187,7 +187,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.10",
             position: 10,
             name: "Marketing Basis",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -208,7 +208,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.11",
             position: 11,
             name: "Marketing Approval ID",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -226,7 +226,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.12",
             position: 12,
             name: "Labeled Shelf Life",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -244,7 +244,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.13",
             position: 13,
             name: "Expected Shelf Life",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -262,7 +262,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.14",
             position: 14,
             name: "Date First Marketed",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -280,7 +280,7 @@ pub static PDC: Segment = Segment {
             id: "PDC.15",
             position: 15,
             name: "Date Last Marketed",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

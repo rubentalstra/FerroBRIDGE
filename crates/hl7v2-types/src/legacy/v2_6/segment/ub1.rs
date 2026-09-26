@@ -16,7 +16,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.1",
             position: 1,
             name: "Set ID - UB1",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -49,7 +49,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.3",
             position: 3,
             name: "Blood Furnished-Pints",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -67,7 +67,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.4",
             position: 4,
             name: "Blood Replaced-Pints",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -85,7 +85,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.5",
             position: 5,
             name: "Blood Not Replaced-Pints",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -103,7 +103,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.6",
             position: 6,
             name: "Co-Insurance Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +118,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.7",
             position: 7,
             name: "Condition Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -136,7 +136,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.8",
             position: 8,
             name: "Covered Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -151,7 +151,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.9",
             position: 9,
             name: "Non Covered Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -166,7 +166,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.10",
             position: 10,
             name: "Value Amount & Code",
-            data_type: Some(DataTypeRef::Legacy("UVC")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::UVC)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(8),
@@ -181,7 +181,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.11",
             position: 11,
             name: "Number Of Grace Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -199,7 +199,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.12",
             position: 12,
             name: "Special Program Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +220,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.13",
             position: 13,
             name: "PSRO/UR Approval Indicator",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +241,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.14",
             position: 14,
             name: "PSRO/UR Approved Stay-Fm",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -259,7 +259,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.15",
             position: 15,
             name: "PSRO/UR Approved Stay-To",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +277,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.16",
             position: 16,
             name: "Occurrence",
-            data_type: Some(DataTypeRef::Legacy("OCD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::OCD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(5),
@@ -292,7 +292,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.17",
             position: 17,
             name: "Occurrence Span",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -310,7 +310,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.18",
             position: 18,
             name: "Occur Span Start Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -325,7 +325,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.19",
             position: 19,
             name: "Occur Span End Date",
-            data_type: Some(DataTypeRef::Legacy("DT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -340,7 +340,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.20",
             position: 20,
             name: "UB-82 Locator 2",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -355,7 +355,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.21",
             position: 21,
             name: "UB-82 Locator 9",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -370,7 +370,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.22",
             position: 22,
             name: "UB-82 Locator 27",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -385,7 +385,7 @@ pub static UB1: Segment = Segment {
             id: "UB1.23",
             position: 23,
             name: "UB-82 Locator 45",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

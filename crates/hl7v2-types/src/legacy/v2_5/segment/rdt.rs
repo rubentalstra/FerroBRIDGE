@@ -15,7 +15,7 @@ pub static RDT: Segment = Segment {
         id: "RDT.1",
         position: 1,
         name: "Column Value",
-        data_type: Some(DataTypeRef::Legacy("VARIES")),
+        data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::VARIES)),
         cardinality: Cardinality {
             min: 1,
             max: Max::Bounded(1),

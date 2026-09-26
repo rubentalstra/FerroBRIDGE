@@ -38,7 +38,11 @@ resources are the authority for what it emits (`.claude/rules/codegen.md`).
   structure whose code v2.9.1 lacks, per version, into the `lower` shapes
   (`legacy::lower`). `v2::render` emits them under `legacy/` with the
   segments whose field table differs from v2.9.1, and links the rest to the
-  v2.9.1 statics. Its defects are tolerated only where
+  v2.9.1 statics. `legacy::datatype` gives each data type code those
+  segments' fields name a `LegacyDataType` static per version, with the base
+  type a version-specific code stands for (`CM_MSG` is `MSG`, `CE_0051` is
+  `CE` bound to table 0051, `TS` is `DTM`), derived from the code since the
+  export carries no base column. Its defects are tolerated only where
   `legacy::lower::LegacyDefect::tolerated_in` lists them.
 - A primitive whose JSON form is a string carries its lexical form into the
   output: `lower` reads the `regex` extension of `<primitive>.value` from the

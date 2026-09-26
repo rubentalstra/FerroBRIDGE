@@ -16,7 +16,9 @@ pub static DRG: Segment = Segment {
             id: "DRG.1",
             position: 1,
             name: "Diagnostic Related Group",
-            data_type: Some(DataTypeRef::Legacy("CE_0055")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0055,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +39,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.2",
             position: 2,
             name: "DRG Assigned Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +57,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.3",
             position: 3,
             name: "DRG Approval Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -76,7 +78,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.4",
             position: 4,
             name: "DRG Grouper Review Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +99,9 @@ pub static DRG: Segment = Segment {
             id: "DRG.5",
             position: 5,
             name: "Outlier Type",
-            data_type: Some(DataTypeRef::Legacy("CE_0083")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0083,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +122,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.6",
             position: 6,
             name: "Outlier Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +140,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.7",
             position: 7,
             name: "Outlier Cost",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +158,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.8",
             position: 8,
             name: "DRG Payor",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +179,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.9",
             position: 9,
             name: "Outlier Reimbursement",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +197,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.10",
             position: 10,
             name: "Confidential Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +218,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.11",
             position: 11,
             name: "DRG Transfer Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

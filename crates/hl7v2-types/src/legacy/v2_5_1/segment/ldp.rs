@@ -16,7 +16,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.1",
             position: 1,
             name: "Primary Key Value - LDP",
-            data_type: Some(DataTypeRef::Legacy("PL")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::PL)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.2",
             position: 2,
             name: "Location Department",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.3",
             position: 3,
             name: "Location Service",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -76,7 +76,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.4",
             position: 4,
             name: "Specialty Type",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -97,7 +97,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.5",
             position: 5,
             name: "Valid Patient Classes",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -118,7 +118,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.6",
             position: 6,
             name: "Active/Inactive Flag",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -139,7 +139,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.7",
             position: 7,
             name: "Activation Date  LDP",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -157,7 +157,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.8",
             position: 8,
             name: "Inactivation Date - LDP",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +175,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.9",
             position: 9,
             name: "Inactivated Reason",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +193,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.10",
             position: 10,
             name: "Visiting Hours",
-            data_type: Some(DataTypeRef::Legacy("VH")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::VH)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -214,7 +214,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.11",
             position: 11,
             name: "Contact Phone",
-            data_type: Some(DataTypeRef::Legacy("XTN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::XTN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -232,7 +232,7 @@ pub static LDP: Segment = Segment {
             id: "LDP.12",
             position: 12,
             name: "Location Cost Center",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5_1::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

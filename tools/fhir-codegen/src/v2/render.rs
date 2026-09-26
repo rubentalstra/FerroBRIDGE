@@ -42,14 +42,6 @@ pub enum RenderError {
         /// The shared name.
         name: String,
     },
-    /// A definition id renders as a Rust keyword.
-    #[error("{id} renders as the keyword {name}")]
-    Keyword {
-        /// The id.
-        id: String,
-        /// The keyword.
-        name: String,
-    },
     /// A structure names a segment the model does not hold.
     #[error("{structure} names segment {segment}, which the model does not hold")]
     MissingSegment {
@@ -149,8 +141,8 @@ fn is_reserved_file_name(stem: &str) -> bool {
 ///
 /// # Errors
 ///
-/// Returns [`RenderError`] when two ids share a Rust name, an id renders as
-/// a keyword, or a structure names a segment the model lacks.
+/// Returns [`RenderError`] when two ids share a Rust name, or a structure
+/// names a segment, component or data type the model lacks.
 pub fn render(
     model: &Model,
     legacy: &LegacyModel,
@@ -217,7 +209,8 @@ pub fn render(
     Ok(files)
 }
 
-/// The module and static name of every id, refusing a collision or a keyword.
+/// The module and static name of every id, refusing a collision; [`names`]
+/// already gives a keyword its trailing `_`.
 fn module_names<'a>(
     ids: impl Iterator<Item = &'a String>,
 ) -> Result<BTreeMap<String, (String, String)>, RenderError> {
@@ -225,12 +218,6 @@ fn module_names<'a>(
     let mut taken: BTreeMap<String, String> = BTreeMap::new();
     for id in ids {
         let (module, name) = names(id);
-        if is_keyword(&module) {
-            return Err(RenderError::Keyword {
-                id: id.clone(),
-                name: module,
-            });
-        }
         if let Some(first) = taken.insert(module.clone(), id.clone()) {
             return Err(RenderError::NameCollision {
                 first,
@@ -279,8 +266,54 @@ fn render_lib(banner: &str, model: &Model, legacy: &LegacyModel) -> Result<Strin
     Ok(out)
 }
 
+/// The segment and data type modules of one legacy version.
+fn render_legacy_segments(
+    banner: &str,
+    version: &LegacyVersion,
+    module: &str,
+    segment_names: &BTreeMap<String, (String, String)>,
+    data_types: &BTreeMap<String, (String, String)>,
+    files: &mut BTreeMap<String, String>,
+) -> Result<(), RenderError> {
+    if !version.segments.is_empty() {
+        let segment_doc = format!(
+            "The segments of the {} tables whose field table differs from the v2.9.1 one, one module each.",
+            version.version
+        );
+        files.insert(
+            format!("legacy/{module}/segment/mod.rs"),
+            render_index(
+                banner,
+                segment_names,
+                Index::Segment,
+                Some((&segment_doc, "ORC")),
+            )?,
+        );
+    }
+    let legacy_types = module_names(version.data_types.keys())?;
+    if !version.data_types.is_empty() {
+        files.insert(
+            format!("legacy/{module}/data_type.rs"),
+            render_legacy_data_types(banner, version, &legacy_types)?,
+        );
+    }
+    let tables = LegacyTables {
+        version: &version.version,
+        module,
+        data_types: &legacy_types,
+    };
+    for (id, segment) in &version.segments {
+        let (file, name) = names(id);
+        files.insert(
+            format!("legacy/{module}/segment/{file}.rs"),
+            render_segment(banner, &name, segment, data_types, Some(&tables))?,
+        );
+    }
+    Ok(())
+}
+
 /// Every file under `legacy/`: the version index, and per version its
-/// structure and segment modules.
+/// structure, segment and data type modules.
 fn render_legacy(
     legacy: &LegacyModel,
     current_segments: &BTreeMap<String, (String, String)>,
@@ -310,28 +343,7 @@ fn render_legacy(
                 Some((&structure_doc, "ORM_O01")),
             )?,
         );
-        if !version.segments.is_empty() {
-            let segment_doc = format!(
-                "The segments of the {} tables whose field table differs from the v2.9.1 one, one module each.",
-                version.version
-            );
-            files.insert(
-                format!("legacy/{module}/segment/mod.rs"),
-                render_index(
-                    &banner,
-                    &segment_names,
-                    Index::Segment,
-                    Some((&segment_doc, "ORC")),
-                )?,
-            );
-        }
-        for (id, segment) in &version.segments {
-            let (file, name) = names(id);
-            files.insert(
-                format!("legacy/{module}/segment/{file}.rs"),
-                render_segment(&banner, &name, segment, data_types, Some(&version.version))?,
-            );
-        }
+        render_legacy_segments(&banner, version, &module, &segment_names, data_types, files)?;
         let resolve = |id: &str| {
             if version.segments.contains_key(id) {
                 segment_names
@@ -361,7 +373,7 @@ fn render_legacy(
     index.sort_by(|left, right| (left.0, left.1).cmp(&(right.0, right.1)));
     let mut out = banner;
     out.push_str(
-        "//! The message structures the v2.9.1 definitions no longer carry, from the\n//! tables of each earlier HL7 v2 version that did, one module per version.\n//!\n//! A version module holds `structure`, one module per structure with its\n//! tree, and `segment` for each segment whose field table differs from the\n//! v2.9.1 one; a tree links a segment that agrees to the v2.9.1 `static`.\n//! Each [`crate::model::Structure`] here carries its version and the version\n//! it is withdrawn as of.\n\n",
+        "//! The message structures the v2.9.1 definitions no longer carry, from the\n//! tables of each earlier HL7 v2 version that did, one module per version.\n//!\n//! A version module holds `structure`, one module per structure with its\n//! tree, and `segment` for each segment whose field table differs from the\n//! v2.9.1 one; a tree links a segment that agrees to the v2.9.1 `static`.\n//! `data_type` holds the data type codes those segments' fields name, each\n//! with the base type a version-specific code stands for.\n//! Each [`crate::model::Structure`] here carries its version and the version\n//! it is withdrawn as of.\n\n",
     );
     for version in &legacy.versions {
         writeln!(out, "pub mod {};", version_module(&version.version))?;
@@ -388,10 +400,66 @@ fn render_version_module(banner: &str, version: &LegacyVersion) -> Result<String
         "//! The legacy message structures of the {} tables, and the segments they\n//! name whose field table differs from the v2.9.1 one.\n\n",
         version.version
     )?;
+    if !version.data_types.is_empty() {
+        out.push_str("pub mod data_type;\n");
+    }
     if !version.segments.is_empty() {
         out.push_str("pub mod segment;\n");
     }
     out.push_str("pub mod structure;\n");
+    Ok(out)
+}
+
+/// The data type codes of one legacy version, from a segment module.
+#[derive(Debug, Clone, Copy)]
+struct LegacyTables<'a> {
+    version: &'a str,
+    module: &'a str,
+    data_types: &'a BTreeMap<String, (String, String)>,
+}
+
+/// The `data_type` module of a legacy version: one `static` per data type
+/// code its segments' fields name.
+fn render_legacy_data_types(
+    banner: &str,
+    version: &LegacyVersion,
+    names: &BTreeMap<String, (String, String)>,
+) -> Result<String, RenderError> {
+    let mut out = String::from(banner);
+    let uses = if version
+        .data_types
+        .values()
+        .any(|data_type| data_type.base.is_some())
+    {
+        "use crate::model::{LegacyBase, LegacyDataType};\n"
+    } else {
+        "use crate::model::LegacyDataType;\n"
+    };
+    write!(
+        out,
+        "//! The data type codes the fields of the {} tables name, with the base\n//! type each version-specific code stands for.\n\n{uses}",
+        version.version
+    )?;
+    for ((code, data_type), (_, name)) in version.data_types.iter().zip(names.values()) {
+        let base = data_type.base.as_ref().map_or_else(
+            || String::from("None"),
+            |base| {
+                let table = base
+                    .table
+                    .as_ref()
+                    .map_or_else(|| String::from("None"), |table| format!("Some({table:?})"));
+                format!(
+                    "Some(LegacyBase {{ code: {:?}, table: {table} }})",
+                    base.code
+                )
+            },
+        );
+        write!(
+            out,
+            "\n/// The `{code}` data type code of the {} tables.\npub static {name}: LegacyDataType = LegacyDataType {{\n    code: {code:?},\n    version: {:?},\n    name: {:?},\n    base: {base},\n}};\n",
+            version.version, version.version, data_type.name
+        )?;
+    }
     Ok(out)
 }
 
@@ -627,16 +695,26 @@ fn data_type_path(code: &str, data_types: &BTreeMap<String, (String, String)>) -
 fn field(
     field: &Field,
     data_types: &BTreeMap<String, (String, String)>,
-    legacy: bool,
+    legacy: Option<&LegacyTables<'_>>,
     uses: &mut BTreeSet<&'static str>,
-) -> String {
-    let data_type = field.data_type.as_ref().map_or_else(
-        || String::from("None"),
-        |code| {
+) -> Result<String, RenderError> {
+    let data_type = match (&field.data_type, legacy) {
+        (None, _) => String::from("None"),
+        (Some(code), Some(tables)) => {
             uses.insert("DataTypeRef");
-            if legacy {
-                return format!("Some(DataTypeRef::Legacy({code:?}))");
-            }
+            let Some((_, name)) = tables.data_types.get(code) else {
+                return Err(RenderError::MissingDataType {
+                    component: field.id.clone(),
+                    data_type: code.clone(),
+                });
+            };
+            format!(
+                "Some(DataTypeRef::Legacy(&crate::legacy::{}::data_type::{name}))",
+                tables.module
+            )
+        }
+        (Some(code), None) => {
+            uses.insert("DataTypeRef");
             match data_type_path(code, data_types) {
                 Some(path) => {
                     uses.insert("data_type");
@@ -644,8 +722,8 @@ fn field(
                 }
                 None => format!("Some(DataTypeRef::Undefined({code:?}))"),
             }
-        },
-    );
+        }
+    };
     let length = length(field.length, uses);
     let conformance_length = conformance_length(field.conformance_length, uses);
     let table = table(field.table.as_ref(), uses);
@@ -659,14 +737,14 @@ fn field(
             }
         },
     );
-    format!(
+    Ok(format!(
         "Field {{ id: {:?}, position: {}, name: {:?}, data_type: {data_type}, cardinality: {}, optionality: {}, length: {length}, conformance_length: {conformance_length}, table: {table}, standards_status: {standards_status} }}",
         field.id,
         field.position,
         field.name,
         cardinality(field.cardinality),
         optionality(field.optionality, uses),
-    )
+    ))
 }
 
 /// The `use` lines for `uses`: the model shapes, and the `data_type`
@@ -689,7 +767,7 @@ fn render_segment(
     name: &str,
     segment: &Segment,
     data_types: &BTreeMap<String, (String, String)>,
-    legacy: Option<&str>,
+    legacy: Option<&LegacyTables<'_>>,
 ) -> Result<String, RenderError> {
     let mut uses: BTreeSet<&'static str> = ["Segment"].into();
     let mut fields = String::new();
@@ -698,9 +776,10 @@ fn render_segment(
         writeln!(
             fields,
             "        {},",
-            field(entry, data_types, legacy.is_some(), &mut uses)
+            field(entry, data_types, legacy, &mut uses)?
         )?;
     }
+    let legacy = legacy.map(|tables| tables.version);
     let mut out = String::from(banner);
     writeln!(
         out,

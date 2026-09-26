@@ -16,7 +16,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.1",
             position: 1,
             name: "Set ID - SPM",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::SI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.2",
             position: 2,
             name: "Specimen ID",
-            data_type: Some(DataTypeRef::Legacy("EIP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.3",
             position: 3,
             name: "Specimen Parent IDs",
-            data_type: Some(DataTypeRef::Legacy("EIP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::EIP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -70,7 +70,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.4",
             position: 4,
             name: "Specimen Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -91,7 +91,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.5",
             position: 5,
             name: "Specimen Type Modifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -112,7 +112,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.6",
             position: 6,
             name: "Specimen Additives",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -133,7 +133,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.7",
             position: 7,
             name: "Specimen Collection Method",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.8",
             position: 8,
             name: "Specimen Source Site",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +175,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.9",
             position: 9,
             name: "Specimen Source Site Modifier",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -196,7 +196,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.10",
             position: 10,
             name: "Specimen Collection Site",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -217,7 +217,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.11",
             position: 11,
             name: "Specimen Role",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -238,7 +238,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.12",
             position: 12,
             name: "Specimen Collection Amount",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -256,7 +256,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.13",
             position: 13,
             name: "Grouped Specimen Count",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -274,7 +274,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.14",
             position: 14,
             name: "Specimen Description",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -292,7 +292,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.15",
             position: 15,
             name: "Specimen Handling Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -313,7 +313,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.16",
             position: 16,
             name: "Specimen Risk Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -334,7 +334,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.17",
             position: 17,
             name: "Specimen Collection Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DR")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::DR)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +352,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.18",
             position: 18,
             name: "Specimen Received Date/Time *",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -370,7 +370,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.19",
             position: 19,
             name: "Specimen Expiration Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -388,7 +388,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.20",
             position: 20,
             name: "Specimen Availability",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -409,7 +409,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.21",
             position: 21,
             name: "Specimen Reject Reason",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -430,7 +430,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.22",
             position: 22,
             name: "Specimen Quality",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -451,7 +451,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.23",
             position: 23,
             name: "Specimen Appropriateness",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -472,7 +472,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.24",
             position: 24,
             name: "Specimen Condition",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -493,7 +493,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.25",
             position: 25,
             name: "Specimen Current Quantity",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -511,7 +511,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.26",
             position: 26,
             name: "Number of Specimen Containers",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -529,7 +529,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.27",
             position: 27,
             name: "Container Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -550,7 +550,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.28",
             position: 28,
             name: "Container Condition",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -571,7 +571,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.29",
             position: 29,
             name: "Specimen Child Role",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -592,7 +592,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.30",
             position: 30,
             name: "Accession ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -610,7 +610,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.31",
             position: 31,
             name: "Other Specimen ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -628,7 +628,7 @@ pub static SPM: Segment = Segment {
             id: "SPM.32",
             position: 32,
             name: "Shipment ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

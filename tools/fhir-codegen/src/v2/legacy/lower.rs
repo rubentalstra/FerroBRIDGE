@@ -22,6 +22,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use crate::v2::legacy::datatype::{LegacyDataType, lower_data_types};
 use crate::v2::legacy::source::{
     CodeStatus, DataElementRow, ElementRow, FieldRow, GroupRow, TABLE_0354, Table0354, Tables,
     VersionTables, version_key,
@@ -188,6 +189,8 @@ pub struct LegacyVersion {
     /// The segments the trees name whose field table agrees with the v2.9.1
     /// segment, which the trees link to instead.
     pub shared: BTreeSet<String>,
+    /// The data type codes the fields of `segments` name, by code.
+    pub data_types: BTreeMap<String, LegacyDataType>,
 }
 
 /// One entry of the legacy message index.
@@ -261,11 +264,13 @@ impl LegacyModel {
                 continue;
             }
             let (segments, shared) = lowered.segments(current)?;
+            let data_types = lower_data_types(version, &segments, &current.data_types)?;
             versions.push(LegacyVersion {
                 version: version.version.clone(),
                 structures,
                 segments,
                 shared,
+                data_types,
             });
         }
         messages.sort_by(|left, right| {

@@ -16,7 +16,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.1",
             position: 1,
             name: "Set Id - PAC",
-            data_type: Some(DataTypeRef::Legacy("SI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::SI)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.2",
             position: 2,
             name: "Package ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.3",
             position: 3,
             name: "Parent Package ID",
-            data_type: Some(DataTypeRef::Legacy("EI")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::EI)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.4",
             position: 4,
             name: "Position in Parent Package",
-            data_type: Some(DataTypeRef::Legacy("NA")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::NA)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.5",
             position: 5,
             name: "Package Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -109,7 +109,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.6",
             position: 6,
             name: "Package Condition",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -130,7 +130,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.7",
             position: 7,
             name: "Package Handling Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -151,7 +151,7 @@ pub static PAC: Segment = Segment {
             id: "PAC.8",
             position: 8,
             name: "Package Risk Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_8_2::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

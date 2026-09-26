@@ -16,7 +16,7 @@ pub static BLG: Segment = Segment {
             id: "BLG.1",
             position: 1,
             name: "When to Charge",
-            data_type: Some(DataTypeRef::Legacy("CCD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CCD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static BLG: Segment = Segment {
             id: "BLG.2",
             position: 2,
             name: "Charge Type",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -58,7 +58,7 @@ pub static BLG: Segment = Segment {
             id: "BLG.3",
             position: 3,
             name: "Account ID",
-            data_type: Some(DataTypeRef::Legacy("CX")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CX)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

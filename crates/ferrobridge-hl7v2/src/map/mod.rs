@@ -360,6 +360,35 @@ pub enum Outcome {
         /// The HL7 version of the structure, for example `2.3`.
         version: &'static str,
     },
+    /// A field of a legacy structure whose own version's data type code is
+    /// version-specific; the base type it stands for chooses the data type
+    /// map.
+    BaseTyped {
+        /// Where: the field.
+        at: Location,
+        /// The row.
+        row: RowRef,
+        /// The field, for example `MSH-9`.
+        field: String,
+        /// The code the version's segment definition gives, for example
+        /// `CM_MSG`.
+        code: &'static str,
+        /// The base type it stands for, for example `MSG`.
+        base: &'static str,
+        /// The HL7 version of the code, for example `2.3`.
+        version: &'static str,
+    },
+    /// A segment whose group path no row of the message map names, reached
+    /// by the one row whose group path differs from it by a single group.
+    GroupPath {
+        /// Where: the segment.
+        at: Location,
+        /// The row's source, for example `ORM_O01.ORDER_DETAIL.CHOICE.OBR`.
+        row_path: String,
+        /// The segment's path in the parsed tree, for example
+        /// `ORM_O01.ORDER.ORDER_DETAIL.CHOICE.OBR`.
+        tree_path: String,
+    },
     /// A value outside the lexical form of the FHIR primitive its element
     /// holds (<https://hl7.org/fhir/R4/datatypes.html#primitive>), which is
     /// never written.
@@ -440,6 +469,8 @@ impl Outcome {
             Self::Superseded { .. } => "superseded",
             Self::FacilityEndpoint { .. } => "facility-endpoint",
             Self::VersionTyped { .. } => "version-typed",
+            Self::BaseTyped { .. } => "base-typed",
+            Self::GroupPath { .. } => "group-path",
             Self::InvalidValue { .. } => "invalid-value",
             Self::MissingRequired { .. } => "missing-required",
             Self::Undecodable { .. } => "undecodable",

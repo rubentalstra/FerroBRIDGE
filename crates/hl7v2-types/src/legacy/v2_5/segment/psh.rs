@@ -16,7 +16,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.1",
             position: 1,
             name: "Report Type",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.2",
             position: 2,
             name: "Report Form Identifier",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.3",
             position: 3,
             name: "Report Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +70,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.4",
             position: 4,
             name: "Report Interval Start Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -88,7 +88,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.5",
             position: 5,
             name: "Report Interval End Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -106,7 +106,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.6",
             position: 6,
             name: "Quantity Manufactured",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -124,7 +124,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.7",
             position: 7,
             name: "Quantity Distributed",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -142,7 +142,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.8",
             position: 8,
             name: "Quantity Distributed Method",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +163,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.9",
             position: 9,
             name: "Quantity Distributed Comment",
-            data_type: Some(DataTypeRef::Legacy("FT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -181,7 +181,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.10",
             position: 10,
             name: "Quantity in Use",
-            data_type: Some(DataTypeRef::Legacy("CQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::CQ)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -199,7 +199,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.11",
             position: 11,
             name: "Quantity in Use Method",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +220,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.12",
             position: 12,
             name: "Quantity in Use Comment",
-            data_type: Some(DataTypeRef::Legacy("FT")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::FT)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -238,7 +238,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.13",
             position: 13,
             name: "Number of Product Experience Reports Filed by Facility",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -256,7 +256,7 @@ pub static PSH: Segment = Segment {
             id: "PSH.14",
             position: 14,
             name: "Number of Product Experience Reports Filed by Distributor",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_5::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,

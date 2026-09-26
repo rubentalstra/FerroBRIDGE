@@ -5,5 +5,6 @@
 //! The legacy message structures of the 2.5.1 tables, and the segments they
 //! name whose field table differs from the v2.9.1 one.
 
+pub mod data_type;
 pub mod segment;
 pub mod structure;

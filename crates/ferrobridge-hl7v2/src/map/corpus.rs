@@ -362,6 +362,14 @@ impl Corpus {
         }
     }
 
+    /// Returns whether any map of `kind` reads from `source`, whatever its
+    /// target: a map whose id is `<kind>-<source>-...`.
+    #[must_use]
+    pub fn maps_from(&self, kind: &str, source: &str) -> bool {
+        let prefix = format!("{kind}-{}-", source.to_ascii_lowercase());
+        self.maps.keys().any(|id| id.starts_with(&prefix))
+    }
+
     /// Returns every map of `kind` from `source` to `target`: the one whose
     /// id is `<kind>-<source>-to-<target>` when there is one, else each
     /// qualified map `<kind>-<source>-<qualifier>-to-<target>`, by id.

@@ -16,7 +16,9 @@ pub static MFI: Segment = Segment {
             id: "MFI.1",
             position: 1,
             name: "Master File Identifier",
-            data_type: Some(DataTypeRef::Legacy("CE_0175")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0175,
+            )),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -37,7 +39,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.2",
             position: 2,
             name: "Master File Application Identifier",
-            data_type: Some(DataTypeRef::Legacy("HD")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::HD)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +57,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.3",
             position: 3,
             name: "File-Level Event Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -76,7 +78,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.4",
             position: 4,
             name: "Entered Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -94,7 +96,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.5",
             position: 5,
             name: "Effective Date/Time",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -112,7 +114,7 @@ pub static MFI: Segment = Segment {
             id: "MFI.6",
             position: 6,
             name: "Response Level Code",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),

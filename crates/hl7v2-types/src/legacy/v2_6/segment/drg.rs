@@ -16,7 +16,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.1",
             position: 1,
             name: "Diagnostic Related Group",
-            data_type: Some(DataTypeRef::Legacy("CNE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CNE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -37,7 +37,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.2",
             position: 2,
             name: "DRG Assigned Date/Time",
-            data_type: Some(DataTypeRef::Legacy("DTM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::DTM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -55,7 +55,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.3",
             position: 3,
             name: "DRG Approval Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -76,7 +76,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.4",
             position: 4,
             name: "DRG Grouper Review Code",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -97,7 +97,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.5",
             position: 5,
             name: "Outlier Type",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -118,7 +118,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.6",
             position: 6,
             name: "Outlier Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -136,7 +136,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.7",
             position: 7,
             name: "Outlier Cost",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -154,7 +154,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.8",
             position: 8,
             name: "DRG Payor",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -175,7 +175,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.9",
             position: 9,
             name: "Outlier Reimbursement",
-            data_type: Some(DataTypeRef::Legacy("CP")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CP)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -193,7 +193,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.10",
             position: 10,
             name: "Confidential Indicator",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -214,7 +214,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.11",
             position: 11,
             name: "DRG Transfer Type",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -235,7 +235,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.12",
             position: 12,
             name: "Name of Coder",
-            data_type: Some(DataTypeRef::Legacy("XPN")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::XPN)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -253,7 +253,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.13",
             position: 13,
             name: "Grouper Status",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -274,7 +274,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.14",
             position: 14,
             name: "PCCL Value Code",
-            data_type: Some(DataTypeRef::Legacy("CWE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::CWE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +295,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.15",
             position: 15,
             name: "Effective Weight",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +313,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.16",
             position: 16,
             name: "Monetary Amount",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +331,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.17",
             position: 17,
             name: "Status Patient",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -352,7 +352,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.18",
             position: 18,
             name: "Grouper Software Name",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -370,7 +370,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.19",
             position: 19,
             name: "Grouper Software Version",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -388,7 +388,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.20",
             position: 20,
             name: "Status Financial Calculation",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -409,7 +409,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.21",
             position: 21,
             name: "Relative Discount/Surcharge",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -427,7 +427,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.22",
             position: 22,
             name: "Basic Charge",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -445,7 +445,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.23",
             position: 23,
             name: "Total Charge",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -463,7 +463,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.24",
             position: 24,
             name: "Discount/Surcharge",
-            data_type: Some(DataTypeRef::Legacy("MO")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::MO)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -481,7 +481,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.25",
             position: 25,
             name: "Calculated Days",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -499,7 +499,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.26",
             position: 26,
             name: "Status Gender",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -520,7 +520,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.27",
             position: 27,
             name: "Status Age",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -541,7 +541,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.28",
             position: 28,
             name: "Status Length of Stay",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -562,7 +562,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.29",
             position: 29,
             name: "Status Same Day Flag",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -583,7 +583,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.30",
             position: 30,
             name: "Status Separation Mode",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -604,7 +604,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.31",
             position: 31,
             name: "Status Weight at Birth",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -625,7 +625,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.32",
             position: 32,
             name: "Status Respiration Minutes",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -646,7 +646,7 @@ pub static DRG: Segment = Segment {
             id: "DRG.33",
             position: 33,
             name: "Status Admission",
-            data_type: Some(DataTypeRef::Legacy("IS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_6::data_type::IS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),

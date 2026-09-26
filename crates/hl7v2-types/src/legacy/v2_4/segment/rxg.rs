@@ -16,7 +16,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.1",
             position: 1,
             name: "Give Sub-ID Counter",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -34,7 +34,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.2",
             position: 2,
             name: "Dispense Sub-ID Counter",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -52,7 +52,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.3",
             position: 3,
             name: "Quantity/Timing",
-            data_type: Some(DataTypeRef::Legacy("TQ")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TQ)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -70,7 +70,9 @@ pub static RXG: Segment = Segment {
             id: "RXG.4",
             position: 4,
             name: "Give Code",
-            data_type: Some(DataTypeRef::Legacy("CE_0292")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0292,
+            )),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -91,7 +93,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.5",
             position: 5,
             name: "Give Amount - Minimum",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -109,7 +111,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.6",
             position: 6,
             name: "Give Amount - Maximum",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -127,7 +129,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.7",
             position: 7,
             name: "Give Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 1,
                 max: Max::Bounded(1),
@@ -145,7 +147,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.8",
             position: 8,
             name: "Give Dosage Form",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -163,7 +165,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.9",
             position: 9,
             name: "Administration Notes",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -181,7 +183,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.10",
             position: 10,
             name: "Substitution Status",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -202,7 +204,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.11",
             position: 11,
             name: "Dispense-To Location",
-            data_type: Some(DataTypeRef::Legacy("LA2")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::LA2)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -220,7 +222,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.12",
             position: 12,
             name: "Needs Human Review",
-            data_type: Some(DataTypeRef::Legacy("ID")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ID)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -241,7 +243,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.13",
             position: 13,
             name: "Pharmacy/Treatment Supplier's Special Administration Instructions",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -259,7 +261,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.14",
             position: 14,
             name: "Give Per (Time Unit)",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -277,7 +279,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.15",
             position: 15,
             name: "Give Rate Amount",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -295,7 +297,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.16",
             position: 16,
             name: "Give Rate Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -313,7 +315,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.17",
             position: 17,
             name: "Give Strength",
-            data_type: Some(DataTypeRef::Legacy("NM")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::NM)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -331,7 +333,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.18",
             position: 18,
             name: "Give Strength Units",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Bounded(1),
@@ -349,7 +351,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.19",
             position: 19,
             name: "Substance Lot Number",
-            data_type: Some(DataTypeRef::Legacy("ST")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::ST)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -367,7 +369,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.20",
             position: 20,
             name: "Substance Expiration Date",
-            data_type: Some(DataTypeRef::Legacy("TS")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::TS)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -385,7 +387,9 @@ pub static RXG: Segment = Segment {
             id: "RXG.21",
             position: 21,
             name: "Substance Manufacturer Name",
-            data_type: Some(DataTypeRef::Legacy("CE_0227")),
+            data_type: Some(DataTypeRef::Legacy(
+                &crate::legacy::v2_4::data_type::CE_0227,
+            )),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
@@ -406,7 +410,7 @@ pub static RXG: Segment = Segment {
             id: "RXG.22",
             position: 22,
             name: "Indication",
-            data_type: Some(DataTypeRef::Legacy("CE")),
+            data_type: Some(DataTypeRef::Legacy(&crate::legacy::v2_4::data_type::CE)),
             cardinality: Cardinality {
                 min: 0,
                 max: Max::Unbounded,
