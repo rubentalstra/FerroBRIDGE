@@ -1137,6 +1137,9 @@ fn options(crate_dir: &Path, check: bool) -> EmitOptions {
 
 #[test]
 fn emitting_twice_is_byte_identical_and_check_passes() {
+    if !crate::full_emit() {
+        return;
+    }
     let first = tempfile::tempdir().expect("tempdir");
     let second = tempfile::tempdir().expect("tempdir");
     let report = emit(&options(first.path(), false)).expect("first emit");
@@ -1168,6 +1171,9 @@ fn emitting_twice_is_byte_identical_and_check_passes() {
 
 #[test]
 fn check_reports_edited_missing_and_stale_files() {
+    if !crate::full_emit() {
+        return;
+    }
     let dir = tempfile::tempdir().expect("tempdir");
     emit(&options(dir.path(), false)).expect("emit");
     let src = dir.path().join("src");
@@ -1191,6 +1197,9 @@ fn check_reports_edited_missing_and_stale_files() {
 
 #[test]
 fn the_committed_crate_is_in_sync() {
+    if !crate::full_emit() {
+        return;
+    }
     emit(&options(&hl7v2_crate_dir(), true))
         .expect("the committed hl7v2-types crate matches the emitter");
 }

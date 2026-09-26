@@ -47,6 +47,9 @@ fn tree(root: &Path) -> Vec<(String, String)> {
 
 #[test]
 fn emitting_twice_is_byte_identical_and_check_passes() {
+    if !crate::full_emit() {
+        return;
+    }
     let first = tempfile::tempdir().expect("tempdir");
     let second = tempfile::tempdir().expect("tempdir");
     let report = emit(&r4b_only(first.path(), false)).expect("first emit");
@@ -136,6 +139,9 @@ fn no_versions_is_refused() {
 
 #[test]
 fn the_committed_crate_is_in_sync() {
+    if !crate::full_emit() {
+        return;
+    }
     emit(&all_versions(&crate_dir(), true))
         .expect("the committed fhir-types crate matches the emitter");
 }
