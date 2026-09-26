@@ -25,6 +25,15 @@ crates on crates.io.
 
 ### Added
 
+- Conformance badges per standard, per HL7 v2 message family and per HL7 v2
+  version (#366). The HL7 v2 corpus test records each case's family (MSH-9.1)
+  and MSH-12 version in its result, and `scripts/checks/conformance.sh
+  --update` writes one badge per family with a case in either corpus
+  (`conformance/badges/hl7v2-family-<family>.json`) and one per version seen
+  (`hl7v2-version-<version>.json`), each the pass fraction across both HL7 v2
+  corpora. The script generates the README badge block: the build badges, then
+  one conformance row per standard, each badge linking to its pass list;
+  `--check` fails when a badge or the block is stale.
 - The file-length guard (#351). `scripts/checks/file-length.sh` fails the CI
   guard tier when a hand-written Rust file exceeds 1000 lines or a listed
   breach in `scripts/checks/file-length-allow.txt` grows; the rule (1000

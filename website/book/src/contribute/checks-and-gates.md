@@ -59,10 +59,11 @@ containers and stops them when it ends.
 ## The conformance pass lists
 
 Neither FHIRconnect nor OMOCL has an external conformance suite, so the corpus
-tests are the instrument. Four corpora are measured, and each keeps a committed
+tests are the instrument. Six corpora are measured, and each keeps a committed
 pass list under `conformance/<corpus>/pass-list.txt`: one passing case id per
-line, then a `total` line with the corpus size. The README badges read the
-counts from `conformance/badges/`.
+line, then a `total` line with the corpus size. The HL7 v2 messages count
+twice: the vendored sets are the `hl7v2` corpus and the sets fetched at build
+time the `hl7v2-smoke` corpus.
 
 | Corpus | A case passes when |
 |---|---|
@@ -70,6 +71,7 @@ counts from `conformance/badges/`.
 | OMOCL mapping library | the file parses, validates against the authored schema, passes the rules of one file, and loads into the library set with every `Include` resolved |
 | FHIR round-trip laws | `PutGet` and `GetPut` both run on the chain and each declares exactly the set its reviewed snapshot pins |
 | FHIRconnect REST API (draft) | the wire contract reads every `in` parameter and part the FSH operation definition declares, and the operation answers only the `out` parameters it declares, each `min = 1` one present (`rest-api.adoc`, draft) |
+| HL7 v2 message corpora, HL7 v2 smoke corpora | the message is framed, decoded and parsed with no refusal, and the Bundle the map writes decodes as R4 and opens with its `MessageHeader` (`bdl-12`); an acknowledgment passes when it parses |
 
 A case the list records that no longer passes fails the corpus test itself, so
 a regression fails CI. When your change makes a case pass, or the corpus
@@ -83,6 +85,35 @@ Commit the rewritten lists and badges with the change. Without a flag the
 script compares and reports without failing on new passes; `--check` is what
 CI runs. It needs `cargo-nextest` and `jq`. Never edit a list by hand, and
 never remove a case from one to make CI green.
+
+### The badges and the README block
+
+The script writes one shields.io endpoint badge per file under
+`conformance/badges/`. A badge's message is the passing and the total count
+(`68 / 120`), and its colour follows the passing share: red under a quarter,
+orange under a half, yellow under three quarters, green from three quarters,
+and brightgreen when every case passes.
+
+- `<corpus>.json`: one per corpus, counted from its pass list.
+- `hl7v2-family-<family>.json`: one per HL7 v2 message family with at least
+  one case in either HL7 v2 corpus, ordered by family code, labelled with the
+  family and counted over both corpora. A family the face maps none of shows
+  red with its passing count at zero. The corpus
+  test records each case's family, MSH-9.1 or else the code before `_` in
+  MSH-9.3, in the result file.
+- `hl7v2-version-<version>.json`: one per MSH-12 version a case of either HL7
+  v2 corpus declares, labelled `v2.5.1` and so on.
+
+The script also generates the README block between `<!-- badges:begin -->`
+and `<!-- badges:end -->` from those files, in a fixed order, so never edit
+it by hand: the build badges, a blank line, then one row per standard
+(FHIRconnect 1.0.0 with the mapping library and the draft REST API, OMOCL
+1.0.0, FHIR R4 with the round-trip laws, and HL7 v2 with its two corpora, its
+family badges and its version badges). Every badge links to its pass list,
+and the family and version badges link to the `hl7v2` list. `--update`
+rewrites the block and removes a family or version badge no case counts any
+more; `--check` fails when a badge file or the block disagrees with what
+`--update` would write.
 
 ## Vendored inputs and the build-time fetch
 
