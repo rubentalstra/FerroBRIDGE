@@ -73,3 +73,9 @@ fuzz/coverage/
 !/crates/ferrobridge-hl7v2/vendor/nist/PROVENANCE.md
 /crates/ferrobridge-hl7v2/vendor/aira-mqe/*
 !/crates/ferrobridge-hl7v2/vendor/aira-mqe/PROVENANCE.md
+
+# The FHIR examples packages scripts/vendor/fhir-packages.sh --build-time
+# fetches. CC0 would permit committing them; at about 600 MB they are fetched
+# instead, and only each PROVENANCE.md is committed.
+/tools/ferrobridge-testkit/vendor/*/*
+!/tools/ferrobridge-testkit/vendor/*/PROVENANCE.md

@@ -1237,6 +1237,7 @@ dependencies = [
 name = "ferrobridge-testkit"
 version = "0.0.3"
 dependencies = [
+ "fhir-types",
  "reqwest",
  "serde_json",
  "sha2 0.11.0",

@@ -21,8 +21,13 @@ FHIRconnect 1.0.0:
 OMOCL 1.0.0:
 [![OMOCL mapping library](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fomocl.json)](conformance/omocl/pass-list.txt)
 
-FHIR R4:
+FHIR, the model per version through fhir-types, then R4 through the mappings and the facade:
+[![FHIR R4](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Ffhir-r4.json)](conformance/fhir-r4/pass-list.txt)
+[![FHIR R4B](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Ffhir-r4b.json)](conformance/fhir-r4b/pass-list.txt)
+[![FHIR R5](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Ffhir-r5.json)](conformance/fhir-r5/pass-list.txt)
+[![FHIR R6](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Ffhir-r6.json)](conformance/fhir-r6/pass-list.txt)
 [![FHIR round-trip laws](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Froundtrip.json)](conformance/roundtrip/pass-list.txt)
+[![FHIR R4 facade](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Ffhir-r4-facade.json)](conformance/fhir-r4-facade/pass-list.txt)
 
 HL7 v2, by corpus, then by message family and by version across both corpora:
 [![HL7 v2 message corpora](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Frubentalstra%2FFerroBRIDGE%2Fmain%2Fconformance%2Fbadges%2Fhl7v2.json)](conformance/hl7v2/pass-list.txt)

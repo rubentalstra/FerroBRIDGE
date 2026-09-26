@@ -14,8 +14,9 @@
 # Reads each pin from docs/VERSIONS.md and each newest release tag from the
 # upstream project's GitHub releases, which is the tag the container image and
 # the installer both carry. A corpus pinned by commit on a repository with no
-# releases is read against the newest commit of the branch it follows. Needs an
-# authenticated `gh`.
+# releases is read against the newest commit of the branch it follows, and a
+# FHIR examples package against the registry's `latest` version. Needs an
+# authenticated `gh`, curl and jq.
 #
 # Exit 0 when every pin is current, 1 when at least one is behind (each such
 # line starts with STALE), 2 when a release could not be read, so a network
@@ -79,7 +80,7 @@ done <<< "$WATCHED"
 # One "matrix label<TAB>upstream repository<TAB>branch" record per line: a
 # corpus pinned by commit on a repository that publishes no releases, read
 # against the newest commit of the branch the pin follows.
-# TODO(#268): the other commit-pinned corpora and the FHIR packages.
+# TODO(#268): the other commit-pinned corpora and the FHIR core packages.
 readonly WATCHED_COMMITS="\
 HL7 v2 samples: Microsoft FHIR-Converter	microsoft/FHIR-Converter	main
 HL7 v2 samples: CDC ReportStream data tests	CDCgov/prime-reportstream	main
@@ -125,6 +126,40 @@ while IFS=$'\t' read -r label repo branch; do
     stale=1
   fi
 done <<< "$WATCHED_COMMITS"
+
+# One "package<TAB>registry metadata URL" record per line: a FHIR package
+# pinned by version, read against the `latest` dist-tag the FHIR package
+# registry publishes for it (the npm registry shape both registries speak).
+readonly WATCHED_PACKAGES="\
+hl7.fhir.r4.examples	https://packages.fhir.org/hl7.fhir.r4.examples
+hl7.fhir.r4b.examples	https://packages.fhir.org/hl7.fhir.r4b.examples
+hl7.fhir.r5.examples	https://packages.fhir.org/hl7.fhir.r5.examples
+hl7.fhir.r6.examples	https://packages2.fhir.org/packages/hl7.fhir.r6.examples"
+
+while IFS=$'\t' read -r label url; do
+  [ -n "$label" ] || continue
+
+  pinned="$(matrix_pin "$label")"
+  if [ -z "$pinned" ]; then
+    printf 'UNREADABLE %s: no pin row in %s\n' "$label" "$MATRIX"
+    unreadable=1
+    continue
+  fi
+
+  if ! latest="$(curl --proto '=https' --tlsv1.2 -fsSL "$url" | jq -er '."dist-tags".latest' 2>&1)"; then
+    printf 'UNREADABLE %s: could not read the latest version at %s (%s)\n' "$label" "$url" "$latest"
+    unreadable=1
+    continue
+  fi
+
+  if [ "$pinned" = "$latest" ]; then
+    printf 'current    %s %s (%s)\n' "$label" "$pinned" "$url"
+  else
+    printf 'STALE      %s: pinned %s, the registry names %s latest (%s)\n' "$label" "$pinned" "$latest" "$url"
+    stale=1
+  fi
+done <<< "$WATCHED_PACKAGES"
+
 
 [ "$unreadable" -eq 0 ] || exit 2
 exit "$stale"

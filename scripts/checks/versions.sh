@@ -620,6 +620,49 @@ else
   note "no docs/VERSIONS.md yet, skipped"
 fi
 
+echo "== FHIR examples packages (tools/ferrobridge-testkit/vendor/*/PROVENANCE.md <-> docs/VERSIONS.md)"
+if [ -f docs/VERSIONS.md ]; then
+  # The rows of the examples table: the package opens the Item cell, and the
+  # Pin cell is the version, then `files <count> digest <sha256>`.
+  examples="$(awk -F'|' '
+    /^## / { on = ($0 ~ /^## FHIR examples packages/); next }
+    on && NF >= 4 && $2 ~ /^[[:space:]]*`/ {
+      k = $2; v = $3
+      sub(/^[[:space:]]*`/, "", k); sub(/`.*/, "", k)
+      gsub(/`/, "", v); gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+      print k "|" v
+    }
+  ' docs/VERSIONS.md)"
+  agreed=0
+  expected=0
+  while IFS='|' read -r pkg cell; do
+    [ -n "$pkg" ] || continue
+    expected=$((expected + 1))
+    prov="tools/ferrobridge-testkit/vendor/$pkg/PROVENANCE.md"
+    ver="$(awk '{ print $1; exit }' <<< "$cell")"
+    files="$(awk '{ for (i = 1; i < NF; i++) if ($i == "files") { print $(i + 1); exit } }' <<< "$cell")"
+    digest="$(awk '{ for (i = 1; i < NF; i++) if ($i == "digest") { print $(i + 1); exit } }' <<< "$cell")"
+    if [ ! -f "$prov" ]; then
+      bad "no $prov for the pinned examples package $pkg (run scripts/vendor/fhir-packages.sh --build-time --stamp)"
+    elif ! grep -qxF -- "- Version: $ver" "$prov"; then
+      bad "$prov does not record version $ver, which docs/VERSIONS.md pins for $pkg"
+    elif ! grep -qxF -- "- Files: $files" "$prov"; then
+      bad "$prov does not record the $files files docs/VERSIONS.md pins for $pkg"
+    elif ! grep -qE '^[0-9a-f]{64}$' <<< "$digest" || ! grep -qF "$digest" "$prov"; then
+      bad "$prov does not name the digest '$digest' docs/VERSIONS.md pins for $pkg"
+    else
+      agreed=$((agreed + 1))
+    fi
+  done <<< "$examples"
+  if [ "$expected" -eq 0 ]; then
+    bad "docs/VERSIONS.md has no FHIR examples rows"
+  elif [ "$agreed" -eq "$expected" ]; then
+    note "OK: all $expected FHIR examples provenance stamps record their pinned version, count and digest"
+  fi
+else
+  note "no docs/VERSIONS.md yet, skipped"
+fi
+
 echo "== licence (LICENSE <-> SPDX headers, manifests, badges, labels)"
 if [ -f LICENSE ]; then
   stale=0

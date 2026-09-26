@@ -59,11 +59,14 @@ containers and stops them when it ends.
 ## The conformance pass lists
 
 Neither FHIRconnect nor OMOCL has an external conformance suite, so the corpus
-tests are the instrument. Six corpora are measured, and each keeps a committed
-pass list under `conformance/<corpus>/pass-list.txt`: one passing case id per
-line, then a `total` line with the corpus size. The HL7 v2 messages count
-twice: the vendored sets are the `hl7v2` corpus and the sets fetched at build
-time the `hl7v2-smoke` corpus.
+tests are the instrument. Eleven corpora are measured, and each keeps a
+committed pass list under `conformance/<corpus>/pass-list.txt`: one passing
+case id per line, then a `total` line with the corpus size. The HL7 v2
+messages count twice: the vendored sets are the `hl7v2` corpus and the sets
+fetched at build time the `hl7v2-smoke` corpus. HL7's examples package of each
+FHIR version is fetched at build time too, and five corpora read it: one per
+version through the `fhir-types` model (`fhir-r4`, `fhir-r4b`, `fhir-r5`,
+`fhir-r6`) and the R4 package through the facade (`fhir-r4-facade`).
 
 | Corpus | A case passes when |
 |---|---|
@@ -72,6 +75,8 @@ time the `hl7v2-smoke` corpus.
 | FHIR round-trip laws | `PutGet` and `GetPut` both run on the chain and each declares exactly the set its reviewed snapshot pins |
 | FHIRconnect REST API (draft) | the wire contract reads every `in` parameter and part the FSH operation definition declares, and the operation answers only the `out` parameters it declares, each `min = 1` one present (`rest-api.adoc`, draft) |
 | HL7 v2 message corpora, HL7 v2 smoke corpora | the message is framed, decoded and parsed with no refusal, and the Bundle the map writes decodes as R4 and opens with its `MessageHeader` (`bdl-12`); an acknowledgment passes when it parses |
+| FHIR R4, FHIR R4B, FHIR R5, FHIR R6 | the example decodes through the strict JSON codec of its version, re-encodes to the same document, and goes through the XML codec and back unchanged, compared as the lexical document model (members by name, numbers in their written text); a refusal or the first difference is the failure reason |
+| FHIR R4 facade | for each context that maps the example's type (the suite's and the KDS diagnosis project), the create answers `201` and the read `200`; the read decodes as an R4 instance; no element the example carries comes back with another value (`PutGet`); and a second create and read of the answer gives it back unchanged. The identity, `meta` and the subject are the facade's and leave the comparison. An example of a type no context maps is counted by type under `set_aside` in the result file, never a case |
 
 A case the list records that no longer passes fails the corpus test itself, so
 a regression fails CI. When your change makes a case pass, or the corpus
@@ -108,7 +113,8 @@ The script also generates the README block between `<!-- badges:begin -->`
 and `<!-- badges:end -->` from those files, in a fixed order, so never edit
 it by hand: the build badges, a blank line, then one row per standard
 (FHIRconnect 1.0.0 with the mapping library and the draft REST API, OMOCL
-1.0.0, FHIR R4 with the round-trip laws, and HL7 v2 with its two corpora, its
+1.0.0, FHIR with the four model corpora, the round-trip laws and the R4
+facade, and HL7 v2 with its two corpora, its
 family badges and its version badges). Every badge links to its pass list,
 and the family and version badges link to the `hl7v2` list. `--update`
 rewrites the block and removes a family or version badge no case counts any
@@ -124,6 +130,15 @@ implementation guide among them, go to `tools/fhir-codegen/vendor/<package>/`
 through `scripts/vendor/fhir-packages.sh`, and the specification corpora go to
 `docs/specs/`. `scripts/checks/versions.sh` reads every provenance file back
 against its pin.
+
+The FHIR examples packages are CC0, but at about 600 MB unpacked they would
+more than double the committed FHIR packages, so
+`scripts/vendor/fhir-packages.sh --build-time` fetches them into
+`tools/ferrobridge-testkit/vendor/<package>/package/`, which `.gitignore`
+refuses except for each committed `PROVENANCE.md`. The script checks the file
+count and tree digest the pin records, keeps a tree already at both, and
+`--cache-key` names the key CI restores them under. Run it before the FHIR
+corpus tests; without the packages those tests say they skipped.
 
 The HL7 v2 definitions are the one input whose terms do not permit
 redistribution, so they are never committed. `scripts/vendor/v2ig.sh` fetches

@@ -24,6 +24,9 @@ tokio = { workspace = true, features = ["time"] }
 wiremock.workspace = true
 
 [dev-dependencies]
+# The FHIR examples corpora decode every resource of every version, so the
+# model is built with each version and the whole resource root set.
+fhir-types = { workspace = true, features = ["r4", "r4b", "r5", "r6", "resources"] }
 # The corpus suite re-hashes the vendored FHIRconnect schemas, so it needs a
 # sha256 the workspace does not otherwise carry.
 sha2.workspace = true

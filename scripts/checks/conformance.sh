@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-FileCopyrightText: Vernum Projecten B.V.
 # SPDX-License-Identifier: BUSL-1.1
-# The conformance gate (#24): runs the six corpus tests, compares what they
+# The conformance gate (#24): runs the eleven corpus tests, compares what they
 # measured with the committed pass lists under conformance/, and renders one
 # shields.io endpoint badge per corpus (https://shields.io/badges/endpoint-badge),
 # one per HL7 v2 message family and one per HL7 v2 version (#366), and the
@@ -27,7 +27,9 @@
 #
 # The hl7v2-smoke corpus reads the NIST and AIRA sets, which it fetches first
 # through scripts/vendor/hl7v2-samples.sh --build-time (a no-op when they are
-# on disk at their pins).
+# on disk at their pins). The four FHIR model corpora and the R4 facade corpus
+# read the HL7 examples packages (#373), fetched the same way through
+# scripts/vendor/fhir-packages.sh --build-time.
 #
 # Needs cargo, cargo-nextest, jq, and the tools that script needs. Exit 0 when
 # clean, 1 on a regression, (under --check) drift or no cargo on PATH, 2 on a
@@ -41,7 +43,8 @@ if ! command -v cargo >/dev/null 2>&1; then
 fi
 cd "$(dirname "$0")/../.."
 
-readonly CORPORA=(fhirconnect-mapping-lib omocl roundtrip draft-rest-api hl7v2 hl7v2-smoke)
+readonly CORPORA=(fhirconnect-mapping-lib omocl roundtrip draft-rest-api hl7v2 hl7v2-smoke
+  fhir-r4 fhir-r4b fhir-r5 fhir-r6 fhir-r4-facade)
 readonly OUT=target/conformance
 readonly BADGES=conformance/badges
 # The shields.io endpoint prefix every conformance badge file is read through.
@@ -77,6 +80,11 @@ label_of() {
     draft-rest-api) echo "FHIRconnect REST API (draft)" ;;
     hl7v2) echo "HL7 v2 message corpora" ;;
     hl7v2-smoke) echo "HL7 v2 smoke corpora (NIST, AIRA)" ;;
+    fhir-r4) echo "FHIR R4" ;;
+    fhir-r4b) echo "FHIR R4B" ;;
+    fhir-r5) echo "FHIR R5" ;;
+    fhir-r6) echo "FHIR R6" ;;
+    fhir-r4-facade) echo "FHIR R4 facade" ;;
     *) return 1 ;;
   esac
 }
@@ -138,8 +146,15 @@ if ! scripts/vendor/hl7v2-samples.sh --build-time; then
   echo "conformance: the build-time HL7 v2 sets could not be fetched" >&2
   exit 2
 fi
+
+# The FHIR corpora read the examples packages fetched at build time, kept the
+# same way at their pinned count and digest.
+if ! scripts/vendor/fhir-packages.sh --build-time; then
+  echo "conformance: the FHIR examples packages could not be fetched" >&2
+  exit 2
+fi
 # One package per invocation, as the CI test lane runs them.
-for package in fhirconnect omocl ferrobridge-hl7v2; do
+for package in fhirconnect omocl ferrobridge-hl7v2 ferrobridge-testkit ferrobridge-server; do
   if ! cargo nextest run --locked -p "$package" --no-tests=fail --no-fail-fast \
     -E 'test(/conformance_/)'; then
     echo "conformance: a $package corpus test failed; a case its list records no longer passes"
@@ -244,8 +259,10 @@ render_block() {
   echo 'OMOCL 1.0.0:'
   badge_link "$(label_of omocl)" omocl conformance/omocl/pass-list.txt
   echo
-  echo 'FHIR R4:'
-  badge_link "$(label_of roundtrip)" roundtrip conformance/roundtrip/pass-list.txt
+  echo 'FHIR, the model per version through fhir-types, then R4 through the mappings and the facade:'
+  for name in fhir-r4 fhir-r4b fhir-r5 fhir-r6 roundtrip fhir-r4-facade; do
+    badge_link "$(label_of "$name")" "$name" "conformance/$name/pass-list.txt"
+  done
   echo
   echo 'HL7 v2, by corpus, then by message family and by version across both corpora:'
   badge_link "$(label_of hl7v2)" hl7v2 conformance/hl7v2/pass-list.txt

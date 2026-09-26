@@ -395,6 +395,25 @@ jobs:
           key: hl7v2-samples-${{ steps.hl7v2-samples.outputs.key }}
       - name: Fetch and verify the HL7 v2 sample sets
         run: bash scripts/vendor/hl7v2-samples.sh --build-time
+      # The FHIR model corpora and the R4 facade corpus read the HL7 examples
+      # packages, fetched at build time and never committed
+      # (tools/ferrobridge-testkit/vendor/hl7.fhir.r4.examples/PROVENANCE.md).
+      # The cache is keyed on their pins, and the script verifies the count
+      # and digest of a restored tree as it does of a download.
+      - name: Read the pinned FHIR examples packages
+        id: fhir-examples
+        run: echo "key=$(bash scripts/vendor/fhir-packages.sh --cache-key)" >> "$GITHUB_OUTPUT"
+      - name: Restore the FHIR examples packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r4.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r4b.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r5.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r6.examples/package
+          key: fhir-examples-${{ steps.fhir-examples.outputs.key }}
+      - name: Fetch and verify the FHIR examples packages
+        run: bash scripts/vendor/fhir-packages.sh --build-time
       # One package at a time, as the clippy and msrv lanes do: a workspace-wide
       # test build schedules the generated giants side by side and the runner
       # kills it with exit 143 (docs/ci-cd.md).
@@ -404,13 +423,15 @@ jobs:
 
   # The conformance gate (#24): the corpus tests measure the vendored
   # FHIRconnect and OMOCL libraries, the round-trip chains, the draft REST
-  # API's operation definitions and the HL7 v2 message sets against the
-  # committed pass lists under conformance/. A case a list records that no
+  # API's operation definitions, the HL7 v2 message sets and the FHIR examples
+  # packages (per version, and R4 through the facade) against the committed
+  # pass lists under conformance/. A case a list records that no
   # longer passes fails the job, and so does an unrecorded new pass or a badge
   # that disagrees with its list. The script runs one package per nextest
   # invocation, as the test lane does through cargo hack, so the generated
   # giants never compile side by side, and fetches the build-time HL7 v2 sets
-  # this job restores from the test lane's cache key.
+  # and FHIR examples packages this job restores from the test lane's cache
+  # keys.
   conformance:
     name: conformance
     needs: detect
@@ -439,6 +460,18 @@ jobs:
             crates/ferrobridge-hl7v2/vendor/nist/ss-r2
             crates/ferrobridge-hl7v2/vendor/aira-mqe/examples
           key: hl7v2-samples-${{ steps.hl7v2-samples.outputs.key }}
+      - name: Read the pinned FHIR examples packages
+        id: fhir-examples
+        run: echo "key=$(bash scripts/vendor/fhir-packages.sh --cache-key)" >> "$GITHUB_OUTPUT"
+      - name: Restore the FHIR examples packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r4.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r4b.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r5.examples/package
+            tools/ferrobridge-testkit/vendor/hl7.fhir.r6.examples/package
+          key: fhir-examples-${{ steps.fhir-examples.outputs.key }}
       - run: scripts/checks/conformance.sh --check
 
   # The container-backed lane. Every test behind the harness returns early

@@ -25,6 +25,21 @@ crates on crates.io.
 
 ### Added
 
+- FHIR conformance per version (#373). HL7's examples package for R4, R4B,
+  R5 and the R6 ballot, at the versions of the pinned core packages, is
+  fetched at build time by `scripts/vendor/fhir-packages.sh --build-time`
+  into `tools/ferrobridge-testkit/vendor/` (about 600 MB unpacked, so only
+  each `PROVENANCE.md` is committed; the pins carry a file count and tree
+  digest, `versions.sh` reads them back and `pin-freshness.sh` reads each
+  version against the registry). Four corpora, `fhir-r4` to `fhir-r6`, send
+  every example through the `fhir-types` JSON codec and back and then through
+  the XML codec and back; a fifth, `fhir-r4-facade`, creates and reads every
+  R4 example of a type the suite and KDS contexts map through the facade over
+  a `wiremock` CDR, with the other examples counted by type, and behind
+  `FERROBRIDGE_E2E` a sample of its passing cases runs against the reference
+  CDR. The README's FHIR row carries the five badges beside the round-trip
+  laws, and the CI `test`, `conformance` and coverage jobs restore the
+  packages from a cache keyed on their pins.
 - Conformance badges per standard, per HL7 v2 message family and per HL7 v2
   version (#366). The HL7 v2 corpus test records each case's family (MSH-9.1)
   and MSH-12 version in its result, and `scripts/checks/conformance.sh

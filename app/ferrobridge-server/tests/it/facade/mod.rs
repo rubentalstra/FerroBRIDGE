@@ -10,6 +10,7 @@
 
 mod capability;
 mod conditional;
+mod examples;
 mod read;
 mod reconcile;
 mod replay;
