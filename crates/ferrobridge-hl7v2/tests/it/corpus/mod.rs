@@ -34,6 +34,7 @@ use ferrobridge_hl7v2::inbound::{self, Received};
 use ferrobridge_hl7v2::map::{Mapped, Outcome, map};
 use ferrobridge_hl7v2::mllp::Codec;
 use ferrobridge_hl7v2::parse;
+use ferrobridge_hl7v2::parse::structure::structure_for;
 use ferrobridge_term::client::Client;
 use ferrobridge_testkit::conformance::{Case, Corpus, record};
 use fhir_types::codec::{Json, Value};
@@ -137,7 +138,7 @@ fn counted(mapped: &Mapped) -> BTreeMap<String, usize> {
 fn declared(message: &[u8]) -> (Option<String>, Option<String>) {
     // NOTE: no specification governs this: our own design; a message with no
     // MSH segment to lex declares no family or version, and its case says why.
-    let Ok(lexed) = parse::lex(&String::from_utf8_lossy(message), Charset::Ascii) else {
+    let Ok(lexed) = parse::lex::lex(&String::from_utf8_lossy(message), Charset::Ascii) else {
         return (None, None);
     };
     let header = &lexed.message;
@@ -186,16 +187,15 @@ async fn verdict(
         Ok(bytes) => bytes,
         Err(reason) => return Case::fail(&message.id, reason),
     };
-    let inbound =
-        match inbound::receive(&bytes, Charset::Ascii, parse::structure_for, support::STAMP) {
-            Received::Parsed(inbound) => inbound,
-            Received::Answered { code, reply } => {
-                return Case::fail(&message.id, answer_reason(&format!("{code:?}"), &reply));
-            }
-            Received::Unanswerable => {
-                return Case::fail(&message.id, "unanswerable: no MSH header can be read");
-            }
-        };
+    let inbound = match inbound::receive(&bytes, Charset::Ascii, structure_for, support::STAMP) {
+        Received::Parsed(inbound) => inbound,
+        Received::Answered { code, reply } => {
+            return Case::fail(&message.id, answer_reason(&format!("{code:?}"), &reply));
+        }
+        Received::Unanswerable => {
+            return Case::fail(&message.id, "unanswerable: no MSH header can be read");
+        }
+    };
     let parsed = inbound.parsed();
     if parsed.message().message_type(1) == Some("ACK") {
         let mut outcomes = BTreeMap::new();

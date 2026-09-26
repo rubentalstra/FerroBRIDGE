@@ -14,6 +14,7 @@
     reason = "test assertions"
 )]
 
+mod condition;
 mod corpus;
 mod decode;
 mod fixtures;

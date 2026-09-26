@@ -1477,7 +1477,7 @@ data type it names agreeing there, links to that version's (327); the other
 earlier version's, with every segment placed through the same static, links
 its nodes to that tree (`<NAME>_NODES`), leaving 1532 trees emitted.
 `message::LEGACY` indexes the trees by code, event and version beside the
-v2.9.1 `MESSAGES`. `parse::structure_for` then selects by MSH-12 for every
+v2.9.1 `MESSAGES`. `parse::structure::structure_for` then selects by MSH-12 for every
 message: a structure the definitions carry is taken from its own version's
 tables where the export carries it there, and from v2.9.1 for 2.9.1, 2.9, a
 later or absent MSH-12, or a version without that tree, counted as

@@ -20,7 +20,8 @@ use hl7v2_types::model::Structure;
 
 use crate::ack::{self, Code, Error, Header, Stamp};
 use crate::decode::{self, Charset, DecodeError};
-use crate::parse::{self, ErrorCode, Message, Parsed, StructureError};
+use crate::parse::structure::StructureError;
+use crate::parse::{self, ErrorCode, Message, Parsed};
 
 /// A parsed message and what its answer is built from.
 #[derive(Debug, Clone)]
@@ -79,7 +80,7 @@ pub enum Received {
 ///
 /// `default` is the character set the connection agreed on for a message
 /// whose MSH-18 is empty, and `select` picks the message structure from the
-/// lexed message ([`parse::structure_for`] selects it from the definitions).
+/// lexed message ([`parse::structure::structure_for`] selects it from the definitions).
 #[must_use]
 pub fn receive(
     message: &[u8],
@@ -104,7 +105,7 @@ pub fn receive(
         Ok(reply) => Received::Answered { code, reply },
         Err(_) => Received::Unanswerable,
     };
-    let lexed = match parse::lex(&decoded.text, decoded.charset) {
+    let lexed = match parse::lex::lex(&decoded.text, decoded.charset) {
         Ok(lexed) => lexed,
         Err(error) => {
             return answer(
@@ -135,7 +136,7 @@ pub fn receive(
             );
         }
     };
-    let parsed = parse::group(lexed, structure);
+    let parsed = parse::grouping::group(lexed, structure);
     if !parsed.refusals().is_empty() {
         let errors: Vec<Error> = parsed.refusals().iter().map(Error::from).collect();
         return answer(Code::Error, &errors);

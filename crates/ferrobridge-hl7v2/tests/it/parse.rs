@@ -5,7 +5,10 @@
 
 use std::collections::BTreeMap;
 
-use ferrobridge_hl7v2::parse::{ErrorCode, Item, Parsed, StructureError, Unplaced, structure_for};
+use ferrobridge_hl7v2::decode::Charset;
+use ferrobridge_hl7v2::parse::lex::{LexError, lex};
+use ferrobridge_hl7v2::parse::structure::{StructureError, structure_for};
+use ferrobridge_hl7v2::parse::{ErrorCode, Item, Location, Parsed, Unplaced};
 
 use crate::{fixtures, support};
 
@@ -200,9 +203,8 @@ fn a_valued_field_beyond_the_segment_table_is_counted() {
 /// Lexes `bytes` as ASCII and selects its structure.
 fn select(bytes: &[u8]) -> Result<&'static str, StructureError> {
     let decoded =
-        ferrobridge_hl7v2::decode::decode(bytes, ferrobridge_hl7v2::decode::Charset::Ascii)
-            .expect("the message decodes");
-    let lexed = ferrobridge_hl7v2::parse::lex(&decoded.text, decoded.charset).expect("it lexes");
+        ferrobridge_hl7v2::decode::decode(bytes, Charset::Ascii).expect("the message decodes");
+    let lexed = lex(&decoded.text, decoded.charset).expect("it lexes");
     structure_for(&lexed.message).map(|structure| structure.id)
 }
 
@@ -408,7 +410,7 @@ fn the_vendored_2_3_1_orm_o01_is_refused_before_selection_for_its_character_set(
     // MSH-18 declares ASCII and the message carries a byte outside it.
     let bytes = vendored("v2-to-fhir/derived/ORM_O01.hl7");
     assert!(matches!(
-        ferrobridge_hl7v2::decode::decode(&bytes, ferrobridge_hl7v2::decode::Charset::Ascii),
+        ferrobridge_hl7v2::decode::decode(&bytes, Charset::Ascii),
         Err(ferrobridge_hl7v2::decode::DecodeError::Undeclared { .. })
     ));
 }
@@ -457,10 +459,8 @@ fn orm(message_type: &str, version: &str) -> Vec<u8> {
 fn a_withdrawn_structure_is_selected_by_msh_9_3_and_the_declared_version() {
     let selected = |bytes: &[u8]| {
         let decoded =
-            ferrobridge_hl7v2::decode::decode(bytes, ferrobridge_hl7v2::decode::Charset::Ascii)
-                .expect("the message decodes");
-        let lexed =
-            ferrobridge_hl7v2::parse::lex(&decoded.text, decoded.charset).expect("it lexes");
+            ferrobridge_hl7v2::decode::decode(bytes, Charset::Ascii).expect("the message decodes");
+        let lexed = lex(&decoded.text, decoded.charset).expect("it lexes");
         structure_for(&lexed.message).map(|structure| (structure.id, structure.version))
     };
     assert_eq!(
@@ -628,4 +628,44 @@ fn a_2_5_1_vxu_v04_is_parsed_against_the_2_5_1_tree_and_its_rxa_table() {
     ]);
     let parsed = support::parsed(&with_end);
     assert_eq!(required_missing(&parsed), Vec::<String>::new());
+}
+
+#[test]
+#[expect(clippy::panic_in_result_fn, reason = "test assertions")]
+fn escape_sequences_decode_to_their_delimiters() -> Result<(), LexError> {
+    let lexed = lex(
+        "MSH|^~\\&|A\rNTE|||a\\F\\b\\S\\c\\E\\d\\X41\\",
+        Charset::Ascii,
+    )?;
+    let note = lexed
+        .message
+        .segments()
+        .get(1)
+        .and_then(|segment| segment.text(3));
+    assert_eq!(note, Some("a|b^c\\dA"));
+    assert!(lexed.refusals.is_empty(), "{:?}", lexed.refusals);
+    Ok(())
+}
+
+#[test]
+#[expect(clippy::panic_in_result_fn, reason = "test assertions")]
+fn an_undecoded_escape_sequence_is_refused_at_its_location() -> Result<(), LexError> {
+    let lexed = lex("MSH|^~\\&|A\rNTE|||\\Zlocal\\", Charset::Ascii)?;
+    let refusal = lexed.refusals.first();
+    assert_eq!(
+        refusal.map(|refusal| refusal.code),
+        Some(ErrorCode::DataType)
+    );
+    assert_eq!(
+        refusal.map(|refusal| refusal.location.erl('^')),
+        Some(String::from("NTE^1^3^1^1^1"))
+    );
+    Ok(())
+}
+
+#[test]
+fn a_location_renders_its_known_erl_components() {
+    let location = Location::segment("PID", 1).with_field(5);
+    assert_eq!(location.erl('^'), "PID^1^5");
+    assert_eq!(location.to_string(), "PID[1]-5");
 }
